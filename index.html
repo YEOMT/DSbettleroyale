@@ -703,8 +703,8 @@
         }
 
         class Wall {
-            constructor(x, y, w, h, angle=0) {
-                this.x = x; this.y = y; this.w = w; this.h = h; this.angle = angle;
+            constructor(x, y, w, h, angle=0, kind='wall') {
+                this.x = x; this.y = y; this.w = w; this.h = h; this.angle = angle; this.kind = kind;
                 // ✨ 장애물이 천천히 회전하도록 난수 기반의 회전 속도 부여
                 this.spinSpeed = (rand() - 0.5) * 0.015; 
                 this.minX = x - w/2; this.maxX = x + w/2; this.minY = y - h/2; this.maxY = y + h/2;
@@ -715,9 +715,76 @@
             }
             draw(ctx) {
                 ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
-                ctx.fillStyle = '#334155'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 5); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = '#1e293b'; ctx.fillRect(-this.w/2, -this.h/2 - 10, this.w, 10);
+                if(this.kind === 'crate') {
+                    ctx.fillStyle='#7c4a24'; ctx.strokeStyle='#d6a15f'; ctx.lineWidth=4;
+                    ctx.beginPath(); ctx.roundRect(-this.w/2,-this.h/2,this.w,this.h,8); ctx.fill(); ctx.stroke();
+                    ctx.strokeStyle='rgba(255,224,170,.48)'; ctx.lineWidth=5;
+                    ctx.beginPath(); ctx.moveTo(-this.w*.36,-this.h*.36); ctx.lineTo(this.w*.36,this.h*.36);
+                    ctx.moveTo(this.w*.36,-this.h*.36); ctx.lineTo(-this.w*.36,this.h*.36); ctx.stroke();
+                } else if(this.kind === 'rock') {
+                    ctx.fillStyle='#475569'; ctx.strokeStyle='#94a3b8'; ctx.lineWidth=3;
+                    ctx.beginPath(); ctx.roundRect(-this.w/2,-this.h/2,this.w,this.h,Math.min(24,this.h*.42)); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle='rgba(226,232,240,.14)'; ctx.beginPath();ctx.ellipse(-this.w*.12,-this.h*.16,this.w*.24,this.h*.16,-.18,0,Math.PI*2);ctx.fill();
+                } else {
+                    ctx.fillStyle = '#334155'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 5); ctx.fill(); ctx.stroke();
+                    ctx.fillStyle = '#1e293b'; ctx.fillRect(-this.w/2, -this.h/2 - 10, this.w, 10);
+                }
+                ctx.restore();
+            }
+        }
+
+        // 충돌은 없지만 안으로 들어가면 멀리 있는 적에게 보이지 않는 수풀.
+        class BushCover {
+            constructor(x,y,radius,seed=0) {
+                this.pos=new Vec2(x,y); this.x=x; this.y=y; this.radius=radius; this.seed=seed;
+            }
+            contains(pos,padding=0) {
+                const rr=Math.max(12,this.radius+padding),dx=pos.x-this.x,dy=pos.y-this.y;
+                return dx*dx+dy*dy<=rr*rr;
+            }
+            draw(ctx,foreground=false) {
+                ctx.save();ctx.translate(this.x,this.y);
+                if(!foreground) {
+                    ctx.globalAlpha=.30;ctx.fillStyle='#052e16';ctx.beginPath();ctx.arc(0,0,this.radius,0,Math.PI*2);ctx.fill();
+                    ctx.globalAlpha=.38;ctx.strokeStyle='#4ade80';ctx.lineWidth=3;ctx.setLineDash([9,10]);ctx.stroke();ctx.setLineDash([]);
+                } else {
+                    const colors=['#166534','#15803d','#22c55e','#4ade80'];
+                    for(let i=0;i<9;i++) {
+                        const a=i*Math.PI*2/9+(this.seed%17)*.07;
+                        const ring=i===8?0:this.radius*(.50+.10*Math.sin(i*2.7+this.seed));
+                        const lr=this.radius*(i===8?.42:.34+.035*(i%3));
+                        ctx.globalAlpha=i===8?.34:.58;ctx.fillStyle=colors[(i+this.seed)%colors.length];
+                        ctx.beginPath();ctx.arc(Math.cos(a)*ring,Math.sin(a)*ring,lr,0,Math.PI*2);ctx.fill();
+                    }
+                    ctx.globalAlpha=.68;ctx.font=Math.round(this.radius*.34)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🌿',0,0);
+                }
+                ctx.restore();
+            }
+        }
+
+        // 고정 연막 지대. 안쪽 인물뿐 아니라 연막 너머의 시야도 차단한다.
+        class SmokeCover {
+            constructor(x,y,radius,seed=0) {
+                this.pos=new Vec2(x,y); this.x=x; this.y=y; this.radius=radius; this.seed=seed; this.phase=seed*.31;
+            }
+            contains(pos,padding=0) {
+                const rr=Math.max(12,this.radius+padding),dx=pos.x-this.x,dy=pos.y-this.y;
+                return dx*dx+dy*dy<=rr*rr;
+            }
+            update() { this.phase+=.012; }
+            draw(ctx) {
+                ctx.save();ctx.translate(this.x,this.y);
+                const haze=ctx.createRadialGradient(0,0,this.radius*.12,0,0,this.radius);
+                haze.addColorStop(0,'rgba(226,232,240,.70)');haze.addColorStop(.62,'rgba(148,163,184,.52)');haze.addColorStop(1,'rgba(71,85,105,0)');
+                ctx.fillStyle=haze;ctx.beginPath();ctx.arc(0,0,this.radius,0,Math.PI*2);ctx.fill();
+                for(let i=0;i<7;i++) {
+                    const a=i*Math.PI*2/7+this.phase*(i%2?1:-1),ring=this.radius*(.18+.34*(i%3)/2);
+                    const puff=this.radius*(.22+.035*(i%3));
+                    ctx.globalAlpha=.18+.08*(i%2);ctx.fillStyle=i%2?'#f1f5f9':'#cbd5e1';
+                    ctx.beginPath();ctx.arc(Math.cos(a)*ring,Math.sin(a)*ring,puff,0,Math.PI*2);ctx.fill();
+                }
+                ctx.globalAlpha=.65;ctx.font=Math.round(this.radius*.25)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🌫️',0,0);
                 ctx.restore();
             }
         }
@@ -3447,7 +3514,8 @@
                             this.setAbilityCooldown();
                         } else if (sub === 'MULTI_GRAB') {
                             const candidates = game.getNearbyParticipants(this.pos,470)
-                                .filter(p=>p.alive && p!==this && p.id!==999 && (this.team===0 || p.team!==this.team) && !game.checkWallBetween(this.pos,p.pos))
+                                .filter(p=>p.alive && p!==this && p.id!==999 && (this.team===0 || p.team!==this.team) &&
+                                    !game.checkWallBetween(this.pos,p.pos) && !game.isConcealedFrom(p,this))
                                 .sort((a,b)=>a.pos.dist(this.pos)-b.pos.dist(this.pos))
                                 .slice(0,3);
                             const grabs = candidates.length ? candidates : [target];
@@ -3617,6 +3685,7 @@
                 this.participants = participants;
                 this.deadParticipants = [];
                 this.projectiles = []; this.particles = []; this.zones = []; this.turrets = []; this.texts = []; this.swings = []; this.walls = [];
+                this.bushes = []; this.smokes = [];
                 this.rings = [];
                 this.signatureEffects = [];
                 this.confetti = []; // ✨ 우승 꽃가루 배열
@@ -3624,7 +3693,7 @@
                 // 20~30명이 서로 바로 마주치지 않도록 교실 대전 전장을 대폭 확장한다.
                 this.mapRadius = 2600; this.center = new Vec2(0, 0);
                 this.mapIndex = Math.floor(rand()*3);
-                this.mapNames = ['🌪️ 유동 폐허','➕ 십자로','🌿 평지'];
+                this.mapNames = ['🌪️ 유동 폐허','➕ 십자로','🌿 안개 수풀'];
                 this.mapName = this.mapNames[this.mapIndex];
                 this.cam = new Vec2(0,0); this.lookAt = new Vec2(0,0); this.zoom = 0.5; 
                 this.frame = 0; this.speed = 1; this.paused = false;
@@ -3670,28 +3739,71 @@
             }
 
             initMap() {
-                const addWall=(x,y,w,h,angle=0,spin=null)=>{
-                    const wall=new Wall(x,y,w,h,angle);
+                const addWall=(x,y,w,h,angle=0,spin=null,kind='wall')=>{
+                    const wall=new Wall(x,y,w,h,angle,kind);
                     if(spin!==null) wall.spinSpeed=spin;
                     this.walls.push(wall); return wall;
                 };
+                const polarPoint=(minR,maxR)=>{
+                    const a=rand()*Math.PI*2,r=minR+(maxR-minR)*Math.sqrt(rand());
+                    return {x:Math.cos(a)*r,y:Math.sin(a)*r,a,r};
+                };
+                const addCrates=(count,minR,maxR)=>{
+                    for(let i=0;i<count;i++) {
+                        const p=polarPoint(minR,maxR),size=72+rand()*54;
+                        addWall(p.x,p.y,size,size*(.82+rand()*.25),rand()*Math.PI,0,'crate');
+                    }
+                };
 
                 if(this.mapIndex===0) {
-                    addWall(0,0,100,20,0);
-                    for(let i=0;i<12;i++) {
-                        const w=200+rand()*200,h=15,angle=rand()*Math.PI;
-                        const dist=420+rand()*1580,theta=rand()*Math.PI*2;
-                        addWall(Math.cos(theta)*dist,Math.sin(theta)*dist,w,h,angle);
+                    addWall(0,0,260,24,0,0);
+                    for(let i=0;i<18;i++) {
+                        const p=polarPoint(360,2180),w=180+rand()*260,h=18+rand()*12;
+                        addWall(p.x,p.y,w,h,rand()*Math.PI,(rand()-.5)*.0045);
                     }
+                    addCrates(8,520,2150);
                 } else if(this.mapIndex===1) {
-                    // v21.1: 중앙 진입로를 크게 넓혀 대형 캐릭터도 최종원에 갇히지 않게 조정.
+                    // 중앙은 넓게 열어 두고 외곽에 방사형 엄폐물을 배치한다.
                     addWall(0,-390,400,18,0,0); addWall(0,390,400,18,0,0);
                     addWall(-390,0,400,18,Math.PI/2,0); addWall(390,0,400,18,Math.PI/2,0);
                     for(const [x,y,a] of [[-720,-560,.3],[720,-560,-.3],[-720,560,-.3],[720,560,.3]]) addWall(x,y,190,16,a,0);
+                    for(let i=0;i<12;i++) {
+                        const a=i*Math.PI/6+(i%2?.16:-.12),d=i%2?1700:1120;
+                        addWall(Math.cos(a)*d,Math.sin(a)*d,220+(i%3)*55,22,a+Math.PI/2,0,i%4===0?'rock':'wall');
+                    }
+                    addCrates(8,620,2200);
                 } else if(this.mapIndex===2) {
-                    // v21.17: 장애물이 전혀 없는 평지 맵.
-                    // 링 아레나와 쌍둥이 요새는 자기장/길찾기 충돌을 줄이기 위해 삭제했다.
+                    // 넓은 수풀 사이에 바위와 짧은 폐벽을 흩어 놓은 은폐 중심 맵.
+                    for(let i=0;i<14;i++) {
+                        const p=polarPoint(420,2200);
+                        addWall(p.x,p.y,105+rand()*125,58+rand()*44,rand()*Math.PI,0,'rock');
+                    }
+                    for(let i=0;i<8;i++) {
+                        const p=polarPoint(500,2100);
+                        addWall(p.x,p.y,145+rand()*175,18+rand()*10,rand()*Math.PI,0,'wall');
+                    }
+                    addCrates(7,650,2150);
                 }
+
+                // 모든 맵에 실제 은폐 판정이 있는 부쉬와 시야를 끊는 고정 연막을 배치한다.
+                const placeCover=(type,count,minR,maxR)=>{
+                    for(let i=0;i<count;i++) {
+                        let placed=false;
+                        for(let tries=0;tries<70&&!placed;tries++) {
+                            const p=polarPoint(minR,maxR);
+                            const radius=type==='bush' ? 94+rand()*58 : 132+rand()*62;
+                            const pos=new Vec2(p.x,p.y);
+                            if(this.checkWallCollision(pos,radius*.32)) continue;
+                            if(this.bushes.some(b=>b.pos.dist(pos)<b.radius+radius*.62)) continue;
+                            if(this.smokes.some(s=>s.pos.dist(pos)<s.radius+radius*.72)) continue;
+                            if(type==='bush') this.bushes.push(new BushCover(p.x,p.y,radius,i+this.mapIndex*41));
+                            else this.smokes.push(new SmokeCover(p.x,p.y,radius,i+this.mapIndex*53));
+                            placed=true;
+                        }
+                    }
+                };
+                placeCover('bush',[28,30,38][this.mapIndex],260,2260);
+                placeCover('smoke',[7,8,10][this.mapIndex],520,2180);
             }
 
             findSafeMapPoint(minRadius=120,maxRadius=2000,clearance=80) {
@@ -3827,6 +3939,33 @@
                 return false;
             }
 
+            getCoverTypeAt(pos) {
+                if(this.smokes.some(s=>s.contains(pos,-10))) return 'smoke';
+                if(this.bushes.some(b=>b.contains(pos,-10))) return 'bush';
+                return '';
+            }
+
+            segmentDistanceToPoint(a,b,p) {
+                const vx=b.x-a.x,vy=b.y-a.y,wx=p.x-a.x,wy=p.y-a.y;
+                const len2=vx*vx+vy*vy;
+                const t=len2>0?Math.max(0,Math.min(1,(wx*vx+wy*vy)/len2)):0;
+                const dx=a.x+vx*t-p.x,dy=a.y+vy*t-p.y;
+                return Math.sqrt(dx*dx+dy*dy);
+            }
+
+            isConcealedFrom(target,viewer) {
+                if(!target||!viewer||target===viewer||target.alive===false) return false;
+                if(target.team!==0&&target.team===viewer.team) return false;
+                const distance=target.pos.dist(viewer.pos);
+                if(distance<=125) return false;
+                if(this.bushes.some(b=>b.contains(target.pos,-12))) return distance>155;
+                for(const smoke of this.smokes) {
+                    if(smoke.contains(target.pos,-8)||smoke.contains(viewer.pos,-8)) return distance>125;
+                    if(distance>165&&this.segmentDistanceToPoint(viewer.pos,target.pos,smoke.pos)<smoke.radius*.78) return true;
+                }
+                return false;
+            }
+
             getWallRepel(pos) {
                 let force = new Vec2(0,0);
                 for(let w of this.walls) {
@@ -3887,7 +4026,8 @@
             getTargetFor(p, forceNearest=false) {
                 if(p.cachedTargetId !== null && this.frame < p.nextTargetRefresh) {
                     const cached = this.participants.find(x => x.id === p.cachedTargetId);
-                    if(cached && cached.alive && (p.team === 0 || cached.team !== p.team) && (!cached.invisible || cached.pos.dist(p.pos) <= 170)) return cached;
+                    if(cached && cached.alive && (p.team === 0 || cached.team !== p.team) &&
+                       (!cached.invisible || cached.pos.dist(p.pos) <= 170) && !this.isConcealedFrom(cached,p)) return cached;
                 }
                 const target = this.findBestTarget(p.pos, p, forceNearest);
                 p.cachedTargetId = target ? target.id : null;
@@ -3908,6 +4048,7 @@
                     if(ignore && ignore.team !== 0 && p.team === ignore.team) continue;
                     const d = p.pos.dist(pos);
                     if(p.invisible && d > 170) continue;
+                    if(ignore&&this.isConcealedFrom(p,ignore)) continue;
                     const hpRate = Math.max(0, p.hp/Math.max(1,p.maxHp));
                     let score = d;
                     if(!forceNearest) {
@@ -5086,6 +5227,7 @@
                     if(!this.supplyDropSpawned&&this.frame>=this.supplyDropSpawnFrame&&this.aliveRealPlayers.length>1) this.spawnSupplyDrop();
 
                     this.walls.forEach(w => w.update());
+                    this.smokes.forEach(s => s.update());
                     
                     // v21.16: 한 캐릭터의 AI/능력 런타임 오류가 경기 전체 requestAnimationFrame을 죽이지 않게 격리.
                     for(const p of this.participants) {
@@ -5256,6 +5398,7 @@
                     ctx.beginPath(); ctx.moveTo(-3200,i); ctx.lineTo(3200,i); ctx.stroke();
                 }
 
+                this.bushes.forEach(b => b.draw(ctx,false));
                 this.walls.forEach(w => w.draw(ctx));
                 this.zones.forEach(z => z.draw(ctx));
                 this.turrets.forEach(t => t.draw(ctx));
@@ -5397,6 +5540,9 @@
                     ctx.fillText(label, p.pos.x, p.pos.y - p.radius - 25);
                 });
 
+                // 잎사귀 앞면이 캐릭터 일부를 덮어 실제로 숨어 있는 느낌을 준다.
+                this.bushes.forEach(b => b.draw(ctx,true));
+
                 // v22.2 draw LOD: 30명 이상에서는 작은 장식 파티클을 절반만 그리되 실제 전투 오브젝트는 모두 유지.
                 this.projectiles.forEach(p => p.draw(ctx));
                 this.swings.forEach((s,i) => { if(this.getPerformanceTier()<3 || i%2===0 || s.tier==='S') s.draw(ctx); });
@@ -5411,6 +5557,8 @@
                     ctx.fillText(t.text, t.pos.x, t.pos.y);
                     ctx.restore();
                 });
+                // 연막은 캐릭터·투사체·이름표 위에 그려 시각적으로도 시야를 차단한다.
+                this.smokes.forEach(s => s.draw(ctx));
                 
                 ctx.restore(); // 월드 카메라(줌, 패닝) 리셋
 
@@ -6318,11 +6466,11 @@
                         <div class="br-role-icon">🧑‍🏫</div>
                         <h2>선생님</h2>
                         <p class="br-small">방을 만들고 퀴즈·뽑기·경기를 한 화면에서 진행합니다.</p>
-                        <div class="br-notice" style="margin:14px 0">실제 여러 기기 연결에는 Firebase Realtime Database 설정이 한 번 필요합니다. 설정값은 QR 링크에도 안전하게 전달됩니다.</div>
+                        <div class="br-notice" style="margin:14px 0">✅ Firebase 실시간 연결이 기본 적용되어 있습니다. 바로 온라인 방을 만들 수 있습니다.</div>
                         <div class="br-grow"></div>
                         <div class="br-actions">
                             <button id="br-create-btn" class="br-btn br-btn-fire br-grow">온라인 방 만들기</button>
-                            <button id="br-config-btn" class="br-btn br-btn-ghost">⚙️ 연결 설정</button>
+                            <button id="br-config-btn" class="br-btn br-btn-ghost">⚙️ 연결 확인</button>
                         </div>
                         <button id="br-demo-btn" class="br-btn br-btn-ghost" style="margin-top:9px">🧪 이 기기에서 수업 흐름 체험</button>
                         <button id="br-legacy-btn" class="br-btn br-btn-ghost" style="margin-top:9px">🤖 기존 AI 관전 모드 열기</button>
@@ -6331,7 +6479,7 @@
                 <div class="br-grid3" style="margin-top:18px">
                     <div class="br-card"><h3>1. 단어 퀴즈</h3><p class="br-small">60초 동안 빠르게 풀고 3문제마다 리롤권 1개 획득</p></div>
                     <div class="br-card"><h3>2. 이모지 뽑기</h3><p class="br-small">S 5% · A 15% · B 25% · C 40% · F 15%</p></div>
-                    <div class="br-card"><h3>3. 직접 전투</h3><p class="br-small">8방향 이동 · 일반 공격 · 등급별 한정 스킬</p></div>
+                    <div class="br-card"><h3>3. 직접 전투</h3><p class="br-small">8방향 이동 · 일반 공격 · 한정 스킬 · 부쉬/연막 은폐</p></div>
                 </div>
             </div>
         </section>
@@ -6529,11 +6677,19 @@
         (function () {
         'use strict';
 
-        // 배포 후 이 상수에 Firebase 웹 config를 직접 넣으면 방 번호 수동 입장도 바로 작동한다.
-        // 비워 두어도 선생님이 화면의 '연결 설정'에 붙여 넣을 수 있고, QR에는 설정이 함께 전달된다.
-        var BR_DEFAULT_FIREBASE_CONFIG = null;
+        // 수업용 Firebase 기본 연결값. 교사가 매번 붙여 넣지 않아도 온라인 방이 바로 열린다.
+        var BR_DEFAULT_FIREBASE_CONFIG = {
+            apiKey: 'AIzaSyBtK7NAfw4wDsS4LRacWF78PHT3zls50IQ',
+            authDomain: 'dsgames-fecef.firebaseapp.com',
+            databaseURL: 'https://dsgames-fecef-default-rtdb.asia-southeast1.firebasedatabase.app',
+            projectId: 'dsgames-fecef',
+            storageBucket: 'dsgames-fecef.firebasestorage.app',
+            messagingSenderId: '723943517090',
+            appId: '1:723943517090:web:3e8596971cedf46cc460fb',
+            measurementId: 'G-GNVR6N4LKQ'
+        };
         var BR_PUBLIC_URL = 'https://yeomt.github.io/DSbettleroyale/';
-        var BR_CONFIG_KEY = 'emojiClassBattleFirebaseConfig_v1';
+        var BR_CONFIG_KEY = 'emojiClassBattleFirebaseConfig_v2';
         var BR_LAST_ROOM_KEY = 'emojiClassBattleLastHostRoom_v1';
         var BR_PHASES = ['lobby','quiz','draft','battle','results'];
         var BR_TEAM_LABELS = ['개인','❤️ 하트','🔺 삼각','♦️ 다이아','⭐ 별'];
@@ -7293,6 +7449,7 @@
             var best=null,bestScore=Infinity, pool=g.aliveRealPlayers&&g.aliveRealPlayers.length?g.aliveRealPlayers:g.participants;
             for(var i=0;i<pool.length;i++) {
                 var o=pool[i];if(!o.alive||o===p||o.id===999||(p.team&&o.team===p.team))continue;
+                if(g.isConcealedFrom&&g.isConcealedFrom(o,p))continue;
                 var delta=o.pos.sub(p.pos),d=delta.mag();if(d>maxRange)continue;
                 var nd=delta.norm(),dot=nd.x*aim.x+nd.y*aim.y;
                 var score=d-(dot*210);
@@ -7301,6 +7458,7 @@
             if(!best) {
                 for(var j=0;j<pool.length;j++) {
                     var q=pool[j];if(!q.alive||q===p||q.id===999||(p.team&&q.team===p.team))continue;
+                    if(g.isConcealedFrom&&g.isConcealedFrom(q,p))continue;
                     var dd=q.pos.dist(p.pos);if(dd<bestScore&&dd<maxRange){best=q;bestScore=dd;}
                 }
             }
@@ -7428,7 +7586,8 @@
                 Math.max(0,Math.round(p.hp)),Math.round(p.maxHp),p.alive?1:0,Number(p.team||0),
                 Number(p.kills||0),Number(p.deaths||0),Math.max(0,Math.round(p.basicCooldown||0)),
                 Math.max(0,Math.round(p.cooldown||0)),Number(p.skillUsesLeft||0),
-                Math.round(respawn*10)/10,Math.round(p.radius),p.humanControlled?1:0
+                Math.round(respawn*10)/10,Math.round(p.radius),p.humanControlled?1:0,
+                game&&game.getCoverTypeAt?game.getCoverTypeAt(p.pos):''
             ];
         }
         function brPublishViews() {
@@ -7443,7 +7602,11 @@
             humans.forEach(function(viewer){
                 // 서버도 가까운 반경의 전투 정보만 학생 기기에 전달한다.
                 var sight=520;
-                var visible=all.filter(function(p){return p===viewer||p.pos.dist(viewer.pos)<sight+p.radius;}).map(brWirePlayer);
+                var visible=all.filter(function(p){
+                    if(p===viewer)return true;
+                    if(p.pos.dist(viewer.pos)>=sight+p.radius)return false;
+                    return !game.isConcealedFrom(p,viewer);
+                }).map(brWirePlayer);
                 var projectiles=game.projectiles.filter(function(q){return q.life>0&&q.pos&&q.pos.dist(viewer.pos)<sight+130;}).slice(-75).map(function(q){
                     return [Math.round(q.pos.x),Math.round(q.pos.y),Math.round(q.size||7),q.emoji||'',q.color||q.impactColor||'#fff',Number(q.owner&&q.owner.team||0)];
                 });
@@ -7451,12 +7614,18 @@
                     return [Math.round(z.pos.x),Math.round(z.pos.y),Math.round(z.radius||40),z.color||'#64748b',z.type||'dmg'];
                 });
                 var walls=game.walls.filter(function(w){return new Vec2(w.x,w.y).dist(viewer.pos)<sight+360;}).map(function(w){
-                    return [Math.round(w.x),Math.round(w.y),Math.round(w.w),Math.round(w.h),Math.round((w.angle||0)*1000)/1000];
+                    return [Math.round(w.x),Math.round(w.y),Math.round(w.w),Math.round(w.h),Math.round((w.angle||0)*1000)/1000,w.kind||'wall'];
+                });
+                var bushes=game.bushes.filter(function(b){return b.pos.dist(viewer.pos)<sight+b.radius;}).map(function(b){
+                    return [Math.round(b.x),Math.round(b.y),Math.round(b.radius),Number(b.seed||0)];
+                });
+                var smokes=game.smokes.filter(function(s){return s.pos.dist(viewer.pos)<sight+s.radius;}).map(function(s){
+                    return [Math.round(s.x),Math.round(s.y),Math.round(s.radius),Number(s.seed||0),Math.round(s.phase*100)/100];
                 });
                 updates['views/'+viewer.remoteId]={
-                    at:now,frame:game.frame,mapRadius:Math.round(game.mapRadius),mode:BRMP.roomMeta.mode,
+                    at:now,frame:game.frame,mapRadius:Math.round(game.mapRadius),mapName:game.mapName,mode:BRMP.roomMeta.mode,
                     clock:Math.round(remaining*10)/10,alive:alive.length,total:all.length,
-                    players:visible,projectiles:projectiles,zones:zones,walls:walls
+                    players:visible,projectiles:projectiles,zones:zones,walls:walls,bushes:bushes,smokes:smokes
                 };
             });
             if(now-Number(BRMP.lastSummaryAt||0)>900) {
@@ -7480,7 +7649,8 @@
                 old.tx=Number(r[3]);old.ty=Number(r[4]);old.row=r;old.last=now;
                 BRMP.drawPlayers.set(id,old);seen.add(id);
             });
-            BRMP.drawPlayers.forEach(function(v,k){if(!seen.has(k)&&now-v.last>1200)BRMP.drawPlayers.delete(k);});
+            // 수풀·연막에 숨은 적의 잔상이 오래 남지 않도록 두 번의 전송 주기 안에 제거한다.
+            BRMP.drawPlayers.forEach(function(v,k){if(!seen.has(k)&&now-v.last>520)BRMP.drawPlayers.delete(k);});
         }
         function brStartStudentBattle() {
             brEl('br-app').classList.add('br-hidden');
@@ -7524,6 +7694,46 @@
             if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);}
             c._cssW=w;c._cssH=h;c._dpr=dpr;
         }
+        function brDrawStudentWall(cc,r) {
+            var kind=r[5]||'wall';cc.save();cc.translate(r[0],r[1]);cc.rotate(r[4]||0);cc.lineWidth=3;
+            if(kind==='crate') {
+                cc.fillStyle='#7c4a24';cc.strokeStyle='#d6a15f';cc.fillRect(-r[2]/2,-r[3]/2,r[2],r[3]);cc.strokeRect(-r[2]/2,-r[3]/2,r[2],r[3]);
+                cc.strokeStyle='rgba(255,224,170,.5)';cc.lineWidth=4;cc.beginPath();cc.moveTo(-r[2]*.35,-r[3]*.35);cc.lineTo(r[2]*.35,r[3]*.35);
+                cc.moveTo(r[2]*.35,-r[3]*.35);cc.lineTo(-r[2]*.35,r[3]*.35);cc.stroke();
+            } else if(kind==='rock') {
+                cc.fillStyle='#475569';cc.strokeStyle='#94a3b8';cc.beginPath();cc.roundRect(-r[2]/2,-r[3]/2,r[2],r[3],Math.min(20,r[3]*.4));cc.fill();cc.stroke();
+            } else {
+                cc.fillStyle='#344157';cc.strokeStyle='#71809a';cc.fillRect(-r[2]/2,-r[3]/2,r[2],r[3]);cc.strokeRect(-r[2]/2,-r[3]/2,r[2],r[3]);
+            }
+            cc.restore();
+        }
+        function brDrawStudentBush(cc,r,foreground) {
+            var x=r[0],y=r[1],radius=r[2],seed=Number(r[3]||0);cc.save();cc.translate(x,y);
+            if(!foreground) {
+                cc.globalAlpha=.30;cc.fillStyle='#052e16';cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.fill();
+                cc.globalAlpha=.38;cc.strokeStyle='#4ade80';cc.lineWidth=3;cc.setLineDash([9,10]);cc.stroke();cc.setLineDash([]);
+            } else {
+                var colors=['#166534','#15803d','#22c55e','#4ade80'];
+                for(var i=0;i<9;i++) {
+                    var a=i*Math.PI*2/9+(seed%17)*.07,ring=i===8?0:radius*(.50+.10*Math.sin(i*2.7+seed));
+                    var lr=radius*(i===8?.42:.34+.035*(i%3));cc.globalAlpha=i===8?.34:.58;cc.fillStyle=colors[(i+seed)%colors.length];
+                    cc.beginPath();cc.arc(Math.cos(a)*ring,Math.sin(a)*ring,lr,0,Math.PI*2);cc.fill();
+                }
+                cc.globalAlpha=.68;cc.font=Math.round(radius*.34)+'px serif';cc.textAlign='center';cc.textBaseline='middle';cc.fillText('🌿',0,0);
+            }
+            cc.restore();
+        }
+        function brDrawStudentSmoke(cc,r) {
+            var radius=r[2],phase=Number(r[4]||0)+performance.now()*.00072;cc.save();cc.translate(r[0],r[1]);
+            var haze=cc.createRadialGradient(0,0,radius*.12,0,0,radius);
+            haze.addColorStop(0,'rgba(226,232,240,.72)');haze.addColorStop(.62,'rgba(148,163,184,.55)');haze.addColorStop(1,'rgba(71,85,105,0)');
+            cc.fillStyle=haze;cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.fill();
+            for(var i=0;i<7;i++) {
+                var a=i*Math.PI*2/7+phase*(i%2?1:-1),ring=radius*(.18+.34*(i%3)/2),puff=radius*(.22+.035*(i%3));
+                cc.globalAlpha=.18+.08*(i%2);cc.fillStyle=i%2?'#f1f5f9':'#cbd5e1';cc.beginPath();cc.arc(Math.cos(a)*ring,Math.sin(a)*ring,puff,0,Math.PI*2);cc.fill();
+            }
+            cc.globalAlpha=.65;cc.font=Math.round(radius*.25)+'px serif';cc.textAlign='center';cc.textBaseline='middle';cc.fillText('🌫️',0,0);cc.restore();
+        }
         function brDrawStudentFrame() {
             BRMP.renderFrame=requestAnimationFrame(brDrawStudentFrame);
             var c=brEl('br-student-canvas');if(c.classList.contains('br-hidden'))return;
@@ -7554,10 +7764,8 @@
             var minX=Math.floor((cam.x-halfW)/160)*160,maxX=cam.x+halfW,minY=Math.floor((cam.y-halfH)/160)*160,maxY=cam.y+halfH;
             for(var gx=minX;gx<=maxX;gx+=160){cc.beginPath();cc.moveTo(gx,minY);cc.lineTo(gx,maxY);cc.stroke();}
             for(var gy=minY;gy<=maxY;gy+=160){cc.beginPath();cc.moveTo(minX,gy);cc.lineTo(maxX,gy);cc.stroke();}
-            (view.walls||[]).forEach(function(r){
-                cc.save();cc.translate(r[0],r[1]);cc.rotate(r[4]||0);cc.fillStyle='#344157';cc.strokeStyle='#71809a';cc.lineWidth=3;
-                cc.fillRect(-r[2]/2,-r[3]/2,r[2],r[3]);cc.strokeRect(-r[2]/2,-r[3]/2,r[2],r[3]);cc.restore();
-            });
+            (view.bushes||[]).forEach(function(r){brDrawStudentBush(cc,r,false);});
+            (view.walls||[]).forEach(function(r){brDrawStudentWall(cc,r);});
             (view.zones||[]).forEach(function(r){
                 cc.save();cc.globalAlpha=.28;cc.fillStyle=r[3]||'#64748b';cc.beginPath();cc.arc(r[0],r[1],r[2],0,Math.PI*2);cc.fill();
                 cc.globalAlpha=.7;cc.strokeStyle=r[3]||'#94a3b8';cc.lineWidth=3;cc.stroke();cc.restore();
@@ -7588,6 +7796,8 @@
                 cc.fillStyle=isSelf?'#fde68a':'#f8fafc';cc.font=(isSelf?'900 ':'700 ')+Math.max(11,Math.min(16,rad*.35))+'px sans-serif';
                 cc.shadowColor='#000';cc.shadowBlur=4;cc.fillText(r[1],0,-rad-13);cc.restore();
             });
+            (view.bushes||[]).forEach(function(r){brDrawStudentBush(cc,r,true);});
+            (view.smokes||[]).forEach(function(r){brDrawStudentSmoke(cc,r);});
             cc.restore();
             cc.strokeStyle='#fb4b63';cc.lineWidth=10/zoom;cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.stroke();
             cc.restore();
@@ -7606,8 +7816,9 @@
             var a=EMOJI_DB[Number(r[2])]||EMOJI_DB[0],hp=Number(r[5]||0),max=Math.max(1,Number(r[6]||1));
             brEl('br-battle-self').textContent=a.e+' '+r[1]+' · '+a.t+'급';
             brEl('br-battle-hp').style.width=brClamp(hp/max*100,0,100)+'%';
-            brEl('br-battle-status').textContent='HP '+Math.round(hp)+' / '+Math.round(max)+' · KILL '+Number(r[9]||0);
-            brEl('br-battle-mode').textContent=BR_MODE_LABELS[view.mode]||'전투';
+            var cover=String(r[17]||''),coverText=cover==='bush'?' · 🌿 은폐 중':cover==='smoke'?' · 🌫️ 연막 은폐':'';
+            brEl('br-battle-status').textContent='HP '+Math.round(hp)+' / '+Math.round(max)+' · KILL '+Number(r[9]||0)+coverText;
+            brEl('br-battle-mode').textContent=(BR_MODE_LABELS[view.mode]||'전투')+(view.mapName?' · '+view.mapName:'');
             brEl('br-battle-time').textContent=(view.mode==='team-respawn'?'남은 ':'경과 ')+brFormatTime(Number(view.clock||0));
             brEl('br-battle-alive').textContent=Number(view.alive||0)+' / '+Number(view.total||0)+'명';
             var basicCd=Number(r[11]||0),skillCd=Number(r[12]||0),skillLeft=Number(r[13]||0);
