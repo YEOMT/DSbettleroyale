@@ -146,15 +146,8 @@
                     <span class="text-sm font-mono text-gray-400" id="game-time">00:00</span>
                 </div>
                 <div class="hud-box flex gap-2">
-                    <button onclick="setSpeed(1)" class="px-3 py-1 bg-gray-600 rounded text-xs font-bold hover:bg-gray-500">x1</button>
-                    <button onclick="setSpeed(2)" class="px-3 py-1 bg-gray-600 rounded text-xs font-bold hover:bg-gray-500">x2</button>
-                    <button onclick="togglePause()" id="pause-btn" class="px-4 py-1 bg-blue-600 rounded text-xs font-bold hover:bg-blue-500">일시정지</button>
                     <button onclick="restartGame()" class="px-3 py-1 bg-red-800 rounded text-xs font-bold hover:bg-red-700">종료</button>
                 </div>
-            </div>
-
-            <div id="slow-mo-indicator" class="hidden absolute top-20 left-1/2 transform -translate-x-1/2 bg-red-600 px-6 py-2 rounded-full text-lg font-black animate-pulse shadow-[0_0_20px_rgba(255,0,0,0.8)] border-2 border-red-400 z-10">
-                최후의 3인 영역 전개!!
             </div>
         </div>
     </div>
@@ -330,12 +323,65 @@
         // v21.2: 이동하면서 장판/함정을 남기는 트레일 대쉬 직업군.
         const TRAIL_DASH_SUBS = new Set(['POISON_TRAIL','ICE_TRAIL','BOMB_TRAIL','INK_TRAIL','BANANA_TRAIL']);
         // v21.10: 직접 몸통박치기로 승부하는 돌진형과 순간이동 암살형.
-        const IMPACT_CHARGE_SUBS = new Set(['THUNDER_DASH','LIGHTNING_DASH','CAR_RUSH','BOAR_CHARGE']);
+        const IMPACT_CHARGE_SUBS = new Set(['THUNDER_DASH','LIGHTNING_DASH','CAR_RUSH','BOAR_CHARGE','KINETIC_CHARGE']);
         const DIRECT_ASSAULT_DASH_SUBS = new Set([
             'THUNDER_DASH','LIGHTNING_DASH','CAR_RUSH','BOAR_CHARGE',
-            'BULLDOZER_DASH','EXPLOSIVE_DASH','FLY_DASH'
+            'BULLDOZER_DASH','EXPLOSIVE_DASH','FLY_DASH','KINETIC_CHARGE'
         ]);
         const ASSASSIN_TELEPORT_SUBS = new Set(['BACKSTAB','VOID_ASSASSIN','THUNDER']);
+        // v24: 스킬 횟수 제한 대신 랭크·위력·무기 콘셉트에 따른 재사용 대기시간을 쓴다.
+        // 강한 상위 랭크/광역/기동 스킬일수록 한 번의 영향력이 큰 만큼 쿨타임도 길어진다.
+        const RANGED_SNIPER_SUBS = new Set(['SNIPE','AIMED_SHOT','VOID_DESTRUCTION']);
+        const RANGED_MACHINE_SUBS = new Set(['ARCANE_BARRAGE','STING','RAPID_BOW']);
+        const RANGED_BOMBER_SUBS = new Set(['GIANT_FIREBALL','CRACKER','SODA_BOMB','POWDER_BARRAGE']);
+        function getRangedWeaponStyle(ability={}) {
+            const sub=ability.sub||'', name=String(ability.n||''), count=Number(ability.pCount||1);
+            if(RANGED_SNIPER_SUBS.has(sub)||ability.type===ABILITY_TYPES.LASER||/스나이퍼|저격|헤드슈터/.test(name)) return 'sniper';
+            if(RANGED_BOMBER_SUBS.has(sub)||Number(ability.pExplode||0)>=34||/폭격|폭탄|운석|다이너마이트/.test(name)) return 'bomber';
+            if(RANGED_MACHINE_SUBS.has(sub)||(count>=4&&!ability.pExplode)||/난사|연사|탄막/.test(name)) return 'machine';
+            if(ability.projType==='missile') return 'homing';
+            if(ability.projType==='BOOMERANG'||sub==='BOOMERANG') return 'boomerang';
+            if(Number(ability.knockback||0)>=15||Number(ability.pSize||0)>=20||Number(ability.pDmg||0)>=24) return 'heavy';
+            return 'standard';
+        }
+        function getRangedCombatProfile(ability={},kind='skill') {
+            const tier=ability.t||'C',style=getRangedWeaponStyle(ability);
+            const ranges={
+                sniper:{S:1250,A:1160,B:1070,C:930,F:760},
+                machine:{S:1120,A:1040,B:950,C:830,F:680},
+                bomber:{S:850,A:790,B:700,C:620,F:520},
+                heavy:{S:980,A:900,B:820,C:730,F:600},
+                homing:{S:1050,A:960,B:880,C:780,F:650},
+                boomerang:{S:800,A:750,B:690,C:620,F:520},
+                standard:{S:1000,A:920,B:840,C:740,F:610}
+            };
+            const speeds={
+                sniper:{S:32,A:29,B:25,C:21,F:16}, machine:{S:24,A:22,B:19,C:16,F:12},
+                bomber:{S:14,A:13,B:11,C:9,F:7}, heavy:{S:18,A:16,B:14,C:12,F:9},
+                homing:{S:17,A:15,B:13,C:11,F:8}, boomerang:{S:22,A:20,B:17,C:14,F:10},
+                standard:{S:22,A:20,B:17,C:14,F:10}
+            };
+            const tierSpeed={S:1.08,A:1.04,B:1,C:.90,F:.78}[tier]||1;
+            const raw=Number(ability.pSpeed||0),conceptSpeed=speeds[style][tier];
+            let speed=raw>0?Math.max(conceptSpeed*.82,raw*tierSpeed):conceptSpeed;
+            if(style==='bomber'&&raw>0) speed=conceptSpeed*.58+raw*tierSpeed*.42;
+            if(kind==='basic') speed*=style==='sniper'?.96:style==='bomber'?.92:.90;
+            let range=ranges[style][tier]*(kind==='basic'?(style==='sniper'?.94:.88):1);
+            const count=kind==='basic'&&style==='machine'?({S:3,A:3,B:2,C:2,F:2}[tier]||2):1;
+            const damageScale={sniper:1.36,machine:.46,bomber:1.02,heavy:1.12,homing:.94,boomerang:.92,standard:1}[style];
+            const knockback={S:16,A:13,B:10,C:7,F:4}[tier]*(style==='bomber'?1.45:style==='heavy'?1.28:style==='sniper'?1.05:.72);
+            const explodeRadius=style==='bomber'?({S:68,A:61,B:54,C:46,F:36}[tier]||46):0;
+            const cooldownScale=style==='sniper'?1.25:style==='bomber'?1.22:style==='machine'?1.16:style==='heavy'?1.12:1;
+            return {style,range:Math.round(range),speed:Math.max(4,speed),count,damageScale,knockback,explodeRadius,cooldownScale};
+        }
+        function getSkillCooldownMultiplier(ability={}) {
+            const tierMult={S:1.72,A:1.58,B:1.43,C:1.30,F:1.18}[ability.t]||1.38;
+            const style=getRangedWeaponStyle(ability);
+            let concept=style==='bomber'?1.10:style==='machine'?1.07:style==='sniper'?1.06:1;
+            if(ability.type===ABILITY_TYPES.TELEPORT||ability.type===ABILITY_TYPES.DASH) concept*=1.07;
+            if(ability.type===ABILITY_TYPES.AREA||ability.type===ABILITY_TYPES.ZONE) concept*=1.06;
+            return tierMult*concept;
+        }
         function isTrailDashAbility(ability) {
             return !!ability && ability.type === ABILITY_TYPES.DASH && TRAIL_DASH_SUBS.has(ability.sub);
         }
@@ -616,6 +662,30 @@
         EMOJI_DB.push({t:'C', e:'☕', n:'바리스타', type:ABILITY_TYPES.PROJ, desc:'뜨거운 커피잔 투척', projEmoji:'☕', pSize: 12, pSpeed: 10, pDmg: 10, spinRate: 0.1, ai:AI_TYPES.KITE, sizeMult: 1.0});
         EMOJI_DB.push({t:'C', e:'💼', n:'직장인', type:ABILITY_TYPES.PROJ, desc:'무거운 서류가방', projEmoji:'💼', pSize: 16, pSpeed: 9, pDmg: 12, spinRate: 0.1, ai:AI_TYPES.KITE, sizeMult: 1.0});
 
+        // ============================================================
+        // v23 참고 전투 시스템 이식: 선명한 궤적과 역할이 분명한 8종
+        // 제공된 v3.9의 가위 연격·공허 광선·영혼 보호막·회전 칼날·
+        // 화약 탄막·운동에너지 돌격·정조준·독 주사 메커니즘을 현재 규칙에 맞게 재구성했다.
+        // ============================================================
+        EMOJI_DB.push(
+            {t:'S', e:'✂️', n:'가위 수호자', type:ABILITY_TYPES.MELEE,
+             desc:'가위 돌진 후 최대 5연속 부채꼴 참격', sub:'SCISSOR_DASH', ai:AI_TYPES.RUSH, sizeMult:1.34},
+            {t:'S', e:'🌌', n:'공허 파괴자', type:ABILITY_TYPES.LASER,
+             desc:'넓은 공허 광선으로 직선상의 적을 관통하고 피해 일부 회복', sub:'VOID_DESTRUCTION', ai:AI_TYPES.KITE, sizeMult:1.52},
+            {t:'A', e:'🗡️', n:'영혼 검사', type:ABILITY_TYPES.MELEE,
+             desc:'영혼 가르기 적중 시 짧은 보호막 획득', sub:'SOUL_CLEAVE', ai:AI_TYPES.RUSH, sizeMult:1.22},
+            {t:'A', e:'🛞', n:'원형 칼날', type:ABILITY_TYPES.ORBIT,
+             desc:'롤링 블레이드 3개를 전개하고 전방으로 압박', sub:'ROLLING_BLADE', ai:AI_TYPES.RUSH, sizeMult:1.18},
+            {t:'B', e:'💥', n:'폭광 포병', type:ABILITY_TYPES.PROJ,
+             desc:'부채꼴 화약탄 5발이 짧은 범위로 연쇄 폭발', sub:'POWDER_BARRAGE', projEmoji:'✦', pCount:5, pSize:12, pSpeed:15, pDmg:10, pExplode:44, knockback:12, pTrail:'#fb7185', pImpact:'#fecdd3', ai:AI_TYPES.KITE, sizeMult:1.02},
+            {t:'B', e:'🪓', n:'철퇴 경호대', type:ABILITY_TYPES.DASH,
+             desc:'전진 돌격으로 적을 크게 밀치고 기절시키는 운동에너지 공격', sub:'KINETIC_CHARGE', ai:AI_TYPES.RUSH, sizeMult:1.28, dashSpeed:39, dashDuration:20, tankRole:true},
+            {t:'B', e:'🔭', n:'BB 스나이퍼', type:ABILITY_TYPES.PROJ,
+             desc:'빠르고 가는 정조준 탄환이 적을 관통', sub:'AIMED_SHOT', projEmoji:'•', pSize:9, pSpeed:26, pDmg:27, pierce:true, faceDir:true, knockback:14, pTrail:'#fde68a', pImpact:'#fff7cc', ai:AI_TYPES.CAMP, sizeMult:0.94},
+            {t:'B', e:'💉', n:'적색 의무단', type:ABILITY_TYPES.PROJ,
+             desc:'독 주사 2발로 지속 피해를 주고 적의 진입을 차단', sub:'TOXIC_INJECTION', projEmoji:'💉', pCount:2, pSize:12, pSpeed:18, pDmg:11, pStatus:'poison', pStatusPower:150, faceDir:true, knockback:5, pTrail:'#fb7185', pImpact:'#fecaca', ai:AI_TYPES.KITE, sizeMult:1.0}
+        );
+
         // --- MATH & UTILS ---
         let seedState = 1;
         function seedRandom(s) {
@@ -668,7 +738,7 @@
                 ctx.globalAlpha = Math.max(0, pct);
                 ctx.lineCap = 'round';
                 ctx.shadowColor = tierColor;
-                ctx.shadowBlur = this.tier === 'S' ? 24 : (this.tier === 'A' ? 16 : 8);
+                ctx.shadowBlur = game&&game.isPerformanceMode()?0:(this.tier === 'S' ? 16 : (this.tier === 'A' ? 10 : 5));
 
                 // 메인 베기 궤적
                 ctx.strokeStyle = tierColor;
@@ -697,6 +767,14 @@
                         ctx.lineTo(this.size*(0.75 + (i%2)*0.05), y*1.35);
                         ctx.stroke();
                     }
+                } else if(this.style==='scissor') {
+                    // 두 개의 교차 곡선만으로 가위 궤적을 표현해 파티클보다 훨씬 가볍다.
+                    ctx.globalAlpha=pct*.88;ctx.strokeStyle='#cffafe';ctx.lineWidth=Math.max(3,7*pct);
+                    ctx.beginPath();ctx.arc(0,-this.size*.12,this.size*.88,-.62,.54);ctx.stroke();
+                    ctx.beginPath();ctx.arc(0,this.size*.12,this.size*.88,-.54,.62);ctx.stroke();
+                } else if(this.style==='soul') {
+                    ctx.globalAlpha=pct*.82;ctx.strokeStyle='#bfdbfe';ctx.lineWidth=Math.max(2,6*pct);
+                    ctx.beginPath();ctx.arc(0,0,this.size*.78,-.72,.72);ctx.stroke();
                 }
                 ctx.restore();
             }
@@ -1272,6 +1350,7 @@
                 this.impactColor = opts.impactColor || color || '#fff';
                 this.status = opts.status || null;
                 this.statusPower = opts.statusPower || 0;
+                this.weaponStyle = opts.weaponStyle || getRangedWeaponStyle(owner?.ability||{});
                 this.hitMemory = Object.create(null);
                 this.spinAngle = 0;
                 // v22.2: 유도탄이 매 프레임 전체 적을 다시 탐색하지 않도록 타깃을 잠시 캐시.
@@ -1286,6 +1365,14 @@
                     // v20: 회전 무기는 상시 보호막이 아니라 일정 시간만 전개된다.
                     this.life = opts.orbitLife || {S:270,A:220,B:185,C:155,F:125}[owner?.ability?.t] || 180;
                     this.maxLife = this.life;
+                }
+                // 한 번의 탄막은 발사 섬광 이벤트 하나만 보내 실제 투사체를 놓치는 저주사율 화면도 방향을 읽게 한다.
+                if(game&&owner&&type!=='ORBIT'&&game.frame-Number(owner.lastStudentShotFxFrame||-9999)>=2) {
+                    game.emitStudentFx('shot',pos,{
+                        dx:dir.x,dy:dir.y,size:Math.min(260,Math.max(120,speed*12)),
+                        color:opts.trailColor||color||'#ffffff',amount:size,style:this.weaponStyle||emoji||opts.vfx||''
+                    });
+                    owner.lastStudentShotFxFrame=game.frame;
                 }
             }
             update(game) {
@@ -1383,6 +1470,10 @@
                 if(this.type !== 'ORBIT' && !this.pierce && this.type !== 'BOOMERANG') this.life = 0;
 
                 game.spawnImpact(this.pos, Math.max(20, this.size * 1.7), this.impactColor, Math.min(1.8, 0.7 + this.damage/30));
+                game.emitStudentFx('impact',this.pos,{
+                    dx:this.vel.x,dy:this.vel.y,size:Math.max(34,this.explodeRadius||this.size*2.4),
+                    color:this.impactColor||this.color||'#ffffff',amount:this.damage,style:this.weaponStyle||'projectile'
+                });
                 
                 if(this.explodeRadius > 0) {
                     game.spawnExplosion(this.pos, this.explodeRadius, this.impactColor || this.color);
@@ -1643,11 +1734,20 @@
                 TEAM_CLOVER:{firstDelaySec:4.8,cooldown:185},
                 TEAM_BUGLE:{firstDelaySec:4.5,cooldown:175},
                 TEAM_BELL:{firstDelaySec:4.6,cooldown:180},
-                TEAM_BANDAGE:{firstDelaySec:5.4,cooldown:235}
+                TEAM_BANDAGE:{firstDelaySec:5.4,cooldown:235},
+                SCISSOR_DASH:{firstDelaySec:4.0,cooldown:150},
+                VOID_DESTRUCTION:{firstDelaySec:5.2,cooldown:205},
+                SOUL_CLEAVE:{firstDelaySec:4.3,cooldown:165},
+                ROLLING_BLADE:{firstDelaySec:4.7,cooldown:290},
+                POWDER_BARRAGE:{firstDelaySec:4.2,cooldown:155},
+                KINETIC_CHARGE:{firstDelaySec:4.4,cooldown:170},
+                AIMED_SHOT:{firstDelaySec:4.8,cooldown:180},
+                TOXIC_INJECTION:{firstDelaySec:4.6,cooldown:175}
             };
             if(overrides[key]) timing = {...timing, ...overrides[key]};
             // 기존 DB에 명시된 customCooldown도 존중하되, 고유 타이밍 override가 있으면 override가 우선한다.
             if(ability.customCooldown && !overrides[key]) timing.cooldown = ability.customCooldown;
+            timing.cooldown = Math.round(timing.cooldown * getSkillCooldownMultiplier(ability));
             return timing;
         }
 
@@ -1960,6 +2060,7 @@
                 else if(sub==='INK_TRAIL') { dmg=5*this.damageMult; push=8; label='🖤 BLIND!'; col='#a78bfa'; victim.blindedFrames=Math.max(victim.blindedFrames||0,120); victim.vel=victim.vel.mult(0.48); this.spawnTrailZone(game,victim.pos,0.96,false); }
                 else if(sub==='BANANA_TRAIL') { dmg=6*this.damageMult; push=18; label='🍌 SLIP!'; col='#fde047'; victim.stunned=Math.max(victim.stunned,20); }
                 victim.takeDamage(dmg,this); victim.vel=victim.vel.add(away.mult(push)); game.addText(victim.pos,label,col,26,24);
+                game.emitStudentFx('impact',victim.pos,{dx:away.x,dy:away.y,size:72+push*1.5,color:col,amount:dmg,style:'dash-trail'});
                 if(!game.isPerformanceMode()) game.spawnImpact(victim.pos,64,col,0.7);
             }
 
@@ -2325,7 +2426,7 @@
                 if(!target || (this.team !== 0 && target.team === this.team)) {
                     this.comboHitsRemaining = 0; this.comboKind = null; return;
                 }
-                const maxRange = this.comboKind === 'blade' ? 270 : 235;
+                const maxRange = this.comboKind === 'blade' ? 270 : this.comboKind === 'scissor' ? 255 : 235;
                 const dist = this.pos.dist(target.pos);
                 if(dist > maxRange || game.checkWallBetween(this.pos, target.pos)) {
                     // 멀어졌다면 콤보를 억지로 허공에 쓰지 않고 다시 추격
@@ -2347,6 +2448,9 @@
                 } else if(this.comboKind === 'basic') {
                     dmg = finalHit ? 22 : 17; push = finalHit ? 17 : 8; stun = finalHit ? 5 : 1;
                     color = '#4ade80'; size = 94;
+                } else if(this.comboKind === 'scissor') {
+                    dmg = finalHit ? 24 : 15; push = finalHit ? 25 : 6; stun = finalHit ? 10 : 2;
+                    color = '#67e8f9'; style = 'scissor'; size = finalHit ? 142 : 112;
                 }
 
                 game.addSwingEffect(this, this.pos.add(dir.mult(this.radius*0.28)), dir, size, style);
@@ -2363,10 +2467,10 @@
                     const heal = Math.min(this.maxHp - this.hp, dealt * 0.52);
                     if(heal > 0) this.hp += heal;
                 }
-                if(finalHit) game.addText(target.pos, this.comboKind === 'blade' ? '⚔️ FINISH!' : '💥 COMBO!', color, 22, 28);
+                if(finalHit) game.addText(target.pos, this.comboKind === 'blade' ? '⚔️ FINISH!' : this.comboKind === 'scissor' ? '✂️ FINAL SNIP!' : '💥 COMBO!', color, 22, 28);
 
                 this.comboHitsRemaining--;
-                this.comboTimer = this.comboKind === 'blade' ? 4 : this.comboKind === 'blood' ? 4 : 5;
+                this.comboTimer = this.comboKind === 'scissor' ? 3 : this.comboKind === 'blade' ? 4 : this.comboKind === 'blood' ? 4 : 5;
                 if(this.comboHitsRemaining <= 0) this.comboKind = null;
             }
 
@@ -2952,11 +3056,15 @@
                         pCount = 8; pSpeed = 12; pDmg = 18 * this.damageMult; pSize = 15; opts.vfx = 'star'; opts.spinRate = 0.2; opts.pierce = true; opts.trailColor = '#fde68a';
                         pSpread = (Math.PI * 2) / pCount;
                     } else if (sub === 'SNIPE') {
-                        for(let angle = -0.2; angle <= 0.2; angle += 0.2) {
-                            let spreadDir = aimDir.rotate(angle);
-                            game.drawLaser(this.pos, this.pos.add(spreadDir.mult(800)), '#0ff');
-                            let hit = game.raycast(this.pos, spreadDir, 800, this);
-                            if(hit) hit.takeDamage(30 * this.damageMult, this);
+                        // 저격수는 여러 줄을 흩뿌리지 않고, 긴 단일 탄도로 강한 한 발을 꽂는다.
+                        const sniperProfile=getRangedCombatProfile(this.ability,'skill');
+                        const sniperRange=manualRange||sniperProfile.range;
+                        game.drawLaser(this.pos, this.pos.add(aimDir.mult(sniperRange)), '#67e8f9',10);
+                        let hit = game.raycast(this.pos, aimDir, sniperRange, this);
+                        if(hit) {
+                            hit.takeDamage(48 * this.damageMult, this);
+                            hit.vel=hit.vel.add(aimDir.mult(18*(hit.knockbackResist||1)));
+                            game.markLaunched(hit,this,20);
                         }
                         return;
                     } else if (sub === 'ICE_SHARD') {
@@ -2976,8 +3084,30 @@
                         pCount = 3; pSpeed = 13; pDmg = 10.5 * this.damageMult; pSize = 17;
                         pExplode = 62; pSpread = 0.14;
                         opts.trailColor = '#38bdf8'; opts.impactColor = '#e0f2fe'; opts.knockback = 18;
+                    } else if(sub === 'POWDER_BARRAGE') {
+                        pCount = 5; pSpeed = 15; pDmg = 10 * this.damageMult; pSize = 12;
+                        pExplode = 44; pSpread = 0.12;
+                        opts.trailColor = '#fb7185'; opts.impactColor = '#fecdd3'; opts.knockback = 12;
+                        game.addText(this.pos,'💥 POWDER BARRAGE!','#fecdd3',24,23);
+                    } else if(sub === 'AIMED_SHOT') {
+                        pCount = 1; pSpeed = 26; pDmg = 27 * this.damageMult; pSize = 9; pSpread = 0;
+                        opts.pierce = true; opts.faceDir = true; opts.knockback = 14;
+                        opts.trailColor = '#fde68a'; opts.impactColor = '#fff7cc';
+                        game.drawLaser(this.pos,this.pos.add(aimDir.mult(manualRange||900)),'#fde68a');
+                    } else if(sub === 'TOXIC_INJECTION') {
+                        pCount = 2; pSpeed = 18; pDmg = 11 * this.damageMult; pSize = 12; pSpread = 0.09;
+                        opts.status = 'poison'; opts.statusPower = 150; opts.knockback = 5;
+                        opts.trailColor = '#fb7185'; opts.impactColor = '#fecaca'; opts.faceDir = true;
                     } else if (sub === 'BOOMERANG') { projType = 'BOOMERANG'; }
                     else if (sub === 'REVOLVER') pSpeed = 22;
+
+                    const rangedProfile=getRangedCombatProfile(this.ability,'skill');
+                    opts.weaponStyle=rangedProfile.style;
+                    if(rangedProfile.style==='bomber'||rangedProfile.style==='heavy'||rangedProfile.style==='sniper')
+                        opts.knockback=Math.max(Number(opts.knockback||0),rangedProfile.knockback);
+                    if(rangedProfile.style==='sniper'||rangedProfile.style==='machine') pSpeed=Math.max(pSpeed,rangedProfile.speed);
+                    else if(rangedProfile.style==='bomber') pSpeed=Math.min(pSpeed,rangedProfile.speed);
+                    else if(!['NOVA','ICE_SHARD','RAPID_BOW','TOXIC_INJECTION'].includes(sub)) pSpeed=rangedProfile.speed;
 
                     if (isLegacySA && sub !== 'GIANT_FIREBALL' && sub !== 'NOVA' && sub !== 'SNIPE' && sub !== 'ICE_SHARD' && sub !== 'RAPID_BOW') {
                         pCount = 3;
@@ -2991,7 +3121,10 @@
                         let angle = startAngle + i * pSpread;
                         let spreadDir = aimDir.rotate(angle);
                         let proj = new Projectile(this, this.pos, spreadDir, pSpeed, pDmg, pSize, projType, this.ability.pImpact || '#ff0', pExplode, pEmoji, opts);
-                        if(manualAim&&manualRange>0&&projType!=='BOOMERANG')proj.life=Math.max(8,Math.ceil(manualRange/Math.max(1,pSpeed)));
+                        if(projType!=='BOOMERANG') {
+                            const shotRange=manualAim&&manualRange>0?manualRange:rangedProfile.range;
+                            proj.life=Math.max(8,Math.ceil(shotRange/Math.max(1,pSpeed)));
+                        }
                         game.projectiles.push(proj);
                     }
                     // 대마법사: 넓은 탄막 뒤에 유도 마력구 3발을 섞어 카이팅 중에도 압박을 유지.
@@ -3001,9 +3134,9 @@
                             const missile=new Projectile(
                                 this,this.pos.add(md.mult(this.radius*0.38)),md,
                                 9.4,10.5*this.damageMult,11,'missile','#e879f9',0,null,
-                                {trailColor:'#ddd6fe',impactColor:'#e879f9',knockback:4}
+                                {trailColor:'#ddd6fe',impactColor:'#e879f9',knockback:4,weaponStyle:'machine'}
                             );
-                            if(manualAim&&manualRange>0)missile.life=Math.max(8,Math.ceil(manualRange/9.4));
+                            missile.life=Math.max(8,Math.ceil((manualAim&&manualRange>0?manualRange:rangedProfile.range)/9.4));
                             game.projectiles.push(missile);
                         }
                         game.addText(this.pos,'✨ ARCANE BARRAGE!','#e9d5ff',28,26);
@@ -3014,9 +3147,9 @@
                             const fd=aimDir.rotate(a);
                             const focusStar=new Projectile(
                                 this,this.pos,fd,14,16*this.damageMult,12,'bullet','#fde047',0,null,
-                                {pierce:true,trailColor:'#fef08a',impactColor:'#facc15',knockback:7,vfx:'star',spinRate:0.22}
+                                {pierce:true,trailColor:'#fef08a',impactColor:'#facc15',knockback:7,vfx:'star',spinRate:0.22,weaponStyle:'standard'}
                             );
-                            if(manualAim&&manualRange>0)focusStar.life=Math.max(8,Math.ceil(manualRange/14));
+                            focusStar.life=Math.max(8,Math.ceil((manualAim&&manualRange>0?manualRange:rangedProfile.range)/14));
                             game.projectiles.push(focusStar);
                         }
                         game.addText(this.pos,'🌟 FOCUS STAR!','#fef08a',22,22);
@@ -3209,6 +3342,13 @@
                         break;
                     }
                     case ABILITY_TYPES.TELEPORT: {
+                        const teleportStart=new Vec2(this.pos.x,this.pos.y);
+                        const teleportColor=sub==='THUNDER'?'#fde047':sub==='DIVE_LAVA'?'#fb7185':'#a78bfa';
+                        const emitTeleportTrail=()=>{
+                            const delta=this.pos.sub(teleportStart),len=delta.mag(),travel=len>0?delta.norm():aimDir;
+                            game.emitStudentFx('teleport',teleportStart,{dx:travel.x,dy:travel.y,size:Math.max(90,len),color:teleportColor,style:sub||'teleport'});
+                            game.emitStudentFx('impact',this.pos,{dx:travel.x,dy:travel.y,size:sub==='THUNDER'?145:sub==='DIVE_LAVA'?125:92,color:teleportColor,style:'teleport'});
+                        };
                         game.spawnParticles(this.pos, 5, '#0ff');
                         if(sub === 'VOID_ASSASSIN') {
                             game.spawnExplosion(this.pos, 92, '#7c3aed');
@@ -3225,6 +3365,7 @@
                             const preHpRate = target.hp / Math.max(1,target.maxHp);
                             const behind = target.pos.add(dir.mult(target.radius + this.radius + 16));
                             this.pos = manualPoint ? new Vec2(manualPoint.x,manualPoint.y) : behind;
+                            emitTeleportTrail();
                             const executeBonus = preHpRate <= 0.35 ? 14 : 0;
                             const dmg = (24 + executeBonus) * this.damageMult;
                             target.takeDamage(dmg,this);
@@ -3246,6 +3387,7 @@
                             const toPredicted = predicted.sub(this.pos).norm();
                             const landing = manualPoint ? predicted : predicted.add(toPredicted.mult(target.radius + this.radius + 24));
                             this.pos = game.checkWallCollision(landing, this.radius) ? predicted : landing;
+                            emitTeleportTrail();
                             const range = 190;
                             game.spawnExplosion(this.pos, range, '#fde047');
                             game.applyAoE(this.pos, range, 44 * this.damageMult, this, 27);
@@ -3261,6 +3403,7 @@
                         }
 
                         this.pos = manualPoint ? new Vec2(manualPoint.x,manualPoint.y) : target.pos.add(dir.mult(50)); 
+                        emitTeleportTrail();
                         
                         if(sub === 'VOID_ASSASSIN') {
                             game.spawnExplosion(this.pos, 142, '#8b5cf6');
@@ -3302,6 +3445,9 @@
                         } else if(sub === 'TORNADO_ORBIT') {
                             desiredCount = 3; orbitDist = this.radius + 44; pSize = 29; pDmg = 15 * this.damageMult;
                             emoji = '🌪️'; impactColor = '#93c5fd'; knockback = 15; orbitSpeed = 0.11;
+                        } else if(sub === 'ROLLING_BLADE') {
+                            desiredCount = 3; orbitDist = this.radius + 52; pSize = 25; pDmg = 16 * this.damageMult;
+                            emoji = '🛞'; impactColor = '#f472b6'; knockback = 18; orbitSpeed = 0.14;
                         }
 
                         // v20: 랭크가 높을수록 오래 유지되지만 영구적으로 돌지는 않는다.
@@ -3310,6 +3456,7 @@
                         if(sub === 'SWORD_ORBIT') orbitLife = 235;       // 검성은 긴급너프 유지
                         else if(sub === 'GEAR_ORBIT') orbitLife = 265;
                         else if(sub === 'TORNADO_ORBIT') orbitLife = 210;
+                        else if(sub === 'ROLLING_BLADE') orbitLife = 230;
 
                         // 첫 시전에서 필요한 개수를 모두 전개. 수명이 끝나면 다음 쿨타임까지 빈틈이 생긴다.
                         for(let i=existing.length; i<desiredCount; i++) {
@@ -3353,6 +3500,15 @@
                                     game.addText(target.pos, '🌪️ PULL!', '#bfdbfe', 20, 27);
                                 } else this.vel = this.vel.add(rushDir.mult(11));
                                 // v20: ORBIT 고유 쿨타임 유지.
+                            } else if(sub === 'ROLLING_BLADE') {
+                                this.vel = this.vel.add(rushDir.mult(14));
+                                if(dist < 285) {
+                                    game.addSwingEffect(this,this.pos.add(rushDir.mult(this.radius*.32)),rushDir,126,'slash');
+                                    target.takeDamage(22*this.damageMult,this);
+                                    target.vel = target.vel.add(rushDir.mult(24));
+                                    target.stunned = Math.max(target.stunned,8);
+                                    game.addText(target.pos,'🛞 ROLLING BLADE!','#f9a8d4',22,24);
+                                }
                             } else {
                                 this.vel = this.vel.add(rushDir.mult(10));
                                 // v20: ORBIT 고유 쿨타임 유지.
@@ -3365,23 +3521,25 @@
                         const tier = this.ability.t;
                         const hitRange = {S:195, A:178, B:158, C:142, F:112}[tier] || 140;
                         const meleeDamage = {S:52, A:48, B:38, C:26, F:10}[tier] || 25;
-                        const basePush = {S:32, A:34, B:25, C:17, F:8}[tier] || 16;
+                        const basePush = {S:40, A:42, B:32, C:23, F:12}[tier] || 22;
                         const chargeSpeed = {S:29, A:26, B:22, C:18, F:12}[tier] || 18;
-                        const swingSize = {S:155, A:132, B:112, C:94, F:80}[tier] || 95;
+                        const swingSize = {S:180, A:156, B:132, C:112, F:92}[tier] || 112;
 
                         if(dist <= hitRange) {
                             let dmg = meleeDamage, push = basePush, stun = 0;
                             let style = 'slash';
                             const color = {S:'#ff334f',A:'#ffd34d',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'}[tier];
 
-                            if(sub === 'VAMPIRE_SLASH') { dmg = 48; push = 25; stun = 10; style='throw'; }
-                            else if(sub === 'HEAVY_PUNCH') { dmg = 60; push = 52; stun = 18; style='punch'; }
-                            else if(sub === 'HAMMER') { dmg = 44; push = 29; stun = 58; style='hammer'; }
-                            else if(sub === 'TANK_RHINO') { dmg=42; push=48; stun=18; style='punch'; }
-                            else if(sub === 'TANK_GORILLA') { dmg=36; push=38; stun=14; style='punch'; }
-                            else if(sub === 'TANK_TURTLE') { dmg=28; push=25; stun=10; style='hammer'; }
-                            else if(sub === 'TANK_CRAB') { dmg=21; push=21; stun=8; style='punch'; }
-                            else if(sub === 'TANK_HEDGEHOG') { dmg=9; push=13; stun=4; style='punch'; }
+                            if(sub === 'VAMPIRE_SLASH') { dmg = 48; push = 32; stun = 10; style='throw'; }
+                            else if(sub === 'HEAVY_PUNCH') { dmg = 60; push = 62; stun = 20; style='punch'; }
+                            else if(sub === 'HAMMER') { dmg = 44; push = 37; stun = 58; style='hammer'; }
+                            else if(sub === 'SCISSOR_DASH') { dmg=42; push=27; stun=7; style='scissor'; }
+                            else if(sub === 'SOUL_CLEAVE') { dmg=46; push=35; stun=11; style='soul'; }
+                            else if(sub === 'TANK_RHINO') { dmg=42; push=56; stun=18; style='punch'; }
+                            else if(sub === 'TANK_GORILLA') { dmg=36; push=46; stun=14; style='punch'; }
+                            else if(sub === 'TANK_TURTLE') { dmg=28; push=32; stun=10; style='hammer'; }
+                            else if(sub === 'TANK_CRAB') { dmg=21; push=27; stun=8; style='punch'; }
+                            else if(sub === 'TANK_HEDGEHOG') { dmg=9; push=17; stun=4; style='punch'; }
 
                             game.addSwingEffect(this, this.pos.add(aimDir.mult(this.radius*0.28)), aimDir, swingSize, style);
                             game.spawnImpact(target.pos, swingSize*0.78, color, tier === 'S' ? 1.8 : tier === 'A' ? 1.55 : 1.1);
@@ -3391,6 +3549,7 @@
                             target.takeDamage(dmg, this);
                             const dealt = Math.max(0, beforeHp - target.hp);
                             target.vel = target.vel.add(aimDir.mult(push * (target.knockbackResist || 1)));
+                            game.emitStudentFx('impact',target.pos,{dx:aimDir.x,dy:aimDir.y,size:Math.min(180,swingSize*.72+push),color,amount:dealt,style:'melee-'+style});
                             if(push >= 24) game.markLaunched(target, this, Math.min(36, 12 + Math.floor(push*0.55)));
                             // 적중 후 너무 깊게 파고들지 않고 곧바로 이탈 동작으로 전환하기 위한 짧은 관성.
                             this.vel = this.vel.add(aimDir.mult(tier === 'S' ? 4.5 : tier === 'A' ? 3.5 : 2.5));
@@ -3417,6 +3576,16 @@
                             } else if(sub === 'HAMMER') {
                                 // 뿅망치: 피해보다 확실한 긴 스턴
                                 game.addText(target.pos, '🔨 STUN!', '#bfdbfe', 24, 30);
+                            } else if(sub === 'SCISSOR_DASH') {
+                                // 참고 전투의 연속 싹둑: 첫 타격 뒤 네 번 더 빠르게 이어진다.
+                                this.comboHitsRemaining=4; this.comboTimer=4; this.comboTargetId=target.id; this.comboKind='scissor';
+                                game.addText(this.pos,'✂️ SNIP COMBO!','#a5f3fc',25,25);
+                            } else if(sub === 'SOUL_CLEAVE') {
+                                // 영혼 가르기 적중 보상: 짧고 강한 보호막을 피해 감소로 표현한다.
+                                this.teamGuardFrames=Math.max(this.teamGuardFrames,105);
+                                this.teamGuardStrength=Math.max(this.teamGuardStrength,0.25);
+                                game.addText(this.pos,'🗡️ SOUL SHIELD!','#bfdbfe',26,24);
+                                game.spawnImpact(this.pos,this.radius*1.8,'#93c5fd',0.8);
                             } else if(TANK_MELEE_SUBS.has(sub)) {
                                 const guard={
                                     TANK_RHINO:[100,0.24,'🦏 IRON GUARD!'],
@@ -3449,9 +3618,9 @@
                                     }
                                 });
                             }
-                            if(sub === 'HEAVY_PUNCH') this.cooldown = 168;
-                            else if(sub === 'HAMMER') this.cooldown = 225;
-                            else if(sub === 'VAMPIRE_SLASH') this.cooldown = this.frenzyFrames > 0 ? 52 : 88;
+                            if(sub === 'HEAVY_PUNCH') this.cooldown = Math.round(168*getSkillCooldownMultiplier(this.ability));
+                            else if(sub === 'HAMMER') this.cooldown = Math.round(225*getSkillCooldownMultiplier(this.ability));
+                            else if(sub === 'VAMPIRE_SLASH') this.cooldown = Math.round((this.frenzyFrames > 0 ? 52 : 88)*getSkillCooldownMultiplier(this.ability));
                             else if(TANK_MELEE_SUBS.has(sub)) this.setAbilityCooldown(tier==='S'?0.72:tier==='A'?0.78:tier==='B'?0.84:tier==='C'?0.90:1.05);
                             else this.setAbilityCooldown(tier === 'S' ? 0.58 : tier === 'A' ? 0.64 : tier === 'B' ? 0.70 : tier === 'C' ? 0.76 : 0.90);
                             // 콤보가 없는 한 타격 직후 빠르게 회피 페이즈로 넘어간다.
@@ -3459,14 +3628,18 @@
                             this.recoveryStrafeSign *= -1;
                         } else {
                             // 사거리 밖이면 쿨타임 짧은 돌진. 고급 근접일수록 훨씬 집요하게 따라붙음.
-                            const burst = dist > 250 ? 1.16 : 1.0;
+                            const burst = sub==='SCISSOR_DASH' ? 1.48 : (dist > 250 ? 1.16 : 1.0);
                             this.vel = this.vel.add(aimDir.mult(chargeSpeed * burst));
+                            if(sub==='SCISSOR_DASH') {
+                                this.dashFrames=Math.max(this.dashFrames,7); this.dashType='SCISSOR_DASH';
+                                game.emitStudentFx('dash',this.pos,{dx:aimDir.x,dy:aimDir.y,size:Math.min(360,Math.max(170,dist)),color:'#67e8f9',style:'scissor'});
+                            }
                             if((tier === 'S' || tier === 'A') && this.rushBurstCooldown <= 0 && dist < 350) {
                                 game.addSwingEffect(this, this.pos, aimDir, tier === 'S' ? 90 : 72, 'punch');
                                 this.rushBurstCooldown = 24;
                             }
-                            // 돌진 자체도 매 프레임 연타하지 않도록 짧은 호흡을 둔다.
-                            this.cooldown = {S:24,A:27,B:30,C:34,F:42}[tier];
+                            // 스킬 시전으로 시작된 돌진은 긴 스킬 쿨타임을 유지한다.
+                            this.cooldown = Math.max(this.cooldown,Math.round(({S:24,A:27,B:30,C:34,F:42}[tier])*getSkillCooldownMultiplier(this.ability)));
                         }
                         break;
                     }
@@ -3515,8 +3688,28 @@
                         break;
                     }
                     case ABILITY_TYPES.LASER: {
-                        game.drawLaser(this.pos, target.pos, '#f0f');
-                        target.takeDamage(20 * this.damageMult, this);
+                        if(sub==='VOID_DESTRUCTION') {
+                            const beamRange=Math.max(260,manualRange||900),beamEnd=this.pos.add(aimDir.mult(beamRange));
+                            game.drawLaser(this.pos,beamEnd,'#a78bfa',72);
+                            let totalDealt=0,hitCount=0;
+                            for(const victim of game.getNearbyParticipants(this.pos,beamRange+120)) {
+                                if(!victim.alive||victim===this||victim.id===999||(this.team!==0&&victim.team===this.team)) continue;
+                                const rel=victim.pos.sub(this.pos),along=rel.x*aimDir.x+rel.y*aimDir.y;
+                                const side=Math.abs(rel.x*aimDir.y-rel.y*aimDir.x);
+                                if(along<0||along>beamRange+victim.radius||side>72+victim.radius*.55) continue;
+                                if(game.checkWallBetween(this.pos,victim.pos)) continue;
+                                const before=victim.hp;
+                                victim.takeDamage(34*this.damageMult,this);
+                                totalDealt+=Math.max(0,before-victim.hp); hitCount++;
+                                victim.stunned=Math.max(victim.stunned,9);
+                                victim.vel=victim.vel.add(aimDir.mult(16*(victim.knockbackResist||1)));
+                            }
+                            if(totalDealt>0)this.hp=Math.min(this.maxHp,this.hp+totalDealt*.18);
+                            game.addText(this.pos,hitCount?'🌌 VOID BREAK ×'+hitCount:'🌌 VOID LASER','#c4b5fd',27,25);
+                        } else {
+                            game.drawLaser(this.pos, target.pos, '#f0f');
+                            target.takeDamage(20 * this.damageMult, this);
+                        }
                         break;
                     }
                     case ABILITY_TYPES.PULL: {
@@ -3579,6 +3772,12 @@
                             this.spawnTrailZone(game,leadPos,0.82,false);
                         }
                         this.vel = dashDir.mult(this.ability.dashSpeed || 35);
+                        game.emitStudentFx('dash',this.pos,{
+                            dx:dashDir.x,dy:dashDir.y,
+                            size:Math.max(180,(this.ability.dashSpeed||35)*(this.ability.dashDuration||15)),
+                            color:sub==='KINETIC_CHARGE'?'#e2e8f0':({S:'#fb7185',A:'#fbbf24',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'}[this.ability.t]||'#fff'),
+                            style:sub||'dash'
+                        });
                         
                         if (sub === 'THUNDER_DASH') {
                             game.addText(this.pos,'🌩️ THUNDER CHARGE!','#fef08a',24,23);
@@ -3587,6 +3786,11 @@
                         if (sub === 'ROCKET_JUMP') {
                             game.spawnExplosion(this.pos, 80, '#ffaa00');
                             game.applyAoE(this.pos, 80, 20 * this.damageMult, this, 15);
+                        }
+                        if(sub==='KINETIC_CHARGE') {
+                            this.teamGuardFrames=Math.max(this.teamGuardFrames,72);
+                            this.teamGuardStrength=Math.max(this.teamGuardStrength,0.18);
+                            game.addText(this.pos,'🪓 KINETIC CHARGE!','#e2e8f0',27,24);
                         }
 
                         this.setAbilityCooldown();
@@ -3647,6 +3851,22 @@
                 this.damageTaken += actualDamage;
                 if (attacker && attacker !== this && attacker.id !== 999) attacker.damageDealt += actualDamage;
                 this.hp -= amt;
+
+                // v23: 참고 파일처럼 피격 자체를 하나의 짧은 이벤트로 보낸다.
+                // 독/다단히트가 몰려도 3프레임에 한 번만 보내 네트워크와 렌더 부하를 제한한다.
+                if(game && attacker && attacker!==this && actualDamage>0 &&
+                   game.frame-Number(this.lastStudentHitFxFrame||-9999)>=3) {
+                    const hitDir=this.pos.sub(attacker.pos||this.pos).norm();
+                    const closeImpact=[ABILITY_TYPES.MELEE,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.ORBIT].includes(attacker.ability?.type);
+                    game.emitStudentFx('hit',this.pos,{
+                        dx:hitDir.x,dy:hitDir.y,
+                        size:Math.min(closeImpact?88:64,Math.max(closeImpact?25:16,actualDamage*(closeImpact?1.65:1.3))),
+                        amount:actualDamage,
+                        color:({S:'#fb4b63',A:'#fbbf24',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'})[attacker.ability?.t]||'#ffffff',
+                        targetId:this.remoteId||('ai-'+this.id),style:(attacker.ability?.type||'hit')+':'+(attacker.ability?.sub||'')
+                    });
+                    this.lastStudentHitFxFrame=game.frame;
+                }
                 
                 // ✨ v13: 타격 발생 자체가 전투 템포 시스템을 깨움
                 this.flashFrames = (game && game.isPerformanceMode()) ? 0 : Math.min(9, 4 + Math.floor(amt/12));
@@ -3705,6 +3925,9 @@
                 this.bushes = []; this.smokes = [];
                 this.rings = [];
                 this.signatureEffects = [];
+                // 학생 화면에는 무거운 파티클 대신 짧은 선/호/피격 이벤트만 전송한다.
+                this.studentFx = [];
+                this.studentFxSeq = 0;
                 this.confetti = []; // ✨ 우승 꽃가루 배열
                 
                 // 20~30명이 서로 바로 마주치지 않도록 교실 대전 전장을 대폭 확장한다.
@@ -3819,8 +4042,9 @@
                         }
                     }
                 };
-                placeCover('bush',[28,30,38][this.mapIndex],260,2260);
-                placeCover('smoke',[7,8,10][this.mapIndex],520,2180);
+                // 은폐 선택지는 유지하되 모바일 렌더링 부담을 줄이도록 과밀 수풀/연막만 약 20% 감축.
+                placeCover('bush',[22,24,30][this.mapIndex],260,2260);
+                placeCover('smoke',[5,6,7][this.mapIndex],520,2180);
             }
 
             findSafeMapPoint(minRadius=120,maxRadius=2000,clearance=80) {
@@ -4237,7 +4461,8 @@
                                     THUNDER_DASH:   {dmg:24, force:38, stun:24, color:'#fde047', label:'🌩️ THUNDER CRASH!'},
                                     LIGHTNING_DASH: {dmg:19, force:33, stun:19, color:'#facc15', label:'⚡ BOLT CRASH!'},
                                     CAR_RUSH:       {dmg:21, force:36, stun:21, color:'#fb7185', label:'🏎️ ROADKILL!'},
-                                    BOAR_CHARGE:    {dmg:17, force:31, stun:17, color:'#f59e0b', label:'🐗 BOAR CRASH!'}
+                                    BOAR_CHARGE:    {dmg:17, force:31, stun:17, color:'#f59e0b', label:'🐗 BOAR CRASH!'},
+                                    KINETIC_CHARGE: {dmg:22, force:42, stun:25, color:'#e2e8f0', label:'🪓 KINETIC CRASH!'}
                                 }[striker.ability.sub];
                                 dmg = profile.dmg * Math.min(1.25, Math.max(0.90, striker.damageMult));
                                 force = profile.force;
@@ -4254,6 +4479,10 @@
                             if(force>=15) this.markLaunched(target,striker,22+Math.floor(force*0.42));
                             target.takeDamage(dmg,striker);
                             this.spawnImpact(target.pos,55+force*1.35,impactColor,specialCharge?1.35:1.0);
+                            this.emitStudentFx('impact',target.pos,{
+                                dx:dir.x,dy:dir.y,size:Math.min(190,64+force*2.2),color:impactColor,
+                                amount:dmg,style:specialCharge?'dash-crash':'body-check'
+                            });
                             if(specialCharge || force>20) this.addText(target.pos,impactLabel,'#fff7cc',specialCharge?25:18,specialCharge?27:23);
                             if(specialCharge) {
                                 const side = dir.rotate(striker.recoveryStrafeSign*Math.PI/2);
@@ -4691,13 +4920,7 @@
             triggerDomainExpansion(alive) {
                 if(this.finalPhaseTriggered||!alive||alive.length!==3) return;
                 this.finalPhaseTriggered=true; this.finalPhase=true; this.finalPhaseStartedAt=this.frame;
-                // v21.8: 최후반 연출 텍스트는 중앙의 한 문구만 사용.
-                this.announce('최후의 3인 영역 전개!!',155);
-                const indicator=document.getElementById('slow-mo-indicator');
-                indicator.classList.add('hidden');
-                this.screenFlashAlpha=Math.max(this.screenFlashAlpha,0.34);
-                this.screenFlashColor='174,95,255'; this.vignettePulse=Math.max(this.vignettePulse,0.95);
-                this.eventFocusPos=new Vec2(this.center.x,this.center.y); this.eventFocusFrames=75;
+                // 별도의 슬로모션/화면 집중 연출 없이 최후반 밸런스 보정만 즉시 적용한다.
                 alive.forEach((p,idx)=>{
                     p.hp=Math.min(p.maxHp,p.hp+p.maxHp*0.12);
                     p.speed*=1.10; p.damageMult*=1.08; p.accuracy=Math.min(1,p.accuracy+0.03);
@@ -4705,9 +4928,7 @@
                     p.cooldownRateMult=(p.cooldownRateMult||1)*0.70;
                     p.cooldown=Math.floor(p.cooldown*0.58); p.stunned=Math.min(p.stunned,8);
                     p.finalPhaseBoosted=true; p.vel=p.vel.mult(1.08);
-                    this.rings.push(new ImpactRing(p.pos,p.radius*0.7,p.radius*2.1,'#c084fc',28,6));
                 });
-                // 별도의 이벤트 피드 문구는 띄우지 않는다. 중앙 문구 하나만 유지.
             }
 
             getPerformanceTier() {
@@ -4724,7 +4945,7 @@
 
             getAICadence() {
                 const tier=this.getPerformanceTier();
-                return tier>=2?3:tier===1?2:1;
+                return tier>=3?4:tier===2?3:tier===1?2:1;
             }
 
             getCollisionCadence() {
@@ -4743,8 +4964,9 @@
             }
 
             getParticleBudget() {
+                if(window.BRMP?.active&&window.BRMP.role==='host'&&window.BRMP.backend==='firebase') return 0;
                 const n=this.aliveRealPlayers?.length||0;
-                return n>=30?22:n>=22?28:n>15?36:n>10?150:240;
+                return n>=30?12:n>=22?18:n>15?24:n>10?90:180;
             }
 
             hasParticleRoom(extra=1) {
@@ -4764,6 +4986,8 @@
             }
 
             getFxScale() {
+                // 온라인 경기의 호스트 파티클은 학생에게 전송되지 않는다. 생성 자체를 생략해 시뮬레이션 여유를 확보한다.
+                if(window.BRMP?.active&&window.BRMP.role==='host'&&window.BRMP.backend==='firebase') return 0;
                 const n=this.aliveRealPlayers?.length || 0;
                 // v22.2: '많이 만든 뒤 삭제'보다 처음부터 덜 생성한다.
                 if(n>=30) return 0.12;
@@ -4803,9 +5027,9 @@
                 if(this.frame - this.lastConvergenceTrigger < 600) return;
                 this.lastConvergenceTrigger = this.frame;
                 this.announce('⚡ CONVERGENCE! 전장이 압축됩니다!', 110);
-                // 수렴 이벤트를 포함한 모든 자기장 압축을 기존 속도의 정확히 1/3로 낮춘다.
+                // 직전 버전 대비 2배가 되도록 수렴 압축도 원래 수치의 2/3를 적용한다.
                 const convergenceFloor = this.mapRadius < 150 ? 0 : 140;
-                this.mapRadius = Math.max(convergenceFloor, this.mapRadius - ((this.mapRadius < 300 ? 75 : 55) / 3));
+                this.mapRadius = Math.max(convergenceFloor, this.mapRadius - ((this.mapRadius < 300 ? 75 : 55) * 2/3));
                 if(!this.isPerformanceMode()) this.vignettePulse = 0.65;
                 this.spawnImpact(this.center, Math.min(260, this.mapRadius*0.35), '#f43f5e', 1.8);
                 this.participants.forEach(p => {
@@ -5160,7 +5384,25 @@
                 if(this.announcementLife > 0) this.announcementLife--;
                 if(this.eventFocusFrames>0) this.eventFocusFrames--; else this.eventFocusPos=null;
                 for(let i=this.eventFeed.length-1;i>=0;i--) { this.eventFeed[i].life--; if(this.eventFeed[i].life<=0) this.eventFeed.splice(i,1); }
+                if(this.studentFx.length) {
+                    const cutoff=this.frame-54;
+                    while(this.studentFx.length&&this.studentFx[0].frame<cutoff)this.studentFx.shift();
+                    if(this.studentFx.length>96)this.studentFx.splice(0,this.studentFx.length-96);
+                }
                 if(this.feverFrames > 0) this.feverFrames--;
+            }
+
+            emitStudentFx(type,pos,data={}) {
+                if(!pos || !window.BRMP?.active) return;
+                const fx={
+                    id:++this.studentFxSeq,type:String(type||'hit'),frame:this.frame,
+                    x:Number(pos.x||0),y:Number(pos.y||0),
+                    dx:Number(data.dx||0),dy:Number(data.dy||0),size:Number(data.size||0),
+                    color:data.color||'#ffffff',amount:Number(data.amount||0),
+                    targetId:data.targetId==null?'':String(data.targetId),style:data.style||''
+                };
+                this.studentFx.push(fx);
+                if(this.studentFx.length>96)this.studentFx.splice(0,this.studentFx.length-96);
             }
 
             punchScreen(damage, targetPos, attacker) {
@@ -5225,7 +5467,7 @@
                     if(this.frame > 780 && idleFrames > 360) this.triggerBattleFever();
                     if(this.frame > 1200 && idleFrames > 720) this.forceConvergence();
 
-                    // FINAL CIRCLE: 수축 시작 시점은 유지하고 실제 수축량은 기존의 1/3로 제한한다.
+                    // v24: 직전 버전보다 정확히 2배 빠르게 수축(원래 속도의 2/3).
                     if(this.frame>1200&&this.mapRadius>0) {
                         let shrink=0.20;
                         if(this.feverFrames>0) shrink+=0.16;
@@ -5234,7 +5476,7 @@
                         if(this.mapRadius<300) shrink+=0.18;
                         if(this.mapRadius<160) shrink+=0.28;
                         if(this.mapRadius<80) shrink+=0.38;
-                        shrink/=3;
+                        shrink*=2/3;
                         this.mapRadius=Math.max(0,this.mapRadius-shrink);
                     }
                     
@@ -5243,8 +5485,11 @@
 
                     if(!this.supplyDropSpawned&&this.frame>=this.supplyDropSpawnFrame&&this.aliveRealPlayers.length>1) this.spawnSupplyDrop();
 
-                    this.walls.forEach(w => w.update());
-                    this.smokes.forEach(s => s.update());
+                    // 장식 애니메이션은 성능 모드에서 20fps만 갱신한다. 충돌/전투 판정과는 무관하다.
+                    if(!this.isPerformanceMode()||this.frame%3===0) {
+                        this.walls.forEach(w => w.update());
+                        this.smokes.forEach(s => s.update());
+                    }
                     
                     // v21.16: 한 캐릭터의 AI/능력 런타임 오류가 경기 전체 requestAnimationFrame을 죽이지 않게 격리.
                     for(const p of this.participants) {
@@ -5295,10 +5540,10 @@
                     }
                     
                     // v21.5 PERFORMANCE LOD: 렌더링뿐 아니라 실제 시뮬레이션 객체 수도 제한.
-                    const zoneCap = this.isPerformanceMode() ? 42 : this.aliveRealPlayers.length > 10 ? 58 : 72;
+                    const zoneCap = this.isPerformanceMode() ? 34 : this.aliveRealPlayers.length > 10 ? 50 : 68;
                     if(this.zones.length > zoneCap) this.zones.splice(0, this.zones.length-zoneCap);
 
-                    const projectileCap = this.aliveRealPlayers.length>=30 ? 210 : this.aliveRealPlayers.length>=22 ? 240 : this.isPerformanceMode() ? 270 : this.aliveRealPlayers.length > 10 ? 320 : 420;
+                    const projectileCap = this.aliveRealPlayers.length>=30 ? 150 : this.aliveRealPlayers.length>=22 ? 180 : this.isPerformanceMode() ? 220 : this.aliveRealPlayers.length > 10 ? 270 : 360;
                     if(this.projectiles.length > projectileCap) {
                         let remove = this.projectiles.length - projectileCap;
                         for(let i=0;i<this.projectiles.length && remove>0;) {
@@ -5319,12 +5564,13 @@
                     // DASH/MELEE의 실제 공격 충돌은 별도 판정이라 공격감은 유지된다.
                     const collisionCadence=this.getCollisionCadence();
                     if(collisionCadence===1 || this.frame % collisionCadence === 0) {
-                        this.rebuildSpatialGrid();
                         this.resolveParticipantCollisions();
                     }
 
                     let alive = this.participants.filter(p => p.alive && p.id !== 999);
-                    updateHUD(alive.length, this.realParticipantCount || (this.realParticipantCount=this.participants.filter(p=>p.id!==999).length), this.frame);
+                    if(!window.BRMP?.active||this.frame%6===0) {
+                        updateHUD(alive.length, this.realParticipantCount || (this.realParticipantCount=this.participants.filter(p=>p.id!==999).length), this.frame);
+                    }
                     
                     // ✨ 팡파레 연출: 그룹 수 계산
                     let aliveTeams = new Set(alive.map(p => p.team));
@@ -5337,8 +5583,9 @@
                     // ✨ 우승자 확정 연출 (모달 띄우기 전 3초간의 세레모니)
                     if (currentAliveGroups <= 1 && this.participants.length > 0 && !this.isGameOver && !window.BRMP?.isRespawnMode()) { 
                         this.isGameOver = true;
-                        // 수백 개의 꽃가루 발사!
-                        for(let i=0; i<400; i++) this.confetti.push(new ConfettiParticle(canvas.width/2, canvas.height + 50));
+                        const onlineClass=window.BRMP?.active&&window.BRMP.role==='host'&&window.BRMP.backend==='firebase';
+                        // 수업 모드에서는 마지막 장시간 연출을 생략하고 곧바로 결과로 넘어간다.
+                        if(!onlineClass) for(let i=0; i<120; i++) this.confetti.push(new ConfettiParticle(canvas.width/2, canvas.height + 50));
                         
                         let winner = alive[0] || this.participants[0];
                         this.winner = winner;
@@ -5346,14 +5593,13 @@
                         if(winner) {
                             this.addText(winner.pos, "👑 WINNER!", "#ffd700");
                             // 우승자 주변으로 폭죽 느낌 파티클 발사
-                            for(let i=0; i<30; i++) {
+                            for(let i=0; i<(onlineClass?0:16); i++) {
                                 let v = new Vec2((rand()-0.5)*40, (rand()-0.5)*40);
                                 this.particles.push(new Particle(winner.pos, v, '#ffff00', 30+rand()*20, 5+rand()*5));
                             }
                         }
                         
-                        // 3초 뒤에 결과창 모달 팝업
-                        this.endTimer = setTimeout(() => { if(!this.resultShown) endGame(winner); }, 3000);
+                        this.endTimer = setTimeout(() => { if(!this.resultShown) endGame(winner); }, onlineClass?650:1500);
                         return; 
                     }
                 }
@@ -5660,6 +5906,7 @@
                 }
             }
             spawnExplosion(pos, radius, color) {
+                this.emitStudentFx('explosion',pos,{size:radius,color:color||'#ffffff'});
                 const scale = this.getFxScale();
                 if(scale <= 0) return;
                 const room=Math.max(0,this.getParticleBudget()-this.particles.length);
@@ -5676,20 +5923,25 @@
                     this.screenFlashColor = '255,245,220';
                 }
             }
-            drawLaser(from, to, color) {
-                if(!this.hasParticleRoom(1) && this.getPerformanceTier()>=2) return;
+            drawLaser(from, to, color, width=6) {
+                const delta=to.sub(from),length=delta.mag(),dir=length>0?delta.norm():new Vec2(1,0);
+                this.emitStudentFx('laser',from,{dx:dir.x,dy:dir.y,size:length,color:color||'#ffffff',amount:width});
+                if(this.isPerformanceMode() || (!this.hasParticleRoom(1) && this.getPerformanceTier()>=2)) return;
                 this.particles.push({
                     life: 5, maxLife: 5, update: function() { this.life--; },
                     draw: function(c) {
-                        c.strokeStyle = color; c.lineWidth = 6; c.globalAlpha = this.life/5;
+                        c.strokeStyle = color; c.lineWidth = width; c.globalAlpha = this.life/5;
                         c.beginPath(); c.moveTo(from.x, from.y); c.lineTo(to.x, to.y); c.stroke();
                         c.globalAlpha = 1;
                     }
                 });
             }
             addSwingEffect(owner, pos, dir, size, style='slash') {
-                // v18: 근접 베기는 초반 저사양 모드에서도 항상 표시. 개수만 제한해 성능을 지킨다.
-                this.swings.push(new SwingEffect(owner, pos, dir, size, style));
+                // 온라인 호스트는 판정만 담당하고, 베기 애니메이션은 학생 화면의 저비용 FX로만 그린다.
+                const onlineHost=window.BRMP?.active&&window.BRMP.role==='host'&&window.BRMP.backend==='firebase';
+                if(!onlineHost)this.swings.push(new SwingEffect(owner, pos, dir, size, style));
+                const color=({S:'#fb4b63',A:'#fbbf24',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'})[owner?.ability?.t]||'#fff';
+                this.emitStudentFx('swing',pos,{dx:dir.x,dy:dir.y,size,color,style,targetId:owner?.remoteId||('ai-'+owner?.id)});
                 const cap = this.isPerformanceMode() ? 36 : 80;
                 if(this.swings.length > cap) this.swings.splice(0, this.swings.length-cap);
             }
@@ -5887,9 +6139,6 @@
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('hud-mode-title').innerText = teamMode > 0 ? "🏆 팀전 모드" : "🏆 개인전 (서든 데스)";
             
-            // ✨ 버그 수정: 게임 시작 시 이전 판의 FINAL 문구 강제 숨김 처리
-            document.getElementById('slow-mo-indicator').classList.add('hidden');
-            
             if (animationId) cancelAnimationFrame(animationId);
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -5909,10 +6158,10 @@
                 console.error('[GAME UPDATE RECOVERY]', err);
             }
             try {
-                // 온라인 수업에서는 학생 기기의 조작을 우선한다. 호스트 화면만 약 20fps로 그리되
+                // 온라인 수업에서는 학생 기기의 조작을 우선한다. 호스트 화면은 약 12fps로 그리되
                 // 서버 시뮬레이션은 계속 60fps로 유지해 판정과 위치 데이터는 느려지지 않는다.
                 var throttleHost=window.BRMP&&BRMP.active&&BRMP.role==='host'&&BRMP.backend==='firebase';
-                if(!throttleHost||game.frame%3===0||game.isGameOver)game.draw();
+                if(!throttleHost||game.frame%5===0||game.isGameOver&&game.frame%3===0)game.draw();
             } catch(err) {
                 console.error('[GAME DRAW RECOVERY]', err);
             }
@@ -5948,21 +6197,11 @@
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('result-modal').classList.add('hidden');
             document.getElementById('stats-modal').classList.add('hidden');
-            document.getElementById('slow-mo-indicator').classList.add('hidden');
             document.getElementById('setup-screen').classList.remove('hidden');
-
-            const pauseBtn = document.getElementById('pause-btn');
-            if(pauseBtn) pauseBtn.innerText = '일시정지';
 
             // 캔버스에 이전 경기 마지막 프레임이 남지 않게 정리한다.
             if(ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
             window.scrollTo(0, 0);
-        }
-        function setSpeed(s) { if(game) game.speed = s; }
-        function togglePause() {
-            if(!game) return;
-            game.paused = !game.paused;
-            document.getElementById('pause-btn').innerText = game.paused ? '재개' : '일시정지';
         }
         function getEarlyPlayerScore(p) {
             const hpRate = p.maxHp > 0 ? Math.max(0, p.hp) / p.maxHp : 0;
@@ -6340,11 +6579,29 @@
         .br-title { margin:0; font-size:clamp(25px,4vw,44px); font-weight:900; letter-spacing:-.04em; }
         .br-sub { color:var(--br-muted); margin:5px 0 0; font-size:14px; }
         .br-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+        .br-home-layout { display:grid; grid-template-columns:minmax(0,2.25fr) minmax(245px,.70fr); gap:16px; align-items:stretch; }
         .br-grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
         .br-card { background:linear-gradient(160deg,rgba(23,34,58,.97),rgba(12,19,34,.98));
             border:1px solid var(--br-line); border-radius:22px; padding:22px; box-shadow:0 18px 50px rgba(0,0,0,.26); }
         .br-card h2,.br-card h3 { margin:0 0 8px; }
         .br-role-card { min-height:310px; display:flex; flex-direction:column; }
+        .br-student-main { min-height:420px; padding:clamp(24px,4vw,42px); border-color:#3f5ca2; }
+        .br-student-main .br-role-icon { font-size:68px; }
+        .br-student-main h2 { font-size:clamp(27px,4vw,40px); }
+        .br-student-main .br-input { min-height:58px; font-size:18px; }
+        .br-student-main #br-join-btn { min-height:58px; font-size:18px; }
+        .br-host-side { min-height:0; padding:18px; opacity:.90; }
+        .br-host-side .br-role-icon { font-size:34px; margin-bottom:4px; }
+        .br-host-side h2 { font-size:20px; }
+        .br-host-side .br-btn { width:100%; padding:10px 11px; font-size:12px; }
+        .br-home-flow { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:14px; color:var(--br-muted); font-size:12px; }
+        .br-home-flow span { border:1px solid #2c3c5d; background:#0c1527; border-radius:999px; padding:7px 10px; }
+        .br-invite-room { display:none; margin:8px 0 18px; border:1px solid #2563eb; background:#0b2348; color:#bfdbfe;
+            border-radius:14px; padding:12px 14px; font-weight:900; letter-spacing:.05em; }
+        #br-home.br-room-invite .br-invite-room { display:block; }
+        #br-home.br-room-invite .br-room-field { display:none; }
+        #br-home.br-room-invite .br-host-side { display:none; }
+        #br-home.br-room-invite .br-home-layout { grid-template-columns:minmax(0,680px); justify-content:center; }
         .br-role-icon { font-size:54px; margin-bottom:10px; }
         .br-field { margin:13px 0; }
         .br-label { display:block; color:#cbd5e1; font-weight:800; font-size:13px; margin:0 0 7px; }
@@ -6413,8 +6670,8 @@
         #br-student-battle { position:fixed; inset:0; z-index:130; background:#07101d; overflow:hidden; touch-action:none; overscroll-behavior:none; contain:strict; }
         #br-student-canvas { width:100%; height:100%; display:block; }
         .br-battle-hud { position:absolute; inset:10px 10px auto; display:flex; justify-content:space-between; gap:8px; pointer-events:none; }
-        .br-hud-box { background:rgba(5,10,20,.76); border:1px solid rgba(120,150,200,.28); border-radius:13px;
-            padding:8px 11px; backdrop-filter:blur(6px); font-size:12px; }
+        .br-hud-box { background:rgba(5,10,20,.86); border:1px solid rgba(120,150,200,.28); border-radius:13px;
+            padding:8px 11px; font-size:12px; }
         .br-hp { width:min(260px,42vw); height:11px; border-radius:99px; overflow:hidden; background:#3b1620; margin-top:5px; }
         .br-hp > i { display:block; height:100%; background:linear-gradient(90deg,#16a34a,#4ade80); width:100%; transition:width .15s; }
         .br-control { --br-cd-angle:360deg; --br-ring-color:#fff; position:absolute; width:116px; height:116px; border-radius:50%;
@@ -6464,8 +6721,10 @@
         .br-kbd { border:1px solid #51617d; border-bottom-width:3px; border-radius:6px; padding:1px 5px; background:#142038; font-size:11px; color:#fff; }
         @media(max-width:800px) {
             .br-shell { width:min(100% - 20px,720px); padding-top:16px; }
-            .br-grid2,.br-grid3,.br-host-layout { grid-template-columns:1fr; }
+            .br-grid2,.br-grid3,.br-host-layout,.br-home-layout { grid-template-columns:1fr; }
             .br-role-card { min-height:auto; }
+            .br-student-main { min-height:0; padding:22px; }
+            .br-student-main .br-role-icon { font-size:46px; }
             .br-topline { align-items:flex-start; }
             .br-choices { grid-template-columns:1fr; }
             .br-awards { grid-template-columns:1fr 1fr; }
@@ -6489,34 +6748,30 @@
                     </div>
                     <span class="br-pill">CLASSROOM EDITION</span>
                 </div>
-                <div class="br-grid2">
-                    <div class="br-card br-role-card">
+                <div class="br-home-layout">
+                    <div class="br-card br-role-card br-student-main">
                         <div class="br-role-icon">🎮</div>
-                        <h2>학생 참가</h2>
-                        <p class="br-small">선생님 화면의 QR을 찍었으면 방 번호가 자동으로 입력됩니다.</p>
-                        <div class="br-field"><label class="br-label" for="br-join-code">방 번호</label><input id="br-join-code" class="br-input" inputmode="numeric" maxlength="6" placeholder="예: 482913"></div>
+                        <h2>학생 바로 참가</h2>
+                        <p class="br-small">QR로 들어왔다면 이름만 입력하면 바로 참가됩니다.</p>
+                        <div id="br-invite-room" class="br-invite-room">ROOM 000000 · 초대받은 방</div>
+                        <div class="br-field br-room-field"><label class="br-label" for="br-join-code">방 번호</label><input id="br-join-code" class="br-input" inputmode="numeric" maxlength="6" placeholder="예: 482913"></div>
                         <div class="br-field"><label class="br-label" for="br-player-name">이름</label><input id="br-player-name" class="br-input" maxlength="12" autocomplete="off" placeholder="실명을 입력하세요"></div>
                         <div class="br-grow"></div>
                         <button id="br-join-btn" class="br-btn br-btn-primary">방에 참가하기</button>
                     </div>
-                    <div class="br-card br-role-card">
+                    <aside class="br-card br-role-card br-host-side">
                         <div class="br-role-icon">🧑‍🏫</div>
-                        <h2>선생님</h2>
-                        <p class="br-small">방을 만들고 퀴즈·뽑기·경기를 한 화면에서 진행합니다.</p>
-                        <div class="br-notice" style="margin:14px 0">✅ Firebase 실시간 연결이 기본 적용되어 있습니다. 바로 온라인 방을 만들 수 있습니다.</div>
+                        <h2>선생님용</h2>
+                        <p class="br-small">실시간 연결이 적용되어 바로 방을 만들 수 있습니다.</p>
                         <div class="br-grow"></div>
-                        <div class="br-actions">
-                            <button id="br-create-btn" class="br-btn br-btn-fire br-grow">온라인 방 만들기</button>
-                            <button id="br-config-btn" class="br-btn br-btn-ghost">⚙️ 연결 확인</button>
-                        </div>
+                        <button id="br-create-btn" class="br-btn br-btn-fire">방 만들기</button>
+                        <button id="br-config-btn" class="br-btn br-btn-ghost" style="margin-top:8px">⚙️ 연결 확인</button>
                         <button id="br-demo-btn" class="br-btn br-btn-ghost" style="margin-top:9px">🧪 이 기기에서 수업 흐름 체험</button>
                         <button id="br-legacy-btn" class="br-btn br-btn-ghost" style="margin-top:9px">🤖 기존 AI 관전 모드 열기</button>
-                    </div>
+                    </aside>
                 </div>
-                <div class="br-grid3" style="margin-top:18px">
-                    <div class="br-card"><h3>1. 단어 퀴즈</h3><p class="br-small">60초 동안 빠르게 풀고 3문제마다 리롤권 1개 획득</p></div>
-                    <div class="br-card"><h3>2. 이모지 뽑기</h3><p class="br-small">S 5% · A 15% · B 25% · C 40% · F 15%</p></div>
-                    <div class="br-card"><h3>3. 직접 전투</h3><p class="br-small">8방향 이동 · 일반 공격 · 한정 스킬 · 부쉬/연막 은폐</p></div>
+                <div class="br-home-flow">
+                    <span>① 1분 영단어 퀴즈</span><span>② 리롤 후 이모지 선택</span><span>③ 직접 이동·조준·전투</span>
                 </div>
             </div>
         </section>
@@ -6641,7 +6896,7 @@
             <span class="br-control-content">공격<br>⚔️</span><span id="br-attack-cd" class="br-cd-text ready">READY</span><span class="br-aim-knob"></span>
         </button>
         <button id="br-skill" type="button" class="br-control" aria-label="스킬 조준">
-            <span class="br-control-content">스킬<br><span id="br-skill-count">0회</span></span><span id="br-skill-cd" class="br-cd-text ready">READY</span><span class="br-aim-knob"></span>
+            <span class="br-control-content">스킬<br><span id="br-skill-count">∞</span></span><span id="br-skill-cd" class="br-cd-text ready">READY</span><span class="br-aim-knob"></span>
         </button>
         <div id="br-joystick" class="br-control"><div id="br-joystick-knob"></div></div>
         <div id="br-respawn" class="br-respawn br-hidden"><b id="br-respawn-text">3초 후 부활</b></div>
@@ -6777,9 +7032,11 @@
             active:false, matchFinished:false, respawnMode:false, focusPlayer:false,
             viewTimer:null, monitorTimer:null, summaryTimer:null, renderFrame:null,
             inputState:null, drawPlayers:null, studentCamera:null, currentSelf:null, aimGesture:null, localCastFx:null,
-            drawProjectiles:null, projectileSeq:0,
+            drawProjectiles:null, drawFx:null, hitStates:null, projectileSeq:0, staticView:null, staticSent:{},
             lastDraftRequests:{}, lastDeaths:{}, deathCounter:0, localDemoHumanId:null,
+            publishInFlight:0,publishCursor:0,lastSmallPublishAt:0,
             legacyEndGame:null, legacyRestartGame:null, lastSnapshotAt:0,
+            renderQuality:1,studentFrameEma:16.7,studentFrameSamples:0,
             isRespawnMode:function(){ return !!this.respawnMode; }
         };
         window.BRMP = BRMP;
@@ -6881,16 +7138,17 @@
             var r=(rnd||Math.random)();
             if(r<.05)return 'S'; if(r<.20)return 'A'; if(r<.45)return 'B'; if(r<.85)return 'C'; return 'F';
         }
-        function brSkillUses(tier) { return tier==='S'?3:tier==='A'?2:tier==='B'?1:0; }
+        function brSkillUses() { return -1; } // -1은 횟수 무제한, 쿨타임만 적용
         function brAimSpec(ability,kind,playerRadius,power) {
             ability=ability||{};playerRadius=Math.max(24,Number(playerRadius||38));
             power=brClamp(Number(power||1),.18,1);
             var type=ability.type,tier=ability.t||'C',sub=ability.sub||'';
             var label=kind==='attack'?'일반 공격':(ability.n||'스킬');
             if(kind==='attack') {
-                var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.PULL].indexOf(type)>=0;
+                var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].indexOf(type)>=0;
                 if(close)return {shape:'cone',range:playerRadius+78,halfAngle:Math.acos(.05),width:playerRadius*.8,label:label};
-                return {shape:'line',range:900,width:Math.max(42,Number(ability.pSize||10)*3.2),label:label};
+                var basicProfile=getRangedCombatProfile(ability,'basic');
+                return {shape:'line',range:basicProfile.range,width:Math.max(42,Number(ability.pSize||10)*3.2),label:label+' · '+({sniper:'저격',machine:'연사',bomber:'폭격',heavy:'중포',homing:'유도',boomerang:'왕복',standard:'사격'}[basicProfile.style]||'사격')};
             }
             if(type===ABILITY_TYPES.MELEE) {
                 return {shape:'dash',range:360*(.38+.62*power),width:playerRadius*1.55,impactRadius:{S:195,A:178,B:158,C:142,F:112}[tier]||142,label:label};
@@ -6911,8 +7169,8 @@
             if(type===ABILITY_TYPES.PULL) return {shape:'line',range:500,width:125,label:label};
             if(type===ABILITY_TYPES.LASER) return {shape:'line',range:800,width:36,label:label};
             if(type===ABILITY_TYPES.PROJ) {
-                var projRange=sub==='SNIPE'?800:brClamp(Number(ability.pSpeed||12)*65,650,1050);
-                return {shape:'line',range:projRange,width:Math.max(44,Number(ability.pSize||12)*3.4),label:label};
+                var profile=getRangedCombatProfile(ability,'skill');
+                return {shape:'line',range:profile.range,width:Math.max(44,Number(ability.pSize||12)*3.4),label:label+' · '+({sniper:'저격',machine:'연사',bomber:'폭격',heavy:'중포',homing:'유도',boomerang:'왕복',standard:'사격'}[profile.style]||'사격')};
             }
             if(type===ABILITY_TYPES.AREA) {
                 var areaR=sub==='NUKE_DEATH'?215:sub==='THUNDER'?195:210;
@@ -7067,8 +7325,8 @@
             if(BRMP.backend==='local') {
                 BRMP.joinUrl='이 기기 전용 데모';
             } else {
-                var encoded=brEncodeConfig(BRMP.config);
-                BRMP.joinUrl=BR_PUBLIC_URL+'?room='+encodeURIComponent(BRMP.roomCode)+(encoded?'#c='+encoded:'');
+                // Firebase 설정은 파일에 내장되어 있으므로 짧고 인식이 빠른 직접 참가 QR만 만든다.
+                BRMP.joinUrl=BR_PUBLIC_URL+'?room='+encodeURIComponent(BRMP.roomCode)+'&join=1';
             }
             brEl('br-join-link').value=BRMP.joinUrl;
             brEl('br-room-code').textContent=BRMP.roomCode;
@@ -7151,8 +7409,15 @@
                 brRenderSelfState();
             },BRMP.studentRefs);
             brRefOn(base.child('views/'+BRMP.playerId),'value',function(s){
-                BRMP.latestView=s.val()||null;
-                if(BRMP.latestView) brIngestView(BRMP.latestView);
+                var incoming=s.val()||null;
+                if(!incoming)return;
+                BRMP.staticView=BRMP.staticView||{};
+                ['walls','bushes','smokes'].forEach(function(key){
+                    if(Object.prototype.hasOwnProperty.call(incoming,key))BRMP.staticView[key]=incoming[key]||[];
+                    else incoming[key]=BRMP.staticView[key]||[];
+                });
+                BRMP.latestView=incoming;
+                brIngestView(incoming);
             },BRMP.studentRefs);
             brRefOn(base.child('results'),'value',function(s){
                 BRMP.results=s.val()||null;
@@ -7473,10 +7738,9 @@
             brEl('br-draft-tier').className='br-tier br-tier-'+a.t;
             brEl('br-draft-name').textContent=a.n;
             brEl('br-draft-desc').textContent=a.desc||'';
-            var uses=brSkillUses(a.t);
-            brEl('br-draft-skill').innerHTML=uses?
-                '<b>'+a.t+'급 한정 스킬 '+uses+'회</b><br>'+brEscape(a.desc||a.n):
-                '<b>일반 공격형</b><br>한정 스킬은 없지만 일반 공격과 이동으로 충분히 생존할 수 있습니다.';
+            var skillSeconds=Math.max(1,Math.round(getAbilityTiming(a).cooldown/60));
+            brEl('br-draft-skill').innerHTML='<b>'+a.t+'급 스킬 · 횟수 무제한</b><br>'+brEscape(a.desc||a.n)+
+                '<br><span class="br-small">기본 재사용 대기시간 약 '+skillSeconds+'초</span>';
             brEl('br-reroll-btn').disabled=Number(p.rerolls||0)<=0||!!p.ready||Number(p.rerollRequest||0)>Number(p.rerollProcessed||0);
             brEl('br-ready-btn').disabled=!!p.ready;
             brEl('br-draft-actions').classList.toggle('br-hidden',!!p.ready);
@@ -7498,7 +7762,8 @@
             var entries=brGetPlayerEntries(false);
             if(entries.length<2){brToast('최소 2명이 필요합니다.');return;}
             BRMP.active=true;BRMP.matchFinished=false;BRMP.respawnMode=BRMP.roomMeta.mode==='team-respawn';
-            BRMP.lastDeaths={};BRMP.deathCounter=0;BRMP.inputs=BRMP.inputs||{};BRMP.projectileSeq=0;
+            BRMP.lastDeaths={};BRMP.deathCounter=0;BRMP.inputs=BRMP.inputs||{};BRMP.projectileSeq=0;BRMP.staticSent={};
+            BRMP.publishInFlight=0;BRMP.publishCursor=0;BRMP.lastSmallPublishAt=0;
             teamMode=Number(BRMP.roomMeta.teamCount||0);
             seedRandom(String(BRMP.roomMeta.seed||'class-battle')+'|participants');
             generatedParticipants=entries.map(function(rec,i){
@@ -7506,7 +7771,7 @@
                 if(!Number.isInteger(idx)||!EMOJI_DB[idx])idx=brAbilityIndex(BRMP.roomMeta.mode,-1,null,Math.random);
                 var p=new Participant(i,rec.name,EMOJI_DB[idx],new Vec2(0,0),Number(rec.team||0));
                 p.remoteId=rec._id;p.abilityIndex=idx;p.isBot=!!rec.bot;p.deaths=0;p.placement=null;
-                p.maxSkillUses=brSkillUses(p.ability.t);p.skillUsesLeft=p.maxSkillUses;
+                p.maxSkillUses=-1;p.skillUsesLeft=-1;
                 p.basicCooldown=0;p.basicCooldownMax=1;p.skillCooldownMax=Math.max(1,Number(p.maxCooldown||1));
                 p.lastRemoteAttack=0;p.lastRemoteSkill=0;p.lastAimDir=new Vec2(1,0);p.manualAimCast=false;
                 p.activationFrame=0;
@@ -7529,6 +7794,8 @@
             brEl('br-host-live').classList.remove('br-hidden');
             startGame();
             game.mapRadius=2600;
+            // 온라인 수업에서는 벽을 고정해 충돌 계산과 정적 맵 재전송을 줄인다.
+            game.walls.forEach(function(w){w.spinSpeed=0;});
             game.mapName=BRMP.respawnMode?'♻️ 리스폰 아레나':game.mapName;
             document.getElementById('hud-mode-title').textContent='🏆 '+BR_MODE_LABELS[BRMP.roomMeta.mode]+' · '+game.mapName;
             brStartHostMatchTimers();
@@ -7651,10 +7918,9 @@
             var skillSeq=Number(input.skillSeq||0);
             if(skillSeq>p.lastRemoteSkill) {
                 p.lastRemoteSkill=skillSeq;
-                if(p.skillUsesLeft>0&&p.cooldown<=0&&p.stunned<=0&&p.alive) {
+                if(p.skillUsesLeft!==0&&p.cooldown<=0&&p.stunned<=0&&p.alive) {
                     brCastHumanSkill(p,g,p.lastAimDir,Number(input.ap||1));
                     p.skillCooldownMax=Math.max(1,Number(p.cooldown||p.maxCooldown||1));
-                    p.skillUsesLeft--;
                     g.pushCombatEvent('✨ '+p.name+' · '+p.ability.n,BR_TIER_COLOR[p.ability.t],2,p.pos);
                 }
             }
@@ -7670,39 +7936,48 @@
             var tier=p.ability.t, cd={S:34,A:38,B:43,C:48,F:56}[tier]||46;
             // 같은 등급 안에서도 이모지마다 고유한 공격 템포를 갖는다(약 ±5프레임).
             cd+=Math.abs(abilityTimingHash((p.ability.n||'emoji')+'|basic'))%11-5;
-            var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.PULL].indexOf(p.ability.type)>=0;
+            var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].indexOf(p.ability.type)>=0;
             p.attackCommitFrames=Math.max(p.attackCommitFrames,10);
             if(close) {
-                var range=p.radius+78,damage={S:25,A:22,B:19,C:16,F:11}[tier],push={S:17,A:15,B:13,C:11,F:7}[tier];
+                var range=p.radius+82,damage={S:25,A:22,B:19,C:16,F:11}[tier],push={S:24,A:21,B:18,C:15,F:10}[tier];
                 var hit=false;
-                g.addSwingEffect(p,p.pos.add(aim.mult(p.radius*.5)),aim,range*1.18,'slash');
+                g.addSwingEffect(p,p.pos.add(aim.mult(p.radius*.5)),aim,range*1.34,'slash');
                 g.getNearbyParticipants(p.pos,range+60).forEach(function(o){
                     if(!o.alive||o===p||o.id===999||(p.team&&o.team===p.team))return;
                     var d=o.pos.sub(p.pos),dist=d.mag(),dot=dist?d.norm().x*aim.x+d.norm().y*aim.y:1;
                     if(dist<range+o.radius*.4&&dot>.05) {
                         o.takeDamage(damage*p.damageMult*.72,p);
                         o.vel=o.vel.add(aim.mult(push*(o.knockbackResist||1)));
-                        o.stunned=Math.max(o.stunned,3);hit=true;
+                        if(push>=18)g.markLaunched(o,p,16+Math.floor(push*.45));
+                        o.stunned=Math.max(o.stunned,5);
+                        g.emitStudentFx('impact',o.pos,{dx:aim.x,dy:aim.y,size:68+push*1.4,color:BR_TIER_COLOR[tier],amount:damage,style:'melee'});
+                        hit=true;
                     }
                 });
                 if(hit)g.spawnImpact(p.pos.add(aim.mult(range*.75)),range*.8,BR_TIER_COLOR[tier],.75);
             } else {
-                var dmg={S:21,A:18,B:15,C:12,F:8}[tier],speed={S:18,A:17,B:16,C:15,F:13}[tier];
-                var size={S:13,A:12,B:11,C:10,F:8}[tier];
+                var profile=getRangedCombatProfile(p.ability,'basic');
+                var dmg={S:21,A:18,B:15,C:12,F:8}[tier]*profile.damageScale;
+                var speed=profile.speed,size={S:13,A:12,B:11,C:10,F:8}[tier]*(profile.style==='heavy'?1.18:profile.style==='bomber'?1.28:profile.style==='sniper'?.82:1);
                 var projectileEmoji=p.ability.projEmoji||((p.ability.type===ABILITY_TYPES.LASER)?'✦':'•');
-                var basicProjectile=new Projectile(
-                    p,p.pos.add(aim.mult(p.radius*.7)),aim,speed,dmg*p.damageMult*.58,size,'bullet',
-                    BR_TIER_COLOR[tier],0,projectileEmoji,{knockback:tier==='S'?8:tier==='A'?6:4,trailColor:BR_TIER_COLOR[tier],impactColor:BR_TIER_COLOR[tier]}
-                );
-                // 조준선의 900 거리와 실제 일반 투사체의 최대 이동거리를 일치시킨다.
-                basicProjectile.life=Math.ceil(900/speed);g.projectiles.push(basicProjectile);
+                var spread=profile.style==='machine'?.055:profile.style==='bomber'?.035:0;
+                for(var shot=0;shot<profile.count;shot++) {
+                    var shotDir=aim.rotate((shot-(profile.count-1)/2)*spread);
+                    var basicProjectile=new Projectile(
+                        p,p.pos.add(shotDir.mult(p.radius*.7)),shotDir,speed,dmg*p.damageMult*.58,size,'bullet',
+                        BR_TIER_COLOR[tier],profile.explodeRadius,projectileEmoji,
+                        {knockback:profile.knockback,trailColor:BR_TIER_COLOR[tier],impactColor:BR_TIER_COLOR[tier],weaponStyle:profile.style}
+                    );
+                    basicProjectile.life=Math.max(8,Math.ceil(profile.range/speed));g.projectiles.push(basicProjectile);
+                }
+                cd=Math.round(cd*profile.cooldownScale);
             }
             p.basicCooldown=cd;p.basicCooldownMax=cd;
         }
         function brStartHostMatchTimers() {
             if(BRMP.viewTimer)clearInterval(BRMP.viewTimer);
             if(BRMP.monitorTimer)clearInterval(BRMP.monitorTimer);
-            BRMP.viewTimer=setInterval(brPublishViews,140);
+            BRMP.viewTimer=setInterval(brPublishViews,90);
             BRMP.monitorTimer=setInterval(brMonitorMatch,120);
         }
         function brMonitorMatch() {
@@ -7750,15 +8025,25 @@
             ];
         }
         function brPublishViews() {
-            if(!BRMP.active||!game||BRMP.backend!=='firebase'||BRMP.publishBusy)return;
+            if(!BRMP.active||!game||BRMP.backend!=='firebase'||Number(BRMP.publishInFlight||0)>=2)return;
             var humans=game.participants.filter(function(p){return p.humanControlled&&p.remoteId&&p.id!==999;});
             if(!humans.length)return;
+            var now=brNow(),viewers=humans;
+            // 12명 이상은 절반씩 번갈아 보내 큰 JSON 생성/GC 순간을 두 프레임으로 분산한다.
+            if(humans.length>=12) {
+                var split=Math.ceil(humans.length/2),phase=Number(BRMP.publishCursor||0)%2;
+                viewers=phase===0?humans.slice(0,split):humans.slice(split);
+                BRMP.publishCursor=phase+1;
+            } else {
+                if(now-Number(BRMP.lastSmallPublishAt||0)<170)return;
+                BRMP.lastSmallPublishAt=now;
+            }
             var all=game.participants.filter(function(p){return p.id!==999;});
             var alive=all.filter(function(p){return p.alive;});
-            var now=brNow(), elapsed=Math.max(0,(now-Number(BRMP.roomMeta.battleStartedAt||now))/1000);
+            var elapsed=Math.max(0,(now-Number(BRMP.roomMeta.battleStartedAt||now))/1000);
             var remaining=BRMP.respawnMode?Math.max(0,(Number(BRMP.roomMeta.battleEndsAt||now)-now)/1000):elapsed;
             var updates={};
-            humans.forEach(function(viewer){
+            viewers.forEach(function(viewer){
                 // 서버도 가까운 반경의 전투 정보만 학생 기기에 전달한다.
                 var sight=1250;
                 var visible=all.filter(function(p){
@@ -7766,28 +8051,42 @@
                     if(p.pos.dist(viewer.pos)>=sight+p.radius)return false;
                     return !game.isConcealedFrom(p,viewer);
                 }).map(brWirePlayer);
-                var projectiles=game.projectiles.filter(function(q){return q.life>0&&q.pos&&q.pos.dist(viewer.pos)<sight+130;}).slice(-75).map(function(q){
+                var projectiles=game.projectiles.filter(function(q){return q.life>0&&q.pos&&q.pos.dist(viewer.pos)<sight+130;}).slice(-54).map(function(q){
                     if(!q._brNetId)q._brNetId='q'+(++BRMP.projectileSeq);
                     return [Math.round(q.pos.x),Math.round(q.pos.y),Math.round(q.size||7),q.emoji||'',q.color||q.impactColor||'#fff',Number(q.owner&&q.owner.team||0),
-                        q._brNetId,Math.round(Number(q.vel&&q.vel.x||0)*100)/100,Math.round(Number(q.vel&&q.vel.y||0)*100)/100];
+                        q._brNetId,Math.round(Number(q.vel&&q.vel.x||0)*100)/100,Math.round(Number(q.vel&&q.vel.y||0)*100)/100,
+                        q.weaponStyle||getRangedWeaponStyle(q.owner&&q.owner.ability||{}),q.owner&&q.owner.ability&&q.owner.ability.t||'C'];
                 });
-                var zones=game.zones.filter(function(z){return z.duration>0&&z.pos&&z.pos.dist(viewer.pos)<sight+Number(z.radius||0);}).slice(-24).map(function(z){
+                var zones=game.zones.filter(function(z){return z.duration>0&&z.pos&&z.pos.dist(viewer.pos)<sight+Number(z.radius||0);}).slice(-18).map(function(z){
                     return [Math.round(z.pos.x),Math.round(z.pos.y),Math.round(z.radius||40),z.color||'#64748b',z.type||'dmg'];
                 });
-                var walls=game.walls.filter(function(w){return new Vec2(w.x,w.y).dist(viewer.pos)<sight+360;}).map(function(w){
-                    return [Math.round(w.x),Math.round(w.y),Math.round(w.w),Math.round(w.h),Math.round((w.angle||0)*1000)/1000,w.kind||'wall'];
+                var fx=(game.studentFx||[]).filter(function(e){
+                    return game.frame-Number(e.frame||0)<=54&&new Vec2(e.x,e.y).dist(viewer.pos)<sight+Math.max(90,Number(e.size||0));
+                }).slice(-24).map(function(e){
+                    return [e.id,e.type,Math.round(e.x),Math.round(e.y),Math.round(e.dx*1000)/1000,Math.round(e.dy*1000)/1000,
+                        Math.round(e.size),e.color||'#fff',Math.round(e.amount*10)/10,e.targetId||'',e.style||''];
                 });
-                var bushes=game.bushes.filter(function(b){return b.pos.dist(viewer.pos)<sight+b.radius;}).map(function(b){
-                    return [Math.round(b.x),Math.round(b.y),Math.round(b.radius),Number(b.seed||0)];
-                });
-                var smokes=game.smokes.filter(function(s){return s.pos.dist(viewer.pos)<sight+s.radius;}).map(function(s){
-                    return [Math.round(s.x),Math.round(s.y),Math.round(s.radius),Number(s.seed||0),Math.round(s.phase*100)/100];
-                });
-                updates['views/'+viewer.remoteId]={
+                var payload={
                     at:now,frame:game.frame,mapRadius:Math.round(game.mapRadius),mapName:game.mapName,mode:BRMP.roomMeta.mode,
                     clock:Math.round(remaining*10)/10,alive:alive.length,total:all.length,
-                    players:visible,projectiles:projectiles,zones:zones,walls:walls,bushes:bushes,smokes:smokes
+                    players:visible,projectiles:projectiles,zones:zones,fx:fx
                 };
+                // 벽·수풀·연막은 정적 데이터다. 이동 거리 또는 4.8초가 지날 때만 다시 보내
+                // 20~30명 방의 Firebase 직렬화/다운로드 양을 크게 줄인다.
+                var sent=BRMP.staticSent[viewer.remoteId],moved=!sent||Math.hypot(viewer.pos.x-sent.x,viewer.pos.y-sent.y)>620;
+                if(!sent||moved||now-sent.at>4800) {
+                    payload.walls=game.walls.filter(function(w){return new Vec2(w.x,w.y).dist(viewer.pos)<sight+650;}).map(function(w){
+                        return [Math.round(w.x),Math.round(w.y),Math.round(w.w),Math.round(w.h),Math.round((w.angle||0)*1000)/1000,w.kind||'wall'];
+                    });
+                    payload.bushes=game.bushes.filter(function(b){return b.pos.dist(viewer.pos)<sight+520+b.radius;}).map(function(b){
+                        return [Math.round(b.x),Math.round(b.y),Math.round(b.radius),Number(b.seed||0)];
+                    });
+                    payload.smokes=game.smokes.filter(function(s){return s.pos.dist(viewer.pos)<sight+520+s.radius;}).map(function(s){
+                        return [Math.round(s.x),Math.round(s.y),Math.round(s.radius),Number(s.seed||0),Math.round(s.phase*100)/100];
+                    });
+                    BRMP.staticSent[viewer.remoteId]={at:now,x:viewer.pos.x,y:viewer.pos.y};
+                }
+                updates['views/'+viewer.remoteId]=payload;
             });
             if(now-Number(BRMP.lastSummaryAt||0)>900) {
                 BRMP.lastSummaryAt=now;
@@ -7795,19 +8094,27 @@
                 all.forEach(function(p){if(p.team)teamScores[p.team]=Number(teamScores[p.team]||0)+Number(p.kills||0);});
                 updates['meta/summary']={alive:alive.length,total:all.length,clock:Math.round(remaining),teamScores:teamScores,updatedAt:now};
             }
-            BRMP.publishBusy=true;
+            BRMP.publishInFlight=Number(BRMP.publishInFlight||0)+1;
             BRMP.db.ref('rooms/'+BRMP.roomCode).update(updates).catch(function(err){
                 console.warn('[BRMP SNAPSHOT]',err);
-            }).finally(function(){BRMP.publishBusy=false;});
+            }).finally(function(){BRMP.publishInFlight=Math.max(0,Number(BRMP.publishInFlight||1)-1);});
         }
 
         function brIngestView(view) {
             if(!BRMP.drawPlayers)BRMP.drawPlayers=new Map();
             if(!BRMP.drawProjectiles)BRMP.drawProjectiles=new Map();
+            if(!BRMP.drawFx)BRMP.drawFx=new Map();
+            if(!BRMP.hitStates)BRMP.hitStates=new Map();
+            if(!BRMP.seenFxIds)BRMP.seenFxIds=new Map();
             var seen=new Set(), now=performance.now();
             (view.players||[]).forEach(function(r){
                 var id=String(r[0]), old=BRMP.drawPlayers.get(id);
-                if(!old)old={x:Number(r[3]),y:Number(r[4]),tx:Number(r[3]),ty:Number(r[4]),vx:0,vy:0,row:r,last:now};
+                if(!old)old={x:Number(r[3]),y:Number(r[4]),tx:Number(r[3]),ty:Number(r[4]),vx:0,vy:0,row:r,last:now,trailHp:Number(r[5]||0),trailHold:0};
+                var previousHp=old.row?Number(old.row[5]||0):Number(r[5]||0),nextHp=Number(r[5]||0);
+                if(nextHp<previousHp) {
+                    old.trailHp=Math.max(Number(old.trailHp||0),previousHp);
+                    old.trailHold=now+340;
+                } else if(nextHp>Number(old.trailHp||0)) old.trailHp=nextHp;
                 old.tx=Number(r[3]);old.ty=Number(r[4]);old.vx=Number(r[18]||0);old.vy=Number(r[19]||0);old.row=r;old.last=now;
                 BRMP.drawPlayers.set(id,old);seen.add(id);
             });
@@ -7821,15 +8128,30 @@
                 BRMP.drawProjectiles.set(id,old);shotSeen.add(id);
             });
             BRMP.drawProjectiles.forEach(function(v,k){if(!shotSeen.has(k)&&now-v.last>260)BRMP.drawProjectiles.delete(k);});
+            (view.fx||[]).forEach(function(r){
+                var id=String(r[0]);
+                if(BRMP.seenFxIds.has(id))return;
+                var type=String(r[1]||'hit'),life=type==='hit'?700:type==='impact'?330:type==='teleport'?480:type==='explosion'?400:type==='dash'?420:type==='swing'?390:type==='laser'?260:300;
+                BRMP.seenFxIds.set(id,now);BRMP.drawFx.set(id,{row:r,start:now,life:life});
+                if(type==='hit') {
+                    var targetId=String(r[9]||''),strength=brClamp(Number(r[6]||16)/5,3,11);
+                    var closeHit=/MELEE|DASH|TELEPORT|ORBIT/.test(String(r[10]||''));
+                    BRMP.hitStates.set(targetId,{until:now+(closeHit?205:155),strength:strength*(closeHit?1.28:1),dx:Number(r[4]||0),dy:Number(r[5]||0),seed:Number(r[0]||0)});
+                    if(targetId===String(BRMP.playerId))BRMP.studentShake={until:now+(closeHit?210:150),strength:Math.min(closeHit?12:8,strength*(closeHit?1.02:.72)),seed:Number(r[0]||0)};
+                }
+            });
+            BRMP.seenFxIds.forEach(function(t,k){if(now-t>5000)BRMP.seenFxIds.delete(k);});
         }
         function brStartStudentBattle() {
             brEl('br-app').classList.add('br-hidden');
             brEl('br-student-battle').classList.remove('br-hidden');
             BRMP.inputState=BRMP.inputState||{dx:0,dy:0,ax:1,ay:0,aimPower:1,attackSeq:0,skillSeq:0};
             if(!Number.isFinite(BRMP.inputState.aimPower))BRMP.inputState.aimPower=1;
-            BRMP.drawPlayers=new Map();BRMP.drawProjectiles=new Map();BRMP.studentCamera=null;BRMP.lastStudentFrameAt=0;BRMP.aimGesture=null;BRMP.localCastFx=null;
+            BRMP.drawPlayers=new Map();BRMP.drawProjectiles=new Map();BRMP.drawFx=new Map();BRMP.hitStates=new Map();BRMP.seenFxIds=new Map();
+            BRMP.studentCamera=null;BRMP.lastStudentFrameAt=0;BRMP.aimGesture=null;BRMP.localCastFx=null;BRMP.staticView=BRMP.staticView||{};BRMP.studentShake=null;
+            BRMP.renderQuality=1;BRMP.studentFrameEma=16.7;BRMP.studentFrameSamples=0;
             if(BRMP.inputTimer)clearInterval(BRMP.inputTimer);
-            BRMP.inputTimer=setInterval(function(){brSendInput(true);},420);
+            BRMP.inputTimer=setInterval(function(){brSendInput(true);},500);
             brResizeStudentCanvas();
             if(!BRMP.renderFrame)BRMP.renderFrame=requestAnimationFrame(brDrawStudentFrame);
             brSendInput(true);
@@ -7838,19 +8160,21 @@
             brEl('br-student-battle').classList.add('br-hidden');
             if(BRMP.inputTimer){clearInterval(BRMP.inputTimer);BRMP.inputTimer=null;}
             if(BRMP.renderFrame){cancelAnimationFrame(BRMP.renderFrame);BRMP.renderFrame=null;}
-            BRMP.drawPlayers=null;BRMP.drawProjectiles=null;BRMP.currentSelf=null;BRMP.aimGesture=null;BRMP.localCastFx=null;
+            BRMP.drawPlayers=null;BRMP.drawProjectiles=null;BRMP.drawFx=null;BRMP.hitStates=null;BRMP.seenFxIds=null;BRMP.currentSelf=null;BRMP.aimGesture=null;BRMP.localCastFx=null;BRMP.staticView=null;BRMP.studentShake=null;
             ['br-attack','br-skill'].forEach(function(id){var el=brEl(id);if(el)el.classList.remove('aiming');});
         }
         function brSendInput(force) {
             if(BRMP.role!=='student'||BRMP.backend!=='firebase'||!BRMP.inputState||!BRMP.roomCode)return;
             var now=brNow();
-            if(!force&&now-Number(BRMP.lastInputSent||0)<(BRMP.aimGesture?42:70))return;
-            BRMP.lastInputSent=now;
+            if(!force&&now-Number(BRMP.lastInputSent||0)<(BRMP.aimGesture?55:85))return;
             var s=BRMP.inputState;
             var data={dx:Math.round(Number(s.dx||0)*100)/100,dy:Math.round(Number(s.dy||0)*100)/100,
                 ax:Math.round(Number(s.ax||0)*100)/100,ay:Math.round(Number(s.ay||0)*100)/100,
                 ap:Math.round(brClamp(Number(s.aimPower||1),.18,1)*100)/100,
                 attackSeq:Number(s.attackSeq||0),skillSeq:Number(s.skillSeq||0),ts:now};
+            var inputKey=[data.dx,data.dy,data.ax,data.ay,data.ap,data.attackSeq,data.skillSeq].join('|');
+            if(!force&&inputKey===BRMP.lastInputKey&&now-Number(BRMP.lastInputSent||0)<260)return;
+            BRMP.lastInputKey=inputKey;BRMP.lastInputSent=now;
             BRMP.db.ref('rooms/'+BRMP.roomCode+'/inputs/'+BRMP.playerId).set(data).catch(function(){});
         }
         function brSetMove(dx,dy) {
@@ -7863,10 +8187,14 @@
             brSendInput(false);
         }
         function brResizeStudentCanvas() {
-            var c=brEl('br-student-canvas'),dpr=Math.min(1.5,window.devicePixelRatio||1);
+            var c=brEl('br-student-canvas'),now=performance.now();
+            var quality=brClamp(Number(BRMP.renderQuality||1),.70,1);
+            if(c._cssW&&Math.abs(Number(c._quality||1)-quality)<.01&&now-Number(c._lastResizeCheck||0)<240)return;
+            c._lastResizeCheck=now;
+            var dpr=Math.min((window.innerWidth<1100?1.08:1.22)*quality,window.devicePixelRatio||1);
             var w=Math.max(1,c.clientWidth),h=Math.max(1,c.clientHeight);
             if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);}
-            c._cssW=w;c._cssH=h;c._dpr=dpr;
+            c._cssW=w;c._cssH=h;c._dpr=dpr;c._quality=quality;
         }
         function brDrawStudentWall(cc,r) {
             var kind=r[5]||'wall';cc.save();cc.translate(r[0],r[1]);cc.rotate(r[4]||0);cc.lineWidth=3;
@@ -7887,10 +8215,10 @@
                 cc.globalAlpha=.30;cc.fillStyle='#052e16';cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.fill();
                 cc.globalAlpha=.38;cc.strokeStyle='#4ade80';cc.lineWidth=3;cc.setLineDash([9,10]);cc.stroke();cc.setLineDash([]);
             } else {
-                var colors=['#166534','#15803d','#22c55e','#4ade80'];
-                for(var i=0;i<9;i++) {
-                    var a=i*Math.PI*2/9+(seed%17)*.07,ring=i===8?0:radius*(.50+.10*Math.sin(i*2.7+seed));
-                    var lr=radius*(i===8?.42:.34+.035*(i%3));cc.globalAlpha=i===8?.34:.58;cc.fillStyle=colors[(i+seed)%colors.length];
+                var colors=['#166534','#15803d','#22c55e','#4ade80'],puffs=BRMP.renderQuality<.9?3:5;
+                for(var i=0;i<puffs;i++) {
+                    var center=i===puffs-1,a=i*Math.PI*2/Math.max(1,puffs-1)+(seed%17)*.07,ring=center?0:radius*(.46+.08*Math.sin(i*2.7+seed));
+                    var lr=radius*(center?.48:.41+.025*(i%2));cc.globalAlpha=center?.36:.58;cc.fillStyle=colors[(i+seed)%colors.length];
                     cc.beginPath();cc.arc(Math.cos(a)*ring,Math.sin(a)*ring,lr,0,Math.PI*2);cc.fill();
                 }
                 cc.globalAlpha=.68;cc.font=Math.round(radius*.34)+'px serif';cc.textAlign='center';cc.textBaseline='middle';cc.fillText('🌿',0,0);
@@ -7899,12 +8227,11 @@
         }
         function brDrawStudentSmoke(cc,r) {
             var radius=r[2],phase=Number(r[4]||0)+performance.now()*.00072;cc.save();cc.translate(r[0],r[1]);
-            var haze=cc.createRadialGradient(0,0,radius*.12,0,0,radius);
-            haze.addColorStop(0,'rgba(226,232,240,.72)');haze.addColorStop(.62,'rgba(148,163,184,.55)');haze.addColorStop(1,'rgba(71,85,105,0)');
-            cc.fillStyle=haze;cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.fill();
-            for(var i=0;i<7;i++) {
-                var a=i*Math.PI*2/7+phase*(i%2?1:-1),ring=radius*(.18+.34*(i%3)/2),puff=radius*(.22+.035*(i%3));
-                cc.globalAlpha=.18+.08*(i%2);cc.fillStyle=i%2?'#f1f5f9':'#cbd5e1';cc.beginPath();cc.arc(Math.cos(a)*ring,Math.sin(a)*ring,puff,0,Math.PI*2);cc.fill();
+            cc.globalAlpha=.28;cc.fillStyle='#94a3b8';cc.beginPath();cc.arc(0,0,radius*.92,0,Math.PI*2);cc.fill();
+            var smokePuffs=BRMP.renderQuality<.9?3:4;
+            for(var i=0;i<smokePuffs;i++) {
+                var a=i*Math.PI*2/smokePuffs+phase*(i%2?1:-1),ring=radius*(.24+.08*(i%2)),puff=radius*(.35+.035*(i%2));
+                cc.globalAlpha=.20+.08*(i%2);cc.fillStyle=i%2?'#f1f5f9':'#cbd5e1';cc.beginPath();cc.arc(Math.cos(a)*ring,Math.sin(a)*ring,puff,0,Math.PI*2);cc.fill();
             }
             cc.globalAlpha=.65;cc.font=Math.round(radius*.25)+'px serif';cc.textAlign='center';cc.textBaseline='middle';cc.fillText('🌫️',0,0);cc.restore();
         }
@@ -7923,7 +8250,7 @@
             var rgb=kind==='attack'?'251,113,133':'96,165,250';
             var fade=gesture?1:brClamp((Number(castFx.until||now)-now)/170,0,1);
             cc.save();cc.globalAlpha=fade;cc.lineJoin='round';cc.lineCap='round';cc.setLineDash([12/zoom,8/zoom]);cc.lineWidth=3/zoom;
-            cc.fillStyle='rgba('+rgb+',.20)';cc.strokeStyle='rgba('+rgb+',.94)';cc.shadowColor='rgba('+rgb+',.65)';cc.shadowBlur=10/zoom;
+            cc.fillStyle='rgba('+rgb+',.20)';cc.strokeStyle='rgba('+rgb+',.94)';cc.shadowColor='rgba('+rgb+',.50)';cc.shadowBlur=gesture?3/zoom:0;
             if(spec.shape==='cone') {
                 cc.beginPath();cc.moveTo(x,y);cc.arc(x,y,range,angle-Number(spec.halfAngle||1.25),angle+Number(spec.halfAngle||1.25));cc.closePath();cc.fill();cc.stroke();
             } else if(spec.shape==='line'||spec.shape==='dash') {
@@ -7951,14 +8278,110 @@
             }
             cc.shadowBlur=5/zoom;cc.fillStyle='#fff';cc.font='900 '+Math.max(11,14/zoom)+'px sans-serif';cc.textAlign='center';cc.textBaseline='bottom';
             var labelX=spec.shape==='circle'?x:endX,labelY=spec.shape==='circle'?y-Number(spec.radius||spec.range||120):endY;
-            cc.fillText(spec.label||'',labelX,labelY-24/zoom);cc.restore();
+            cc.fillText(spec.label||'',labelX,labelY-24/zoom);
+            // 손을 뗀 즉시 로컬에서 가벼운 발사 섬광을 보여 네트워크 왕복 전에도 공격감이 난다.
+            if(!gesture&&castFx) {
+                var release=1-fade,close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.PULL].indexOf(ability.type)>=0;
+                cc.setLineDash([]);cc.globalAlpha=fade*.95;cc.strokeStyle=kind==='attack'?'#ffe4e6':'#dbeafe';cc.lineCap='round';
+                if(close) {
+                    cc.lineWidth=Math.max(4,10*(1-release))/zoom;cc.beginPath();cc.arc(x,y,Math.min(range,Number(self.row[15]||38)+92)*(0.82+release*.22),angle-1.05,angle+1.05);cc.stroke();
+                } else {
+                    cc.lineWidth=Math.max(3,7*(1-release))/zoom;cc.beginPath();cc.moveTo(x+aimX*Number(self.row[15]||38)*.55,y+aimY*Number(self.row[15]||38)*.55);
+                    cc.lineTo(x+aimX*Math.min(range,190+release*80),y+aimY*Math.min(range,190+release*80));cc.stroke();
+                }
+            }
+            cc.restore();
+        }
+        function brDrawStudentFx(cc,now,zoom,onScreen) {
+            var fxMap=BRMP.drawFx;if(!fxMap)return;
+            fxMap.forEach(function(fx,id){
+                var age=now-fx.start;
+                if(age>=fx.life){fxMap.delete(id);return;}
+                var r=fx.row,type=String(r[1]||'hit'),x=Number(r[2]||0),y=Number(r[3]||0);
+                var dx=Number(r[4]||0),dy=Number(r[5]||0),mag=Math.hypot(dx,dy)||1;dx/=mag;dy/=mag;
+                var size=Math.max(8,Number(r[6]||24)),color=r[7]||'#fff',p=brClamp(age/fx.life,0,1),alpha=1-p;
+                if(!onScreen(x,y,size+180))return;
+                cc.save();cc.lineCap='round';cc.lineJoin='round';cc.globalAlpha=alpha;
+                if(type==='swing') {
+                    cc.translate(x,y);cc.rotate(Math.atan2(dy,dx));
+                    // 넓은 부채꼴 + 3중 칼날 궤적으로 작은 화면에서도 근접 공격 방향을 즉시 읽게 한다.
+                    cc.fillStyle=color;cc.globalAlpha=alpha*.16;cc.beginPath();cc.moveTo(0,0);
+                    cc.arc(0,0,size*(.88+p*.12),-1.08,1.08);cc.closePath();cc.fill();
+                    cc.globalAlpha=alpha;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(3,(12*(1-p)+3)/zoom);
+                    cc.beginPath();cc.arc(0,0,size*(.84+p*.16),-1.05,1.05);cc.stroke();
+                    cc.strokeStyle=color;cc.lineWidth=Math.max(2,(7*(1-p)+2)/zoom);
+                    cc.beginPath();cc.arc(0,0,size*(.70+p*.14),-.98,.98);cc.stroke();
+                    cc.globalAlpha=alpha*.72;cc.lineWidth=Math.max(2,4/zoom);cc.beginPath();cc.arc(0,0,size*(.98+p*.10),-.88,.88);cc.stroke();
+                    if(String(r[10]||'')==='scissor') {
+                        cc.strokeStyle='#cffafe';cc.lineWidth=Math.max(2,5/zoom);
+                        cc.beginPath();cc.arc(0,-size*.12,size*.78,-.78,.52);cc.stroke();
+                        cc.beginPath();cc.arc(0,size*.12,size*.78,-.52,.78);cc.stroke();
+                    } else if(String(r[10]||'')==='soul') {
+                        cc.strokeStyle='#bfdbfe';cc.lineWidth=Math.max(2,4/zoom);cc.beginPath();cc.arc(0,0,size*.68,-.88,.88);cc.stroke();
+                    }
+                } else if(type==='hit') {
+                    // 짧은 밀림 잔상 + X 타격표 + 떠오르는 피해량. 모두 단순 선/원이라 저사양에서도 가볍다.
+                    cc.strokeStyle=color;cc.lineWidth=Math.max(2,5/zoom);
+                    cc.beginPath();cc.moveTo(x-dx*size*(1.05-p*.35),y-dy*size*(1.05-p*.35));cc.lineTo(x-dx*size*.18,y-dy*size*.18);cc.stroke();
+                    var mark=size*(.42+.18*p),rot=Math.atan2(dy,dx);cc.translate(x,y);cc.rotate(rot);
+                    cc.strokeStyle=p<.35?'#ffffff':color;cc.lineWidth=Math.max(2,(6*(1-p)+2)/zoom);
+                    cc.beginPath();cc.moveTo(-mark,-mark);cc.lineTo(mark,mark);cc.moveTo(-mark,mark);cc.lineTo(mark,-mark);cc.stroke();
+                    cc.globalAlpha=alpha*.75;cc.beginPath();cc.arc(0,0,size*(.45+p*.75),0,Math.PI*2);cc.stroke();
+                    cc.rotate(-rot);cc.globalAlpha=Math.min(1,alpha*1.55);cc.fillStyle=Number(r[8]||0)>=30?'#fde047':'#ff8b82';
+                    cc.strokeStyle='rgba(5,10,20,.96)';cc.lineWidth=Math.max(2,4/zoom);
+                    cc.font='1000 '+Math.max(20,(Number(r[8]||0)>=30?29:25)/zoom)+'px sans-serif';cc.textAlign='center';cc.textBaseline='middle';
+                    var damageY=-size-22/zoom-age*.052/zoom,damageText='-'+Math.max(1,Math.round(Number(r[8]||0)));
+                    cc.strokeText(damageText,0,damageY);cc.fillText(damageText,0,damageY);
+                } else if(type==='impact') {
+                    var impactStyle=String(r[10]||''),impactR=size*(.24+.72*p);
+                    cc.strokeStyle=p<.24?'#ffffff':color;cc.lineWidth=Math.max(2,(9*(1-p)+2)/zoom);
+                    cc.beginPath();cc.arc(x,y,impactR,0,Math.PI*2);cc.stroke();
+                    cc.translate(x,y);cc.rotate(Math.atan2(dy,dx));
+                    var rays=/melee|dash|teleport|body/.test(impactStyle)?8:5;
+                    cc.strokeStyle=color;cc.lineWidth=Math.max(2,(6*(1-p)+1)/zoom);cc.globalAlpha=alpha*.92;
+                    for(var ri=0;ri<rays;ri++){
+                        var ra=ri*Math.PI*2/rays,inner=size*(.18+.15*p),outer=size*(.48+.42*p);
+                        cc.beginPath();cc.moveTo(Math.cos(ra)*inner,Math.sin(ra)*inner);cc.lineTo(Math.cos(ra)*outer,Math.sin(ra)*outer);cc.stroke();
+                    }
+                } else if(type==='laser') {
+                    var len=size,beamW=Math.max(4,Number(r[8]||6));
+                    cc.strokeStyle='rgba(255,255,255,.9)';cc.lineWidth=Math.max(2,beamW*.34/zoom);cc.beginPath();cc.moveTo(x,y);cc.lineTo(x+dx*len,y+dy*len);cc.stroke();
+                    cc.globalAlpha=alpha*.72;cc.strokeStyle=color;cc.lineWidth=Math.max(3,beamW/zoom);cc.beginPath();cc.moveTo(x,y);cc.lineTo(x+dx*len,y+dy*len);cc.stroke();
+                } else if(type==='explosion') {
+                    cc.strokeStyle=color;cc.lineWidth=Math.max(2,(8*(1-p)+2)/zoom);
+                    cc.beginPath();cc.arc(x,y,size*(.18+.82*p),0,Math.PI*2);cc.stroke();
+                    cc.globalAlpha=alpha*.55;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(1,3/zoom);cc.beginPath();cc.arc(x,y,size*(.08+.52*p),0,Math.PI*2);cc.stroke();
+                } else if(type==='shot') {
+                    var shotStyle=String(r[10]||''),travel=size*Math.min(1,p*1.8),sx=x+dx*travel,sy=y+dy*travel,shotSize=Math.max(5,Number(r[8]||8));
+                    var tailLen=shotStyle==='sniper'?130:shotStyle==='machine'?86:shotStyle==='bomber'?54:72;
+                    cc.strokeStyle=color;cc.lineWidth=Math.max(2,shotSize*(shotStyle==='sniper'?.48:.30));cc.beginPath();cc.moveTo(x+dx*Math.max(0,travel-tailLen),y+dy*Math.max(0,travel-tailLen));cc.lineTo(sx,sy);cc.stroke();
+                    if(shotStyle==='bomber'){cc.globalAlpha=alpha*.55;cc.lineWidth=Math.max(2,3/zoom);cc.beginPath();cc.arc(sx,sy,shotSize*(1.1+p*.8),0,Math.PI*2);cc.stroke();}
+                    cc.globalAlpha=alpha*.95;cc.fillStyle='#ffffff';cc.beginPath();cc.arc(sx,sy,Math.max(3,shotSize*(shotStyle==='sniper'?.46:.34)),0,Math.PI*2);cc.fill();
+                } else if(type==='dash') {
+                    var dashLen=size*(.25+.75*Math.min(1,p*1.8));
+                    var nx=-dy,ny=dx,side=10/zoom;cc.strokeStyle=color;cc.lineWidth=Math.max(3,(15*(1-p)+3)/zoom);
+                    cc.beginPath();cc.moveTo(x,y);cc.lineTo(x+dx*dashLen,y+dy*dashLen);cc.stroke();
+                    cc.globalAlpha=alpha*.52;cc.lineWidth=Math.max(2,4/zoom);cc.beginPath();cc.moveTo(x+nx*side,y+ny*side);cc.lineTo(x+dx*dashLen+nx*side,y+dy*dashLen+ny*side);
+                    cc.moveTo(x-nx*side,y-ny*side);cc.lineTo(x+dx*dashLen-nx*side,y+dy*dashLen-ny*side);cc.stroke();
+                    cc.globalAlpha=alpha*.72;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(1,3/zoom);cc.beginPath();cc.moveTo(x,y);cc.lineTo(x+dx*dashLen,y+dy*dashLen);cc.stroke();
+                } else if(type==='teleport') {
+                    var teleLen=size,tx=x+dx*teleLen,ty=y+dy*teleLen;
+                    cc.strokeStyle=color;cc.lineWidth=Math.max(3,(10*(1-p)+2)/zoom);cc.setLineDash([18/zoom,12/zoom]);
+                    cc.beginPath();cc.moveTo(x,y);cc.lineTo(tx,ty);cc.stroke();cc.setLineDash([]);
+                    cc.globalAlpha=alpha*.86;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(2,4/zoom);
+                    cc.beginPath();cc.arc(x,y,size*(.10+.13*p),0,Math.PI*2);cc.stroke();
+                    cc.beginPath();cc.arc(tx,ty,size*(.22+.12*(1-p)),0,Math.PI*2);cc.stroke();
+                    for(var ti=1;ti<=3;ti++){var tr=ti/4;cc.globalAlpha=alpha*(.48-tr*.08);cc.beginPath();cc.arc(x+dx*teleLen*tr,y+dy*teleLen*tr,size*.075,0,Math.PI*2);cc.stroke();}
+                }
+                cc.restore();
+            });
         }
         function brDrawStudentFrame() {
             BRMP.renderFrame=requestAnimationFrame(brDrawStudentFrame);
             var c=brEl('br-student-canvas');if(c.classList.contains('br-hidden'))return;
             brResizeStudentCanvas();
             var w=c._cssW,h=c._cssH,dpr=c._dpr,cc=c._brCtx||(c._brCtx=c.getContext('2d',{alpha:false,desynchronized:true}));
-            cc.setTransform(dpr,0,0,dpr,0,0);cc.clearRect(0,0,w,h);cc.fillStyle='#07101d';cc.fillRect(0,0,w,h);
+            cc.setTransform(dpr,0,0,dpr,0,0);cc.fillStyle='#07101d';cc.fillRect(0,0,w,h);
             var view=BRMP.latestView,draw=BRMP.drawPlayers;
             if(!view||!draw||!draw.size) {
                 cc.fillStyle='#dbeafe';cc.textAlign='center';cc.font='800 18px sans-serif';cc.fillText('경기 화면을 불러오는 중…',w/2,h/2);
@@ -7966,6 +8389,15 @@
             }
             var frameNow=performance.now(),dt=brClamp(frameNow-Number(BRMP.lastStudentFrameAt||frameNow-16.67),5,50);
             BRMP.lastStudentFrameAt=frameNow;
+            BRMP.studentFrameEma=Number(BRMP.studentFrameEma||16.7)*.94+dt*.06;
+            BRMP.studentFrameSamples=Number(BRMP.studentFrameSamples||0)+1;
+            if(BRMP.studentFrameSamples%45===0) {
+                var currentQuality=Number(BRMP.renderQuality||1),nextQuality=currentQuality,ema=BRMP.studentFrameEma;
+                if(ema>30)nextQuality=.70;
+                else if(ema>23)nextQuality=.84;
+                else if(ema<19.2)nextQuality=1;
+                if(Math.abs(nextQuality-currentQuality)>.04){BRMP.renderQuality=nextQuality;c._lastResizeCheck=0;}
+            }
             var follow=1-Math.exp(-dt/58);
             draw.forEach(function(p,id){
                 var leadFrames=Math.min(8.5,Math.max(0,(frameNow-p.last)/16.667));
@@ -7979,6 +8411,11 @@
                 if(leadMag>260){leadX=leadX/leadMag*260;leadY=leadY/leadMag*260;}
                 var targetX=p.tx+leadX,targetY=p.ty+leadY;
                 p.x+=(targetX-p.x)*follow;p.y+=(targetY-p.y)*follow;
+                var currentHp=Number(p.row&&p.row[5]||0);
+                if(frameNow>Number(p.trailHold||0)&&Number(p.trailHp||0)>currentHp) {
+                    p.trailHp+=(currentHp-p.trailHp)*(1-Math.exp(-dt/430));
+                    if(p.trailHp-currentHp<.2)p.trailHp=currentHp;
+                }
             });
             var shots=BRMP.drawProjectiles,shotFollow=1-Math.exp(-dt/34);
             if(shots)shots.forEach(function(s){
@@ -7997,7 +8434,13 @@
             BRMP.studentCamera.x+=(self.x-BRMP.studentCamera.x)*cameraFollow;BRMP.studentCamera.y+=(self.y-BRMP.studentCamera.y)*cameraFollow;
             // 긴 화면 축으로 약 12칸(칸당 160)을 보이게 해 주변 전황과 자기 캐릭터 크기를 함께 확보한다.
             var cam=BRMP.studentCamera,zoom=brClamp(Math.max(w,h)/(160*12),.24,.68);
-            cc.save();cc.translate(w/2,h/2);cc.scale(zoom,zoom);cc.translate(-cam.x,-cam.y);
+            var shakeX=0,shakeY=0,studentShake=BRMP.studentShake;
+            if(studentShake&&frameNow<studentShake.until) {
+                var shakeRatio=Math.min(1,(studentShake.until-frameNow)/145);
+                shakeX=Math.sin(frameNow*.17+studentShake.seed)*studentShake.strength*shakeRatio;
+                shakeY=Math.sin(frameNow*.23+studentShake.seed*1.7)*studentShake.strength*.55*shakeRatio;
+            } else if(studentShake)BRMP.studentShake=null;
+            cc.save();cc.translate(w/2+shakeX,h/2+shakeY);cc.scale(zoom,zoom);cc.translate(-cam.x,-cam.y);
             var radius=Number(view.mapRadius||2600);
             cc.fillStyle='#17233a';cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.fill();
             cc.save();cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.clip();
@@ -8014,11 +8457,16 @@
                 cc.save();cc.globalAlpha=.28;cc.fillStyle=r[3]||'#64748b';cc.beginPath();cc.arc(r[0],r[1],r[2],0,Math.PI*2);cc.fill();
                 cc.globalAlpha=.7;cc.strokeStyle=r[3]||'#94a3b8';cc.lineWidth=3;cc.stroke();cc.restore();
             });
-            (shots?Array.from(shots.values()):[]).forEach(function(s){
+            if(shots)shots.forEach(function(s){
                 var r=s.row;if(!onScreen(s.x,s.y,60))return;
                 cc.save();cc.translate(s.x,s.y);
+                var svx=Number(s.vx||0),svy=Number(s.vy||0),sm=Math.hypot(svx,svy)||1,weaponStyle=String(r[9]||'standard');
+                var tail=weaponStyle==='sniper'?Math.min(105,Math.max(48,sm*4.2)):weaponStyle==='machine'?Math.min(66,Math.max(26,sm*2.8)):Math.min(50,Math.max(17,sm*2.2));
+                cc.strokeStyle=r[4]||'#fff';cc.globalAlpha=weaponStyle==='sniper'?.82:.58;cc.lineWidth=Math.max(2,Number(r[2]||7)*(weaponStyle==='sniper'?.55:.42));cc.lineCap='round';
+                cc.beginPath();cc.moveTo(-svx/sm*tail,-svy/sm*tail);cc.lineTo(0,0);cc.stroke();cc.globalAlpha=1;
+                if(weaponStyle==='bomber'){cc.globalAlpha=.45;cc.strokeStyle=r[4]||'#fff';cc.lineWidth=3;cc.beginPath();cc.arc(0,0,Math.max(10,Number(r[2]||7)*1.45),0,Math.PI*2);cc.stroke();cc.globalAlpha=1;}
                 if(r[3]){cc.font=Math.max(18,r[2]*1.65)+'px serif';cc.textAlign='center';cc.textBaseline='middle';cc.fillText(r[3],0,0);}
-                else{cc.fillStyle=r[4]||'#fff';cc.shadowColor=r[4]||'#fff';cc.shadowBlur=10;cc.beginPath();cc.arc(0,0,Math.max(4,r[2]),0,Math.PI*2);cc.fill();}
+                else{cc.fillStyle=r[4]||'#fff';cc.beginPath();cc.arc(0,0,Math.max(5,r[2]),0,Math.PI*2);cc.fill();}
                 cc.restore();
             });
             var ordered=Array.from(draw.values()).sort(function(a,b){return (a.row[0]===BRMP.playerId?1:0)-(b.row[0]===BRMP.playerId?1:0);});
@@ -8026,7 +8474,13 @@
                 var r=s.row,a=EMOJI_DB[Number(r[2])]||EMOJI_DB[0],isSelf=String(r[0])===String(BRMP.playerId);
                 var rad=Math.max(25,Number(r[15]||38),(isSelf?28:17)/zoom);
                 if(!onScreen(s.x,s.y,rad+50))return;
-                cc.save();cc.translate(s.x,s.y);
+                var hitState=BRMP.hitStates&&BRMP.hitStates.get(String(r[0])),hitRatio=0,hitX=0,hitY=0;
+                if(hitState&&frameNow<hitState.until) {
+                    hitRatio=Math.min(1,(hitState.until-frameNow)/155);
+                    hitX=Math.sin(frameNow*.19+hitState.seed)*hitState.strength*hitRatio/zoom;
+                    hitY=Math.sin(frameNow*.27+hitState.seed*1.3)*hitState.strength*.52*hitRatio/zoom;
+                } else if(hitState&&BRMP.hitStates)BRMP.hitStates.delete(String(r[0]));
+                cc.save();cc.translate(s.x+hitX,s.y+hitY);
                 if(!r[7])cc.globalAlpha=.34;
                 var team=Number(r[8]||0);
                 if(team>0) {
@@ -8037,12 +8491,22 @@
                     cc.strokeStyle=isSelf?'#fde047':BR_TIER_COLOR[a.t];cc.lineWidth=isSelf?6:3;cc.stroke();
                 }
                 cc.font=Math.round(rad*1.45)+'px serif';cc.textAlign='center';cc.textBaseline='middle';cc.fillText(r[7]?a.e:'☠️',0,0);
+                if(hitRatio>0&&r[7]) {
+                    cc.save();cc.globalAlpha=Math.min(.70,hitRatio*.72);cc.fillStyle='#ffffff';
+                    if(team>0){drawTeamShapePath(cc,team,0,0,rad*1.08);cc.fill();}
+                    else{cc.beginPath();cc.arc(0,0,rad*1.08,0,Math.PI*2);cc.fill();}
+                    cc.restore();
+                }
                 cc.globalAlpha=1;
                 var hp=Number(r[5]||0),max=Number(r[6]||1),bw=Math.max(58,rad*1.65),by=rad+17;
-                cc.fillStyle='#351924';cc.fillRect(-bw/2,by,bw,7);cc.fillStyle=hp/max>.35?'#34d399':'#fb4b63';cc.fillRect(-bw/2,by,bw*brClamp(hp/max,0,1),7);
+                var trailHp=Math.max(hp,Math.min(max,Number(s.trailHp==null?hp:s.trailHp)));
+                cc.fillStyle='#374151';cc.fillRect(-bw/2,by,bw,7);
+                cc.fillStyle='#ef4444';cc.fillRect(-bw/2,by,bw*brClamp(trailHp/max,0,1),7);
+                cc.fillStyle=hp/max>.35?'#34d399':'#fb4b63';cc.fillRect(-bw/2,by,bw*brClamp(hp/max,0,1),7);
                 cc.fillStyle=isSelf?'#fde68a':'#f8fafc';cc.font=(isSelf?'900 ':'700 ')+Math.max(11,Math.min(16,rad*.35))+'px sans-serif';
-                cc.shadowColor='#000';cc.shadowBlur=4;cc.fillText(r[1],0,-rad-13);cc.restore();
+                cc.shadowBlur=0;cc.fillText(r[1],0,-rad-13);cc.restore();
             });
+            brDrawStudentFx(cc,frameNow,zoom,onScreen);
             (view.bushes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentBush(cc,r,true);});
             (view.smokes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentSmoke(cc,r);});
             brDrawAimPreview(cc,self,zoom);
@@ -8050,12 +8514,18 @@
             cc.strokeStyle='#fb4b63';cc.lineWidth=10/zoom;cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.stroke();
             cc.restore();
             // 약 12칸은 온전히 읽히되 화면 가장자리만 어둡게 해 제한된 전술 시야의 긴장감은 유지한다.
-            var screenReach=Math.hypot(w,h)*.5,visionRadius=screenReach*1.04;
-            var vignette=cc.createRadialGradient(w/2,h/2,Math.min(w,h)*.30,w/2,h/2,visionRadius);
-            vignette.addColorStop(0,'rgba(1,5,14,0)');vignette.addColorStop(.64,'rgba(1,5,14,.04)');
-            vignette.addColorStop(.88,'rgba(1,5,14,.22)');vignette.addColorStop(1,'rgba(1,5,14,.52)');
-            cc.fillStyle=vignette;cc.fillRect(0,0,w,h);
-            brUpdateStudentHud(self.row,view,self);
+            if(!c._brVignette||c._brVignetteW!==w||c._brVignetteH!==h) {
+                var screenReach=Math.hypot(w,h)*.5,visionRadius=screenReach*1.04;
+                c._brVignette=cc.createRadialGradient(w/2,h/2,Math.min(w,h)*.30,w/2,h/2,visionRadius);
+                c._brVignette.addColorStop(0,'rgba(1,5,14,0)');c._brVignette.addColorStop(.64,'rgba(1,5,14,.04)');
+                c._brVignette.addColorStop(.88,'rgba(1,5,14,.22)');c._brVignette.addColorStop(1,'rgba(1,5,14,.52)');
+                c._brVignetteW=w;c._brVignetteH=h;
+            }
+            cc.fillStyle=c._brVignette;cc.fillRect(0,0,w,h);
+            // DOM HUD는 20fps면 충분하다. 캔버스 애니메이션은 60fps를 유지하고 스타일 재계산을 분리한다.
+            if(frameNow-Number(BRMP.lastStudentHudAt||0)>=50) {
+                BRMP.lastStudentHudAt=frameNow;brUpdateStudentHud(self.row,view,self);
+            }
         }
         function brUpdateStudentHud(r,view,selfObj) {
             var a=EMOJI_DB[Number(r[2])]||EMOJI_DB[0],hp=Number(r[5]||0),max=Math.max(1,Number(r[6]||1));
@@ -8072,16 +8542,16 @@
             basicCd=Math.max(basicCd,Math.max(0,Number(BRMP.localAttackLockUntil||0)-uiNow)/16.667);
             skillCd=Math.max(skillCd,Math.max(0,Number(BRMP.localSkillLockUntil||0)-uiNow)/16.667);
             var basicMax=Math.max(1,Number(r[20]||r[11]||1)),skillMax=Math.max(1,Number(r[21]||r[12]||1));
-            var attackBtn=brEl('br-attack'),skillBtn=brEl('br-skill'),attackReady=basicCd<=.5&&!!r[7],skillReady=skillCd<=.5&&skillLeft>0&&!!r[7];
+            var attackBtn=brEl('br-attack'),skillBtn=brEl('br-skill'),attackReady=basicCd<=.5&&!!r[7],skillReady=skillCd<=.5&&skillLeft!==0&&!!r[7];
             attackBtn.classList.toggle('disabled',!attackReady);skillBtn.classList.toggle('disabled',!skillReady);
             attackBtn.setAttribute('aria-disabled',attackReady?'false':'true');skillBtn.setAttribute('aria-disabled',skillReady?'false':'true');
             attackBtn.style.setProperty('--br-cd-angle',(brClamp(1-basicCd/basicMax,0,1)*360).toFixed(1)+'deg');
             skillBtn.style.setProperty('--br-cd-angle',(brClamp(1-skillCd/skillMax,0,1)*360).toFixed(1)+'deg');
             var attackCdEl=brEl('br-attack-cd'),skillCdEl=brEl('br-skill-cd');
             brSetText(attackCdEl,!r[7]?'탈락':attackReady?'READY':(basicCd/60).toFixed(1)+'s');
-            brSetText(skillCdEl,!r[7]?'탈락':skillReady?'READY':skillLeft<=0?'0회':(skillCd/60).toFixed(1)+'s');
+            brSetText(skillCdEl,!r[7]?'탈락':skillReady?'READY':(skillCd/60).toFixed(1)+'s');
             attackCdEl.classList.toggle('ready',attackReady);skillCdEl.classList.toggle('ready',skillReady);
-            brSetText(brEl('br-skill-count'),skillLeft+'회');
+            brSetText(brEl('br-skill-count'),skillLeft<0?'∞':skillLeft+'회');
             BRMP.currentSelf=selfObj||{row:r,last:performance.now()};
             BRMP.currentSelf.basicCd=basicCd;BRMP.currentSelf.skillCd=skillCd;BRMP.currentSelf.skillLeft=skillLeft;
             var resp=brEl('br-respawn');
@@ -8235,7 +8705,7 @@
             var self=BRMP.currentSelf,r=self&&self.row,now=brNow();
             if(!BRMP.inputState||!r||!r[7])return false;
             if(kind==='attack')return Number(self.basicCd||0)<=.5&&now>=Number(BRMP.localAttackLockUntil||0);
-            return Number(self.skillCd||0)<=.5&&Number(self.skillLeft||0)>0&&now>=Number(BRMP.localSkillLockUntil||0);
+            return Number(self.skillCd||0)<=.5&&Number(self.skillLeft||0)!==0&&now>=Number(BRMP.localSkillLockUntil||0);
         }
         function brSetupControls() {
             var joy=brEl('br-joystick'),knob=brEl('br-joystick-knob'),joyPointer=null;
@@ -8341,7 +8811,16 @@
             brEl('br-question-bank').value=brQuestionTextDefault();
             var query=new URLSearchParams(location.search),hash=new URLSearchParams(location.hash.replace(/^#/,''));
             var room=query.get('room'),encoded=hash.get('c');
-            if(room)brEl('br-join-code').value=String(room).replace(/\D/g,'').slice(0,6);
+            if(room) {
+                room=String(room).replace(/\D/g,'').slice(0,6);
+                brEl('br-join-code').value=room;
+                if(room.length===6) {
+                    brEl('br-home').classList.add('br-room-invite');
+                    brEl('br-invite-room').textContent='ROOM '+room+' · 초대받은 방';
+                    brEl('br-join-btn').textContent='이름으로 바로 참가';
+                    setTimeout(function(){brEl('br-player-name').focus();},80);
+                }
+            }
             if(encoded){var cfg=brDecodeConfig(encoded);if(brConfigLooksValid(cfg))BRMP.config=cfg;}
             brEl('br-create-btn').addEventListener('click',brCreateOnlineRoom);
             brEl('br-demo-btn').addEventListener('click',brCreateDemoRoom);
