@@ -19,6 +19,7 @@
             width: 100%;
             height: 100%;
         }
+        #game-canvas { width:100%; height:100%; display:block; }
 
         /* Tier Colors */
         .tier-S { color: #ff0033; font-weight: 900; text-shadow: 0 0 8px rgba(255, 0, 51, 0.8); }
@@ -367,11 +368,12 @@
             if(style==='bomber'&&raw>0) speed=conceptSpeed*.58+raw*tierSpeed*.42;
             if(kind==='basic') speed*=style==='sniper'?.96:style==='bomber'?.92:.90;
             let range=ranges[style][tier]*(kind==='basic'?(style==='sniper'?.94:.88):1);
-            const count=kind==='basic'&&style==='machine'?({S:3,A:3,B:2,C:2,F:2}[tier]||2):1;
-            const damageScale={sniper:1.36,machine:.46,bomber:1.02,heavy:1.12,homing:.94,boomerang:.92,standard:1}[style];
+            // 일반 공격은 모든 원거리 캐릭터가 한 발의 원형 탄환을 쓴다. 콘셉트는 수치에만 남긴다.
+            const count=1;
+            const damageScale={sniper:1.36,machine:.82,bomber:1.08,heavy:1.16,homing:.96,boomerang:.94,standard:1}[style];
             const knockback={S:16,A:13,B:10,C:7,F:4}[tier]*(style==='bomber'?1.45:style==='heavy'?1.28:style==='sniper'?1.05:.72);
             const explodeRadius=style==='bomber'?({S:68,A:61,B:54,C:46,F:36}[tier]||46):0;
-            const cooldownScale=style==='sniper'?1.25:style==='bomber'?1.22:style==='machine'?1.16:style==='heavy'?1.12:1;
+            const cooldownScale=style==='sniper'?1.28:style==='bomber'?1.24:style==='machine'?.74:style==='heavy'?1.14:1;
             return {style,range:Math.round(range),speed:Math.max(4,speed),count,damageScale,knockback,explodeRadius,cooldownScale};
         }
         function getSkillCooldownMultiplier(ability={}) {
@@ -1313,7 +1315,7 @@
 
                 // v22.7: 상위랭크 원거리(PROJ) 화력 보강.
                 // S는 체감될 정도, A는 소폭만 올리고 B/C/F는 그대로 유지.
-                const rangedProjectileUser = owner?.ability?.type === ABILITY_TYPES.PROJ;
+                const rangedProjectileUser = owner?.ability?.type === ABILITY_TYPES.PROJ && !opts.normalizedSkillStats;
                 if(rangedProjectileUser && owner?.ability?.t === 'S') {
                     damage *= 1.10;
                     size *= 1.14;
@@ -1339,6 +1341,10 @@
                 this.status = opts.status || null;
                 this.statusPower = opts.statusPower || 0;
                 this.weaponStyle = opts.weaponStyle || getRangedWeaponStyle(owner?.ability||{});
+                this.impactStyle = opts.impactStyle || '';
+                this.playerSkillBlast=!!opts.playerSkillBlast;
+                this.rangeRemaining=Number.isFinite(opts.rangeRemaining)?Math.max(0,opts.rangeRemaining):null;
+                this.detonated=false;
                 this.hitMemory = Object.create(null);
                 this.spinAngle = 0;
                 // v22.2: 유도탄이 매 프레임 전체 적을 다시 탐색하지 않도록 타깃을 잠시 캐시.
@@ -1388,7 +1394,9 @@
                     if (this.wobble) this.vel = this.vel.rotate((rand() - 0.5) * 0.4);
                     if (this.spinRate) this.spinAngle += this.spinRate;
 
-                    let nextPos = this.pos.add(this.vel);
+                    let travel=this.vel;
+                    if(this.rangeRemaining!==null&&travel.mag()>this.rangeRemaining)travel=travel.norm().mult(this.rangeRemaining);
+                    let nextPos = this.pos.add(travel);
                     let wallHit = game.checkWallCollision(nextPos, this.size);
                     if(wallHit) {
                         if(this.bounces > 0) {
@@ -1396,6 +1404,7 @@
                             else this.vel.y *= -1;
                             this.bounces--; return;
                         } else if(this.type !== 'GHOST') {
+                            if(this.playerSkillBlast){this.detonatePlayerSkill(game);return;}
                             this.life = 0; game.spawnParticles(this.pos, 3, '#fff');
                             if (this.explodeRadius > 0) {
                                 game.spawnExplosion(this.pos, this.explodeRadius, this.color);
@@ -1406,6 +1415,8 @@
                     }
                     this.pos = nextPos;
                     this.life--;
+                    if(this.rangeRemaining!==null)this.rangeRemaining=Math.max(0,this.rangeRemaining-travel.mag());
+                    if(this.playerSkillBlast&&(this.life<=0||this.rangeRemaining===0)){this.detonatePlayerSkill(game);return;}
                     if(this.type === 'missile') {
                         // v22.2: 위치 보정은 부드럽게 매 프레임 하되, 무거운 타깃 탐색만 인구수에 따라 분산.
                         const refreshEvery = game.getHomingRefreshCadence();
@@ -1452,7 +1463,30 @@
                     }
                 }
             }
+            detonatePlayerSkill(game,primaryTarget=null) {
+                if(this.detonated)return;
+                this.detonated=true;this.life=0;
+                const radius=Math.max(50,this.explodeRadius),sourceId=this.owner?.remoteId||('ai-'+this.owner?.id);
+                game.emitStudentFx('explosion',this.pos,{size:radius,color:this.color,style:this.weaponStyle,sourceId,impactLevel:3});
+                const previousStyle=this.owner?.currentImpactStyle;
+                if(this.owner)this.owner.currentImpactStyle=this.impactStyle||'ranged-power';
+                try {
+                    for(const victim of game.getNearbyParticipants(this.pos,radius+80)) {
+                        if(victim===this.owner||!victim.alive||victim.id===999||(this.owner.team&&victim.team===this.owner.team))continue;
+                        const distance=victim.pos.dist(this.pos);
+                        if(victim!==primaryTarget&&(distance>radius+victim.radius*.35||game.checkWallBetween(this.pos,victim.pos)))continue;
+                        const falloff=victim===primaryTarget?1:1-.35*Math.min(1,distance/radius);
+                        victim.takeDamage(this.damage*falloff,this.owner);
+                        const outward=victim.pos.sub(this.pos),dir=outward.mag()>.01?outward.norm():this.vel.norm();
+                        const push=this.knockback*falloff;
+                        victim.vel=victim.vel.add(dir.mult(push*(victim.knockbackResist||1)));
+                        victim.stunned=Math.max(victim.stunned,Math.round(6+push*.14));
+                        if(push>=24)game.markLaunched(victim,this.owner,Math.min(35,Math.round(12+push*.35)));
+                    }
+                } finally {if(this.owner)this.owner.currentImpactStyle=previousStyle||'';}
+            }
             hit(game, target) {
+                if(this.playerSkillBlast){this.detonatePlayerSkill(game,target);return;}
                 // ✨ v15: 궤도형은 hitMemory의 개별 재타격 쿨다운만 사용한다.
                 // 과거의 global frame % 15 조건 때문에 실제로 닿아도 대부분 피해가 무효화되던 문제 수정.
                 if(this.type !== 'ORBIT' && !this.pierce && this.type !== 'BOOMERANG') this.life = 0;
@@ -1460,8 +1494,14 @@
                 game.spawnImpact(this.pos, Math.max(20, this.size * 1.7), this.impactColor, Math.min(1.8, 0.7 + this.damage/30));
                 game.emitStudentFx('impact',this.pos,{
                     dx:this.vel.x,dy:this.vel.y,size:Math.max(34,this.explodeRadius||this.size*2.4),
-                    color:this.impactColor||this.color||'#ffffff',amount:this.damage,style:this.weaponStyle||'projectile'
+                    color:this.impactColor||this.color||'#ffffff',amount:this.damage,style:this.impactStyle||this.weaponStyle||'projectile'
                 });
+                const dealDamage=(victim)=>{
+                    const previousStyle=this.owner&&this.owner.currentImpactStyle;
+                    if(this.owner&&this.impactStyle)this.owner.currentImpactStyle=this.impactStyle;
+                    try { victim.takeDamage(this.damage,this.owner); }
+                    finally { if(this.owner)this.owner.currentImpactStyle=previousStyle||''; }
+                };
                 
                 if(this.explodeRadius > 0) {
                     game.spawnExplosion(this.pos, this.explodeRadius, this.impactColor || this.color);
@@ -1469,14 +1509,14 @@
                         if(p===this.owner || !p.alive || p.id===999) continue;
                         if(this.owner.team!==0 && p.team===this.owner.team) continue;
                         if(p.pos.dist(this.pos) < this.explodeRadius) {
-                            p.takeDamage(this.damage, this.owner);
+                            dealDamage(p);
                             p.vel = p.vel.add(p.pos.sub(this.pos).norm().mult(Math.max(12, this.knockback) * (p.knockbackResist || 1)));
                             if(this.owner?.ability?.sub==='SODA_BOMB') p.stunned=Math.max(p.stunned,7);
                         }
                     }
                     if(this.owner?.ability?.sub==='SODA_BOMB') game.addText(this.pos,'🥤 POP!','#e0f2fe',18,18);
                 } else {
-                    target.takeDamage(this.damage, this.owner);
+                    dealDamage(target);
                     if(this.type === 'ICE_SHARD') target.stunned = Math.max(target.stunned, 20);
                     if(this.status === 'stun') target.stunned = Math.max(target.stunned, this.statusPower || 24);
                     if(this.status === 'poison' && this.owner && this.owner.alive) {
@@ -2075,7 +2115,7 @@
             update(game) {
                 if(!this.alive) return;
                 this.survivalFrames++;
-                if(this.rivalFrames > 0) {
+                if(!this.humanControlled && this.rivalFrames > 0) {
                     this.rivalFrames--;
                     this.rivalScore *= 0.998;
                     if(this.rivalFrames <= 0 || this.rivalScore < 3) { this.rivalId = null; this.rivalScore = 0; }
@@ -2131,13 +2171,17 @@
 
                 // v21.15: 자기장 복귀는 하나의 상태 머신에서만 속도를 결정한다.
                 // 일반 카이팅/회피/전투 AI와 동시에 속도 벡터를 덮어쓰지 않는다.
-                const ringDanger = this.updateRingRecovery(game);
+                // Human movement belongs to the joystick, including outside the ring.
+                // Bot recovery/pathfinding used to override the stick and teleport idle players.
+                if(this.humanControlled) this.ringRecoveryActive=false;
+                const ringDanger = this.humanControlled ? false : this.updateRingRecovery(game);
 
                 if(this.comboHitsRemaining > 0 && this.comboTimer <= 0 && this.stunned <= 0 && !ringDanger && !this.ringRecoveryActive) this.processMeleeCombo(game);
 
                 // ✨ 새로운 동적 돌진 이펙트 처리
+                if(this.humanControlled&&this.playerDash&&this.stunned>0){this.playerDash=null;this.dashFrames=0;}
                 if (this.dashFrames > 0) {
-                    this.dashFrames--;
+                    if(!this.playerDash)this.dashFrames--;
                     if (this.dashType === 'EXPLOSIVE_DASH' && this.dashFrames % 4 === 0) {
                         game.spawnExplosion(this.pos, 60, '#ff4400');
                         game.applyAoE(this.pos, 60, 15 * this.damageMult, this, 10);
@@ -2147,7 +2191,7 @@
                     if (this.dashType === 'BOMB_TRAIL' && this.dashFrames % 7 === 0) this.spawnTrailZone(game,this.pos);
                     if (this.dashType === 'INK_TRAIL' && this.dashFrames % 5 === 0) this.spawnTrailZone(game,this.pos);
                     if (this.dashType === 'BANANA_TRAIL' && this.dashFrames % 6 === 0) this.spawnTrailZone(game,this.pos);
-                    if (TRAIL_DASH_SUBS.has(this.dashType)) this.applyTrailDashContact(game);
+                    if (TRAIL_DASH_SUBS.has(this.dashType)&&!this.playerDash) this.applyTrailDashContact(game);
                     if (this.dashType === 'LIGHTNING_DASH' && this.dashFrames % 5 === 0) {
                         const boltTarget = this.dashTargetId != null
                             ? game.participants.find(p=>p.id===this.dashTargetId && p.alive)
@@ -2192,11 +2236,18 @@
                     if(this.dashFrames === 0 && TRAIL_DASH_SUBS.has(this.dashType)) this.finishTrailDash(game);
                 }
 
+                // 학생 입력은 위치 적분보다 먼저 반영한다. 한 물리 프레임 늦게 출발하던 체감 지연을 제거한다.
+                if(this.humanControlled&&!this.ringRecoveryActive&&this.stunned<=0)this.runAI(game);
+
+                const playerDashStep=this.humanControlled&&this.playerDash&&this.playerDash.remaining>0?this.playerDash:null;
+                const dashStart=playerDashStep?new Vec2(this.pos.x,this.pos.y):null;
+                if(playerDashStep)this.vel=playerDashStep.dir.mult(Math.min(playerDashStep.speed,playerDashStep.remaining));
                 let nextPos = this.pos.add(this.vel);
                 if (isNaN(nextPos.x) || isNaN(nextPos.y)) { this.vel = new Vec2(0,0); return; }
 
                 let wallHit = game.checkWallCollision(nextPos, this.radius);
-                if(wallHit && this.ability.sub !== 'GHOST_MOVE' && !(this.ability.sub === 'FLY_DASH' && this.dashFrames > 0)) {
+                if(wallHit&&playerDashStep){playerDashStep.remaining=0;this.vel=new Vec2(0,0);}
+                else if(wallHit && this.ability.sub !== 'GHOST_MOVE' && !(this.ability.sub === 'FLY_DASH' && this.dashFrames > 0)) {
                     game.handleWallCrash(this, this.vel.mag());
                     const n = wallHit.normal || this.pos.sub(new Vec2(wallHit.x,wallHit.y)).norm();
                     const vn = this.vel.x*n.x + this.vel.y*n.y;
@@ -2210,19 +2261,33 @@
                     this.pos = nextPos;
                 }
 
-                // ✨ v13: 벽/캐릭터 사이에 끼여 거의 움직이지 못하면 자동 탈출
-                const moved = this.pos.dist(this.lastPos);
-                if(this.unstuckCooldown > 0) this.unstuckCooldown--;
-                if(moved < 0.55 && this.vel.mag() < 1.4) this.stuckFrames++;
-                else this.stuckFrames = Math.max(0, this.stuckFrames - 3);
-                if(this.stuckFrames > 34 && this.unstuckCooldown <= 0) {
-                    game.unstickParticipant(this);
-                    this.stuckFrames = 0;
-                    this.unstuckCooldown = 90;
+                if(playerDashStep) {
+                    playerDashStep.remaining=Math.max(0,playerDashStep.remaining-this.pos.dist(dashStart));
+                    this.playerDashContactFrame=game.frame;
+                    playerDashStep.contact(game,dashStart,this.pos);
+                    this.dashFrames=Math.ceil(playerDashStep.remaining/playerDashStep.speed);
+                    if(playerDashStep.remaining<.001){this.playerDash=null;this.dashFrames=0;this.vel=new Vec2(0,0);}
                 }
-                this.lastPos = new Vec2(this.pos.x, this.pos.y);
+
+                // ✨ v13: 벽/캐릭터 사이에 끼여 거의 움직이지 못하면 자동 탈출
+                if(!this.humanControlled) {
+                    const moved = this.pos.dist(this.lastPos);
+                    if(this.unstuckCooldown > 0) this.unstuckCooldown--;
+                    if(moved < 0.55 && this.vel.mag() < 1.4) this.stuckFrames++;
+                    else this.stuckFrames = Math.max(0, this.stuckFrames - 3);
+                    if(this.stuckFrames > 34 && this.unstuckCooldown <= 0) {
+                        game.unstickParticipant(this);
+                        this.stuckFrames = 0;
+                        this.unstuckCooldown = 90;
+                    }
+                    this.lastPos.x=this.pos.x; this.lastPos.y=this.pos.y;
+                }
                 
-                this.vel = this.vel.mult(0.92);
+                if(!playerDashStep)this.vel = this.vel.mult(0.92);
+                if(this.humanControlled) {
+                    const edge=(game.worldRadius||2600)-this.radius-4,delta=this.pos.sub(game.center),distance=delta.mag();
+                    if(distance>edge) { const normal=delta.mult(1/distance);this.pos=game.center.add(normal.mult(edge));const outward=this.vel.x*normal.x+this.vel.y*normal.y;if(outward>0)this.vel=this.vel.sub(normal.mult(outward)); }
+                }
                 let dist = this.pos.dist(game.center);
                 if(dist > game.mapRadius) {
                     this.outsideZoneFrames++;
@@ -2242,10 +2307,8 @@
 
                 // 복귀 상태에서는 일반 전투 AI를 절대 섞지 않는다.
                 if(!this.ringRecoveryActive && this.stunned <= 0) {
-                    // 학생 조작은 성능용 AI 간격의 영향을 받지 않고 매 프레임 처리한다.
-                    // 봇만 기존 cadence를 적용해 20~30명 경기에서도 입력 지연을 만들지 않는다.
-                    if(this.humanControlled)this.runAI(game);
-                    else {
+                    // 학생 조작은 위에서 60Hz로 처리했다. 봇만 성능용 cadence를 적용한다.
+                    if(!this.humanControlled) {
                         const aiCadence=game.getAICadence();
                         if(aiCadence===1 || ((game.frame + Math.abs(this.id)) % aiCadence === 0)) this.runAI(game);
                     }
@@ -2253,6 +2316,7 @@
             }
 
             updateRingRecovery(game) {
+                if(this.humanControlled) { this.ringRecoveryActive=false; return false; }
                 const dist=this.pos.dist(game.center);
 
                 // v22.7.1 HOTFIX
@@ -3845,16 +3909,20 @@
                 // 피해량을 물리 충격량으로 변환한다. 독/지속 피해는 제외하고,
                 // 중·강타일수록 밀림→짧은 경직→날아감이 순차적으로 붙는다.
                 let impactLevel=actualDamage>=40?3:actualDamage>=25?2:actualDamage>=12?1:0;
-                const closeImpact=!!(attacker&&[ABILITY_TYPES.MELEE,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.ORBIT,ABILITY_TYPES.PULL].includes(attacker.ability?.type));
+                const impactStyle=String(attacker?.currentImpactStyle||((attacker?.ability?.type||'hit')+':'+(attacker?.ability?.sub||'')));
+                const skillImpact=/tank-|melee-|uppercut|combo|lunge|ranged-power|power-shot|skill/i.test(impactStyle);
+                const closeImpact=!!(attacker&&([ABILITY_TYPES.MELEE,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.ORBIT,ABILITY_TYPES.PULL].includes(attacker.ability?.type)||
+                    /tank|melee|dash|teleport|punch|smash|uppercut|combo|lunge/i.test(impactStyle)));
                 if(closeImpact&&actualDamage>=9) impactLevel=Math.min(3,impactLevel+1);
+                if(skillImpact&&actualDamage>=7) impactLevel=Math.min(3,impactLevel+1);
                 if(game&&attacker&&attacker!==this&&attacker.id!==999&&actualDamage>=7&&
                    (game.frame-Number(this.lastDamageImpulseFrame||-9999)>=2||impactLevel>Number(this.lastDamageImpactLevel||0))) {
                     let hitDir=this.pos.sub(attacker.pos||this.pos).norm();
                     if(hitDir.mag()<.01)hitDir=(attacker.lastAimDir&&attacker.lastAimDir.mag()>.01)?attacker.lastAimDir.norm():new Vec2(1,0);
-                    const kick=[1.6,5.5,9.5,15.5][impactLevel]*(closeImpact?1.34:1);
+                    const kick=[2,6.8,11.4,18.5][impactLevel]*(closeImpact?1.40:1)*(skillImpact?1.10:1);
                     this.vel=this.vel.add(hitDir.mult(kick*(this.knockbackResist||1)));
-                    if(impactLevel>=2)this.stunned=Math.max(this.stunned,impactLevel===3?(closeImpact?10:7):(closeImpact?6:3));
-                    if(impactLevel>=3&&closeImpact)game.markLaunched(this,attacker,26);
+                    if(impactLevel>=2)this.stunned=Math.max(this.stunned,impactLevel===3?(closeImpact?13:8):(closeImpact?8:4));
+                    if(impactLevel>=3&&closeImpact)game.markLaunched(this,attacker,skillImpact?32:27);
                     this.lastDamageImpulseFrame=game.frame;this.lastDamageImpactLevel=impactLevel;
                 }
                 this.damageTaken += actualDamage;
@@ -3871,7 +3939,7 @@
                         size:Math.min(closeImpact?112:78,Math.max(closeImpact?30:18,actualDamage*(closeImpact?1.9:1.45))),
                         amount:actualDamage,
                         color:({S:'#fb4b63',A:'#fbbf24',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'})[attacker.ability?.t]||'#ffffff',
-                        targetId:this.remoteId||('ai-'+this.id),style:(attacker.ability?.type||'hit')+':'+(attacker.ability?.sub||''),
+                        targetId:this.remoteId||('ai-'+this.id),style:impactStyle,
                         sourceId:attacker.remoteId||('ai-'+attacker.id),impactLevel
                     });
                     this.lastStudentHitFxFrame=game.frame;
@@ -3946,9 +4014,10 @@
                 this.confetti = []; // ✨ 우승 꽃가루 배열
                 
                 // 20~30명이 서로 바로 마주치지 않도록 교실 대전 전장을 대폭 확장한다.
-                this.mapRadius = 2600; this.center = new Vec2(0, 0);
-                this.mapIndex = Math.floor(rand()*3);
-                this.mapNames = ['🌪️ 유동 폐허','➕ 십자로','🌿 안개 수풀'];
+                this.worldRadius = 2600; this.mapRadius = 2600; this.center = new Vec2(0, 0);
+                const requestedMap=window.BRMP?.active ? window.BRMP.roomMeta?.mapIndex : -1;
+                this.mapIndex=Number.isInteger(requestedMap)&&requestedMap>=0&&requestedMap<5 ? requestedMap : Math.floor(rand()*5);
+                this.mapNames=['🌪️ 유동 폐허','➕ 십자로','🌿 안개 수풀','🏟️ 네 갈래 광장','📦 화물 기지'];
                 this.mapName = this.mapNames[this.mapIndex];
                 this.cam = new Vec2(0,0); this.lookAt = new Vec2(0,0); this.zoom = 0.5; 
                 this.frame = 0; this.speed = 1; this.paused = false;
@@ -4038,6 +4107,31 @@
                         addWall(p.x,p.y,145+rand()*175,18+rand()*10,rand()*Math.PI,0,'wall');
                     }
                     addCrates(7,650,2150);
+                } else if(this.mapIndex===3) {
+                    // Four symmetric courts: a clear central cross and wide paths around every cover island.
+                    // No closed wall loops, so movement, aim and escape remain readable on touch screens.
+                    for(const sx of [-1,1]) for(const sy of [-1,1]) {
+                        addWall(sx*690,sy*1080,700,34,0,0,'wall');
+                        addWall(sx*1120,sy*620,620,34,Math.PI/2,0,'wall');
+                        addWall(sx*470,sy*430,190,66,sx*sy*.35,0,'rock');
+                        addWall(sx*1500,sy*1120,220,96,0,0,'rock');
+                        addWall(sx*850,sy*1750,240,38,0,0,'wall');
+                        addWall(sx*1730,sy*570,100,100,0,0,'crate');
+                    }
+                } else if(this.mapIndex===4) {
+                    // Staggered cargo rows create distinct long lanes and short cover-to-cover crossings.
+                    // Every container has at least two open exits; a broad central aisle stays unobstructed.
+                    for(const y of [-1440,-720,0,720,1440]) {
+                        const alternate=Math.abs(y/720)%2;
+                        for(const sx of [-1,1]) {
+                            addWall(sx*(alternate?1000:820),y,alternate?510:650,110,0,0,'crate');
+                            addWall(sx*(alternate?1680:1570),y+190,150,100,0,0,'rock');
+                        }
+                    }
+                    for(const sx of [-1,1]) {
+                        addWall(sx*300,-410,150,42,Math.PI/2,0,'wall');
+                        addWall(sx*300,410,150,42,Math.PI/2,0,'wall');
+                    }
                 }
 
                 // 모든 맵에 실제 은폐 판정이 있는 부쉬와 시야를 끊는 고정 연막을 배치한다.
@@ -4058,8 +4152,10 @@
                     }
                 };
                 // 실전 은폐 선택지는 남기고, 학생 기기가 동시에 합성하는 개체 수는 줄인다.
-                placeCover('bush',[16,18,22][this.mapIndex],260,2260);
-                placeCover('smoke',[3,4,5][this.mapIndex],520,2180);
+                placeCover('bush',[16,18,22,18,16][this.mapIndex],260,2260);
+                placeCover('smoke',[3,4,5,3,3][this.mapIndex],520,2180);
+                // Fixed cover keeps collision prediction identical on the host and every student.
+                if(window.BRMP?.active) this.walls.forEach(w=>{w.spinSpeed=0;});
             }
 
             findSafeMapPoint(minRadius=120,maxRadius=2000,clearance=80) {
@@ -4158,15 +4254,25 @@
             }
 
             checkWallCollision(pos, radius) {
+                const radiusSq=radius*radius;
                 for(let w of this.walls) {
-                    const ca = Math.cos(-w.angle), sa = Math.sin(-w.angle);
-                    let relX = pos.x - w.x; let relY = pos.y - w.y;
-                    let rotatedX = relX * ca - relY * sa;
-                    let rotatedY = relX * sa + relY * ca;
-                    let closestX = Math.max(-w.w/2, Math.min(rotatedX, w.w/2));
-                    let closestY = Math.max(-w.h/2, Math.min(rotatedY, w.h/2));
-                    let dX = rotatedX - closestX; let dY = rotatedY - closestY; let dist = Math.sqrt(dX*dX + dY*dY);
-                    if(dist < radius) {
+                    // Recompute trigonometry only when a wall actually changes. An AABB test
+                    // rejects distant cover before the exact rotated-rectangle collision test.
+                    if(w._collisionAngle!==w.angle || w._collisionW!==w.w || w._collisionH!==w.h) {
+                        w._collisionAngle=w.angle; w._collisionW=w.w; w._collisionH=w.h;
+                        w._collisionCos=Math.cos(w.angle); w._collisionSin=Math.sin(w.angle);
+                        w._collisionHalfX=Math.abs(w._collisionCos)*w.w*.5+Math.abs(w._collisionSin)*w.h*.5;
+                        w._collisionHalfY=Math.abs(w._collisionSin)*w.w*.5+Math.abs(w._collisionCos)*w.h*.5;
+                    }
+                    let relX=pos.x-w.x, relY=pos.y-w.y;
+                    if(Math.abs(relX)>w._collisionHalfX+radius || Math.abs(relY)>w._collisionHalfY+radius) continue;
+                    const ca=w._collisionCos, sa=-w._collisionSin;
+                    let rotatedX=relX*ca-relY*sa, rotatedY=relX*sa+relY*ca;
+                    let closestX=Math.max(-w.w/2,Math.min(rotatedX,w.w/2));
+                    let closestY=Math.max(-w.h/2,Math.min(rotatedY,w.h/2));
+                    let dX=rotatedX-closestX, dY=rotatedY-closestY, distanceSq=dX*dX+dY*dY;
+                    if(distanceSq < radiusSq) {
+                        const dist=Math.sqrt(distanceSq);
                         // v20: 벽 중심이 아니라 실제 접촉면의 법선을 반환하여 벽을 따라 미끄러질 수 있게 한다.
                         let nx=0, ny=0;
                         if(dist > 0.001) { nx=dX/dist; ny=dY/dist; }
@@ -4176,7 +4282,7 @@
                             if(dxFace < dyFace) nx = rotatedX >= 0 ? 1 : -1;
                             else ny = rotatedY >= 0 ? 1 : -1;
                         }
-                        const cw=Math.cos(w.angle), sw=Math.sin(w.angle);
+                        const cw=w._collisionCos, sw=w._collisionSin;
                         const normal = new Vec2(nx*cw - ny*sw, nx*sw + ny*cw).norm();
                         return {x:w.x, y:w.y, wall:w, normal};
                     }
@@ -4337,7 +4443,7 @@
             }
 
             registerRivalHit(victim, attacker, damage) {
-                if(!victim || !attacker || victim === attacker || !victim.alive) return;
+                if(!victim || !attacker || victim === attacker || !victim.alive || victim.humanControlled) return;
                 if(victim.team !== 0 && victim.team === attacker.team) return;
                 const revenge = victim.personality?.revenge ?? 0.6;
                 const gain = Math.max(2, (damage / Math.max(1,victim.maxHp)) * 105 * (0.55 + revenge));
@@ -4386,7 +4492,7 @@
                 // 팀원이 쓰러지면 공격자는 해당 팀 생존자들의 라이벌 후보가 된다.
                 if(victim.team > 0) {
                     for(const mate of this.aliveRealPlayers) {
-                        if(mate.team !== victim.team || mate.id === victim.id) continue;
+                        if(mate.humanControlled || mate.team !== victim.team || mate.id === victim.id) continue;
                         const gain = 18 + (mate.personality?.revenge||0.5)*24;
                         if(mate.rivalId === attacker.id) mate.rivalScore = Math.min(100,mate.rivalScore+gain);
                         else if(mate.rivalId===null || gain > mate.rivalScore) { mate.rivalId=attacker.id; mate.rivalScore=gain; }
@@ -4435,6 +4541,9 @@
 
                         const enemy = p1.team===0 || p1.team!==p2.team;
                         if(!enemy) continue;
+                        // Player dash damage already uses the swept movement segment, once per victim.
+                        // Keep separation above, but never add another BODY CHECK for that same contact.
+                        if(p1.playerDash||p2.playerDash||p1.playerDashContactFrame===this.frame||p2.playerDashContactFrame===this.frame)continue;
                         const s1=p1.vel.mag(), s2=p2.vel.mag();
                         const p1Attacking = p1.attackCommitFrames>0 || p1.dashFrames>0 || p1.comboHitsRemaining>0;
                         const p2Attacking = p2.attackCommitFrames>0 || p2.dashFrames>0 || p2.comboHitsRemaining>0;
@@ -4464,7 +4573,7 @@
                             striker.bodyHitCooldown=18; target.bodyHitCooldown=20;
                             const dir=target.pos.sub(striker.pos).norm();
                             const tierBonus={S:1.35,A:1.18,B:1.0,C:0.82,F:0.45}[striker.ability.t]||1;
-                            const specialCharge = IMPACT_CHARGE_SUBS.has(striker.ability.sub);
+                            const specialCharge = IMPACT_CHARGE_SUBS.has(striker.ability.sub)||striker.dashType==='PLAYER_TANK_CHARGE';
 
                             let dmg=Math.min(18, Math.max(3,(strikerSpeed-5)*0.72*tierBonus));
                             let force=Math.min(26,7+strikerSpeed*0.75*tierBonus);
@@ -4526,6 +4635,7 @@
             }
 
             playSignature(p) {
+                if(window.BRMP?.active&&window.BRMP.role==='host'&&window.BRMP.backend==='firebase') return;
                 if(!p?.alive || (this.aliveRealPlayers?.length || 99)>15) return;
                 if(this.signatureEffects.length>18) this.signatureEffects.splice(0,this.signatureEffects.length-18);
                 this.signatureEffects.push(new SignatureEffect(p));
@@ -4958,7 +5068,8 @@
             }
 
             isPerformanceMode() {
-                return this.getPerformanceTier()>0;
+                // A host stays a lightweight simulation server even after only a few survive.
+                return !!(window.BRMP?.active&&window.BRMP.role==='host'&&window.BRMP.backend==='firebase') || this.getPerformanceTier()>0;
             }
 
             getAICadence() {
@@ -5037,7 +5148,7 @@
                 if(!this.isPerformanceMode()) { this.screenFlashAlpha = Math.max(this.screenFlashAlpha, 0.22); this.screenFlashColor = '255,120,40'; this.vignettePulse = 0.75; }
                 this.spawnImpact(this.center, 90, '#fb923c', 1.4);
                 this.participants.forEach(p => {
-                    if(!p.alive || p.id === 999) return;
+                    if(!p.alive || p.id === 999 || p.humanControlled) return;
                     const target = this.getTargetFor(p, false);
                     if(target) p.vel = p.vel.add(target.pos.sub(p.pos).norm().mult(6));
                 });
@@ -5049,11 +5160,11 @@
                 this.announce('⚡ CONVERGENCE! 전장이 압축됩니다!', 110);
                 // 직전 버전 대비 2배가 되도록 수렴 압축도 원래 수치의 2/3를 적용한다.
                 const convergenceFloor = this.mapRadius < 150 ? 0 : 140;
-                this.mapRadius = Math.max(convergenceFloor, this.mapRadius - ((this.mapRadius < 300 ? 75 : 55) * 2/3));
+                this.mapRadius = Math.max(convergenceFloor, this.mapRadius - ((this.mapRadius < 300 ? 75 : 55) * 2/3 * 1.3));
                 if(!this.isPerformanceMode()) this.vignettePulse = 0.65;
                 this.spawnImpact(this.center, Math.min(260, this.mapRadius*0.35), '#f43f5e', 1.8);
                 this.participants.forEach(p => {
-                    if(!p.alive || p.id === 999) return;
+                    if(!p.alive || p.id === 999 || p.humanControlled) return;
                     const target = this.getTargetFor(p, false);
                     const pullToFight = target ? target.pos.sub(p.pos).norm() : this.center.sub(p.pos).norm();
                     p.vel = p.vel.add(pullToFight.mult(10));
@@ -5344,6 +5455,7 @@
             }
 
             unstickParticipant(p) {
+                if(p.humanControlled) return false;
                 const outside = p.pos.dist(this.center) > this.mapRadius;
                 const currentCenterDist = p.pos.dist(this.center);
                 const preferredDir = outside ? this.getSafeZoneReturnDirection(p) : null;
@@ -5462,8 +5574,8 @@
 
                 // ✨ 큰 타격 순간 1~2프레임 정지하여 무게감 부여
                 if(this.hitStopFrames > 0) {
-                    this.hitStopFrames--;
-                    return;
+                    if(window.BRMP?.active) this.hitStopFrames=0;
+                    else { this.hitStopFrames--; return; }
                 }
 
                 // ✨ 우승 연출: 게임이 끝났을 땐 AI와 이동을 멈추고 꽃가루/이펙트만 재생
@@ -5481,7 +5593,8 @@
                     return;
                 }
 
-                for(let s=0; s<this.speed; s++) {
+                const simulationSteps=window.BRMP?.active ? 1 : this.speed;
+                for(let s=0; s<simulationSteps; s++) {
                     this.frame++;
                     this.refreshAliveCache();
                     this.rebuildSpatialGrid();
@@ -5490,7 +5603,7 @@
                     if(this.frame > 780 && idleFrames > 360) this.triggerBattleFever();
                     if(this.frame > 1200 && idleFrames > 720) this.forceConvergence();
 
-                    // v24: 직전 버전보다 정확히 2배 빠르게 수축(원래 속도의 2/3).
+                    // 현재 수축 곡선과 수렴 압축을 동일하게 1.3배 가속한다.
                     if(this.frame>1200&&this.mapRadius>0) {
                         let shrink=0.20;
                         if(this.feverFrames>0) shrink+=0.16;
@@ -5499,7 +5612,7 @@
                         if(this.mapRadius<300) shrink+=0.18;
                         if(this.mapRadius<160) shrink+=0.28;
                         if(this.mapRadius<80) shrink+=0.38;
-                        shrink*=2/3;
+                        shrink*=2/3*1.3;
                         this.mapRadius=Math.max(0,this.mapRadius-shrink);
                     }
                     
@@ -5530,8 +5643,11 @@
                             p.forcedEscapeUntil=0;
                             p.dashFrames=0;
                             p.comboHitsRemaining=0;
-                            const fallback=this.center.sub(p.pos).norm();
-                            if(fallback.mag()>0.05) p.vel=p.vel.mult(0.25).add(fallback.mult(Math.max(3.5,p.speed*2.1)));
+                            if(p.humanControlled) p.vel=new Vec2(0,0);
+                            else {
+                                const fallback=this.center.sub(p.pos).norm();
+                                if(fallback.mag()>0.05) p.vel=p.vel.mult(0.25).add(fallback.mult(Math.max(3.5,p.speed*2.1)));
+                            }
                         }
                     }
                     if(this.supplyDrop) {
@@ -5591,7 +5707,7 @@
                     }
 
                     let alive = this.participants.filter(p => p.alive && p.id !== 999);
-                    if(!window.BRMP?.active||this.frame%6===0) {
+                    if(!window.BRMP?.active||this.frame%30===0) {
                         updateHUD(alive.length, this.realParticipantCount || (this.realParticipantCount=this.participants.filter(p=>p.id!==999).length), this.frame);
                     }
                     
@@ -5625,6 +5741,30 @@
                         this.endTimer = setTimeout(() => { if(!this.resultShown) endGame(winner); }, onlineClass?650:1500);
                         return; 
                     }
+                }
+            }
+
+            // 온라인 호스트는 전투 판정 서버 역할이 우선이다. 정적 미니맵 수준으로만 그려
+            // 파티클·그림자·텍스트 측정 비용을 학생 위치 계산과 Firebase 전송에 돌린다.
+            drawHostLite() {
+                const cw=canvas.width,ch=canvas.height,worldRadius=2700;
+                const scale=Math.min(cw,ch)/(worldRadius*2+180),cx=cw/2,cy=ch/2;
+                ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#101a30';ctx.fillRect(0,0,cw,ch);
+                ctx.fillStyle='#1e293b';ctx.beginPath();ctx.arc(cx,cy,worldRadius*scale,0,Math.PI*2);ctx.fill();
+                ctx.strokeStyle='rgba(100,116,139,.34)';ctx.lineWidth=1;
+                const grid=400*scale;
+                for(let x=cx-worldRadius*scale;x<=cx+worldRadius*scale;x+=grid){ctx.beginPath();ctx.moveTo(x,cy-worldRadius*scale);ctx.lineTo(x,cy+worldRadius*scale);ctx.stroke();}
+                for(let y=cy-worldRadius*scale;y<=cy+worldRadius*scale;y+=grid){ctx.beginPath();ctx.moveTo(cx-worldRadius*scale,y);ctx.lineTo(cx+worldRadius*scale,y);ctx.stroke();}
+                ctx.strokeStyle='#fb4b63';ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx+(this.center.x||0)*scale,cy+(this.center.y||0)*scale,Math.max(1,this.mapRadius*scale),0,Math.PI*2);ctx.stroke();
+                // 장애물은 윤곽만 일부 그린다.
+                ctx.fillStyle='rgba(148,163,184,.28)';
+                for(let wi=0;wi<this.walls.length;wi+=2){const w=this.walls[wi];ctx.fillRect(cx+(w.x-w.w*.5)*scale,cy+(w.y-w.h*.5)*scale,Math.max(1,w.w*scale),Math.max(1,w.h*scale));}
+                const tierColor={S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'};
+                for(const p of this.participants) {
+                    if(!p.alive||p.id===999)continue;
+                    const x=cx+(p.pos.x||0)*scale,y=cy+(p.pos.y||0)*scale,r=p.humanControlled?6:4;
+                    ctx.fillStyle=tierColor[p.ability?.t]||'#fff';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+                    if(p.humanControlled){ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#e2e8f0';ctx.font='700 8px sans-serif';ctx.textAlign='center';ctx.fillText(String(p.name||''),x,y-9);}
                 }
             }
 
@@ -6157,14 +6297,20 @@
             goToDraft();
         }
 
+        function resizeGameCanvas() {
+            const onlineHost=window.BRMP&&BRMP.active&&BRMP.role==='host'&&BRMP.backend==='firebase';
+            const ratio=onlineHost ? .48 : 1;
+            canvas.width=Math.max(320,Math.round(window.innerWidth*ratio));
+            canvas.height=Math.max(180,Math.round(window.innerHeight*ratio));
+        }
+
         function startGame() {
             document.getElementById('draft-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('hud-mode-title').innerText = teamMode > 0 ? "🏆 팀전 모드" : "🏆 개인전 (서든 데스)";
             
             if (animationId) cancelAnimationFrame(animationId);
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            resizeGameCanvas();
             // 전투용 난수도 현재 시드에서 다시 시작: 같은 시드 = 같은 전투 흐름에 최대한 근접
             seedRandom(document.getElementById('seed-input').value + '|combat');
             game = new GameWorld(generatedParticipants);
@@ -6194,9 +6340,9 @@
             // 긴 멈춤 뒤 수백 프레임을 한꺼번에 계산해 다시 멈추는 악순환을 막는다.
             if(steps===maxCatchup&&loopAccumulator>FIXED_SIM_MS*1.5)loopAccumulator=FIXED_SIM_MS;
             try {
-                // 온라인 수업에서는 호스트 관전 화면을 약 7fps로 낮추고 확보한 시간을 물리·통신에 쓴다.
-                const drawGap=game.isGameOver?95:140;
-                if(!onlineHost||tickNow-hostLastDrawAt>=drawGap){game.draw();hostLastDrawAt=tickNow;}
+                // 호스트는 저해상도 전황판을 12.5fps로 표시하고 물리 계산은 60Hz로 유지한다.
+                const drawGap=game.isGameOver?160:80;
+                if(!onlineHost||tickNow-hostLastDrawAt>=drawGap){onlineHost?game.drawHostLite():game.draw();hostLastDrawAt=tickNow;}
             } catch(err) {
                 console.error('[GAME DRAW RECOVERY]', err);
             }
@@ -6582,9 +6728,7 @@
             listEl.appendChild(summary);
         }
 
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        });
+        window.addEventListener('resize', resizeGameCanvas);
 
         randomizeSeed();
     </script>
@@ -6695,6 +6839,8 @@
         .br-draft-card:after { content:''; position:absolute; inset:-45%; background:conic-gradient(transparent,rgba(255,255,255,.08),transparent 24%);
             animation:brspin 5s linear infinite; pointer-events:none; }
         @keyframes brspin { to { transform:rotate(360deg); } }
+        .br-draft-card.br-reroll-pop .br-draft-emoji { animation:brrerollpop .16s ease-out; }
+        @keyframes brrerollpop { 0% { transform:scale(.78) rotate(-7deg); opacity:.45; } 100% { transform:scale(1) rotate(0); opacity:1; } }
         .br-draft-emoji { font-size:112px; line-height:1.15; filter:drop-shadow(0 12px 20px rgba(0,0,0,.35)); position:relative; z-index:1; }
         .br-tier { display:inline-grid; place-items:center; min-width:48px; height:31px; border-radius:9px; font-size:18px; font-weight:1000; position:relative; z-index:1; }
         .br-tier-S { background:#7f102b; color:#ffb3c1; border:1px solid #ff334f; }
@@ -6710,27 +6856,44 @@
         .br-hp { width:min(260px,42vw); height:11px; border-radius:99px; overflow:hidden; background:#3b1620; margin-top:5px; }
         .br-hp > i { display:block; height:100%; background:linear-gradient(90deg,#16a34a,#4ade80); width:100%; transition:width .15s; }
         .br-control { --br-cd-angle:360deg; --br-ring-color:#fff; position:absolute; width:116px; height:116px; border-radius:50%;
-            user-select:none; -webkit-user-select:none; touch-action:none; overflow:visible; transition:transform .12s,opacity .12s; }
+            user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; touch-action:none; overflow:visible;
+            transition:transform .10s ease-out,opacity .12s,filter .10s; will-change:transform; }
         .br-control::before { content:''; position:absolute; inset:-9px; z-index:3; border-radius:50%; pointer-events:none;
             background:conic-gradient(from -90deg,var(--br-ring-color) 0deg,var(--br-ring-color) var(--br-cd-angle),rgba(255,255,255,.12) var(--br-cd-angle),rgba(255,255,255,.12) 360deg);
             -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 8px),#000 calc(100% - 7px));
             mask:radial-gradient(farthest-side,transparent calc(100% - 8px),#000 calc(100% - 7px)); }
-        .br-control-content { position:relative; z-index:2; display:grid; place-items:center; line-height:1.12; pointer-events:none; }
+        .br-control-content { position:relative; z-index:2; width:100%; height:100%; display:grid; place-content:center; place-items:center; gap:3px; line-height:1; pointer-events:none; }
+        .br-action-name { font-size:12px; font-weight:1000; letter-spacing:-.03em; text-shadow:0 2px 4px rgba(0,0,0,.45); }
+        .br-attack-symbol { position:relative; display:block; width:39px; height:39px; border:5px solid #fff; border-radius:50%;
+            filter:drop-shadow(0 3px 3px rgba(0,0,0,.32)); }
+        .br-attack-symbol::before,.br-attack-symbol::after { content:''; position:absolute; left:50%; top:50%; background:#fff; border-radius:4px; transform:translate(-50%,-50%); }
+        .br-attack-symbol::before { width:55px; height:5px; }
+        .br-attack-symbol::after { width:5px; height:55px; }
+        .br-skill-symbol { font-size:42px; color:#fff7ae; line-height:.9; text-shadow:0 2px 0 #5b21b6,0 4px 9px rgba(0,0,0,.38); }
         .br-cd-text { position:absolute; z-index:4; right:-3px; top:-3px; min-width:28px; height:28px; padding:0 5px; border-radius:99px;
             display:grid; place-items:center; background:rgba(2,6,18,.90); border:1px solid rgba(255,255,255,.55); color:#fff; font-size:12px; font-weight:1000; pointer-events:none; }
         .br-cd-text.ready { color:#bbf7d0; border-color:#4ade80; }
         .br-aim-knob { position:absolute; z-index:5; left:50%; top:50%; width:30px; height:30px; margin:-15px; border-radius:50%;
             background:rgba(255,255,255,.92); border:3px solid rgba(15,23,42,.68); box-shadow:0 4px 14px rgba(0,0,0,.45); opacity:0; pointer-events:none; will-change:transform; }
-        .br-control.aiming { transform:scale(1.05); }
+        .br-control.aiming { transform:scale(1.08); filter:brightness(1.12); }
         .br-control.aiming .br-aim-knob { opacity:1; }
-        #br-joystick { left:22px; right:auto; bottom:24px; border:2px solid rgba(255,255,255,.24); background:rgba(12,24,44,.48); }
-        #br-joystick-knob { position:absolute; width:54px; height:54px; left:29px; top:29px; border-radius:50%;
-            background:rgba(255,255,255,.78); box-shadow:0 3px 10px rgba(0,0,0,.28); transform:translate(0,0); }
-        #br-attack { --br-ring-color:#fb7185; right:22px; left:auto; bottom:24px; border:3px solid rgba(255,255,255,.6); background:linear-gradient(145deg,#e11d48,#f97316);
-            color:#fff; font-weight:1000; font-size:17px; display:grid; place-items:center; box-shadow:0 6px 16px rgba(225,29,72,.22); }
-        #br-skill { --br-ring-color:#93c5fd; right:112px; left:auto; bottom:132px; width:88px; height:88px; border:3px solid rgba(255,255,255,.55);
-            background:linear-gradient(145deg,#5b21b6,#2563eb); color:#fff; font-weight:1000; font-size:14px; display:grid; place-items:center; text-align:center; }
-        #br-skill-label { display:block; max-width:70px; font-size:11px; line-height:1.05; }
+        #br-joystick { left:calc(22px + env(safe-area-inset-left)); right:auto; bottom:calc(22px + env(safe-area-inset-bottom)); width:132px; height:132px;
+            border:3px solid rgba(255,255,255,.24); background:radial-gradient(circle at 45% 38%,rgba(58,83,122,.50),rgba(9,20,38,.48) 68%);
+            box-shadow:inset 0 0 0 12px rgba(255,255,255,.035),0 8px 24px rgba(0,0,0,.30); }
+        #br-joystick::before { inset:-5px; background:repeating-conic-gradient(from -2deg,rgba(255,255,255,.72) 0 4deg,transparent 4deg 45deg);
+            -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));
+            mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px)); }
+        #br-joystick-knob { position:absolute; z-index:4; width:58px; height:58px; left:37px; top:37px; border-radius:50%;
+            border:3px solid rgba(255,255,255,.78); background:radial-gradient(circle at 37% 30%,#f8fafc,#94a3b8 72%);
+            box-shadow:0 5px 15px rgba(0,0,0,.38),inset 0 -5px 9px rgba(15,23,42,.22); transform:translate(0,0); will-change:transform; }
+        #br-attack { --br-ring-color:#ff4969; right:calc(22px + env(safe-area-inset-right)); left:auto; bottom:calc(22px + env(safe-area-inset-bottom));
+            border:4px solid rgba(255,255,255,.78); background:radial-gradient(circle at 36% 28%,#ff826f,#ef274f 58%,#ad1239);
+            color:#fff; display:grid; place-items:center; box-shadow:inset 0 -8px 12px rgba(95,10,36,.30),0 8px 18px rgba(225,29,72,.27); }
+        #br-skill { --br-ring-color:#fde047; right:calc(122px + env(safe-area-inset-right)); left:auto; bottom:calc(137px + env(safe-area-inset-bottom)); width:88px; height:88px;
+            border:4px solid rgba(255,255,255,.70); background:radial-gradient(circle at 35% 27%,#b892ff,#7546e8 56%,#3e1b9a);
+            color:#fff; display:grid; place-items:center; text-align:center; box-shadow:inset 0 -7px 10px rgba(38,15,110,.32),0 7px 17px rgba(91,33,182,.26); }
+        #br-skill-label { display:block; max-width:72px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; line-height:1; }
+        #br-skill-count { display:none; }
         .br-control.disabled { opacity:.48; }
         .br-control.disabled::before { --br-ring-color:#64748b; }
         .br-respawn { position:absolute; inset:0; display:grid; place-items:center; background:rgba(3,7,18,.54); pointer-events:none; }
@@ -6763,10 +6926,14 @@
             .br-awards { grid-template-columns:1fr 1fr; }
             .br-rank { grid-template-columns:38px 38px minmax(80px,1fr) auto; }
             .br-rank .br-hide-mobile { display:none; }
-            #br-attack { width:104px; height:104px; }
-            #br-joystick { width:110px; height:110px; }
-            #br-joystick-knob { left:27px; top:27px; }
-            #br-skill { right:92px; left:auto; bottom:122px; width:78px; height:78px; }
+            #br-attack { width:106px; height:106px; }
+            #br-joystick { width:118px; height:118px; }
+            #br-joystick-knob { width:54px; height:54px; left:32px; top:32px; }
+            #br-skill { right:calc(102px + env(safe-area-inset-right)); left:auto; bottom:calc(126px + env(safe-area-inset-bottom)); width:80px; height:80px; }
+            .br-attack-symbol { width:34px; height:34px; }
+            .br-attack-symbol::before { width:48px; }
+            .br-attack-symbol::after { height:48px; }
+            .br-skill-symbol { font-size:37px; }
         }
     </style>
 
@@ -6834,6 +7001,7 @@
                             <div class="br-grid2">
                                 <div class="br-field"><label class="br-label">경기 모드</label><select id="br-mode" class="br-select"><option value="solo">👑 최후의 1인</option><option value="team-elim">🛡️ 팀 생존전</option><option value="team-respawn">♻️ 팀 킬 대결</option></select></div>
                                 <div class="br-field"><label class="br-label">팀 수</label><select id="br-team-count" class="br-select"><option value="2">2팀</option><option value="3">3팀</option><option value="4">4팀</option></select></div>
+                                <div class="br-field"><label class="br-label" for="br-map">전장</label><select id="br-map" class="br-select"><option value="random">🎲 무작위</option><option value="0">🌪️ 유동 폐허</option><option value="1">➕ 십자로</option><option value="2">🌿 안개 수풀</option><option value="3">🏟️ 네 갈래 광장</option><option value="4">📦 화물 기지</option></select></div>
                                 <div class="br-field"><label class="br-label">퀴즈 시간</label><select id="br-quiz-seconds" class="br-select"><option value="45">45초</option><option value="60" selected>60초</option><option value="90">90초</option></select></div>
                                 <div class="br-field"><label class="br-label">팀 킬 대결 시간</label><select id="br-match-seconds" class="br-select"><option value="120">2분</option><option value="180" selected>3분</option><option value="300">5분</option></select></div>
                             </div>
@@ -6926,10 +7094,10 @@
             <div class="br-hud-box" style="text-align:right"><b id="br-battle-mode">생존전</b><br><span id="br-battle-time">00:00</span> · <span id="br-battle-alive">20명</span></div>
         </div>
         <button id="br-attack" type="button" class="br-control" aria-label="공격 조준">
-            <span class="br-control-content">공격<br>⚔️</span><span id="br-attack-cd" class="br-cd-text ready">READY</span><span class="br-aim-knob"></span>
+            <span class="br-control-content"><span class="br-attack-symbol" aria-hidden="true"></span><span class="br-action-name">공격</span></span><span id="br-attack-cd" class="br-cd-text ready">✓</span><span class="br-aim-knob"></span>
         </button>
         <button id="br-skill" type="button" class="br-control" aria-label="스킬 조준">
-            <span class="br-control-content"><span id="br-skill-label">스킬</span><br><span id="br-skill-count">∞</span></span><span id="br-skill-cd" class="br-cd-text ready">READY</span><span class="br-aim-knob"></span>
+            <span class="br-control-content"><span class="br-skill-symbol" aria-hidden="true">★</span><span id="br-skill-label" class="br-action-name">스킬</span><span id="br-skill-count">∞</span></span><span id="br-skill-cd" class="br-cd-text ready">✓</span><span class="br-aim-knob"></span>
         </button>
         <div id="br-joystick" class="br-control"><div id="br-joystick-knob"></div></div>
         <div id="br-respawn" class="br-respawn br-hidden"><b id="br-respawn-text">3초 후 부활</b></div>
@@ -7027,32 +7195,62 @@
             'team-respawn':'팀 킬 대결'
         };
         var BR_TIER_COLOR = {S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'};
+        // 수업용 지정 어휘 54개. 정답과 오답의 품사를 맞춰 의미가 겹치지 않게 구성한다.
         var BR_DEFAULT_QUESTIONS = [
-            ['apple','사과','바나나','포도','우유'],['book','책','연필','책상','문'],
-            ['school','학교','병원','공원','시장'],['teacher','선생님','학생','의사','요리사'],
-            ['student','학생','경찰관','선생님','운전기사'],['friend','친구','가족','손님','이웃'],
-            ['challenge','도전','휴식','습관','약속'],['environment','환경','경험','에너지','발명'],
-            ['recycle','재활용하다','낭비하다','버리다','구입하다'],['reduce','줄이다','나누다','넓히다','올리다'],
-            ['reuse','재사용하다','교환하다','수리하다','보관하다'],['protect','보호하다','발견하다','공격하다','초대하다'],
-            ['practice','연습하다','포기하다','약속하다','기다리다'],['improve','향상시키다','방해하다','상상하다','포함하다'],
-            ['prepare','준비하다','비교하다','생산하다','제공하다'],['decide','결정하다','설명하다','기억하다','도착하다'],
-            ['careful','조심하는','유명한','완전한','지루한'],['healthy','건강한','배고픈','위험한','친절한'],
-            ['different','다른','어려운','중요한','비슷한'],['possible','가능한','평화로운','특별한','정확한'],
-            ['quickly','빠르게','조용히','갑자기','마침내'],['together','함께','대신에','미리','따로'],
-            ['before','전에','동안','근처에','너머에'],['because','왜냐하면','비록','그러나','그러므로'],
-            ['return','돌아오다','출발하다','변화하다','나타나다'],['choose','고르다','옮기다','닫다','던지다'],
-            ['survive','살아남다','공격하다','응원하다','따라잡다'],['avoid','피하다','허락하다','도착하다','더하다'],
-            ['attack','공격하다','방어하다','치료하다','숨기다'],['defend','방어하다','결정하다','발견하다','배달하다'],
-            ['team','팀','규칙','점수','기술'],['score','점수','속도','체력','경기장'],
-            ['skill','기술','실수','기회','방향'],['victory','승리','경험','노력','평화'],
-            ['damage','피해','도움','차이','결과'],['chance','기회','선택','변화','도전'],
-            ['move','움직이다','멈추다','고치다','세우다'],['strong','강한','느린','낮은','안전한'],
-            ['fast','빠른','넓은','무거운','정확한'],['safe','안전한','위험한','낯선','비싼'],
-            ['leader','리더','관중','선수','심판'],['support','돕다','공격하다','피하다','나누다'],
-            ['complete','완성하다','경쟁하다','계속하다','연결하다'],['result','결과','과정','원인','방법'],
-            ['remember','기억하다','잊다','반복하다','추천하다'],['important','중요한','불가능한','평범한','비슷한'],
-            ['energy','에너지','산업','환경','기계'],['future','미래','과거','현재','역사'],
-            ['local','지역의','세계적인','개인적인','전통적인'],['career','진로','취미','건강','여행']
+            ['rent','v. 빌리다','v. 빌려주다','v. 구매하다','v. 돌려주다'],
+            ['develop','v. 발전시키다, 성장하다','v. 감소시키다','v. 보호하다','v. 예측하다'],
+            ['upload','v. ~을 전송하다, 업로드하다','v. ~을 내려받다, 다운로드하다','v. ~을 삭제하다','v. ~을 인쇄하다'],
+            ['method','n. 방법, 방식','n. 결과, 성과','n. 태도, 자세','n. 양, 액수'],
+            ['purchase','n. 구매, 구매품','n. 대여, 임대','n. 판매, 매출','n. 교환, 교환품'],
+            ['recommend','v. 추천하다, 권하다','v. 피하다','v. 분석하다','v. 확인하다'],
+            ['trace','n. 흔적, 자취','n. 증상, 징후','n. 상징, 기호','n. 물건, 물체'],
+            ['analyze','v. 분석하다','v. 예측하다','v. 포함하다','v. 나타나다'],
+            ['predict','v. 예측하다','v. 추천하다','v. 상징하다','v. 구부리다'],
+            ['amount','n. 양, 액수','n. 방법, 방식','n. 산업, 공업','n. 존경, 경의'],
+            ['communication','n. 통신, 의사소통','n. 사회','n. 데이터베이스','n. 경기력, 성과'],
+            ['flu','n. 독감, 유행성 감기','n. 범죄','n. 증상, 징후','n. 산업, 공업'],
+            ['influence','v. 영향을 주다','v. 피하다','v. 포함하다','v. 확인하다'],
+            ['avoid','v. 피하다','v. 발전시키다','v. 나타내다','v. 추천하다'],
+            ['spread','n. 확산, 전파','n. 흔적, 자취','n. 구매, 구매품','n. 충실, 충성'],
+            ['symptom','n. 증상, 징후','n. 독감, 유행성 감기','n. 태도, 자세','n. 상징, 기호'],
+            ['database','n. 데이터베이스','n. 통신, 의사소통','n. 산업, 공업','n. 시대, 왕조'],
+            ['improve','v. 향상하다, 향상시키다','v. 피하다','v. 구부리다','v. 나타나다'],
+            ['include','v. 포함하다','v. 분석하다','v. 예측하다','v. 추천하다'],
+            ['performance','n. 경기력, 성과','n. 행동','n. 방법, 방식','n. 통신, 의사소통'],
+            ['focus on','~에 주력하다','역할을 하다','~할 것 같다','~에게 …을 상기시키다'],
+            ['crime','n. 범죄','n. 정의, 공정','n. 사회','n. 충실, 충성'],
+            ['identify','v. 확인하다, 알아보다','v. 분석하다','v. 예측하다','v. 추천하다'],
+            ['industry','n. 산업, 공업','n. 사회','n. 데이터베이스','n. 시대, 왕조'],
+            ['play a role','역할을 하다','~에 주력하다','~할 것 같다','특히, 특별히'],
+            ['be likely to','~할 것 같다','역할을 하다','~에 주력하다','~에도 불구하고'],
+            ['dynasty','n. 시대, 왕조','n. 산업, 공업','n. 사회','n. 정의, 공정'],
+            ['carp','n. 잉어','n. 대나무','n. 연꽃','n. 물건, 물체'],
+            ['bamboo','n. 대나무','n. 잉어','n. 연꽃','n. 민화'],
+            ['lotus flower','연꽃','대나무','잉어','민화'],
+            ['object','n. 물건, 물체','n. 상징, 기호','n. 방법, 방식','n. 흔적, 자취'],
+            ['symbol','n. 상징, 기호','n. 물건, 물체','n. 태도, 자세','n. 충실, 충성'],
+            ['loyalty','n. 충실, 충성','n. 존경, 경의','n. 정의, 공정','n. 행동'],
+            ['appear','v. 나타나다, 출현하다','v. 꽃을 피우다','v. 구부러지다','v. 포함하다'],
+            ['folk painting','민화','연꽃','시대, 왕조','상징, 기호'],
+            ['represent','v. 나타내다, 상징하다','v. 포함하다','v. 피하다','v. 분석하다'],
+            ['disappointed','a. 실망한','a. 얼어붙은','a. 아픈, 병든','a. 상징적인'],
+            ['frozen','a. 얼어붙은','a. 실망한','a. 아픈, 병든','a. 상징적인'],
+            ['ill','a. 아픈, 병든','a. 얼어붙은','a. 실망한','a. 상징적인'],
+            ['respect','n. 존경, 경의','n. 충실, 충성','n. 정의, 공정','n. 태도, 자세'],
+            ['once upon a time','옛날 옛날에','이런 이유 때문에','특히, 특별히','~에도 불구하고'],
+            ['symbolic','a. 상징적인','a. 실망한','a. 얼어붙은','a. 아픈, 병든'],
+            ['symbolize','v. 상징하다','v. 분석하다','v. 포함하다','v. 예측하다'],
+            ['bend','v. 굽다, 구부러지다','v. 꽃을 피우다','v. 나타나다','v. 피하다'],
+            ['bloom','v. 꽃을 피우다, 꽃이 피다','v. 굽다, 구부러지다','v. 나타나다','v. 분석하다'],
+            ['for this reason','이런 이유 때문에','옛날 옛날에','특히, 특별히','~에도 불구하고'],
+            ['despite','prep. ~에도 불구하고','이런 이유 때문에','특히, 특별히','옛날 옛날에'],
+            ['justice','n. 정의, 공정','n. 범죄','n. 충실, 충성','n. 존경, 경의'],
+            ['thus','ad. 그러므로, 따라서','특히, 특별히','~에도 불구하고','옛날 옛날에'],
+            ['attitude','n. 태도, 자세','n. 행동','n. 경기력, 성과','n. 방법, 방식'],
+            ['behavior','n. 행동','n. 태도, 자세','n. 통신, 의사소통','n. 경기력, 성과'],
+            ['remind ~ of','~에게 …을 상기시키다','~에 주력하다','역할을 하다','~할 것 같다'],
+            ['in particular','특히, 특별히','그러므로, 따라서','~에도 불구하고','옛날 옛날에'],
+            ['society','n. 사회','n. 산업, 공업','n. 시대, 왕조','n. 통신, 의사소통']
         ];
 
         var BRMP = {
@@ -7070,6 +7268,7 @@
             legacyEndGame:null, legacyRestartGame:null, lastSnapshotAt:0,
             renderQuality:1,studentFrameEma:16.7,studentFrameSamples:0,lastQualityChangeAt:0,
             localFxSeq:0,studentRecoil:null,hitConfirm:null,damageFlash:null,audioCtx:null,audioNoiseBuffer:null,
+            rerollOptimistic:null,rerollWriteChain:null,draftReadyPending:false,
             isRespawnMode:function(){ return !!this.respawnMode; }
         };
         window.BRMP = BRMP;
@@ -7165,7 +7364,7 @@
             return parsed.length>=4?parsed:BR_DEFAULT_QUESTIONS.slice();
         }
         function brQuestionTextDefault() {
-            return BR_DEFAULT_QUESTIONS.slice(0,20).map(function(q){return q.join(' | ');}).join('\n');
+            return BR_DEFAULT_QUESTIONS.map(function(q){return q.join(' | ');}).join('\n');
         }
         function brRollTier(rnd) {
             var r=(rnd||Math.random)();
@@ -7173,12 +7372,26 @@
         }
         function brSkillUses() { return -1; } // -1은 횟수 무제한, 쿨타임만 적용
         function brTierValue(tier,values) { return Number(values[tier]==null?values.C:values[tier]); }
+        function brRangedPowerProfile(ability) {
+            var tier=ability.t||'C',style=getRangedWeaponStyle(ability),scale=brTierValue(tier,{S:1,A:.92,B:.84,C:.76,F:.65});
+            var concept=style==='sniper'?'sniper':style==='bomber'?'bomber':style==='heavy'?'heavy':'plasma';
+            var data={sniper:[1540,38,31,104,1.12,36,'폭발 저격'],bomber:[880,20,52,260,.93,56,'충격 폭탄'],heavy:[1120,27,44,206,1.04,47,'중력 포격'],plasma:[1180,30,37,170,1,40,'플라즈마 탄']}[concept];
+            return {style:'skill-'+concept,concept:concept,label:data[6],range:Math.round(data[0]*scale),speed:data[1]*(.65+.35*scale),
+                size:Math.round(data[2]*(.7+.3*scale)),blast:Math.round(data[3]*(.68+.32*scale)),
+                damage:Math.round(brTierValue(tier,{S:80,A:70,B:60,C:49,F:38})*data[4]),push:data[5]*(.65+.35*scale),
+                color:ability.pTrail||BR_TIER_COLOR[tier]||'#67e8f9'};
+        }
         function brGetPlayableSkillInfo(ability) {
             if(!ability||isTeamSupportAbility(ability))return null;
             var tier=ability.t||'C',type=ability.type,sub=ability.sub||'',hash=abilityTimingHash((ability.n||'emoji')+'|player-skill');
             var cooldownExtra=brTierValue(tier,{S:0,A:45,B:90,C:135,F:180});
             function skill(key,label,desc,baseCooldown){return {key:key,label:label,desc:desc,cooldown:baseCooldown+cooldownExtra};}
 
+            if(type===ABILITY_TYPES.TELEPORT) {
+                if(sub==='THUNDER')return skill('teleport-thunder','낙뢰 강림','조준한 곳으로 번개 이동 후 주변을 폭발시킴',900);
+                if(sub==='DIVE_LAVA')return skill('teleport-lava','용암 강하','조준한 곳에 착지해 폭발과 용암을 남김',960);
+                return skill('teleport-assassin',sub==='VOID_ASSASSIN'?'공허 처형':'그림자 기습','조준한 곳으로 순간이동해 착지 범위의 적을 암살',810);
+            }
             // 탱커는 충돌, 제어, 초중량 한 방으로 세 가지 손맛을 갖는다.
             if(isTankAbility(ability)) {
                 if(type===ABILITY_TYPES.DASH||IMPACT_CHARGE_SUBS.has(sub)||/RUSH|CHARGE|DASH/.test(sub))
@@ -7203,11 +7416,11 @@
             if(type===ABILITY_TYPES.PROJ||type===ABILITY_TYPES.LASER) {
                 var style=getRangedWeaponStyle(ability);
                 if(style==='sniper'||style==='bomber'||style==='heavy')
-                    return skill('ranged-power','필살 일격','길고 선명한 강탄 한 발을 발사함',900);
+                    return skill('ranged-power',brRangedPowerProfile(ability).label,'선명한 대형 강탄 · 적중하거나 사거리 끝에서 폭발',900);
                 if(style==='machine'||hash%3===1)
                     return skill('ranged-overdrive','초가속 연사','5초간 일반 공격 재사용 속도가 대폭 증가',840);
                 if(hash%3===2)return skill('ranged-sprint','기동 부스트','4초간 이동 속도가 대폭 증가',780);
-                return skill('ranged-power','필살 일격','길고 선명한 강탄 한 발을 발사함',900);
+                return skill('ranged-power',brRangedPowerProfile(ability).label,'선명한 대형 강탄 · 적중하거나 사거리 끝에서 폭발',900);
             }
             return null;
         }
@@ -7230,7 +7443,15 @@
                 if(playable.key==='tank-punch'||playable.key==='melee-uppercut')return {shape:'cone',range:playerRadius+brTierValue(tier,{S:190,A:176,B:162,C:148,F:128}),halfAngle:.62,width:playerRadius*1.2,label:label};
                 if(playable.key==='melee-lunge')return {shape:'dash',range:brTierValue(tier,{S:500,A:460,B:420,C:380,F:330})*(.38+.62*power),width:playerRadius*1.5,impactRadius:playerRadius*1.1,label:label};
                 if(playable.key==='melee-combo')return {shape:'cone',range:playerRadius+brTierValue(tier,{S:210,A:195,B:180,C:165,F:145}),halfAngle:.86,width:playerRadius*1.45,label:label};
-                if(playable.key==='ranged-power')return {shape:'line',range:brTierValue(tier,{S:1320,A:1210,B:1090,C:940,F:780}),width:Math.max(52,playerRadius*.88),label:label};
+                if(playable.key.indexOf('teleport-')===0) {
+                    var blinkMax=sub==='DIVE_LAVA'?560:sub==='BACKSTAB'?520:650;
+                    var blinkRadius=sub==='THUNDER'?220:sub==='DIVE_LAVA'?205:sub==='VOID_ASSASSIN'?180:140;
+                    return {shape:'target',range:blinkMax*(.28+.72*power),radius:blinkRadius,impactRadius:blinkRadius,label:label,teleport:true};
+                }
+                if(playable.key==='ranged-power') {
+                    var powerProfile=brRangedPowerProfile(ability);
+                    return {shape:'line',range:powerProfile.range,width:powerProfile.size*2,impactRadius:powerProfile.blast,label:label};
+                }
                 if(playable.key==='ranged-sprint'||playable.key==='ranged-overdrive')return {shape:'circle',range:135,radius:135,label:label};
             }
             if(type===ABILITY_TYPES.MELEE) {
@@ -7267,7 +7488,7 @@
             if(type===ABILITY_TYPES.CLONE)return {shape:'circle',range:135,radius:135,label:label};
             return {shape:'circleDir',range:300,radius:150,width:playerRadius,label:label};
         }
-        function brAbilityIndex(mode, excludeIndex, usedEmojiSet, rnd) {
+        function brAbilityIndex(mode, excludeIndex, unusedEmojiSet, rnd) {
             rnd=rnd||Math.random;
             var tier=brRollTier(rnd);
             var pool=[];
@@ -7275,14 +7496,13 @@
                 var a=EMOJI_DB[i];
                 if(a.t!==tier||i===excludeIndex) continue;
                 if(mode==='solo'&&a.teamOnly) continue;
-                if(usedEmojiSet&&usedEmojiSet.has(a.e)) continue;
                 pool.push(i);
             }
             if(!pool.length) {
                 for(var j=0;j<EMOJI_DB.length;j++) {
                     var b=EMOJI_DB[j];
                     if(j===excludeIndex||(mode==='solo'&&b.teamOnly))continue;
-                    if(!usedEmojiSet||!usedEmojiSet.has(b.e))pool.push(j);
+                    pool.push(j);
                 }
             }
             return pool.length?pool[Math.floor(rnd()*pool.length)]:0;
@@ -7332,7 +7552,7 @@
             BRMP[bucketName]=[];
         }
         function brClearTimers() {
-            ['hostTimer','hostHeartbeat','quizTimer','viewTimer','monitorTimer','summaryTimer'].forEach(function(k){
+            ['hostTimer','hostHeartbeat','hostRenderTimer','quizTimer','viewTimer','monitorTimer','summaryTimer'].forEach(function(k){
                 if(BRMP[k]){clearInterval(BRMP[k]);clearTimeout(BRMP[k]);BRMP[k]=null;}
             });
             if(BRMP.renderFrame){cancelAnimationFrame(BRMP.renderFrame);BRMP.renderFrame=null;}
@@ -7376,7 +7596,7 @@
                 BRMP.roomMeta={
                     phase:'lobby',hostId:BRMP.playerId,hostConnected:true,createdAt:brNow(),
                     updatedAt:brNow(),expiresAt:brNow()+1000*60*60*6,mode:'solo',teamCount:0,
-                    quizSeconds:60,matchSeconds:180,rerollEvery:3,seed:brUid('seed')
+                    quizSeconds:60,matchSeconds:180,mapIndex:-1,rerollEvery:3,seed:brUid('seed')
                 };
                 await roomRef.set({meta:BRMP.roomMeta,players:{},inputs:{},views:{}});
                 try{roomRef.child('meta/hostConnected').onDisconnect().set(false);}catch(e){}
@@ -7394,7 +7614,7 @@
             BRMP.playerId='host-demo'; BRMP.players={}; BRMP.inputs={}; BRMP.results=null;
             BRMP.roomMeta={
                 phase:'lobby',hostId:'host-demo',hostConnected:true,createdAt:brNow(),updatedAt:brNow(),
-                mode:'solo',teamCount:0,quizSeconds:60,matchSeconds:180,rerollEvery:3,seed:'demo-'+brNow()
+                mode:'solo',teamCount:0,quizSeconds:60,matchSeconds:180,mapIndex:-1,rerollEvery:3,seed:'demo-'+brNow()
             };
             BRMP.localDemoHumanId='demo-human';
             BRMP.players[BRMP.localDemoHumanId]={name:'교사 체험',connected:true,bot:false,demoHuman:true,joinedAt:brNow(),quizScore:0,ready:false};
@@ -7427,11 +7647,16 @@
             brClearRefs('hostRefs');
             var playersRef=BRMP.db.ref('rooms/'+BRMP.roomCode+'/players');
             var inputsRef=BRMP.db.ref('rooms/'+BRMP.roomCode+'/inputs');
-            brRefOn(playersRef,'value',function(s){
-                BRMP.players=s.val()||{};
-                brProcessDraftRequests();
-                brRenderHost();
-            },BRMP.hostRefs);
+            // 참가자 한 명의 퀴즈/리롤 변화 때문에 30명 전체를 다시 받지 않는다.
+            BRMP.players={};
+            function scheduleHostRender(){
+                if(BRMP.hostRenderTimer)return;
+                BRMP.hostRenderTimer=setTimeout(function(){BRMP.hostRenderTimer=null;brRenderHost();},55);
+            }
+            function upsertPlayer(s){BRMP.players[String(s.key||'')]=s.val()||{};brProcessDraftRequests();scheduleHostRender();}
+            brRefOn(playersRef,'child_added',upsertPlayer,BRMP.hostRefs);
+            brRefOn(playersRef,'child_changed',upsertPlayer,BRMP.hostRefs);
+            brRefOn(playersRef,'child_removed',function(s){delete BRMP.players[String(s.key||'')];scheduleHostRender();},BRMP.hostRefs);
             // 한 학생이 조이스틱을 움직일 때마다 inputs 전체(최대 30명)를 다시 내려받던 병목 제거.
             // 변경된 자식 한 개만 반영해 JSON 파싱·GC와 Firebase 다운로드를 크게 줄인다.
             BRMP.inputs={};
@@ -7490,17 +7715,21 @@
                 BRMP.roomMeta=meta; brHandleStudentPhase(meta);
             },BRMP.studentRefs);
             brRefOn(base.child('players/'+BRMP.playerId),'value',function(s){
-                BRMP.selfPlayer=s.val()||BRMP.selfPlayer||{};
+                var incoming=s.val()||BRMP.selfPlayer||{},optimistic=BRMP.rerollOptimistic;
+                // 연속 리롤 저장 중 먼저 도착한 이전 스냅샷이 화면을 되감지 않게 한다.
+                if(optimistic&&BRMP.roomMeta&&BRMP.roomMeta.phase==='draft'&&Number(incoming.rerollProcessed||0)<Number(optimistic.rerollProcessed||0)) {
+                    incoming=Object.assign({},incoming,optimistic);
+                } else if(optimistic&&Number(incoming.rerollProcessed||0)>=Number(optimistic.rerollProcessed||0)) {
+                    BRMP.rerollOptimistic=null;
+                }
+                if(BRMP.draftReadyPending&&!incoming.ready)incoming=Object.assign({},incoming,{ready:true});
+                else if(incoming.ready)BRMP.draftReadyPending=false;
+                BRMP.selfPlayer=incoming;
                 brRenderSelfState();
             },BRMP.studentRefs);
             brRefOn(base.child('views/'+BRMP.playerId),'value',function(s){
-                var incoming=s.val()||null;
-                if(!incoming)return;
-                BRMP.staticView=BRMP.staticView||{};
-                ['walls','bushes','smokes'].forEach(function(key){
-                    if(Object.prototype.hasOwnProperty.call(incoming,key))BRMP.staticView[key]=incoming[key]||[];
-                    else incoming[key]=BRMP.staticView[key]||[];
-                });
+                var incoming=brDecodeView(s.val());
+                if(!incoming||(BRMP.lastViewFrame!=null&&incoming.frame<=BRMP.lastViewFrame))return;
                 BRMP.latestView=incoming;
                 brIngestView(incoming);
             },BRMP.studentRefs);
@@ -7523,6 +7752,7 @@
             } else if(phase==='quiz') {
                 brStartStudentQuiz(meta);
             } else if(phase==='draft') {
+                BRMP.rerollOptimistic=null;BRMP.rerollWriteChain=null;BRMP.draftReadyPending=false;
                 brStopQuiz();
                 brShow('br-draft');
                 brRenderDraft();
@@ -7559,7 +7789,9 @@
 
         function brRenderHost() {
             if(BRMP.role!=='host'||!BRMP.roomMeta)return;
-            var phase=BRMP.roomMeta.phase||'lobby', entries=brGetPlayerEntries(true);
+            var phase=BRMP.roomMeta.phase||'lobby';
+            if(phase==='battle'&&BRMP.active)return; // 숨겨진 로비 DOM을 다시 만들지 않는다.
+            var entries=brGetPlayerEntries(true);
             brSetHostStage(phase);
             brEl('br-online-pill').textContent=BRMP.backend==='firebase'?'● ONLINE':'● LOCAL DEMO';
             brEl('br-online-pill').className='br-pill '+(BRMP.backend==='firebase'?'br-pill-live':'br-pill-warn');
@@ -7660,10 +7892,12 @@
             var now=brNow(), seconds=parseInt(brEl('br-quiz-seconds').value,10)||60;
             var mode=brEl('br-mode').value, teamCount=mode==='solo'?0:(parseInt(brEl('br-team-count').value,10)||2);
             var matchSeconds=parseInt(brEl('br-match-seconds').value,10)||180;
+            var mapIndex=parseInt(brEl('br-map').value,10);
+            if(!Number.isInteger(mapIndex)||mapIndex<0||mapIndex>4)mapIndex=-1;
             var bank=brParseQuestionText(brEl('br-question-bank').value);
             var updates={
                 'meta/phase':'quiz','meta/mode':mode,'meta/teamCount':teamCount,
-                'meta/quizSeconds':seconds,'meta/matchSeconds':matchSeconds,
+                'meta/quizSeconds':seconds,'meta/matchSeconds':matchSeconds,'meta/mapIndex':mapIndex,
                 'meta/quizStartedAt':now,'meta/quizEndsAt':now+seconds*1000,
                 'meta/quizBank':bank,'meta/updatedAt':now
             };
@@ -7675,7 +7909,7 @@
                 if(p.bot)updates['players/'+p._id+'/botQuizTarget']=3+Math.floor(Math.random()*16);
             });
             BRMP.roomMeta.phase='quiz'; BRMP.roomMeta.mode=mode; BRMP.roomMeta.teamCount=teamCount;
-            BRMP.roomMeta.quizSeconds=seconds; BRMP.roomMeta.matchSeconds=matchSeconds;
+            BRMP.roomMeta.quizSeconds=seconds; BRMP.roomMeta.matchSeconds=matchSeconds; BRMP.roomMeta.mapIndex=mapIndex;
             BRMP.roomMeta.quizStartedAt=now; BRMP.roomMeta.quizEndsAt=now+seconds*1000; BRMP.roomMeta.quizBank=bank;
             await brHostUpdate(updates);
             brStartHostQuizTimer();
@@ -7715,10 +7949,10 @@
             var rnd=brHashRandom(String(BRMP.roomMeta.seed||'seed')+'|draft|'+brNow());
             var order=brShuffle(entries,rnd), teams={}, tc=Number(BRMP.roomMeta.teamCount||0);
             order.forEach(function(p,i){teams[p._id]=tc?((i%tc)+1):0;});
-            var used=new Set(), updates={'meta/phase':'draft','meta/draftStartedAt':brNow(),'meta/updatedAt':brNow()};
+            var updates={'meta/phase':'draft','meta/draftStartedAt':brNow(),'meta/updatedAt':brNow()};
             order.forEach(function(p){
-                var idx=brAbilityIndex(BRMP.roomMeta.mode,-1,used,rnd), a=EMOJI_DB[idx];
-                if(a)used.add(a.e);
+                // 같은 이모지는 여러 학생에게 나올 수 있다. 참가자 전체 중복 검사는 하지 않는다.
+                var idx=brAbilityIndex(BRMP.roomMeta.mode,-1,null,rnd);
                 var rerolls=Math.floor(Number(p.quizScore||0)/Number(BRMP.roomMeta.rerollEvery||3));
                 updates['players/'+p._id+'/team']=teams[p._id];
                 updates['players/'+p._id+'/abilityIndex']=idx;
@@ -7741,12 +7975,8 @@
                     brHostUpdate((function(){var u={};u['players/'+id+'/rerollProcessed']=req;return u;})());
                     return;
                 }
-                var used=new Set();
-                Object.keys(BRMP.players).forEach(function(otherId){
-                    if(otherId===id)return;var o=BRMP.players[otherId];
-                    if(o&&Number.isInteger(o.abilityIndex)&&EMOJI_DB[o.abilityIndex])used.add(EMOJI_DB[o.abilityIndex].e);
-                });
-                var idx=brAbilityIndex(BRMP.roomMeta.mode,Number(p.abilityIndex),used,Math.random);
+                // 구형 요청을 받은 경우에도 다른 학생 데이터를 모으지 않고 즉시 한 번만 교체한다.
+                var idx=brAbilityIndex(BRMP.roomMeta.mode,Number(p.abilityIndex),null,Math.random);
                 var up={};
                 up['players/'+id+'/abilityIndex']=idx;
                 up['players/'+id+'/rerolls']=Math.max(0,Number(p.rerolls||0)-1);
@@ -7826,7 +8056,7 @@
             var skillFrames=playable?playable.cooldown:getAbilityTiming(a).cooldown,skillSeconds=Math.max(1,Math.round(skillFrames/60));
             brEl('br-draft-desc').textContent=skillDesc;
             brEl('br-draft-skill').innerHTML='<b>'+brEscape(skillLabel)+'</b> · '+skillSeconds+'초';
-            brEl('br-reroll-btn').disabled=Number(p.rerolls||0)<=0||!!p.ready||Number(p.rerollRequest||0)>Number(p.rerollProcessed||0);
+            brEl('br-reroll-btn').disabled=Number(p.rerolls||0)<=0||!!p.ready;
             brEl('br-ready-btn').disabled=!!p.ready;
             brEl('br-draft-actions').classList.toggle('br-hidden',!!p.ready);
             brEl('br-draft-wait').classList.toggle('br-hidden',!p.ready);
@@ -7835,11 +8065,26 @@
             var p=BRMP.selfPlayer||{};
             if(p.ready||Number(p.rerolls||0)<=0)return;
             var req=Math.max(Number(p.rerollRequest||0),Number(p.rerollProcessed||0))+1;
-            brEl('br-reroll-btn').disabled=true;
-            brWriteSelf({rerollRequest:req,lastSeen:brNow()}).catch(function(err){brToast(brFriendlyError(err));});
+            var idx=brAbilityIndex(BRMP.roomMeta&&BRMP.roomMeta.mode,Number(p.abilityIndex),null,Math.random);
+            var fields={abilityIndex:idx,rerolls:Math.max(0,Number(p.rerolls||0)-1),rerollRequest:req,rerollProcessed:req,lastSeen:brNow()};
+            // 화면은 Firebase 왕복 전에 즉시 바꾸고, 빠른 연속 탭은 같은 순서로 직렬 저장한다.
+            BRMP.rerollOptimistic=Object.assign({},fields);
+            Object.assign(p,fields);BRMP.selfPlayer=p;brRenderDraft();
+            var card=brEl('br-draft-card');card.classList.remove('br-reroll-pop');void card.offsetWidth;card.classList.add('br-reroll-pop');
+            BRMP.rerollWriteChain=(BRMP.rerollWriteChain||Promise.resolve()).catch(function(){}).then(function(){
+                return brWriteSelf(fields);
+            }).catch(function(err){
+                if(BRMP.rerollOptimistic&&Number(BRMP.rerollOptimistic.rerollProcessed||0)===req)BRMP.rerollOptimistic=null;
+                brToast(brFriendlyError(err));
+                if(BRMP.db)BRMP.db.ref('rooms/'+BRMP.roomCode+'/players/'+BRMP.playerId).once('value').then(function(s){BRMP.selfPlayer=s.val()||{};brRenderDraft();});
+            });
         }
         function brConfirmDraft() {
-            brWriteSelf({ready:true,lastSeen:brNow()}).catch(function(err){brToast(brFriendlyError(err));});
+            var p=BRMP.selfPlayer||{};if(p.ready)return;
+            p.ready=true;BRMP.draftReadyPending=true;brRenderDraft();
+            BRMP.rerollWriteChain=(BRMP.rerollWriteChain||Promise.resolve()).catch(function(){}).then(function(){
+                return brWriteSelf({ready:true,lastSeen:brNow()});
+            }).catch(function(err){BRMP.draftReadyPending=false;p.ready=false;brRenderDraft();brToast(brFriendlyError(err));});
         }
 
         async function brStartHostBattle() {
@@ -7848,7 +8093,7 @@
             if(entries.length<2){brToast('최소 2명이 필요합니다.');return;}
             BRMP.active=true;BRMP.matchFinished=false;BRMP.respawnMode=BRMP.roomMeta.mode==='team-respawn';
             BRMP.lastDeaths={};BRMP.deathCounter=0;BRMP.inputs=BRMP.inputs||{};BRMP.projectileSeq=0;BRMP.staticSent={};
-            BRMP.publishInFlight=0;BRMP.publishCursor=0;BRMP.lastSmallPublishAt=0;
+            BRMP.publishInFlight=0;BRMP.publishCursor=0;BRMP.lastSmallPublishAt=0;BRMP.viewFxCursor={};BRMP.wireRoster=null;BRMP.publishEpoch=Number(BRMP.publishEpoch||0)+1;
             teamMode=Number(BRMP.roomMeta.teamCount||0);
             seedRandom(String(BRMP.roomMeta.seed||'class-battle')+'|participants');
             generatedParticipants=entries.map(function(rec,i){
@@ -7863,7 +8108,7 @@
                 if(!rec.bot) {
                     p.humanControlled=true;
                     p.runAI=function(g){brRunHumanControl(this,g);};
-                }
+                } else p.speed*=.7;
                 return p;
             });
             document.getElementById('seed-input').value=String(BRMP.roomMeta.seed||'classbattle');
@@ -7934,7 +8179,7 @@
         }
         function brAimEndpoint(p,g,aim,range) {
             var point=p.pos.add(aim.mult(Math.max(0,range))),center=g.center||new Vec2(0,0);
-            var edge=Math.max(20,Number(g.mapRadius||2600)-p.radius-18),fromCenter=point.sub(center);
+            var edge=Math.max(20,Number(g.worldRadius||2600)-p.radius-18),fromCenter=point.sub(center);
             if(fromCenter.mag()>edge)point=center.add(fromCenter.norm().mult(edge));
             if(g.checkWallCollision&&g.checkWallCollision(point,p.radius)) {
                 var found=false;
@@ -7970,13 +8215,31 @@
         function brApplyPlayableHit(p,g,target,damage,push,stun,dir,style,color) {
             if(!target||!target.alive)return false;
             var hitDir=dir&&dir.mag()>.01?dir.norm():target.pos.sub(p.pos).norm();if(hitDir.mag()<.01)hitDir=new Vec2(1,0);
-            target.takeDamage(damage,p);
-            target.vel=target.vel.add(hitDir.mult(push*(target.knockbackResist||1)));
-            if(stun>0)target.stunned=Math.max(target.stunned,stun);
-            if(push>=24)g.markLaunched(target,p,Math.min(38,16+Math.round(push*.48)));
-            g.emitStudentFx('impact',target.pos,{dx:hitDir.x,dy:hitDir.y,size:Math.min(190,72+push*2),color:color,amount:damage,
+            var previousStyle=p.currentImpactStyle;p.currentImpactStyle=style;
+            try { target.takeDamage(damage,p); } finally { p.currentImpactStyle=previousStyle||''; }
+            var skillPush=push*1.18+3;
+            target.vel=target.vel.add(hitDir.mult(skillPush*(target.knockbackResist||1)));
+            if(stun>0)target.stunned=Math.max(target.stunned,stun+2);
+            if(skillPush>=24)g.markLaunched(target,p,Math.min(44,18+Math.round(skillPush*.50)));
+            g.emitStudentFx('impact',target.pos,{dx:hitDir.x,dy:hitDir.y,size:Math.min(205,78+skillPush*2.05),color:color,amount:damage,
                 targetId:target.remoteId||('ai-'+target.id),sourceId:p.remoteId||('ai-'+p.id),style:style,impactLevel:damage>=40?3:damage>=25?2:1});
             return true;
+        }
+        function brStartPlayerDash(p,aim,speed,range,damage,push,stun,style,color) {
+            var hits=new Set(),direction=aim.norm();
+            p.playerDash={dir:direction,speed:speed,remaining:range,contact:function(g,from,to){
+                var segment=to.sub(from),lengthSquared=segment.x*segment.x+segment.y*segment.y;
+                var middle=from.add(to).mult(.5),reach=Math.sqrt(lengthSquared)*.5+p.radius+150;
+                g.getNearbyParticipants(middle,reach).forEach(function(o){
+                    if(o===p||!o.alive||o.id===999||(p.team&&p.team===o.team)||hits.has(o.id))return;
+                    var rel=o.pos.sub(from),along=lengthSquared>0?brClamp((rel.x*segment.x+rel.y*segment.y)/lengthSquared,0,1):0;
+                    var touch=from.add(segment.mult(along));
+                    if(o.pos.dist(touch)>p.radius+o.radius||g.checkWallBetween(touch,o.pos))return;
+                    hits.add(o.id);brApplyPlayableHit(p,g,o,damage,push,stun,direction,style,color);
+                    o.bodyHitCooldown=Math.max(o.bodyHitCooldown||0,24);
+                });
+            }};
+            p.vel=direction.mult(Math.min(speed,range));p.dashFrames=Math.ceil(range/speed);
         }
         function brCastPlayableSkill(p,g,aim,power,info,spec) {
             if(!info)return false;
@@ -7985,10 +8248,9 @@
             p.attackCommitFrames=Math.max(p.attackCommitFrames,20);p.lastAimDir=aim;
             if(key==='tank-charge') {
                 var chargeSpeed=brTierValue(tier,{S:40,A:37,B:34,C:31,F:27});
-                p.vel=aim.mult(chargeSpeed);p.dashFrames=Math.max(9,Math.round(range/chargeSpeed));p.dashType='PLAYER_TANK_CHARGE';
+                p.dashType='PLAYER_TANK_CHARGE';
+                brStartPlayerDash(p,aim,chargeSpeed,range,brTierValue(tier,{S:48,A:42,B:36,C:30,F:23}),brTierValue(tier,{S:48,A:43,B:38,C:33,F:27}),brTierValue(tier,{S:26,A:23,B:20,C:17,F:13}),'tank-charge',color);
                 g.emitStudentFx('dash',p.pos,{dx:aim.x,dy:aim.y,size:range,color:color,style:'tank-charge',sourceId:sourceId});
-                var chargeTarget=brFindDirectionalTarget(p,g,aim,spec,false);
-                if(chargeTarget)brApplyPlayableHit(p,g,chargeTarget,brTierValue(tier,{S:48,A:42,B:36,C:30,F:23}),brTierValue(tier,{S:48,A:43,B:38,C:33,F:27}),brTierValue(tier,{S:26,A:23,B:20,C:17,F:13}),aim,'tank-charge',color);
             } else if(key==='tank-stun') {
                 var slamRadius=Number(spec.radius||spec.range||190),slamDamage=brTierValue(tier,{S:38,A:34,B:30,C:26,F:20});
                 g.emitStudentFx('explosion',p.pos,{dx:aim.x,dy:aim.y,size:slamRadius,color:color,style:'tank-stun',sourceId:sourceId});
@@ -8004,10 +8266,9 @@
                     brTierValue(tier,key==='tank-punch'?{S:15,A:13,B:11,C:9,F:7}:{S:30,A:27,B:24,C:20,F:16}),aim,key,color);
             } else if(key==='melee-lunge') {
                 var lungeSpeed=brTierValue(tier,{S:36,A:34,B:31,C:29,F:25});
-                p.vel=aim.mult(lungeSpeed);p.dashFrames=Math.max(6,Math.round(range/lungeSpeed));p.dashType='PLAYER_MELEE_LUNGE';
+                p.dashType='PLAYER_MELEE_LUNGE';
+                brStartPlayerDash(p,aim,lungeSpeed,range,brTierValue(tier,{S:43,A:38,B:33,C:28,F:22}),brTierValue(tier,{S:34,A:30,B:26,C:22,F:17}),brTierValue(tier,{S:12,A:10,B:8,C:7,F:5}),'melee-lunge',color);
                 g.emitStudentFx('dash',p.pos,{dx:aim.x,dy:aim.y,size:range,color:color,style:'melee-lunge',sourceId:sourceId});
-                var lungeTarget=brFindDirectionalTarget(p,g,aim,spec,false);
-                if(lungeTarget)brApplyPlayableHit(p,g,lungeTarget,brTierValue(tier,{S:43,A:38,B:33,C:28,F:22}),brTierValue(tier,{S:34,A:30,B:26,C:22,F:17}),brTierValue(tier,{S:12,A:10,B:8,C:7,F:5}),aim,'melee-lunge',color);
             } else if(key==='melee-combo') {
                 targets=brPlayableEnemiesInCone(p,g,aim,Number(spec.range||220),Number(spec.halfAngle||.86),3);
                 g.addSwingEffect(p,p.pos.add(aim.mult(p.radius*.42)),aim,Number(spec.range||220)*.94,'slash');
@@ -8020,13 +8281,31 @@
             } else if(key==='ranged-overdrive') {
                 p.playerAttackHasteFrames=Math.max(p.playerAttackHasteFrames,300);p.basicCooldown=0;
                 g.emitStudentFx('impact',p.pos,{dx:aim.x,dy:aim.y,size:128,color:'#fbbf24',style:'attack-haste',sourceId:sourceId});
+            } else if(key.indexOf('teleport-')===0) {
+                var departure=new Vec2(p.pos.x,p.pos.y),landing=brAimEndpoint(p,g,aim,range),delta=landing.sub(departure),distance=delta.mag();
+                var teleColor=key==='teleport-thunder'?'#fde047':key==='teleport-lava'?'#fb923c':'#c4b5fd';
+                p.pos=landing;p.vel=new Vec2(0,0);p.warpSeq=(p.warpSeq||0)+1;
+                var landingRadius=Number(spec.radius||140),isAssassin=key==='teleport-assassin';
+                var blinkDamage=brTierValue(tier,{S:66,A:59,B:52,C:44,F:34});
+                g.emitStudentFx('teleport',departure,{dx:distance?delta.x/distance:aim.x,dy:distance?delta.y/distance:aim.y,size:distance,
+                    amount:landingRadius,color:teleColor,style:key,sourceId:sourceId});
+                targets=g.getNearbyParticipants(landing,landingRadius+80).filter(function(o){
+                    return o!==p&&o.alive&&o.id!==999&&!(p.team&&o.team===p.team)&&o.pos.dist(landing)<=landingRadius+o.radius*.3&&!g.checkWallBetween(landing,o.pos);
+                }).sort(function(a,b){return a.pos.dist(landing)-b.pos.dist(landing);});
+                if(isAssassin)targets=targets.slice(0,p.ability.sub==='VOID_ASSASSIN'?2:1);
+                targets.forEach(function(o){
+                    var execute=isAssassin&&o.hp/Math.max(1,o.maxHp)<=.35;
+                    brApplyPlayableHit(p,g,o,blinkDamage*(key==='teleport-thunder'?.90:key==='teleport-lava'?.82:1)+(execute?18:0),
+                        isAssassin?30:key==='teleport-thunder'?42:37,isAssassin?14:18,o.pos.sub(landing),key,teleColor);
+                });
+                if(key==='teleport-lava')g.zones.push(new Zone(p,new Vec2(landing.x,landing.y),landingRadius,8,120,'rgba(255,100,20,0.5)','dmg'));
             } else if(key==='ranged-power') {
-                var shotSpeed=brTierValue(tier,{S:36,A:33,B:29,C:25,F:20}),shotDamage=brTierValue(tier,{S:62,A:54,B:46,C:38,F:29});
-                var shotSize=brTierValue(tier,{S:21,A:19,B:17,C:15,F:13}),shotPush=brTierValue(tier,{S:34,A:30,B:26,C:22,F:17});
-                var powerShot=new Projectile(p,p.pos.add(aim.mult(p.radius*.78)),aim,shotSpeed,shotDamage,shotSize,'bullet',color,0,p.ability.projEmoji||'✦',
-                    {knockback:shotPush,pierce:p.ability.pierce&&tier!=='F',trailColor:color,impactColor:'#ffffff',weaponStyle:'sniper',faceDir:true});
-                powerShot.life=Math.max(12,Math.ceil(Number(spec.range||900)/shotSpeed));g.projectiles.push(powerShot);
-                g.emitStudentFx('muzzle',p.pos.add(aim.mult(p.radius*.72)),{dx:aim.x,dy:aim.y,size:112,color:color,style:'power-shot',sourceId:sourceId});
+                var profile=brRangedPowerProfile(p.ability),muzzle=p.radius*.78;
+                var powerShot=new Projectile(p,p.pos.add(aim.mult(muzzle)),aim,profile.speed,profile.damage,profile.size,'bullet',profile.color,profile.blast,null,
+                    {knockback:profile.push,trailColor:profile.color,impactColor:profile.color,weaponStyle:profile.style,impactStyle:'ranged-power',
+                     normalizedSkillStats:true,playerSkillBlast:true,rangeRemaining:Math.max(1,profile.range-muzzle)});
+                powerShot.life=Math.max(12,Math.ceil((profile.range-muzzle)/profile.speed)+1);g.projectiles.push(powerShot);
+                g.emitStudentFx('muzzle',p.pos.add(aim.mult(muzzle)),{dx:aim.x,dy:aim.y,size:148,color:profile.color,style:profile.style,sourceId:sourceId});
             } else return false;
             p.cooldown=Math.max(60,Math.round(info.cooldown));p.maxCooldown=Math.max(p.maxCooldown||1,p.cooldown);
             return true;
@@ -8048,16 +8327,25 @@
             }
             try {
                 p.useAbility(g,actual,aim,selfCast?0:actual.pos.dist(p.pos));
+                if(p.ability.type===ABILITY_TYPES.DASH){
+                    var tier=p.ability.t||'C';
+                    brStartPlayerDash(p,aim,Math.max(1,Number(p.ability.dashSpeed||35)),Number(spec.range||360),
+                        brTierValue(tier,{S:34,A:30,B:26,C:22,F:16}),brTierValue(tier,{S:32,A:29,B:26,C:23,F:18}),8,'native-dash',BR_TIER_COLOR[tier]||'#fff');
+                }
             } finally {
                 p.manualAimCast=false;p.manualAimPoint=null;p.manualDashFrames=0;
             }
             return true;
+        }
+        function brHumanMoveSpeed(p) {
+            return .7*Math.max(5.6,p.speed*4.05)*(p.teamHasteFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*(p.ability.sub==='STONE'?.48:1);
         }
         function brRunHumanControl(p,g) {
             var input;
             if(p.remoteId===BRMP.localDemoHumanId)input=BRMP.localInput||{};
             else input=BRMP.inputs[p.remoteId]||{};
             var fresh=p.remoteId===BRMP.localDemoHumanId||brNow()-Number(input._receivedAt||0)<2600;
+            p.lastInputSeq=Math.max(Number(p.lastInputSeq||0),Number(input.seq||0));
             var dx=fresh?Number(input.dx||0):0,dy=fresh?Number(input.dy||0):0;
             var move=new Vec2(dx,dy),moveAmount=brClamp(move.mag(),0,1);if(move.mag()>1)move=move.norm();
             var receivedAim=false;
@@ -8086,10 +8374,9 @@
                     g.pushCombatEvent('✨ '+p.name+' · '+(played?played.label:p.ability.n),BR_TIER_COLOR[p.ability.t],2,p.pos);
                 }
             }
-            if(p.stunned<=0&&p.dashFrames<=0&&!p.ringRecoveryActive) {
+            if(p.stunned<=0&&p.dashFrames<=0&&!p.playerDash&&!p.ringRecoveryActive) {
                 // 스틱 크기까지 유지한 연속 아날로그 이동. 입력 시 빠르게 잡고 놓을 때는 짧게 감속한다.
-                var moveSpeed=Math.max(5.6,p.speed*4.05)*(p.teamHasteFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1);
-                if(p.ability.sub==='STONE')moveSpeed*=.48;
+                var moveSpeed=brHumanMoveSpeed(p);
                 var desired=moveAmount>.05?move.norm().mult(moveSpeed*(.24+.76*moveAmount)):new Vec2(0,0);
                 var response=moveAmount>.05?.78:.48;
                 p.vel=p.vel.mult(1-response).add(desired.mult(response));
@@ -8103,7 +8390,7 @@
             var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].indexOf(p.ability.type)>=0;
             p.attackCommitFrames=Math.max(p.attackCommitFrames,10);
             if(close) {
-                var range=p.radius+86,damage={S:27,A:24,B:21,C:18,F:13}[tier],push={S:34,A:30,B:26,C:22,F:16}[tier];
+                var range=p.radius+86,damage={S:27,A:24,B:21,C:18,F:13}[tier],push={S:39,A:35,B:30,C:25,F:19}[tier];
                 var hit=false;
                 g.addSwingEffect(p,p.pos.add(aim.mult(p.radius*.5)),aim,range*1.34,'slash');
                 g.getNearbyParticipants(p.pos,range+60).forEach(function(o){
@@ -8113,8 +8400,8 @@
                         o.takeDamage(damage*p.damageMult*.72,p);
                         o.vel=o.vel.add(aim.mult(push*(o.knockbackResist||1)));
                         if(push>=18)g.markLaunched(o,p,16+Math.floor(push*.45));
-                        o.stunned=Math.max(o.stunned,push>=30?9:push>=22?7:5);
-                        g.emitStudentFx('impact',o.pos,{dx:aim.x,dy:aim.y,size:72+push*1.7,color:BR_TIER_COLOR[tier],amount:damage,style:'melee-smash',sourceId:p.remoteId||('ai-'+p.id)});
+                        o.stunned=Math.max(o.stunned,push>=34?11:push>=25?8:6);
+                        g.emitStudentFx('impact',o.pos,{dx:aim.x,dy:aim.y,size:74+push*1.8,color:BR_TIER_COLOR[tier],amount:damage,style:'melee-smash',sourceId:p.remoteId||('ai-'+p.id)});
                         hit=true;
                     }
                 });
@@ -8123,17 +8410,13 @@
                 var profile=getRangedCombatProfile(p.ability,'basic');
                 var dmg={S:21,A:18,B:15,C:12,F:8}[tier]*profile.damageScale;
                 var speed=profile.speed,size={S:13,A:12,B:11,C:10,F:8}[tier]*(profile.style==='heavy'?1.18:profile.style==='bomber'?1.28:profile.style==='sniper'?.82:1);
-                var projectileEmoji=p.ability.projEmoji||((p.ability.type===ABILITY_TYPES.LASER)?'✦':'•');
-                var spread=profile.style==='machine'?.055:profile.style==='bomber'?.035:0;
-                for(var shot=0;shot<profile.count;shot++) {
-                    var shotDir=aim.rotate((shot-(profile.count-1)/2)*spread);
-                    var basicProjectile=new Projectile(
-                        p,p.pos.add(shotDir.mult(p.radius*.7)),shotDir,speed,dmg*p.damageMult*.58,size,'bullet',
-                        BR_TIER_COLOR[tier],profile.explodeRadius,projectileEmoji,
-                        {knockback:profile.knockback,trailColor:BR_TIER_COLOR[tier],impactColor:BR_TIER_COLOR[tier],weaponStyle:profile.style}
-                    );
-                    basicProjectile.life=Math.max(8,Math.ceil(profile.range/speed));g.projectiles.push(basicProjectile);
-                }
+                var shotColor=p.ability.pTrail||BR_TIER_COLOR[tier]||'#ffffff';
+                var basicProjectile=new Projectile(
+                    p,p.pos.add(aim.mult(p.radius*.7)),aim,speed,dmg*p.damageMult*.72,size,'bullet',
+                    shotColor,0,null,
+                    {knockback:profile.knockback,trailColor:shotColor,impactColor:shotColor,weaponStyle:'orb',impactStyle:'ranged-basic'}
+                );
+                basicProjectile.life=Math.max(8,Math.ceil(profile.range/speed));g.projectiles.push(basicProjectile);
                 cd=Math.round(cd*profile.cooldownScale);
             }
             p.basicCooldown=cd;p.basicCooldownMax=cd;
@@ -8141,7 +8424,7 @@
         function brStartHostMatchTimers() {
             if(BRMP.viewTimer)clearInterval(BRMP.viewTimer);
             if(BRMP.monitorTimer)clearInterval(BRMP.monitorTimer);
-            // 한 번에 15명씩 큰 JSON을 만들던 스파이크를 없애고 6명씩 짧게 나눈다.
+            // 저사양 호스트 렌더링으로 확보한 여유를 이용해 8명씩 보내 좌표 간격을 약 0.22초로 줄인다.
             BRMP.viewTimer=setInterval(brPublishViews,60);
             BRMP.monitorTimer=setInterval(brMonitorMatch,120);
         }
@@ -8165,14 +8448,14 @@
         }
         function brRespawnPlayer(p) {
             p.alive=true;p.hp=p.maxHp;p.vel=new Vec2(0,0);p.stunned=0;p.blindedFrames=0;p.poisonFrames=0;
-            p.deathFrame=null;p.respawnAtFrame=null;p.ringRecoveryActive=false;p.dashFrames=0;p.comboHitsRemaining=0;
+            p.deathFrame=null;p.respawnAtFrame=null;p.ringRecoveryActive=false;p.dashFrames=0;p.playerDash=null;p.playerDashContactFrame=-1;p.comboHitsRemaining=0;
             p.basicCooldown=30;p.basicCooldownMax=30;p.cooldown=Math.min(p.cooldown||0,60);
             p.skillCooldownMax=Math.max(1,Number(p.cooldown||p.maxCooldown||1));
             var tc=Math.max(2,Number(BRMP.roomMeta.teamCount||2));
             var angle=-Math.PI/2+(Number(p.team||1)-1)*Math.PI*2/tc;
             var anchor=new Vec2(Math.cos(angle)*1450,Math.sin(angle)*1450);
             var spot=game.findSafePointNear(anchor,260,p.radius+28,[])||game.findSafeMapPoint(420,1750,p.radius+28);
-            p.pos=spot;p.lastPos=new Vec2(spot.x,spot.y);
+            p.pos=spot;p.lastPos=new Vec2(spot.x,spot.y);p.warpSeq=Number(p.warpSeq||0)+1;
             game.addText(p.pos,'♻️ RESPAWN','#a7f3d0',45,28);
         }
         function brWirePlayer(p) {
@@ -8187,92 +8470,88 @@
                 game&&game.getCoverTypeAt?game.getCoverTypeAt(p.pos):'',
                 Math.round(Number(p.vel&&p.vel.x||0)*100)/100,Math.round(Number(p.vel&&p.vel.y||0)*100)/100,
                 Math.max(1,Math.round(Number(p.basicCooldownMax||1))),Math.max(1,Math.round(Number(p.skillCooldownMax||p.maxCooldown||1))),
-                Math.round((Math.max(5.6,p.speed*4.05)*(p.teamHasteFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*(p.ability.sub==='STONE'?.48:1))*100)/100,
-                (p.stunned>0?1:0)|(p.dashFrames>0?2:0)|(p.ringRecoveryActive?4:0)|(p.playerMoveBoostFrames>0?8:0)|(p.playerAttackHasteFrames>0?16:0)
+                Math.round(brHumanMoveSpeed(p)*100)/100,
+                (p.stunned>0?1:0)|(p.dashFrames>0?2:0)|(p.ringRecoveryActive?4:0)|(p.playerMoveBoostFrames>0?8:0)|(p.playerAttackHasteFrames>0?16:0),
+                Number(p.lastInputSeq||0),Math.max(0,Number(p.stunned||0)),Math.max(0,Number(p.dashFrames||0)),Number(p.warpSeq||0)
             ];
         }
         function brPublishViews() {
-            if(!BRMP.active||!game||BRMP.backend!=='firebase'||Number(BRMP.publishInFlight||0)>=2)return;
+            if(!BRMP.active||!game||BRMP.backend!=='firebase'||Number(BRMP.publishInFlight||0)>=3)return;
             var humans=game.participants.filter(function(p){return p.humanControlled&&p.remoteId&&p.id!==999;});
             if(!humans.length)return;
             var now=brNow(),viewers=humans;
-            // 12명 이상은 6명 단위 순환 배치로 직렬화·GC·Firebase update 스파이크를 분산한다.
             if(humans.length>=12) {
-                var batchSize=6,start=Number(BRMP.publishCursor||0)%humans.length;
-                viewers=[];
-                for(var bi=0;bi<Math.min(batchSize,humans.length);bi++)viewers.push(humans[(start+bi)%humans.length]);
-                BRMP.publishCursor=(start+batchSize)%humans.length;
-            } else {
-                if(now-Number(BRMP.lastSmallPublishAt||0)<125)return;
-                BRMP.lastSmallPublishAt=now;
-            }
-            var all=game.participants.filter(function(p){return p.id!==999;});
-            var alive=all.filter(function(p){return p.alive;});
-            // 같은 주기의 6개 화면에서 플레이어 데이터를 반복 계산하지 않는다.
-            var wiredPlayers=new Map();all.forEach(function(p){wiredPlayers.set(p,brWirePlayer(p));});
-            var elapsed=Math.max(0,(now-Number(BRMP.roomMeta.battleStartedAt||now))/1000);
-            var remaining=BRMP.respawnMode?Math.max(0,(Number(BRMP.roomMeta.battleEndsAt||now)-now)/1000):elapsed;
-            var updates={};
+                var count=Math.min(8,humans.length),start=Number(BRMP.publishCursor||0)%humans.length;viewers=[];
+                for(var i=0;i<count;i++)viewers.push(humans[(start+i)%humans.length]);
+                BRMP.publishCursor=(start+count)%humans.length;
+            } else {if(now-Number(BRMP.lastSmallPublishAt||0)<95)return;BRMP.lastSmallPublishAt=now;}
+            var all=game.participants.filter(function(p){return p.id!==999;}),alive=0,wired=new Map();
+            // 이름·등급 등 불변 데이터는 별도 사전으로 보낸다. 매 프레임에는 작은 숫자 행만 전송한다.
+            var roster=all.map(function(p){return [p.remoteId||('ai-'+p.id),p.name,Number(p.abilityIndex||0),Number(p.team||0),Math.round(p.radius),p.humanControlled?1:0];});
+            all.forEach(function(p,index){var r=brWirePlayer(p);if(p.alive)alive++;wired.set(p,[index,r[3],r[4],r[5],r[6],r[7],r[9],r[10],r[11],r[12],r[14],r[17],r[18],r[19],r[20],r[21],r[22],r[23],r[24],r[25],r[26],r[27]]);});
+            var shots=game.projectiles.filter(function(q){return q.life>0&&q.pos;}).map(function(q){
+                if(!q._brNetId)q._brNetId='q'+(++BRMP.projectileSeq);
+                return {q:q,row:[Math.round(q.pos.x),Math.round(q.pos.y),Math.round(q.size||7),q.emoji||'',q.color||q.impactColor||'#fff',Number(q.owner&&q.owner.team||0),q._brNetId,
+                    Math.round(Number(q.vel&&q.vel.x||0)*100)/100,Math.round(Number(q.vel&&q.vel.y||0)*100)/100,q.weaponStyle||getRangedWeaponStyle(q.owner&&q.owner.ability||{}),q.owner&&q.owner.ability&&q.owner.ability.t||'C']};
+            });
+            var elapsed=Math.max(0,(now-Number(BRMP.roomMeta.battleStartedAt||now))/1000),remaining=BRMP.respawnMode?Math.max(0,(Number(BRMP.roomMeta.battleEndsAt||now)-now)/1000):elapsed;
+            BRMP.viewFxCursor=BRMP.viewFxCursor||{};BRMP.staticSent=BRMP.staticSent||{};
+            var updates={},pendingStatic=[],pendingFx=[],epoch=BRMP.publishEpoch;
             viewers.forEach(function(viewer){
-                // 서버도 가까운 반경의 전투 정보만 학생 기기에 전달한다.
-                var sight=1250;
-                var visible=all.filter(function(p){
-                    if(p===viewer)return true;
-                    if(p.pos.dist(viewer.pos)>=sight+p.radius)return false;
-                    return !game.isConcealedFrom(p,viewer);
-                }).map(function(p){return wiredPlayers.get(p);});
-                var projectiles=game.projectiles.filter(function(q){return q.life>0&&q.pos&&q.pos.dist(viewer.pos)<sight+130;}).slice(-42).map(function(q){
-                    if(!q._brNetId)q._brNetId='q'+(++BRMP.projectileSeq);
-                    return [Math.round(q.pos.x),Math.round(q.pos.y),Math.round(q.size||7),q.emoji||'',q.color||q.impactColor||'#fff',Number(q.owner&&q.owner.team||0),
-                        q._brNetId,Math.round(Number(q.vel&&q.vel.x||0)*100)/100,Math.round(Number(q.vel&&q.vel.y||0)*100)/100,
-                        q.weaponStyle||getRangedWeaponStyle(q.owner&&q.owner.ability||{}),q.owner&&q.owner.ability&&q.owner.ability.t||'C'];
+                var id=viewer.remoteId,sight=1250,vx=viewer.pos.x,vy=viewer.pos.y;
+                function near(x,y,r){var dx=x-vx,dy=y-vy;return dx*dx+dy*dy<r*r;}
+                var visible=all.filter(function(p){return p===viewer||(near(p.pos.x,p.pos.y,sight+p.radius)&&!game.isConcealedFrom(p,viewer));}).map(function(p){return wired.get(p);});
+                var projectiles=shots.filter(function(s){return near(s.q.pos.x,s.q.pos.y,sight+130);}).slice(-42).map(function(s){return s.row;});
+                var zones=game.zones.filter(function(z){return z.duration>0&&z.pos&&near(z.pos.x,z.pos.y,sight+Number(z.radius||0));}).slice(-12).map(function(z){return [Math.round(z.pos.x),Math.round(z.pos.y),Math.round(z.radius||40),z.color||'#64748b',z.type||'dmg'];});
+                var lastFx=Number(BRMP.viewFxCursor[id]||-1);
+                var fx=(game.studentFx||[]).filter(function(e){return e.frame>lastFx&&game.frame-e.frame<=90&&near(e.x,e.y,sight+Math.max(90,Number(e.size||0)));}).sort(function(a,b){
+                    function priority(e){return (e.targetId===id||e.sourceId===id?8:0)+(e.type==='hit'?3:0)+(Number(e.impactLevel||0));}
+                    return priority(b)-priority(a)||b.frame-a.frame;
+                }).slice(0,24).sort(function(a,b){return a.id-b.id;}).map(function(e){
+                    return [e.id,e.type,Math.round(e.x),Math.round(e.y),Math.round(e.dx*1000)/1000,Math.round(e.dy*1000)/1000,Math.round(e.size),e.color||'#fff',Math.round(e.amount*10)/10,e.targetId||'',e.style||'',e.sourceId||'',Number(e.impactLevel||0)];
                 });
-                var zones=game.zones.filter(function(z){return z.duration>0&&z.pos&&z.pos.dist(viewer.pos)<sight+Number(z.radius||0);}).slice(-12).map(function(z){
-                    return [Math.round(z.pos.x),Math.round(z.pos.y),Math.round(z.radius||40),z.color||'#64748b',z.type||'dmg'];
-                });
-                var fx=(game.studentFx||[]).filter(function(e){
-                    var dx=Number(e.x||0)-viewer.pos.x,dy=Number(e.y||0)-viewer.pos.y,limit=sight+Math.max(90,Number(e.size||0));
-                    return game.frame-Number(e.frame||0)<=54&&dx*dx+dy*dy<limit*limit;
-                }).slice(-14).map(function(e){
-                    return [e.id,e.type,Math.round(e.x),Math.round(e.y),Math.round(e.dx*1000)/1000,Math.round(e.dy*1000)/1000,
-                        Math.round(e.size),e.color||'#fff',Math.round(e.amount*10)/10,e.targetId||'',e.style||'',e.sourceId||'',Number(e.impactLevel||0)];
-                });
-                var payload={
-                    at:now,frame:game.frame,mapRadius:Math.round(game.mapRadius),mapName:game.mapName,mode:BRMP.roomMeta.mode,
-                    clock:Math.round(remaining*10)/10,alive:alive.length,total:all.length,
-                    players:visible,projectiles:projectiles,zones:zones,fx:fx
-                };
-                // 벽·수풀·연막은 정적 데이터다. 이동 거리 또는 4.8초가 지날 때만 다시 보내
-                // 20~30명 방의 Firebase 직렬화/다운로드 양을 크게 줄인다.
-                var sent=BRMP.staticSent[viewer.remoteId],moved=!sent||Math.hypot(viewer.pos.x-sent.x,viewer.pos.y-sent.y)>620;
-                if(!sent||moved||now-sent.at>4800) {
-                    payload.walls=game.walls.filter(function(w){var dx=w.x-viewer.pos.x,dy=w.y-viewer.pos.y,limit=sight+650;return dx*dx+dy*dy<limit*limit;}).map(function(w){
-                        return [Math.round(w.x),Math.round(w.y),Math.round(w.w),Math.round(w.h),Math.round((w.angle||0)*1000)/1000,w.kind||'wall'];
-                    });
-                    payload.bushes=game.bushes.filter(function(b){return b.pos.dist(viewer.pos)<sight+520+b.radius;}).map(function(b){
-                        return [Math.round(b.x),Math.round(b.y),Math.round(b.radius)];
-                    });
-                    payload.smokes=game.smokes.filter(function(s){return s.pos.dist(viewer.pos)<sight+520+s.radius;}).map(function(s){
-                        return [Math.round(s.x),Math.round(s.y),Math.round(s.radius),Number(s.seed||0)];
-                    });
-                    BRMP.staticSent[viewer.remoteId]={at:now,x:viewer.pos.x,y:viewer.pos.y};
+                var payload={v:2,at:now,frame:game.frame,worldRadius:game.worldRadius||2600,mapRadius:Math.round(game.mapRadius),mapName:game.mapName,mode:BRMP.roomMeta.mode,clock:Math.round(remaining*10)/10,alive:alive,total:all.length,players:visible,projectiles:projectiles,zones:zones,fx:fx};
+                var sent=BRMP.staticSent[id];
+                if(!sent||now-sent.at>5000||(BRMP.inputs[id]&&BRMP.inputs[id].needsArena)) {
+                    payload.roster=roster;
+                    // 고정 맵 전체는 최초/재연결용으로만 보낸다. 멀리 이동해도 벽 예측이 빠지지 않는다.
+                    payload.walls=game.walls.map(function(w){return [Math.round(w.x),Math.round(w.y),Math.round(w.w),Math.round(w.h),Math.round((w.angle||0)*1000)/1000,w.kind||'wall'];});
+                    payload.bushes=game.bushes.map(function(b){return [Math.round(b.x),Math.round(b.y),Math.round(b.radius)];});
+                    payload.smokes=game.smokes.map(function(b){return [Math.round(b.x),Math.round(b.y),Math.round(b.radius),Number(b.seed||0)];});
+                    pendingStatic.push(id);
                 }
-                updates['views/'+viewer.remoteId]=payload;
+                pendingFx.push([id,game.frame]);
+                // RTDB에 수천 개의 개별 노드 대신 학생별 단일 문자열을 전달해 SDK 처리량을 줄인다.
+                updates['views/'+id]=JSON.stringify(payload);
             });
             if(now-Number(BRMP.lastSummaryAt||0)>900) {
-                BRMP.lastSummaryAt=now;
-                var teamScores={};
-                all.forEach(function(p){if(p.team)teamScores[p.team]=Number(teamScores[p.team]||0)+Number(p.kills||0);});
-                updates['meta/summary']={alive:alive.length,total:all.length,clock:Math.round(remaining),teamScores:teamScores,updatedAt:now};
+                BRMP.lastSummaryAt=now;var teamScores={};all.forEach(function(p){if(p.team)teamScores[p.team]=Number(teamScores[p.team]||0)+Number(p.kills||0);});
+                updates['meta/summary']={alive:alive,total:all.length,clock:Math.round(remaining),teamScores:teamScores,updatedAt:now};
             }
             BRMP.publishInFlight=Number(BRMP.publishInFlight||0)+1;
-            BRMP.db.ref('rooms/'+BRMP.roomCode).update(updates).catch(function(err){
-                console.warn('[BRMP SNAPSHOT]',err);
-            }).finally(function(){BRMP.publishInFlight=Math.max(0,Number(BRMP.publishInFlight||1)-1);});
+            BRMP.db.ref('rooms/'+BRMP.roomCode).update(updates).then(function(){
+                if(epoch!==BRMP.publishEpoch)return;
+                pendingStatic.forEach(function(id){BRMP.staticSent[id]={at:now};});
+                pendingFx.forEach(function(pair){BRMP.viewFxCursor[pair[0]]=Math.max(Number(BRMP.viewFxCursor[pair[0]]||0),pair[1]);});
+            }).catch(function(err){console.warn('[BRMP SNAPSHOT]',err);}).finally(function(){if(epoch===BRMP.publishEpoch)BRMP.publishInFlight=Math.max(0,Number(BRMP.publishInFlight||1)-1);});
         }
 
-        // 학생 화면의 체감 피드백은 Firebase 왕복을 기다리지 않는다. 판정은 호스트가 맡되
-        // 발사·베기·대시의 첫 0.3초는 기기에서 즉시 재생하고 서버 효과로 자연스럽게 넘긴다.
+        function brDecodeView(incoming) {
+            if(typeof incoming==='string') {try {incoming=JSON.parse(incoming);}catch(e){return null;}}
+            if(!incoming||typeof incoming!=='object'||!Array.isArray(incoming.players))return null;
+            BRMP.staticView=BRMP.staticView||{};
+            ['walls','bushes','smokes','roster'].forEach(function(key){
+                if(Object.prototype.hasOwnProperty.call(incoming,key))BRMP.staticView[key]=incoming[key]||[];
+                else incoming[key]=BRMP.staticView[key]||[];
+            });
+            if(incoming.v===2) {
+                var roster=incoming.roster;
+                incoming.players=incoming.players.map(function(r){var m=roster[r[0]];if(!m)return null;return [m[0],m[1],m[2],r[1],r[2],r[3],r[4],r[5],m[3],r[6],r[7],r[8],r[9],-1,r[10],m[4],m[5],r[11],r[12],r[13],r[14],r[15],r[16],r[17],r[18],r[19],r[20],r[21]];}).filter(Boolean);
+            }
+            return incoming;
+        }
+
+        // 판정은 호스트가 맡고 발사·베기·돌진의 첫 반응은 학생 기기에서 바로 재생한다.
         function brFxLife(type) {
             return type==='hit'?720:type==='impact'?360:type==='teleport'?500:type==='explosion'?430:
                 type==='dash'?440:type==='swing'?410:type==='laser'?280:type==='muzzle'?210:320;
@@ -8330,24 +8609,27 @@
             BRMP.nameSpriteCache.set(key,sprite);return sprite;
         }
         function brRegisterHitFeedback(targetId,amount,x,y,sourceId,style,confirmed,impactLevel) {
-            var now=performance.now(),damage=Math.max(0,Number(amount||0)),close=/MELEE|DASH|TELEPORT|ORBIT|PULL|melee|dash|teleport|punch|smash/.test(String(style||''));
+            var now=performance.now(),damage=Math.max(0,Number(amount||0)),styleText=String(style||'');
+            var close=/MELEE|DASH|TELEPORT|ORBIT|PULL|melee|dash|teleport|punch|smash|uppercut|combo|lunge|tank/i.test(styleText);
+            var skillHit=/tank-|melee-|uppercut|combo|lunge|ranged-power|power-shot|skill/i.test(styleText);
             var level=Number.isFinite(Number(impactLevel))&&Number(impactLevel)>0?Number(impactLevel):(damage>=40?3:damage>=25?2:damage>=12?1:0);
             if(close&&damage>=9)level=Math.min(3,level+1);
+            if(skillHit&&damage>=7)level=Math.min(3,level+1);
             if(!confirmed&&damage<=0)level=close?1:0;
-            var duration=[135,175,225,275][level],strength=brClamp([3.5,6.5,10.5,15.5][level]+(close?1.5:0),3.5,17);
+            var duration=[140,190,245,310][level],strength=brClamp([3.8,7.2,11.8,17.8][level]+(close?1.8:0)+(skillHit?1.2:0),3.8,21);
             if(BRMP.hitStates)BRMP.hitStates.set(String(targetId||''),{until:now+duration,duration:duration,strength:strength,level:level,dx:0,dy:0,seed:Number(BRMP.localFxSeq||1)});
             if(String(targetId)===String(BRMP.playerId)) {
-                BRMP.studentShake={until:now+[115,165,215,265][level],strength:Math.min(17,strength*1.12),seed:now%997};
-                BRMP.damageFlash={until:now+[80,120,165,210][level],alpha:[.06,.10,.16,.23][level],level:level};
+                BRMP.studentShake={until:now+[125,180,240,310][level],strength:Math.min(21,strength*1.16),seed:now%997};
+                BRMP.damageFlash={until:now+[85,130,180,235][level],alpha:[.07,.12,.19,.28][level],level:level};
                 if(now-Number(BRMP.lastHurtSfxAt||0)>65){BRMP.lastHurtSfxAt=now;brPlaySfx('hurt',level>=2);}
-                if(typeof navigator!=='undefined'&&navigator.vibrate&&confirmed)navigator.vibrate([[9],[12,8,18],[16,9,27],[20,8,34,10,44]][level]);
+                if(typeof navigator!=='undefined'&&navigator.vibrate&&confirmed)navigator.vibrate([[10],[14,8,21],[19,9,32],[26,10,42,12,58]][level]);
             }
             if(String(sourceId)===String(BRMP.playerId)) {
                 var confirmDuration=confirmed?155+level*25:95;
                 BRMP.hitConfirm={until:now+confirmDuration,duration:confirmDuration,amount:damage,heavy:level>=2,level:level,confirmed:!!confirmed};
-                BRMP.studentShake={until:now+85+level*22,strength:2.8+level*1.55,seed:(now+37)%997};
+                BRMP.studentShake={until:now+92+level*28,strength:3.1+level*1.9+(skillHit?1.2:0),seed:(now+37)%997};
                 if(now-Number(BRMP.lastHitSfxAt||0)>52){BRMP.lastHitSfxAt=now;brPlaySfx('hit',level>=2);}
-                if(typeof navigator!=='undefined'&&navigator.vibrate&&confirmed)navigator.vibrate([[8],[11,7,15],[15,8,23],[18,8,29,9,36]][level]);
+                if(typeof navigator!=='undefined'&&navigator.vibrate&&confirmed)navigator.vibrate([[8],[12,7,18],[17,8,27],[21,9,35,10,47]][level]);
             }
         }
         function brSpawnLocalProjectile(x,y,dir,speed,size,color,emoji,style,team,life) {
@@ -8367,6 +8649,22 @@
             });
             return best;
         }
+        function brLocalAimEndpoint(x,y,ax,ay,range,radius,view) {
+            view=view||BRMP.latestView||{};
+            var edge=Math.max(20,Number(view.worldRadius||view.mapRadius||2600)-radius-18),point={x:x+ax*range,y:y+ay*range};
+            var length=Math.hypot(point.x,point.y);if(length>edge){point.x*=edge/length;point.y*=edge/length;}
+            function blocked(q){return (view.walls||[]).some(function(w){
+                var dx=q.x-w[0],dy=q.y-w[1],angle=-Number(w[4]||0),ca=Math.cos(angle),sa=Math.sin(angle);
+                var lx=dx*ca-dy*sa,ly=dx*sa+dy*ca,cx=brClamp(lx,-w[2]/2,w[2]/2),cy=brClamp(ly,-w[3]/2,w[3]/2);
+                return Math.hypot(lx-cx,ly-cy)<radius;
+            });}
+            if(blocked(point)) {
+                var found=false;
+                for(var step=.90;step>=.15;step-=.15){var candidate={x:x+ax*range*step,y:y+ay*range*step};if(!blocked(candidate)){point=candidate;found=true;break;}}
+                if(!found)point={x:x,y:y};
+            }
+            return point;
+        }
         function brImmediateCastFeedback(kind) {
             var self=BRMP.drawPlayers&&BRMP.drawPlayers.get(String(BRMP.playerId));if(!self||!self.row)return;
             var r=self.row,a=EMOJI_DB[Number(r[2])]||EMOJI_DB[0],tier=a.t||'C',color=BR_TIER_COLOR[tier]||'#ffffff';
@@ -8379,20 +8677,17 @@
                 if(closeTarget){brPushLocalFx('impact',closeTarget.o.x,closeTarget.o.y,{dx:ax,dy:ay,size:86,color:color,style:'predicted-melee',sourceId:BRMP.playerId});brRegisterHitFeedback(closeTarget.id,0,closeTarget.o.x,closeTarget.o.y,BRMP.playerId,'predicted-melee',false);}
                 brPushLocalFx('muzzle',x+ax*rad,y+ay*rad,{dx:ax,dy:ay,size:62,color:'#ffffff',style:'melee'});brPlaySfx('melee',tier==='S'||tier==='A');
             } else if(kind==='attack') {
-                var profile=getRangedCombatProfile(a,'basic'),count=Math.min(3,profile.count||1),spread=profile.style==='machine'?.065:profile.style==='bomber'?.035:0;
-                for(var i=0;i<count;i++) {
-                    var ang=(i-(count-1)/2)*spread,ca=Math.cos(ang),sa=Math.sin(ang),sd={x:ax*ca-ay*sa,y:ax*sa+ay*ca};
-                    var sz={S:15,A:13,B:12,C:10,F:9}[tier]*(profile.style==='bomber'?1.35:profile.style==='sniper'?1.05:1);
-                    brSpawnLocalProjectile(x+sd.x*rad*.72,y+sd.y*rad*.72,sd,profile.speed,sz,color,a.projEmoji||'',profile.style,Number(r[8]||0));
-                }
-                brPushLocalFx('muzzle',x+ax*rad*.8,y+ay*rad*.8,{dx:ax,dy:ay,size:profile.style==='sniper'?105:76,color:color,style:profile.style});
+                var profile=getRangedCombatProfile(a,'basic'),shotColor=a.pTrail||color;
+                var sz={S:15,A:13,B:12,C:10,F:9}[tier]*(profile.style==='bomber'?1.35:profile.style==='heavy'?1.22:profile.style==='sniper'?.90:1);
+                brSpawnLocalProjectile(x+ax*rad*.72,y+ay*rad*.72,dir,profile.speed,sz,shotColor,'','orb',Number(r[8]||0),profile.range/profile.speed*16.667);
+                brPushLocalFx('muzzle',x+ax*rad*.8,y+ay*rad*.8,{dx:ax,dy:ay,size:profile.style==='sniper'?96:70,color:shotColor,style:'orb'});
                 brPlaySfx('shoot',profile.style==='sniper'||profile.style==='bomber');
             } else {
                 var spec=brAimSpec(a,'skill',rad,Number(BRMP.inputState&&BRMP.inputState.aimPower||1)),playable=brGetPlayableSkillInfo(a),playKey=playable&&playable.key;
                 if(playKey==='tank-charge'||playKey==='melee-lunge') {
                     brPushLocalFx('dash',x,y,{dx:ax,dy:ay,size:spec.range,color:color,style:playKey,sourceId:BRMP.playerId});
                     var localDashSpeed=playKey==='tank-charge'?brTierValue(tier,{S:40,A:37,B:34,C:31,F:27}):brTierValue(tier,{S:36,A:34,B:31,C:29,F:25});
-                    BRMP.localDash={vx:ax*localDashSpeed,vy:ay*localDashSpeed,until:performance.now()+Math.min(360,Math.max(130,Number(spec.range||360)/localDashSpeed*16.667))};
+                    BRMP.localDash={vx:ax*localDashSpeed,vy:ay*localDashSpeed,remaining:Number(spec.range||360),until:performance.now()+(Math.ceil(Number(spec.range||360)/localDashSpeed)+2)*16.667};
                     self.predVx=ax*localDashSpeed;self.predVy=ay*localDashSpeed;
                 } else if(playKey==='tank-stun') {
                     brPushLocalFx('explosion',x,y,{dx:ax,dy:ay,size:Number(spec.radius||190),color:color,style:playKey,sourceId:BRMP.playerId});
@@ -8402,12 +8697,20 @@
                     brPushLocalFx('impact',x,y,{dx:ax,dy:ay,size:128,color:playKey==='ranged-sprint'?'#67e8f9':'#fbbf24',style:playKey,sourceId:BRMP.playerId});
                     if(playKey==='ranged-sprint')BRMP.localMoveBoostUntil=performance.now()+4000;
                     else BRMP.localAttackHasteUntil=performance.now()+5000;
+                } else if(playKey&&playKey.indexOf('teleport-')===0) {
+                    var destination=brLocalAimEndpoint(x,y,ax,ay,spec.range,rad,BRMP.latestView),teleDx=destination.x-x,teleDy=destination.y-y,teleDistance=Math.hypot(teleDx,teleDy);
+                    var teleColor=playKey==='teleport-thunder'?'#fde047':playKey==='teleport-lava'?'#fb923c':'#c4b5fd';
+                    brPushLocalFx('teleport',x,y,{dx:teleDistance?teleDx/teleDistance:ax,dy:teleDistance?teleDy/teleDistance:ay,size:teleDistance,amount:spec.radius,color:teleColor,style:playKey,sourceId:BRMP.playerId});
+                    self.predX=destination.x;self.predY=destination.y;self.x=destination.x;self.y=destination.y;self.predVx=0;self.predVy=0;self.previousX=destination.x;self.previousY=destination.y;self.predAccumulator=0;self.predState={x:destination.x,y:destination.y,vx:0,vy:0};BRMP.localDash=null;
+                    BRMP.localTeleportUntil=performance.now()+650;BRMP.localTeleportTarget=destination;
                 } else if(playKey==='ranged-power') {
-                    brSpawnLocalProjectile(x+ax*rad*.78,y+ay*rad*.78,dir,brTierValue(tier,{S:36,A:33,B:29,C:25,F:20}),brTierValue(tier,{S:21,A:19,B:17,C:15,F:13}),color,a.projEmoji||'✦','sniper',Number(r[8]||0),760);
-                    brPushLocalFx('muzzle',x+ax*rad*.72,y+ay*rad*.72,{dx:ax,dy:ay,size:112,color:color,style:'power-shot',sourceId:BRMP.playerId});
+                    var powerProfile=brRangedPowerProfile(a);
+                    brSpawnLocalProjectile(x+ax*rad*.78,y+ay*rad*.78,dir,powerProfile.speed,powerProfile.size,powerProfile.color,'',powerProfile.style,Number(r[8]||0),(powerProfile.range-rad*.78)/powerProfile.speed*16.667);
+                    var castProjectile=BRMP.localProjectiles[BRMP.localProjectiles.length-1];castProjectile.blast=powerProfile.blast;castProjectile.rangeRemaining=powerProfile.range-rad*.78;
+                    brPushLocalFx('muzzle',x+ax*rad*.78,y+ay*rad*.78,{dx:ax,dy:ay,size:148,color:powerProfile.color,style:powerProfile.style,sourceId:BRMP.playerId});
                 } else if(a.type===ABILITY_TYPES.DASH) {
                     brPushLocalFx('dash',x,y,{dx:ax,dy:ay,size:spec.range,color:color,style:a.sub||'dash'});
-                    var nativeDashSpeed=Math.max(20,Number(a.dashSpeed||35));BRMP.localDash={vx:ax*nativeDashSpeed,vy:ay*nativeDashSpeed,until:performance.now()+Math.min(380,Math.max(140,Number(spec.range||360)/nativeDashSpeed*16.667))};
+                    var nativeDashSpeed=Math.max(1,Number(a.dashSpeed||35));BRMP.localDash={vx:ax*nativeDashSpeed,vy:ay*nativeDashSpeed,remaining:Number(spec.range||360),until:performance.now()+(Math.ceil(Number(spec.range||360)/nativeDashSpeed)+2)*16.667};
                     self.predVx=ax*nativeDashSpeed;self.predVy=ay*nativeDashSpeed;
                 }
                 else if(a.type===ABILITY_TYPES.TELEPORT)brPushLocalFx('teleport',x,y,{dx:ax,dy:ay,size:spec.range,color:color,style:a.sub||'teleport'});
@@ -8424,28 +8727,31 @@
                     var tx=x+ax*Number(spec.range||220),ty=y+ay*Number(spec.range||220);
                     brPushLocalFx('impact',tx,ty,{dx:ax,dy:ay,size:Number(spec.radius||spec.impactRadius||105),color:color,style:'skill-target'});
                 }
-                var playableClose=playKey==='tank-charge'||playKey==='tank-punch'||playKey==='melee-uppercut'||playKey==='melee-lunge'||playKey==='melee-combo';
-                if(playableClose||(!playable&&(a.type===ABILITY_TYPES.DASH||a.type===ABILITY_TYPES.TELEPORT||a.type===ABILITY_TYPES.MELEE))) {
+                var playableClose=playKey==='tank-punch'||playKey==='melee-uppercut'||playKey==='melee-combo';
+                if(playableClose||(!playable&&a.type===ABILITY_TYPES.MELEE)) {
                     var skillTarget=brPredictLocalContact(x,y,ax,ay,Math.max(160,Number(spec.range||220)),Math.max(rad,Number(spec.width||rad)),Number(r[8]||0));
                     if(skillTarget){var predictedStyle='predicted-'+(playKey||String(a.type||'skill'));brPushLocalFx('impact',skillTarget.o.x,skillTarget.o.y,{dx:ax,dy:ay,size:118,color:color,style:predictedStyle,sourceId:BRMP.playerId});brRegisterHitFeedback(skillTarget.id,0,skillTarget.o.x,skillTarget.o.y,BRMP.playerId,predictedStyle,false);}
                 }
                 if(playKey!=='ranged-sprint'&&playKey!=='ranged-overdrive'&&playKey!=='ranged-power')brPushLocalFx('muzzle',x+ax*rad*.55,y+ay*rad*.55,{dx:ax,dy:ay,size:92,color:'#ffffff',style:'skill'});
                 brPlaySfx('skill',tier==='S'||tier==='A');
             }
-            BRMP.studentRecoil={x:-ax*(kind==='skill'?15:9),y:-ay*(kind==='skill'?15:9),vx:0,vy:0,until:performance.now()+(kind==='skill'?190:125)};
+            BRMP.studentRecoil={x:-ax*(kind==='skill'?19:10),y:-ay*(kind==='skill'?19:10),vx:0,vy:0,until:performance.now()+(kind==='skill'?220:135)};
         }
 
         function brResolvePredictedCollision(p,view,radius) {
             var walls=view&&view.walls||[];
             for(var i=0;i<walls.length;i++) {
-                var w=walls[i],dx=p.x-w[0],dy=p.y-w[1],ang=-(Number(w[4])||0),ca=Math.cos(ang),sa=Math.sin(ang);
+                var w=walls[i],dx=p.x-w[0],dy=p.y-w[1],ang=-(Number(w[4])||0);
+                if(w._angle!==ang){w._angle=ang;w._ca=Math.cos(ang);w._sa=Math.sin(ang);w._bx=Math.abs(w._ca)*w[2]*.5+Math.abs(w._sa)*w[3]*.5;w._by=Math.abs(w._sa)*w[2]*.5+Math.abs(w._ca)*w[3]*.5;}
+                if(Math.abs(dx)>w._bx+radius||Math.abs(dy)>w._by+radius)continue;
+                var ca=w._ca,sa=w._sa;
                 var lx=dx*ca-dy*sa,ly=dx*sa+dy*ca,hx=w[2]*.5,hy=w[3]*.5,cx=brClamp(lx,-hx,hx),cy=brClamp(ly,-hy,hy);
                 var ox=lx-cx,oy=ly-cy,dist=Math.hypot(ox,oy);if(dist>=radius)continue;
                 if(dist<.001) {var penX=hx+radius-Math.abs(lx),penY=hy+radius-Math.abs(ly);if(penX<penY){ox=lx<0?-1:1;oy=0;dist=1;}else{ox=0;oy=ly<0?-1:1;dist=1;}}
                 var push=radius-dist+1,nx=ox/dist,ny=oy/dist,wx=nx*ca+ny*sa,wy=-nx*sa+ny*ca;p.x+=wx*push;p.y+=wy*push;
                 var vn=p.vx*wx+p.vy*wy;if(vn<0){p.vx-=wx*vn;p.vy-=wy*vn;}
             }
-            var mapR=Math.max(radius+8,Number(view&&view.mapRadius||2600)-radius-4),d=Math.hypot(p.x,p.y);
+            var mapR=Math.max(radius+8,Number(view&&view.worldRadius||2600)-radius-4),d=Math.hypot(p.x,p.y);
             if(d>mapR){p.x=p.x/d*mapR;p.y=p.y/d*mapR;var nx=p.x/mapR,ny=p.y/mapR,vn=p.vx*nx+p.vy*ny;if(vn>0){p.vx-=nx*vn;p.vy-=ny*vn;}}
         }
 
@@ -8456,12 +8762,24 @@
             if(!BRMP.hitStates)BRMP.hitStates=new Map();
             if(!BRMP.seenFxIds)BRMP.seenFxIds=new Map();
             var seen=new Set(), now=performance.now();
+            var serverTime=Number(view.frame||0)*(1000/60);
+            // 고정 오프셋으로 서버 프레임 간격을 보존한다. 네트워크 도착 간격은 좌표 시간으로 쓰지 않는다.
+            if(!Number.isFinite(BRMP.netClockOffset)){BRMP.netClockOffset=now-serverTime;BRMP.clockSamples=[];}
+            BRMP.clockSamples.push(now-serverTime);if(BRMP.clockSamples.length>12)BRMP.clockSamples.shift();
+            var clockCorrection=brClamp((Math.min.apply(null,BRMP.clockSamples)-BRMP.netClockOffset)*.12,-16,16);
+            BRMP.netClockOffset+=clockCorrection;
+            if(clockCorrection)BRMP.drawPlayers.forEach(function(p){(p.samples||[]).forEach(function(s){s.t+=clockCorrection;});});
+            var sampleTime=serverTime+BRMP.netClockOffset;
+            if(BRMP.lastViewFrame!=null&&view.frame<=BRMP.lastViewFrame)return;
+            if(BRMP.lastViewFrame!=null)BRMP.viewGap=Number(BRMP.viewGap||180)*.8+Math.min(500,(view.frame-BRMP.lastViewFrame)*(1000/60))*.2;
+            BRMP.lastViewFrame=view.frame;
+            BRMP.remoteBuffer=brClamp(Number(BRMP.viewGap||180)+35,120,320);
             var packetHits=new Set((view.fx||[]).filter(function(e){return String(e[1])==='hit';}).map(function(e){return String(e[9]||'');}));
             (view.players||[]).forEach(function(r){
                 var id=String(r[0]), old=BRMP.drawPlayers.get(id),sx=Number(r[3]),sy=Number(r[4]),svx=Number(r[18]||0),svy=Number(r[19]||0);
                 if(!old)old={x:sx,y:sy,tx:sx,ty:sy,vx:svx,vy:svy,row:r,last:now,trailHp:Number(r[5]||0),trailHold:0,
                     samples:[],predX:sx,predY:sy,predVx:svx,predVy:svy,authX:sx,authY:sy,authAt:now};
-                var snapGap=Math.max(16,Math.min(420,now-Number(old.last||now-180)));
+                var priorRow=old.row||r,warpChanged=Number(r[27]||0)!==Number(priorRow[27]||0),respawned=!priorRow[7]&&r[7];
                 var previousHp=old.row?Number(old.row[5]||0):Number(r[5]||0),nextHp=Number(r[5]||0);
                 if(nextHp<previousHp) {
                     old.trailHp=Math.max(Number(old.trailHp||0),previousHp);
@@ -8472,23 +8790,33 @@
                         brRegisterHitFeedback(id,lost,sx,sy,'','snapshot-hit',true);
                     }
                 } else if(nextHp>Number(old.trailHp||0)) old.trailHp=nextHp;
-                old.samples=old.samples||[];old.samples.push({x:sx,y:sy,vx:svx,vy:svy,t:now});if(old.samples.length>5)old.samples.shift();
+                old.samples=old.samples||[];if(warpChanged||respawned)old.samples=[];old.samples.push({x:sx,y:sy,vx:svx,vy:svy,t:sampleTime});if(old.samples.length>6)old.samples.shift();
                 old.tx=sx;old.ty=sy;old.vx=svx;old.vy=svy;old.row=r;
-                var leadFrames=brClamp(snapGap/34,2.5,7.5);old.authX=sx+svx*leadFrames;old.authY=sy+svy*leadFrames;old.authAt=now;
+                var leadFrames=brClamp(Number(BRMP.minInputRtt||100)/2/(1000/60),0,8);old.authX=sx+svx*leadFrames;old.authY=sy+svy*leadFrames;old.authAt=now;
                 if(id===String(BRMP.playerId)) {
-                    var err=Math.hypot(old.authX-old.predX,old.authY-old.predY);
-                    var serverFlags=Number(r[23]||0);
-                    if(!Number.isFinite(old.predX)||err>900||(serverFlags&2)){old.predX=old.authX;old.predY=old.authY;old.predVx=svx;old.predVy=svy;}
+                    var ack=Number(r[24]||0),sentAt=BRMP.inputSentAt&&BRMP.inputSentAt.get(ack);
+                    if(sentAt!=null){var rtt=now-sentAt;BRMP.minInputRtt=Math.min(Number(BRMP.minInputRtt||1000),Math.max(20,rtt));}
+                    old.inputAck=ack;old.stunUntil=now+Math.max(0,Number(r[25]||0))*(1000/60);old.dashUntil=now+Math.max(0,Number(r[26]||0))*(1000/60);
+                    if(now<Number(BRMP.localDashGraceUntil||0))old.dashUntil=0;
+                    if(nextHp<previousHp&&packetHits.has(id))old.hitCorrectionUntil=now+160;
+                    if((Number(r[23]||0)&2)&&!(Number(priorRow[23]||0)&2)&&!BRMP.localDash&&now>=Number(BRMP.localDashGraceUntil||0)){old.predVx=svx;old.predVy=svy;}
+                    if(warpChanged||respawned||!Number.isFinite(old.predX)) {
+                        old.predX=sx;old.predY=sy;old.x=sx;old.y=sy;old.predVx=svx;old.predVy=svy;old.predAccumulator=0;old.previousX=sx;old.previousY=sy;
+                        BRMP.localTeleportUntil=0;BRMP.localDash=null;
+                    } else if((Number(r[23]||0)&1)&&nextHp<previousHp) {
+                        old.predVx=svx;old.predVy=svy; // 서버의 피격 충격량을 내 기기에도 전달한다.
+                    }
+                    if(!r[7]){old.predVx=0;old.predVy=0;}
                 }
                 old.last=now;
                 BRMP.drawPlayers.set(id,old);seen.add(id);
             });
             // 수풀·연막에 숨은 적의 잔상이 오래 남지 않도록 두 번의 전송 주기 안에 제거한다.
-            BRMP.drawPlayers.forEach(function(v,k){if(!seen.has(k)&&now-v.last>850)BRMP.drawPlayers.delete(k);});
+            BRMP.drawPlayers.forEach(function(v,k){if(!seen.has(k))BRMP.drawPlayers.delete(k);});
             var shotSeen=new Set();
             (view.projectiles||[]).forEach(function(r,i){
                 var id=String(r[6]||('legacy-'+i+'-'+r[3])),old=BRMP.drawProjectiles.get(id),pvx=Number(r[7]||0),pvy=Number(r[8]||0);
-                var shotGap=old?Math.max(16,Math.min(360,now-Number(old.last||now-180))):150,shotLead=brClamp(shotGap/34,2.5,7.5);
+                var shotLead=brClamp(Number(BRMP.minInputRtt||100)/2/(1000/60),0,8);
                 var projectedX=Number(r[0])+pvx*shotLead,projectedY=Number(r[1])+pvy*shotLead;
                 if(!old)old={x:projectedX,y:projectedY,tx:Number(r[0]),ty:Number(r[1]),vx:pvx,vy:pvy,row:r,last:now,history:[]};
                 old.tx=Number(r[0]);old.ty=Number(r[1]);old.vx=pvx;old.vy=pvy;old.row=r;old.last=now;
@@ -8496,7 +8824,7 @@
                 BRMP.drawProjectiles.set(id,old);shotSeen.add(id);
             });
             // 30명 방은 각 학생 스냅샷이 약 0.3초 간격이므로, 그 사이 투사체를 삭제해 깜빡이지 않게 한다.
-            BRMP.drawProjectiles.forEach(function(v,k){if(!shotSeen.has(k)&&now-v.last>720)BRMP.drawProjectiles.delete(k);});
+            BRMP.drawProjectiles.forEach(function(v,k){if(!shotSeen.has(k))BRMP.drawProjectiles.delete(k);});
             (view.fx||[]).forEach(function(r){
                 var id=String(r[0]);
                 if(BRMP.seenFxIds.has(id))return;
@@ -8514,17 +8842,19 @@
             BRMP.inputState=BRMP.inputState||{dx:0,dy:0,ax:1,ay:0,aimPower:1,attackSeq:0,skillSeq:0};
             if(!Number.isFinite(BRMP.inputState.aimPower))BRMP.inputState.aimPower=1;
             BRMP.drawPlayers=new Map();BRMP.drawProjectiles=new Map();BRMP.localProjectiles=[];BRMP.drawFx=new Map();BRMP.hitStates=new Map();BRMP.seenFxIds=new Map();
+            BRMP.netClockOffset=undefined;BRMP.lastViewFrame=null;BRMP.viewGap=180;BRMP.remoteBuffer=215;BRMP.minInputRtt=undefined;BRMP.inputSentAt=new Map();BRMP.localTeleportUntil=0;BRMP.localDashGraceUntil=0;
             BRMP.studentCamera=null;BRMP.lastStudentFrameAt=0;BRMP.aimGesture=null;BRMP.localCastFx=null;BRMP.localDash=null;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.staticView=BRMP.staticView||{};BRMP.studentShake=null;BRMP.studentRecoil=null;BRMP.hitConfirm=null;BRMP.damageFlash=null;
             // 고해상도 태블릿에서 2~3배 DPR로 거대한 캔버스를 만드는 대신 CSS 기준 선명도를 유지한다.
             BRMP.renderQuality=window.innerWidth<1100?.84:.92;BRMP.studentFrameEma=16.7;BRMP.studentFrameSamples=0;BRMP.lastQualityChangeAt=performance.now();
             if(BRMP.inputTimer)clearInterval(BRMP.inputTimer);
-            BRMP.inputTimer=setInterval(function(){brSendInput(true);},500);
+            BRMP.inputTimer=setInterval(function(){brSendInput(true);},350);
             brResizeStudentCanvas();
             if(!BRMP.renderFrame)BRMP.renderFrame=requestAnimationFrame(brDrawStudentFrame);
             brSendInput(true);
         }
         function brStopStudentBattle() {
             brEl('br-student-battle').classList.add('br-hidden');
+            if(BRMP.inputTrailingTimer){clearTimeout(BRMP.inputTrailingTimer);BRMP.inputTrailingTimer=null;}
             if(BRMP.inputTimer){clearInterval(BRMP.inputTimer);BRMP.inputTimer=null;}
             if(BRMP.renderFrame){cancelAnimationFrame(BRMP.renderFrame);BRMP.renderFrame=null;}
             BRMP.drawPlayers=null;BRMP.drawProjectiles=null;BRMP.localProjectiles=null;BRMP.drawFx=null;BRMP.hitStates=null;BRMP.seenFxIds=null;BRMP.currentSelf=null;BRMP.aimGesture=null;BRMP.localCastFx=null;BRMP.localDash=null;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.staticView=null;BRMP.studentShake=null;BRMP.studentRecoil=null;BRMP.hitConfirm=null;BRMP.damageFlash=null;
@@ -8532,16 +8862,23 @@
         }
         function brSendInput(force) {
             if(BRMP.role!=='student'||BRMP.backend!=='firebase'||!BRMP.inputState||!BRMP.roomCode)return;
-            var now=brNow();
-            if(!force&&now-Number(BRMP.lastInputSent||0)<(BRMP.aimGesture?55:85))return;
-            var s=BRMP.inputState;
-            var data={dx:Math.round(Number(s.dx||0)*100)/100,dy:Math.round(Number(s.dy||0)*100)/100,
-                ax:Math.round(Number(s.ax||0)*100)/100,ay:Math.round(Number(s.ay||0)*100)/100,
-                ap:Math.round(brClamp(Number(s.aimPower||1),.18,1)*100)/100,
-                attackSeq:Number(s.attackSeq||0),skillSeq:Number(s.skillSeq||0),ts:now};
-            var inputKey=[data.dx,data.dy,data.ax,data.ay,data.ap,data.attackSeq,data.skillSeq].join('|');
-            if(!force&&inputKey===BRMP.lastInputKey&&now-Number(BRMP.lastInputSent||0)<260)return;
-            BRMP.lastInputKey=inputKey;BRMP.lastInputSent=now;
+            var now=brNow(),gap=BRMP.aimGesture?45:65,elapsed=now-Number(BRMP.lastInputSent||0);
+            if(BRMP.inputTrailingTimer){clearTimeout(BRMP.inputTrailingTimer);BRMP.inputTrailingTimer=null;}
+            if(!force&&elapsed<gap) {
+                // 마지막 방향 변경도 반드시 보낸다. 손가락을 멈췄을 때 350ms heartbeat까지 기다리지 않는다.
+                BRMP.inputTrailingTimer=setTimeout(function(){BRMP.inputTrailingTimer=null;brSendInput(false);},gap-elapsed+1);return;
+            }
+            var s=BRMP.inputState,data={dx:Math.round(Number(s.dx||0)*100)/100,dy:Math.round(Number(s.dy||0)*100)/100,
+                ax:Math.round(Number(s.ax||0)*100)/100,ay:Math.round(Number(s.ay||0)*100)/100,ap:Math.round(brClamp(Number(s.aimPower||1),.18,1)*100)/100,
+                attackSeq:Number(s.attackSeq||0),skillSeq:Number(s.skillSeq||0),ts:now,needsArena:!(BRMP.staticView&&BRMP.staticView.roster&&BRMP.staticView.roster.length&&BRMP.staticView.walls)};
+            var key=[data.dx,data.dy,data.ax,data.ay,data.ap,data.attackSeq,data.skillSeq].join('|');
+            if(!force&&key===BRMP.lastInputKey&&elapsed<260)return;
+            if(data.dx!==BRMP.lastWireDx||data.dy!==BRMP.lastWireDy)BRMP.lastMoveSeq=Number(BRMP.inputSeq||0)+1;
+            BRMP.lastWireDx=data.dx;BRMP.lastWireDy=data.dy;
+            data.seq=BRMP.inputSeq=Number(BRMP.inputSeq||0)+1;
+            if(!BRMP.inputSentAt)BRMP.inputSentAt=new Map();BRMP.inputSentAt.set(data.seq,performance.now());
+            if(BRMP.inputSentAt.size>60)BRMP.inputSentAt.delete(BRMP.inputSentAt.keys().next().value);
+            BRMP.lastInputKey=key;BRMP.lastInputSent=now;
             BRMP.db.ref('rooms/'+BRMP.roomCode+'/inputs/'+BRMP.playerId).set(data).catch(function(){});
         }
         function brSetMove(dx,dy) {
@@ -8578,17 +8915,30 @@
             }
             cc.restore();
         }
-        function brDrawStudentBush(cc,r,foreground) {
-            var x=r[0],y=r[1],radius=r[2];cc.save();cc.translate(x,y);
-            if(!foreground) {
-                cc.globalAlpha=.25;cc.fillStyle='#052e16';cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.fill();
-                cc.globalAlpha=.30;cc.strokeStyle='#4ade80';cc.lineWidth=3;cc.stroke();
-            } else {
-                cc.globalAlpha=.50;cc.fillStyle='#15803d';cc.beginPath();cc.arc(0,0,radius*.92,0,Math.PI*2);cc.fill();
-                cc.globalAlpha=.34;cc.fillStyle='#4ade80';cc.beginPath();cc.arc(-radius*.18,-radius*.16,radius*.55,0,Math.PI*2);cc.fill();
-                cc.globalAlpha=.58;cc.strokeStyle='#86efac';cc.lineWidth=2;cc.beginPath();cc.moveTo(0,radius*.18);cc.lineTo(0,-radius*.20);cc.stroke();
+        function brGetGrassSprite(variant,foreground) {
+            BRMP.grassSpriteCache=BRMP.grassSpriteCache||new Map();
+            var key=variant+'|'+(foreground?1:0);if(BRMP.grassSpriteCache.has(key))return BRMP.grassSpriteCache.get(key);
+            var sprite=document.createElement('canvas');sprite.width=256;sprite.height=256;var gc=sprite.getContext('2d');
+            gc.translate(128,128);
+            if(!foreground){gc.fillStyle='#123e26';gc.beginPath();gc.ellipse(0,12,120,104,0,0,Math.PI*2);gc.fill();}
+            var colors=foreground?['#38a84c','#51bc51','#7bce62']:['#1b6534','#247b38','#319443'];
+            // Deterministic overlapping leaf clumps: no random animation, filters or shadows.
+            for(var i=0;i<70;i++) {
+                var angle=i*2.399963+variant*.7,dist=Math.sqrt((i+.5)/70)*108;
+                var bx=Math.cos(angle)*dist,by=Math.sin(angle)*dist*.86+18;
+                if(foreground&&i%3===0)continue;
+                var height=18+(i*13+variant*7)%23,width=7+(i*7)%8;
+                gc.fillStyle=colors[i%3];gc.beginPath();
+                gc.moveTo(bx-width,by+7);gc.lineTo(bx-width*1.9,by-height*.8);gc.lineTo(bx-3,by-5);
+                gc.lineTo(bx+(i%2?3:-3),by-height);gc.lineTo(bx+4,by-5);gc.lineTo(bx+width*1.8,by-height*.72);gc.lineTo(bx+width,by+7);gc.closePath();gc.fill();
             }
-            cc.restore();
+            BRMP.grassSpriteCache.set(key,sprite);return sprite;
+        }
+        function brDrawStudentBush(cc,r,foreground) {
+            var radius=r[2],variant=Math.abs(Math.round(r[0]*.03+r[1]*.07))%3;
+            var self=BRMP.drawPlayers&&BRMP.drawPlayers.get(String(BRMP.playerId)),inside=self&&Math.hypot(self.x-r[0],self.y-r[1])<radius;
+            cc.save();cc.globalAlpha=foreground?(inside?.29:.58):.98;
+            cc.drawImage(brGetGrassSprite(variant,foreground),r[0]-radius,r[1]-radius,radius*2,radius*2);cc.restore();
         }
         function brDrawStudentSmoke(cc,r) {
             var radius=r[2];cc.save();cc.translate(r[0],r[1]);
@@ -8608,6 +8958,7 @@
             var spec=brAimSpec(ability,kind,Number(self.row[15]||38),Number(source.aimPower||1));
             var x=self.x,y=self.y,angle=Math.atan2(aimY,aimX),range=Math.max(1,Number(spec.range||0));
             var endX=x+aimX*range,endY=y+aimY*range;
+            if(spec.teleport){var landing=brLocalAimEndpoint(x,y,aimX,aimY,range,Number(self.row[15]||38),BRMP.latestView);endX=landing.x;endY=landing.y;}
             var rgb=kind==='attack'?'251,113,133':'96,165,250';
             var fade=gesture?1:brClamp((Number(castFx.until||now)-now)/170,0,1);
             cc.save();cc.globalAlpha=fade;cc.lineJoin='round';cc.lineCap='round';cc.setLineDash([12/zoom,8/zoom]);cc.lineWidth=3/zoom;
@@ -8712,9 +9063,12 @@
                     cc.strokeStyle='rgba(255,255,255,.9)';cc.lineWidth=Math.max(2,beamW*.34/zoom);cc.beginPath();cc.moveTo(x,y);cc.lineTo(x+dx*len,y+dy*len);cc.stroke();
                     cc.globalAlpha=alpha*.72;cc.strokeStyle=color;cc.lineWidth=Math.max(3,beamW/zoom);cc.beginPath();cc.moveTo(x,y);cc.lineTo(x+dx*len,y+dy*len);cc.stroke();
                 } else if(type==='explosion') {
-                    cc.strokeStyle=color;cc.lineWidth=Math.max(2,(8*(1-p)+2)/zoom);
-                    cc.beginPath();cc.arc(x,y,size*(.18+.82*p),0,Math.PI*2);cc.stroke();
-                    cc.globalAlpha=alpha*.55;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(1,3/zoom);cc.beginPath();cc.arc(x,y,size*(.08+.52*p),0,Math.PI*2);cc.stroke();
+                    var skillBlast=String(r[10]||'').indexOf('skill-')===0;
+                    cc.globalAlpha=alpha*(skillBlast?.32:.15);cc.fillStyle=color;cc.beginPath();cc.arc(x,y,size*(.40+.60*Math.min(1,p*2.8)),0,Math.PI*2);cc.fill();
+                    cc.globalAlpha=alpha;cc.strokeStyle=color;cc.lineWidth=Math.max(2,((skillBlast?13:8)*(1-p)+2)/zoom);
+                    cc.beginPath();cc.arc(x,y,size*(.22+.78*p),0,Math.PI*2);cc.stroke();
+                    cc.globalAlpha=alpha*.85;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(1,(skillBlast?6:3)/zoom);cc.beginPath();cc.arc(x,y,size*(.12+.52*p),0,Math.PI*2);cc.stroke();
+                    if(skillBlast){cc.beginPath();for(var ray=0;ray<6;ray++){var rayAngle=ray*Math.PI/3;cc.moveTo(x+Math.cos(rayAngle)*size*.45,y+Math.sin(rayAngle)*size*.45);cc.lineTo(x+Math.cos(rayAngle)*size*(.60+p*.36),y+Math.sin(rayAngle)*size*(.60+p*.36));}cc.stroke();}
                 } else if(type==='shot') {
                     var shotStyle=String(r[10]||''),travel=size*Math.min(1,p*1.8),sx=x+dx*travel,sy=y+dy*travel,shotSize=Math.max(5,Number(r[8]||8));
                     var tailLen=shotStyle==='sniper'?130:shotStyle==='machine'?86:shotStyle==='bomber'?54:72;
@@ -8729,22 +9083,36 @@
                     cc.moveTo(x-nx*side,y-ny*side);cc.lineTo(x+dx*dashLen-nx*side,y+dy*dashLen-ny*side);cc.stroke();
                     cc.globalAlpha=alpha*.72;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(1,3/zoom);cc.beginPath();cc.moveTo(x,y);cc.lineTo(x+dx*dashLen,y+dy*dashLen);cc.stroke();
                 } else if(type==='teleport') {
-                    var teleLen=size,tx=x+dx*teleLen,ty=y+dy*teleLen;
-                    cc.strokeStyle=color;cc.lineWidth=Math.max(3,(10*(1-p)+2)/zoom);cc.setLineDash([18/zoom,12/zoom]);
-                    cc.beginPath();cc.moveTo(x,y);cc.lineTo(tx,ty);cc.stroke();cc.setLineDash([]);
-                    cc.globalAlpha=alpha*.86;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(2,4/zoom);
-                    cc.beginPath();cc.arc(x,y,size*(.10+.13*p),0,Math.PI*2);cc.stroke();
-                    cc.beginPath();cc.arc(tx,ty,size*(.22+.12*(1-p)),0,Math.PI*2);cc.stroke();
+                    var teleLen=Number(r[6]||0),tx=x+dx*teleLen,ty=y+dy*teleLen,arrival=Math.max(50,Number(r[8]||110)),blinkStyle=String(r[10]||'');
+                    // One disappearing portal, one narrow seam and one arriving strike.
+                    cc.strokeStyle=color;cc.lineWidth=Math.max(2,(7*(1-p)+1)/zoom);
+                    cc.beginPath();cc.ellipse(x,y,Math.max(4,50*(1-p)),72*(1-p)+5,Math.atan2(dy,dx),0,Math.PI*2);cc.stroke();
+                    cc.globalAlpha=alpha*.42;cc.lineWidth=Math.max(2,6*(1-p)/zoom);cc.beginPath();cc.moveTo(x,y);cc.lineTo(tx,ty);cc.stroke();
+                    cc.globalAlpha=alpha*.24;cc.fillStyle=color;cc.beginPath();cc.arc(tx,ty,arrival*(.64+.36*p),0,Math.PI*2);cc.fill();
+                    cc.globalAlpha=alpha;cc.strokeStyle=color;cc.lineWidth=Math.max(2,6/zoom);cc.beginPath();cc.arc(tx,ty,arrival*(.54+.46*p),0,Math.PI*2);cc.stroke();
+                    cc.translate(tx,ty);cc.rotate(Math.atan2(dy,dx)+Math.PI/4);cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(3,(12*(1-p)+2)/zoom);
+                    var slash=arrival*(.70+.30*p);cc.beginPath();cc.moveTo(-slash,-slash*.25);cc.lineTo(slash,slash*.25);
+                    if(!/lava|thunder/.test(blinkStyle)){cc.moveTo(-slash*.25,slash);cc.lineTo(slash*.25,-slash);}cc.stroke();
                 }
                 cc.restore();
             });
         }
         function brDrawProjectileGlyph(cc,x,y,vx,vy,size,emoji,color,style,zoom,alpha) {
             var speed=Math.hypot(vx,vy)||1,ux=vx/speed,uy=vy/speed;
-            var minPx=style==='sniper'?10:style==='bomber'?11:style==='machine'?6.5:8;
-            var visualR=Math.max(Number(size||7),minPx/Math.max(.1,zoom)),tailPx=style==='sniper'?145:style==='machine'?82:style==='bomber'?58:76;
+            var skillShot=String(style||'').indexOf('skill-')===0;
+            var minPx=skillShot?16:style==='orb'?9:style==='sniper'?10:style==='bomber'?11:style==='machine'?6.5:8;
+            var visualR=Math.max(Number(size||7),minPx/Math.max(.1,zoom)),tailPx=style==='orb'?54:style==='sniper'?145:style==='machine'?82:style==='bomber'?58:76;
             var tail=Math.max(tailPx/Math.max(.1,zoom),Math.min(155,speed*4.4));
             cc.save();cc.globalAlpha=alpha==null?1:alpha;cc.lineCap='round';
+            if(skillShot) {
+                var skillTail=style==='skill-sniper'?175/zoom:style==='skill-bomber'?42/zoom:92/zoom;
+                cc.strokeStyle=color;cc.lineWidth=visualR*.9;cc.beginPath();cc.moveTo(x-ux*skillTail,y-uy*skillTail);cc.lineTo(x,y);cc.stroke();
+                cc.fillStyle=color;cc.beginPath();cc.arc(x,y,visualR,0,Math.PI*2);cc.fill();
+                cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(2,3/zoom);cc.beginPath();cc.arc(x,y,visualR*.78,0,Math.PI*2);cc.stroke();
+                cc.fillStyle='#ffffff';cc.beginPath();cc.arc(x+ux*visualR*.15,y+uy*visualR*.15,visualR*.36,0,Math.PI*2);cc.fill();
+                if(style==='skill-bomber'||style==='skill-heavy'){cc.strokeStyle=color;cc.lineWidth=Math.max(2,3/zoom);cc.beginPath();cc.arc(x,y,visualR*1.28,0,Math.PI*2);cc.stroke();}
+                cc.restore();return;
+            }
             cc.strokeStyle=color||'#ffffff';cc.lineWidth=Math.max(3/zoom,visualR*(style==='sniper'?.58:.42));
             cc.beginPath();cc.moveTo(x-ux*tail,y-uy*tail);cc.lineTo(x,y);cc.stroke();
             cc.globalAlpha=(alpha==null?1:alpha)*.32;cc.lineWidth=Math.max(7/zoom,visualR*1.55);cc.beginPath();cc.moveTo(x-ux*tail*.62,y-uy*tail*.62);cc.lineTo(x,y);cc.stroke();
@@ -8758,8 +9126,20 @@
         function brUpdateAndDrawLocalProjectiles(cc,dt,zoom,onScreen,frameNow) {
             var list=BRMP.localProjectiles||[],frames=dt/16.667,draw=BRMP.drawPlayers,self=draw&&draw.get(String(BRMP.playerId)),selfTeam=Number(self&&self.row&&self.row[8]||0);
             for(var i=list.length-1;i>=0;i--) {
-                var p=list[i],age=frameNow-p.born;p.life=p.maxLife-age;if(p.life<=0){list.splice(i,1);continue;}
-                p.px=p.x;p.py=p.y;p.x+=p.vx*frames;p.y+=p.vy*frames;
+                var p=list[i],age=frameNow-p.born;p.life=p.maxLife-age;
+                if(p.life<=0){if(p.blast)brPushLocalFx('explosion',p.x,p.y,{size:p.blast,color:p.color,style:p.style,sourceId:BRMP.playerId});list.splice(i,1);continue;}
+                p.px=p.x;p.py=p.y;
+                var liveFrames=Math.min(frames,Math.max(0,(p.life+dt)/16.667));
+                if(p.rangeRemaining!=null)liveFrames=Math.min(liveFrames,p.rangeRemaining/Math.max(.01,Math.hypot(p.vx,p.vy)));
+                p.x+=p.vx*liveFrames;p.y+=p.vy*liveFrames;
+                if(p.rangeRemaining!=null)p.rangeRemaining=Math.max(0,p.rangeRemaining-Math.hypot(p.vx,p.vy)*liveFrames);
+                var terrain=BRMP.latestView&&BRMP.latestView.walls||[],wallHit=false;
+                for(var wi=0;wi<terrain.length;wi++){
+                    var w=terrain[wi],ang=-Number(w[4]||0),ca=Math.cos(ang),sa=Math.sin(ang),rx=p.x-w[0],ry=p.y-w[1];
+                    var lx=rx*ca-ry*sa,ly=rx*sa+ry*ca;
+                    if(Math.hypot(lx-brClamp(lx,-w[2]/2,w[2]/2),ly-brClamp(ly,-w[3]/2,w[3]/2))<p.size){wallHit=true;break;}
+                }
+                if(wallHit){if(p.blast)brPushLocalFx('explosion',p.px,p.py,{size:p.blast,color:p.color,style:p.style,sourceId:BRMP.playerId});list.splice(i,1);continue;}
                 var hitTarget=null;if(draw&&!p.hit) {
                     draw.forEach(function(o,id){if(hitTarget||String(id)===String(BRMP.playerId)||!o.row||!o.row[7])return;
                         var team=Number(o.row[8]||0);if(selfTeam&&team===selfTeam)return;
@@ -8767,9 +9147,10 @@
                     });
                 }
                 if(hitTarget) {
-                    p.hit=true;brPushLocalFx('impact',p.x,p.y,{dx:p.vx,dy:p.vy,size:p.style==='bomber'?105:68,color:p.color,style:'predicted-'+p.style,sourceId:BRMP.playerId});
+                    p.hit=true;brPushLocalFx(p.blast?'explosion':'impact',p.x,p.y,{dx:p.vx,dy:p.vy,size:p.blast||(p.style==='bomber'?105:68),color:p.color,style:p.blast?p.style:'predicted-'+p.style,sourceId:BRMP.playerId});
                     brRegisterHitFeedback(String(hitTarget.id),0,p.x,p.y,BRMP.playerId,'predicted-projectile',false);list.splice(i,1);continue;
                 }
+                if(p.rangeRemaining===0){if(p.blast)brPushLocalFx('explosion',p.x,p.y,{size:p.blast,color:p.color,style:p.style,sourceId:BRMP.playerId});list.splice(i,1);continue;}
                 if(onScreen(p.x,p.y,120))brDrawProjectileGlyph(cc,p.x,p.y,p.vx,p.vy,p.size,p.emoji,p.color,p.style,zoom,brClamp(p.life/90,0,1));
             }
         }
@@ -8780,9 +9161,55 @@
             for(var i=0;i<4;i++){var a=Math.PI/4+i*Math.PI/2,inner=size*.42,outer=size;cc.beginPath();cc.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);cc.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);cc.stroke();}
             cc.restore();
         }
+        function brPredictSelf(p,view,dt,now) {
+            var step=1000/60,input=BRMP.inputState||{},dx=Number(input.dx||0),dy=Number(input.dy||0),amount=Math.hypot(dx,dy),flags=Number(p.row[23]||0);
+            var speed=Number(p.row[22]||4.27),moveX=0,moveY=0;
+            if(now<Number(BRMP.localMoveBoostUntil||0)&&!(flags&8))speed*=1.48;
+            if(amount>.05){var analog=speed*(.24+.76*Math.min(1,amount));moveX=dx/amount*analog;moveY=dy/amount*analog;}
+            p.predAccumulator=Math.min(80,Number(p.predAccumulator||0)+dt);
+            var state=p.predState||(p.predState={x:p.predX,y:p.predY,vx:p.predVx,vy:p.predVy});
+            var localDash=BRMP.localDash,localDashActive=localDash&&now<localDash.until;
+            if(localDash&&!localDashActive){BRMP.localDash=null;BRMP.localDashGraceUntil=now+450;p.dashUntil=0;}
+            while(p.predAccumulator+1e-6>=step) {
+                p.previousX=p.predX;p.previousY=p.predY;
+                if(!p.row[7]){p.predVx=0;p.predVy=0;}
+                else if(now<Number(p.stunUntil||0)) {p.predVx*=.8;p.predVy*=.8;localDashActive=false;BRMP.localDash=null;}
+                else if(localDashActive) {
+                    var dashSpeed=Math.hypot(localDash.vx,localDash.vy),dashStep=Math.min(dashSpeed,Math.max(0,localDash.remaining));
+                    var dashX=localDash.vx/Math.max(.01,dashSpeed),dashY=localDash.vy/Math.max(.01,dashSpeed);
+                    var landing=brLocalAimEndpoint(p.predX,p.predY,dashX,dashY,dashStep,Math.max(24,Number(p.row[15]||38)),view);
+                    if(Math.hypot(landing.x-(p.predX+dashX*dashStep),landing.y-(p.predY+dashY*dashStep))>.01){dashStep=0;localDash.remaining=0;}
+                    p.predVx=dashX*dashStep;p.predVy=dashY*dashStep;localDash.remaining=Math.max(0,localDash.remaining-dashStep);
+                }
+                else if(!localDashActive&&now>=Number(p.dashUntil||0)) {
+                    var response=amount>.05?.78:.48;
+                    p.predVx+=(moveX-p.predVx)*response;p.predVy+=(moveY-p.predVy)*response;
+                }
+                p.predX+=p.predVx;p.predY+=p.predVy;
+                state.x=p.predX;state.y=p.predY;state.vx=p.predVx;state.vy=p.predVy;
+                brResolvePredictedCollision(state,view,Math.max(24,Number(p.row[15]||38)));
+                p.predX=state.x;p.predY=state.y;p.predVx=state.vx*(localDashActive?1:.92);p.predVy=state.vy*(localDashActive?1:.92);p.predAccumulator-=step;
+                if(localDashActive&&localDash.remaining<=.001){p.predVx=0;p.predVy=0;localDashActive=false;BRMP.localDash=null;p.dashUntil=0;BRMP.localDashGraceUntil=now+450;}
+            }
+            var age=now-Number(p.authAt||0),ackReady=Number(p.inputAck||0)>=Number(BRMP.lastMoveSeq||0);
+            var hitCorrection=now<Number(p.hitCorrectionUntil||0);
+            if(p.row[7]&&age<500&&(ackReady||hitCorrection)&&now>=Number(BRMP.localTeleportUntil||0)&&!localDashActive&&(now>=Number(BRMP.localDashGraceUntil||0)||hitCorrection)) {
+                var travel=Math.min(100,Math.max(0,age))/step,authX=p.authX+Number(p.vx||0)*travel,authY=p.authY+Number(p.vy||0)*travel;
+                var ex=authX-p.predX,ey=authY-p.predY,error=Math.hypot(ex,ey),threshold=hitCorrection?4:amount>.05?80:12;
+                if(error>threshold) {
+                    var fix=1-Math.exp(-dt/(hitCorrection?90:amount>.05?480:180));
+                    var fx=ex*fix,fy=ey*fix,previousX=Number.isFinite(p.previousX)?p.previousX:p.predX,previousY=Number.isFinite(p.previousY)?p.previousY:p.predY;
+                    p.predX+=fx;p.predY+=fy;p.previousX=previousX+fx;p.previousY=previousY+fy;
+                }
+            }
+            // 30/60/90/120Hz에서도 물리는 정확히 60Hz. 그 사이 화면은 이전/현재 위치를 보간한다.
+            var blend=brClamp(p.predAccumulator/step,0,1);
+            p.x=Number.isFinite(p.previousX)?p.previousX+(p.predX-p.previousX)*blend:p.predX;
+            p.y=Number.isFinite(p.previousY)?p.previousY+(p.predY-p.previousY)*blend:p.predY;
+        }
         function brDrawStudentFrame() {
             BRMP.renderFrame=requestAnimationFrame(brDrawStudentFrame);
-            var c=brEl('br-student-canvas');if(c.classList.contains('br-hidden'))return;
+            var c=brEl('br-student-canvas');if(brEl('br-student-battle').classList.contains('br-hidden'))return;
             brResizeStudentCanvas();
             var w=c._cssW,h=c._cssH,dpr=c._dpr,cc=c._brCtx||(c._brCtx=c.getContext('2d',{alpha:false,desynchronized:true}));
             cc.setTransform(dpr,0,0,dpr,0,0);cc.fillStyle='#07101d';cc.fillRect(0,0,w,h);
@@ -8791,7 +9218,7 @@
                 cc.fillStyle='#dbeafe';cc.textAlign='center';cc.font='800 18px sans-serif';cc.fillText('경기 화면을 불러오는 중…',w/2,h/2);
                 return;
             }
-            var frameNow=performance.now(),dt=brClamp(frameNow-Number(BRMP.lastStudentFrameAt||frameNow-16.67),5,50);
+            var frameNow=performance.now(),dt=brClamp(frameNow-Number(BRMP.lastStudentFrameAt||frameNow-16.67),0,80);
             BRMP.lastStudentFrameAt=frameNow;
             BRMP.studentFrameEma=Number(BRMP.studentFrameEma||16.7)*.94+dt*.06;
             BRMP.studentFrameSamples=Number(BRMP.studentFrameSamples||0)+1;
@@ -8803,42 +9230,17 @@
                 if(Math.abs(nextQuality-currentQuality)>.04){BRMP.renderQuality=nextQuality;BRMP.lastQualityChangeAt=frameNow;c._lastResizeCheck=0;}
             }
             // 다른 플레이어는 약 150ms 과거의 두 스냅샷 사이를 보간한다. 내 캐릭터만 즉시 예측한다.
-            var frameUnits=dt/16.667,renderTime=frameNow-150;
+            var frameUnits=dt/(1000/60),renderTime=frameNow-Number(BRMP.remoteBuffer||215);
             draw.forEach(function(p,id){
                 if(String(id)===String(BRMP.playerId)&&BRMP.inputState) {
-                    var imx=Number(BRMP.inputState.dx||0),imy=Number(BRMP.inputState.dy||0),im=Math.hypot(imx,imy),flags=Number(p.row&&p.row[23]||0);
-                    var moveSpeed=Math.max(5.6,Number(p.row&&p.row[22]||6.1)),desiredX=0,desiredY=0;
-                    if(frameNow<Number(BRMP.localMoveBoostUntil||0)&&!(flags&8))moveSpeed*=1.48;
-                    var inputAmount=brClamp(im,0,1);
-                    if(im>.08){var analogSpeed=moveSpeed*(.24+.76*inputAmount);desiredX=imx/im*analogSpeed;desiredY=imy/im*analogSpeed;}
-                    var localDash=BRMP.localDash,localDashActive=localDash&&frameNow<Number(localDash.until||0);
-                    if(localDashActive){p.predVx=Number(localDash.vx||0);p.predVy=Number(localDash.vy||0);}
-                    else if(flags&3) {p.predVx=Number(p.vx||0);p.predVy=Number(p.vy||0);}
-                    else {
-                        var accel=1-Math.exp(-dt/(im>.08?18:42));
-                        p.predVx+=(desiredX-p.predVx)*accel;p.predVy+=(desiredY-p.predVy)*accel;
-                    }
-                    if(localDash&&!localDashActive)BRMP.localDash=null;
-                    p.predX+=p.predVx*frameUnits;p.predY+=p.predVy*frameUnits;
-                    var authAge=frameNow-Number(p.authAt||0);
-                    if(authAge<460){p.authX+=Number(p.vx||0)*frameUnits;p.authY+=Number(p.vy||0)*frameUnits;}
-                    var ex=p.authX-p.predX,ey=p.authY-p.predY,err=Math.hypot(ex,ey);
-                    // 스틱을 누르는 동안은 작은 서버 차이를 완전히 무시한다. 이것이 스냅샷마다 발생하던 미세한 뒤로 끄는 느낌을 없앤다.
-                    if(authAge<460) {
-                        if(im>.08&&err>220){var movingFix=1-Math.exp(-dt/680);p.predX+=ex*movingFix;p.predY+=ey*movingFix;}
-                        else if(im<=.08&&err>22){var idleFix=1-Math.exp(-dt/120);p.predX+=ex*idleFix;p.predY+=ey*idleFix;}
-                    }
-                    if(err>980){p.predX=p.authX;p.predY=p.authY;p.predVx=Number(p.vx||0);p.predVy=Number(p.vy||0);}
-                    var ps=p.predState||(p.predState={x:p.predX,y:p.predY,vx:p.predVx,vy:p.predVy});ps.x=p.predX;ps.y=p.predY;ps.vx=p.predVx;ps.vy=p.predVy;
-                    brResolvePredictedCollision(ps,view,Math.max(24,Number(p.row&&p.row[15]||38)));
-                    p.predX=ps.x;p.predY=ps.y;p.predVx=ps.vx;p.predVy=ps.vy;p.x=p.predX;p.y=p.predY;
+                    brPredictSelf(p,view,dt,frameNow);
                 } else {
                     var samples=p.samples||[],aSample=null,bSample=null;
                     for(var si=0;si<samples.length;si++){if(samples[si].t<=renderTime)aSample=samples[si];if(samples[si].t>=renderTime){bSample=samples[si];break;}}
                     if(!aSample)aSample=samples[0];if(!bSample)bSample=samples[samples.length-1];
                     if(aSample&&bSample) {
                         if(aSample!==bSample){var span=Math.max(1,bSample.t-aSample.t),mix=brClamp((renderTime-aSample.t)/span,0,1);p.x=aSample.x+(bSample.x-aSample.x)*mix;p.y=aSample.y+(bSample.y-aSample.y)*mix;}
-                        else {var extra=brClamp((renderTime-aSample.t)/16.667,0,20);p.x=aSample.x+aSample.vx*extra;p.y=aSample.y+aSample.vy*extra;}
+                        else {var extra=brClamp((renderTime-aSample.t)/(1000/60),0,8);p.x=aSample.x+aSample.vx*extra;p.y=aSample.y+aSample.vy*extra;}
                     }
                 }
                 var currentHp=Number(p.row&&p.row[5]||0);
@@ -8874,15 +9276,17 @@
             if(recoil&&frameNow<recoil.until){var recoilRatio=brClamp((recoil.until-frameNow)/150,0,1);shakeX+=recoil.x*recoilRatio;shakeY+=recoil.y*recoilRatio;}
             else if(recoil)BRMP.studentRecoil=null;
             cc.save();cc.translate(w/2+shakeX,h/2+shakeY);cc.scale(zoom,zoom);cc.translate(-cam.x,-cam.y);
-            var radius=Number(view.mapRadius||2600);
-            cc.fillStyle='#17233a';cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.fill();
-            cc.save();cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.clip();
+            var radius=Number.isFinite(view.mapRadius)?Math.max(0,view.mapRadius):2600,worldRadius=Number(view.worldRadius||2600);
+            cc.fillStyle='#17233a';cc.beginPath();cc.arc(0,0,worldRadius,0,Math.PI*2);cc.fill();
+            cc.save();cc.beginPath();cc.arc(0,0,worldRadius,0,Math.PI*2);cc.clip();
             cc.strokeStyle='rgba(107,139,184,.15)';cc.lineWidth=1;
             var halfW=w/zoom/2+220,halfH=h/zoom/2+220;
             function onScreen(x,y,pad){pad=Number(pad||0);return Math.abs(x-cam.x)<=halfW+pad&&Math.abs(y-cam.y)<=halfH+pad;}
             var minX=Math.floor((cam.x-halfW)/160)*160,maxX=cam.x+halfW,minY=Math.floor((cam.y-halfH)/160)*160,maxY=cam.y+halfH;
-            for(var gx=minX;gx<=maxX;gx+=160){cc.beginPath();cc.moveTo(gx,minY);cc.lineTo(gx,maxY);cc.stroke();}
-            for(var gy=minY;gy<=maxY;gy+=160){cc.beginPath();cc.moveTo(minX,gy);cc.lineTo(maxX,gy);cc.stroke();}
+            cc.beginPath();
+            for(var gx=minX;gx<=maxX;gx+=160){cc.moveTo(gx,minY);cc.lineTo(gx,maxY);}
+            for(var gy=minY;gy<=maxY;gy+=160){cc.moveTo(minX,gy);cc.lineTo(maxX,gy);}
+            cc.stroke();
             (view.bushes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentBush(cc,r,false);});
             (view.walls||[]).forEach(function(r){if(onScreen(r[0],r[1],Math.hypot(r[2],r[3])*.5))brDrawStudentWall(cc,r);});
             (view.zones||[]).forEach(function(r){
@@ -8951,6 +9355,8 @@
             (view.bushes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentBush(cc,r,true);});
             (view.smokes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentSmoke(cc,r);});
             brDrawAimPreview(cc,self,zoom);
+            // 위험 지역에서도 내 캐릭터와 장애물은 계속 보인다. 원 밖은 가벼운 색면만 덧씌운다.
+            cc.fillStyle='rgba(116,39,144,.25)';cc.beginPath();cc.arc(0,0,worldRadius,0,Math.PI*2);cc.arc(0,0,radius,0,Math.PI*2,true);cc.fill('evenodd');
             cc.restore();
             cc.strokeStyle='#fb4b63';cc.lineWidth=10/zoom;cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.stroke();
             cc.restore();
@@ -8966,7 +9372,7 @@
             cc.fillStyle=c._brVignette;cc.fillRect(0,0,w,h);
             var damageFlash=BRMP.damageFlash;
             if(damageFlash&&frameNow<damageFlash.until) {
-                var flashLife=[80,120,165,210][Number(damageFlash.level||0)]||120;
+                var flashLife=[85,130,180,235][Number(damageFlash.level||0)]||130;
                 var flashRatio=brClamp((damageFlash.until-frameNow)/flashLife,0,1);
                 cc.fillStyle='rgba(255,45,68,'+(Number(damageFlash.alpha||.10)*flashRatio).toFixed(3)+')';cc.fillRect(0,0,w,h);
             } else if(damageFlash)BRMP.damageFlash=null;
@@ -8998,8 +9404,8 @@
             attackBtn.style.setProperty('--br-cd-angle',(brClamp(1-basicCd/basicMax,0,1)*360).toFixed(1)+'deg');
             skillBtn.style.setProperty('--br-cd-angle',(brClamp(1-skillCd/skillMax,0,1)*360).toFixed(1)+'deg');
             var attackCdEl=brEl('br-attack-cd'),skillCdEl=brEl('br-skill-cd');
-            brSetText(attackCdEl,!r[7]?'탈락':attackReady?'READY':(basicCd/60).toFixed(1)+'s');
-            brSetText(skillCdEl,!r[7]?'탈락':skillReady?'READY':(skillCd/60).toFixed(1)+'s');
+            brSetText(attackCdEl,!r[7]?'×':attackReady?'✓':(basicCd/60).toFixed(1));
+            brSetText(skillCdEl,!r[7]?'×':skillReady?'✓':(skillCd/60).toFixed(1));
             attackCdEl.classList.toggle('ready',attackReady);skillCdEl.classList.toggle('ready',skillReady);
             brSetText(brEl('br-skill-count'),skillLeft<0?'∞':skillLeft+'회');
             BRMP.currentSelf=selfObj||{row:r,last:performance.now()};
@@ -9148,7 +9554,7 @@
                 BRMP.db.ref('rooms/'+BRMP.roomCode+'/inputs/'+BRMP.playerId).remove().catch(function(){});
             }
             brStopStudentBattle();brTearDownGame();brClearTimers();brClearRefs('studentRefs');brClearRefs('hostRefs');
-            BRMP.role=null;BRMP.backend=null;BRMP.roomCode='';BRMP.playerId='';BRMP.roomMeta=null;BRMP.players={};BRMP.inputs={};BRMP.results=null;BRMP.phaseHandled=null;
+            BRMP.role=null;BRMP.backend=null;BRMP.roomCode='';BRMP.playerId='';BRMP.roomMeta=null;BRMP.players={};BRMP.inputs={};BRMP.results=null;BRMP.phaseHandled=null;BRMP.rerollOptimistic=null;BRMP.rerollWriteChain=null;BRMP.draftReadyPending=false;
             brShow('br-home');
         }
 
@@ -9215,7 +9621,7 @@
                         BRMP.localCastFx={kind:kind,ax:Number(BRMP.inputState.ax||1),ay:Number(BRMP.inputState.ay||0),
                             aimPower:Number(BRMP.inputState.aimPower||1),until:performance.now()+170};
                         brImmediateCastFeedback(kind);
-                        brSendInput(true);if(navigator.vibrate)navigator.vibrate(kind==='attack'?12:[18,18,24]);
+                        brSendInput(true);if(navigator.vibrate)navigator.vibrate(kind==='attack'?12:[22,12,32]);
                     }
                     clearAim(gesture);
                 });
