@@ -717,14 +717,91 @@
             }
         }
 
+        // Shared contact geometry only: host authority and local prediction use the same walls.
+        function combatWallShape(w) {
+            if(Array.isArray(w)) {
+                const row=w;w=row._combatShape||(row._combatShape={});
+                w.x=row[0];w.y=row[1];w.w=row[2];w.h=row[3];w.angle=Number(row[4]||0);
+            }
+            const angle=Number(w.angle||0);
+            if(w._contactAngle!==angle){w._contactAngle=angle;w._contactCos=Math.cos(angle);w._contactSin=Math.sin(angle);}
+            return w;
+        }
+        function combatWallContact(x,y,r,wall) {
+            const w=combatWallShape(wall),c=w._contactCos,s=w._contactSin;
+            const dx=x-w.x,dy=y-w.y,lx=dx*c+dy*s,ly=-dx*s+dy*c,hx=w.w/2,hy=w.h/2;
+            const ox=lx-Math.max(-hx,Math.min(hx,lx)),oy=ly-Math.max(-hy,Math.min(hy,ly)),d=Math.hypot(ox,oy);
+            if(d>=r)return null;
+            let nx,ny,depth;
+            if(d>1e-8){nx=ox/d;ny=oy/d;depth=r-d;}
+            else if(hx-Math.abs(lx)<hy-Math.abs(ly)){nx=lx<0?-1:1;ny=0;depth=r+hx-Math.abs(lx);}
+            else {nx=0;ny=ly<0?-1:1;depth=r+hy-Math.abs(ly);}
+            return {nx:nx*c-ny*s,ny:nx*s+ny*c,depth,wall};
+        }
+        function combatSegmentCircleTime(x,y,dx,dy,r) {
+            const c=x*x+y*y-r*r;if(c<=0)return 0;
+            const a=dx*dx+dy*dy;if(a<1e-12)return null;
+            const b=x*dx+y*dy,disc=b*b-a*c;if(b>=0||disc<0)return null;
+            const t=(-b-Math.sqrt(disc))/a;return t>=0&&t<=1?t:null;
+        }
+        function combatSegmentBoxTime(x,y,dx,dy,hx,hy) {
+            let enter=0,exit=1;
+            for(const [p,v,h] of [[x,dx,hx],[y,dy,hy]]) {
+                if(Math.abs(v)<1e-12){if(Math.abs(p)>h)return null;continue;}
+                const a=(-h-p)/v,b=(h-p)/v;enter=Math.max(enter,Math.min(a,b));exit=Math.min(exit,Math.max(a,b));
+                if(enter>exit)return null;
+            }
+            return enter;
+        }
+        function combatTraceWalls(from,to,r,walls) {
+            let best=null;const vx=to.x-from.x,vy=to.y-from.y;
+            for(const wall of walls) {
+                const w=combatWallShape(wall),c=w._contactCos,s=w._contactSin,hx=w.w/2,hy=w.h/2;
+                const x=(from.x-w.x)*c+(from.y-w.y)*s,y=-(from.x-w.x)*s+(from.y-w.y)*c,dx=vx*c+vy*s,dy=-vx*s+vy*c;
+                if(Math.min(x,x+dx)>hx+r||Math.max(x,x+dx)<-hx-r||Math.min(y,y+dy)>hy+r||Math.max(y,y+dy)<-hy-r)continue;
+                let t=null;
+                const include=v=>{if(v!==null&&(t===null||v<t))t=v;};
+                include(combatSegmentBoxTime(x,y,dx,dy,hx+r,hy));include(combatSegmentBoxTime(x,y,dx,dy,hx,hy+r));
+                for(const sx of [-1,1])for(const sy of [-1,1])include(combatSegmentCircleTime(x-sx*hx,y-sy*hy,dx,dy,r));
+                if(t===null||(best&&t>=best.t))continue;
+                const hit=combatWallContact(from.x+vx*t,from.y+vy*t,r+.001,wall);
+                if(!hit)continue;
+                if(t<1e-8&&vx*hit.nx+vy*hit.ny>=-1e-8)continue;
+                best={...hit,t};
+            }
+            return best;
+        }
+        function combatMoveCircle(pos,vel,r,walls,stopOnWall=false) {
+            const out={x:pos.x,y:pos.y,vx:vel.x,vy:vel.y,hit:null};
+            // Resolve full penetration (including a centre inside cover), then slide along contact normals.
+            for(let pass=0;pass<4;pass++) {
+                let changed=false;
+                for(const w of walls){const h=combatWallContact(out.x,out.y,r,w);if(!h)continue;
+                    out.x+=h.nx*(h.depth+.001);out.y+=h.ny*(h.depth+.001);out.hit=h;changed=true;
+                    const vn=out.vx*h.nx+out.vy*h.ny;if(vn<0){out.vx-=h.nx*vn;out.vy-=h.ny*vn;}}
+                if(!changed)break;
+            }
+            let dx=out.vx,dy=out.vy;
+            for(let pass=0;pass<4&&Math.hypot(dx,dy)>1e-7;pass++) {
+                const h=combatTraceWalls(out,{x:out.x+dx,y:out.y+dy},r,walls);
+                if(!h){out.x+=dx;out.y+=dy;break;}
+                out.hit=h;out.x+=dx*h.t+h.nx*.001;out.y+=dy*h.t+h.ny*.001;
+                if(stopOnWall){out.vx=0;out.vy=0;break;}
+                dx*=1-h.t;dy*=1-h.t;
+                const vn=out.vx*h.nx+out.vy*h.ny;if(vn<0){out.vx-=h.nx*vn;out.vy-=h.ny*vn;}
+                const dn=dx*h.nx+dy*h.ny;if(dn<0){dx-=h.nx*dn;dy-=h.ny*dn;}
+            }
+            return out;
+        }
+
         // --- GAME CLASSES ---
         class SwingEffect {
-            constructor(owner, pos, dir, size, style='slash') {
+            constructor(owner, pos, dir, size, style='slash', halfAngle=Math.PI*.48) {
                 this.owner = owner;
                 this.pos = new Vec2(pos.x, pos.y);
                 this.dir = Math.atan2(dir.y, dir.x);
                 this.size = size;
-                this.style = style;
+                this.style = style;this.halfAngle=halfAngle;
                 this.life = owner?.ability?.t === 'S' ? 18 : (owner?.ability?.t === 'A' ? 16 : 13);
                 this.maxLife = this.life;
                 this.tier = owner?.ability?.t || 'C';
@@ -746,7 +823,7 @@
                 ctx.strokeStyle = tierColor;
                 ctx.lineWidth = (this.tier === 'S' ? 14 : this.tier === 'A' ? 11 : 7) * pct + 2;
                 ctx.beginPath();
-                ctx.arc(0, 0, this.size, -Math.PI*0.48, Math.PI*0.48);
+                ctx.arc(0, 0, this.size, -this.halfAngle, this.halfAngle);
                 ctx.stroke();
 
                 // 등급이 높을수록 겹쳐지는 2차 궤적
@@ -1310,6 +1387,7 @@
         class Projectile {
             constructor(owner, pos, dir, speed, damage, size, type, color, explodeRadius=0, emoji=null, opts={}) {
                 this.owner = owner; this.pos = pos; this.vel = dir.mult(speed);
+                this.inputKind=owner?.activeInputCommand?.kind||'';this.inputSeq=Number(owner?.activeInputCommand?.seq||0);
 
                 // v22.7: 상위랭크 원거리(PROJ) 화력 보강.
                 // S는 체감될 정도, A는 소폭만 올리고 B/C/F는 그대로 유지.
@@ -1362,12 +1440,14 @@
                 if(game&&owner&&type!=='ORBIT'&&game.frame-Number(owner.lastStudentShotFxFrame||-9999)>=2) {
                     game.emitStudentFx('shot',pos,{
                         dx:dir.x,dy:dir.y,size:Math.min(260,Math.max(120,speed*12)),
-                        color:opts.trailColor||color||'#ffffff',amount:size,style:this.weaponStyle||emoji||opts.vfx||''
+                        color:opts.trailColor||color||'#ffffff',amount:size,style:this.weaponStyle||emoji||opts.vfx||'',sourceId:owner.remoteId||('ai-'+owner.id)
                     });
                     owner.lastStudentShotFxFrame=game.frame;
                 }
             }
             update(game) {
+                if(this.life<=0)return;
+                const shotStart=new Vec2(this.pos.x,this.pos.y);let wallContact=null;
                 if(this.type === 'ORBIT') {
                     if(!this.owner.alive) { this.life = 0; return; }
                     this.life--;
@@ -1395,26 +1475,10 @@
                     let travel=this.vel;
                     if(this.rangeRemaining!==null&&travel.mag()>this.rangeRemaining)travel=travel.norm().mult(this.rangeRemaining);
                     let nextPos = this.pos.add(travel);
-                    let wallHit = game.checkWallCollision(nextPos, this.size);
-                    if(wallHit) {
-                        if(this.bounces > 0) {
-                            if(Math.abs(this.pos.x - wallHit.x) > Math.abs(this.pos.y - wallHit.y)) this.vel.x *= -1;
-                            else this.vel.y *= -1;
-                            this.bounces--; return;
-                        } else if(this.type !== 'GHOST') {
-                            if(this.playerSkillBlast){this.detonatePlayerSkill(game);return;}
-                            this.life = 0; game.spawnParticles(this.pos, 3, '#fff');
-                            if (this.explodeRadius > 0) {
-                                game.spawnExplosion(this.pos, this.explodeRadius, this.color);
-                                game.applyAoE(this.pos, this.explodeRadius, this.damage, this.owner, this.knockback);
-                            }
-                            return;
-                        }
-                    }
+                    if(this.type!=='GHOST')wallContact=combatTraceWalls(this.pos,nextPos,this.size,game.walls);
                     this.pos = nextPos;
                     this.life--;
                     if(this.rangeRemaining!==null)this.rangeRemaining=Math.max(0,this.rangeRemaining-travel.mag());
-                    if(this.playerSkillBlast&&(this.life<=0||this.rangeRemaining===0)){this.detonatePlayerSkill(game);return;}
                     if(this.type === 'missile') {
                         // v22.2: 위치 보정은 부드럽게 매 프레임 하되, 무거운 타깃 탐색만 인구수에 따라 분산.
                         const refreshEvery = game.getHomingRefreshCadence();
@@ -1439,27 +1503,50 @@
                     game.particles.push(new Particle(new Vec2(this.pos.x, this.pos.y), back.add(jitter), this.trailColor, 10, Math.max(2, this.size*0.22)));
                 }
 
-                // v22.2 HOT PATH: 매 투사체마다 임시 배열을 만들지 않고 Spatial Grid 버킷을 직접 순회.
-                const hitRadius=this.size+150;
-                const cs=game.spatialCellSize;
-                const minX=Math.floor((this.pos.x-hitRadius)/cs), maxX=Math.floor((this.pos.x+hitRadius)/cs);
-                const minY=Math.floor((this.pos.y-hitRadius)/cs), maxY=Math.floor((this.pos.y+hitRadius)/cs);
-                for(let gx=minX;gx<=maxX;gx++) for(let gy=minY;gy<=maxY;gy++) {
-                    const bucket=game.spatialGrid.get(`${gx},${gy}`);
-                    if(!bucket) continue;
+                // Test the travelled segment against moving targets, in impact order.
+                // ORBIT remains a contact weapon and retains its existing repeat-hit interval.
+                const shotEnd=new Vec2(this.pos.x,this.pos.y),travel=shotEnd.sub(shotStart),orbit=this.type==='ORBIT';
+                const padding=this.size+150+Number(game.maxParticipantStep||0),cs=game.spatialCellSize;
+                const minX=Math.floor((Math.min(shotStart.x,shotEnd.x)-padding)/cs),maxX=Math.floor((Math.max(shotStart.x,shotEnd.x)+padding)/cs);
+                const minY=Math.floor((Math.min(shotStart.y,shotEnd.y)-padding)/cs),maxY=Math.floor((Math.max(shotStart.y,shotEnd.y)+padding)/cs),contacts=[];
+                for(let gx=minX;gx<=maxX;gx++)for(let gy=minY;gy<=maxY;gy++) {
+                    const bucket=game.spatialGrid.get(`${gx},${gy}`);if(!bucket)continue;
                     for(const p of bucket) {
-                        if(p === this.owner || !p.alive || (this.owner.team !== 0 && p.team === this.owner.team)) continue;
-                        if(this.pos.dist(p.pos) >= p.radius + this.size) continue;
-                        const repeatDelay = this.type === 'ORBIT'
-                            ? (this.owner?.ability?.sub === 'SWORD_ORBIT' ? 12 : 10)
-                            : ((this.pierce || this.type === 'BOOMERANG') ? 10 : 0);
-                        const lastHit = this.hitMemory[p.id] ?? -99999;
-                        if(repeatDelay > 0 && game.frame - lastHit < repeatDelay) continue;
-                        this.hitMemory[p.id] = game.frame;
-                        this.hit(game, p);
-                        if(this.type !== 'ORBIT' && this.type !== 'BOOMERANG' && !this.pierce) return;
+                        if(p===this.owner||!p.alive||(this.owner.team!==0&&p.team===this.owner.team))continue;
+                        let t;
+                        if(orbit)t=this.pos.dist(p.pos)<p.radius+this.size?0:null;
+                        else {
+                            const px=Number.isFinite(p.combatPreviousX)?p.combatPreviousX:p.pos.x,py=Number.isFinite(p.combatPreviousY)?p.combatPreviousY:p.pos.y;
+                            t=combatSegmentCircleTime(shotStart.x-px,shotStart.y-py,travel.x-(p.pos.x-px),travel.y-(p.pos.y-py),p.radius+this.size);
+                        }
+                        if(t===null||(wallContact&&t>=wallContact.t))continue;
+                        const repeatDelay=orbit?(this.owner?.ability?.sub==='SWORD_ORBIT'?12:10):((this.pierce||this.type==='BOOMERANG')?10:0);
+                        if(repeatDelay>0&&game.frame-(this.hitMemory[p.id]??-99999)<repeatDelay)continue;
+                        contacts.push({p,t});
                     }
                 }
+                contacts.sort((a,b)=>a.t-b.t||a.p.id-b.p.id);
+                for(const {p,t} of contacts) {
+                    if(!p.alive)continue;
+                    this.hitMemory[p.id]=game.frame;
+                    this.pos=orbit?shotEnd:shotStart.add(travel.mult(t));
+                    this.hit(game,p);
+                    if(this.detonated||(this.type!=='ORBIT'&&this.type!=='BOOMERANG'&&!this.pierce))return;
+                }
+                this.pos=shotEnd;
+                if(wallContact) {
+                    this.pos=shotStart.add(travel.mult(wallContact.t));
+                    if(this.bounces>0) {
+                        const normal=new Vec2(wallContact.nx,wallContact.ny),vn=this.vel.x*normal.x+this.vel.y*normal.y;
+                        this.vel=this.vel.sub(normal.mult(2*vn));this.pos=this.pos.add(normal.mult(.01));this.bounces--;
+                    } else {
+                        if(this.playerSkillBlast){this.detonatePlayerSkill(game);return;}
+                        this.life=0;game.spawnParticles(this.pos,3,'#fff');
+                        if(this.explodeRadius>0){game.spawnExplosion(this.pos,this.explodeRadius,this.color);game.applyAoE(this.pos,this.explodeRadius,this.damage,this.owner,this.knockback);}
+                        return;
+                    }
+                }
+                if(this.playerSkillBlast&&(this.life<=0||this.rangeRemaining===0))this.detonatePlayerSkill(game);
             }
             detonatePlayerSkill(game,primaryTarget=null) {
                 if(this.detonated)return;
@@ -1474,7 +1561,7 @@
                         const distance=victim.pos.dist(this.pos);
                         if(victim!==primaryTarget&&(distance>radius+victim.radius*.35||game.checkWallBetween(this.pos,victim.pos)))continue;
                         const falloff=victim===primaryTarget?1:1-.35*Math.min(1,distance/radius);
-                        victim.takeDamage(this.damage*falloff,this.owner);
+                        victim.takeDamage(this.damage*falloff,this.owner,false,victim.pos.sub(this.pos));
                         const outward=victim.pos.sub(this.pos),dir=outward.mag()>.01?outward.norm():this.vel.norm();
                         const push=this.knockback*falloff;
                         victim.vel=victim.vel.add(dir.mult(push*(victim.knockbackResist||1)));
@@ -1497,7 +1584,7 @@
                 const dealDamage=(victim)=>{
                     const previousStyle=this.owner&&this.owner.currentImpactStyle;
                     if(this.owner&&this.impactStyle)this.owner.currentImpactStyle=this.impactStyle;
-                    try { victim.takeDamage(this.damage,this.owner); }
+                    try { victim.takeDamage(this.damage,this.owner,false,this.explodeRadius>0?victim.pos.sub(this.pos):(this.type==='ORBIT'?victim.pos.sub(this.owner.pos):this.vel)); }
                     finally { if(this.owner)this.owner.currentImpactStyle=previousStyle||''; }
                 };
                 
@@ -1506,7 +1593,7 @@
                     for(const p of game.getNearbyParticipants(this.pos,this.explodeRadius+70)) {
                         if(p===this.owner || !p.alive || p.id===999) continue;
                         if(this.owner.team!==0 && p.team===this.owner.team) continue;
-                        if(p.pos.dist(this.pos) < this.explodeRadius) {
+                        if(p===target||p.pos.dist(this.pos) < this.explodeRadius) {
                             dealDamage(p);
                             p.vel = p.vel.add(p.pos.sub(this.pos).norm().mult(Math.max(12, this.knockback) * (p.knockbackResist || 1)));
                             if(this.owner?.ability?.sub==='SODA_BOMB') p.stunned=Math.max(p.stunned,7);
@@ -2148,6 +2235,7 @@
                     }
                     if(this.poisonFrames <= 0) this.poisonOwner = null;
                 }
+                if(!this.alive)return; // A lethal DOT cannot be followed by movement or a new attack.
                 if (this.ability.sub === 'REGEN' && this.hp < this.maxHp && game.frame % 60 === 0) {
                     this.hp = Math.min(this.hp + (4.2 * this.damageMult), this.maxHp); game.addText(this.pos, "✚", "#0f0");
                 }
@@ -2236,7 +2324,7 @@
                 }
 
                 // 학생 입력은 위치 적분보다 먼저 반영한다. 한 물리 프레임 늦게 출발하던 체감 지연을 제거한다.
-                if(this.humanControlled&&!this.ringRecoveryActive&&this.stunned<=0)this.runAI(game);
+                if(this.humanControlled&&!this.ringRecoveryActive)this.runAI(game);
 
                 const playerDashStep=this.humanControlled&&this.playerDash&&this.playerDash.remaining>0?this.playerDash:null;
                 const dashStart=playerDashStep?new Vec2(this.pos.x,this.pos.y):null;
@@ -2245,7 +2333,15 @@
                 if (isNaN(nextPos.x) || isNaN(nextPos.y)) { this.vel = new Vec2(0,0); return; }
 
                 let wallHit = game.checkWallCollision(nextPos, this.radius);
-                if(wallHit&&playerDashStep){playerDashStep.remaining=0;this.vel=new Vec2(0,0);}
+                if(this.humanControlled) {
+                    const phasesWalls=this.ability.sub==='GHOST_MOVE'||(this.ability.sub==='FLY_DASH'&&this.dashFrames>0);
+                    const moved=combatMoveCircle(this.pos,this.vel,this.radius,phasesWalls?[]:game.walls,!!playerDashStep);
+                    wallHit=moved.hit;
+                    if(wallHit&&!playerDashStep)game.handleWallCrash(this,this.vel.mag());
+                    this.pos=new Vec2(moved.x,moved.y);this.vel=this.alive?new Vec2(moved.vx,moved.vy):new Vec2(0,0);
+                    if(wallHit&&playerDashStep)playerDashStep.remaining=0;
+                }
+                else if(wallHit&&playerDashStep){playerDashStep.remaining=0;this.vel=new Vec2(0,0);}
                 else if(wallHit && this.ability.sub !== 'GHOST_MOVE' && !(this.ability.sub === 'FLY_DASH' && this.dashFrames > 0)) {
                     game.handleWallCrash(this, this.vel.mag());
                     const n = wallHit.normal || this.pos.sub(new Vec2(wallHit.x,wallHit.y)).norm();
@@ -2260,6 +2356,7 @@
                     this.pos = nextPos;
                 }
 
+                if(!this.alive)return;
                 if(playerDashStep) {
                     playerDashStep.remaining=Math.max(0,playerDashStep.remaining-this.pos.dist(dashStart));
                     this.playerDashContactFrame=game.frame;
@@ -3885,7 +3982,8 @@
                 }
             }
 
-            takeDamage(amt, attacker, reflected=false) {
+            takeDamage(amt, attacker, reflected=false, contactDirection=null) {
+                if(!this.alive||!Number.isFinite(amt)||amt<=0)return 0;
                 if (this.invisible && rand() < 0.4) { game.addText(this.pos, "MISS", "#888"); return; }
                 
                 if (this.ability.sub === 'WEAK' || this.ability.sub === 'PAPER_THIN') amt *= 3;
@@ -3915,7 +4013,7 @@
                 if(skillImpact&&actualDamage>=7) impactLevel=Math.min(3,impactLevel+1);
                 if(game&&attacker&&attacker!==this&&attacker.id!==999&&actualDamage>=7&&
                    (game.frame-Number(this.lastDamageImpulseFrame||-9999)>=2||impactLevel>Number(this.lastDamageImpactLevel||0))) {
-                    let hitDir=this.pos.sub(attacker.pos||this.pos).norm();
+                    let hitDir=contactDirection&&contactDirection.mag()>.001?contactDirection.norm():this.pos.sub(attacker.pos||this.pos).norm();
                     if(hitDir.mag()<.01)hitDir=(attacker.lastAimDir&&attacker.lastAimDir.mag()>.01)?attacker.lastAimDir.norm():new Vec2(1,0);
                     const kick=[2,6.8,11.4,18.5][impactLevel]*(closeImpact?1.40:1)*(skillImpact?1.10:1);
                     this.vel=this.vel.add(hitDir.mult(kick*(this.knockbackResist||1)));
@@ -3931,7 +4029,7 @@
                 // 독/다단히트가 몰려도 3프레임에 한 번만 보내 네트워크와 렌더 부하를 제한한다.
                 if(game && attacker && attacker!==this && actualDamage>0 &&
                    game.frame-Number(this.lastStudentHitFxFrame||-9999)>=3) {
-                    const hitDir=this.pos.sub(attacker.pos||this.pos).norm();
+                    const hitDir=contactDirection&&contactDirection.mag()>.001?contactDirection.norm():this.pos.sub(attacker.pos||this.pos).norm();
                     game.emitStudentFx('hit',this.pos,{
                         dx:hitDir.x,dy:hitDir.y,
                         size:Math.min(closeImpact?112:78,Math.max(closeImpact?30:18,actualDamage*(closeImpact?1.9:1.45))),
@@ -4295,7 +4393,8 @@
             }
 
             checkWallBetween(p1, p2) {
-                // ✨ v13: 중점 하나만 보던 방식 대신 선분 여러 지점을 검사
+                if(window.BRMP?.active)return !!combatTraceWalls(p1,p2,8,this.walls);
+                // Legacy AI pathfinding retains its existing sampling.
                 const steps = 7;
                 for(let i=1; i<steps; i++) {
                     const t = i/steps;
@@ -4364,6 +4463,7 @@
                 if(!eliminated)return;
                 eliminated.vel=new Vec2(0,0);eliminated.invisible=false;eliminated.attackCommitFrames=0;
                 eliminated.cachedTargetId=null;eliminated.comboTargetId=null;eliminated.rivalId=null;
+                eliminated.pendingAttack=null;eliminated.pendingSkill=null;eliminated.playerDash=null;eliminated.dashFrames=0;
                 for(const p of this.participants) {
                     if(p===eliminated)continue;
                     if(p.cachedTargetId===eliminated.id){p.cachedTargetId=null;p.nextTargetRefresh=0;}
@@ -4526,8 +4626,8 @@
                         const delta=p1.pos.sub(p2.pos); let d=delta.mag();
                         const minD=p1.radius+p2.radius;
                         if(d>=minD) continue;
-                        if(d<0.001) d=0.001;
-                        const n=delta.mult(1/d);
+                        const n=d<0.001?new Vec2(p1.id<p2.id?1:-1,0):delta.mult(1/d);
+                        if(d<0.001)d=0;
                         const overlap=minD-d;
                         const m1=Math.max(1,p1.radius*p1.radius), m2=Math.max(1,p2.radius*p2.radius);
                         p1.pos=p1.pos.add(n.mult(overlap*(m2/(m1+m2))));
@@ -5619,6 +5719,8 @@
                     this.frame++;
                     this.refreshAliveCache();
                     this.rebuildSpatialGrid();
+                    this.maxParticipantStep=0;
+                    for(const p of this.participants){p.combatPreviousX=p.pos.x;p.combatPreviousY=p.pos.y;p.combatPreviousWarp=Number(p.warpSeq||0);}
                     const idleFrames = this.frame - this.lastCombatFrame;
                     // v18: 초반 정찰/간보기 시간을 Battle Fever가 억지로 깨지 않도록 최소 13초 이후부터 개입.
                     if(this.frame > 780 && idleFrames > 360) this.triggerBattleFever();
@@ -5671,6 +5773,11 @@
                             }
                         }
                     }
+                    for(const p of this.participants) {
+                        if(!Number.isFinite(p.combatPreviousX)||Number(p.warpSeq||0)!==p.combatPreviousWarp){p.combatPreviousX=p.pos.x;p.combatPreviousY=p.pos.y;}
+                        this.maxParticipantStep=Math.max(this.maxParticipantStep,Math.hypot(p.pos.x-p.combatPreviousX,p.pos.y-p.combatPreviousY));
+                    }
+                    this.rebuildSpatialGrid(); // Projectiles query the current cells, not the pre-movement cells.
                     if(this.supplyDrop) {
                         this.supplyDrop.update(this);
                         if(this.supplyDrop.claimed||this.supplyDrop.life<=0) {
@@ -5724,6 +5831,12 @@
                     const collisionCadence=this.getCollisionCadence();
                     if(collisionCadence===1 || this.frame % collisionCadence === 0) {
                         this.resolveParticipantCollisions();
+                        for(const p of this.participants)if(p.humanControlled&&p.alive&&p.ability.sub!=='GHOST_MOVE'&&!(p.ability.sub==='FLY_DASH'&&p.dashFrames>0)) {
+                            const corrected=combatMoveCircle(p.pos,{x:0,y:0},p.radius,this.walls);
+                            p.pos=new Vec2(corrected.x,corrected.y);
+                            const edge=(this.worldRadius||2600)-p.radius-4,delta=p.pos.sub(this.center),d=delta.mag();
+                            if(d>edge)p.pos=this.center.add(delta.mult(edge/d));
+                        }
                     }
 
                     let alive = this.participants.filter(p => p.alive && p.id !== 999);
@@ -6164,11 +6277,11 @@
                     }
                 });
             }
-            addSwingEffect(owner, pos, dir, size, style='slash') {
+            addSwingEffect(owner, pos, dir, size, style='slash',halfAngle=Math.PI*.48) {
                 // 베기 궤적은 저비용 객체라 호스트에도 제한된 개수만 유지해 근접 교전을 읽을 수 있게 한다.
-                this.swings.push(new SwingEffect(owner,pos,dir,size,style));
+                this.swings.push(new SwingEffect(owner,pos,dir,size,style,halfAngle));
                 const color=({S:'#fb4b63',A:'#fbbf24',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'})[owner?.ability?.t]||'#fff';
-                this.emitStudentFx('swing',pos,{dx:dir.x,dy:dir.y,size,color,style,targetId:owner?.remoteId||('ai-'+owner?.id)});
+                this.emitStudentFx('swing',pos,{dx:dir.x,dy:dir.y,size,color,style,amount:halfAngle,sourceId:owner?.remoteId||('ai-'+owner?.id),targetId:owner?.remoteId||('ai-'+owner?.id)});
                 const cap = this.isVisualPerformanceMode() ? 36 : 80;
                 if(this.swings.length > cap) this.swings.splice(0, this.swings.length-cap);
             }
@@ -7531,16 +7644,27 @@
             }
             return null;
         }
+        function brBasicAttackFrames(ability) {
+            var cd=({S:34,A:38,B:43,C:48,F:56}[ability.t]||46)+Math.abs(abilityTimingHash((ability.n||'emoji')+'|basic'))%11-5;
+            var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].includes(ability.type);
+            return close?cd:Math.round(cd*getRangedCombatProfile(ability,'basic').cooldownScale);
+        }
+        function brBasicShotSize(ability,rendered) {
+            var style=getRangedCombatProfile(ability,'basic').style;
+            var size={S:13,A:12,B:11,C:10,F:8}[ability.t]*(style==='heavy'?1.18:style==='bomber'?1.28:style==='sniper'?.82:1);
+            if(rendered&&ability.type===ABILITY_TYPES.PROJ)size*=ability.t==='S'?1.14:ability.t==='A'?1.08:1;
+            return size;
+        }
         function brAimSpec(ability,kind,playerRadius,power) {
-            ability=ability||{};playerRadius=Math.max(24,Number(playerRadius||38));
+            ability=ability||{};playerRadius=Math.max(kind==='attack'?1:24,Number(playerRadius||38));
             power=brClamp(Number(power||1),.18,1);
             var type=ability.type,tier=ability.t||'C',sub=ability.sub||'';
             var label=kind==='attack'?'일반 공격':(ability.n||'스킬');
             if(kind==='attack') {
                 var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].indexOf(type)>=0;
-                if(close)return {shape:'cone',range:playerRadius+78,halfAngle:Math.acos(.05),width:playerRadius*.8,label:label};
+                if(close)return {shape:'cone',range:playerRadius+86,halfAngle:Math.acos(.05),width:playerRadius*.8,label:label};
                 var basicProfile=getRangedCombatProfile(ability,'basic');
-                return {shape:'line',range:basicProfile.range,width:Math.max(42,Number(ability.pSize||10)*3.2),label:label+' · '+({sniper:'저격',machine:'연사',bomber:'폭격',heavy:'중포',homing:'유도',boomerang:'왕복',standard:'사격'}[basicProfile.style]||'사격')};
+                return {shape:'line',range:playerRadius*.7+Math.ceil(basicProfile.range/basicProfile.speed)*basicProfile.speed,width:brBasicShotSize(ability,true)*2,label:label+' · '+({sniper:'저격',machine:'연사',bomber:'폭격',heavy:'중포',homing:'유도',boomerang:'왕복',standard:'사격'}[basicProfile.style]||'사격')};
             }
             var playable=brGetPlayableSkillInfo(ability);
             if(playable) {
@@ -7768,7 +7892,7 @@
             // 한 학생이 조이스틱을 움직일 때마다 inputs 전체(최대 30명)를 다시 내려받던 병목 제거.
             // 변경된 자식 한 개만 반영해 JSON 파싱·GC와 Firebase 다운로드를 크게 줄인다.
             BRMP.inputs={};
-            function upsertInput(s){var id=String(s.key||''),data=s.val()||{};data._receivedAt=brNow();BRMP.inputs[id]=data;}
+            function upsertInput(s){var id=String(s.key||''),data=s.val()||{},old=BRMP.inputs[id];if(old&&Number(data.seq||0)<Number(old.seq||0))return;data._receivedAt=brNow();BRMP.inputs[id]=data;}
             brRefOn(inputsRef,'child_added',upsertInput,BRMP.hostRefs);
             brRefOn(inputsRef,'child_changed',upsertInput,BRMP.hostRefs);
             brRefOn(inputsRef,'child_removed',function(s){delete BRMP.inputs[String(s.key||'')];},BRMP.hostRefs);
@@ -8246,7 +8370,7 @@
                 var p=new Participant(i,rec.name,EMOJI_DB[idx],new Vec2(0,0),Number(rec.team||0));
                 p.remoteId=rec._id;p.abilityIndex=idx;p.isBot=!!rec.bot;p.deaths=0;p.placement=null;
                 p.maxSkillUses=-1;p.skillUsesLeft=-1;
-                p.basicCooldown=0;p.basicCooldownMax=1;p.skillCooldownMax=Math.max(1,Number(p.maxCooldown||1));
+                p.basicCooldown=0;p.basicCooldownMax=brBasicAttackFrames(p.ability);p.skillCooldownMax=Math.max(1,Number(p.maxCooldown||1));
                 p.lastRemoteAttack=0;p.lastRemoteSkill=0;p.lastAimDir=new Vec2(1,0);p.manualAimCast=false;
                 p.activationFrame=0;
                 if(!rec.bot) {
@@ -8360,7 +8484,7 @@
             if(!target||!target.alive)return false;
             var hitDir=dir&&dir.mag()>.01?dir.norm():target.pos.sub(p.pos).norm();if(hitDir.mag()<.01)hitDir=new Vec2(1,0);
             var previousStyle=p.currentImpactStyle;p.currentImpactStyle=style;
-            try { target.takeDamage(damage,p); } finally { p.currentImpactStyle=previousStyle||''; }
+            try { target.takeDamage(damage,p,false,hitDir); } finally { p.currentImpactStyle=previousStyle||''; }
             var skillPush=push*1.18+3;
             target.vel=target.vel.add(hitDir.mult(skillPush*(target.knockbackResist||1)));
             if(stun>0)target.stunned=Math.max(target.stunned,stun+2);
@@ -8404,7 +8528,7 @@
                 });
             } else if(key==='tank-punch'||key==='melee-uppercut') {
                 targets=brPlayableEnemiesInCone(p,g,aim,Number(spec.range||220),Number(spec.halfAngle||.65),1);
-                g.addSwingEffect(p,p.pos.add(aim.mult(p.radius*.52)),aim,Number(spec.range||220),key==='tank-punch'?'punch':'hammer');
+                g.addSwingEffect(p,p.pos,aim,Number(spec.range||220),key==='tank-punch'?'punch':'hammer',Number(spec.halfAngle||.62));
                 if(targets[0])brApplyPlayableHit(p,g,targets[0],brTierValue(tier,key==='tank-punch'?{S:60,A:52,B:44,C:36,F:27}:{S:52,A:46,B:40,C:34,F:26}),
                     brTierValue(tier,key==='tank-punch'?{S:58,A:52,B:46,C:40,F:32}:{S:48,A:43,B:38,C:33,F:27}),
                     brTierValue(tier,key==='tank-punch'?{S:15,A:13,B:11,C:9,F:7}:{S:30,A:27,B:24,C:20,F:16}),aim,key,color);
@@ -8415,8 +8539,8 @@
                 g.emitStudentFx('dash',p.pos,{dx:aim.x,dy:aim.y,size:range,color:color,style:'melee-lunge',sourceId:sourceId});
             } else if(key==='melee-combo') {
                 targets=brPlayableEnemiesInCone(p,g,aim,Number(spec.range||220),Number(spec.halfAngle||.86),3);
-                g.addSwingEffect(p,p.pos.add(aim.mult(p.radius*.42)),aim,Number(spec.range||220)*.94,'slash');
-                g.addSwingEffect(p,p.pos.add(aim.mult(p.radius*.68)),aim.rotate(.13),Number(spec.range||220)*.78,'slash');
+                g.addSwingEffect(p,p.pos,aim,Number(spec.range||220),'slash',Number(spec.halfAngle||.86));
+                g.addSwingEffect(p,p.pos,aim,Number(spec.range||220)*.78,'slash',Number(spec.halfAngle||.86));
                 targets.forEach(function(o,idx){brApplyPlayableHit(p,g,o,brTierValue(tier,{S:48,A:43,B:38,C:33,F:26})*(idx?0.74:1),brTierValue(tier,{S:30,A:27,B:24,C:20,F:16}),7,aim,'melee-combo',color);});
                 if(p.ability.sub==='VAMPIRE_SLASH'&&targets.length)p.hp=Math.min(p.maxHp,p.hp+brTierValue(tier,{S:30,A:24,B:20,C:16,F:12}));
             } else if(key==='ranged-sprint') {
@@ -8503,18 +8627,28 @@
                 var cdStep=p.teamHasteFrames>0?2:1;
                 p.cooldown=Math.max(0,p.cooldown-cdStep);
             }
-            var attackSeq=Number(input.attackSeq||0);
-            if(attackSeq>p.lastRemoteAttack) {
-                p.lastRemoteAttack=attackSeq;
-                if(p.basicCooldown<=0&&p.stunned<=0&&p.alive)brBasicAttack(p,g,p.lastAimDir);
-            }
-            var skillSeq=Number(input.skillSeq||0);
-            if(skillSeq>p.lastRemoteSkill) {
-                p.lastRemoteSkill=skillSeq;
-                if(p.skillUsesLeft!==0&&p.cooldown<=0&&p.stunned<=0&&p.alive) {
-                    brCastHumanSkill(p,g,p.lastAimDir,Number(input.ap||1));
-                    p.skillCooldownMax=Math.max(1,Number(p.cooldown||p.maxCooldown||1));
+            for(var kind of ['attack','skill']) {
+                var isAttack=kind==='attack',seq=Number(input[kind+'Seq']||0),seenKey=isAttack?'lastRemoteAttack':'lastRemoteSkill';
+                var pendingKey=isAttack?'pendingAttack':'pendingSkill',resolvedKey=isAttack?'resolvedAttackSeq':'resolvedSkillSeq';
+                if(seq>Number(p[seenKey]||0)) {
+                    p[seenKey]=seq;
+                    var command=input[kind],captured=command&&Number(command.seq)===seq?command:input;
+                    var ax=Number(captured.ax??p.lastAimDir.x),ay=Number(captured.ay??p.lastAimDir.y),dir=new Vec2(ax,ay);
+                    if(!Number.isFinite(ax)||!Number.isFinite(ay)||dir.mag()<.05)dir=p.lastAimDir;
+                    p[pendingKey]=fresh?{seq:seq,aim:dir.norm(),power:brClamp(Number(captured.ap??input.ap??1),.18,1),expires:g.frame+6}:null;
+                    if(!fresh)p[resolvedKey]=seq;
                 }
+                var pending=p[pendingKey];if(!pending)continue;
+                if(!fresh||!p.alive||g.frame>pending.expires||(!isAttack&&p.skillUsesLeft===0)) {
+                    p[resolvedKey]=pending.seq;p[pendingKey]=null;continue;
+                }
+                if((isAttack?p.basicCooldown:p.cooldown)>0||p.stunned>0)continue;
+                p.activeInputCommand={kind:kind,seq:pending.seq};
+                try {
+                    if(isAttack)brBasicAttack(p,g,pending.aim);
+                    else {brCastHumanSkill(p,g,pending.aim,pending.power);p.skillCooldownMax=Math.max(1,Number(p.cooldown||p.maxCooldown||1));}
+                    p[isAttack?'firedAttackSeq':'firedSkillSeq']=pending.seq;
+                } finally {p.activeInputCommand=null;p[resolvedKey]=pending.seq;p[pendingKey]=null;}
             }
             if(p.stunned<=0&&p.dashFrames<=0&&!p.playerDash&&!p.ringRecoveryActive) {
                 // 스틱 크기까지 유지한 연속 아날로그 이동. 입력 시 빠르게 잡고 놓을 때는 짧게 감속한다.
@@ -8526,20 +8660,18 @@
         }
         function brBasicAttack(p,g,aim) {
             aim=aim&&aim.mag()>.05?aim.norm():new Vec2(1,0);
-            var tier=p.ability.t, cd={S:34,A:38,B:43,C:48,F:56}[tier]||46;
-            // 같은 등급 안에서도 이모지마다 고유한 공격 템포를 갖는다(약 ±5프레임).
-            cd+=Math.abs(abilityTimingHash((p.ability.n||'emoji')+'|basic'))%11-5;
+            var tier=p.ability.t,cd=brBasicAttackFrames(p.ability);
             var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].indexOf(p.ability.type)>=0;
             p.attackCommitFrames=Math.max(p.attackCommitFrames,10);
             if(close) {
                 var range=p.radius+86,damage={S:27,A:24,B:21,C:18,F:13}[tier],push={S:39,A:35,B:30,C:25,F:19}[tier];
                 var hit=false;
-                g.addSwingEffect(p,p.pos.add(aim.mult(p.radius*.5)),aim,range*1.34,'slash');
+                g.addSwingEffect(p,p.pos,aim,range,'slash',Math.acos(.05));
                 g.getNearbyParticipants(p.pos,range+60).forEach(function(o){
                     if(!o.alive||o===p||o.id===999||(p.team&&o.team===p.team))return;
                     var d=o.pos.sub(p.pos),dist=d.mag(),dot=dist?d.norm().x*aim.x+d.norm().y*aim.y:1;
-                    if(dist<range+o.radius*.4&&dot>.05) {
-                        o.takeDamage(damage*p.damageMult*.72,p);
+                    if(dist<range+o.radius*.4&&dot>.05&&!g.checkWallBetween(p.pos,o.pos)) {
+                        o.takeDamage(damage*p.damageMult*.72,p,false,aim);
                         o.vel=o.vel.add(aim.mult(push*(o.knockbackResist||1)));
                         if(push>=18)g.markLaunched(o,p,16+Math.floor(push*.45));
                         o.stunned=Math.max(o.stunned,push>=34?11:push>=25?8:6);
@@ -8551,7 +8683,7 @@
             } else {
                 var profile=getRangedCombatProfile(p.ability,'basic');
                 var dmg={S:21,A:18,B:15,C:12,F:8}[tier]*profile.damageScale;
-                var speed=profile.speed,size={S:13,A:12,B:11,C:10,F:8}[tier]*(profile.style==='heavy'?1.18:profile.style==='bomber'?1.28:profile.style==='sniper'?.82:1);
+                var speed=profile.speed,size=brBasicShotSize(p.ability,false);
                 var shotColor=p.ability.pTrail||BR_TIER_COLOR[tier]||'#ffffff';
                 var basicProjectile=new Projectile(
                     p,p.pos.add(aim.mult(p.radius*.7)),aim,speed,dmg*p.damageMult*.72,size,'bullet',
@@ -8559,7 +8691,6 @@
                     {knockback:profile.knockback,trailColor:shotColor,impactColor:shotColor,weaponStyle:'orb',impactStyle:'ranged-basic'}
                 );
                 basicProjectile.life=Math.max(8,Math.ceil(profile.range/speed));g.projectiles.push(basicProjectile);
-                cd=Math.round(cd*profile.cooldownScale);
             }
             p.basicCooldown=cd;p.basicCooldownMax=cd;
         }
@@ -8590,6 +8721,8 @@
         }
         function brRespawnPlayer(p) {
             p.alive=true;p.hp=p.maxHp;p.vel=new Vec2(0,0);p.stunned=0;p.blindedFrames=0;p.poisonFrames=0;
+            var respawnInput=BRMP.inputs[p.remoteId]||{};p.lastRemoteAttack=Number(respawnInput.attackSeq||p.lastRemoteAttack||0);p.lastRemoteSkill=Number(respawnInput.skillSeq||p.lastRemoteSkill||0);
+            p.resolvedAttackSeq=p.lastRemoteAttack;p.resolvedSkillSeq=p.lastRemoteSkill;p.pendingAttack=null;p.pendingSkill=null;
             p.deathFrame=null;p.deathVisualUntilFrame=null;p.deathVisualUntilAt=null;p.respawnAtFrame=null;p.ringRecoveryActive=false;p.dashFrames=0;p.playerDash=null;p.playerDashContactFrame=-1;p.comboHitsRemaining=0;
             p.basicCooldown=30;p.basicCooldownMax=30;p.cooldown=Math.min(p.cooldown||0,60);
             p.skillCooldownMax=Math.max(1,Number(p.cooldown||p.maxCooldown||1));
@@ -8608,19 +8741,22 @@
                 Math.max(0,Math.round(p.hp)),Math.round(p.maxHp),p.alive?1:0,Number(p.team||0),
                 Number(p.kills||0),Number(p.deaths||0),Math.max(0,Math.round(p.basicCooldown||0)),
                 Math.max(0,Math.round(p.cooldown||0)),Number(p.skillUsesLeft||0),
-                Math.round(respawn*10)/10,Math.round(p.radius),p.humanControlled?1:0,
+                Math.round(respawn*10)/10,Number(p.radius),p.humanControlled?1:0,
                 game&&game.getCoverTypeAt?game.getCoverTypeAt(p.pos):'',
                 Math.round(Number(p.vel&&p.vel.x||0)*100)/100,Math.round(Number(p.vel&&p.vel.y||0)*100)/100,
                 Math.max(1,Math.round(Number(p.basicCooldownMax||1))),Math.max(1,Math.round(Number(p.skillCooldownMax||p.maxCooldown||1))),
-                Math.round(brHumanMoveSpeed(p)*100)/100,
+                brHumanMoveSpeed(p),
                 (p.stunned>0?1:0)|(p.dashFrames>0?2:0)|(p.ringRecoveryActive?4:0)|(p.playerMoveBoostFrames>0?8:0)|(p.playerAttackHasteFrames>0?16:0),
-                Number(p.lastInputSeq||0),Math.max(0,Number(p.stunned||0)),Math.max(0,Number(p.dashFrames||0)),Number(p.warpSeq||0)
+                Number(p.lastInputSeq||0),Math.max(0,Number(p.stunned||0)),Math.max(0,Number(p.dashFrames||0)),Number(p.warpSeq||0),
+                Number(p.resolvedAttackSeq||0),Number(p.resolvedSkillSeq||0),Number(p.firedAttackSeq||0),Number(p.firedSkillSeq||0)
             ];
         }
         function brPublishViews() {
             if(!BRMP.active||!game||BRMP.backend!=='firebase'||Number(BRMP.publishInFlight||0)>=3)return;
             var humans=game.participants.filter(function(p){return p.humanControlled&&p.remoteId&&p.id!==999;});
             if(!humans.length)return;
+            // Performance Pass note: per-view visibility scans, FX sorting and JSON serialization remain unchanged.
+            // Keep this pass's 60Hz input/movement/hit tests; optimize snapshot work separately.
             var now=brNow(),viewers=humans;
             if(humans.length>=12) {
                 var count=Math.min(8,humans.length),start=Number(BRMP.publishCursor||0)%humans.length;viewers=[];
@@ -8629,12 +8765,12 @@
             } else {if(now-Number(BRMP.lastSmallPublishAt||0)<95)return;BRMP.lastSmallPublishAt=now;}
             var all=game.participants.filter(function(p){return p.id!==999;}),alive=0,wired=new Map();
             // 이름·등급 등 불변 데이터는 별도 사전으로 보낸다. 매 프레임에는 작은 숫자 행만 전송한다.
-            var roster=all.map(function(p){return [p.remoteId||('ai-'+p.id),p.name,Number(p.abilityIndex||0),Number(p.team||0),Math.round(p.radius),p.humanControlled?1:0];});
-            all.forEach(function(p,index){var r=brWirePlayer(p);if(p.alive)alive++;wired.set(p,[index,r[3],r[4],r[5],r[6],r[7],r[9],r[10],r[11],r[12],r[14],r[17],r[18],r[19],r[20],r[21],r[22],r[23],r[24],r[25],r[26],r[27]]);});
+            var roster=all.map(function(p){return [p.remoteId||('ai-'+p.id),p.name,Number(p.abilityIndex||0),Number(p.team||0),Number(p.radius),p.humanControlled?1:0];});
+            all.forEach(function(p,index){var r=brWirePlayer(p);if(p.alive)alive++;wired.set(p,[index,r[3],r[4],r[5],r[6],r[7],r[9],r[10],r[11],r[12],r[14],r[17],r[18],r[19],r[20],r[21],r[22],r[23],r[24],r[25],r[26],r[27],r[28],r[29],r[30],r[31]]);});
             var shots=game.projectiles.filter(function(q){return q.life>0&&q.pos;}).map(function(q){
                 if(!q._brNetId)q._brNetId='q'+(++BRMP.projectileSeq);
                 return {q:q,row:[Math.round(q.pos.x),Math.round(q.pos.y),Math.round(q.size||7),q.emoji||'',q.color||q.impactColor||'#fff',Number(q.owner&&q.owner.team||0),q._brNetId,
-                    Math.round(Number(q.vel&&q.vel.x||0)*100)/100,Math.round(Number(q.vel&&q.vel.y||0)*100)/100,q.weaponStyle||getRangedWeaponStyle(q.owner&&q.owner.ability||{}),q.owner&&q.owner.ability&&q.owner.ability.t||'C']};
+                    Math.round(Number(q.vel&&q.vel.x||0)*100)/100,Math.round(Number(q.vel&&q.vel.y||0)*100)/100,q.weaponStyle||getRangedWeaponStyle(q.owner&&q.owner.ability||{}),q.owner&&q.owner.ability&&q.owner.ability.t||'C',q.owner?.remoteId||('ai-'+q.owner?.id),q.inputKind||'',Number(q.inputSeq||0),Number(q.life||0),q.type||'bullet']};
             });
             var elapsed=Math.max(0,(now-Number(BRMP.roomMeta.battleStartedAt||now))/1000),remaining=BRMP.respawnMode?Math.max(0,(Number(BRMP.roomMeta.battleEndsAt||now)-now)/1000):elapsed;
             BRMP.viewFxCursor=BRMP.viewFxCursor||{};BRMP.staticSent=BRMP.staticSent||{};
@@ -8691,7 +8827,7 @@
             });
             if(incoming.v===2) {
                 var roster=incoming.roster;
-                incoming.players=incoming.players.map(function(r){var m=roster[r[0]];if(!m)return null;return [m[0],m[1],m[2],r[1],r[2],r[3],r[4],r[5],m[3],r[6],r[7],r[8],r[9],-1,r[10],m[4],m[5],r[11],r[12],r[13],r[14],r[15],r[16],r[17],r[18],r[19],r[20],r[21]];}).filter(Boolean);
+                incoming.players=incoming.players.map(function(r){var m=roster[r[0]];if(!m)return null;return [m[0],m[1],m[2],r[1],r[2],r[3],r[4],r[5],m[3],r[6],r[7],r[8],r[9],-1,r[10],m[4],m[5],r[11],r[12],r[13],r[14],r[15],r[16],r[17],r[18],r[19],r[20],r[21],r[22],r[23],r[24],r[25]];}).filter(Boolean);
             }
             return incoming;
         }
@@ -8754,17 +8890,17 @@
             BRMP.nameSpriteCache.set(key,sprite);return sprite;
         }
         function brRegisterHitFeedback(targetId,amount,x,y,sourceId,style,confirmed,impactLevel) {
+            if(!confirmed)return;
             var now=performance.now(),damage=Math.max(0,Number(amount||0)),styleText=String(style||'');
             var close=/MELEE|DASH|TELEPORT|ORBIT|PULL|melee|dash|teleport|punch|smash|uppercut|combo|lunge|tank/i.test(styleText);
             var skillHit=/tank-|melee-|uppercut|combo|lunge|ranged-power|power-shot|skill/i.test(styleText);
             var level=Number.isFinite(Number(impactLevel))&&Number(impactLevel)>0?Number(impactLevel):(damage>=40?3:damage>=25?2:damage>=12?1:0);
-            if(close&&damage>=9)level=Math.min(3,level+1);
-            if(skillHit&&damage>=7)level=Math.min(3,level+1);
+            if(!(Number(impactLevel)>0)){if(close&&damage>=9)level=Math.min(3,level+1);if(skillHit&&damage>=7)level=Math.min(3,level+1);}
             if(!confirmed&&damage<=0)level=close?1:0;
-            var duration=[140,190,245,310][level],strength=brClamp([3.8,7.2,11.8,17.8][level]+(close?1.8:0)+(skillHit?1.2:0),3.8,21);
+            var duration=[75,95,120,145][level],strength=[1.1,1.5,2,2.5][level];
             if(BRMP.hitStates)BRMP.hitStates.set(String(targetId||''),{until:now+duration,duration:duration,strength:strength,level:level,dx:0,dy:0,seed:Number(BRMP.localFxSeq||1)});
             if(String(targetId)===String(BRMP.playerId)) {
-                BRMP.studentShake={until:now+[125,180,240,310][level],strength:Math.min(21,strength*1.16),seed:now%997};
+                BRMP.studentShake={until:now+[125,180,240,310][level],strength:Math.min(7,2+level*1.6),seed:now%997};
                 BRMP.damageFlash={until:now+[85,130,180,235][level],alpha:[.07,.12,.19,.28][level],level:level};
                 if(now-Number(BRMP.lastHurtSfxAt||0)>65){BRMP.lastHurtSfxAt=now;brPlaySfx('hurt',level>=2);}
                 if(typeof navigator!=='undefined'&&navigator.vibrate&&confirmed)navigator.vibrate([[10],[14,8,21],[19,9,32],[26,10,42,12,58]][level]);
@@ -8772,27 +8908,17 @@
             if(String(sourceId)===String(BRMP.playerId)) {
                 var confirmDuration=confirmed?155+level*25:95;
                 BRMP.hitConfirm={until:now+confirmDuration,duration:confirmDuration,amount:damage,heavy:level>=2,level:level,confirmed:!!confirmed};
-                BRMP.studentShake={until:now+92+level*28,strength:3.1+level*1.9+(skillHit?1.2:0),seed:(now+37)%997};
+                BRMP.studentShake={until:now+92+level*28,strength:1.4+level*.9+(skillHit?.5:0),seed:(now+37)%997};
                 if(now-Number(BRMP.lastHitSfxAt||0)>52){BRMP.lastHitSfxAt=now;brPlaySfx('hit',level>=2);}
                 if(typeof navigator!=='undefined'&&navigator.vibrate&&confirmed)navigator.vibrate([[8],[12,7,18],[17,8,27],[21,9,35,10,47]][level]);
             }
         }
         function brSpawnLocalProjectile(x,y,dir,speed,size,color,emoji,style,team,life) {
             BRMP.localProjectiles=BRMP.localProjectiles||[];
-            var maxLife=Math.max(260,Number(life||520));
+            var maxLife=Math.max(1,Number(life||520));
             BRMP.localProjectiles.push({x:x,y:y,px:x,py:y,vx:dir.x*speed,vy:dir.y*speed,size:size,color:color,
-                emoji:emoji||'',style:style||'standard',team:Number(team||0),born:performance.now(),life:maxLife,maxLife:maxLife,hit:false});
+                emoji:emoji||'',style:style||'standard',team:Number(team||0),born:performance.now(),life:maxLife,maxLife:maxLife,hit:false,kind:BRMP.feedbackCommand?.kind||'attack',seq:Number(BRMP.feedbackCommand?.seq||0)});
             if(BRMP.localProjectiles.length>12)BRMP.localProjectiles.splice(0,BRMP.localProjectiles.length-12);
-        }
-        function brPredictLocalContact(x,y,ax,ay,range,width,team) {
-            var best=null,bestForward=Infinity,draw=BRMP.drawPlayers;if(!draw)return null;
-            draw.forEach(function(o,id){
-                if(String(id)===String(BRMP.playerId)||!o.row||!o.row[7])return;
-                var otherTeam=Number(o.row[8]||0);if(team&&otherTeam===team)return;
-                var rx=o.x-x,ry=o.y-y,forward=rx*ax+ry*ay,lateral=Math.abs(rx*(-ay)+ry*ax),rr=Math.max(24,Number(o.row[15]||38));
-                if(forward>0&&forward<range+rr&&lateral<width+rr&&forward<bestForward){bestForward=forward;best={id:String(id),o:o};}
-            });
-            return best;
         }
         function brLocalAimEndpoint(x,y,ax,ay,range,radius,view) {
             view=view||BRMP.latestView||{};
@@ -8810,25 +8936,24 @@
             }
             return point;
         }
-        function brImmediateCastFeedback(kind) {
+        function brImmediateCastFeedback(kind,command) {
             var self=BRMP.drawPlayers&&BRMP.drawPlayers.get(String(BRMP.playerId));if(!self||!self.row)return;
             var r=self.row,a=EMOJI_DB[Number(r[2])]||EMOJI_DB[0],tier=a.t||'C',color=BR_TIER_COLOR[tier]||'#ffffff';
-            var ax=Number(BRMP.inputState&&BRMP.inputState.ax||1),ay=Number(BRMP.inputState&&BRMP.inputState.ay||0),am=Math.hypot(ax,ay)||1;
+            command=command||BRMP.inputState||{};
+            var ax=Number(command.ax??1),ay=Number(command.ay??0),am=Math.hypot(ax,ay)||1;
             ax/=am;ay/=am;var dir={x:ax,y:ay},x=Number(self.predX==null?self.x:self.predX),y=Number(self.predY==null?self.y:self.predY),rad=Number(r[15]||38);
             var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].indexOf(a.type)>=0;
             if(kind==='attack'&&close) {
-                brPushLocalFx('swing',x+ax*rad*.55,y+ay*rad*.55,{dx:ax,dy:ay,size:rad+112,color:color,style:'melee-local',sourceId:BRMP.playerId});
-                var closeTarget=brPredictLocalContact(x,y,ax,ay,rad+105,rad*.72,Number(r[8]||0));
-                if(closeTarget){brPushLocalFx('impact',closeTarget.o.x,closeTarget.o.y,{dx:ax,dy:ay,size:86,color:color,style:'predicted-melee',sourceId:BRMP.playerId});brRegisterHitFeedback(closeTarget.id,0,closeTarget.o.x,closeTarget.o.y,BRMP.playerId,'predicted-melee',false);}
+                brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:rad+86,amount:Math.acos(.05),color:color,style:'melee-local',sourceId:BRMP.playerId});
                 brPushLocalFx('muzzle',x+ax*rad,y+ay*rad,{dx:ax,dy:ay,size:62,color:'#ffffff',style:'melee'});brPlaySfx('melee',tier==='S'||tier==='A');
             } else if(kind==='attack') {
                 var profile=getRangedCombatProfile(a,'basic'),shotColor=a.pTrail||color;
-                var sz={S:15,A:13,B:12,C:10,F:9}[tier]*(profile.style==='bomber'?1.35:profile.style==='heavy'?1.22:profile.style==='sniper'?.90:1);
-                brSpawnLocalProjectile(x+ax*rad*.72,y+ay*rad*.72,dir,profile.speed,sz,shotColor,'','orb',Number(r[8]||0),profile.range/profile.speed*16.667);
+                var sz=brBasicShotSize(a,true);
+                brSpawnLocalProjectile(x+ax*rad*.7,y+ay*rad*.7,dir,profile.speed,sz,shotColor,'','orb',Number(r[8]||0),Math.max(8,Math.ceil(profile.range/profile.speed))*(1000/60));
                 brPushLocalFx('muzzle',x+ax*rad*.8,y+ay*rad*.8,{dx:ax,dy:ay,size:profile.style==='sniper'?96:70,color:shotColor,style:'orb'});
                 brPlaySfx('shoot',profile.style==='sniper'||profile.style==='bomber');
             } else {
-                var spec=brAimSpec(a,'skill',rad,Number(BRMP.inputState&&BRMP.inputState.aimPower||1)),playable=brGetPlayableSkillInfo(a),playKey=playable&&playable.key;
+                var spec=brAimSpec(a,'skill',rad,Number(command.ap??command.aimPower??1)),playable=brGetPlayableSkillInfo(a),playKey=playable&&playable.key;
                 if(playKey==='tank-charge'||playKey==='melee-lunge') {
                     brPushLocalFx('dash',x,y,{dx:ax,dy:ay,size:spec.range,color:color,style:playKey,sourceId:BRMP.playerId});
                     var localDashSpeed=playKey==='tank-charge'?brTierValue(tier,{S:40,A:37,B:34,C:31,F:27}):brTierValue(tier,{S:36,A:34,B:31,C:29,F:25});
@@ -8837,7 +8962,7 @@
                 } else if(playKey==='tank-stun') {
                     brPushLocalFx('explosion',x,y,{dx:ax,dy:ay,size:Number(spec.radius||190),color:color,style:playKey,sourceId:BRMP.playerId});
                 } else if(playKey==='tank-punch'||playKey==='melee-uppercut'||playKey==='melee-combo') {
-                    brPushLocalFx('swing',x+ax*rad*.45,y+ay*rad*.45,{dx:ax,dy:ay,size:Math.max(170,Number(spec.range||190)),color:color,style:playKey,sourceId:BRMP.playerId});
+                    brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:Number(spec.range||190),amount:Number(spec.halfAngle||.86),color:color,style:playKey,sourceId:BRMP.playerId});
                 } else if(playKey==='ranged-sprint'||playKey==='ranged-overdrive') {
                     brPushLocalFx('impact',x,y,{dx:ax,dy:ay,size:128,color:playKey==='ranged-sprint'?'#67e8f9':'#fbbf24',style:playKey,sourceId:BRMP.playerId});
                     if(playKey==='ranged-sprint')BRMP.localMoveBoostUntil=performance.now()+4000;
@@ -8872,32 +8997,19 @@
                     var tx=x+ax*Number(spec.range||220),ty=y+ay*Number(spec.range||220);
                     brPushLocalFx('impact',tx,ty,{dx:ax,dy:ay,size:Number(spec.radius||spec.impactRadius||105),color:color,style:'skill-target'});
                 }
-                var playableClose=playKey==='tank-punch'||playKey==='melee-uppercut'||playKey==='melee-combo';
-                if(playableClose||(!playable&&a.type===ABILITY_TYPES.MELEE)) {
-                    var skillTarget=brPredictLocalContact(x,y,ax,ay,Math.max(160,Number(spec.range||220)),Math.max(rad,Number(spec.width||rad)),Number(r[8]||0));
-                    if(skillTarget){var predictedStyle='predicted-'+(playKey||String(a.type||'skill'));brPushLocalFx('impact',skillTarget.o.x,skillTarget.o.y,{dx:ax,dy:ay,size:118,color:color,style:predictedStyle,sourceId:BRMP.playerId});brRegisterHitFeedback(skillTarget.id,0,skillTarget.o.x,skillTarget.o.y,BRMP.playerId,predictedStyle,false);}
-                }
                 if(playKey!=='ranged-sprint'&&playKey!=='ranged-overdrive'&&playKey!=='ranged-power')brPushLocalFx('muzzle',x+ax*rad*.55,y+ay*rad*.55,{dx:ax,dy:ay,size:92,color:'#ffffff',style:'skill'});
                 brPlaySfx('skill',tier==='S'||tier==='A');
             }
-            BRMP.studentRecoil={x:-ax*(kind==='skill'?19:10),y:-ay*(kind==='skill'?19:10),vx:0,vy:0,until:performance.now()+(kind==='skill'?220:135)};
+            BRMP.studentRecoil={x:-ax*(kind==='skill'?7:3),y:-ay*(kind==='skill'?7:3),vx:0,vy:0,until:performance.now()+(kind==='skill'?220:135)};
         }
 
-        function brResolvePredictedCollision(p,view,radius) {
-            var walls=view&&view.walls||[];
-            for(var i=0;i<walls.length;i++) {
-                var w=walls[i],dx=p.x-w[0],dy=p.y-w[1],ang=-(Number(w[4])||0);
-                if(w._angle!==ang){w._angle=ang;w._ca=Math.cos(ang);w._sa=Math.sin(ang);w._bx=Math.abs(w._ca)*w[2]*.5+Math.abs(w._sa)*w[3]*.5;w._by=Math.abs(w._sa)*w[2]*.5+Math.abs(w._ca)*w[3]*.5;}
-                if(Math.abs(dx)>w._bx+radius||Math.abs(dy)>w._by+radius)continue;
-                var ca=w._ca,sa=w._sa;
-                var lx=dx*ca-dy*sa,ly=dx*sa+dy*ca,hx=w[2]*.5,hy=w[3]*.5,cx=brClamp(lx,-hx,hx),cy=brClamp(ly,-hy,hy);
-                var ox=lx-cx,oy=ly-cy,dist=Math.hypot(ox,oy);if(dist>=radius)continue;
-                if(dist<.001) {var penX=hx+radius-Math.abs(lx),penY=hy+radius-Math.abs(ly);if(penX<penY){ox=lx<0?-1:1;oy=0;dist=1;}else{ox=0;oy=ly<0?-1:1;dist=1;}}
-                var push=radius-dist+1,nx=ox/dist,ny=oy/dist,wx=nx*ca+ny*sa,wy=-nx*sa+ny*ca;p.x+=wx*push;p.y+=wy*push;
-                var vn=p.vx*wx+p.vy*wy;if(vn<0){p.vx-=wx*vn;p.vy-=wy*vn;}
-            }
-            var mapR=Math.max(radius+8,Number(view&&view.worldRadius||2600)-radius-4),d=Math.hypot(p.x,p.y);
+        function brResolvePredictedCollision(p,view,radius,from,stopOnWall) {
+            var result=combatMoveCircle(from||p,from?{x:p.vx,y:p.vy}:{x:0,y:0},radius,view?.walls||[],!!stopOnWall);
+            p.x=result.x;p.y=result.y;
+            if(from){p.vx=result.vx;p.vy=result.vy;}
+            var mapR=Math.max(radius+8,Number(view?.worldRadius||2600)-radius-4),d=Math.hypot(p.x,p.y);
             if(d>mapR){p.x=p.x/d*mapR;p.y=p.y/d*mapR;var nx=p.x/mapR,ny=p.y/mapR,vn=p.vx*nx+p.vy*ny;if(vn>0){p.vx-=nx*vn;p.vy-=ny*vn;}}
+            return result.hit;
         }
 
         function brIngestView(view) {
@@ -8913,7 +9025,7 @@
             BRMP.clockSamples.push(now-serverTime);if(BRMP.clockSamples.length>12)BRMP.clockSamples.shift();
             var clockCorrection=brClamp((Math.min.apply(null,BRMP.clockSamples)-BRMP.netClockOffset)*.12,-16,16);
             BRMP.netClockOffset+=clockCorrection;
-            if(clockCorrection)BRMP.drawPlayers.forEach(function(p){(p.samples||[]).forEach(function(s){s.t+=clockCorrection;});});
+            if(clockCorrection){for(var actors of [BRMP.drawPlayers,BRMP.drawProjectiles])actors.forEach(function(p){(p.samples||[]).forEach(function(s){s.t+=clockCorrection;});});}
             var sampleTime=serverTime+BRMP.netClockOffset;
             if(BRMP.lastViewFrame!=null&&view.frame<=BRMP.lastViewFrame)return;
             if(BRMP.lastViewFrame!=null)BRMP.viewGap=Number(BRMP.viewGap||180)*.8+Math.min(500,(view.frame-BRMP.lastViewFrame)*(1000/60))*.2;
@@ -8937,13 +9049,28 @@
                 } else if(nextHp>Number(old.trailHp||0)) old.trailHp=nextHp;
                 if(eliminated){old.deathFadeStartedAt=now;old.deathFadeUntil=now+750;old.samples=[];}
                 if(respawned){old.deathFadeStartedAt=0;old.deathFadeUntil=0;}
+                if(id===String(BRMP.playerId)&&(eliminated||respawned)){BRMP.pendingLocalActions={};BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;BRMP.localDash=null;BRMP.localTeleportUntil=0;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.localProjectiles=[];}
                 old.samples=old.samples||[];if(warpChanged||respawned)old.samples=[];old.samples.push({x:sx,y:sy,vx:svx,vy:svy,t:sampleTime});if(old.samples.length>6)old.samples.shift();
                 old.tx=sx;old.ty=sy;old.vx=svx;old.vy=svy;old.row=r;
                 var leadFrames=brClamp(Number(BRMP.minInputRtt||100)/2/(1000/60),0,8);old.authX=sx+svx*leadFrames;old.authY=sy+svy*leadFrames;old.authAt=now;
                 if(id===String(BRMP.playerId)) {
                     var ack=Number(r[24]||0),sentAt=BRMP.inputSentAt&&BRMP.inputSentAt.get(ack);
                     if(sentAt!=null){var rtt=now-sentAt;BRMP.minInputRtt=Math.min(Number(BRMP.minInputRtt||1000),Math.max(20,rtt));}
-                    old.inputAck=ack;old.stunUntil=now+Math.max(0,Number(r[25]||0))*(1000/60);old.dashUntil=now+Math.max(0,Number(r[26]||0))*(1000/60);
+                    old.inputAck=ack;
+                    var statusAge=Math.max(0,now-sampleTime);
+                    old.stunUntil=now+Math.max(0,Number(r[25]||0)*(1000/60)-statusAge);old.dashUntil=now+Math.max(0,Number(r[26]||0)*(1000/60)-statusAge);
+                    for(var actionKind of ['attack','skill']) {
+                        var action=BRMP.pendingLocalActions&&BRMP.pendingLocalActions[actionKind],resolved=Number(r[actionKind==='attack'?28:29]||0);
+                        if(!action||resolved<action.seq)continue;
+                        var accepted=Number(r[actionKind==='attack'?30:31]||0)===action.seq;
+                        if(accepted&&!action.previewed){BRMP.feedbackCommand={kind:actionKind,seq:action.seq};try{brImmediateCastFeedback(actionKind,action.command);}finally{BRMP.feedbackCommand=null;}}
+                        if(actionKind==='attack')BRMP.localAttackLockUntil=0;else BRMP.localSkillLockUntil=0;
+                        if(!accepted){
+                            BRMP.localProjectiles=(BRMP.localProjectiles||[]).filter(function(q){return q.kind!==actionKind||q.seq!==action.seq;});
+                            if(actionKind==='skill'){BRMP.localDash=null;BRMP.localTeleportUntil=0;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;}
+                        }
+                        delete BRMP.pendingLocalActions[actionKind];
+                    }
                     if(now<Number(BRMP.localDashGraceUntil||0))old.dashUntil=0;
                     if(nextHp<previousHp&&packetHits.has(id))old.hitCorrectionUntil=now+160;
                     if((Number(r[23]||0)&2)&&!(Number(priorRow[23]||0)&2)&&!BRMP.localDash&&now>=Number(BRMP.localDashGraceUntil||0)){old.predVx=svx;old.predVy=svy;}
@@ -8963,11 +9090,15 @@
             var shotSeen=new Set();
             (view.projectiles||[]).forEach(function(r,i){
                 var id=String(r[6]||('legacy-'+i+'-'+r[3])),old=BRMP.drawProjectiles.get(id),pvx=Number(r[7]||0),pvy=Number(r[8]||0);
-                var shotLead=brClamp(Number(BRMP.minInputRtt||100)/2/(1000/60),0,8);
-                var projectedX=Number(r[0])+pvx*shotLead,projectedY=Number(r[1])+pvy*shotLead;
-                if(!old)old={x:projectedX,y:projectedY,tx:Number(r[0]),ty:Number(r[1]),vx:pvx,vy:pvy,row:r,last:now,history:[]};
-                old.tx=Number(r[0]);old.ty=Number(r[1]);old.vx=pvx;old.vy=pvy;old.row=r;old.last=now;
-                old.correctionX=projectedX-old.x;old.correctionY=projectedY-old.y;
+                var projectedX=Number(r[0]),projectedY=Number(r[1]);
+                if(!old)old={x:projectedX,y:projectedY,tx:projectedX,ty:projectedY,vx:pvx,vy:pvy,row:r,last:now,samples:[]};
+                old.tx=projectedX;old.ty=projectedY;old.vx=pvx;old.vy=pvy;old.row=r;old.last=now;
+                old.samples=old.samples||[];old.samples.push({x:projectedX,y:projectedY,vx:pvx,vy:pvy,t:sampleTime});if(old.samples.length>6)old.samples.shift();
+                if(String(r[11])===String(BRMP.playerId)&&r[12]&&Number(r[13])>0) {
+                    var local=(BRMP.localProjectiles||[]).find(function(q){return q.kind===r[12]&&q.seq===Number(r[13]);});
+                    if(local){old.x=local.x;old.y=local.y;old.localHandoff=true;}
+                    BRMP.localProjectiles=(BRMP.localProjectiles||[]).filter(function(q){return q!==local;});
+                }
                 BRMP.drawProjectiles.set(id,old);shotSeen.add(id);
             });
             // 30명 방은 각 학생 스냅샷이 약 0.3초 간격이므로, 그 사이 투사체를 삭제해 깜빡이지 않게 한다.
@@ -8976,7 +9107,8 @@
                 var id=String(r[0]);
                 if(BRMP.seenFxIds.has(id))return;
                 var type=String(r[1]||'hit'),life=brFxLife(type);
-                BRMP.seenFxIds.set(id,now);BRMP.drawFx.set(id,{row:r,start:now,life:life});
+                var selfCast=String(r[11]||'')===String(BRMP.playerId)&&['shot','muzzle','swing','dash','teleport'].includes(type);
+                BRMP.seenFxIds.set(id,now);if(selfCast) return;BRMP.drawFx.set(id,{row:r,start:now,life:life});
                 if(type==='hit') {
                     brRegisterHitFeedback(String(r[9]||''),Number(r[8]||0),Number(r[2]||0),Number(r[3]||0),String(r[11]||''),String(r[10]||''),true,Number(r[12]||0));
                 }
@@ -8986,7 +9118,10 @@
         function brStartStudentBattle() {
             brEl('br-app').classList.add('br-hidden');
             brEl('br-student-battle').classList.remove('br-hidden');
-            BRMP.inputState=BRMP.inputState||{dx:0,dy:0,ax:1,ay:0,aimPower:1,attackSeq:0,skillSeq:0};
+            var matchKey=BRMP.roomCode+'|'+String(BRMP.roomMeta?.battleStartedAt||0),prior=BRMP.inputMatchKey===matchKey?BRMP.inputState:null;
+            BRMP.inputMatchKey=matchKey;BRMP.inputState={dx:0,dy:0,ax:prior?.ax??1,ay:prior?.ay??0,aimPower:1,attackSeq:Number(prior?.attackSeq||0),skillSeq:Number(prior?.skillSeq||0),attack:prior?.attack||null,skill:prior?.skill||null};
+            if(BRMP.resetControls)BRMP.resetControls();
+            BRMP.pendingLocalActions={};BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;
             if(!Number.isFinite(BRMP.inputState.aimPower))BRMP.inputState.aimPower=1;
             BRMP.drawPlayers=new Map();BRMP.drawProjectiles=new Map();BRMP.localProjectiles=[];BRMP.drawFx=new Map();BRMP.hitStates=new Map();BRMP.seenFxIds=new Map();
             BRMP.netClockOffset=undefined;BRMP.lastViewFrame=null;BRMP.viewGap=180;BRMP.remoteBuffer=215;BRMP.minInputRtt=undefined;BRMP.inputSentAt=new Map();BRMP.localTeleportUntil=0;BRMP.localDashGraceUntil=0;
@@ -9000,6 +9135,7 @@
             brSendInput(true);
         }
         function brStopStudentBattle() {
+            if(BRMP.resetControls)BRMP.resetControls();BRMP.pendingLocalActions={};
             brEl('br-student-battle').classList.add('br-hidden');
             if(BRMP.inputTrailingTimer){clearTimeout(BRMP.inputTrailingTimer);BRMP.inputTrailingTimer=null;}
             if(BRMP.inputTimer){clearInterval(BRMP.inputTimer);BRMP.inputTimer=null;}
@@ -9017,7 +9153,7 @@
             }
             var s=BRMP.inputState,data={dx:Math.round(Number(s.dx||0)*100)/100,dy:Math.round(Number(s.dy||0)*100)/100,
                 ax:Math.round(Number(s.ax||0)*100)/100,ay:Math.round(Number(s.ay||0)*100)/100,ap:Math.round(brClamp(Number(s.aimPower||1),.18,1)*100)/100,
-                attackSeq:Number(s.attackSeq||0),skillSeq:Number(s.skillSeq||0),ts:now,needsArena:!(BRMP.staticView&&BRMP.staticView.roster&&BRMP.staticView.roster.length&&BRMP.staticView.walls)};
+                attackSeq:Number(s.attackSeq||0),skillSeq:Number(s.skillSeq||0),attack:s.attack||null,skill:s.skill||null,ts:now,needsArena:!(BRMP.staticView&&BRMP.staticView.roster&&BRMP.staticView.roster.length&&BRMP.staticView.walls)};
             var key=[data.dx,data.dy,data.ax,data.ay,data.ap,data.attackSeq,data.skillSeq].join('|');
             if(!force&&key===BRMP.lastInputKey&&elapsed<260)return;
             if(data.dx!==BRMP.lastWireDx||data.dy!==BRMP.lastWireDy)BRMP.lastMoveSeq=Number(BRMP.inputSeq||0)+1;
@@ -9028,16 +9164,20 @@
             BRMP.lastInputKey=key;BRMP.lastInputSent=now;
             BRMP.db.ref('rooms/'+BRMP.roomCode+'/inputs/'+BRMP.playerId).set(data).catch(function(){});
         }
+        function brUrgentMoveChange(px,py,dx,dy) {
+            var before=Math.hypot(px,py),after=Math.hypot(dx,dy);
+            return (before>.12)!==(after>.12)||(before>.12&&after>.12&&(px*dx+py*dy)/(before*after)<.15);
+        }
         function brSetMove(dx,dy) {
             if(!BRMP.inputState)return;
-            var previous=Math.hypot(Number(BRMP.inputState.dx||0),Number(BRMP.inputState.dy||0)),m=Math.hypot(dx,dy);
+            var previousX=Number(BRMP.inputState.dx||0),previousY=Number(BRMP.inputState.dy||0),m=Math.hypot(dx,dy);
             if(m>.12) {
                 // 8방향 반올림을 제거해 손가락 각도와 스틱 크기를 그대로 사용한다.
                 var scale=Math.min(1,m)/m;
                 BRMP.inputState.dx=dx*scale;BRMP.inputState.dy=dy*scale;
             } else {BRMP.inputState.dx=0;BRMP.inputState.dy=0;}
             // 스틱을 처음 누르거나 놓는 순간은 전송 제한을 무시해 출발/정지 지연을 없앤다.
-            brSendInput((previous>.12)!==(m>.12));
+            brSendInput(brUrgentMoveChange(previousX,previousY,BRMP.inputState.dx,BRMP.inputState.dy));
         }
         function brResizeStudentCanvas() {
             var c=brEl('br-student-canvas'),now=performance.now();
@@ -9157,6 +9297,7 @@
                 var age=now-fx.start;
                 if(age>=fx.life){fxMap.delete(id);return;}
                 var r=fx.row,type=String(r[1]||'hit'),x=Number(r[2]||0),y=Number(r[3]||0);
+                if((type==='hit'||type==='impact')&&r[9]){var target=BRMP.drawPlayers&&BRMP.drawPlayers.get(String(r[9]));if(target){x=target.x;y=target.y;}}
                 var dx=Number(r[4]||0),dy=Number(r[5]||0),mag=Math.hypot(dx,dy)||1;dx/=mag;dy/=mag;
                 var size=Math.max(8,Number(r[6]||24)),color=r[7]||'#fff',p=brClamp(age/fx.life,0,1),alpha=1-p;
                 if(!onScreen(x,y,size+180))return;
@@ -9166,14 +9307,14 @@
                     cc.strokeStyle=color;cc.lineWidth=Math.max(2,(7*(1-p)+2)/zoom);cc.beginPath();cc.arc(0,0,size*(.22+.62*p),-.82,.82);cc.stroke();
                     cc.globalAlpha=alpha*.9;cc.fillStyle='#ffffff';cc.beginPath();cc.moveTo(size*(.10+.16*p),0);cc.lineTo(size*(.72+.18*p),-size*.22*(1-p));cc.lineTo(size*(.72+.18*p),size*.22*(1-p));cc.closePath();cc.fill();
                 } else if(type==='swing') {
-                    cc.translate(x,y);cc.rotate(Math.atan2(dy,dx));
+                    cc.translate(x,y);cc.rotate(Math.atan2(dy,dx));var swingAngle=Number(r[8]||Math.PI*.48);
                     // 넓은 부채꼴과 두 개의 명확한 궤적만 남겨 가독성과 프레임을 같이 잡는다.
                     cc.fillStyle=color;cc.globalAlpha=alpha*.16;cc.beginPath();cc.moveTo(0,0);
-                    cc.arc(0,0,size*(.88+p*.12),-1.08,1.08);cc.closePath();cc.fill();
+                    cc.arc(0,0,size,-swingAngle,swingAngle);cc.closePath();cc.fill();
                     cc.globalAlpha=alpha;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(3,(12*(1-p)+3)/zoom);
-                    cc.beginPath();cc.arc(0,0,size*(.84+p*.16),-1.05,1.05);cc.stroke();
+                    cc.beginPath();cc.arc(0,0,size,-swingAngle,swingAngle);cc.stroke();
                     cc.strokeStyle=color;cc.lineWidth=Math.max(2,(7*(1-p)+2)/zoom);
-                    cc.beginPath();cc.arc(0,0,size*(.70+p*.14),-.98,.98);cc.stroke();
+                    cc.beginPath();cc.arc(0,0,size*.78,-swingAngle*.88,swingAngle*.88);cc.stroke();
                     if(String(r[10]||'')==='scissor') {
                         cc.strokeStyle='#cffafe';cc.lineWidth=Math.max(2,5/zoom);
                         cc.beginPath();cc.arc(0,-size*.12,size*.78,-.78,.52);cc.stroke();
@@ -9223,11 +9364,8 @@
                     cc.globalAlpha=alpha*.85;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(1,(skillBlast?6:3)/zoom);cc.beginPath();cc.arc(x,y,size*(.12+.52*p),0,Math.PI*2);cc.stroke();
                     if(skillBlast){cc.beginPath();for(var ray=0;ray<6;ray++){var rayAngle=ray*Math.PI/3;cc.moveTo(x+Math.cos(rayAngle)*size*.45,y+Math.sin(rayAngle)*size*.45);cc.lineTo(x+Math.cos(rayAngle)*size*(.60+p*.36),y+Math.sin(rayAngle)*size*(.60+p*.36));}cc.stroke();}
                 } else if(type==='shot') {
-                    var shotStyle=String(r[10]||''),travel=size*Math.min(1,p*1.8),sx=x+dx*travel,sy=y+dy*travel,shotSize=Math.max(5,Number(r[8]||8));
-                    var tailLen=shotStyle==='sniper'?130:shotStyle==='machine'?86:shotStyle==='bomber'?54:72;
-                    cc.strokeStyle=color;cc.lineWidth=Math.max(2,shotSize*(shotStyle==='sniper'?.48:.30));cc.beginPath();cc.moveTo(x+dx*Math.max(0,travel-tailLen),y+dy*Math.max(0,travel-tailLen));cc.lineTo(sx,sy);cc.stroke();
-                    if(shotStyle==='bomber'){cc.globalAlpha=alpha*.55;cc.lineWidth=Math.max(2,3/zoom);cc.beginPath();cc.arc(sx,sy,shotSize*(1.1+p*.8),0,Math.PI*2);cc.stroke();}
-                    cc.globalAlpha=alpha*.95;cc.fillStyle='#ffffff';cc.beginPath();cc.arc(sx,sy,Math.max(3,shotSize*(shotStyle==='sniper'?.46:.34)),0,Math.PI*2);cc.fill();
+                    cc.translate(x,y);cc.rotate(Math.atan2(dy,dx));cc.strokeStyle=color;cc.lineWidth=Math.max(1,3/zoom);
+                    cc.beginPath();cc.arc(0,0,Math.max(9,Number(r[8]||8))*(1+p*.7),-.7,.7);cc.stroke();
                 } else if(type==='dash') {
                     var dashLen=size*(.25+.75*Math.min(1,p*1.8));
                     var nx=-dy,ny=dx,side=10/zoom;cc.strokeStyle=color;cc.lineWidth=Math.max(3,(15*(1-p)+3)/zoom);
@@ -9251,60 +9389,35 @@
             });
         }
         function brDrawProjectileGlyph(cc,x,y,vx,vy,size,emoji,color,style,zoom,alpha) {
-            var speed=Math.hypot(vx,vy)||1,ux=vx/speed,uy=vy/speed;
-            var skillShot=String(style||'').indexOf('skill-')===0;
-            var minPx=skillShot?16:style==='orb'?9:style==='sniper'?10:style==='bomber'?11:style==='machine'?6.5:8;
-            var visualR=Math.max(Number(size||7),minPx/Math.max(.1,zoom)),tailPx=style==='orb'?54:style==='sniper'?145:style==='machine'?82:style==='bomber'?58:76;
-            var tail=Math.max(tailPx/Math.max(.1,zoom),Math.min(155,speed*4.4));
-            cc.save();cc.globalAlpha=alpha==null?1:alpha;cc.lineCap='round';
-            if(skillShot) {
-                var skillTail=style==='skill-sniper'?175/zoom:style==='skill-bomber'?42/zoom:92/zoom;
-                cc.strokeStyle=color;cc.lineWidth=visualR*.9;cc.beginPath();cc.moveTo(x-ux*skillTail,y-uy*skillTail);cc.lineTo(x,y);cc.stroke();
-                cc.fillStyle=color;cc.beginPath();cc.arc(x,y,visualR,0,Math.PI*2);cc.fill();
-                cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(2,3/zoom);cc.beginPath();cc.arc(x,y,visualR*.78,0,Math.PI*2);cc.stroke();
-                cc.fillStyle='#ffffff';cc.beginPath();cc.arc(x+ux*visualR*.15,y+uy*visualR*.15,visualR*.36,0,Math.PI*2);cc.fill();
-                if(style==='skill-bomber'||style==='skill-heavy'){cc.strokeStyle=color;cc.lineWidth=Math.max(2,3/zoom);cc.beginPath();cc.arc(x,y,visualR*1.28,0,Math.PI*2);cc.stroke();}
-                cc.restore();return;
-            }
-            cc.strokeStyle=color||'#ffffff';cc.lineWidth=Math.max(3/zoom,visualR*(style==='sniper'?.58:.42));
+            var speed=Math.hypot(vx,vy)||1,ux=vx/speed,uy=vy/speed,r=Math.max(1,Number(size||7)),opacity=alpha==null?1:alpha;
+            var skillShot=String(style||'').indexOf('skill-')===0,tail=Math.min(style==='sniper'||style==='skill-sniper'?150:85,speed*4.4);
+            cc.save();cc.lineCap='round';cc.globalAlpha=opacity*.30;cc.strokeStyle=color;cc.lineWidth=Math.max(1/zoom,r*.70);
             cc.beginPath();cc.moveTo(x-ux*tail,y-uy*tail);cc.lineTo(x,y);cc.stroke();
-            cc.globalAlpha=(alpha==null?1:alpha)*.32;cc.lineWidth=Math.max(7/zoom,visualR*1.55);cc.beginPath();cc.moveTo(x-ux*tail*.62,y-uy*tail*.62);cc.lineTo(x,y);cc.stroke();
-            cc.globalAlpha=alpha==null?1:alpha;
-            if(style==='bomber'||style==='heavy') {cc.strokeStyle=color||'#fff';cc.lineWidth=Math.max(2/zoom,visualR*.24);cc.beginPath();cc.arc(x,y,visualR*1.35,0,Math.PI*2);cc.stroke();}
-            cc.fillStyle='#ffffff';cc.beginPath();cc.arc(x,y,Math.max(3.5/zoom,visualR*.52),0,Math.PI*2);cc.fill();
-            cc.strokeStyle=color||'#fff';cc.lineWidth=Math.max(2/zoom,visualR*.24);cc.beginPath();cc.arc(x,y,visualR*.86,0,Math.PI*2);cc.stroke();
-            if(emoji) {var sprite=brGetEmojiSprite(emoji),drawR=Math.max(11/zoom,visualR*1.22);cc.drawImage(sprite,x-drawR,y-drawR,drawR*2,drawR*2);}
+            cc.globalAlpha=opacity*.16;cc.fillStyle=color;cc.beginPath();cc.arc(x,y,Math.max(r*1.45,(skillShot?10:5)/zoom),0,Math.PI*2);cc.fill();
+            cc.globalAlpha=opacity;cc.fillStyle=color;cc.beginPath();cc.arc(x,y,r,0,Math.PI*2);cc.fill();
+            cc.strokeStyle='#ffffff';cc.lineWidth=Math.min(r*.25,2/zoom);cc.beginPath();cc.arc(x,y,r*.83,0,Math.PI*2);cc.stroke();
+            cc.fillStyle='#fff';cc.beginPath();cc.arc(x+ux*r*.12,y+uy*r*.12,r*.33,0,Math.PI*2);cc.fill();
+            if(emoji){cc.drawImage(brGetEmojiSprite(emoji),x-r,y-r,r*2,r*2);}
             cc.restore();
         }
         function brUpdateAndDrawLocalProjectiles(cc,dt,zoom,onScreen,frameNow) {
-            var list=BRMP.localProjectiles||[],frames=dt/16.667,draw=BRMP.drawPlayers,self=draw&&draw.get(String(BRMP.playerId)),selfTeam=Number(self&&self.row&&self.row[8]||0);
+            var list=BRMP.localProjectiles||[],frames=dt/(1000/60),draw=BRMP.drawPlayers,self=draw&&draw.get(String(BRMP.playerId)),selfTeam=Number(self&&self.row&&self.row[8]||0);
             for(var i=list.length-1;i>=0;i--) {
                 var p=list[i],age=frameNow-p.born;p.life=p.maxLife-age;
-                if(p.life<=0){if(p.blast)brPushLocalFx('explosion',p.x,p.y,{size:p.blast,color:p.color,style:p.style,sourceId:BRMP.playerId});list.splice(i,1);continue;}
+                if(p.life<=0){list.splice(i,1);continue;}
                 p.px=p.x;p.py=p.y;
-                var liveFrames=Math.min(frames,Math.max(0,(p.life+dt)/16.667));
+                var liveFrames=Math.min(frames,Math.max(0,(p.life+dt)/(1000/60)));
                 if(p.rangeRemaining!=null)liveFrames=Math.min(liveFrames,p.rangeRemaining/Math.max(.01,Math.hypot(p.vx,p.vy)));
                 p.x+=p.vx*liveFrames;p.y+=p.vy*liveFrames;
                 if(p.rangeRemaining!=null)p.rangeRemaining=Math.max(0,p.rangeRemaining-Math.hypot(p.vx,p.vy)*liveFrames);
-                var terrain=BRMP.latestView&&BRMP.latestView.walls||[],wallHit=false;
-                for(var wi=0;wi<terrain.length;wi++){
-                    var w=terrain[wi],ang=-Number(w[4]||0),ca=Math.cos(ang),sa=Math.sin(ang),rx=p.x-w[0],ry=p.y-w[1];
-                    var lx=rx*ca-ry*sa,ly=rx*sa+ry*ca;
-                    if(Math.hypot(lx-brClamp(lx,-w[2]/2,w[2]/2),ly-brClamp(ly,-w[3]/2,w[3]/2))<p.size){wallHit=true;break;}
-                }
-                if(wallHit){if(p.blast)brPushLocalFx('explosion',p.px,p.py,{size:p.blast,color:p.color,style:p.style,sourceId:BRMP.playerId});list.splice(i,1);continue;}
-                var hitTarget=null;if(draw&&!p.hit) {
-                    draw.forEach(function(o,id){if(hitTarget||String(id)===String(BRMP.playerId)||!o.row||!o.row[7])return;
-                        var team=Number(o.row[8]||0);if(selfTeam&&team===selfTeam)return;
-                        var rr=Math.max(24,Number(o.row[15]||38));if(Math.hypot(o.x-p.x,o.y-p.y)<rr+Math.max(p.size,8/zoom))hitTarget={id:id,o:o};
-                    });
-                }
-                if(hitTarget) {
-                    p.hit=true;brPushLocalFx(p.blast?'explosion':'impact',p.x,p.y,{dx:p.vx,dy:p.vy,size:p.blast||(p.style==='bomber'?105:68),color:p.color,style:p.blast?p.style:'predicted-'+p.style,sourceId:BRMP.playerId});
-                    brRegisterHitFeedback(String(hitTarget.id),0,p.x,p.y,BRMP.playerId,'predicted-projectile',false);list.splice(i,1);continue;
-                }
-                if(p.rangeRemaining===0){if(p.blast)brPushLocalFx('explosion',p.x,p.y,{size:p.blast,color:p.color,style:p.style,sourceId:BRMP.playerId});list.splice(i,1);continue;}
-                if(onScreen(p.x,p.y,120))brDrawProjectileGlyph(cc,p.x,p.y,p.vx,p.vy,p.size,p.emoji,p.color,p.style,zoom,brClamp(p.life/90,0,1));
+                var from={x:p.px,y:p.py},to={x:p.x,y:p.y},wallHit=combatTraceWalls(from,to,p.size,BRMP.latestView?.walls||[]);
+                var touched=false;if(draw)draw.forEach(function(o,id){
+                    if(touched||String(id)===String(BRMP.playerId)||!o.row?.[7]||(selfTeam&&Number(o.row[8])===selfTeam))return;
+                    touched=combatSegmentCircleTime(p.px-o.x,p.py-o.y,p.x-p.px,p.y-p.py,Number(o.row[15]||38)+p.size)!==null;
+                });
+                // Hiding the prediction at contact avoids flying through an enemy; damage feedback waits for authority.
+                if(wallHit||touched||p.rangeRemaining===0){list.splice(i,1);continue;}
+                if(onScreen(p.x,p.y,120))brDrawProjectileGlyph(cc,p.x,p.y,p.vx,p.vy,p.size,p.emoji,p.color,p.style,zoom,brClamp(p.life/60,0,1));
             }
         }
         function brDrawHitConfirm(cc,w,h,now) {
@@ -9330,17 +9443,16 @@
                 else if(localDashActive) {
                     var dashSpeed=Math.hypot(localDash.vx,localDash.vy),dashStep=Math.min(dashSpeed,Math.max(0,localDash.remaining));
                     var dashX=localDash.vx/Math.max(.01,dashSpeed),dashY=localDash.vy/Math.max(.01,dashSpeed);
-                    var landing=brLocalAimEndpoint(p.predX,p.predY,dashX,dashY,dashStep,Math.max(24,Number(p.row[15]||38)),view);
-                    if(Math.hypot(landing.x-(p.predX+dashX*dashStep),landing.y-(p.predY+dashY*dashStep))>.01){dashStep=0;localDash.remaining=0;}
                     p.predVx=dashX*dashStep;p.predVy=dashY*dashStep;localDash.remaining=Math.max(0,localDash.remaining-dashStep);
                 }
                 else if(!localDashActive&&now>=Number(p.dashUntil||0)) {
                     var response=amount>.05?.78:.48;
                     p.predVx+=(moveX-p.predVx)*response;p.predVy+=(moveY-p.predVy)*response;
                 }
-                p.predX+=p.predVx;p.predY+=p.predVy;
                 state.x=p.predX;state.y=p.predY;state.vx=p.predVx;state.vy=p.predVy;
-                brResolvePredictedCollision(state,view,Math.max(24,Number(p.row[15]||38)));
+                var ability=EMOJI_DB[Number(p.row[2])]||{},phases=ability.sub==='GHOST_MOVE'||(ability.sub==='FLY_DASH'&&(localDashActive||now<Number(p.dashUntil||0)));
+                var collision=brResolvePredictedCollision(state,phases?{walls:[],worldRadius:view.worldRadius}:view,Number(p.row[15]||38),{x:p.predX,y:p.predY},localDashActive);
+                if(collision&&localDashActive)localDash.remaining=0;
                 p.predX=state.x;p.predY=state.y;p.predVx=state.vx*(localDashActive?1:.92);p.predVy=state.vy*(localDashActive?1:.92);p.predAccumulator-=step;
                 if(localDashActive&&localDash.remaining<=.001){p.predVx=0;p.predVy=0;localDashActive=false;BRMP.localDash=null;p.dashUntil=0;BRMP.localDashGraceUntil=now+450;}
             }
@@ -9355,14 +9467,27 @@
                     p.predX+=fx;p.predY+=fy;p.previousX=previousX+fx;p.previousY=previousY+fy;
                 }
             }
+            state.x=p.predX;state.y=p.predY;state.vx=p.predVx;state.vy=p.predVy;
+            var currentAbility=EMOJI_DB[Number(p.row[2])]||{};
+            if(currentAbility.sub!=='GHOST_MOVE'&&!(currentAbility.sub==='FLY_DASH'&&(localDashActive||now<Number(p.dashUntil||0))))brResolvePredictedCollision(state,view,Number(p.row[15]||38));
+            var correctionX=state.x-p.predX,correctionY=state.y-p.predY;p.predX=state.x;p.predY=state.y;
+            if(Number.isFinite(p.previousX)){p.previousX+=correctionX;p.previousY+=correctionY;}
             // 30/60/90/120Hz에서도 물리는 정확히 60Hz. 그 사이 화면은 이전/현재 위치를 보간한다.
             var blend=brClamp(p.predAccumulator/step,0,1);
             p.x=Number.isFinite(p.previousX)?p.previousX+(p.predX-p.previousX)*blend:p.predX;
             p.y=Number.isFinite(p.previousY)?p.previousY+(p.predY-p.previousY)*blend:p.predY;
         }
+        function brSampleRemote(p,renderTime) {
+            var samples=p.samples||[],a=null,b=null;
+            for(var i=0;i<samples.length;i++){if(samples[i].t<=renderTime)a=samples[i];if(samples[i].t>=renderTime){b=samples[i];break;}}
+            if(!a)a=samples[0];if(!b)b=samples[samples.length-1];if(!a||!b)return;
+            if(a!==b){var mix=brClamp((renderTime-a.t)/Math.max(1,b.t-a.t),0,1);p.x=a.x+(b.x-a.x)*mix;p.y=a.y+(b.y-a.y)*mix;}
+            else {var extra=brClamp((renderTime-a.t)/(1000/60),0,8);p.x=a.x+a.vx*extra;p.y=a.y+a.vy*extra;}
+        }
         function brDrawStudentFrame() {
             BRMP.renderFrame=requestAnimationFrame(brDrawStudentFrame);
             var c=brEl('br-student-canvas');if(brEl('br-student-battle').classList.contains('br-hidden'))return;
+            brAdvanceLocalActions();
             brResizeStudentCanvas();
             var w=c._cssW,h=c._cssH,dpr=c._dpr,cc=c._brCtx||(c._brCtx=c.getContext('2d',{alpha:false,desynchronized:true}));
             cc.setTransform(dpr,0,0,dpr,0,0);cc.fillStyle='#07101d';cc.fillRect(0,0,w,h);
@@ -9388,13 +9513,7 @@
                 if(String(id)===String(BRMP.playerId)&&BRMP.inputState) {
                     brPredictSelf(p,view,dt,frameNow);
                 } else {
-                    var samples=p.samples||[],aSample=null,bSample=null;
-                    for(var si=0;si<samples.length;si++){if(samples[si].t<=renderTime)aSample=samples[si];if(samples[si].t>=renderTime){bSample=samples[si];break;}}
-                    if(!aSample)aSample=samples[0];if(!bSample)bSample=samples[samples.length-1];
-                    if(aSample&&bSample) {
-                        if(aSample!==bSample){var span=Math.max(1,bSample.t-aSample.t),mix=brClamp((renderTime-aSample.t)/span,0,1);p.x=aSample.x+(bSample.x-aSample.x)*mix;p.y=aSample.y+(bSample.y-aSample.y)*mix;}
-                        else {var extra=brClamp((renderTime-aSample.t)/(1000/60),0,8);p.x=aSample.x+aSample.vx*extra;p.y=aSample.y+aSample.vy*extra;}
-                    }
+                    brSampleRemote(p,renderTime);
                 }
                 var currentHp=Number(p.row&&p.row[5]||0);
                 if(frameNow>Number(p.trailHold||0)&&Number(p.trailHp||0)>currentHp) {
@@ -9404,9 +9523,13 @@
             });
             var shots=BRMP.drawProjectiles;
             if(shots)shots.forEach(function(s){
-                s.x+=Number(s.vx||0)*frameUnits;s.y+=Number(s.vy||0)*frameUnits;
-                var corr=1-Math.exp(-dt/72);s.x+=Number(s.correctionX||0)*corr;s.y+=Number(s.correctionY||0)*corr;
-                s.correctionX=Number(s.correctionX||0)*(1-corr);s.correctionY=Number(s.correctionY||0)*(1-corr);
+                var own=String(s.row[11])===String(BRMP.playerId);
+                s.expired=Number.isFinite(s.row[14])&&(frameNow-s.last)>Number(s.row[14])*(1000/60);
+                if(own) {
+                    var age=Math.min(100,Math.max(0,frameNow-s.last))/(1000/60),lead=brClamp(Number(BRMP.minInputRtt||100)/2/(1000/60),0,8);
+                    var tx=s.tx+s.vx*(age+lead),ty=s.ty+s.vy*(age+lead),blend=1-Math.exp(-dt/65);
+                    s.x+=s.vx*frameUnits;s.y+=s.vy*frameUnits;s.x+=(tx-s.x)*blend;s.y+=(ty-s.y)*blend;
+                } else brSampleRemote(s,renderTime);
             });
             var self=draw.get(String(BRMP.playerId));
             if(!self) {
@@ -9457,7 +9580,7 @@
                 cc.restore();
             }
             if(shots)shots.forEach(function(s){
-                var r=s.row;if(!onScreen(s.x,s.y,60))return;
+                var r=s.row;if(s.expired||!onScreen(s.x,s.y,60))return;
                 brDrawProjectileGlyph(cc,s.x,s.y,Number(s.vx||0),Number(s.vy||0),Number(r[2]||7),r[3]||'',r[4]||'#fff',String(r[9]||'standard'),zoom,1);
             });
             brUpdateAndDrawLocalProjectiles(cc,dt,zoom,onScreen,frameNow);
@@ -9466,7 +9589,7 @@
                 if(!alive&&!Number(s.deathFadeUntil||0)){s.deathFadeStartedAt=frameNow;s.deathFadeUntil=frameNow+750;}
                 var deathRatio=alive?1:brClamp((Number(s.deathFadeUntil||0)-frameNow)/750,0,1);
                 if(!alive&&deathRatio<=0)return;
-                var rad=Math.max(25,Number(r[15]||38),(isSelf?28:17)/zoom);
+                var rad=Math.max(1,Number(r[15]||38));
                 if(!onScreen(s.x,s.y,rad+50))return;
                 var hitState=BRMP.hitStates&&BRMP.hitStates.get(String(r[0])),hitRatio=0,hitX=0,hitY=0;
                 if(hitState&&frameNow<hitState.until) {
@@ -9476,6 +9599,7 @@
                 } else if(hitState&&BRMP.hitStates)BRMP.hitStates.delete(String(r[0]));
                 cc.save();cc.translate(s.x+hitX,s.y+hitY);
                 if(!alive){cc.scale(.42+.58*deathRatio,.42+.58*deathRatio);cc.globalAlpha=deathRatio;}
+                if(isSelf&&alive){cc.save();cc.strokeStyle='rgba(253,224,71,.7)';cc.lineWidth=2/zoom;cc.setLineDash([5/zoom,4/zoom]);cc.beginPath();cc.arc(0,0,Math.max(rad*1.4,26/zoom),0,Math.PI*2);cc.stroke();cc.restore();}
                 var team=Number(r[8]||0);
                 if(team>0) {
                     cc.save();drawTeamShapePath(cc,team,0,0,rad*1.18);cc.fillStyle='rgba(6,12,24,.82)';cc.fill();
@@ -9550,11 +9674,11 @@
             brSetText(brEl('br-battle-alive'),Number(view.alive||0)+' / '+Number(view.total||0)+'명');
             var elapsedFrames=Math.max(0,(performance.now()-Number(selfObj&&selfObj.last||performance.now()))/16.667),playerFlags=Number(r[23]||0);
             var localHaste=performance.now()<Number(BRMP.localAttackHasteUntil||0),basicRate=(playerFlags&16)||localHaste?3:1;
-            var basicCd=Math.max(0,Number(r[11]||0)-elapsedFrames*basicRate),skillCd=Math.max(0,Number(r[12]||0)-elapsedFrames),skillLeft=Number(r[13]||0);
+            var basicCd=brActionRemaining('attack',selfObj),skillCd=brActionRemaining('skill',selfObj),skillLeft=Number(r[13]||0);
             var uiNow=brNow();
             basicCd=Math.max(basicCd,Math.max(0,Number(BRMP.localAttackLockUntil||0)-uiNow)/16.667);
             skillCd=Math.max(skillCd,Math.max(0,Number(BRMP.localSkillLockUntil||0)-uiNow)/16.667);
-            var basicMax=Math.max(1,Number(r[20]||r[11]||1)),skillMax=Math.max(1,Number(r[21]||r[12]||1));
+            var basicMax=Math.max(1,Number(r[20]||r[11]||1)/basicRate),skillMax=Math.max(1,Number(r[21]||r[12]||1));
             var attackBtn=brEl('br-attack'),skillBtn=brEl('br-skill'),attackReady=basicCd<=.5&&!!r[7],skillReady=skillCd<=.5&&skillLeft!==0&&!!r[7];
             attackBtn.classList.toggle('disabled',!attackReady);skillBtn.classList.toggle('disabled',!skillReady);
             attackBtn.setAttribute('aria-disabled',attackReady?'false':'true');skillBtn.setAttribute('aria-disabled',skillReady?'false':'true');
@@ -9716,10 +9840,41 @@
         }
 
         function brCanStartAim(kind) {
-            var self=BRMP.currentSelf,r=self&&self.row,now=brNow();
-            if(!BRMP.inputState||!r||!r[7])return false;
-            if(kind==='attack')return Number(self.basicCd||0)<=.5&&now>=Number(BRMP.localAttackLockUntil||0);
-            return Number(self.skillCd||0)<=.5&&Number(self.skillLeft||0)!==0&&now>=Number(BRMP.localSkillLockUntil||0);
+            var self=BRMP.drawPlayers&&BRMP.drawPlayers.get(String(BRMP.playerId)),r=self&&self.row;
+            return !!(BRMP.inputState&&r&&r[7]&&(kind==='attack'||Number(r[13])!==0));
+        }
+        function brActionRemaining(kind,self) {
+            self=self||(BRMP.drawPlayers&&BRMP.drawPlayers.get(String(BRMP.playerId)));if(!self)return Infinity;
+            var r=self.row,now=performance.now(),flags=Number(r[23]||0),haste=(flags&16)||now<Number(BRMP.localAttackHasteUntil||0),rate=kind==='attack'&&haste?3:1;
+            var frames=Math.max(0,Number(r[kind==='attack'?11:12]||0)-(now-Number(self.last??now))/(1000/60)*rate);
+            var deadline=kind==='attack'?BRMP.localAttackLockUntil:BRMP.localSkillLockUntil;
+            return Math.max(frames/rate,Math.max(0,Number(deadline||0)-brNow())/(1000/60),Math.max(0,Number(self.stunUntil||0)-now)/(1000/60));
+        }
+        function brRequestAction(kind) {
+            if(!brCanStartAim(kind)||brActionRemaining(kind)>6)return false;
+            var input=BRMP.inputState,now=brNow(),pending=BRMP.pendingLocalActions||(BRMP.pendingLocalActions={});
+            if(pending[kind]&&!pending[kind].previewed)return false;
+            var seq=++input[kind+'Seq'],ax=Number(input.ax??1),ay=Number(input.ay??0),mag=Math.hypot(ax,ay)||1;
+            input[kind]={seq:seq,ax:ax/mag,ay:ay/mag,ap:Number(input.aimPower||1)};
+            pending[kind]={seq:seq,command:input[kind],at:performance.now(),previewed:false};
+            brSendInput(true);brAdvanceLocalActions();return true;
+        }
+        function brAdvanceLocalActions() {
+            var pending=BRMP.pendingLocalActions;if(!pending)return;
+            var self=BRMP.drawPlayers&&BRMP.drawPlayers.get(String(BRMP.playerId));if(!self)return;
+            for(var kind of ['attack','skill']) {
+                var action=pending[kind];if(!action)continue;
+                if(!self.row[7]||(!action.previewed&&performance.now()-action.at>160)){delete pending[kind];continue;}
+                if(action.previewed||brActionRemaining(kind,self)>.5)continue;
+                action.previewed=true;
+                var a=EMOJI_DB[Number(self.row[2])]||EMOJI_DB[0],haste=(Number(self.row[23]||0)&16)||performance.now()<Number(BRMP.localAttackHasteUntil||0);
+                if(kind==='attack')BRMP.localAttackLockUntil=brNow()+brBasicAttackFrames(a)*(1000/60)/(haste?3:1);
+                else BRMP.localSkillLockUntil=brNow()+Math.max(1,Number(brGetPlayableSkillInfo(a)?.cooldown||self.row[21]||60))*(1000/60);
+                BRMP.localCastFx={kind:kind,ax:action.command.ax,ay:action.command.ay,aimPower:action.command.ap,until:performance.now()+170};
+                BRMP.feedbackCommand={kind:kind,seq:action.seq};
+                try {brImmediateCastFeedback(kind,action.command);} finally {BRMP.feedbackCommand=null;}
+                if(navigator.vibrate)navigator.vibrate(kind==='attack'?8:16);
+            }
         }
         function brSetupControls() {
             var joy=brEl('br-joystick'),knob=brEl('br-joystick-knob'),joyPointer=null;
@@ -9730,18 +9885,18 @@
                 knob.style.transform='translate('+dx+'px,'+dy+'px)';
                 brSetMove(dx/max,dy/max);
             }
-            joy.addEventListener('pointerdown',function(e){e.preventDefault();joyPointer=e.pointerId;if(joy.setPointerCapture)joy.setPointerCapture(e.pointerId);moveJoy(e);});
+            joy.addEventListener('pointerdown',function(e){e.preventDefault();if(joyPointer!==null||e.button>0)return;joyPointer=e.pointerId;if(joy.setPointerCapture)joy.setPointerCapture(e.pointerId);moveJoy(e);});
             joy.addEventListener('pointermove',function(e){if(e.pointerId===joyPointer){e.preventDefault();moveJoy(e);}});
             function endJoy(e){if(e.pointerId!==joyPointer)return;joyPointer=null;knob.style.transform='translate(0,0)';brSetMove(0,0);}
-            joy.addEventListener('pointerup',endJoy);joy.addEventListener('pointercancel',endJoy);
+            joy.addEventListener('pointerup',endJoy);joy.addEventListener('pointercancel',endJoy);joy.addEventListener('lostpointercapture',endJoy);
             function setupAimButton(id,kind) {
                 var button=brEl(id),aimKnob=button.querySelector('.br-aim-knob');
                 function updateAim(e,gesture) {
                     var rect=button.getBoundingClientRect(),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
-                    var dx=Number(e.clientX)-cx,dy=Number(e.clientY)-cy,mag=Math.hypot(dx,dy);
-                    if(mag>4) {BRMP.inputState.ax=dx/mag;BRMP.inputState.ay=dy/mag;}
-                    else {dx=Number(BRMP.inputState.ax||1);dy=Number(BRMP.inputState.ay||0);mag=0;}
-                    BRMP.inputState.aimPower=mag>4?brClamp(mag/(Math.max(rect.width,rect.height)*.92),.18,1):1;
+                    var dx=Number(e.clientX)-gesture.startX,dy=Number(e.clientY)-gesture.startY,mag=Math.hypot(dx,dy);
+                    if(mag>7) {BRMP.inputState.ax=dx/mag;BRMP.inputState.ay=dy/mag;gesture.moved=true;}
+                    else {dx=Number(BRMP.inputState.ax??1);dy=Number(BRMP.inputState.ay||0);mag=0;}
+                    BRMP.inputState.aimPower=mag>7?brClamp(mag/(Math.max(rect.width,rect.height)*.92),.18,1):1;
                     var knobDistance=Math.min(Math.max(rect.width,rect.height)*.56,mag),dirMag=Math.hypot(dx,dy)||1;
                     aimKnob.style.transform='translate('+(dx/dirMag*knobDistance)+'px,'+(dy/dirMag*knobDistance)+'px)';
                     // 조준 미리보기는 기기 안에서 즉시 처리하고, 실제 방향은 발사 순간 한 번에 전송한다.
@@ -9754,8 +9909,8 @@
                 button.addEventListener('pointerdown',function(e){
                     e.preventDefault();
                     brEnsureAudio();
-                    if(BRMP.aimGesture||!brCanStartAim(kind))return;
-                    var gesture={kind:kind,pointerId:e.pointerId,button:button,moved:false};BRMP.aimGesture=gesture;
+                    if(e.button>0||BRMP.aimGesture||!brCanStartAim(kind))return;
+                    var gesture={kind:kind,pointerId:e.pointerId,button:button,moved:false,startX:e.clientX,startY:e.clientY};BRMP.aimGesture=gesture;
                     button.classList.add('aiming');if(button.setPointerCapture)button.setPointerCapture(e.pointerId);
                     updateAim(e,gesture);
                 });
@@ -9766,28 +9921,25 @@
                 button.addEventListener('pointerup',function(e){
                     var gesture=BRMP.aimGesture;if(!gesture||gesture.button!==button||gesture.pointerId!==e.pointerId)return;
                     e.preventDefault();updateAim(e,gesture);
-                    if(brCanStartAim(kind)) {
-                        if(kind==='attack'){
-                            BRMP.inputState.attackSeq++;
-                            var selfRow=BRMP.currentSelf&&BRMP.currentSelf.row||[],basicFrames=Math.max(18,Number(selfRow[20]||32));
-                            var haste=performance.now()<Number(BRMP.localAttackHasteUntil||0)||(Number(selfRow[23]||0)&16);
-                            var lockMs=Math.max(haste?140:300,Math.min(850,basicFrames*15)/(haste?3:1));
-                            BRMP.localAttackLockUntil=brNow()+lockMs;
-                        }
-                        else {BRMP.inputState.skillSeq++;BRMP.localSkillLockUntil=brNow()+700;}
-                        BRMP.localCastFx={kind:kind,ax:Number(BRMP.inputState.ax||1),ay:Number(BRMP.inputState.ay||0),
-                            aimPower:Number(BRMP.inputState.aimPower||1),until:performance.now()+170};
-                        brImmediateCastFeedback(kind);
-                        brSendInput(true);if(navigator.vibrate)navigator.vibrate(kind==='attack'?12:[22,12,32]);
-                    }
+                    brRequestAction(kind);
                     clearAim(gesture);
                 });
                 button.addEventListener('pointercancel',function(e){
                     var gesture=BRMP.aimGesture;if(gesture&&gesture.button===button&&gesture.pointerId===e.pointerId)clearAim(gesture);
                 });
+                button.addEventListener('lostpointercapture',function(e){var gesture=BRMP.aimGesture;if(gesture&&gesture.button===button&&gesture.pointerId===e.pointerId)clearAim(gesture);});
+                button.addEventListener('contextmenu',function(e){e.preventDefault();});
                 button.addEventListener('click',function(e){e.preventDefault();});
             }
             setupAimButton('br-attack','attack');setupAimButton('br-skill','skill');
+            BRMP.resetControls=function(){
+                joyPointer=null;knob.style.transform='translate(0,0)';
+                var gesture=BRMP.aimGesture;if(gesture){gesture.button.classList.remove('aiming');gesture.button.querySelector('.br-aim-knob').style.transform='translate(0,0)';}BRMP.aimGesture=null;
+                BRMP.keys={};if(BRMP.localInput){BRMP.localInput.dx=0;BRMP.localInput.dy=0;}
+                if(BRMP.inputState){BRMP.inputState.dx=0;BRMP.inputState.dy=0;brSendInput(true);}
+            };
+            window.addEventListener('blur',BRMP.resetControls);window.addEventListener('pagehide',BRMP.resetControls);
+            document.addEventListener('visibilitychange',function(){if(document.hidden)BRMP.resetControls();});
             BRMP.keys={};BRMP.localInput={dx:0,dy:0,ax:1,ay:0,aimPower:1,attackSeq:0,skillSeq:0,_receivedAt:brNow()};
             window.addEventListener('keydown',function(e){
                 var tag=(document.activeElement&&document.activeElement.tagName||'').toLowerCase();
@@ -9798,27 +9950,27 @@
                 if(studentBattle||demoBattle) {
                     if(['arrowup','arrowdown','arrowleft','arrowright',' ','w','a','s','d','q'].indexOf(k)>=0)e.preventDefault();
                     if((k===' '||k==='enter')&&!e.repeat) {
-                        if(studentBattle){brEnsureAudio();BRMP.inputState.attackSeq++;brImmediateCastFeedback('attack');brSendInput(true);}else BRMP.localInput.attackSeq++;
+                        if(studentBattle){brEnsureAudio();brRequestAction('attack');}else {BRMP.localInput.attackSeq++;BRMP.localInput.attack={seq:BRMP.localInput.attackSeq,ax:BRMP.localInput.ax,ay:BRMP.localInput.ay,ap:1};}
                     }
                     if(k==='q'&&!e.repeat) {
-                        if(studentBattle){brEnsureAudio();BRMP.inputState.skillSeq++;brImmediateCastFeedback('skill');brSendInput(true);}else BRMP.localInput.skillSeq++;
+                        if(studentBattle){brEnsureAudio();brRequestAction('skill');}else {BRMP.localInput.skillSeq++;BRMP.localInput.skill={seq:BRMP.localInput.skillSeq,ax:BRMP.localInput.ax,ay:BRMP.localInput.ay,ap:1};}
                     }
-                    brUpdateKeyboardMove(studentBattle,demoBattle);
+                    if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k))brUpdateKeyboardMove(studentBattle,demoBattle);
                 }
             });
             window.addEventListener('keyup',function(e){
                 BRMP.keys[e.key.toLowerCase()]=false;
-                brUpdateKeyboardMove(BRMP.role==='student',BRMP.role==='host'&&BRMP.backend==='local'&&BRMP.active);
+                if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(e.key.toLowerCase()))brUpdateKeyboardMove(BRMP.role==='student',BRMP.role==='host'&&BRMP.backend==='local'&&BRMP.active);
             });
         }
         function brUpdateKeyboardMove(student,demo) {
             var k=BRMP.keys||{},dx=(k.d||k.arrowright?1:0)-(k.a||k.arrowleft?1:0),dy=(k.s||k.arrowdown?1:0)-(k.w||k.arrowup?1:0);
             var m=Math.hypot(dx,dy);if(m){dx/=m;dy/=m;}
             if(student&&BRMP.inputState) {
-                var previous=Math.hypot(Number(BRMP.inputState.dx||0),Number(BRMP.inputState.dy||0));
+                var previousX=Number(BRMP.inputState.dx||0),previousY=Number(BRMP.inputState.dy||0);
                 BRMP.inputState.dx=dx;BRMP.inputState.dy=dy;
                 if(m&&!BRMP.aimGesture){BRMP.inputState.ax=dx;BRMP.inputState.ay=dy;BRMP.inputState.aimPower=1;}
-                brSendInput((previous>.12)!==(m>.12));
+                brSendInput(brUrgentMoveChange(previousX,previousY,BRMP.inputState.dx,BRMP.inputState.dy));
             }
             if(demo) {
                 BRMP.localInput.dx=dx;BRMP.localInput.dy=dy;if(m){BRMP.localInput.ax=dx;BRMP.localInput.ay=dy;}BRMP.localInput._receivedAt=brNow();
