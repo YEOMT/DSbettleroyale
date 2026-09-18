@@ -1004,7 +1004,178 @@
             }
         }
 
-        // v21: 한 판에 한 번 떨어지는 보급품. 체력 25% 회복 + 현재 쿨타임 45% 단축.
+        // Farming extends the existing single supply drop with XP and 28% healing during a run.
+        // Farming objects have their own small collision list and never enter combat targeting.
+        // All mutations run in the authoritative GameWorld; clients only draw snapshots.
+        window.brFarm = (() => {
+            const RADIUS=32, CELL=320, UNITS_TO_BREAK=1;
+            const key=(x,y)=>x+','+y;
+            const real=p=>p&&p.id!==999&&!p.isClone&&!p.cloneOwner;
+            const dirty=g=>{g.farmRevision=(g.farmRevision||0)+1;g._farmSnapshot=null;};
+            function init(g) {
+                dispose(g);g.farmRevision=1;g.farmSeq=0;g.farmGrid=new Map();
+                const players=g.participants.filter(real),count=Math.min(34,Math.max(6,Math.round(players.length*30/27)));
+                g.farmPickupSearchRadius=Math.max(100,...players.map(p=>p.radius+38));
+                // Separate random stream leaves map, character and combat RNG untouched.
+                let seed=2166136261;
+                const text=String(window.BRMP?.roomMeta?.seed||'farm')+'|'+String(window.BRMP?.roomMeta?.matchRound||0)+'|'+g.mapIndex;
+                for(let i=0;i<text.length;i++){seed^=text.charCodeAt(i);seed=Math.imul(seed,16777619);}
+                const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+                for(let i=0;i<count;i++)for(let tries=0;tries<100;tries++) {
+                    const near=players[i%Math.max(1,players.length)],angle=random()*Math.PI*2;
+                    const distance=tries<24&&near?180+random()*220:Math.sqrt(random())*(g.worldRadius-240);
+                    const pos=tries<24&&near?new Vec2(near.pos.x+Math.cos(angle)*distance,near.pos.y+Math.sin(angle)*distance):new Vec2(Math.cos(angle)*distance,Math.sin(angle)*distance);
+                    if(pos.dist(g.center)>g.worldRadius-140||g.checkWallCollision(pos,RADIUS+28))continue;
+                    if(g.farmBoxes.some(b=>b.pos.dist(pos)<150)||players.some(p=>p.pos.dist(pos)<p.radius+RADIUS+30))continue;
+                    const box={id:++g.farmSeq,pos,radius:RADIUS,hp:UNITS_TO_BREAK,lastHits:new Map()};
+                    g.farmBoxes.push(box);
+                    const cell=key(Math.floor(pos.x/CELL),Math.floor(pos.y/CELL));
+                    if(!g.farmGrid.has(cell))g.farmGrid.set(cell,[]);g.farmGrid.get(cell).push(box);break;
+                }
+            }
+            function dispose(g) {g.farmBoxes=[];g.xpBundles=[];g.farmGrid=new Map();g._farmSnapshot=null;g.farmRevision=0;g.farmSeq=0;}
+            function spawn(g,pos,amount,source) {
+                if(!g.xpBundles)return null;
+                // Normal BR has at most ~57 drops. Repeated respawns also stay bounded:
+                // merge one closest old pair at the cap, preserving XP and the new death position.
+                if(g.xpBundles.length>=96) {
+                    let first=-1,second=-1,best=Infinity;
+                    for(let i=0;i<g.xpBundles.length;i++)for(let j=i+1;j<g.xpBundles.length;j++) {
+                        const a=g.xpBundles[i],b=g.xpBundles[j];if(a.source!==b.source)continue;
+                        const dx=a.pos.x-b.pos.x,dy=a.pos.y-b.pos.y,d=dx*dx+dy*dy;
+                        if(d<best){best=d;first=i;second=j;}
+                    }
+                    if(first>=0){g.xpBundles[first].amount+=g.xpBundles[second].amount;g.xpBundles[first].born=Math.max(g.xpBundles[first].born,g.xpBundles[second].born);g.xpBundles.splice(second,1);}
+                }
+                const drop={id:++g.farmSeq,pos:new Vec2(pos.x,pos.y),amount:Math.max(1,Math.round(amount)),source:source||0,born:g.frame};
+                g.xpBundles.push(drop);dirty(g);return drop;
+            }
+            function death(g,p) {
+                if(!real(p)||p._farmDropDeathSeq===p.eliminationSeq)return;
+                p._farmDropDeathSeq=p.eliminationSeq;
+                spawn(g,p.pos,Math.min(5,Math.max(1,Number(p.run?.level||1)))+1,1);
+            }
+            function damage(g,box,owner,units,token) {
+                if(!box||box.hp<=0||!real(owner)||!Number.isFinite(units)||units<=0)return false;
+                token=token||'hit:'+g.frame;
+                const id=owner.remoteId||owner.id,previous=box.lastHits.get(id);
+                if(previous&&(previous.token===token||g.frame-previous.frame<6))return false;
+                box.lastHits.set(id,{token,frame:g.frame});box.hp=Math.max(0,box.hp-units);dirty(g);
+                if(box.hp<=1e-6) {
+                    box.hp=0;const i=g.farmBoxes.indexOf(box);if(i>=0)g.farmBoxes.splice(i,1);
+                    spawn(g,box.pos,1,0);
+                }
+                g.emitStudentFx('impact',box.pos,{size:48,color:'#fbbf24',style:'farm',sourceId:owner.remoteId||('ai-'+owner.id)});
+                return true;
+            }
+            function area(g,owner,pos,radius,units=.65,token) {
+                if(!g.farmBoxes?.length||!real(owner))return;
+                token=token||'area:'+g.frame;
+                for(const box of g.farmBoxes.slice()) {
+                    const dx=box.pos.x-pos.x,dy=box.pos.y-pos.y,reach=radius+RADIUS;
+                    if(dx*dx+dy*dy<=reach*reach&&!g.checkWallBetween(pos,box.pos))damage(g,box,owner,units,token);
+                }
+            }
+            function cone(g,owner,aim,range,halfAngle,units,token) {
+                if(!g.farmBoxes?.length)return;
+                for(const box of g.farmBoxes.slice()) {
+                    const dx=box.pos.x-owner.pos.x,dy=box.pos.y-owner.pos.y,d=Math.hypot(dx,dy);
+                    if(d<=range+RADIUS*.4&&(d===0||(dx*aim.x+dy*aim.y)/d>=Math.cos(halfAngle))&&!g.checkWallBetween(owner.pos,box.pos))damage(g,box,owner,units,token);
+                }
+            }
+            function line(g,owner,from,to,width,units,token) {
+                if(!g.farmBoxes?.length)return;
+                for(const box of g.farmBoxes.slice()) {
+                    const t=combatSegmentCircleTime(from.x-box.pos.x,from.y-box.pos.y,to.x-from.x,to.y-from.y,RADIUS+width);
+                    if(t!==null&&!g.checkWallBetween(from,box.pos))damage(g,box,owner,units,token);
+                }
+            }
+            function projectileContacts(g,shot,from,to,wall,contacts) {
+                if(!g.farmBoxes?.length||!real(shot.owner))return;
+                const r=RADIUS+shot.size,dx=to.x-from.x,dy=to.y-from.y;
+                const minX=Math.floor((Math.min(from.x,to.x)-r)/CELL),maxX=Math.floor((Math.max(from.x,to.x)+r)/CELL);
+                const minY=Math.floor((Math.min(from.y,to.y)-r)/CELL),maxY=Math.floor((Math.max(from.y,to.y)+r)/CELL);
+                for(let x=minX;x<=maxX;x++)for(let y=minY;y<=maxY;y++)for(const box of g.farmGrid.get(key(x,y))||[]) {
+                    const last=shot._farmHitIds?.get(box.id);
+                    if(box.hp<=0||(last!==undefined&&(shot.type!=='ORBIT'||g.frame-last<12)))continue;
+                    const t=combatSegmentCircleTime(from.x-box.pos.x,from.y-box.pos.y,dx,dy,r);
+                    if(t!==null&&(!wall||t<wall.t))contacts.push({farm:box,t});
+                }
+            }
+            function projectileHit(g,shot,box) {
+                if(box.hp<=0)return false;
+                (shot._farmHitIds||(shot._farmHitIds=new Map())).set(box.id,g.frame);
+                const token=shot.type==='ORBIT'?'orbit:'+g.frame:shot.farmToken||('shot:'+shot.inputKind+':'+shot.inputSeq+':'+(shot.farmBornFrame??g.frame));
+                damage(g,box,shot.owner,shot.type==='ORBIT'?12/90:shot.farmDamage||.65,token);
+                if(shot.playerSkillBlast){shot.detonatePlayerSkill(g);return true;}
+                if(shot.explodeRadius>0) {
+                    area(g,shot.owner,shot.pos,shot.explodeRadius,shot.farmDamage||.65,token);
+                    g.spawnExplosion(shot.pos,shot.explodeRadius,shot.impactColor||shot.color);
+                    g.applyAoE(shot.pos,shot.explodeRadius,shot.damage,shot.owner,Math.max(12,shot.knockback));
+                }
+                if(shot.type!=='ORBIT'&&shot.type!=='BOOMERANG'&&!shot.pierce){shot.life=0;return true;}
+                return false;
+            }
+            function update(g) {
+                if(!g.xpBundles?.length)return;
+                for(let i=g.xpBundles.length-1;i>=0;i--) {
+                    const drop=g.xpBundles[i];if(g.frame-drop.born<12)continue;
+                    if(g.frame-drop.born>5400&&drop.pos.dist(g.center)>g.mapRadius+180){g.xpBundles.splice(i,1);dirty(g);continue;}
+                    let picker=null,best=Infinity;
+                    for(const p of g.getNearbyParticipants(drop.pos,g.farmPickupSearchRadius||150)) {
+                        if(!p.alive||!real(p))continue;
+                        const dx=p.pos.x-drop.pos.x,dy=p.pos.y-drop.pos.y,d=dx*dx+dy*dy,r=p.radius+28;
+                        if(d<=r*r&&(d<best||(d===best&&p.id<picker.id))&&!g.checkWallBetween(p.pos,drop.pos)){picker=p;best=d;}
+                    }
+                    if(!picker)continue;
+                    g.xpBundles.splice(i,1);dirty(g);
+                    window.brProgression?.awardXP(picker,drop.amount,drop.source===1?.10:.05);
+                    g.addText(picker.pos,'+'+drop.amount+' XP','#67e8f9',24,22);
+                }
+            }
+            function snapshot(g) {
+                if(g._farmSnapshot)return g._farmSnapshot;
+                const supply=g.supplyDrop&&!g.supplyDrop.claimed&&g.supplyDrop.life>0?g.supplyDrop:null;
+                return g._farmSnapshot={r:g.farmRevision||0,b:(g.farmBoxes||[]).map(b=>[b.id,Math.round(b.pos.x),Math.round(b.pos.y),Math.round(b.hp*100)]),x:(g.xpBundles||[]).map(d=>[d.id,Math.round(d.pos.x),Math.round(d.pos.y),d.amount,d.source]),s:supply?[Math.round(supply.pos.x),Math.round(supply.pos.y),supply.landed?1:0]:null};
+            }
+            function drawStudent(c,data,onScreen,zoom=1,includeSupply=true) {
+                if(!data)return;c.save();c.textAlign='center';c.textBaseline='middle';
+                const supply=data.s;
+                if(includeSupply&&supply&&(!onScreen||onScreen(supply[0],supply[1],90))) {
+                    c.strokeStyle='#67e8f9';c.lineWidth=4;c.fillStyle='#164e63';c.beginPath();c.arc(supply[0],supply[1],52,0,Math.PI*2);c.fill();
+                    if(!supply[2])c.setLineDash([9,7]);c.stroke();c.setLineDash([]);
+                    if(zoom>.20){c.font='36px sans-serif';c.fillText(supply[2]?'📦':'↓',supply[0],supply[1]);c.fillStyle='#cffafe';c.font='800 19px sans-serif';c.fillText('SUPPLY +2 XP',supply[0],supply[1]+73);}
+                }
+                for(const b of data.b||[]) {
+                    if(onScreen&&!onScreen(b[1],b[2],55))continue;
+                    c.fillStyle='#593b24';c.strokeStyle='#f5c96b';c.lineWidth=3;c.fillRect(b[1]-RADIUS,b[2]-RADIUS,RADIUS*2,RADIUS*2);c.strokeRect(b[1]-RADIUS,b[2]-RADIUS,RADIUS*2,RADIUS*2);
+                    c.strokeStyle='#a67638';c.lineWidth=5;c.beginPath();c.moveTo(b[1]-26,b[2]-26);c.lineTo(b[1]+26,b[2]+26);c.moveTo(b[1]+26,b[2]-26);c.lineTo(b[1]-26,b[2]+26);c.stroke();
+                    if(zoom>.20){c.fillStyle='#fff0b3';c.font='900 19px sans-serif';c.fillText('XP',b[1],b[2]);}
+                    if(b[3]<100){c.fillStyle='#172033';c.fillRect(b[1]-RADIUS,b[2]-42,64,5);c.fillStyle='#fbbf24';c.fillRect(b[1]-RADIUS,b[2]-42,64*b[3]/100,5);}
+                }
+                for(const d of data.x||[]) {
+                    if(onScreen&&!onScreen(d[1],d[2],52))continue;
+                    const radius=d[4]?20:15;c.fillStyle=d[4]?'#c4b5fd':'#67e8f9';c.strokeStyle='#ecfeff';c.lineWidth=2;
+                    c.beginPath();c.moveTo(d[1],d[2]-radius);c.lineTo(d[1]+radius,d[2]);c.lineTo(d[1],d[2]+radius);c.lineTo(d[1]-radius,d[2]);c.closePath();c.fill();c.stroke();
+                    if(zoom>.20){c.fillStyle='#ecfeff';c.font='800 17px sans-serif';c.fillText('XP ×'+d[3],d[1],d[2]+radius+15);}
+                }
+                c.restore();
+            }
+            // Count complete attack intervals, including the first hit at time zero.
+            // This keeps slow/heavy and rapid/multishot basics near 1–2 seconds alike.
+            function basicUnits(frames){return 1/(Math.ceil(60/Math.max(1,Number(frames||45)))+1);}
+            function pickupTarget(g,p) {
+                if(!p.alive||!real(p)||p.pos.dist(g.center)>g.mapRadius-160)return null;
+                let best=null,bestD=360*360;
+                for(const d of g.xpBundles||[]) {
+                    const dx=d.pos.x-p.pos.x,dy=d.pos.y-p.pos.y,dist=dx*dx+dy*dy;
+                    if(dist<bestD&&d.pos.dist(g.center)<g.mapRadius-120&&!g.checkWallBetween(p.pos,d.pos)){best=d.pos;bestD=dist;}
+                }
+                return best;
+            }
+            return {radius:RADIUS,init,dispose,spawn,death,damage,area,cone,line,projectileContacts,projectileHit,update,snapshot,drawStudent,basicUnits,pickupTarget,changed:dirty};
+        })();
+
         class SupplyDrop {
             constructor(pos) {
                 this.pos=new Vec2(pos.x,pos.y); this.fallFrames=105; this.life=1350;
@@ -1017,23 +1188,28 @@
                     this.fallFrames--;
                     if(this.fallFrames<=0) {
                         this.landed=true;
+                        window.brFarm.changed(game);
                         game.spawnImpact(this.pos,90,'#67e8f9',1.0);
                     }
                     return;
                 }
                 this.life--;
                 let picker=null,best=Infinity;
-                for(const p of game.getNearbyParticipants(this.pos,90)) {
+                for(const p of game.getNearbyParticipants(this.pos,game.farmPickupSearchRadius||150)) {
                     if(!p.alive || p.id===999) continue;
                     const d=p.pos.dist(this.pos);
                     if(d<p.radius+38 && d<best){best=d;picker=p;}
                 }
                 if(picker) {
                     this.claimed=true;
-                    picker.hp=Math.min(picker.maxHp,picker.hp+picker.maxHp*0.25);
-                    picker.cooldown=Math.max(0,Math.floor(picker.cooldown*0.55));
-                    picker.stunned=Math.min(picker.stunned,5);
-                    game.addText(picker.pos,'📦 SUPPLY!','#67e8f9',52,34);
+                    window.brFarm.changed(game);
+                    const progression=picker.run&&window.brProgression;
+                    if(progression)progression.awardXP(picker,2,.28);
+                    else {
+                        picker.hp=Math.min(picker.maxHp,picker.hp+picker.maxHp*.25);
+                        picker.cooldown=Math.max(0,Math.floor(picker.cooldown*.55));picker.stunned=Math.min(picker.stunned,5);
+                    }
+                    game.addText(picker.pos,progression?'SUPPLY +2 XP':'SUPPLY!','#67e8f9',40,30);
                     game.spawnImpact(picker.pos,125,'#67e8f9',1.4);
                 }
             }
@@ -1052,6 +1228,7 @@
                     ctx.beginPath(); ctx.arc(0,0,52*pulse,0,Math.PI*2); ctx.fill();
                     ctx.globalAlpha=1; ctx.font='38px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('📦',0,0);
                     ctx.strokeStyle='#a5f3fc'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(0,0,58*pulse,0,Math.PI*2); ctx.stroke();
+                    ctx.shadowBlur=0;ctx.fillStyle='#cffafe';ctx.font='800 20px sans-serif';ctx.fillText('+2 XP',0,77);
                 }
                 ctx.restore();
             }
@@ -1086,8 +1263,39 @@
             }
         }
 
+        // Run modifiers are cached when an augment is selected. Cast snapshots keep
+        // delayed hits independent of later choices and never mutate roster stats.
+        function brRunMod(p,key,fallback=1) { const v=p?.run?.mods?.[key];return Number.isFinite(v)?v:fallback; }
+        function brRunSkillSnapshot(p) { return {damage:brRunMod(p,'skillDamage'),size:brRunMod(p,'skillSize'),control:brRunMod(p,'skillControl'),restore:brRunMod(p,'skillRestore'),duration:Math.max(.5,brRunMod(p,'signatureDuration')+brRunMod(p,'skillDuration')-1),cooldown:brRunMod(p,'skillCooldown')}; }
+        function brRunCount(base,extra,cap=12) { return base+Math.min(2,Math.max(0,Math.floor(extra||0)),Math.max(0,cap-base)); }
+        function brRunCC(base,mult=1) { return mult===1?base:Math.max(base,Math.min(90,Math.round(base*mult))); }
+        function brWithRunSkill(p,g,fn,snapshot=null,finishCast=true) {
+            if(p._runSkillCast)return fn();
+            const cast=snapshot||brRunSkillSnapshot(p);p._runSkillCast=cast;
+            const adjust=cast.control!==1||cast.restore!==1||cast.duration!==1;
+            const before=adjust?(g.participants||[]).filter(x=>x.alive).map(x=>({p:x,hp:x.hp,guard:x.teamGuardStrength,stun:x.stunned,vx:x.vel.x,vy:x.vel.y,timers:['ghostTimer','teamGuardFrames','teamHasteFrames','playerMoveBoostFrames','playerAttackHasteFrames'].map(k=>Number(x[k]||0))})):null;
+            try{return fn();}finally{
+                p._runSkillCast=null;
+                if(before)for(const old of before){
+                    const q=old.p,ally=q===p||(p.team&&q.team===p.team);
+                    if(ally){
+                        if(q.hp>old.hp&&cast.restore!==1)q.hp=Math.min(q.maxHp,old.hp+(q.hp-old.hp)*cast.restore);
+                        if(q.teamGuardStrength>Number(old.guard||0)&&cast.restore!==1)q.teamGuardStrength=Math.min(.45,Number(old.guard||0)+(q.teamGuardStrength-Number(old.guard||0))*cast.restore);
+                        if(cast.duration!==1)['ghostTimer','teamGuardFrames','teamHasteFrames','playerMoveBoostFrames','playerAttackHasteFrames'].forEach((k,i)=>{if(q[k]>old.timers[i])q[k]=Math.round(old.timers[i]+(q[k]-old.timers[i])*cast.duration);});
+                    } else if(cast.control!==1){
+                        if(q.stunned>old.stun)q.stunned=Math.max(old.stun,brRunCC(q.stunned,cast.control));
+                        q.vel=new Vec2(old.vx+(q.vel.x-old.vx)*cast.control,old.vy+(q.vel.y-old.vy)*cast.control);
+                    }
+                }
+                if(finishCast){p.cooldown=Math.max(1,Math.round(p.cooldown*cast.cooldown));p._runLastSkill=cast;}
+            }
+        }
+
         class Zone {
-            constructor(owner, pos, radius, damage, duration, color, type) {
+            constructor(owner, pos, radius, damage, duration, color, type, opts={}) {
+                this.runSkill=owner?._runSkillCast||(owner?.dashFrames>0?owner._runLastSkill:null)||brRunSkillSnapshot(owner);
+                if(!opts.scaledRadius)radius*=this.runSkill.size;
+                damage*=this.runSkill.damage;duration=Math.round(duration*this.runSkill.duration);
                 this.owner = owner; this.pos = new Vec2(pos.x, pos.y); this.radius = radius; this.damage = damage;
                 this.duration = duration; this.maxDuration = duration; this.color = color; this.type = type;
                 this.triggered = false;
@@ -1114,18 +1322,19 @@
                 }
                 const tickRate = this.owner?.ability?.type === ABILITY_TYPES.ZONE ? 12 : 15;
                 if(this.duration % tickRate === 0) {
+                    if((this.damage>0&&this.type!=='pull')||this.owner?.ability?.sub==='GRAVITY_WELL')window.brFarm.area(game,this.owner,this.pos,this.radius,tickRate/90,'zone:'+game.frame);
                     const scanRadius = this.type === 'pull' ? this.radius * 2 + 80 : this.radius + 80;
                     for(const p of game.getNearbyParticipants(this.pos, scanRadius)) {
                         if (p === this.owner || !p.alive || (this.owner.team !== 0 && p.team === this.owner.team)) continue;
                         if(this.type === 'pull' && p.pos.dist(this.pos) < this.radius * 2) {
                             const pullPower = this.owner?.ability?.sub === 'GRAVITY_WELL' ? 4.6 : 2;
-                            p.vel = p.vel.add(this.pos.sub(p.pos).norm().mult(pullPower));
+                            p.vel = p.vel.add(this.pos.sub(p.pos).norm().mult(pullPower*this.runSkill.control));
                         }
                         if(p.pos.dist(this.pos) < this.radius) {
                             if(this.type === 'pull' && this.owner?.ability?.sub === 'GRAVITY_WELL') {
                                 // v21.12: 블랙홀 중심부는 흡입만 하는 빈 장판이 아니라 지속 압축 피해를 준다.
-                                p.takeDamage(4.2 * (this.owner.damageMult || 1), this.owner);
-                                p.vel = p.vel.add(this.pos.sub(p.pos).norm().mult(1.25));
+                                p.takeDamage(4.2 * (this.owner.damageMult || 1)*this.runSkill.damage, this.owner);
+                                p.vel = p.vel.add(this.pos.sub(p.pos).norm().mult(1.25*this.runSkill.control));
                             }
                             if (this.type !== 'pull') {
                                 // v17: 장판은 단일 피해는 얌전하지만, 여러 장판이 겹치면 위력이 빠르게 커진다.
@@ -1138,22 +1347,22 @@
                             }
                             if(this.type === 'web') {
                                 const freeze = this.pattern === 'ice' ? 16 : 10;
-                                p.stunned = Math.max(p.stunned, freeze);
-                                if(this.pattern === 'ice') p.vel = p.vel.mult(0.72);
+                                p.stunned = Math.max(p.stunned, brRunCC(freeze,this.runSkill.control));
+                                if(this.pattern === 'ice') p.vel = p.vel.mult(Math.max(.35,1-.28*this.runSkill.control));
                             }
-                            if(this.pattern === 'lava' && this.owner?.ability?.type === ABILITY_TYPES.ZONE) p.vel = p.vel.mult(0.84);
+                            if(this.pattern === 'lava' && this.owner?.ability?.type === ABILITY_TYPES.ZONE) p.vel = p.vel.mult(Math.max(.35,1-.16*this.runSkill.control));
                             if(['poison','plague','stink'].includes(this.pattern)) {
-                                if(this.owner?.ability?.sub === 'POISON_TRAIL') p.vel = p.vel.mult(0.88);
-                                else if(this.owner?.ability?.type === ABILITY_TYPES.ZONE) p.vel = p.vel.mult(0.90);
+                                if(this.owner?.ability?.sub === 'POISON_TRAIL') p.vel = p.vel.mult(Math.max(.35,1-.12*this.runSkill.control));
+                                else if(this.owner?.ability?.type === ABILITY_TYPES.ZONE) p.vel = p.vel.mult(Math.max(.35,1-.10*this.runSkill.control));
                             }
                             if(this.pattern === 'ink') {
-                                p.blindedFrames = Math.max(p.blindedFrames || 0, 58);
-                                p.vel = p.vel.mult(0.82);
+                                p.blindedFrames = Math.max(p.blindedFrames || 0, brRunCC(58,this.runSkill.control));
+                                p.vel = p.vel.mult(Math.max(.35,1-.18*this.runSkill.control));
                             }
                             if((this.pattern === 'bomb' || this.pattern === 'banana') && this.duration < this.maxDuration - 12 && p.pos.dist(this.pos) < this.radius * 1.15) {
                                 this.triggered = true; this.duration = 0;
                             }
-                            if(this.type === 'boom') p.vel = p.pos.sub(this.pos).norm().mult(15);
+                            if(this.type === 'boom') p.vel = p.pos.sub(this.pos).norm().mult(15*this.runSkill.control);
                         }
                     }
                 }
@@ -1162,14 +1371,14 @@
                     const burstDamage = isBlackHole ? 42 : (this.owner?.ability?.t === 'S' ? 54 : 40);
                     const burstPush = isBlackHole ? 30 : (this.owner?.ability?.t === 'S' ? 24 : 20);
                     const burstRadius = isBlackHole ? this.radius * 1.10 : this.radius;
-                    game.spawnExplosion(this.pos, burstRadius, '#f0f'); game.applyAoE(this.pos, burstRadius, burstDamage, this.owner, burstPush);
+                    game.spawnExplosion(this.pos, burstRadius, '#f0f'); game.applyAoE(this.pos, burstRadius, burstDamage*this.runSkill.damage, this.owner, burstPush*this.runSkill.control);
                 }
                 if(this.type === 'time_bomb' && this.duration <= 0) {
                     let burstDamage = 60, burstPush = 30, burstRadius = this.radius * 1.5;
                     if(this.owner?.ability?.sub === 'BOMB_TRAIL') { burstDamage = 34 * this.owner.damageMult; burstPush = 25; burstRadius = this.radius * 1.65; }
                     else if(this.owner?.ability?.sub === 'BANANA_TRAIL') { burstDamage = 28 * this.owner.damageMult; burstPush = 34; burstRadius = this.radius * 1.7; }
                     game.spawnExplosion(this.pos, burstRadius, this.pattern === 'banana' ? '#facc15' : '#f97316');
-                    game.applyAoE(this.pos, burstRadius, burstDamage, this.owner, burstPush);
+                    game.applyAoE(this.pos, burstRadius, burstDamage*this.runSkill.damage, this.owner, burstPush*this.runSkill.control);
                 }
             }
             draw(ctx) {
@@ -1319,9 +1528,10 @@
 
         class Turret {
             constructor(owner, pos) {
+                this.runSkill=owner?._runSkillCast||(owner?.dashFrames>0?owner._runLastSkill:null)||brRunSkillSnapshot(owner);
                 this.owner = owner; this.pos = new Vec2(pos.x,pos.y);
                 this.isGolden = owner.ability.sub === 'GOLDEN_TURRET';
-                this.life = this.isGolden ? 430 : 400;
+                this.life = Math.round((this.isGolden ? 430 : 400)*this.runSkill.duration);
                 this.cooldown = 0; this.shotCount = 0;
             }
             update(game) {
@@ -1344,11 +1554,11 @@
                                 (heavy ? 15 : 8.5) * this.owner.damageMult,
                                 heavy ? 10 : 7,
                                 'missile', '#fbbf24', heavy ? 48 : 0, null,
-                                {trailColor:'#fde68a', impactColor:'#fbbf24', knockback:heavy?12:6, vfx:'star'}
+                                {trailColor:'#fde68a', impactColor:'#fbbf24', knockback:heavy?12:6, vfx:'star',runSkill:this.runSkill}
                             ));
                             if(heavy) game.addText(this.pos, '✨ GOLD SHOT!', '#fde047', 20, 20);
                         } else {
-                            game.projectiles.push(new Projectile(this.owner, this.pos, dir, 7, 6*this.owner.damageMult, 5, 'bullet', '#cbd5e1'));
+                            game.projectiles.push(new Projectile(this.owner, this.pos, dir, 7, 6*this.owner.damageMult, 5, 'bullet', '#cbd5e1',0,null,{runSkill:this.runSkill}));
                         }
                     }
                 }
@@ -1370,7 +1580,11 @@
 
         class Projectile {
             constructor(owner, pos, dir, speed, damage, size, type, color, explodeRadius=0, emoji=null, opts={}) {
+                this.runSkill=opts.impactStyle==='ranged-basic'?null:(opts.runSkill||owner?._runSkillCast||(owner?.dashFrames>0?owner._runLastSkill:null)||brRunSkillSnapshot(owner));
+                this.dotDamageMult=this.runSkill?.damage||Number(opts.basicDamageMultiplier||1);
+                if(this.runSkill){damage*=this.runSkill.damage;size*=this.runSkill.size;explodeRadius*=this.runSkill.size;}
                 this.owner = owner; this.pos = pos; this.vel = dir.mult(speed);
+                this.farmBornFrame=game?.frame||0;
                 this.inputKind=owner?.activeInputCommand?.kind||'';this.inputSeq=Number(owner?.activeInputCommand?.seq||0);
 
                 // v22.7: 상위랭크 원거리(PROJ) 화력 보강.
@@ -1393,7 +1607,7 @@
                 this.wobble = opts.wobble || false;
                 this.spinRate = opts.spinRate || 0;
                 this.faceDir = opts.faceDir || false;
-                this.knockback = opts.knockback || 3;
+                this.knockback = (opts.knockback || 3)*(this.runSkill?.control||1);
                 this.vfx = opts.vfx || null;
                 // ✨ v13: 투사체별 잔상/충돌색/상태효과
                 this.trailColor = opts.trailColor || null;
@@ -1419,7 +1633,7 @@
                     this.orbitDist = opts.orbitDist || owner.radius + 35;
                     this.orbitSpeed = opts.orbitSpeed || 0.10;
                     // v20: 회전 무기는 상시 보호막이 아니라 일정 시간만 전개된다.
-                    this.life = opts.orbitLife || {S:270,A:220,B:185,C:155,F:125}[owner?.ability?.t] || 180;
+                    this.life = Math.round((opts.orbitLife || {S:270,A:220,B:185,C:155,F:125}[owner?.ability?.t] || 180)*(this.runSkill?.duration||1));
                     this.maxLife = this.life;
                 }
                 // 한 번의 탄막은 발사 섬광 이벤트 하나만 보내 실제 투사체를 놓치는 저주사율 화면도 방향을 읽게 한다.
@@ -1514,8 +1728,15 @@
                         contacts.push({p,t});
                     }
                 }
-                contacts.sort((a,b)=>a.t-b.t||a.p.id-b.p.id);
-                for(const {p,t} of contacts) {
+                window.brFarm.projectileContacts(game,this,shotStart,shotEnd,wallContact,contacts);
+                contacts.sort((a,b)=>a.t-b.t||(a.p?.id??a.farm.id)-(b.p?.id??b.farm.id));
+                for(const {p,t,farm} of contacts) {
+                    if(farm) {
+                        if(farm.hp<=0)continue;
+                        this.pos=orbit?shotEnd:shotStart.add(travel.mult(t));
+                        if(window.brFarm.projectileHit(game,this,farm))return;
+                        continue;
+                    }
                     if(!p.alive)continue;
                     this.hitMemory[p.id]=game.frame;
                     this.pos=orbit?shotEnd:shotStart.add(travel.mult(t));
@@ -1541,6 +1762,7 @@
                 if(this.detonated)return;
                 this.detonated=true;this.life=0;
                 const radius=Math.max(50,this.explodeRadius),sourceId=this.owner?.remoteId||('ai-'+this.owner?.id);
+                window.brFarm.area(game,this.owner,this.pos,radius,this.farmDamage||.65,this.farmToken||'blast:'+this.farmBornFrame);
                 game.emitStudentFx('explosion',this.pos,{size:radius,color:this.color,style:this.weaponStyle,sourceId,impactLevel:3});
                 const previousStyle=this.owner?.currentImpactStyle;
                 if(this.owner)this.owner.currentImpactStyle=this.impactStyle||'ranged-power';
@@ -1591,21 +1813,22 @@
                     if(this.owner?.ability?.sub==='SODA_BOMB') game.addText(this.pos,'🥤 POP!','#e0f2fe',18,18);
                 } else {
                     dealDamage(target);
-                    if(this.type === 'ICE_SHARD') target.stunned = Math.max(target.stunned, 20);
-                    if(this.status === 'stun') target.stunned = Math.max(target.stunned, this.statusPower || 24);
+                    if(this.type === 'ICE_SHARD') target.stunned = Math.max(target.stunned, brRunCC(20,this.runSkill?.control));
+                    if(this.status === 'stun') target.stunned = Math.max(target.stunned, brRunCC(this.statusPower || 24,this.runSkill?.control));
                     if(this.status === 'poison' && this.owner && this.owner.alive) {
                         target.poisonFrames = Math.max(target.poisonFrames || 0, this.statusPower || 90);
                         target.poisonOwner = this.owner;
+                        target.poisonDamageMult = this.dotDamageMult;
                     }
                     if(this.status === 'pull' && this.owner && this.owner.alive) {
-                        target.vel = target.vel.add(this.owner.pos.sub(target.pos).norm().mult((this.statusPower || 18) * (target.knockbackResist || 1)));
+                        target.vel = target.vel.add(this.owner.pos.sub(target.pos).norm().mult((this.statusPower || 18) * (this.runSkill?.control||1) * (target.knockbackResist || 1)));
                     }
                     let impactDir = this.vel.mag() > 0 ? this.vel.norm() : null;
                     if(this.type === 'ORBIT' && this.owner) impactDir = target.pos.sub(this.owner.pos).norm();
                     if(!impactDir || impactDir.mag() === 0) impactDir = new Vec2(1,0);
                     target.vel = target.vel.add(impactDir.mult(this.knockback * (target.knockbackResist || 1)));
                     if(this.type === 'ORBIT' && this.owner?.ability?.sub === 'SWORD_ORBIT') {
-                        target.stunned = Math.max(target.stunned, 4);
+                        target.stunned = Math.max(target.stunned, brRunCC(4,this.runSkill?.control));
                         this.owner.vel = this.owner.vel.add(target.pos.sub(this.owner.pos).norm().mult(1.2));
                     }
                     game.spawnParticles(this.pos, this.type === 'ORBIT' ? 8 : 5, this.impactColor || this.color);
@@ -2154,6 +2377,9 @@
             }
 
             applyTrailDashContact(game) {
+                return brWithRunSkill(this,game,()=>this.applyTrailDashContactBase(game),this._runLastSkill,false);
+            }
+            applyTrailDashContactBase(game) {
                 if(this.dashImpactDone || !TRAIL_DASH_SUBS.has(this.dashType)) return;
                 const range=this.radius+64; let victim=null,best=Infinity;
                 for(const p of game.getNearbyParticipants(this.pos,range+30)) {
@@ -2223,7 +2449,7 @@
                 if(this.poisonFrames > 0) {
                     this.poisonFrames--;
                     if(this.poisonFrames % 18 === 0 && this.poisonOwner?.alive) {
-                        this.takeDamage(2.2, this.poisonOwner);
+                        this.takeDamage(2.2*(this.poisonDamageMult||1), this.poisonOwner);
                         if(!game.isVisualPerformanceMode()) game.addText(this.pos, '☠', '#a3e635', 12, 15);
                     }
                     if(this.poisonFrames <= 0) this.poisonOwner = null;
@@ -2261,10 +2487,11 @@
                 // ✨ 새로운 동적 돌진 이펙트 처리
                 if(this.humanControlled&&this.playerDash&&this.stunned>0){this.playerDash=null;this.dashFrames=0;}
                 if (this.dashFrames > 0) {
+                    const cast=this._runLastSkill||brRunSkillSnapshot(this);
                     if(!this.playerDash)this.dashFrames--;
                     if (this.dashType === 'EXPLOSIVE_DASH' && this.dashFrames % 4 === 0) {
                         game.spawnExplosion(this.pos, 60, '#ff4400');
-                        game.applyAoE(this.pos, 60, 15 * this.damageMult, this, 10);
+                        game.applyAoE(this.pos, 60, 15 * this.damageMult*cast.damage, this, 10*cast.control);
                     }
                     if (this.dashType === 'POISON_TRAIL' && this.dashFrames % 5 === 0) this.spawnTrailZone(game,this.pos);
                     if (this.dashType === 'ICE_TRAIL' && this.dashFrames % 5 === 0) this.spawnTrailZone(game,this.pos);
@@ -2300,18 +2527,18 @@
                     if (this.dashType === 'BULLDOZER_DASH' && this.dashFrames % 5 === 0) {
                         let dir = new Vec2(rand()-0.5, rand()-0.5).norm();
                         game.projectiles.push(new Projectile(this, this.pos, dir, 8, 15*this.damageMult, 12, 'bullet', '#888', 0, '🪨'));
-                        game.applyAoE(this.pos, 80, 10 * this.damageMult, this, 25);
+                        game.applyAoE(this.pos, 80, 10 * this.damageMult*cast.damage, this, 25*cast.control);
                     }
                     if (this.dashType === 'ROCKET_JUMP' && this.dashFrames === 1) {
                         game.spawnExplosion(this.pos, 80, '#ffaa00');
-                        game.applyAoE(this.pos, 80, 20 * this.damageMult, this, 15);
+                        game.applyAoE(this.pos, 80, 20 * this.damageMult*cast.damage, this, 15*cast.control);
                     }
                     if(this.dashType === 'FLY_DASH' && this.dashFrames === 1) {
                         game.addText(this.pos,'🦅 SKY CRASH!','#e0f2fe',28,26);
                         game.spawnExplosion(this.pos,115,'#7dd3fc');
-                        game.applyAoE(this.pos,115,28*this.damageMult,this,22);
+                        game.applyAoE(this.pos,115,28*this.damageMult*cast.damage,this,22*cast.control);
                         for(const p of game.getNearbyParticipants(this.pos,125)) {
-                            if(p!==this && p.alive && p.id!==999 && (this.team===0 || p.team!==this.team)) p.stunned=Math.max(p.stunned,12);
+                            if(p!==this && p.alive && p.id!==999 && (this.team===0 || p.team!==this.team)) p.stunned=Math.max(p.stunned,brRunCC(12,cast.control));
                         }
                         this.vel=this.vel.mult(0.42);
                     }
@@ -2570,6 +2797,9 @@
             }
 
             processMeleeCombo(game) {
+                return brWithRunSkill(this,game,()=>this.processMeleeComboBase(game),this._runLastSkill,false);
+            }
+            processMeleeComboBase(game) {
                 let target = game.participants.find(p => p.id === this.comboTargetId && p.alive);
                 if(!target || (this.team !== 0 && target.team === this.team)) {
                     this.comboHitsRemaining = 0; this.comboKind = null; return;
@@ -3141,6 +3371,9 @@
             }
 
             useAbility(game, target, dir, dist) {
+                return brWithRunSkill(this,game,()=>this.useAbilityBase(game,target,dir,dist));
+            }
+            useAbilityBase(game, target, dir, dist) {
                 this.abilityUses++;
                 game.playSignature(this);
                 // v20: 이 짧은 구간에만 몸통박치기/CLASH가 '공격'으로 인정된다.
@@ -3207,6 +3440,7 @@
                         const sniperProfile=getRangedCombatProfile(this.ability,'skill');
                         const sniperRange=manualRange||sniperProfile.range;
                         game.drawLaser(this.pos, this.pos.add(aimDir.mult(sniperRange)), '#67e8f9',10);
+                        window.brFarm.line(game,this,this.pos,this.pos.add(aimDir.mult(sniperRange)),5,.65,'snipe:'+game.frame);
                         let hit = game.raycast(this.pos, aimDir, sniperRange, this);
                         if(hit) {
                             hit.takeDamage(48 * this.damageMult, this);
@@ -3269,6 +3503,10 @@
                         Object.assign(opts,{bounces:signature.bounces,pierce:signature.pierce,spinRate:signature.spin,faceDir:signature.face,
                             knockback:signature.push,status:signature.status,statusPower:signature.statusPower});
                     }
+                    const nativeCount=pCount;
+                    pCount=brRunCount(pCount,brRunMod(this,'skillCount',0));
+                    if(pCount>nativeCount&&pSpread===0)pSpread=.10;
+                    if(sub==='NOVA')pSpread=Math.PI*2/pCount;
                     let startAngle = sub === 'NOVA' ? 0 : -pSpread * (pCount - 1) / 2;
 
                     for (let i = 0; i < pCount; i++) {
@@ -3844,14 +4082,14 @@
                     }
                     case ABILITY_TYPES.LASER: {
                         if(sub==='VOID_DESTRUCTION') {
-                            const beamRange=Math.max(260,manualRange||900),beamEnd=this.pos.add(aimDir.mult(beamRange));
-                            game.drawLaser(this.pos,beamEnd,'#a78bfa',144);
+                            const beamRange=Math.max(260,manualRange||900),beamEnd=this.pos.add(aimDir.mult(beamRange)),beamSize=brRunMod(this,'skillSize');
+                            game.drawLaser(this.pos,beamEnd,'#a78bfa',144*beamSize);
                             let totalDealt=0,hitCount=0;
                             for(const victim of game.getNearbyParticipants(this.pos,beamRange+120)) {
                                 if(!victim.alive||victim===this||victim.id===999||(this.team!==0&&victim.team===this.team)) continue;
                                 const rel=victim.pos.sub(this.pos),along=rel.x*aimDir.x+rel.y*aimDir.y;
                                 const side=Math.abs(rel.x*aimDir.y-rel.y*aimDir.x);
-                                if(along<0||along>beamRange+victim.radius||side>72+victim.radius*.55) continue;
+                                if(along<0||along>beamRange+victim.radius||side>72*beamSize+victim.radius*.55) continue;
                                 if(game.checkWallBetween(this.pos,victim.pos)) continue;
                                 const before=victim.hp;
                                 victim.takeDamage(34*this.damageMult,this);
@@ -3974,6 +4212,7 @@
                         } else if(sub === 'FREEZE_STOMP') {
                             range = 210; color = '#67e8f9';
                         }
+                        range*=brRunMod(this,'skillSize');
                         game.spawnExplosion(this.pos, range, color);
                         game.applyAoE(this.pos, range, damage, this, push);
                         if(sub === 'THUNDER') {
@@ -3988,6 +4227,7 @@
 
             takeDamage(amt, attacker, reflected=false, contactDirection=null) {
                 if(!this.alive||!Number.isFinite(amt)||amt<=0)return 0;
+                if(!reflected&&attacker?._runSkillCast)amt*=attacker._runSkillCast.damage;
                 if (this.invisible && rand() < 0.4) { game.addText(this.pos, "MISS", "#888"); return; }
                 
                 if (this.ability.sub === 'WEAK' || this.ability.sub === 'PAPER_THIN') amt *= 3;
@@ -3996,10 +4236,11 @@
                 }
                 if (!this.humanControlled && this.ability.sub === 'DRIFT') this.vel = this.vel.add(new Vec2(rand()-0.5, rand()-0.5).mult(50));
                 if (!reflected && (this.ability.sub === 'REFLECT' || this.ability.sub === 'SPIKE_REFLECT' || (this.ability.combat?.skill==='counter' && this.teamGuardFrames>0)) && attacker && attacker !== this && attacker.id !== 999) {
-                    attacker.takeDamage(amt * 0.5, this, true); game.drawLaser(this.pos, attacker.pos, '#fff');
+                    attacker.takeDamage(amt * 0.5 * brRunMod(this,'skillDamage'), this, true); game.drawLaser(this.pos, attacker.pos, '#fff');
                 }
 
                 const actualDamage = Math.max(0, Math.min(this.hp, amt));
+                if(actualDamage>0&&this.run)this.run.lastDamageFrame=game?game.frame:this.survivalFrames;
                 if(game && attacker && attacker !== this && attacker.id !== 999 && actualDamage > 0) {
                     game.registerRivalHit(this, attacker, actualDamage);
                     attacker.lastSuccessfulHitFrame = game.frame;
@@ -4170,6 +4411,10 @@
                 this.supplyDropSpawnFrame = Math.round(randRange(1050,1750));
 
                 this.initMap(); this.initParticipants();
+                if(window.BRMP?.active&&window.brProgression){
+                    this.participants.forEach(p=>window.brProgression.init(p));
+                    if(window.brFarm)window.brFarm.init(this);
+                }
                 this.refreshAliveCache();
                 this.rebuildSpatialGrid();
             }
@@ -4282,11 +4527,13 @@
             recordElimination(participant) {
                 if(!participant||participant.id===999||participant.eliminationSeq>0)return participant&&participant.eliminationSeq||0;
                 participant.eliminationSeq=++this.eliminationCounter;
+                if(participant.run){participant.run.offer=null;participant.run.revision++;}
                 if(!window.BRMP?.isRespawnMode()) {
                     const total=this.realParticipantCount||(this.realParticipantCount=this.participants.filter(p=>p.id!==999).length);
                     participant.placement=Math.max(2,total-participant.eliminationSeq+1);
                 }
                 this.deadParticipants.push(participant);
+                window.brFarm.death(this,participant);
                 return participant.eliminationSeq;
             }
 
@@ -5169,7 +5416,7 @@
 
             getSupplyTargetFor(p) {
                 const d=this.supplyDrop;
-                if(!d||d.claimed||!d.landed||d.life<=0||!p?.alive) return null;
+                if(!d||d.claimed||!d.landed||d.life<=0||!p?.alive) return window.brFarm.pickupTarget(this,p);
                 const dist=p.pos.dist(d.pos),hpRate=p.hp/Math.max(1,p.maxHp);
                 const wants=hpRate<0.58||p.ability.t==='F'||(p.cooldown>130&&dist<360)||(teamMode>0&&hpRate<0.72&&dist<360);
                 return wants&&dist<=620 ? d.pos : null;
@@ -5181,6 +5428,7 @@
                 const maxR=Math.max(260,Math.min(720,this.mapRadius-130));
                 const pos=this.findSafeMapPoint(100,maxR,90);
                 this.supplyDrop=new SupplyDrop(pos);
+                window.brFarm.changed(this);
                 this.announce('SUPPLY DROP',90);
             }
 
@@ -5825,10 +6073,12 @@
                         this.maxParticipantStep=Math.max(this.maxParticipantStep,Math.hypot(p.pos.x-p.combatPreviousX,p.pos.y-p.combatPreviousY));
                     }
                     this.rebuildSpatialGrid(); // Projectiles query the current cells, not the pre-movement cells.
+                    window.brFarm.update(this);
                     if(this.supplyDrop) {
                         this.supplyDrop.update(this);
                         if(this.supplyDrop.claimed||this.supplyDrop.life<=0) {
                             this.supplyDrop=null;
+                            window.brFarm.changed(this);
                         }
                     }
                     for(let i = this.projectiles.length - 1; i >= 0; i--) {
@@ -5872,6 +6122,7 @@
 
                     this.refreshAliveCache();
                     let alive = this.aliveRealPlayers;
+                    if(window.brProgression)window.brProgression.update(this);
                     this.updateBroadcastStage(alive.length);
                     if(!window.BRMP?.active||this.frame%30===0) {
                         updateHUD(alive.length, this.realParticipantCount || (this.realParticipantCount=this.participants.filter(p=>p.id!==999).length), this.frame);
@@ -5952,6 +6203,7 @@
                 this.drawCombatBeams(ctx,scale,cx,cy);
                 ctx.fillStyle='rgba(148,163,184,.42)';
                 for(const wall of this.walls){ctx.save();ctx.translate(cx+wall.x*scale,cy+wall.y*scale);ctx.rotate(wall.angle||0);ctx.fillRect(-wall.w*scale*.5,-wall.h*scale*.5,wall.w*scale,wall.h*scale);ctx.restore();}
+                ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);window.brFarm.drawStudent(ctx,window.brFarm.snapshot(this),null,scale);ctx.restore();
                 for(const z of this.zones) {
                     if(z.duration<=0||!z.pos)continue;
                     window.brCombatVisual.hazard(ctx,cx+z.pos.x*scale,cy+z.pos.y*scale,Math.max(1,z.radius*scale),z.color,z.type,z.owner?.ability?.e||'',1,false);
@@ -6051,6 +6303,7 @@
 
                 this.drawCombatBeams(ctx);
                 this.walls.forEach(w => w.draw(ctx));
+                window.brFarm.drawStudent(ctx,window.brFarm.snapshot(this),null,this.zoom,false);
                 this.zones.forEach(z => z.draw(ctx));
                 this.turrets.forEach(t => t.draw(ctx));
                 if(this.supplyDrop) this.supplyDrop.draw(ctx);
@@ -6257,6 +6510,7 @@
             }
             pathfind(from, to) { return to.sub(from).norm(); } 
             applyAoE(pos, radius, dmg, owner, pushForce=5) {
+                if(dmg>0)window.brFarm.area(this,owner,pos,radius,.65,'aoe:'+this.frame);
                 // v22.2: 폭발/광역기도 Spatial Grid 주변 대상만 검사.
                 for(const p of this.getNearbyParticipants(pos,radius+90)) {
                     if(p !== owner && p.alive && p.pos.dist(pos) < radius && (owner.team === 0 || p.team !== owner.team)) {
@@ -7126,6 +7380,39 @@
             padding:8px 11px; font-size:12px; }
         .br-hp { width:min(260px,42vw); height:11px; border-radius:99px; overflow:hidden; background:#3b1620; margin-top:5px; }
         .br-hp > i { display:block; height:100%; background:linear-gradient(90deg,#16a34a,#4ade80); width:100%; transition:width .15s; }
+        .br-run-hud { margin-top:5px; max-width:min(260px,42vw); }
+        .br-run-level { display:flex; align-items:center; gap:6px; font-size:11px; line-height:14px; }
+        .br-run-level b { color:#c4b5fd; white-space:nowrap; }
+        .br-run-xp { flex:1; height:5px; min-width:35px; background:#26334d; border-radius:99px; overflow:hidden; }
+        .br-run-xp > i { display:block; height:100%; width:0; background:#a78bfa; transition:width .16s; }
+        #br-run-xp-text { color:#cbd5e1; font-size:10px; white-space:nowrap; }
+        .br-run-owned { display:flex; gap:4px; margin-top:3px; min-height:0; }
+        .br-run-chip { border:1px solid #536078; background:#19243b; color:#e2e8f0; border-radius:5px; padding:1px 4px; font-size:10px; line-height:14px; white-space:nowrap; }
+        .br-run-ui { position:absolute; top:calc(112px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); width:min(610px,calc(100% - 24px)); z-index:3; pointer-events:none; }
+        .br-run-ui button { font:inherit; color:inherit; cursor:pointer; pointer-events:auto; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+        .br-run-ready { display:block; margin:0 auto; min-height:40px; padding:8px 14px; border:1px solid #c4b5fd; border-radius:10px; background:#342467; color:#ede9fe!important; font-size:12px!important; font-weight:900!important; box-shadow:0 3px 10px #02061788; }
+        .br-run-panel { padding:7px; background:rgba(8,15,30,.95); border:1px solid #7972a4; border-radius:12px; box-shadow:0 5px 16px #02061766; }
+        .br-run-heading { display:flex; justify-content:space-between; align-items:center; gap:6px; margin:0 2px 5px; font-size:11px; color:#e9d5ff; }
+        .br-run-heading button { min-height:32px; min-width:50px; padding:3px 7px; background:#23304a; border:1px solid #465577; border-radius:6px; font-size:11px; }
+        .br-run-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+        .br-run-card { min-width:0; text-align:left; padding:9px 8px; border:1px solid #64748b; border-radius:8px; background:#17233b; transition:background .1s,border-color .1s; }
+        .br-run-card:hover,.br-run-card:focus-visible { background:#263458; border-color:#ddd6fe; outline:2px solid #c4b5fd; outline-offset:1px; }
+        .br-run-card:disabled { cursor:wait; opacity:.65; }
+        .br-run-card.is-selected { border-color:#c4b5fd; background:#3a2d65; opacity:1; }
+        .br-run-card-family { display:block; font-size:10px; color:#a5b4c9; line-height:1.2; }
+        .br-run-card-name { display:block; font-size:13px; line-height:1.3; font-weight:900; color:#f5f3ff; margin:4px 0; overflow-wrap:anywhere; }
+        .br-run-card-tier { color:#c4b5fd; white-space:nowrap; }
+        .br-run-card-effect { display:block; font-size:12px; line-height:1.45; color:#e2e8f0; word-break:keep-all; }
+        .br-run-card-detail { display:block; margin-top:4px; font-size:10px; line-height:1.3; color:#aebcd0; word-break:keep-all; }
+        #br-run-choice-status { margin:5px 2px 0; font-size:11px; line-height:1.3; color:#cbd5e1; }
+        #br-run-choice-status:empty { display:none; }
+        #br-student-battle > .br-control { z-index:4; }
+        @media (max-height:500px) and (min-width:620px) {
+            .br-run-ui { top:calc(98px + env(safe-area-inset-top)); left:calc(158px + env(safe-area-inset-left)); right:calc(225px + env(safe-area-inset-right)); width:auto; transform:none; }
+            .br-run-panel { padding:5px; }.br-run-cards { gap:4px; }.br-run-card { padding:6px 5px; }
+            .br-run-card-name { font-size:11px; }.br-run-card-effect { font-size:11px; }.br-run-card-detail { display:none; }
+        }
+        @media (prefers-reduced-motion:reduce) { .br-run-xp > i,.br-run-card { transition:none; } }
         .br-control { --br-cd-angle:360deg; --br-ring-color:#fff; position:absolute; width:116px; height:116px; border-radius:50%;
             user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; touch-action:none; overflow:visible;
             transition:transform .10s ease-out,opacity .12s,filter .10s; will-change:transform; }
@@ -7361,8 +7648,21 @@
     <section id="br-student-battle" class="br-hidden">
         <canvas id="br-student-canvas"></canvas>
         <div class="br-battle-hud">
-            <div class="br-hud-box"><b id="br-battle-self">나</b><div class="br-hp"><i id="br-battle-hp"></i></div><span id="br-battle-status">HP 100 / 100</span></div>
+            <div class="br-hud-box"><b id="br-battle-self">나</b><div class="br-hp"><i id="br-battle-hp"></i></div><span id="br-battle-status">HP 100 / 100</span>
+                <div id="br-run-hud" class="br-run-hud br-hidden">
+                    <div class="br-run-level"><b id="br-run-level">LV.1</b><div id="br-run-xp" class="br-run-xp" role="progressbar" aria-label="다음 레벨까지 경험치" aria-valuemin="0" aria-valuemax="2" aria-valuenow="0"><i id="br-run-xp-fill"></i></div><span id="br-run-xp-text">0 / 2</span></div>
+                    <div id="br-run-owned" class="br-run-owned" aria-label="보유 강화"></div>
+                </div>
+            </div>
             <div class="br-hud-box" style="text-align:right"><b id="br-battle-mode">생존전</b><br><span id="br-battle-time">00:00</span> · <span id="br-battle-alive">20명</span></div>
+        </div>
+        <div id="br-run-ui" class="br-run-ui br-hidden">
+            <button id="br-run-ready" type="button" class="br-run-ready br-hidden" aria-controls="br-run-panel" aria-expanded="false">UPGRADE READY</button>
+            <section id="br-run-panel" class="br-run-panel br-hidden" aria-label="레벨 업 강화 선택">
+                <div class="br-run-heading"><b id="br-run-offer-title">LEVEL UP · 강화 선택</b><button id="br-run-later" type="button" aria-label="강화 선택을 접고 나중에 선택">나중에</button></div>
+                <div id="br-run-cards" class="br-run-cards"></div>
+                <p id="br-run-choice-status" role="status" aria-live="polite"></p>
+            </section>
         </div>
         <button id="br-attack" type="button" class="br-control" aria-label="공격 조준">
             <span class="br-control-content"><span class="br-attack-symbol" aria-hidden="true"></span><span class="br-action-name">공격</span></span><span id="br-attack-cd" class="br-cd-text ready">✓</span><span class="br-aim-knob"></span>
@@ -7740,10 +8040,47 @@
             }
             Object.defineProperty(ability,'_basicIdentity',{value:p,configurable:true,writable:true});return p;
         }
-        function brBasicAttackFrames(ability) {
+        var brRunNeutralMods=Object.freeze({}),brRunCapabilityCache=new WeakMap();
+        function brRunClientMods(){return BRMP.selfRun&&BRMP.selfRun.mods||brRunNeutralMods;}
+        var brRunBasicCache=new WeakMap();
+        function brRunBasicProfile(ability,mods){
+            var base=brBasicCombatProfile(ability);if(!mods)return base;
+            var cached=brRunBasicCache.get(mods);if(cached&&cached.ability===ability)return cached.profile;
+            var p=Object.assign({},base);
+            p.damageScale*=Number(mods.basicDamage||1);
+            if(p.close)p.pushScale*=Number(mods.basicKnockback||1);
+            else{
+                p.count=brRunCount(p.count,mods.basicCount,6);
+                if(p.count>base.count&&!p.spread)p.spread=.10;
+                p.speed*=Number(mods.basicVelocity||1);p.knockback*=Number(mods.basicKnockback||1);
+            }
+            brRunBasicCache.set(mods,{ability:ability,profile:p});return p;
+        }
+        function brRunCapabilities(a){
+            var cached=brRunCapabilityCache.get(a);if(cached)return cached;
+            var basic=brBasicCombatProfile(a),info=brGetPlayableSkillInfo(a),key=info&&info.key||'native',type=a.type,sub=a.sub||'';
+            var projectile=key==='ranged-power'||(key==='native'&&type===ABILITY_TYPES.PROJ&&sub!=='SNIPE');
+            var area=key==='tank-stun'||key==='tank-punch'||key==='melee-uppercut'||key==='melee-combo'||key==='melee-drain'||key.indexOf('teleport-')===0||
+                (key==='native'&&(type===ABILITY_TYPES.ZONE||type===ABILITY_TYPES.AREA||type===ABILITY_TYPES.ORBIT||sub==='VOID_DESTRUCTION'||TRAIL_DASH_SUBS.has(sub)));
+            var dash=key==='slip-dash'||key==='tank-charge'||key==='melee-lunge'||key.indexOf('teleport-')===0||type===ABILITY_TYPES.DASH;
+            var heal=key==='melee-drain'||['REGEN','VOID_DESTRUCTION','MULTI_GRAB','TEAM_SANCTUARY','TEAM_MEDIC','TEAM_BLOOM','TEAM_GUARD','TEAM_TONIC','TEAM_RALLY','TEAM_CLOVER','TEAM_BANDAGE'].includes(sub);
+            var shield=key.indexOf('guard-')===0||key.indexOf('tank-')===0||['SOUL_CLEAVE','KINETIC_CHARGE','TEAM_SANCTUARY','TEAM_GUARD','TEAM_BARRIER','TEAM_BELL'].includes(sub);
+            var damage=projectile||area||key==='tank-charge'||key==='melee-lunge'||key==='guard-counter'||
+                (key==='native'&&([ABILITY_TYPES.PROJ,ABILITY_TYPES.LASER,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.AREA,ABILITY_TYPES.TURRET].includes(type)||['ABDUCT','MULTI_GRAB','GHOST_MOVE'].includes(sub)));
+            var cc=damage||key==='guard-pulse'||type===ABILITY_TYPES.PULL;
+            if(key==='guard-counter')cc=false;
+            var duration=type===ABILITY_TYPES.ZONE||type===ABILITY_TYPES.ORBIT||type===ABILITY_TYPES.TURRET||sub==='GHOST_MOVE'||shield||['TEAM_HASTE_A','TEAM_BUGLE'].includes(sub)||key==='ranged-sprint'||key==='ranged-overdrive';
+            var capabilities={basic:{melee:basic.close,projectile:!basic.close,knockback:basic.close||basic.knockback>0},
+                skill:{damage:damage,projectile:projectile,multicast:projectile,expandable:projectile||area,area:area,cc:cc&&sub!=='TINY_FLAME',heal:heal,shield:shield,dash:dash,summon:type===ABILITY_TYPES.TURRET||type===ABILITY_TYPES.CLONE,trap:type===ABILITY_TYPES.ZONE,duration:duration,utility:!damage},
+                signature:{range:dash,duration:duration},signatureRange:dash,signatureDuration:duration};
+            brRunCapabilityCache.set(a,capabilities);return capabilities;
+        }
+        window.brProgressionCombat={capabilities:brRunCapabilities,count:brRunCount,cc:brRunCC,basicProfile:brRunBasicProfile,skillSnapshot:brRunSkillSnapshot};
+        function brBasicAttackFrames(ability,mods) {
             var cd=({S:34,A:38,B:43,C:48,F:56}[ability.t]||46)+Math.abs(abilityTimingHash((ability.timingSeed||ability.n||'emoji')+'|basic'))%11-5;
             var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].includes(ability.type);
-            return Math.max(12,Math.round(cd*brBasicCombatProfile(ability).cooldownScale));
+            var base=Math.max(12,Math.round(cd*brBasicCombatProfile(ability).cooldownScale));
+            return Math.max(6,Math.round(base/Number((mods||{}).basicSpeed||1)));
         }
         function brBasicShotSize(ability,rendered) {
             var style=getRangedCombatProfile(ability,'basic').style;
@@ -7751,7 +8088,34 @@
             if(rendered&&ability.type===ABILITY_TYPES.PROJ)size*=ability.t==='S'?1.14:ability.t==='A'?1.08:1;
             return size;
         }
-        function brAimSpec(ability,kind,playerRadius,power) {
+        function brAimSpec(ability,kind,playerRadius,power,mods) {
+            mods=mods||brRunClientMods();
+            var spec=brBaseAimSpec(ability,kind,playerRadius,power),caps=brRunCapabilities(ability);
+            if(kind==='attack'){
+                if(caps.basic.melee)spec.range*=Number(mods.basicRange||1);
+                else{
+                    var profile=brRunBasicProfile(ability,mods);
+                    spec.width=brBasicShotSize(ability,true)*2*Number(mods.basicSize||1);
+                    spec.range=playerRadius*.7+Math.ceil(profile.range/profile.speed)*profile.speed;
+                    if(profile.count>1){spec.shape='cone';spec.halfAngle=profile.spread*(profile.count-1)*.5+.025;}
+                }
+            }else{
+                var size=Number(mods.skillSize||1);
+                if(caps.skill.area||caps.skill.projectile){
+                    if(spec.width)spec.width*=size;
+                    if(spec.impactRadius)spec.impactRadius*=size;
+                    if(spec.radius&&ability.type!==ABILITY_TYPES.PROJ)spec.radius*=size;
+                    if(['cone','circle'].includes(spec.shape)&&ability.type!==ABILITY_TYPES.PROJ)spec.range*=size;
+                }
+                if(caps.signature.range)spec.range*=Number(mods.signatureRange||1);
+                if(caps.skill.projectile&&ability.type===ABILITY_TYPES.PROJ){
+                    var signature=getPlayerSignatureProjectileProfile(ability),count=brRunCount(signature.count,mods.skillCount),spread=signature.spread||(count>1?.10:0);
+                    if(ability.sub!=='NOVA'&&count>1){spec.shape='cone';spec.halfAngle=spread*(count-1)*.5+.025;}
+                }
+            }
+            return spec;
+        }
+        function brBaseAimSpec(ability,kind,playerRadius,power) {
             ability=ability||{};playerRadius=Math.max(kind==='attack'?1:24,Number(playerRadius||38));
             power=brClamp(Number(power||1),.18,1);
             var type=ability.type,tier=ability.t||'C',sub=ability.sub||'';
@@ -7998,6 +8362,9 @@
             brRefOn(inputsRef,'child_added',upsertInput,BRMP.hostRefs);
             brRefOn(inputsRef,'child_changed',upsertInput,BRMP.hostRefs);
             brRefOn(inputsRef,'child_removed',function(s){delete BRMP.inputs[String(s.key||'')];},BRMP.hostRefs);
+            var upgradeRef=BRMP.db.ref('rooms/'+BRMP.roomCode+'/upgradeRequests');
+            brRefOn(upgradeRef,'child_added',brHandleRunRequest,BRMP.hostRefs);
+            brRefOn(upgradeRef,'child_changed',brHandleRunRequest,BRMP.hostRefs);
             BRMP.hostHeartbeat=setInterval(function(){
                 if(BRMP.backend==='firebase'&&BRMP.roomCode) BRMP.db.ref('rooms/'+BRMP.roomCode+'/meta').update({hostConnected:true,updatedAt:brNow()});
             },10000);
@@ -8044,6 +8411,7 @@
         function brSubscribeStudent() {
             brClearRefs('studentRefs');
             var base=BRMP.db.ref('rooms/'+BRMP.roomCode);
+            brSubscribeRunStudent(base);
             brRefOn(base.child('meta'),'value',function(s){
                 var meta=s.val();
                 if(!meta){brToast('방이 종료되었습니다.');brReturnHome();return;}
@@ -8111,6 +8479,188 @@
             brEl('br-wait-desc').textContent=desc;
             brRenderSelfState();
         }
+        // Run progression is match-scoped. Only choices rebuild cached modifiers.
+        var BR_RUN_XP=[0,2,3,4,5];
+        var BR_RUN_PATHS={
+            rapid:{name:'RAPID',icon:'⚡',family:'BASIC',tiers:[{basicSpeed:1.30,basicDamage:.80},{basicSpeed:1.50,basicDamage:.90},{basicSpeed:2,basicDamage:1}],text:['공격속도 130% · 1타 피해 80%','공격속도 150% · 1타 피해 90%','공격속도 200% · 1타 피해 100%']},
+            heavy:{name:'HEAVY',icon:'💥',family:'BASIC',tiers:[{basicDamage:1.30,basicSpeed:.80},{basicDamage:1.55,basicSpeed:.90},{basicDamage:1.90,basicSpeed:1}],text:['일반 피해 130% · 공속 80%','일반 피해 155% · 공속 90%','일반 피해 190% · 공속 100%']},
+            multi:{name:'MULTI',icon:'🔱',family:'BASIC',tiers:[{basicCount:1,basicDamage:.65},{basicCount:1,basicDamage:.80},{basicCount:2,basicDamage:.65}],text:['일반 탄환 +1 · 탄당 피해 65%','일반 탄환 +1 · 탄당 피해 80%','일반 탄환 +2 · 탄당 피해 65%']},
+            giant:{name:'GIANT',icon:'🔵',family:'BASIC',tiers:[{basicSize:1.25,basicVelocity:.90},{basicSize:1.50,basicVelocity:.95},{basicSize:1.80,basicVelocity:1}],text:['일반 탄환 크기 125% · 탄속 90%','일반 탄환 크기 150% · 탄속 95%','일반 탄환 크기 180% · 탄속 100%']},
+            impact:{name:'IMPACT',icon:'🥊',family:'BASIC',tiers:[{basicKnockback:1.35,basicDamage:.90},{basicKnockback:1.65,basicDamage:.95},{basicKnockback:2.10,basicDamage:1}],text:['일반 넉백 135% · 피해 90%','일반 넉백 165% · 피해 95%','일반 넉백 210% · 피해 100%']},
+            wide:{name:'WIDE STRIKE',icon:'⚔️',family:'BASIC',tiers:[{basicRange:1.15,basicSpeed:.90},{basicRange:1.30,basicSpeed:.95},{basicRange:1.50,basicSpeed:1}],text:['근접 범위 115% · 공속 90%','근접 범위 130% · 공속 95%','근접 범위 150% · 공속 100%']},
+            quick:{name:'QUICK CAST',icon:'⏱️',family:'SKILL',tiers:[{skillCooldown:.80,skillDamage:.85},{skillCooldown:.70,skillDamage:.93},{skillCooldown:.55,skillDamage:1}],text:['스킬 쿨다운 80% · 피해 85%','스킬 쿨다운 70% · 피해 93%','스킬 쿨다운 55% · 피해 100%']},
+            amplify:{name:'AMPLIFY',icon:'🔥',family:'SKILL',tiers:[{skillDamage:1.30,skillCooldown:1.15},{skillDamage:1.55,skillCooldown:1.08},{skillDamage:1.90,skillCooldown:1}],text:['스킬 피해 130% · 쿨다운 115%','스킬 피해 155% · 쿨다운 108%','스킬 피해 190% · 쿨다운 100%']},
+            expansion:{name:'EXPANSION',icon:'🌀',family:'SKILL',tiers:[{skillSize:1.25,skillDamage:.90},{skillSize:1.50,skillDamage:.95},{skillSize:1.80,skillDamage:1}],text:['스킬 범위·크기 125% · 피해 90%','스킬 범위·크기 150% · 피해 95%','스킬 범위·크기 180% · 피해 100%']},
+            multicast:{name:'MULTICAST',icon:'☄️',family:'SKILL',tiers:[{skillCount:1,skillDamage:.65},{skillCount:1,skillDamage:.80},{skillCount:2,skillDamage:.65}],text:['스킬 탄환 +1 · 탄당 피해 65%','스킬 탄환 +1 · 탄당 피해 80%','스킬 탄환 +2 · 탄당 피해 65%']},
+            control:{name:'CONTROL',icon:'❄️',family:'SKILL',tiers:[{skillControl:1.25,skillDamage:.90},{skillControl:1.45,skillDamage:.95},{skillControl:1.65,skillDamage:1}],text:['스킬 제어 효과 125% · 피해 90%','스킬 제어 효과 145% · 피해 95%','스킬 제어 효과 165% · 피해 100%']},
+            restore:{name:'RESTORE',icon:'💚',family:'SKILL',tiers:[{skillRestore:1.25,skillCooldown:1.10},{skillRestore:1.45,skillCooldown:1.05},{skillRestore:1.70,skillCooldown:1}],text:['회복·보호량 125% · 쿨다운 110%','회복·보호량 145% · 쿨다운 105%','회복·보호량 170% · 쿨다운 100%']},
+            swift:{name:'SWIFT',icon:'👟',family:'BODY',tiers:[{moveSpeed:1.12,maxHp:.90},{moveSpeed:1.20,maxHp:.95},{moveSpeed:1.30,maxHp:1}],text:['이동속도 112% · 최대 HP 90%','이동속도 120% · 최대 HP 95%','이동속도 130% · 최대 HP 100%']},
+            titan:{name:'TITAN',icon:'🛡️',family:'BODY',tiers:[{maxHp:1.25,moveSpeed:.90},{maxHp:1.40,moveSpeed:.95},{maxHp:1.60,moveSpeed:1}],text:['최대 HP 125% · 이동속도 90%','최대 HP 140% · 이동속도 95%','최대 HP 160% · 이동속도 100%']},
+            regen:{name:'REGEN',icon:'🌱',family:'BODY',tiers:[{regenRate:.015,regenDelay:300,maxHp:.90},{regenRate:.0225,regenDelay:240,maxHp:.95},{regenRate:.03,regenDelay:180,maxHp:1}],text:['5초 무피격 후 초당 HP 1.5% · 최대 HP 90%','4초 무피격 후 초당 HP 2.25% · 최대 HP 95%','3초 무피격 후 초당 HP 3% · 최대 HP 100%']},
+            signature_range:{name:'LONG STEP',icon:'🪽',family:'SKILL',signature:true,tiers:[{signatureRange:1.12,skillCooldown:1.08},{signatureRange:1.20,skillCooldown:1.04},{signatureRange:1.30,skillCooldown:1}],text:['고유 이동 스킬 거리 112% · 쿨다운 108%','고유 이동 스킬 거리 120% · 쿨다운 104%','고유 이동 스킬 거리 130% · 쿨다운 100%']},
+            signature_duration:{name:'AFTERGLOW',icon:'✨',family:'SKILL',signature:true,tiers:[{signatureDuration:1.15,skillCooldown:1.10},{signatureDuration:1.25,skillCooldown:1.05},{signatureDuration:1.35,skillCooldown:1}],text:['고유 지속 스킬 시간 115% · 쿨다운 110%','고유 지속 스킬 시간 125% · 쿨다운 105%','고유 지속 스킬 시간 135% · 쿨다운 100%']}
+        };
+        function brRunDefaultMods(){return {basicSpeed:1,basicDamage:1,basicCount:0,basicSize:1,basicVelocity:1,basicKnockback:1,basicRange:1,skillCooldown:1,skillDamage:1,skillCount:0,skillSize:1,skillControl:1,skillRestore:1,skillDuration:1,moveSpeed:1,maxHp:1,regenRate:0,regenDelay:300,signatureRange:1,signatureDuration:1};}
+        function brRunMatchKey(){return String(BRMP.roomCode||'local')+'|'+Number(BRMP.roomMeta&&BRMP.roomMeta.matchRound||0)+'|'+Number(BRMP.roomMeta&&BRMP.roomMeta.battleStartedAt||0);}
+        function brInitRun(p){
+            if(!p||p.id===999)return;
+            var capabilities=window.brProgressionCombat?window.brProgressionCombat.capabilities(p.ability):{basic:{},skill:{},signature:{}};
+            p.run={level:1,xp:0,paths:{},base:{maxHp:p.maxHp,speed:p.speed},mods:brRunDefaultMods(),capabilities:capabilities,pending:0,offer:null,offerSeq:0,choices:0,revision:1,lastDamageFrame:0,matchKey:brRunMatchKey()};
+            p.run.rng=brHashRandom(p.run.matchKey+'|build|'+String(p.remoteId??p.id));
+        }
+        function brRunEligible(p,id){
+            var c=p.run.capabilities,b=c.basic||{},s=c.skill||{},sig=c.signature||{};
+            if(!Object.prototype.hasOwnProperty.call(BR_RUN_PATHS,id))return false;
+            // Legacy bots only cast their autonomous skills; do not offer them inert basic paths.
+            if(p.isBot&&(BR_RUN_PATHS[id].family==='BASIC'||id==='signature_range'))return false;
+            if(id==='multi'||id==='giant')return !!b.projectile;
+            if(id==='impact')return !!(b.knockback||b.melee);
+            if(id==='wide')return !!b.melee;
+            if(id==='amplify')return !!s.damage;
+            if(id==='expansion')return s.expandable!==undefined?!!s.expandable:!!(s.projectile||s.area);
+            if(id==='multicast')return s.multicast!==undefined?!!s.multicast:!!s.projectile;
+            if(id==='control')return !!s.cc;
+            if(id==='restore')return !!(s.heal||s.shield);
+            if(id==='signature_range')return (p.ability.t==='S'||p.ability.t==='A')&&!!(sig.range||c.signatureRange);
+            if(id==='signature_duration')return (p.ability.t==='S'||p.ability.t==='A')&&!!(sig.duration||c.signatureDuration);
+            return true;
+        }
+        function brRunCard(p,id,tier){
+            var d=BR_RUN_PATHS[id],effect=d.text[tier-1];
+            if(id==='quick'&&!p.run.capabilities.skill?.damage) {
+                var cd=[80,70,55][tier-1];
+                effect='스킬 쿨다운 '+cd+'%';
+                if(p.run.capabilities.skill?.duration)effect+=' · 효과 지속 '+[85,93,100][tier-1]+'%';
+                else if(p.run.capabilities.skill?.heal||p.run.capabilities.skill?.shield)effect+=' · 회복·보호량 '+[85,93,100][tier-1]+'%';
+            }
+            return {id:id,tier:tier,name:d.name,icon:d.icon,family:d.family,effect:effect,detail:d.signature?'고유 스킬 특화':''};
+        }
+        function brRunOffer(p){
+            var run=p.run;if(!p.alive||!run||run.offer||run.pending<=0)return;
+            var nextLevel=run.choices+2,candidates=[];
+            Object.keys(BR_RUN_PATHS).forEach(function(id){var tier=Number(run.paths[id]||0)+1;if(tier<=3&&brRunEligible(p,id))candidates.push({id:id,tier:tier,weight:tier>1?(nextLevel===5?3.2:2.5):1});});
+            var cards=[],families=[];
+            for(var i=0;i<3&&candidates.length;i++){
+                var weights=candidates.map(function(c){var family=BR_RUN_PATHS[c.id].family;return c.weight*(i===2&&families[0]===families[1]&&family===families[0]?.45:1);});
+                var total=weights.reduce(function(a,b){return a+b;},0),pick=run.rng()*total,index=weights.length-1;
+                for(var j=0;j<weights.length;j++){pick-=weights[j];if(pick<0){index=j;break;}}
+                var chosen=candidates.splice(index,1)[0];cards.push(brRunCard(p,chosen.id,chosen.tier));families.push(BR_RUN_PATHS[chosen.id].family);
+            }
+            run.offer={id:run.matchKey+':'+String(p.remoteId??p.id)+':'+(++run.offerSeq),level:nextLevel,cards:cards};
+        }
+        function brRecomputeRun(p){
+            var run=p.run,old=run.mods,m=brRunDefaultMods();
+            Object.keys(run.paths).forEach(function(id){var tier=run.paths[id],d=BR_RUN_PATHS[id].tiers[tier-1];Object.keys(d).forEach(function(k){
+                if(k==='regenDelay'){m[k]=d[k];return;}
+                if(k==='regenRate'||k==='basicCount'||k==='skillCount'){m[k]+=d[k];return;}
+                if(id==='quick'&&k==='skillDamage'&&!run.capabilities.skill?.damage){if(run.capabilities.skill?.duration)m.skillDuration+=d[k]-1;else if(run.capabilities.skill?.heal||run.capabilities.skill?.shield)m.skillRestore+=d[k]-1;return;}
+                m[k]+=d[k]-1;
+            });});
+            var caps={basicSpeed:[.5,2.25],basicDamage:[.25,2.5],basicSize:[1,1.8],basicVelocity:[.75,1.25],basicKnockback:[1,2.1],basicRange:[1,1.5],skillCooldown:[.45,1.6],skillDamage:[.25,2.5],skillSize:[1,1.8],skillControl:[1,1.65],skillRestore:[.75,1.7],skillDuration:[.75,1],moveSpeed:[.75,1.30],maxHp:[.70,1.60],signatureRange:[1,1.30],signatureDuration:[1,1.35]};
+            Object.keys(caps).forEach(function(k){m[k]=brClamp(m[k],caps[k][0],caps[k][1]);});m.basicCount=brClamp(m.basicCount,0,2);m.skillCount=brClamp(m.skillCount,0,2);
+            var ratio=brClamp(p.hp/Math.max(1,p.maxHp),0,1);
+            // Preserve temporary combat buffs; replace only the old run multiplier.
+            p.maxHp=p.maxHp/Math.max(.01,old.maxHp)*m.maxHp;p.hp=p.alive?p.maxHp*ratio:0;
+            if(!p.humanControlled)p.speed=p.speed/Math.max(.01,old.moveSpeed)*m.moveSpeed;
+            run.mods=m;
+        }
+        function brChooseRun(p,offerId,id){
+            var run=p&&p.run;if(!p||!p.alive||!run||run.matchKey!==brRunMatchKey()||run.pending<=0||!run.offer||run.offer.id!==offerId)return false;
+            var card=run.offer.cards.find(function(c){return c.id===id;});if(!card||card.tier!==Number(run.paths[id]||0)+1||!brRunEligible(p,id))return false;
+            run.paths[id]=card.tier;run.pending--;run.choices++;run.offer=null;brRecomputeRun(p);brRunOffer(p);run.revision++;return true;
+        }
+        function brAwardRunXP(p,amount,healFraction){
+            if(!p||!p.alive||p.id===999||!p.run||!Number.isFinite(amount)||amount<=0)return false;
+            var run=p.run;p.hp=Math.min(p.maxHp,p.hp+p.maxHp*brClamp(Number(healFraction||0),0,.30));
+            if(run.level<5){run.xp+=amount;while(run.level<5&&run.xp>=BR_RUN_XP[run.level]){run.xp-=BR_RUN_XP[run.level];run.level++;run.pending++;}if(run.level===5)run.xp=0;}
+            brRunOffer(p);run.revision++;return true;
+        }
+        function brRunSnapshot(p){
+            var r=p.run;if(!r)return null;
+            return {matchKey:r.matchKey,level:r.level,xp:r.xp,required:r.level<5?BR_RUN_XP[r.level]:0,paths:Object.assign({},r.paths),mods:Object.assign({},r.mods),revision:r.revision,pending:r.pending,offer:p.alive?r.offer:null,alive:!!p.alive,abilityId:p.ability.id,
+                chips:Object.keys(r.paths).map(function(id){return brRunCard(p,id,r.paths[id]);})};
+        }
+        function brUpdateRunWorld(g){
+            if(!g||g.isGameOver)return;
+            for(var p of g.activeParticipants||g.participants){var r=p.run;if(!p.alive||!r)continue;
+                var m=r.mods;if(m.regenRate>0&&g.frame-r.lastDamageFrame>=m.regenDelay&&p.hp<p.maxHp&&p.pos.dist(g.center)<=g.mapRadius)p.hp=Math.min(p.maxHp,p.hp+p.maxHp*m.regenRate/60);
+                if(p.isBot&&r.offer&&g.frame%90===p.id%90)brChooseRun(p,r.offer.id,r.offer.cards[Math.floor(r.rng()*r.offer.cards.length)].id);
+            }
+        }
+        window.brProgression={init:brInitRun,awardXP:brAwardRunXP,choose:brChooseRun,update:brUpdateRunWorld,snapshot:brRunSnapshot,eligible:brRunEligible,recompute:brRecomputeRun,catalog:BR_RUN_PATHS,defaultMods:brRunDefaultMods};
+
+        // Build and farming state has its own event revision; movement snapshots stay unchanged.
+        function brFlushRunState(){
+            if(!game||!BRMP.active||BRMP.backend!=='firebase'||BRMP.runPublishInFlight)return;
+            var sent=BRMP.runPublishedRev||(BRMP.runPublishedRev={}),updates={},revisions=[],epoch=BRMP.publishEpoch,key=brRunMatchKey();
+            for(var p of game.participants){if(!p.run||p.id===999||!p.humanControlled||!p.remoteId)continue;if(sent[p.remoteId]===p.run.revision)continue;
+                updates['runState/players/'+p.remoteId]=brRunSnapshot(p);revisions.push([p.remoteId,p.run.revision]);}
+            var farm=window.brFarm&&window.brFarm.snapshot(game),farmRevision=farm&&farm.r;
+            if(farm&&BRMP.runFarmRevision!==farmRevision)updates['runState/farm']=Object.assign({matchKey:key},farm);
+            if(!Object.keys(updates).length)return;
+            BRMP.runPublishInFlight=true;
+            BRMP.db.ref('rooms/'+BRMP.roomCode).update(updates).then(function(){if(epoch!==BRMP.publishEpoch)return;
+                revisions.forEach(function(r){sent[r[0]]=r[1];});if(farm)BRMP.runFarmRevision=farmRevision;
+            }).catch(function(err){console.warn('[RUN SYNC]',err);}).finally(function(){if(epoch===BRMP.publishEpoch)BRMP.runPublishInFlight=false;});
+        }
+        function brAcceptRunCache(previous,incoming,revisionKey){
+            if(!previous)return true;
+            if(previous.matchKey===incoming.matchKey)return Number(incoming[revisionKey]||0)>=Number(previous[revisionKey]||0);
+            var a=String(previous.matchKey||'').split('|'),b=String(incoming.matchKey||'').split('|');
+            if(a[0]!==b[0])return b[0]===String(BRMP.roomCode||'local');
+            return Number(b[1]||0)>Number(a[1]||0)||(Number(b[1]||0)===Number(a[1]||0)&&Number(b[2]||0)>=Number(a[2]||0));
+        }
+        function brReceiveRunState(state){
+            if(!state||!brAcceptRunCache(BRMP.pendingRunState,state,'revision'))return;BRMP.pendingRunState=state;
+            if(!BRMP.roomMeta||BRMP.roomMeta.phase!=='battle'||state.matchKey!==brRunMatchKey())return;
+            if(BRMP.selfRun&&BRMP.selfRun.matchKey===state.matchKey&&Number(state.revision)<Number(BRMP.selfRun.revision))return;
+            BRMP.selfRun=state;if(typeof brRenderRunHud==='function')brRenderRunHud(state);
+        }
+        function brReceiveFarmState(state){
+            if(!state||!brAcceptRunCache(BRMP.pendingFarmState,state,'r'))return;BRMP.pendingFarmState=state;
+            if(BRMP.roomMeta?.phase==='battle'&&state.matchKey===brRunMatchKey()){
+                if(BRMP.farmView&&BRMP.farmView.matchKey===state.matchKey&&Number(state.r)<Number(BRMP.farmView.r))return;
+                BRMP.farmView=state;
+            }
+        }
+        function brSubscribeRunStudent(base){
+            brRefOn(base.child('runState/players/'+BRMP.playerId),'value',function(s){brReceiveRunState(s.val());},BRMP.studentRefs);
+            brRefOn(base.child('runState/farm'),'value',function(s){brReceiveFarmState(s.val());},BRMP.studentRefs);
+            brRefOn(base.child('upgradeAcks/'+BRMP.playerId),'value',function(s){var ack=s.val(),pending=BRMP.runChoicePending;if(!ack||!pending||ack.matchKey!==brRunMatchKey()||ack.requestId!==pending.id)return;
+                clearTimeout(pending.timer);BRMP.runChoicePending=null;
+                if(ack.accepted)pending.resolve();else pending.reject(new Error('선택지가 갱신되었습니다. 다시 선택해 주세요.'));
+            },BRMP.studentRefs);
+        }
+        function brHandleRunRequest(snapshot){
+            var id=String(snapshot.key||''),request=snapshot.val();if(!request||!request.requestId||!BRMP.active||!game)return;
+            var matchKey=brRunMatchKey();if(request.matchKey!==matchKey)return;
+            var seen=BRMP.lastRunRequests||(BRMP.lastRunRequests={});if(seen[id]===request.requestId)return;
+            seen[id]=request.requestId;
+            var p=game.participants.find(function(candidate){return candidate.remoteId===id&&candidate.humanControlled;}),accepted=brChooseRun(p,request.offerId,String(request.pathId||''));
+            var updates={};updates['upgradeAcks/'+id]={requestId:request.requestId,matchKey:matchKey,accepted:accepted};
+            if(p&&p.run)updates['runState/players/'+id]=brRunSnapshot(p);
+            BRMP.db.ref('rooms/'+BRMP.roomCode).update(updates).catch(function(err){delete seen[id];console.warn('[RUN CHOICE]',err);});
+        }
+        function brChooseRunAugment(offerId,pathId){
+            if(BRMP.backend==='local'){
+                var p=game&&game.participants.find(function(v){return v.remoteId===BRMP.localDemoHumanId;});
+                return brChooseRun(p,offerId,pathId)?Promise.resolve():Promise.reject(new Error('지금 선택할 수 없습니다.'));
+            }
+            if(BRMP.roomMeta?.phase!=='battle'||!BRMP.selfRun?.alive||BRMP.selfRun.offer?.id!==offerId||BRMP.runChoicePending)return Promise.reject(new Error('선택지가 갱신되었습니다.'));
+            return new Promise(function(resolve,reject){
+                var id=brUid('choice'),pending={id:id,resolve:resolve,reject:reject,timer:null};BRMP.runChoicePending=pending;
+                pending.timer=setTimeout(function(){if(BRMP.runChoicePending!==pending)return;BRMP.runChoicePending=null;reject(new Error('선택이 확인되지 않았습니다. 다시 눌러 주세요.'));},6500);
+                BRMP.db.ref('rooms/'+BRMP.roomCode+'/upgradeRequests/'+BRMP.playerId).set({requestId:id,matchKey:brRunMatchKey(),offerId:offerId,pathId:pathId}).catch(function(err){
+                    if(BRMP.runChoicePending!==pending)return;clearTimeout(pending.timer);BRMP.runChoicePending=null;reject(err);
+                });
+            });
+        }
+        function brResetRunClient(){
+            var pending=BRMP.runChoicePending;if(pending){clearTimeout(pending.timer);BRMP.runChoicePending=null;pending.reject(new Error('경기가 종료되었습니다.'));}
+            BRMP.selfRun=null;BRMP.farmView=null;BRMP.pendingRunState=null;BRMP.pendingFarmState=null;
+            if(typeof brResetRunHud==='function')brResetRunHud();
+        }
+
         function brRenderSelfState() {
             var p=BRMP.selfPlayer||{}, box=brEl('br-self-summary');
             if(!box)return;
@@ -8482,6 +9032,7 @@
             var entries=brGetPlayerEntries(false);
             if(entries.length<2){brToast('최소 2명이 필요합니다.');return;}
             BRMP.active=true;BRMP.matchFinished=false;BRMP.respawnMode=BRMP.roomMeta.mode==='team-respawn';
+            BRMP.runPublishedRev={};BRMP.runFarmRevision=null;BRMP.runPublishInFlight=false;BRMP.lastRunRequests={};
             BRMP.lastDeaths={};BRMP.deathCounter=0;BRMP.inputs=BRMP.inputs||{};BRMP.projectileSeq=0;BRMP.staticSent={};
             BRMP.publishInFlight=0;BRMP.publishCursor=0;BRMP.lastSmallPublishAt=0;BRMP.viewFxCursor={};BRMP.wireRoster=null;BRMP.wireParticipants=null;BRMP.wireHumans=null;BRMP.wireArena=null;BRMP.publishEpoch=Number(BRMP.publishEpoch||0)+1;
             teamMode=Number(BRMP.roomMeta.teamCount||0);
@@ -8505,7 +9056,7 @@
             var now=brNow(), battleUpdates={
                 'meta/phase':'battle','meta/battleStartedAt':now,
                 'meta/battleEndsAt':BRMP.respawnMode?now+Number(BRMP.roomMeta.matchSeconds||180)*1000:0,
-                'meta/updatedAt':now,'results':null
+                'meta/updatedAt':now,'results':null,'runState':null,'upgradeRequests':null,'upgradeAcks':null
             };
             BRMP.roomMeta.phase='battle';BRMP.roomMeta.battleStartedAt=now;
             BRMP.roomMeta.battleEndsAt=BRMP.respawnMode?now+Number(BRMP.roomMeta.matchSeconds||180)*1000:0;
@@ -8616,8 +9167,10 @@
             return true;
         }
         function brStartPlayerDash(p,aim,speed,range,damage,push,stun,style,color) {
-            var hits=new Set(),direction=aim.norm();
+            var hits=new Set(),direction=aim.norm(),cast=p._runSkillCast||brRunSkillSnapshot(p),farmToken='dash:'+(p.farmActionSeq=(p.farmActionSeq||0)+1);
             p.playerDash={dir:direction,speed:speed,remaining:range,contact:function(g,from,to){
+                return brWithRunSkill(p,g,function(){
+                if(damage>0)window.brFarm.line(g,p,from,to,p.radius,.65,farmToken);
                 var segment=to.sub(from),lengthSquared=segment.x*segment.x+segment.y*segment.y;
                 var middle=from.add(to).mult(.5),reach=Math.sqrt(lengthSquared)*.5+p.radius+150;
                 g.getNearbyParticipants(middle,reach).forEach(function(o){
@@ -8629,6 +9182,7 @@
                     if(p.ability.sub==='SOUL_CLEAVE'){p.teamGuardFrames=Math.max(p.teamGuardFrames,90);p.teamGuardStrength=Math.max(p.teamGuardStrength,.25);}
                     o.bodyHitCooldown=Math.max(o.bodyHitCooldown||0,24);
                 });
+                },cast,false);
             }};
             p.vel=direction.mult(Math.min(speed,range));p.dashFrames=Math.ceil(range/speed);
         }
@@ -8697,21 +9251,31 @@
                     brApplyPlayableHit(p,g,o,blinkDamage*(key==='teleport-thunder'?.90:key==='teleport-lava'?.82:1)+(execute?18:0),
                         isAssassin?30:key==='teleport-thunder'?42:37,isAssassin?14:18,o.pos.sub(landing),key,teleColor);
                 });
-                if(key==='teleport-lava')g.zones.push(new Zone(p,new Vec2(landing.x,landing.y),landingRadius,8,120,'rgba(255,100,20,0.5)','dmg'));
+                if(key==='teleport-lava')g.zones.push(new Zone(p,new Vec2(landing.x,landing.y),landingRadius,8,120,'rgba(255,100,20,0.5)','dmg',{scaledRadius:true}));
             } else if(key==='ranged-power') {
-                var profile=brRangedPowerProfile(p.ability),muzzle=p.radius*.78;
-                var powerShot=new Projectile(p,p.pos.add(aim.mult(muzzle)),aim,profile.speed,profile.damage,profile.size,'bullet',profile.color,profile.blast,null,
+                var profile=brRangedPowerProfile(p.ability),muzzle=p.radius*.78,count=brRunCount(1,brRunMod(p,'skillCount',0));
+                for(var shotIndex=0;shotIndex<count;shotIndex++){
+                var shotDir=aim.rotate((shotIndex-(count-1)*.5)*.10);
+                var powerShot=new Projectile(p,p.pos.add(shotDir.mult(muzzle)),shotDir,profile.speed,profile.damage,profile.size,'bullet',profile.color,profile.blast,null,
                     {knockback:profile.push,trailColor:profile.color,impactColor:profile.color,weaponStyle:profile.style,impactStyle:'ranged-power',
                      normalizedSkillStats:true,playerSkillBlast:true,rangeRemaining:Math.max(1,profile.range-muzzle)});
                 powerShot.life=Math.max(12,Math.ceil((profile.range-muzzle)/profile.speed)+1);g.projectiles.push(powerShot);
+                }
                 g.emitStudentFx('muzzle',p.pos.add(aim.mult(muzzle)),{dx:aim.x,dy:aim.y,size:148,color:profile.color,style:profile.style,sourceId:sourceId});
             } else return false;
+            var farmSkillToken='skill:'+(p.farmActionSeq=(p.farmActionSeq||0)+1);
+            if(key==='tank-stun')window.brFarm.area(g,p,p.pos,Number(spec.radius||spec.range||190),.65,farmSkillToken);
+            else if(['tank-punch','melee-uppercut','melee-combo','melee-drain'].includes(key))window.brFarm.cone(g,p,aim,Number(spec.range||220),Number(spec.halfAngle||.65),.65,farmSkillToken);
+            else if(key.indexOf('teleport-')===0)window.brFarm.area(g,p,p.pos,Number(spec.radius||140),.65,farmSkillToken);
             if(isTankAbility(p.ability)&&key.indexOf('tank-')===0){p.teamGuardFrames=Math.max(p.teamGuardFrames,72);p.teamGuardStrength=Math.max(p.teamGuardStrength,.20);}
             p.cooldown=Math.max(60,Math.round(info.cooldown));p.maxCooldown=Math.max(p.maxCooldown||1,p.cooldown);
             return true;
         }
         function brCastHumanSkill(p,g,aim,power) {
-            var spec=brAimSpec(p.ability,'skill',p.radius,power),point=brAimEndpoint(p,g,aim,Number(spec.range||0));
+            return brWithRunSkill(p,g,function(){return brCastHumanSkillBase(p,g,aim,power);});
+        }
+        function brCastHumanSkillBase(p,g,aim,power) {
+            var spec=brAimSpec(p.ability,'skill',p.radius,power,p.run?.mods||{}),point=brAimEndpoint(p,g,aim,Number(spec.range||0));
             var playable=brGetPlayableSkillInfo(p.ability);
             if(playable&&brCastPlayableSkill(p,g,aim,power,playable,spec))return true;
             var selfCast=p.ability.type===ABILITY_TYPES.BUFF||p.ability.type===ABILITY_TYPES.AREA||p.ability.type===ABILITY_TYPES.CLONE;
@@ -8729,6 +9293,7 @@
             }
             try {
                 p.useAbility(g,actual,aim,selfCast?0:actual.pos.dist(p.pos));
+                if(p.ability.type===ABILITY_TYPES.LASER)window.brFarm.line(g,p,p.pos,point,Number(spec.width||36)*.5,.65,'laser:'+(p.farmActionSeq=(p.farmActionSeq||0)+1));
                 if(p.ability.type===ABILITY_TYPES.DASH){
                     var tier=p.ability.t||'C';
                     var contact={THUNDER_DASH:[24,38,24],LIGHTNING_DASH:[19,33,19],CAR_RUSH:[21,36,21],BOAR_CHARGE:[17,31,17],KINETIC_CHARGE:[22,42,25]}[p.ability.sub];
@@ -8743,7 +9308,7 @@
             return true;
         }
         function brHumanMoveSpeed(p) {
-            return .7*Math.max(5.6,p.speed*4.05)*(p.teamHasteFrames>0?1.12:1)*(p.playerChaseFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*(p.ability.sub==='STONE'?.48:1);
+            return .7*Math.max(5.6,p.speed*4.05)*(p.teamHasteFrames>0?1.12:1)*(p.playerChaseFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*(p.ability.sub==='STONE'?.48:1)*brRunMod(p,'moveSpeed');
         }
         function brRunHumanControl(p,g) {
             var input;
@@ -8797,12 +9362,14 @@
         }
         function brBasicAttack(p,g,aim) {
             aim=aim&&aim.mag()>.05?aim.norm():new Vec2(1,0);
-            var tier=p.ability.t,cd=brBasicAttackFrames(p.ability),profile=brBasicCombatProfile(p.ability),color=p.ability.pTrail||BR_TIER_COLOR[tier]||'#fff';
+            var mods=p.run?.mods||{},tier=p.ability.t,cd=brBasicAttackFrames(p.ability,mods),profile=brRunBasicProfile(p.ability,mods),color=p.ability.pTrail||BR_TIER_COLOR[tier]||'#fff';
+            var farmToken='basic:'+(p.farmActionSeq=(p.farmActionSeq||0)+1),farmUnits=window.brFarm.basicUnits(cd);
             p.attackCommitFrames=Math.max(p.attackCommitFrames,10);
             if(profile.close) {
-                var range=p.radius+profile.rangeBonus,damage=brTierValue(tier,{S:27,A:24,B:21,C:18,F:13})*profile.damageScale;
+                var range=(p.radius+profile.rangeBonus)*Number(mods.basicRange||1),damage=brTierValue(tier,{S:27,A:24,B:21,C:18,F:13})*profile.damageScale;
                 var push=brTierValue(tier,{S:39,A:35,B:30,C:25,F:19})*profile.pushScale,hit=false,totalDealt=0;
                 g.addSwingEffect(p,p.pos,aim,range,profile.style,profile.halfAngle);
+                window.brFarm.cone(g,p,aim,range,profile.halfAngle,farmUnits,farmToken);
                 for(var o of g.getNearbyParticipants(p.pos,range+100)) {
                     if(!o.alive||o===p||o.id===999||(p.team&&o.team===p.team))continue;
                     var dx=o.pos.x-p.pos.x,dy=o.pos.y-p.pos.y,dist=Math.hypot(dx,dy),dot=dist?(dx*aim.x+dy*aim.y)/dist:1;
@@ -8821,11 +9388,12 @@
                     g.spawnImpact(p.pos.add(aim.mult(range*.75)),range*.65,color,.65);
                 }
             } else {
-                var damage=brTierValue(tier,{S:21,A:18,B:15,C:12,F:8})*profile.damageScale*p.damageMult*.72,size=brBasicShotSize(p.ability,false);
+                var damage=brTierValue(tier,{S:21,A:18,B:15,C:12,F:8})*profile.damageScale*p.damageMult*.72,size=brBasicShotSize(p.ability,false)*Number(mods.basicSize||1);
                 for(var i=0;i<profile.count;i++) {
                     var dir=aim.rotate((i-(profile.count-1)/2)*profile.spread),shot=new Projectile(p,p.pos.add(dir.mult(p.radius*.7)),dir,profile.speed,damage,size,profile.type,color,profile.explode,profile.emoji,
-                        {knockback:profile.knockback,trailColor:color,impactColor:color,weaponStyle:profile.style,impactStyle:'ranged-basic',pierce:profile.pierce,bounces:profile.bounces,status:profile.status,statusPower:profile.statusPower,spinRate:profile.spin,faceDir:profile.face,hitOncePerPass:true});
+                        {knockback:profile.knockback,trailColor:color,impactColor:color,weaponStyle:profile.style,impactStyle:'ranged-basic',basicDamageMultiplier:Number(mods.basicDamage||1),pierce:profile.pierce,bounces:profile.bounces,status:profile.status,statusPower:profile.statusPower,spinRate:profile.spin,faceDir:profile.face,hitOncePerPass:true});
                     var outward=Math.max(8,Math.ceil(profile.range/profile.speed));shot.life=profile.type==='BOOMERANG'?outward+60:outward;shot.returnAfterLife=60;
+                    shot.farmDamage=farmUnits;shot.farmToken=farmToken;
                     g.projectiles.push(shot);
                 }
             }
@@ -8858,6 +9426,7 @@
         }
         function brRespawnPlayer(p) {
             p.alive=true;p.hp=p.maxHp;p.vel=new Vec2(0,0);p.stunned=0;p.blindedFrames=0;p.poisonFrames=0;
+            if(p.run){p.run.lastDamageFrame=game.frame;brRunOffer(p);p.run.revision++;}
             var respawnInput=BRMP.inputs[p.remoteId]||{};p.lastRemoteAttack=Number(respawnInput.attackSeq||p.lastRemoteAttack||0);p.lastRemoteSkill=Number(respawnInput.skillSeq||p.lastRemoteSkill||0);
             p.resolvedAttackSeq=p.lastRemoteAttack;p.resolvedSkillSeq=p.lastRemoteSkill;p.pendingAttack=null;p.pendingSkill=null;
             p.deathFrame=null;p.deathVisualUntilFrame=null;p.deathVisualUntilAt=null;p.respawnAtFrame=null;p.ringRecoveryActive=false;p.dashFrames=0;p.playerDash=null;p.playerDashContactFrame=-1;p.comboHitsRemaining=0;
@@ -8889,6 +9458,7 @@
             ];
         }
         function brPublishViews() {
+            brFlushRunState();
             if(!BRMP.active||!game||BRMP.backend!=='firebase'||Number(BRMP.publishInFlight||0)>=3)return;
             // Match participants are stable (temporary clones use id 999), so keep the immutable
             // roster references and arena rows instead of rebuilding them for every 60 ms batch.
@@ -9095,13 +9665,13 @@
             command=command||BRMP.inputState||{};
             var ax=Number(command.ax??1),ay=Number(command.ay??0),am=Math.hypot(ax,ay)||1;
             ax/=am;ay/=am;var dir={x:ax,y:ay},x=Number(self.predX==null?self.x:self.predX),y=Number(self.predY==null?self.y:self.predY),rad=Number(r[15]||38);
-            var close=brBasicCombatProfile(a).close;
+            var mods=brRunClientMods(),close=brBasicCombatProfile(a).close;
             if(kind==='attack'&&close) {
                 var basicMelee=brBasicCombatProfile(a);
-                brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:rad+basicMelee.rangeBonus,amount:basicMelee.halfAngle,color:color,style:'melee-local',sourceId:BRMP.playerId});
+                brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:(rad+basicMelee.rangeBonus)*Number(mods.basicRange||1),amount:basicMelee.halfAngle,color:color,style:'melee-local',sourceId:BRMP.playerId});
                 brPushLocalFx('muzzle',x+ax*rad,y+ay*rad,{dx:ax,dy:ay,size:62,color:'#ffffff',style:'melee'});brPlaySfx('melee',tier==='S'||tier==='A');
             } else if(kind==='attack') {
-                var profile=brBasicCombatProfile(a),shotColor=a.pTrail||color,sz=brBasicShotSize(a,true);
+                var profile=brRunBasicProfile(a,mods),shotColor=a.pTrail||color,sz=brBasicShotSize(a,true)*Number(mods.basicSize||1);
                 for(var bi=0;bi<profile.count;bi++) {
                     var angle=(bi-(profile.count-1)/2)*profile.spread,c=Math.cos(angle),sn=Math.sin(angle),bd={x:ax*c-ay*sn,y:ax*sn+ay*c};
                     var outward=Math.max(8,Math.ceil(profile.range/profile.speed)),lifeFrames=profile.type==='BOOMERANG'?outward+60:outward;
@@ -9132,9 +9702,12 @@
                     self.predX=destination.x;self.predY=destination.y;self.x=destination.x;self.y=destination.y;self.predVx=0;self.predVy=0;self.previousX=destination.x;self.previousY=destination.y;self.predAccumulator=0;self.predState={x:destination.x,y:destination.y,vx:0,vy:0};BRMP.localDash=null;
                     BRMP.localTeleportUntil=performance.now()+650;BRMP.localTeleportTarget=destination;
                 } else if(playKey==='ranged-power') {
-                    var powerProfile=brRangedPowerProfile(a);
-                    brSpawnLocalProjectile(x+ax*rad*.78,y+ay*rad*.78,dir,powerProfile.speed,powerProfile.size,powerProfile.color,'',powerProfile.style,Number(r[8]||0),(powerProfile.range-rad*.78)/powerProfile.speed*16.667);
-                    var castProjectile=BRMP.localProjectiles[BRMP.localProjectiles.length-1];castProjectile.blast=powerProfile.blast;castProjectile.rangeRemaining=powerProfile.range-rad*.78;
+                    var powerProfile=brRangedPowerProfile(a),powerCount=brRunCount(1,mods.skillCount);
+                    for(var pi=0;pi<powerCount;pi++){
+                        var pa=(pi-(powerCount-1)*.5)*.10,pc=Math.cos(pa),ps=Math.sin(pa),pd={x:ax*pc-ay*ps,y:ax*ps+ay*pc};
+                        brSpawnLocalProjectile(x+pd.x*rad*.78,y+pd.y*rad*.78,pd,powerProfile.speed,powerProfile.size*Number(mods.skillSize||1),powerProfile.color,'',powerProfile.style,Number(r[8]||0),(powerProfile.range-rad*.78)/powerProfile.speed*16.667);
+                        var castProjectile=BRMP.localProjectiles[BRMP.localProjectiles.length-1];castProjectile.blast=powerProfile.blast*Number(mods.skillSize||1);castProjectile.rangeRemaining=powerProfile.range-rad*.78;
+                    }
                     brPushLocalFx('muzzle',x+ax*rad*.78,y+ay*rad*.78,{dx:ax,dy:ay,size:148,color:powerProfile.color,style:powerProfile.style,sourceId:BRMP.playerId});
                 } else if(a.type===ABILITY_TYPES.DASH) {
                     brPushLocalFx('dash',x,y,{dx:ax,dy:ay,size:spec.range,color:color,style:a.sub||'dash'});
@@ -9144,11 +9717,14 @@
                 else if(a.type===ABILITY_TYPES.TELEPORT)brPushLocalFx('teleport',x,y,{dx:ax,dy:ay,size:spec.range,color:color,style:a.sub||'teleport'});
                 else if(a.type===ABILITY_TYPES.LASER)brPushLocalFx('laser',x,y,{dx:ax,dy:ay,size:spec.range,color:color,amount:Number(spec.width||6),style:'laser'});
                 else if(a.type===ABILITY_TYPES.PROJ) {
-                    var skillProfile=getPlayerSignatureProjectileProfile(a);
+                    var skillProfile=Object.assign({},getPlayerSignatureProjectileProfile(a));
+                    skillProfile.count=brRunCount(skillProfile.count,mods.skillCount);
+                    if(a.sub==='NOVA')skillProfile.spread=Math.PI*2/skillProfile.count;
+                    else if(skillProfile.count>1&&!skillProfile.spread)skillProfile.spread=.10;
                     if(a.sub==='SNIPE')brPushLocalFx('laser',x,y,{dx:ax,dy:ay,size:spec.range,color:'#67e8f9',amount:10,style:'laser'});
                     else for(var j=0;j<skillProfile.count;j++) {
                         var sang=a.sub==='NOVA'?j*skillProfile.spread:(j-(skillProfile.count-1)/2)*skillProfile.spread,c2=Math.cos(sang),s2=Math.sin(sang),d2={x:ax*c2-ay*s2,y:ax*s2+ay*c2};
-                        var skillSize=skillProfile.size*(tier==='S'?1.14:tier==='A'?1.08:1),frames=skillProfile.type==='BOOMERANG'?120:Math.max(8,Math.ceil(skillProfile.range/skillProfile.speed));
+                        var skillSize=skillProfile.size*(tier==='S'?1.14:tier==='A'?1.08:1)*Number(mods.skillSize||1),frames=skillProfile.type==='BOOMERANG'?120:Math.max(8,Math.ceil(skillProfile.range/skillProfile.speed));
                         brSpawnLocalProjectile(x,y,d2,skillProfile.speed,skillSize,a.pImpact||color,skillProfile.emoji,skillProfile.style,Number(r[8]||0),frames*(1000/60));
                         var localSkill=BRMP.localProjectiles[BRMP.localProjectiles.length-1];localSkill.bounces=skillProfile.bounces;localSkill.pierce=skillProfile.pierce;localSkill.type=skillProfile.type;localSkill.returnAt=30*(1000/60);
                     }
@@ -9294,6 +9870,7 @@
         function brStartStudentBattle() {
             brEl('br-app').classList.add('br-hidden');
             brEl('br-student-battle').classList.remove('br-hidden');
+            brReceiveRunState(BRMP.pendingRunState);brReceiveFarmState(BRMP.pendingFarmState);
             var matchKey=BRMP.roomCode+'|'+String(BRMP.roomMeta?.battleStartedAt||0),prior=BRMP.inputMatchKey===matchKey?BRMP.inputState:null;
             BRMP.inputMatchKey=matchKey;BRMP.inputState={dx:0,dy:0,ax:prior?.ax??1,ay:prior?.ay??0,aimPower:1,attackSeq:Number(prior?.attackSeq||0),skillSeq:Number(prior?.skillSeq||0),attack:prior?.attack||null,skill:prior?.skill||null};
             if(BRMP.resetControls)BRMP.resetControls();
@@ -9311,6 +9888,7 @@
             brSendInput(true);
         }
         function brStopStudentBattle() {
+            brResetRunClient();
             if(BRMP.resetControls)BRMP.resetControls();BRMP.pendingLocalActions={};
             brEl('br-student-battle').classList.add('br-hidden');
             if(BRMP.inputTrailingTimer){clearTimeout(BRMP.inputTrailingTimer);BRMP.inputTrailingTimer=null;}
@@ -9604,6 +10182,15 @@
                 p.x+=p.vx*liveFrames;p.y+=p.vy*liveFrames;
                 if(p.rangeRemaining!=null)p.rangeRemaining=Math.max(0,p.rangeRemaining-Math.hypot(p.vx,p.vy)*liveFrames);
                 var from={x:p.px,y:p.py},to={x:p.x,y:p.y},wallHit=p.type==='BOOMERANG'||p.type==='GHOST'?null:combatTraceWalls(from,to,p.size,BRMP.latestView?.walls||[]);
+                // Stop only the cosmetic prediction at the same solid farming
+                // contact as authority. XP, box HP and impact feedback stay authoritative.
+                var farmContact=false;
+                if(!p.pierce&&p.type!=='BOOMERANG')for(const box of BRMP.farmView?.b||[]){
+                    if(box[3]<=0)continue;
+                    var farmTime=combatSegmentCircleTime(p.px-box[1],p.py-box[2],p.x-p.px,p.y-p.py,(window.brFarm?.radius||32)+p.size);
+                    if(farmTime!==null&&(!wallHit||farmTime<wallHit.t)){farmContact=true;break;}
+                }
+                if(farmContact){list.splice(i,1);continue;}
                 var touched=false;if(draw)draw.forEach(function(o,id){
                     if(touched||String(id)===String(BRMP.playerId)||!o.row?.[7]||(selfTeam&&Number(o.row[8])===selfTeam))return;
                     touched=combatSegmentCircleTime(p.px-o.x,p.py-o.y,p.x-p.px,p.y-p.py,Number(o.row[15]||38)+p.size)!==null;
@@ -9762,6 +10349,7 @@
             cc.stroke();
             brDrawDangerFill(cc,0,0,radius,worldRadius);
             (view.walls||[]).forEach(function(r){if(onScreen(r[0],r[1],Math.hypot(r[2],r[3])*.5))brDrawStudentWall(cc,r);});
+            if(window.brFarm)window.brFarm.drawStudent(cc,BRMP.farmView,onScreen,zoom);
             (view.zones||[]).forEach(function(r){
                 if(!onScreen(r[0],r[1],r[2]))return;
                 brDrawHazardCircle(cc,r[0],r[1],r[2],r[3],r[4],r[6]||'',zoom,Number(self.row[8])>0&&Number(r[5])===Number(self.row[8]));
@@ -9862,6 +10450,136 @@
                 BRMP.lastStudentHudAt=frameNow;brUpdateStudentHud(self.row,view,self);
             }
         }
+        // Event-driven run HUD: no build calculation, input mutation or world pause.
+        var brRunHud={initialized:false,state:null,offer:null,offerKey:'',opened:false,epoch:0,collapseTimer:null,ackTimer:null,pending:null,catalog:{},chipKey:''};
+        function brRunTier(tier) { return ['','I','II','III'][Math.max(1,Math.min(3,Number(tier)||1))]; }
+        function brRunClearTimer(key) { if(brRunHud[key])clearTimeout(brRunHud[key]);brRunHud[key]=null; }
+        function brRunSetOpen(open) {
+            var valid=!!brRunHud.offer;
+            brRunHud.opened=!!open&&valid;brRunClearTimer('collapseTimer');
+            brEl('br-run-ui').classList.toggle('br-hidden',!valid);
+            brEl('br-run-panel').classList.toggle('br-hidden',!brRunHud.opened);
+            brEl('br-run-ready').classList.toggle('br-hidden',!valid||brRunHud.opened);
+            brEl('br-run-ready').setAttribute('aria-expanded',brRunHud.opened?'true':'false');
+            if(brRunHud.opened) {
+                var epoch=brRunHud.epoch;
+                brRunHud.collapseTimer=setTimeout(function(){
+                    brRunHud.collapseTimer=null;
+                    if(epoch===brRunHud.epoch)brRunSetOpen(false);
+                },7000);
+            }
+        }
+        function brRunSetPending(pathId) {
+            var buttons=brEl('br-run-cards').querySelectorAll('button[data-run-path]');
+            buttons.forEach(function(button){
+                button.disabled=!!pathId;
+                button.classList.toggle('is-selected',!!pathId&&button.dataset.runPath===pathId);
+                button.setAttribute('aria-busy',pathId&&button.dataset.runPath===pathId?'true':'false');
+            });
+        }
+        function brRunSubmitChoice(pathId) {
+            var offer=brRunHud.offer;
+            if(!offer||brRunHud.pending||!offer.cards.some(function(card){return String(card.id)===pathId;}))return;
+            var pending={offerId:brRunHud.offerKey,pathId:pathId,epoch:brRunHud.epoch};
+            brRunHud.pending=pending;brRunSetPending(pathId);
+            brSetText(brEl('br-run-choice-status'),'강화 적용 중…');
+            // A write acknowledgement can precede the host's authoritative update.
+            // Release the UI after a lost reply; retrying the offer is host-idempotent.
+            brRunClearTimer('ackTimer');
+            brRunHud.ackTimer=setTimeout(function(){
+                brRunHud.ackTimer=null;
+                if(brRunHud.pending!==pending||brRunHud.epoch!==pending.epoch)return;
+                brRunHud.pending=null;brRunSetPending('');
+                brSetText(brEl('br-run-choice-status'),'연결을 확인하고 다시 선택해 주세요.');
+            },7000);
+            var request;
+            try {
+                if(typeof brChooseRunAugment!=='function')throw new Error('Upgrade connection is not ready');
+                request=brChooseRunAugment(pending.offerId,pathId);
+            } catch(err) { request=Promise.reject(err); }
+            Promise.resolve(request).then(function(result){
+                if(brRunHud.pending!==pending||brRunHud.epoch!==pending.epoch)return;
+                if(result===false||result&&result.ok===false)throw new Error('Upgrade was not accepted');
+                // Some transports return the authoritative state, others emit it separately.
+                if(result&&typeof result.level==='number'&&result.paths)brRenderRunHud(result);
+            }).catch(function(){
+                if(brRunHud.pending!==pending||brRunHud.epoch!==pending.epoch)return;
+                brRunClearTimer('ackTimer');brRunHud.pending=null;brRunSetPending('');
+                brSetText(brEl('br-run-choice-status'),'적용되지 않았어요. 다시 선택해 주세요.');
+            });
+        }
+        function brInitRunHud() {
+            if(brRunHud.initialized)return;brRunHud.initialized=true;
+            brEl('br-run-ready').addEventListener('click',function(){brRunSetOpen(true);});
+            brEl('br-run-later').addEventListener('click',function(){brRunSetOpen(false);});
+            brEl('br-run-cards').addEventListener('click',function(event){
+                var card=event.target.closest('button[data-run-path]');
+                if(card&&card.dataset.runOffer===brRunHud.offerKey)brRunSubmitChoice(card.dataset.runPath);
+            });
+            // Enter/space activates the focused choice, without also firing a basic attack.
+            // Direction keys still reach the existing keyboard movement handler.
+            brEl('br-run-ui').addEventListener('keydown',function(event){
+                if((event.key==='Enter'||event.key===' ')&&event.target.closest('button'))event.stopPropagation();
+            });
+        }
+        function brResetRunHud() {
+            brRunClearTimer('collapseTimer');brRunClearTimer('ackTimer');
+            brRunHud.epoch++;brRunHud.state=null;brRunHud.offer=null;brRunHud.offerKey='';
+            brRunHud.pending=null;brRunHud.opened=false;brRunHud.catalog={};brRunHud.chipKey='';
+            brEl('br-run-hud').classList.add('br-hidden');brRunSetOpen(false);
+            brEl('br-run-cards').textContent='';brEl('br-run-owned').textContent='';
+            brSetText(brEl('br-run-choice-status'),'');
+        }
+        function brRenderRunHud(state) {
+            if(!state||state.alive===false||(BRMP.currentSelf&&BRMP.currentSelf.row&&!BRMP.currentSelf.row[7])) {
+                brResetRunHud();return;
+            }
+            if(brRunHud.state&&Number(state.revision||0)<Number(brRunHud.state.revision||0))return;
+            brInitRunHud();brRunHud.state=state;
+            var level=Math.max(1,Math.min(5,Number(state.level)||1)),xp=Math.max(0,Number(state.xp)||0);
+            var required=level===5?0:Math.max(1,Number(state.required)||level+1),maxed=level===5;
+            brEl('br-run-hud').classList.remove('br-hidden');
+            brSetText(brEl('br-run-level'),'LV.'+level);
+            brSetText(brEl('br-run-xp-text'),maxed?'MAX':xp+' / '+required);
+            brEl('br-run-xp-fill').style.width=(maxed?100:brClamp(xp/required*100,0,100))+'%';
+            var xpBar=brEl('br-run-xp');xpBar.setAttribute('aria-valuemax',maxed?'1':String(required));
+            xpBar.setAttribute('aria-valuenow',maxed?'1':String(Math.min(xp,required)));
+            xpBar.setAttribute('aria-valuetext',maxed?'최대 레벨':xp+' / '+required+' XP');
+            var offer=state.offer,seen=new Set(),cards=offer&&Array.isArray(offer.cards)?offer.cards.filter(function(card){
+                if(!card||!card.id||seen.has(String(card.id)))return false;seen.add(String(card.id));return true;
+            }):[];
+            // Never show an incomplete/duplicate selection as a valid three-card offer.
+            var valid=!!(offer&&offer.id&&cards.length===3&&offer.cards.length===3),key=valid?String(offer.id):'';
+            if(key!==brRunHud.offerKey) {
+                brRunHud.epoch++;brRunClearTimer('ackTimer');brRunHud.pending=null;
+                brRunHud.offerKey=key;brRunHud.offer=valid?{id:key,cards:cards,level:offer.level}:null;
+                brSetText(brEl('br-run-choice-status'),'');
+                if(valid) {
+                    var families={BASIC:'일반 공격',SKILL:'고유 스킬',BODY:'기동 · 체력',SIGNATURE:'고유 강화'};
+                    brSetText(brEl('br-run-offer-title'),'LV.'+(Number(offer.level)||level)+' · 강화 선택');
+                    brEl('br-run-cards').innerHTML=cards.map(function(card){
+                        brRunHud.catalog[String(card.id)]={name:String(card.name||card.id),icon:String(card.icon||'✦')};
+                        var effect=String(card.effect||'').split(/\n|\s*·\s*/).filter(Boolean).map(function(line){return '<span class="br-run-card-effect">'+brEscape(line)+'</span>';}).join('');
+                        return '<button type="button" class="br-run-card" data-run-path="'+brEscape(card.id)+'" data-run-offer="'+brEscape(key)+'">'+
+                            '<span class="br-run-card-family">'+brEscape(families[card.family]||'강화')+'</span>'+
+                            '<span class="br-run-card-name">'+brEscape(card.icon||'✦')+' '+brEscape(card.name||card.id)+' <span class="br-run-card-tier">'+brRunTier(card.tier)+'</span></span>'+effect+
+                            (card.detail?'<span class="br-run-card-detail">'+brEscape(card.detail)+'</span>':'')+'</button>';
+                    }).join('');
+                } else brEl('br-run-cards').textContent='';
+                brRunSetOpen(valid);
+            }
+            var paths=state.paths||{},ids=Object.keys(paths).filter(function(id){return Number(paths[id])>0;}).slice(0,4);
+            var chipKey=ids.map(function(id){return id+':'+paths[id];}).join('|');
+            if(chipKey!==brRunHud.chipKey) {
+                brRunHud.chipKey=chipKey;
+                var catalog=window.brProgression&&window.brProgression.catalog||{};
+                brEl('br-run-owned').innerHTML=ids.map(function(id){
+                    var meta=brRunHud.catalog[id]||catalog[id]||{name:id.replace(/_/g,' ').toUpperCase(),icon:'✦'},label=meta.name+' '+brRunTier(paths[id]);
+                    return '<span class="br-run-chip" title="'+brEscape(label)+'" aria-label="'+brEscape(label)+'">'+brEscape(meta.icon)+' '+brRunTier(paths[id])+'</span>';
+                }).join('');
+            }
+        }
+        window.brRenderRunHud=brRenderRunHud;window.brResetRunHud=brResetRunHud;
         function brUpdateStudentHud(r,view,selfObj) {
             var a=EMOJI_DB[Number(r[2])]||EMOJI_DB[0],hp=Number(r[5]||0),max=Math.max(1,Number(r[6]||1));
             brSetText(brEl('br-battle-self'),a.e+' '+r[1]+' · '+a.t+'급');
@@ -9893,9 +10611,13 @@
             BRMP.currentSelf.basicCd=basicCd;BRMP.currentSelf.skillCd=skillCd;BRMP.currentSelf.skillLeft=skillLeft;
             var resp=brEl('br-respawn');
             if(!r[7]) {
+                if(brRunHud.state)brResetRunHud();
                 resp.classList.remove('br-hidden');
                 brSetText(brEl('br-respawn-text'),view.mode==='team-respawn'?Math.ceil(Number(r[14]||0))+'초 후 부활':'탈락 · 관전 중');
-            } else resp.classList.add('br-hidden');
+            } else {
+                resp.classList.add('br-hidden');
+                if(!brRunHud.state&&BRMP.selfRun)brRenderRunHud(BRMP.selfRun);
+            }
         }
 
         function brBuildResults() {
@@ -9923,6 +10645,7 @@
                 return {rank:i+1,id:p.remoteId||('ai-'+p.id),name:p.name,abilityIndex:Number(p.abilityIndex||0),abilityId:p.ability.id,abilityName:p.ability.n,abilityEmoji:p.ability.e,rosterVersion:BR_ROSTER_VERSION,
                     tier:p.ability.t,team:Number(p.team||0),kills:Number(p.kills||0),deaths:Number(p.deaths||0),
                     damage:Math.round(p.damageDealt||0),taken:Math.round(p.damageTaken||0),
+                    level:Number(p.run?.level||1),build:p.run?Object.assign({},p.run.paths):{},
                     survival:Math.round((p.alive?game.frame:Number(p.deathFrame||p.survivalFrames||0))/60),alive:!!p.alive,eliminationSeq:Number(p.eliminationSeq||0)};
             });
             var winningPool=teamWinner?rows.filter(function(r){return r.team===teamWinner;}):rows;
@@ -9996,7 +10719,7 @@
         async function brResetSameRoom() {
             if(BRMP.role!=='host')return;
             brTearDownGame();
-            var updates={'meta/phase':'lobby','meta/updatedAt':brNow(),'meta/summary':null,'results':null,'views':null,'inputs':null};
+            var updates={'meta/phase':'lobby','meta/updatedAt':brNow(),'meta/summary':null,'results':null,'views':null,'inputs':null,'runState':null,'upgradeRequests':null,'upgradeAcks':null};
             brGetPlayerEntries(true).forEach(function(p){
                 var previousAbilityId=p.abilityId||(brResolveAbilityIndex(p)>=0?EMOJI_DB[brResolveAbilityIndex(p)].id:null)||p.lastAbilityId||null;
                 p.lastAbilityId=previousAbilityId;p.abilityId=null;p.abilityIndex=null;p.quizScore=0;p.quizFinished=false;p.rerolls=0;p.ready=false;p.team=0;
@@ -10019,6 +10742,7 @@
             BRMP.active=false;BRMP.respawnMode=false;
             if(animationId){cancelAnimationFrame(animationId);animationId=null;}
             if(game) {
+                if(window.brFarm)window.brFarm.dispose(game);
                 if(game.endTimer){clearTimeout(game.endTimer);game.endTimer=null;}
                 ['projectiles','particles','zones','turrets','texts','swings','rings','signatureEffects','studentFx','confetti','deadParticipants','smokes','walls'].forEach(function(key){if(Array.isArray(game[key]))game[key].length=0;});
                 if(Array.isArray(game.participants))game.participants.length=0;
@@ -10034,6 +10758,7 @@
             BRMP.publishEpoch=Number(BRMP.publishEpoch||0)+1;BRMP.publishInFlight=0;BRMP.publishCursor=0;BRMP.lastSmallPublishAt=0;
             BRMP.lastDeaths={};BRMP.deathCounter=0;BRMP.projectileSeq=0;BRMP.staticSent={};BRMP.viewFxCursor={};
             BRMP.wireArena=null;BRMP.wireRoster=null;BRMP.wireParticipants=null;BRMP.wireHumans=null;
+            BRMP.runPublishedRev={};BRMP.runFarmRevision=null;BRMP.runPublishInFlight=false;BRMP.lastRunRequests={};brResetRunClient();
             BRMP.latestView=null;BRMP.lastViewFrame=null;BRMP.staticView=null;BRMP.focusPlayer=false;
             loopLastTime=0;loopAccumulator=0;hostLastDrawAt=0;hostRenderMode='';
         }
@@ -10086,8 +10811,8 @@
                 if(action.previewed||brActionRemaining(kind,self)>.5)continue;
                 action.previewed=true;
                 var a=EMOJI_DB[Number(self.row[2])]||EMOJI_DB[0],haste=(Number(self.row[23]||0)&16)||performance.now()<Number(BRMP.localAttackHasteUntil||0);
-                if(kind==='attack')BRMP.localAttackLockUntil=brNow()+brBasicAttackFrames(a)*(1000/60)/(haste?3:1);
-                else BRMP.localSkillLockUntil=brNow()+Math.max(1,Number(brGetPlayableSkillInfo(a)?.cooldown||self.row[21]||60))*(1000/60);
+                if(kind==='attack')BRMP.localAttackLockUntil=brNow()+brBasicAttackFrames(a,brRunClientMods())*(1000/60)/(haste?3:1);
+                else {var skillInfo=brGetPlayableSkillInfo(a);BRMP.localSkillLockUntil=brNow()+Math.max(1,skillInfo?Math.round(Number(skillInfo.cooldown)*Number(brRunClientMods().skillCooldown||1)):Number(self.row[21]||60))*(1000/60);}
                 BRMP.localCastFx={kind:kind,ax:action.command.ax,ay:action.command.ay,aimPower:action.command.ap,until:performance.now()+170};
                 BRMP.feedbackCommand={kind:kind,seq:action.seq};
                 try {brImmediateCastFeedback(kind,action.command);} finally {BRMP.feedbackCommand=null;}
@@ -10243,7 +10968,7 @@
                 brEl('br-app').classList.add('br-hidden');document.getElementById('setup-screen').classList.remove('hidden');
             });
             window.addEventListener('resize',brResizeStudentCanvas);
-            brApplyModeControls();brSetupControls();brShow('br-home');
+            brApplyModeControls();brSetupControls();brInitRunHud();brShow('br-home');
 
             BRMP.legacyEndGame=endGame;BRMP.legacyRestartGame=restartGame;
             endGame=function(winner,options){
