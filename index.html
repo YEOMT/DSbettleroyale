@@ -336,7 +336,7 @@
         const RANGED_MACHINE_SUBS = new Set(['ARCANE_BARRAGE','STING','RAPID_BOW']);
         const RANGED_BOMBER_SUBS = new Set(['GIANT_FIREBALL','CRACKER','SODA_BOMB','POWDER_BARRAGE']);
         function getRangedWeaponStyle(ability={}) {
-            const sub=ability.sub||'', name=String(ability.n||''), count=Number(ability.pCount||1);
+            const sub=ability.sub||'', name=String(ability.timingSeed||ability.n||''), count=Number(ability.pCount||1);
             if(RANGED_SNIPER_SUBS.has(sub)||ability.type===ABILITY_TYPES.LASER||/스나이퍼|저격|헤드슈터/.test(name)) return 'sniper';
             if(RANGED_BOMBER_SUBS.has(sub)||Number(ability.pExplode||0)>=34||/폭격|폭탄|운석|다이너마이트/.test(name)) return 'bomber';
             if(RANGED_MACHINE_SUBS.has(sub)||(count>=4&&!ability.pExplode)||/난사|연사|탄막/.test(name)) return 'machine';
@@ -368,13 +368,40 @@
             if(style==='bomber'&&raw>0) speed=conceptSpeed*.58+raw*tierSpeed*.42;
             if(kind==='basic') speed*=style==='sniper'?.96:style==='bomber'?.92:.90;
             let range=ranges[style][tier]*(kind==='basic'?(style==='sniper'?.94:.88):1);
-            // 일반 공격은 모든 원거리 캐릭터가 한 발의 원형 탄환을 쓴다. 콘셉트는 수치에만 남긴다.
+            // Shared range/tempo budget; brBasicCombatProfile adds each character’s projectile identity.
             const count=1;
             const damageScale={sniper:1.36,machine:.82,bomber:1.08,heavy:1.16,homing:.96,boomerang:.94,standard:1}[style];
             const knockback={S:16,A:13,B:10,C:7,F:4}[tier]*(style==='bomber'?1.45:style==='heavy'?1.28:style==='sniper'?1.05:.72);
             const explodeRadius=style==='bomber'?({S:68,A:61,B:54,C:46,F:36}[tier]||46):0;
             const cooldownScale=style==='sniper'?1.28:style==='bomber'?1.24:style==='machine'?.74:style==='heavy'?1.14:1;
             return {style,range:Math.round(range),speed:Math.max(4,speed),count,damageScale,knockback,explodeRadius,cooldownScale};
+        }
+        function getIdentityProjectileEmoji(ability={}) {
+            return ability.projEmoji||({GIANT_FIREBALL:'🔥',ARCANE_BARRAGE:'🔮',NOVA:'🌟',ICE_SHARD:'🧊',RAPID_BOW:'🏹',SNIPE:'🎯',GHOST_MOVE:'👻',STING:'🐝',CRACKER:'🧨',SODA_BOMB:'🥤',POWDER_BARRAGE:'💥',AIMED_SHOT:'📐',TOXIC_INJECTION:'💉',BOOMERANG:'🪃'})[ability.sub]||ability.e||'•';
+        }
+        function getPlayerSignatureProjectileProfile(ability={}) {
+            const sub=ability.sub||'',base=getRangedCombatProfile(ability,'skill');
+            const p={count:Math.min(6,Number(ability.pCount||1)),speed:Number(ability.pSpeed||10),damage:Number(ability.pDmg||15),size:Number(ability.pSize||8),
+                type:ability.projType||'bullet',spread:.2,explode:Number(ability.pExplode||0),emoji:getIdentityProjectileEmoji(ability),range:base.range,
+                pierce:!!ability.pierce,bounces:Number(ability.pBounce||0),spin:Number(ability.spinRate||0),face:!!ability.faceDir,
+                status:ability.pStatus||null,statusPower:Number(ability.pStatusPower||0),push:Number(ability.knockback||3),style:base.style};
+            if(sub==='GIANT_FIREBALL')Object.assign(p,{count:3,speed:9,damage:30,size:30,type:'bullet',explode:80});
+            else if(sub==='ARCANE_BARRAGE')Object.assign(p,{count:6,speed:13.2,damage:8.8,size:9,spread:.085,push:2.5});
+            else if(sub==='NOVA')Object.assign(p,{count:6,speed:12,damage:18,size:15,spread:Math.PI/3,pierce:true,spin:.2});
+            else if(sub==='ICE_SHARD')Object.assign(p,{count:3,type:'ICE_SHARD',face:true});
+            else if(sub==='RAPID_BOW')p.count=3;
+            else if(sub==='CRACKER')Object.assign(p,{count:2,speed:11.5,damage:14,size:13,explode:48,spread:.13,push:11});
+            else if(sub==='STING')Object.assign(p,{count:5,speed:17,damage:7.2,size:6,spread:.15,push:1.5,status:'poison',statusPower:96});
+            else if(sub==='SODA_BOMB')Object.assign(p,{count:3,speed:13,damage:10.5,size:17,explode:62,spread:.14,push:18});
+            else if(sub==='POWDER_BARRAGE')Object.assign(p,{count:5,speed:15,damage:10,size:12,explode:44,spread:.15,push:12});
+            else if(sub==='AIMED_SHOT')Object.assign(p,{count:1,speed:26,damage:27,size:9,spread:0,pierce:true,face:true,push:14});
+            else if(sub==='TOXIC_INJECTION')Object.assign(p,{count:2,speed:18,damage:11,size:12,spread:.09,status:'poison',statusPower:150,push:5,face:true});
+            else if(sub==='BOOMERANG')p.type='BOOMERANG';
+            if(base.style==='sniper'||base.style==='machine')p.speed=Math.max(p.speed,base.speed);
+            else if(base.style==='bomber')p.speed=Math.min(p.speed,base.speed);
+            else if(!['NOVA','ICE_SHARD','RAPID_BOW','TOXIC_INJECTION'].includes(sub))p.speed=base.speed;
+            if(['bomber','heavy','sniper'].includes(base.style))p.push=Math.max(p.push,base.knockback);
+            return p;
         }
         function getSkillCooldownMultiplier(ability={}) {
             const tierMult={S:1.72,A:1.58,B:1.43,C:1.30,F:1.18}[ability.t]||1.38;
@@ -388,305 +415,246 @@
             return !!ability && ability.type === ABILITY_TYPES.DASH && TRAIL_DASH_SUBS.has(ability.sub);
         }
 
+        // Core roster: persistent IDs refer to original identities, never compact array positions.
+        const BR_ROSTER_VERSION = 'emoji86-v1';
         const EMOJI_DB = [
-            // v19: 검성 긴급 너프 + 랭크별 신규 3종 추가
-            {t:'S', e:'🐲', n:'용의 분노', type:ABILITY_TYPES.PROJ, desc:'폭발하는 거대 화염구', sub:'GIANT_FIREBALL', ai:AI_TYPES.KITE, sizeMult: 2.8},
-            {t:'S', e:'⚡', n:'천둥군주', type:ABILITY_TYPES.TELEPORT, desc:'번개처럼 적 뒤로 순간이동한 뒤 주변을 폭발시킴', sub:'THUNDER', ai:AI_TYPES.AMBUSH, sizeMult: 2.0},
-            {t:'S', e:'🛸', n:'우주 납치범', type:ABILITY_TYPES.PULL, desc:'잡아서 튕겨냄 (조정됨)', sub:'ABDUCT', ai:AI_TYPES.RUSH, sizeMult: 2.5},
-            {t:'S', e:'🧙‍♂️', n:'대마법사', type:ABILITY_TYPES.PROJ, desc:'수많은 마력탄을 와라라라 쏟아붓는 탄막 마법', sub:'ARCANE_BARRAGE', ai:AI_TYPES.KITE, sizeMult: 1.85, pTrail:'#c084fc', pImpact:'#e879f9'},
-            {t:'S', e:'🥷', n:'공허 암살자', type:ABILITY_TYPES.TELEPORT, desc:'적 뒤로 차원이동해 전후방 폭발을 연계', sub:'VOID_ASSASSIN', ai:AI_TYPES.AMBUSH, sizeMult: 1.45},
-            {t:'S', e:'🌋', n:'지옥불', type:ABILITY_TYPES.ZONE, desc:'초대형 용암 지대', sub:'LAVA_POOL', ai:AI_TYPES.CAMP, sizeMult: 2.0},
-            {t:'S', e:'⚔️', n:'검성', type:ABILITY_TYPES.ORBIT, desc:'회전 검기 4개와 빠른 연속참', sub:'SWORD_ORBIT', ai:AI_TYPES.RUSH, sizeMult: 1.8},
-            {t:'S', e:'☢️', n:'폴아웃', type:ABILITY_TYPES.AREA, desc:'방사능 충격파 + 사망 시 초대형 핵폭발', sub:'NUKE_DEATH', ai:AI_TYPES.RUSH, sizeMult: 1.8},
-            {t:'S', e:'👻', n:'폴터가이스트', type:ABILITY_TYPES.BUFF, desc:'은신 & 벽 통과 + 유도 영혼탄', sub:'GHOST_MOVE', ai:AI_TYPES.AMBUSH, sizeMult: 1.5},
-            {t:'S', e:'💩', n:'오염물질', type:ABILITY_TYPES.ZONE, desc:'치명적인 독성 지대', sub:'STINK', ai:AI_TYPES.CAMP, sizeMult: 1.8},
-            {t:'S', e:'🪐', n:'블랙홀', type:ABILITY_TYPES.ZONE, desc:'넓은 중력장으로 적을 끌어당기며 압축 피해 후 폭발', sub:'GRAVITY_WELL', ai:AI_TYPES.CAMP, sizeMult: 2.6},
-            {t:'S', e:'🌩️', n:'뇌신', type:ABILITY_TYPES.DASH, desc:'번개 돌진 · 직격 시 초강력 넉백과 감전 스턴 · 전열 탱커', sub:'THUNDER_DASH', ai:AI_TYPES.RUSH, sizeMult: 2.2, dashSpeed: 42, dashDuration: 20, tankRole:true, legacyTank:true},
-            {t:'S', e:'🧞', n:'지니', type:ABILITY_TYPES.TURRET, desc:'장거리 황금 포탑 소환 · 4번째 사격은 황금 미사일', sub:'GOLDEN_TURRET', ai:AI_TYPES.CAMP, sizeMult: 2.0},
-            {t:'S', e:'🩸', n:'블러드로드', type:ABILITY_TYPES.MELEE, desc:'체력 흡수 광역 베기 · 흡혈형 탱커', sub:'VAMPIRE_SLASH', ai:AI_TYPES.RUSH, sizeMult: 2.12, tankRole:true, legacyTank:true},
-            {t:'S', e:'🦠', n:'역병군주', type:ABILITY_TYPES.ZONE, desc:'확산되는 독구름', sub:'SPREADING_POISON', ai:AI_TYPES.PATROL, sizeMult: 1.8},
-
-            // ✨ 신규 S급 (다이내믹 돌진 & 투사체)
-            {t:'S', e:'🌠', n:'유성 돌진', type:ABILITY_TYPES.DASH, desc:'폭발하며 연속 돌진', sub:'EXPLOSIVE_DASH', ai:AI_TYPES.RUSH, sizeMult: 1.6, dashSpeed: 40, dashDuration: 20},
-            {t:'S', e:'🐉', n:'드래곤 다이브', type:ABILITY_TYPES.TELEPORT, desc:'도약 후 거대 용암 생성', sub:'DIVE_LAVA', ai:AI_TYPES.RUSH, sizeMult: 2.0},
-            {t:'S', e:'🚁', n:'모함 호출', type:ABILITY_TYPES.DASH, desc:'비행하며 포탑 다수 투하', sub:'TURRET_TRAIL', ai:AI_TYPES.CAMP, sizeMult: 2.2, dashSpeed: 25, dashDuration: 30},
-            {t:'S', e:'☄️', n:'운석 폭격', type:ABILITY_TYPES.PROJ, desc:'거대한 운석이 넓은 범위를 폭발시킴', projEmoji:'☄️', pSize: 48, pSpeed: 11, pDmg: 42, pExplode: 175, ai:AI_TYPES.KITE, sizeMult: 1.5, spinRate: 0.1, customCooldown:170},
-            {t:'S', e:'🚂', n:'폭주기관차', type:ABILITY_TYPES.PROJ, desc:'벽 튕기는 거대 기차', projEmoji:'🚂', pSize: 45, pSpeed: 18, pDmg: 35, pBounce: 3, pierce: true, faceDir: true, ai:AI_TYPES.RUSH, sizeMult: 1.8, customCooldown: 210},
-            {t:'S', e:'🌟', n:'초신성', type:ABILITY_TYPES.PROJ, desc:'8방향 별 폭발 + 타깃 방향 집중 별사격', sub:'NOVA', ai:AI_TYPES.CAMP, sizeMult: 1.5, customCooldown: 150},
-            {t:'S', e:'⚙️', n:'기계공학자', type:ABILITY_TYPES.ORBIT, desc:'빠르게 도는 거대 톱니바퀴', sub:'GEAR_ORBIT', ai:AI_TYPES.RUSH, sizeMult: 1.8},
-            {t:'S', e:'🪀', n:'요요 마스터', type:ABILITY_TYPES.PROJ, desc:'초고속 넉백 요요', sub:'BOOMERANG', projEmoji:'🪀', pSize: 18, pSpeed: 25, pDmg: 15, spinRate: 0.5, knockback: 25, ai:AI_TYPES.KITE, sizeMult: 1.1},
-
-            // A, B, C, F 티어
-            {t:'A', e:'🔫', n:'헤드슈터', type:ABILITY_TYPES.PROJ, desc:'장거리 레이저 저격', sub:'SNIPE', ai:AI_TYPES.CAMP, sizeMult: 1.2},
-            {t:'A', e:'🌪️', n:'윈드워커', type:ABILITY_TYPES.ORBIT, desc:'회오리 바람 보호막', sub:'TORNADO_ORBIT', ai:AI_TYPES.PATROL, sizeMult: 1.3},
-            {t:'A', e:'🥊', n:'핵주먹', type:ABILITY_TYPES.MELEE, desc:'강력한 넉백 펀치', sub:'HEAVY_PUNCH', ai:AI_TYPES.RUSH, sizeMult: 1.4},
-            {t:'A', e:'❄️', n:'아이스킹', type:ABILITY_TYPES.PROJ, desc:'3방향 얼음 송곳', sub:'ICE_SHARD', ai:AI_TYPES.KITE, sizeMult: 1.3},
-            {t:'A', e:'🏎️', n:'로드킬', type:ABILITY_TYPES.DASH, desc:'초고속 차량 돌진 · 직격 시 강한 넉백과 스턴', sub:'CAR_RUSH', ai:AI_TYPES.RUSH, sizeMult: 1.5, dashSpeed: 46, dashDuration: 19},
-            {t:'A', e:'🛡️', n:'아이언월', type:ABILITY_TYPES.BUFF, desc:'받은 피해 반사 · 정면 압박 탱커', sub:'REFLECT', ai:AI_TYPES.RUSH, sizeMult: 1.7, tankRole:true, legacyTank:true},
-            {t:'A', e:'🦅', n:'스카이 하이', type:ABILITY_TYPES.DASH, desc:'벽을 넘어 비행한 뒤 착지 충격파', sub:'FLY_DASH', ai:AI_TYPES.PATROL, sizeMult: 1.8, dashSpeed: 38, dashDuration: 22},
-            {t:'A', e:'🦑', n:'크라켄', type:ABILITY_TYPES.PULL, desc:'최대 3명을 촉수로 끌어당기며 압착 피해', sub:'MULTI_GRAB', ai:AI_TYPES.RUSH, sizeMult: 1.5},
-            
-            // ✨ 신규 A급 (다이내믹 돌진 & 특수 무기)
-            {t:'A', e:'🦨', n:'스컹크 대쉬', type:ABILITY_TYPES.DASH, desc:'적 옆을 가로질러 독길을 만들고 독성 충격으로 추격자를 떼어냄', sub:'POISON_TRAIL', ai:AI_TYPES.KITE, sizeMult: 1.2, dashSpeed: 33, dashDuration: 27},
-            {t:'A', e:'🐆', n:'볼트', type:ABILITY_TYPES.DASH, desc:'적을 추적하며 번개 질주 · 직격 시 감전 넉백과 스턴', sub:'LIGHTNING_DASH', ai:AI_TYPES.RUSH, sizeMult: 1.3, dashSpeed: 40, dashDuration: 21},
-            {t:'A', e:'🚜', n:'불도저', type:ABILITY_TYPES.DASH, desc:'바위를 날리며 밀어붙이는 돌진 탱커', sub:'BULLDOZER_DASH', ai:AI_TYPES.RUSH, sizeMult: 1.6, dashSpeed: 20, dashDuration: 30, tankRole:true, legacyTank:true},
-            {t:'A', e:'🎳', n:'볼링 챔피언', type:ABILITY_TYPES.PROJ, desc:'여러번 튕기는 볼링공', projEmoji:'🎳', pSize: 22, pSpeed: 16, pDmg: 20, pBounce: 5, spinRate: 0.15, ai:AI_TYPES.KITE, sizeMult: 1.1},
-            {t:'A', e:'🪚', n:'전기톱 투척', type:ABILITY_TYPES.PROJ, desc:'적을 관통하는 전기톱', projEmoji:'🪚', pSize: 20, pSpeed: 14, pDmg: 18, pierce: true, spinRate: 0.3, ai:AI_TYPES.RUSH, sizeMult: 1.2},
-            {t:'A', e:'🦇', n:'뱀파이어 떼', type:ABILITY_TYPES.PROJ, desc:'유도 박쥐 3마리', projType: 'missile', projEmoji:'🦇', pCount: 3, pSize: 15, pSpeed: 10, pDmg: 15, faceDir: true, ai:AI_TYPES.KITE, sizeMult: 1.1},
-            {t:'S', e:'🚑', n:'힐링 팩터', type:ABILITY_TYPES.BUFF, desc:'초재생 · 지속 회복과 SECOND WIND', sub:'REGEN', ai:AI_TYPES.KITE, sizeMult: 1.0},
-
-            {t:'B', e:'🔪', n:'암살자', type:ABILITY_TYPES.TELEPORT, desc:'적 뒤로 순간이동해 백스탭 · 약한 적 추가 피해', sub:'BACKSTAB', ai:AI_TYPES.AMBUSH, sizeMult: 0.86},
-            {t:'B', e:'🧨', n:'다이너마이트', type:ABILITY_TYPES.PROJ, desc:'폭발하는 다이너마이트 2개 투척', sub:'CRACKER', ai:AI_TYPES.KITE, sizeMult: 0.9},
-            {t:'B', e:'🐗', n:'성난 멧돼지', type:ABILITY_TYPES.DASH, desc:'성난 돌진 · 직격 시 큰 넉백과 짧은 스턴 · 돌진 탱커', sub:'BOAR_CHARGE', ai:AI_TYPES.RUSH, sizeMult: 1.3, dashSpeed: 36, dashDuration: 19, tankRole:true, legacyTank:true},
-            {t:'B', e:'🐝', n:'킬러비', type:ABILITY_TYPES.PROJ, desc:'독침 5연사 · 맞으면 짧은 중독', sub:'STING', ai:AI_TYPES.KITE, sizeMult: 0.6},
-            {t:'B', e:'🔨', n:'뿅망치', type:ABILITY_TYPES.MELEE, desc:'긴 스턴 공격 · 제어형 탱커', sub:'HAMMER', ai:AI_TYPES.RUSH, sizeMult: 1.2, tankRole:true, legacyTank:true},
-            
-            // ✨ 신규 B급 (다이내믹 돌진 & 재미 무기)
-            {t:'B', e:'🚀', n:'로켓 점프', type:ABILITY_TYPES.DASH, desc:'도약 및 착지 시 폭발', sub:'ROCKET_JUMP', ai:AI_TYPES.RUSH, sizeMult: 1.2, dashSpeed: 30, dashDuration: 15},
-            {t:'B', e:'🏂', n:'스노우보더', type:ABILITY_TYPES.DASH, desc:'적의 진행방향을 가로질러 빙판을 만들고 충돌 시 빙결시킴', sub:'ICE_TRAIL', ai:AI_TYPES.KITE, sizeMult: 1.1, dashSpeed: 31, dashDuration: 27},
-            {t:'B', e:'🎾', n:'테니스 챔피언', type:ABILITY_TYPES.PROJ, desc:'튕기는 테니스공 2개', projEmoji:'🎾', pCount: 2, pSize: 12, pSpeed: 18, pDmg: 12, pBounce: 3, spinRate: 0.2, ai:AI_TYPES.KITE, sizeMult: 1.0},
-            {t:'B', e:'🍕', n:'피자 배달', type:ABILITY_TYPES.PROJ, desc:'피자 3조각 투척', projEmoji:'🍕', pCount: 3, pSize: 14, pSpeed: 12, pDmg: 10, spinRate: 0.1, ai:AI_TYPES.KITE, sizeMult: 1.0},
-            {t:'B', e:'⚽', n:'파워 슛', type:ABILITY_TYPES.PROJ, desc:'강력한 넉백 축구공', projEmoji:'⚽', pSize: 18, pSpeed: 15, pDmg: 12, knockback: 15, spinRate: 0.2, ai:AI_TYPES.KITE, sizeMult: 1.0},
-            {t:'B', e:'🛒', n:'카트 질주', type:ABILITY_TYPES.DASH, desc:'적의 퇴로를 가르며 접근 감지 바나나 폭탄을 흘림', sub:'BANANA_TRAIL', ai:AI_TYPES.KITE, sizeMult: 1.2, dashSpeed: 34, dashDuration: 27},
-
-            {t:'F', e:'🥚', n:'개복치', type:ABILITY_TYPES.BUFF, desc:'스치면 사망', sub:'WEAK', ai:AI_TYPES.AMBUSH, sizeMult: 0.5},
-            {t:'F', e:'🐌', n:'민달팽이', type:ABILITY_TYPES.BUFF, desc:'극도로 느리지만 단단한 F급 탱커', sub:'SLOW_TANK', ai:AI_TYPES.RUSH, sizeMult: 0.7, tankRole:true, legacyTank:true},
-            {t:'F', e:'🏳️', n:'평화주의자', type:ABILITY_TYPES.BUFF, desc:'능력 없음', sub:'NONE', ai:AI_TYPES.AMBUSH, sizeMult: 1.0},
-            {t:'F', e:'🧱', n:'벽돌', type:ABILITY_TYPES.BUFF, desc:'움직이지 않음', sub:'STONE', ai:AI_TYPES.CAMP, sizeMult: 0.8},
-            {t:'F', e:'🍂', n:'낙엽', type:ABILITY_TYPES.BUFF, desc:'잘 날아감(넉백 취약)', sub:'DRIFT', ai:AI_TYPES.PATROL, sizeMult: 0.6},
-            {t:'F', e:'🧼', n:'비누', type:ABILITY_TYPES.DASH, desc:'제어 불가 미끄러짐', sub:'SLIP', ai:AI_TYPES.RUSH, sizeMult: 0.8},
-            {t:'F', e:'💤', n:'잠만보', type:ABILITY_TYPES.BUFF, desc:'자느라 가끔 멈추지만 체급이 좋은 F급 탱커', sub:'SLEEP', ai:AI_TYPES.CAMP, sizeMult: 1.2, tankRole:true, legacyTank:true},
-
-            // ✨ 신규 F급
-            {t:'F', e:'🫧', n:'비눗방울 놀이', type:ABILITY_TYPES.PROJ, desc:'느리고 약한 방울', projEmoji:'🫧', pSize: 15, pSpeed: 4, pDmg: 3, wobble: true, ai:AI_TYPES.KITE, sizeMult: 1.0},
-            {t:'F', e:'🪃', n:'초보 부메랑', type:ABILITY_TYPES.PROJ, desc:'뒤로 가는 부메랑', projEmoji:'🪃', sub: 'BACKWARD', pSize: 12, pSpeed: 12, pDmg: 5, projType: 'BOOMERANG', spinRate: 0.3, ai:AI_TYPES.KITE, sizeMult: 1.0},
-
-            // ============================================================
-            // ✨ v13 신규 능력 25종: 각 랭크별 5개
-            // 음식/생활용품/대형 오브젝트 등 투사체의 '보는 맛'을 강화한 구성
-            // ============================================================
-            // S급 5종
-            {t:'S', e:'🐳', n:'고래 캐논', type:ABILITY_TYPES.PROJ, desc:'거대한 고래가 적을 관통하며 날아감', projEmoji:'🐳', pSize:42, pSpeed:12, pDmg:38, pierce:true, knockback:32, faceDir:true, pTrail:'#60a5fa', pImpact:'#bfdbfe', ai:AI_TYPES.RUSH, sizeMult:1.8, customCooldown:150},
-            {t:'S', e:'🍣', n:'스시 폭풍', type:ABILITY_TYPES.PROJ, desc:'유도 초밥 7개가 적을 사방에서 추격', projEmoji:'🍣', projType:'missile', pCount:7, pSize:15, pSpeed:13, pDmg:13, spinRate:0.25, pTrail:'#fda4af', pImpact:'#fecdd3', ai:AI_TYPES.KITE, sizeMult:1.3, customCooldown:125},
-            {t:'S', e:'🛰️', n:'궤도 폭격', type:ABILITY_TYPES.PROJ, desc:'폭발하는 위성 3기를 유도 발사', projEmoji:'🛰️', projType:'missile', pCount:3, pSize:26, pSpeed:10, pDmg:30, pExplode:85, spinRate:0.12, pTrail:'#c4b5fd', pImpact:'#e9d5ff', ai:AI_TYPES.CAMP, sizeMult:1.5, customCooldown:175},
-            {t:'S', e:'🎆', n:'불꽃축제', type:ABILITY_TYPES.PROJ, desc:'폭발성 불꽃 9발을 넓게 연사', projEmoji:'🎆', pCount:9, pSize:17, pSpeed:15, pDmg:16, pExplode:46, spinRate:0.2, pTrail:'#fde047', pImpact:'#fff7ed', ai:AI_TYPES.KITE, sizeMult:1.4, customCooldown:145},
-            {t:'S', e:'🚀', n:'로켓 사령관', type:ABILITY_TYPES.PROJ, desc:'초고속 로켓 4발이 적을 추적해 폭발', projEmoji:'🚀', projType:'missile', pCount:4, pSize:20, pSpeed:17, pDmg:24, pExplode:55, faceDir:true, pTrail:'#fb923c', pImpact:'#fed7aa', ai:AI_TYPES.RUSH, sizeMult:1.5, customCooldown:140},
-
-            // A급 5종
-            {t:'A', e:'🍔', n:'버거 캐논', type:ABILITY_TYPES.PROJ, desc:'두꺼운 햄버거 3개를 강하게 발사', projEmoji:'🍔', pCount:3, pSize:20, pSpeed:15, pDmg:19, knockback:16, spinRate:0.18, pTrail:'#f59e0b', pImpact:'#fde68a', ai:AI_TYPES.KITE, sizeMult:1.15},
-            {t:'A', e:'🥥', n:'코코넛 포병', type:ABILITY_TYPES.PROJ, desc:'단단한 코코넛이 벽을 여러 번 튕김', projEmoji:'🥥', pCount:2, pSize:20, pSpeed:17, pDmg:18, pBounce:5, knockback:18, spinRate:0.25, pTrail:'#a3e635', pImpact:'#d9f99d', ai:AI_TYPES.KITE, sizeMult:1.15},
-            {t:'A', e:'🧲', n:'자석포', type:ABILITY_TYPES.PROJ, desc:'맞은 적을 사용자 쪽으로 강하게 끌어당김', projEmoji:'🧲', pSize:19, pSpeed:18, pDmg:17, knockback:2, pStatus:'pull', pStatusPower:24, spinRate:0.25, pTrail:'#f87171', pImpact:'#fecaca', ai:AI_TYPES.RUSH, sizeMult:1.15},
-            {t:'A', e:'🪃', n:'프로 부메랑', type:ABILITY_TYPES.PROJ, desc:'거대한 부메랑 2개가 왕복하며 연속 타격', projEmoji:'🪃', projType:'BOOMERANG', pCount:2, pSize:18, pSpeed:18, pDmg:15, spinRate:0.45, knockback:10, pTrail:'#c084fc', pImpact:'#e9d5ff', ai:AI_TYPES.KITE, sizeMult:1.1},
-            {t:'A', e:'🧯', n:'소화기 난사', type:ABILITY_TYPES.PROJ, desc:'소화기 5개를 난사해 적을 밀어냄', projEmoji:'🧯', pCount:5, pSize:14, pSpeed:16, pDmg:11, knockback:12, wobble:true, pTrail:'#e5e7eb', pImpact:'#ffffff', ai:AI_TYPES.RUSH, sizeMult:1.1, customCooldown:95},
-
-            // B급 5종
-            {t:'B', e:'🌭', n:'핫도그 투척', type:ABILITY_TYPES.PROJ, desc:'핫도그 4개를 부채꼴로 투척', projEmoji:'🌭', pCount:4, pSize:15, pSpeed:14, pDmg:11, spinRate:0.2, pTrail:'#fbbf24', pImpact:'#fde68a', ai:AI_TYPES.KITE, sizeMult:1.0},
-            {t:'B', e:'🪑', n:'의자 투척', type:ABILITY_TYPES.PROJ, desc:'묵직한 의자가 적을 멀리 날려버림', projEmoji:'🪑', pSize:24, pSpeed:11, pDmg:18, knockback:28, spinRate:0.18, pTrail:'#a16207', pImpact:'#fde68a', ai:AI_TYPES.RUSH, sizeMult:1.1},
-            {t:'B', e:'🎯', n:'다트 챔피언', type:ABILITY_TYPES.PROJ, desc:'빠른 다트 3개가 적을 관통', projEmoji:'🎯', pCount:3, pSize:11, pSpeed:23, pDmg:10, pierce:true, faceDir:true, pTrail:'#f43f5e', pImpact:'#fecdd3', ai:AI_TYPES.KITE, sizeMult:0.95},
-            {t:'B', e:'🐟', n:'생선 부메랑', type:ABILITY_TYPES.PROJ, desc:'생선 2마리가 날아갔다 되돌아옴', projEmoji:'🐟', projType:'BOOMERANG', pCount:2, pSize:17, pSpeed:16, pDmg:11, spinRate:0.3, wobble:true, pTrail:'#22d3ee', pImpact:'#cffafe', ai:AI_TYPES.KITE, sizeMult:1.0},
-            {t:'B', e:'🥤', n:'탄산 폭탄', type:ABILITY_TYPES.PROJ, desc:'탄산컵 3개가 터지며 피해와 강한 넉백', sub:'SODA_BOMB', projEmoji:'🥤', pCount:3, pSize:17, pSpeed:13, pDmg:10.5, pExplode:62, knockback:18, spinRate:0.2, pTrail:'#38bdf8', pImpact:'#e0f2fe', ai:AI_TYPES.KITE, sizeMult:1.0},
-
-            // C급 5종
-            {t:'C', e:'📚', n:'교과서 투척', type:ABILITY_TYPES.PROJ, desc:'묵직한 교과서를 힘껏 던짐', projEmoji:'📚', pSize:18, pSpeed:11, pDmg:10, knockback:14, spinRate:0.2, pTrail:'#60a5fa', pImpact:'#dbeafe', ai:AI_TYPES.RUSH, sizeMult:1.0},
-            {t:'C', e:'🥿', n:'슬리퍼 스나이퍼', type:ABILITY_TYPES.PROJ, desc:'빠른 슬리퍼가 직선으로 날아감', projEmoji:'🥿', pCount:2, pSize:14, pSpeed:20, pDmg:8, faceDir:true, pTrail:'#fb7185', pImpact:'#ffe4e6', ai:AI_TYPES.KITE, sizeMult:0.95},
-            {t:'C', e:'🍎', n:'사과 투척', type:ABILITY_TYPES.PROJ, desc:'사과 2개가 벽을 통통 튕김', projEmoji:'🍎', pCount:2, pSize:14, pSpeed:14, pDmg:8, pBounce:3, spinRate:0.25, pTrail:'#ef4444', pImpact:'#fee2e2', ai:AI_TYPES.KITE, sizeMult:1.0},
-            {t:'C', e:'🧻', n:'휴지 대포', type:ABILITY_TYPES.PROJ, desc:'흔들리는 휴지 5롤을 마구 발사', projEmoji:'🧻', pCount:5, pSize:12, pSpeed:12, pDmg:5, wobble:true, spinRate:0.25, pTrail:'#f8fafc', pImpact:'#ffffff', ai:AI_TYPES.KITE, sizeMult:1.0},
-            {t:'C', e:'🥐', n:'크루아상 부메랑', type:ABILITY_TYPES.PROJ, desc:'크루아상이 빙글 돌며 돌아옴', projEmoji:'🥐', projType:'BOOMERANG', pSize:15, pSpeed:15, pDmg:8, spinRate:0.5, pTrail:'#fbbf24', pImpact:'#fef3c7', ai:AI_TYPES.KITE, sizeMult:1.0},
-
-            // F급 5종
-            {t:'F', e:'🥄', n:'숟가락 투척', type:ABILITY_TYPES.PROJ, desc:'작고 약한 숟가락 하나를 던짐', projEmoji:'🥄', pSize:9, pSpeed:12, pDmg:3, spinRate:0.4, pTrail:'#d1d5db', pImpact:'#f3f4f6', ai:AI_TYPES.KITE, sizeMult:0.9},
-            {t:'F', e:'🧸', n:'곰인형 던지기', type:ABILITY_TYPES.PROJ, desc:'느릿느릿 날아가는 말랑한 인형', projEmoji:'🧸', pSize:18, pSpeed:6, pDmg:4, knockback:2, wobble:true, pTrail:'#f9a8d4', pImpact:'#fce7f3', ai:AI_TYPES.KITE, sizeMult:1.0},
-            {t:'F', e:'🍙', n:'삼각김밥', type:ABILITY_TYPES.PROJ, desc:'삼각김밥 2개를 어설프게 던짐', projEmoji:'🍙', pCount:2, pSize:12, pSpeed:9, pDmg:4, wobble:true, spinRate:0.2, pTrail:'#94a3b8', pImpact:'#e2e8f0', ai:AI_TYPES.KITE, sizeMult:0.95},
-            {t:'F', e:'🪶', n:'깃털 사격', type:ABILITY_TYPES.PROJ, desc:'바람에 흔들리는 아주 약한 깃털 4개', projEmoji:'🪶', pCount:4, pSize:10, pSpeed:7, pDmg:2, wobble:true, pTrail:'#f8fafc', pImpact:'#ffffff', ai:AI_TYPES.KITE, sizeMult:0.85},
-            {t:'F', e:'🥜', n:'땅콩 투척', type:ABILITY_TYPES.PROJ, desc:'작은 땅콩을 빠르게 툭 던짐', projEmoji:'🥜', pCount:2, pSize:8, pSpeed:14, pDmg:3, pBounce:1, spinRate:0.3, pTrail:'#d97706', pImpact:'#fef3c7', ai:AI_TYPES.KITE, sizeMult:0.85},
-
-            // ============================================================
-            // ✨ v19 신규 능력 15종: 각 랭크별 3개
-            // 기존 투사체 엔진을 활용하되 궤적/상태/물리 특성을 서로 다르게 구성
-            // ============================================================
-            // S급 3종
-            {t:'S', e:'🦈', n:'메갈로돈 어택', type:ABILITY_TYPES.PROJ, desc:'거대한 상어 2마리가 적을 추적해 강하게 들이받음', projEmoji:'🦈', projType:'missile', pCount:2, pSize:30, pSpeed:14, pDmg:25, knockback:22, faceDir:true, pTrail:'#38bdf8', pImpact:'#bae6fd', ai:AI_TYPES.RUSH, sizeMult:1.65, customCooldown:170},
-            {t:'S', e:'🌊', n:'쓰나미', type:ABILITY_TYPES.PROJ, desc:'거대한 파도 3개가 전장을 관통하며 적을 밀어냄', projEmoji:'🌊', pCount:3, pSize:28, pSpeed:11, pDmg:18, pierce:true, knockback:29, pTrail:'#0ea5e9', pImpact:'#e0f2fe', ai:AI_TYPES.PATROL, sizeMult:1.55, customCooldown:185},
-            {t:'S', e:'🧿', n:'심연의 눈', type:ABILITY_TYPES.PROJ, desc:'유도 마안 4개가 적을 추적하고 짧게 경직시킴', projEmoji:'🧿', projType:'missile', pCount:4, pSize:17, pSpeed:12, pDmg:16, pStatus:'stun', pStatusPower:20, spinRate:0.22, pTrail:'#818cf8', pImpact:'#ddd6fe', ai:AI_TYPES.KITE, sizeMult:1.35, customCooldown:165},
-
-            // A급 3종
-            {t:'A', e:'🐊', n:'악어 어뢰', type:ABILITY_TYPES.PROJ, desc:'악어 2마리를 직선으로 날려 강한 넉백을 줌', projEmoji:'🐊', pCount:2, pSize:24, pSpeed:16, pDmg:15, knockback:20, faceDir:true, pTrail:'#4ade80', pImpact:'#bbf7d0', ai:AI_TYPES.RUSH, sizeMult:1.25, customCooldown:145},
-            {t:'A', e:'🏹', n:'사냥꾼', type:ABILITY_TYPES.PROJ, desc:'빠른 화살 묶음 4발을 좁게 퍼뜨려 발사', projEmoji:'🏹', pCount:4, pSize:13, pSpeed:22, pDmg:10, faceDir:true, pTrail:'#fbbf24', pImpact:'#fef3c7', ai:AI_TYPES.KITE, sizeMult:1.05, customCooldown:120},
-            {t:'A', e:'🧊', n:'빙하 파편', type:ABILITY_TYPES.PROJ, desc:'묵직한 얼음덩이 3개가 맞은 적을 순간 경직시킴', projEmoji:'🧊', pCount:3, pSize:18, pSpeed:13, pDmg:11, pStatus:'stun', pStatusPower:16, knockback:9, spinRate:0.12, pTrail:'#67e8f9', pImpact:'#cffafe', ai:AI_TYPES.KITE, sizeMult:1.15, customCooldown:150},
-
-            // B급 3종
-            {t:'B', e:'🥏', n:'프리스비 마스터', type:ABILITY_TYPES.PROJ, desc:'프리스비 2개가 날아갔다 되돌아오며 재타격', projEmoji:'🥏', projType:'BOOMERANG', pCount:2, pSize:15, pSpeed:17, pDmg:7, knockback:8, spinRate:0.5, pTrail:'#22c55e', pImpact:'#dcfce7', ai:AI_TYPES.KITE, sizeMult:1.0, customCooldown:145},
-            {t:'B', e:'🐔', n:'치킨 런처', type:ABILITY_TYPES.PROJ, desc:'닭 3마리가 제멋대로 흔들리며 날아감', projEmoji:'🐔', pCount:3, pSize:16, pSpeed:12, pDmg:6, wobble:true, faceDir:true, pTrail:'#fb923c', pImpact:'#ffedd5', ai:AI_TYPES.KITE, sizeMult:1.0, customCooldown:125},
-            {t:'B', e:'🧃', n:'주스 폭탄', type:ABILITY_TYPES.PROJ, desc:'주스팩 2개가 터지며 주변 적까지 밀어냄', projEmoji:'🧃', pCount:2, pSize:17, pSpeed:13, pDmg:7, pExplode:34, knockback:13, spinRate:0.18, pTrail:'#f472b6', pImpact:'#fce7f3', ai:AI_TYPES.KITE, sizeMult:1.0, customCooldown:150},
-
-            // C급 3종
-            {t:'C', e:'🍳', n:'프라이팬 투척', type:ABILITY_TYPES.PROJ, desc:'묵직한 프라이팬 한 장으로 상대를 밀쳐냄', projEmoji:'🍳', pSize:19, pSpeed:12, pDmg:6, knockback:19, spinRate:0.3, pTrail:'#94a3b8', pImpact:'#e2e8f0', ai:AI_TYPES.RUSH, sizeMult:1.05, customCooldown:145},
-            {t:'C', e:'🥔', n:'감자 투척', type:ABILITY_TYPES.PROJ, desc:'감자 2개가 벽을 통통 튕기며 날아감', projEmoji:'🥔', pCount:2, pSize:13, pSpeed:13, pDmg:4, pBounce:3, spinRate:0.25, pTrail:'#a16207', pImpact:'#fef3c7', ai:AI_TYPES.KITE, sizeMult:0.95, customCooldown:125},
-            {t:'C', e:'🖍️', n:'크레파스 난사', type:ABILITY_TYPES.PROJ, desc:'알록달록한 크레파스 4개를 빠르게 흩뿌림', projEmoji:'🖍️', pCount:4, pSize:10, pSpeed:16, pDmg:3, spinRate:0.45, pTrail:'#f472b6', pImpact:'#fbcfe8', ai:AI_TYPES.KITE, sizeMult:0.95, customCooldown:115},
-
-            // F급 3종
-            {t:'F', e:'🧦', n:'양말 투척', type:ABILITY_TYPES.PROJ, desc:'축 늘어진 양말 2짝이 비틀거리며 날아감', projEmoji:'🧦', pCount:2, pSize:12, pSpeed:8, pDmg:2.5, wobble:true, spinRate:0.2, pTrail:'#cbd5e1', pImpact:'#f1f5f9', ai:AI_TYPES.KITE, sizeMult:0.9, customCooldown:180},
-            {t:'F', e:'🍬', n:'사탕총', type:ABILITY_TYPES.PROJ, desc:'작은 사탕 3개를 어설프게 연사', projEmoji:'🍬', pCount:3, pSize:8, pSpeed:11, pDmg:2, wobble:true, pTrail:'#fb7185', pImpact:'#ffe4e6', ai:AI_TYPES.KITE, sizeMult:0.85, customCooldown:165},
-            {t:'F', e:'🧽', n:'수세미 부메랑', type:ABILITY_TYPES.PROJ, desc:'느린 수세미가 한 바퀴 돌아 다시 돌아옴', projEmoji:'🧽', projType:'BOOMERANG', pSize:14, pSpeed:9, pDmg:3, wobble:true, spinRate:0.35, knockback:3, pTrail:'#facc15', pImpact:'#fef9c3', ai:AI_TYPES.KITE, sizeMult:0.9, customCooldown:190}
+            {"t":"S","e":"🐲","n":"용리온","type":"PROJ","desc":"큰 불덩이로 진입로를 막는 용 포격수","sub":"GIANT_FIREBALL","ai":"KITE","sizeMult":2.8,"id":"emoji-000","legacyIndex":0,"timingSeed":"용의 분노","category":"원거리형","concept":"큰 불덩이로 진입로를 막는 용 포격수","basicSummary":"작은 폭발 화염구","skillSummary":"세 갈래 거대 화염구 폭발"},
+            {"t":"S","e":"⚡","n":"번개넨","type":"TELEPORT","desc":"착지 지점을 골라 번개를 터뜨리는 기습자","sub":"THUNDER","ai":"AMBUSH","sizeMult":2,"id":"emoji-001","legacyIndex":1,"timingSeed":"천둥군주","category":"암살자","concept":"착지 지점을 골라 번개를 터뜨리는 기습자","basicSummary":"번개 근접 타격","skillSummary":"조준 지점 순간이동과 낙뢰"},
+            {"t":"S","e":"🛸","n":"블리츠UFO","type":"PULL","desc":"정확한 납치로 적을 내 앞으로 옮긴다","sub":"ABDUCT","ai":"RUSH","sizeMult":2.5,"id":"emoji-002","legacyIndex":2,"timingSeed":"우주 납치범","category":"근접형","concept":"정확한 납치로 적을 내 앞으로 옮긴다","basicSummary":"전방 근접 타격","skillSummary":"빔에 맞은 적 납치와 짧은 기절"},
+            {"t":"S","e":"🧙‍♂️","n":"라이즈업","type":"PROJ","desc":"마력탄 탄막으로 좁은 길을 봉쇄한다","sub":"ARCANE_BARRAGE","ai":"KITE","sizeMult":1.85,"pTrail":"#c084fc","pImpact":"#e879f9","id":"emoji-003","legacyIndex":3,"timingSeed":"대마법사","category":"원거리형","concept":"마력탄 탄막으로 좁은 길을 봉쇄한다","basicSummary":"빠른 마력탄","skillSummary":"여섯 발의 좁은 마력 탄막"},
+            {"t":"S","e":"🥷","n":"닌자딘","type":"TELEPORT","desc":"순간이동으로 약해진 적을 마무리한다","sub":"VOID_ASSASSIN","ai":"AMBUSH","sizeMult":1.45,"id":"emoji-004","legacyIndex":4,"timingSeed":"공허 암살자","category":"암살자","concept":"순간이동으로 약해진 적을 마무리한다","basicSummary":"빠른 단도 베기","skillSummary":"착지 범위 암살과 저체력 추가 피해"},
+            {"t":"S","e":"⚔️","n":"마스터검","type":"ORBIT","desc":"회전 검 사이로 파고드는 연속 참격 검사","sub":"SWORD_ORBIT","ai":"RUSH","sizeMult":1.8,"id":"emoji-006","legacyIndex":6,"timingSeed":"검성","category":"근접형","concept":"회전 검 사이로 파고드는 연속 참격 검사","basicSummary":"짧은 검격","skillSummary":"회전 검 전개와 가까운 적 연격"},
+            {"t":"S","e":"☢️","n":"핵직스","type":"AREA","desc":"자신을 중심으로 위험 구역을 만드는 방사능 투사","sub":"NUKE_DEATH","ai":"RUSH","sizeMult":1.8,"id":"emoji-007","legacyIndex":7,"timingSeed":"폴아웃","category":"원거리형","concept":"자신을 중심으로 위험 구역을 만드는 방사능 투사","basicSummary":"방사능 탄","skillSummary":"주변 충격파와 짧은 오염 지대"},
+            {"t":"S","e":"👻","n":"유령샤","type":"BUFF","desc":"벽을 통과하며 기습 각도를 만드는 유령","sub":"GHOST_MOVE","ai":"AMBUSH","sizeMult":1.5,"id":"emoji-008","legacyIndex":8,"timingSeed":"폴터가이스트","category":"원거리형","concept":"벽을 통과하며 기습 각도를 만드는 유령","basicSummary":"유도 영혼탄","skillSummary":"짧은 은신과 영혼탄 발사"},
+            {"t":"S","e":"🪐","n":"블랙가스","type":"ZONE","desc":"중력장을 놓아 적의 동선을 끌어 모은다","sub":"GRAVITY_WELL","ai":"CAMP","sizeMult":2.6,"id":"emoji-010","legacyIndex":10,"timingSeed":"블랙홀","category":"설치형","concept":"중력장을 놓아 적의 동선을 끌어 모은다","basicSummary":"행성 탄","skillSummary":"조준 지점의 중력장과 마지막 폭발"},
+            {"t":"S","e":"🌩️","n":"볼리번개","type":"DASH","desc":"묵직한 몸통 돌진으로 전열을 무너뜨린다","sub":"THUNDER_DASH","ai":"RUSH","sizeMult":2.2,"dashSpeed":42,"dashDuration":20,"tankRole":true,"legacyTank":true,"id":"emoji-011","legacyIndex":11,"timingSeed":"뇌신","category":"탱커","concept":"묵직한 몸통 돌진으로 전열을 무너뜨린다","basicSummary":"무거운 근접 타격","skillSummary":"직선 충돌과 강한 밀침·기절"},
+            {"t":"S","e":"🧞","n":"지니머딩","type":"TURRET","desc":"포탑 옆에서 전선을 만드는 설치 전문가","sub":"GOLDEN_TURRET","ai":"CAMP","sizeMult":2,"id":"emoji-012","legacyIndex":12,"timingSeed":"지니","category":"설치형","concept":"포탑 옆에서 전선을 만드는 설치 전문가","basicSummary":"지니 사격","skillSummary":"한 개의 황금 포탑 설치"},
+            {"t":"S","e":"🩸","n":"블라드링","type":"MELEE","desc":"붙어서 피를 빼앗고 위기에서 연격한다","sub":"VAMPIRE_SLASH","ai":"RUSH","sizeMult":2.12,"tankRole":true,"legacyTank":true,"id":"emoji-013","legacyIndex":13,"timingSeed":"블러드로드","category":"탱커","concept":"붙어서 피를 빼앗고 위기에서 연격한다","basicSummary":"흡혈하는 피의 베기","skillSummary":"흡혈 베기와 저체력 연격"},
+            {"t":"S","e":"🦠","n":"신지독","type":"ZONE","desc":"퍼지는 독구름으로 공간을 빼앗는다","sub":"SPREADING_POISON","ai":"PATROL","sizeMult":1.8,"id":"emoji-014","legacyIndex":14,"timingSeed":"역병군주","category":"설치형","concept":"퍼지는 독구름으로 공간을 빼앗는다","basicSummary":"독성 구체","skillSummary":"천천히 커지는 독 장판 한 개"},
+            {"t":"S","e":"🚂","n":"레일사이온","type":"PROJ","desc":"거대한 기차로 일렬의 적을 관통한다","projEmoji":"🚂","pSize":45,"pSpeed":18,"pDmg":35,"pBounce":3,"pierce":true,"faceDir":true,"ai":"RUSH","sizeMult":1.8,"customCooldown":210,"id":"emoji-019","legacyIndex":19,"timingSeed":"폭주기관차","category":"원거리형","concept":"거대한 기차로 일렬의 적을 관통한다","basicSummary":"반사·관통 기차","skillSummary":"벽을 튕기며 관통하는 기차"},
+            {"t":"S","e":"🌟","n":"스타럭스","type":"PROJ","desc":"별을 전방위로 뿌려 포위를 뚫는다","sub":"NOVA","ai":"CAMP","sizeMult":1.5,"customCooldown":150,"id":"emoji-020","legacyIndex":20,"timingSeed":"초신성","category":"원거리형","concept":"별을 전방위로 뿌려 포위를 뚫는다","basicSummary":"별 탄","skillSummary":"여섯 방향의 관통 별"},
+            {"t":"S","e":"🪀","n":"요요리","type":"PROJ","desc":"나가는 길과 돌아오는 길을 모두 맞힌다","sub":"BOOMERANG","projEmoji":"🪀","pSize":18,"pSpeed":25,"pDmg":15,"spinRate":0.5,"knockback":25,"ai":"KITE","sizeMult":1.1,"id":"emoji-022","legacyIndex":22,"timingSeed":"요요 마스터","category":"원거리형","concept":"나가는 길과 돌아오는 길을 모두 맞힌다","basicSummary":"왕복 요요","skillSummary":"빠른 요요로 밀어내기"},
+            {"t":"S","e":"🚑","n":"문도카","type":"BUFF","desc":"재생으로 버티며 다음 교전을 준비한다","sub":"REGEN","ai":"KITE","sizeMult":1,"id":"emoji-037","legacyIndex":37,"timingSeed":"힐링 팩터","category":"원거리형","concept":"재생으로 버티며 다음 교전을 준비한다","basicSummary":"구급차 투척","skillSummary":"즉시 자가 회복과 기절 완화"},
+            {"t":"S","e":"🧿","n":"눈코즈","type":"PROJ","desc":"눈알을 추적시켜 적의 발을 묶는다","projEmoji":"🧿","projType":"missile","pCount":4,"pSize":17,"pSpeed":12,"pDmg":16,"pStatus":"stun","pStatusPower":20,"spinRate":0.22,"pTrail":"#818cf8","pImpact":"#ddd6fe","ai":"KITE","sizeMult":1.35,"customCooldown":165,"id":"emoji-085","legacyIndex":85,"timingSeed":"심연의 눈","category":"원거리형","concept":"눈알을 추적시켜 적의 발을 묶는다","basicSummary":"마안 유도탄","skillSummary":"짧은 경직을 주는 유도 마안"},
+            {"t":"S","e":"👼","n":"엔젤카","type":"BUFF","desc":"아군이 모인 순간 성역으로 전열을 지킨다","sub":"TEAM_SANCTUARY","ai":"KITE","sizeMult":1.15,"teamOnly":true,"id":"emoji-098","legacyIndex":98,"timingSeed":"성역술사","category":"지원가","concept":"아군이 모인 순간 성역으로 전열을 지킨다","basicSummary":"천사 사격","skillSummary":"주변 아군 회복과 짧은 수호"},
+            {"t":"S","e":"🦏","n":"코뿔파이트","type":"MELEE","desc":"몸통 돌진 뒤 철갑으로 버티는 탱커","sub":"TANK_RHINO","ai":"RUSH","sizeMult":1.72,"tankRole":true,"id":"emoji-110","legacyIndex":110,"timingSeed":"철갑 코뿔소","category":"탱커","concept":"몸통 돌진 뒤 철갑으로 버티는 탱커","basicSummary":"묵직한 뿔 타격","skillSummary":"충돌 진입과 짧은 방어"},
+            {"t":"S","e":"✂️","n":"가위웬","type":"MELEE","desc":"붙은 상대에게 연속 가위질을 퍼붓는다","sub":"SCISSOR_DASH","ai":"RUSH","sizeMult":1.34,"id":"emoji-131","legacyIndex":131,"timingSeed":"가위 수호자","category":"근접형","concept":"붙은 상대에게 연속 가위질을 퍼붓는다","basicSummary":"빠른 가위 베기 · 적중 후 짧은 추격 가속","skillSummary":"첫 베기 뒤 두 번의 추가 가위질"},
+            {"t":"S","e":"🌌","n":"공허빔","type":"LASER","desc":"일직선 광선으로 관통하고 체력을 회수한다","sub":"VOID_DESTRUCTION","ai":"KITE","sizeMult":1.52,"id":"emoji-132","legacyIndex":132,"timingSeed":"공허 파괴자","category":"원거리형","concept":"일직선 광선으로 관통하고 체력을 회수한다","basicSummary":"가느다란 공허탄","skillSummary":"넓은 관통 광선과 적중 회복"},
+            {"t":"A","e":"🔫","n":"케이틀빵","type":"PROJ","desc":"멀리서 정확한 한 발을 노리는 저격수","sub":"SNIPE","ai":"CAMP","sizeMult":1.2,"id":"emoji-023","legacyIndex":23,"timingSeed":"헤드슈터","category":"원거리형","concept":"멀리서 정확한 한 발을 노리는 저격수","basicSummary":"빠른 단발 저격탄","skillSummary":"길고 정밀한 단일 저격"},
+            {"t":"A","e":"🌪️","n":"윈드오","type":"ORBIT","desc":"회오리 안으로 적을 당겨 붙잡는다","sub":"TORNADO_ORBIT","ai":"PATROL","sizeMult":1.3,"id":"emoji-024","legacyIndex":24,"timingSeed":"윈드워커","category":"근접형","concept":"회오리 안으로 적을 당겨 붙잡는다","basicSummary":"바람 근접 베기","skillSummary":"회전 회오리와 가까운 적 끌기"},
+            {"t":"A","e":"🥊","n":"펀치셋","type":"MELEE","desc":"한 방으로 적을 멀리 날리는 격투가","sub":"HEAVY_PUNCH","ai":"RUSH","sizeMult":1.4,"id":"emoji-025","legacyIndex":25,"timingSeed":"핵주먹","category":"근접형","concept":"한 방으로 적을 멀리 날리는 격투가","basicSummary":"짧고 무거운 펀치","skillSummary":"어퍼컷과 강한 밀침"},
+            {"t":"A","e":"❄️","n":"얼음쉬","type":"PROJ","desc":"얼음 부채꼴로 이동 경로를 좁힌다","sub":"ICE_SHARD","ai":"KITE","sizeMult":1.3,"id":"emoji-026","legacyIndex":26,"timingSeed":"아이스킹","category":"원거리형","concept":"얼음 부채꼴로 이동 경로를 좁힌다","basicSummary":"얼음 조각","skillSummary":"세 갈래 얼음 송곳과 짧은 빙결"},
+            {"t":"A","e":"🏎️","n":"드리프트","type":"DASH","desc":"긴 직선 주행으로 진입과 이탈을 고른다","sub":"CAR_RUSH","ai":"RUSH","sizeMult":1.5,"dashSpeed":46,"dashDuration":19,"id":"emoji-027","legacyIndex":27,"timingSeed":"로드킬","category":"기동형","concept":"긴 직선 주행으로 진입과 이탈을 고른다","basicSummary":"차체 근접 타격","skillSummary":"조준한 방향의 고속 돌진"},
+            {"t":"A","e":"🛡️","n":"브라움벽","type":"BUFF","desc":"상대 공격을 받아내며 반격 각도를 만든다","sub":"REFLECT","ai":"RUSH","sizeMult":1.7,"tankRole":true,"legacyTank":true,"id":"emoji-028","legacyIndex":28,"timingSeed":"아이언월","category":"탱커","concept":"상대 공격을 받아내며 반격 각도를 만든다","basicSummary":"방패 근접 타격","skillSummary":"2초간 방어하며 피해 반격"},
+            {"t":"A","e":"🦅","n":"퀸글","type":"DASH","desc":"벽을 넘어 착지하며 압박하는 비행가","sub":"FLY_DASH","ai":"PATROL","sizeMult":1.8,"dashSpeed":38,"dashDuration":22,"id":"emoji-029","legacyIndex":29,"timingSeed":"스카이 하이","category":"기동형","concept":"벽을 넘어 착지하며 압박하는 비행가","basicSummary":"날개 근접 타격","skillSummary":"비행 이동과 착지 충격"},
+            {"t":"A","e":"🦑","n":"촉수크랭","type":"PULL","desc":"촉수로 상대를 당겨 거리를 지운다","sub":"MULTI_GRAB","ai":"RUSH","sizeMult":1.5,"id":"emoji-030","legacyIndex":30,"timingSeed":"크라켄","category":"근접형","concept":"촉수로 상대를 당겨 거리를 지운다","basicSummary":"촉수 근접 타격","skillSummary":"전방의 최대 세 명을 끌어당겨 기절"},
+            {"t":"A","e":"🦨","n":"스컹지드","type":"DASH","desc":"적 옆을 스쳐 독길로 추격을 막는다","sub":"POISON_TRAIL","ai":"KITE","sizeMult":1.2,"dashSpeed":33,"dashDuration":27,"id":"emoji-031","legacyIndex":31,"timingSeed":"스컹크 대쉬","category":"기동형","concept":"적 옆을 스쳐 독길로 추격을 막는다","basicSummary":"꼬리 근접 타격","skillSummary":"돌진 경로의 독 흔적"},
+            {"t":"A","e":"🚜","n":"불도사이온","type":"DASH","desc":"돌진으로 전열을 밀어내는 공성 탱커","sub":"BULLDOZER_DASH","ai":"RUSH","sizeMult":1.6,"dashSpeed":20,"dashDuration":30,"tankRole":true,"legacyTank":true,"id":"emoji-033","legacyIndex":33,"timingSeed":"불도저","category":"탱커","concept":"돌진으로 전열을 밀어내는 공성 탱커","basicSummary":"무거운 차체 타격","skillSummary":"바위와 충격을 남기는 직선 돌진"},
+            {"t":"A","e":"🎳","n":"리코볼","type":"PROJ","desc":"벽을 계산해 돌아오는 볼링공을 맞힌다","projEmoji":"🎳","pSize":22,"pSpeed":16,"pDmg":20,"pBounce":5,"spinRate":0.15,"ai":"KITE","sizeMult":1.1,"id":"emoji-034","legacyIndex":34,"timingSeed":"볼링 챔피언","category":"원거리형","concept":"벽을 계산해 돌아오는 볼링공을 맞힌다","basicSummary":"벽에 튕기는 볼링공","skillSummary":"여러 번 튕기는 큰 볼링공"},
+            {"t":"A","e":"🪚","n":"톱니언","type":"PROJ","desc":"관통하는 톱으로 뒤쪽 적까지 긁는다","projEmoji":"🪚","pSize":20,"pSpeed":14,"pDmg":18,"pierce":true,"spinRate":0.3,"ai":"RUSH","sizeMult":1.2,"id":"emoji-035","legacyIndex":35,"timingSeed":"전기톱 투척","category":"원거리형","concept":"관통하는 톱으로 뒤쪽 적까지 긁는다","basicSummary":"관통 톱날","skillSummary":"회전 전기톱 관통"},
+            {"t":"A","e":"🦇","n":"박쥐모트","type":"PROJ","desc":"박쥐 무리로 움직이는 적을 추적한다","projType":"missile","projEmoji":"🦇","pCount":3,"pSize":15,"pSpeed":10,"pDmg":15,"faceDir":true,"ai":"KITE","sizeMult":1.1,"id":"emoji-036","legacyIndex":36,"timingSeed":"뱀파이어 떼","category":"원거리형","concept":"박쥐 무리로 움직이는 적을 추적한다","basicSummary":"박쥐 유도탄","skillSummary":"세 마리의 유도 박쥐"},
+            {"t":"A","e":"🍔","n":"버거그브","type":"PROJ","desc":"가까운 적에게 두꺼운 산탄을 모아 맞힌다","projEmoji":"🍔","pCount":3,"pSize":20,"pSpeed":15,"pDmg":19,"knockback":16,"spinRate":0.18,"pTrail":"#f59e0b","pImpact":"#fde68a","ai":"KITE","sizeMult":1.15,"id":"emoji-063","legacyIndex":63,"timingSeed":"버거 캐논","category":"원거리형","concept":"가까운 적에게 두꺼운 산탄을 모아 맞힌다","basicSummary":"넓게 퍼지는 버거 탄","skillSummary":"세 개의 버거 집중 포격"},
+            {"t":"A","e":"🧲","n":"마그니츠","type":"PROJ","desc":"자석을 맞혀 유리한 거리로 끌어온다","projEmoji":"🧲","pSize":19,"pSpeed":18,"pDmg":17,"knockback":2,"pStatus":"pull","pStatusPower":24,"spinRate":0.25,"pTrail":"#f87171","pImpact":"#fecaca","ai":"RUSH","sizeMult":1.15,"id":"emoji-065","legacyIndex":65,"timingSeed":"자석포","category":"원거리형","concept":"자석을 맞혀 유리한 거리로 끌어온다","basicSummary":"자석 탄","skillSummary":"강하게 당기는 자석 투척"},
+            {"t":"A","e":"🪃","n":"부메시비","type":"PROJ","desc":"두 개의 부메랑 복귀 경로를 겹친다","projEmoji":"🪃","projType":"BOOMERANG","pCount":2,"pSize":18,"pSpeed":18,"pDmg":15,"spinRate":0.45,"knockback":10,"pTrail":"#c084fc","pImpact":"#e9d5ff","ai":"KITE","sizeMult":1.1,"id":"emoji-066","legacyIndex":66,"timingSeed":"프로 부메랑","category":"원거리형","concept":"두 개의 부메랑 복귀 경로를 겹친다","basicSummary":"왕복 부메랑","skillSummary":"두 개의 대형 왕복 부메랑"},
+            {"t":"A","e":"🏹","n":"활조","type":"PROJ","desc":"빠른 화살을 좁게 모아 쏜다","projEmoji":"🏹","pCount":4,"pSize":13,"pSpeed":22,"pDmg":10,"faceDir":true,"pTrail":"#fbbf24","pImpact":"#fef3c7","ai":"KITE","sizeMult":1.05,"customCooldown":120,"id":"emoji-087","legacyIndex":87,"timingSeed":"사냥꾼","category":"원거리형","concept":"빠른 화살을 좁게 모아 쏜다","basicSummary":"빠른 화살","skillSummary":"좁은 부채꼴 화살 묶음"},
+            {"t":"A","e":"🧑‍⚕️","n":"메딕카","type":"BUFF","desc":"가장 위험한 아군 한 명을 살린다","sub":"TEAM_MEDIC","ai":"KITE","sizeMult":1.05,"teamOnly":true,"id":"emoji-099","legacyIndex":99,"timingSeed":"전투 의무병","category":"지원가","concept":"가장 위험한 아군 한 명을 살린다","basicSummary":"의무병 사격","skillSummary":"저체력 아군 집중 회복"},
+            {"t":"A","e":"🪄","n":"룰루팡","type":"BUFF","desc":"팀의 공격 기회를 앞당기는 가속 지원가","sub":"TEAM_HASTE_A","ai":"KITE","sizeMult":0.98,"teamOnly":true,"id":"emoji-101","legacyIndex":101,"timingSeed":"가속마도사","category":"지원가","concept":"팀의 공격 기회를 앞당기는 가속 지원가","basicSummary":"마법 지팡이 사격","skillSummary":"주변 아군의 공격·스킬 준비 가속"},
+            {"t":"A","e":"🗡️","n":"영혼쉔","type":"MELEE","desc":"베기를 맞혀 보호를 얻고 버틴다","sub":"SOUL_CLEAVE","ai":"RUSH","sizeMult":1.22,"id":"emoji-133","legacyIndex":133,"timingSeed":"영혼 검사","category":"근접형","concept":"베기를 맞혀 보호를 얻고 버틴다","basicSummary":"적중 시 짧게 보호받는 영혼 검격","skillSummary":"진입 베기와 적중 보호"},
+            {"t":"B","e":"🔪","n":"탈론칼","type":"TELEPORT","desc":"짧게 사라져 약한 적을 처형한다","sub":"BACKSTAB","ai":"AMBUSH","sizeMult":0.86,"id":"emoji-038","legacyIndex":38,"timingSeed":"암살자","category":"암살자","concept":"짧게 사라져 약한 적을 처형한다","basicSummary":"단도 근접 베기","skillSummary":"순간이동 기습과 마무리 피해"},
+            {"t":"B","e":"🧨","n":"다이너쾅","type":"PROJ","desc":"쌍 폭탄으로 좁은 틈을 터뜨린다","sub":"CRACKER","ai":"KITE","sizeMult":0.9,"id":"emoji-039","legacyIndex":39,"timingSeed":"다이너마이트","category":"원거리형","concept":"쌍 폭탄으로 좁은 틈을 터뜨린다","basicSummary":"작은 폭탄","skillSummary":"나란히 던지는 두 다이너마이트"},
+            {"t":"B","e":"🐗","n":"멧라이더","type":"DASH","desc":"멧돼지 돌진으로 첫 교전을 연다","sub":"BOAR_CHARGE","ai":"RUSH","sizeMult":1.3,"dashSpeed":36,"dashDuration":19,"tankRole":true,"legacyTank":true,"id":"emoji-040","legacyIndex":40,"timingSeed":"성난 멧돼지","category":"탱커","concept":"멧돼지 돌진으로 첫 교전을 연다","basicSummary":"엄니 타격","skillSummary":"직선 충돌과 짧은 기절"},
+            {"t":"B","e":"🐝","n":"벌티모","type":"PROJ","desc":"독침을 연속 적중해 체력을 갉는다","sub":"STING","ai":"KITE","sizeMult":0.6,"id":"emoji-041","legacyIndex":41,"timingSeed":"킬러비","category":"원거리형","concept":"독침을 연속 적중해 체력을 갉는다","basicSummary":"독침 사격","skillSummary":"좁은 독침 연사"},
+            {"t":"B","e":"🔨","n":"뽀망치","type":"MELEE","desc":"망치 한 방으로 앞의 적을 멈추는 제어 탱커","sub":"HAMMER","ai":"RUSH","sizeMult":1.2,"tankRole":true,"legacyTank":true,"id":"emoji-042","legacyIndex":42,"timingSeed":"뿅망치","category":"탱커","concept":"망치 한 방으로 앞의 적을 멈추는 제어 탱커","basicSummary":"짧은 기절을 주는 망치 타격","skillSummary":"전방 한 명을 강하게 밀치고 기절"},
+            {"t":"B","e":"🚀","n":"점프타나","type":"DASH","desc":"출발과 착지의 폭발로 거리를 바꾼다","sub":"ROCKET_JUMP","ai":"RUSH","sizeMult":1.2,"dashSpeed":30,"dashDuration":15,"id":"emoji-043","legacyIndex":43,"timingSeed":"로켓 점프","category":"기동형","concept":"출발과 착지의 폭발로 거리를 바꾼다","basicSummary":"로켓 근접 타격","skillSummary":"로켓 도약과 폭발"},
+            {"t":"B","e":"🏂","n":"스노우누","type":"DASH","desc":"빙판을 가로질러 추격 속도를 늦춘다","sub":"ICE_TRAIL","ai":"KITE","sizeMult":1.1,"dashSpeed":31,"dashDuration":27,"id":"emoji-044","legacyIndex":44,"timingSeed":"스노우보더","category":"기동형","concept":"빙판을 가로질러 추격 속도를 늦춘다","basicSummary":"보드 근접 타격","skillSummary":"미끄러지는 빙판 경로"},
+            {"t":"B","e":"🎾","n":"테니스코","type":"PROJ","desc":"두 개의 튀는 공으로 각도를 넓힌다","projEmoji":"🎾","pCount":2,"pSize":12,"pSpeed":18,"pDmg":12,"pBounce":3,"spinRate":0.2,"ai":"KITE","sizeMult":1,"id":"emoji-045","legacyIndex":45,"timingSeed":"테니스 챔피언","category":"원거리형","concept":"두 개의 튀는 공으로 각도를 넓힌다","basicSummary":"튕기는 테니스공","skillSummary":"두 공의 반사 사격"},
+            {"t":"B","e":"⚽","n":"골리신","type":"PROJ","desc":"공 한 번으로 상대 위치를 크게 바꾼다","projEmoji":"⚽","pSize":18,"pSpeed":15,"pDmg":12,"knockback":15,"spinRate":0.2,"ai":"KITE","sizeMult":1,"id":"emoji-047","legacyIndex":47,"timingSeed":"파워 슛","category":"원거리형","concept":"공 한 번으로 상대 위치를 크게 바꾼다","basicSummary":"축구공 슛","skillSummary":"강한 밀침의 파워 슛"},
+            {"t":"B","e":"🛒","n":"바나나카트","type":"DASH","desc":"퇴로에 바나나 함정을 남기는 질주꾼","sub":"BANANA_TRAIL","ai":"KITE","sizeMult":1.2,"dashSpeed":34,"dashDuration":27,"id":"emoji-048","legacyIndex":48,"timingSeed":"카트 질주","category":"기동형","concept":"퇴로에 바나나 함정을 남기는 질주꾼","basicSummary":"카트 근접 타격","skillSummary":"질주하며 제한된 바나나 함정 설치"},
+            {"t":"B","e":"🎯","n":"다트넨","type":"PROJ","desc":"작고 빠른 관통탄을 정확히 모아 맞힌다","projEmoji":"🎯","pCount":3,"pSize":11,"pSpeed":23,"pDmg":10,"pierce":true,"faceDir":true,"pTrail":"#f43f5e","pImpact":"#fecdd3","ai":"KITE","sizeMult":0.95,"id":"emoji-070","legacyIndex":70,"timingSeed":"다트 챔피언","category":"원거리형","concept":"작고 빠른 관통탄을 정확히 모아 맞힌다","basicSummary":"빠른 관통 다트","skillSummary":"세 갈래 관통 다트"},
+            {"t":"B","e":"🥤","n":"탄산직스","type":"PROJ","desc":"탄산 폭발로 상대 간격을 벌린다","sub":"SODA_BOMB","projEmoji":"🥤","pCount":3,"pSize":17,"pSpeed":13,"pDmg":10.5,"pExplode":62,"knockback":18,"spinRate":0.2,"pTrail":"#38bdf8","pImpact":"#e0f2fe","ai":"KITE","sizeMult":1,"id":"emoji-072","legacyIndex":72,"timingSeed":"탄산 폭탄","category":"원거리형","concept":"탄산 폭발로 상대 간격을 벌린다","basicSummary":"탄산컵 투척","skillSummary":"세 컵 폭발과 밀침"},
+            {"t":"B","e":"🥏","n":"프리스비르","type":"PROJ","desc":"원반을 돌아오게 해 두 번의 기회를 만든다","projEmoji":"🥏","projType":"BOOMERANG","pCount":2,"pSize":15,"pSpeed":17,"pDmg":7,"knockback":8,"spinRate":0.5,"pTrail":"#22c55e","pImpact":"#dcfce7","ai":"KITE","sizeMult":1,"customCooldown":145,"id":"emoji-089","legacyIndex":89,"timingSeed":"프리스비 마스터","category":"원거리형","concept":"원반을 돌아오게 해 두 번의 기회를 만든다","basicSummary":"왕복 원반","skillSummary":"두 개의 프리스비 왕복"},
+            {"t":"B","e":"🔰","n":"가드오","type":"BUFF","desc":"위급한 아군에게 먼저 방어를 씌운다","sub":"TEAM_GUARD","ai":"KITE","sizeMult":1,"teamOnly":true,"id":"emoji-102","legacyIndex":102,"timingSeed":"보호술사","category":"지원가","concept":"위급한 아군에게 먼저 방어를 씌운다","basicSummary":"수호 표식 사격","skillSummary":"저체력 아군들에게 피해 감소"},
+            {"t":"B","e":"🧴","n":"약사바드","type":"BUFF","desc":"다친 두 아군을 조금씩 회복한다","sub":"TEAM_TONIC","ai":"KITE","sizeMult":0.95,"teamOnly":true,"id":"emoji-103","legacyIndex":103,"timingSeed":"약제사","category":"지원가","concept":"다친 두 아군을 조금씩 회복한다","basicSummary":"약병 탄","skillSummary":"두 아군에게 회복약"},
+            {"t":"B","e":"🐢","n":"람북스","type":"MELEE","desc":"공격 뒤 껍질로 버티는 수비 탱커","sub":"TANK_TURTLE","ai":"RUSH","sizeMult":1.2,"tankRole":true,"id":"emoji-112","legacyIndex":112,"timingSeed":"철갑 거북","category":"탱커","concept":"공격 뒤 껍질로 버티는 수비 탱커","basicSummary":"등껍질 타격","skillSummary":"주변 제압과 짧은 보호"},
+            {"t":"B","e":"🔭","n":"진조준","type":"PROJ","desc":"빠른 관통 한 발을 맞히는 명사수","sub":"AIMED_SHOT","projEmoji":"•","pSize":9,"pSpeed":26,"pDmg":27,"pierce":true,"faceDir":true,"knockback":14,"pTrail":"#fde68a","pImpact":"#fff7cc","ai":"CAMP","sizeMult":0.94,"id":"emoji-137","legacyIndex":137,"timingSeed":"BB 스나이퍼","category":"원거리형","concept":"빠른 관통 한 발을 맞히는 명사수","basicSummary":"정밀 단발 탄","skillSummary":"정조준 관통 사격"},
+            {"t":"B","e":"💉","n":"닥터톡신","type":"PROJ","desc":"독 주사로 교전 뒤에도 피해를 남긴다","sub":"TOXIC_INJECTION","projEmoji":"💉","pCount":2,"pSize":12,"pSpeed":18,"pDmg":11,"pStatus":"poison","pStatusPower":150,"faceDir":true,"knockback":5,"pTrail":"#fb7185","pImpact":"#fecaca","ai":"KITE","sizeMult":1,"id":"emoji-138","legacyIndex":138,"timingSeed":"적색 의무단","category":"원거리형","concept":"독 주사로 교전 뒤에도 피해를 남긴다","basicSummary":"두 갈래 독 주사","skillSummary":"두 개의 긴 중독 주사"},
+            {"t":"C","e":"📚","n":"북레이븐","type":"PROJ","desc":"무거운 책으로 접근을 끊는다","projEmoji":"📚","pSize":18,"pSpeed":11,"pDmg":10,"knockback":14,"spinRate":0.2,"pTrail":"#60a5fa","pImpact":"#dbeafe","ai":"RUSH","sizeMult":1,"id":"emoji-073","legacyIndex":73,"timingSeed":"교과서 투척","category":"원거리형","concept":"무거운 책으로 접근을 끊는다","basicSummary":"묵직한 책 투척","skillSummary":"크게 밀치는 교과서"},
+            {"t":"C","e":"🥿","n":"슬리퍼린","type":"PROJ","desc":"긴 직선의 빠른 슬리퍼를 맞힌다","projEmoji":"🥿","pCount":2,"pSize":14,"pSpeed":20,"pDmg":8,"faceDir":true,"pTrail":"#fb7185","pImpact":"#ffe4e6","ai":"KITE","sizeMult":0.95,"id":"emoji-074","legacyIndex":74,"timingSeed":"슬리퍼 스나이퍼","category":"원거리형","concept":"긴 직선의 빠른 슬리퍼를 맞힌다","basicSummary":"빠른 두 장의 슬리퍼","skillSummary":"두 장의 정밀 슬리퍼"},
+            {"t":"C","e":"🍎","n":"사과리코","type":"PROJ","desc":"벽에 튀는 사과로 쉬운 반사를 배운다","projEmoji":"🍎","pCount":2,"pSize":14,"pSpeed":14,"pDmg":8,"pBounce":3,"spinRate":0.25,"pTrail":"#ef4444","pImpact":"#fee2e2","ai":"KITE","sizeMult":1,"id":"emoji-075","legacyIndex":75,"timingSeed":"사과 투척","category":"원거리형","concept":"벽에 튀는 사과로 쉬운 반사를 배운다","basicSummary":"튕기는 사과","skillSummary":"두 사과의 반사 사격"},
+            {"t":"C","e":"🧻","n":"휴지콜트","type":"PROJ","desc":"흔들리는 휴지 탄막으로 넓게 견제한다","projEmoji":"🧻","pCount":5,"pSize":12,"pSpeed":12,"pDmg":5,"wobble":true,"spinRate":0.25,"pTrail":"#f8fafc","pImpact":"#ffffff","ai":"KITE","sizeMult":1,"id":"emoji-076","legacyIndex":76,"timingSeed":"휴지 대포","category":"원거리형","concept":"흔들리는 휴지 탄막으로 넓게 견제한다","basicSummary":"휴지 탄","skillSummary":"흔들리는 다섯 롤 탄막"},
+            {"t":"C","e":"🥐","n":"빵메랑","type":"PROJ","desc":"돌아오는 빵의 궤도로 두 번 노린다","projEmoji":"🥐","projType":"BOOMERANG","pSize":15,"pSpeed":15,"pDmg":8,"spinRate":0.5,"pTrail":"#fbbf24","pImpact":"#fef3c7","ai":"KITE","sizeMult":1,"id":"emoji-077","legacyIndex":77,"timingSeed":"크루아상 부메랑","category":"원거리형","concept":"돌아오는 빵의 궤도로 두 번 노린다","basicSummary":"왕복 크루아상","skillSummary":"크루아상 왕복 투척"},
+            {"t":"C","e":"🍳","n":"팬테옹","type":"PROJ","desc":"프라이팬으로 거리를 두다 공격 순간 반격한다","projEmoji":"🍳","pSize":19,"pSpeed":12,"pDmg":6,"knockback":19,"spinRate":0.3,"pTrail":"#94a3b8","pImpact":"#e2e8f0","ai":"RUSH","sizeMult":1.05,"customCooldown":145,"id":"emoji-092","legacyIndex":92,"timingSeed":"프라이팬 투척","category":"원거리형","concept":"프라이팬으로 거리를 두다 공격 순간 반격한다","basicSummary":"프라이팬 투척","skillSummary":"2초간 방어하며 받은 피해 반격","combat":{"skill":"counter"}},
+            {"t":"C","e":"🖍️","n":"크레콜트","type":"PROJ","desc":"퍼지는 색연필로 정면을 채운다","projEmoji":"🖍️","pCount":4,"pSize":10,"pSpeed":16,"pDmg":3,"spinRate":0.45,"pTrail":"#f472b6","pImpact":"#fbcfe8","ai":"KITE","sizeMult":0.95,"customCooldown":115,"id":"emoji-094","legacyIndex":94,"timingSeed":"크레파스 난사","category":"원거리형","concept":"퍼지는 색연필로 정면을 채운다","basicSummary":"크레파스 사격","skillSummary":"네 갈래 크레파스"},
+            {"t":"C","e":"📣","n":"응원세라","type":"BUFF","desc":"다 같이 다시 싸울 기회를 만든다","sub":"TEAM_RALLY","ai":"KITE","sizeMult":0.95,"teamOnly":true,"id":"emoji-105","legacyIndex":105,"timingSeed":"응원단장","category":"지원가","concept":"다 같이 다시 싸울 기회를 만든다","basicSummary":"확성기 사격","skillSummary":"주변 아군 소량 회복과 기술 준비 단축"},
+            {"t":"C","e":"🎺","n":"트럼바드","type":"BUFF","desc":"나팔로 짧은 공격 기회를 만든다","sub":"TEAM_BUGLE","ai":"KITE","sizeMult":0.95,"teamOnly":true,"id":"emoji-107","legacyIndex":107,"timingSeed":"전투악사","category":"지원가","concept":"나팔로 짧은 공격 기회를 만든다","basicSummary":"나팔 사격","skillSummary":"주변 아군의 짧은 공격 가속"},
+            {"t":"C","e":"🛎️","n":"벨리오","type":"BUFF","desc":"팀이 뭉친 순간 종을 울려 지킨다","sub":"TEAM_BELL","ai":"KITE","sizeMult":0.98,"teamOnly":true,"id":"emoji-108","legacyIndex":108,"timingSeed":"수호종","category":"지원가","concept":"팀이 뭉친 순간 종을 울려 지킨다","basicSummary":"종 투척","skillSummary":"근처 아군의 짧은 방어"},
+            {"t":"C","e":"🦀","n":"게렌","type":"MELEE","desc":"집게 적중 뒤 갑옷으로 버틴다","sub":"TANK_CRAB","ai":"RUSH","sizeMult":1.05,"tankRole":true,"id":"emoji-113","legacyIndex":113,"timingSeed":"갑옷 게","category":"탱커","concept":"집게 적중 뒤 갑옷으로 버틴다","basicSummary":"집게 타격","skillSummary":"주변 제압과 짧은 보호"},
+            {"t":"C","e":"😆","n":"시민검","type":"MELEE","desc":"단순한 진입과 베기로 근접전을 배운다","sub":"BASIC","ai":"RUSH","sizeMult":1,"id":"emoji-119","legacyIndex":119,"timingSeed":"빵터진 시민","category":"근접형","concept":"단순한 진입과 베기로 근접전을 배운다","basicSummary":"기본 검격 · 적중 후 짧은 추격 가속","skillSummary":"짧은 전방 진입"},
+            {"t":"C","e":"🧹","n":"빗자루신","type":"PROJ","desc":"관통 빗자루로 뒤쪽 적까지 밀친다","projEmoji":"🧹","pCount":2,"pSize":17,"pSpeed":15,"pDmg":5.5,"pierce":true,"knockback":10,"faceDir":true,"pTrail":"#c4b5fd","pImpact":"#ede9fe","ai":"RUSH","sizeMult":1.05,"customCooldown":138,"id":"emoji-121","legacyIndex":121,"timingSeed":"빗자루 기사","category":"원거리형","concept":"관통 빗자루로 뒤쪽 적까지 밀친다","basicSummary":"관통 빗자루","skillSummary":"두 빗자루의 관통 사격"},
+            {"t":"C","e":"🪴","n":"화분이라","type":"PROJ","desc":"깨지는 화분으로 좁은 길을 막는다","projEmoji":"🪴","pCount":2,"pSize":17,"pSpeed":12,"pDmg":5,"pExplode":42,"knockback":8,"spinRate":0.18,"pTrail":"#86efac","pImpact":"#dcfce7","ai":"KITE","sizeMult":1,"customCooldown":145,"id":"emoji-122","legacyIndex":122,"timingSeed":"화분 투척","category":"원거리형","concept":"깨지는 화분으로 좁은 길을 막는다","basicSummary":"화분 투척","skillSummary":"두 화분의 작은 폭발"},
+            {"t":"C","e":"📌","n":"압정티모","type":"PROJ","desc":"작고 빠른 압정을 좁게 모아 맞힌다","projEmoji":"📌","pCount":6,"pSize":8,"pSpeed":20,"pDmg":2.5,"faceDir":true,"pTrail":"#f87171","pImpact":"#fee2e2","ai":"KITE","sizeMult":0.9,"customCooldown":108,"id":"emoji-126","legacyIndex":126,"timingSeed":"압정 난사","category":"원거리형","concept":"작고 빠른 압정을 좁게 모아 맞힌다","basicSummary":"빠른 압정","skillSummary":"좁은 압정 연사"},
+            {"t":"C","e":"🛼","n":"롤러붐","type":"DASH","desc":"질주한 길에 폭탄을 남긴다","sub":"BOMB_TRAIL","ai":"KITE","sizeMult":1,"dashSpeed":29,"dashDuration":30,"id":"emoji-127","legacyIndex":127,"timingSeed":"롤러스케이트","category":"기동형","concept":"질주한 길에 폭탄을 남긴다","basicSummary":"롤러 근접 타격","skillSummary":"짧은 이동과 제한된 근접 감지 폭탄"},
+            {"t":"C","e":"🐙","n":"잉크랭","type":"DASH","desc":"먹물길로 적의 조준과 추격을 방해한다","sub":"INK_TRAIL","ai":"PATROL","sizeMult":1,"dashSpeed":30,"dashDuration":25,"id":"emoji-128","legacyIndex":128,"timingSeed":"먹물 대쉬","category":"기동형","concept":"먹물길로 적의 조준과 추격을 방해한다","basicSummary":"촉수 근접 타격","skillSummary":"이동 경로의 먹물 흔적"},
+            {"t":"F","e":"🐌","n":"달팽람","type":"BUFF","desc":"느리게 버티며 방어 타이밍을 배운다","sub":"SLOW_TANK","ai":"RUSH","sizeMult":0.7,"tankRole":true,"legacyTank":true,"id":"emoji-050","legacyIndex":50,"timingSeed":"민달팽이","category":"탱커","concept":"느리게 버티며 방어 타이밍을 배운다","basicSummary":"느린 근접 타격","skillSummary":"짧은 등껍질 방어"},
+            {"t":"F","e":"🧱","n":"벽돌리오","type":"BUFF","desc":"위험할 때 몸을 굳히는 초보 요새","sub":"STONE","ai":"CAMP","sizeMult":0.8,"id":"emoji-052","legacyIndex":52,"timingSeed":"벽돌","category":"원거리형","concept":"위험할 때 몸을 굳히는 초보 요새","basicSummary":"벽돌 투척","skillSummary":"주변을 밀어내고 2초간 방어"},
+            {"t":"F","e":"🧼","n":"비누누","type":"DASH","desc":"조준한 방향으로 미끄러져 빠져나간다","sub":"SLIP","ai":"RUSH","sizeMult":0.8,"id":"emoji-054","legacyIndex":54,"timingSeed":"비누","category":"기동형","concept":"조준한 방향으로 미끄러져 빠져나간다","basicSummary":"비누 근접 타격","skillSummary":"짧은 수동 미끄러짐"},
+            {"t":"F","e":"🫧","n":"버블나미","type":"PROJ","desc":"느린 방울로 상대의 이동을 견제한다","projEmoji":"🫧","pSize":15,"pSpeed":4,"pDmg":3,"wobble":true,"ai":"KITE","sizeMult":1,"id":"emoji-056","legacyIndex":56,"timingSeed":"비눗방울 놀이","category":"원거리형","concept":"느린 방울로 상대의 이동을 견제한다","basicSummary":"비눗방울 사격","skillSummary":"흔들리는 큰 방울"},
+            {"t":"F","e":"🪃","n":"초보시비","type":"PROJ","desc":"쉬운 왕복 무기로 복귀 경로를 익힌다","projEmoji":"🪃","sub":"BACKWARD","pSize":12,"pSpeed":12,"pDmg":5,"projType":"BOOMERANG","spinRate":0.3,"ai":"KITE","sizeMult":1,"id":"emoji-057","legacyIndex":57,"timingSeed":"초보 부메랑","category":"원거리형","concept":"쉬운 왕복 무기로 복귀 경로를 익힌다","basicSummary":"왕복 부메랑","skillSummary":"조준 방향으로 돌아오는 부메랑"},
+            {"t":"F","e":"🥜","n":"땅콩리코","type":"PROJ","desc":"작은 땅콩으로 짧은 반사를 노린다","projEmoji":"🥜","pCount":2,"pSize":8,"pSpeed":14,"pDmg":3,"pBounce":1,"spinRate":0.3,"pTrail":"#d97706","pImpact":"#fef3c7","ai":"KITE","sizeMult":0.85,"id":"emoji-082","legacyIndex":82,"timingSeed":"땅콩 투척","category":"원거리형","concept":"작은 땅콩으로 짧은 반사를 노린다","basicSummary":"한 번 튕기는 땅콩","skillSummary":"두 땅콩의 짧은 반사"},
+            {"t":"F","e":"🍬","n":"캔디콜트","type":"PROJ","desc":"사탕을 퍼뜨려 가까운 적을 견제한다","projEmoji":"🍬","pCount":3,"pSize":8,"pSpeed":11,"pDmg":2,"wobble":true,"pTrail":"#fb7185","pImpact":"#ffe4e6","ai":"KITE","sizeMult":0.85,"customCooldown":165,"id":"emoji-096","legacyIndex":96,"timingSeed":"사탕총","category":"원거리형","concept":"사탕을 퍼뜨려 가까운 적을 견제한다","basicSummary":"세 갈래 사탕 사격","skillSummary":"세 개의 흔들리는 사탕"},
+            {"t":"F","e":"🩹","n":"밴드소라","type":"BUFF","desc":"다친 아군 한 명에게 응급처치를 한다","sub":"TEAM_BANDAGE","ai":"KITE","sizeMult":0.9,"teamOnly":true,"id":"emoji-109","legacyIndex":109,"timingSeed":"초보 구급병","category":"지원가","concept":"다친 아군 한 명에게 응급처치를 한다","basicSummary":"붕대 탄","skillSummary":"한 아군의 작은 회복"},
+            {"t":"F","e":"🦔","n":"가시람","type":"MELEE","desc":"짧은 타격 뒤 웅크려 버틴다","sub":"TANK_HEDGEHOG","ai":"RUSH","sizeMult":0.9,"tankRole":true,"id":"emoji-114","legacyIndex":114,"timingSeed":"초보 가시탱커","category":"탱커","concept":"짧은 타격 뒤 웅크려 버틴다","basicSummary":"가시 근접 타격","skillSummary":"근접 강타와 짧은 웅크리기"}
         ];
-
-        // ============================================================
-        // 🤝 v22.6 팀전 전용 지원가 풀
-        // 팀당 서포터 1명 보장은 유지하지만, A/B/C는 여러 역할 중 무작위로 등장한다.
-        // 개인전 풀에서는 모두 제외된다.
-        // ============================================================
-        EMOJI_DB.push(
-            {t:'S', e:'👼', n:'성역술사', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 주변 아군 회복 + 짧은 수호 효과',
-             sub:'TEAM_SANCTUARY', ai:AI_TYPES.KITE, sizeMult:1.15, teamOnly:true},
-
-            // A급: 기존 1 + 신규 2
-            {t:'A', e:'🧑‍⚕️', n:'전투 의무병', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 체력이 가장 낮은 아군을 집중 치료',
-             sub:'TEAM_MEDIC', ai:AI_TYPES.KITE, sizeMult:1.05, teamOnly:true},
-            {t:'A', e:'🪷', n:'생명술사', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 체력이 낮은 아군 2명을 회복',
-             sub:'TEAM_BLOOM', ai:AI_TYPES.KITE, sizeMult:1.0, teamOnly:true},
-            {t:'A', e:'🪄', n:'가속마도사', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 주변 아군의 공격/스킬 준비속도 증가',
-             sub:'TEAM_HASTE_A', ai:AI_TYPES.KITE, sizeMult:0.98, teamOnly:true},
-
-            // B급: 기존 1 + 신규 2
-            {t:'B', e:'🔰', n:'보호술사', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 위급한 아군들에게 피해 감소 보호막 부여',
-             sub:'TEAM_GUARD', ai:AI_TYPES.KITE, sizeMult:1.0, teamOnly:true},
-            {t:'B', e:'🧴', n:'약제사', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 다친 아군 2명에게 간단한 회복약 사용',
-             sub:'TEAM_TONIC', ai:AI_TYPES.KITE, sizeMult:0.95, teamOnly:true},
-            {t:'B', e:'🪬', n:'결계술사', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 아군 3명에게 짧은 피해 감소 결계',
-             sub:'TEAM_BARRIER', ai:AI_TYPES.KITE, sizeMult:1.0, teamOnly:true},
-
-            // C급: 기존 1 + 신규 3
-            {t:'C', e:'📣', n:'응원단장', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 주변 아군을 조금 회복하고 기술 쿨타임 단축',
-             sub:'TEAM_RALLY', ai:AI_TYPES.KITE, sizeMult:0.95, teamOnly:true},
-            {t:'C', e:'🍀', n:'응급지원가', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 가장 다친 아군 한 명을 소량 회복',
-             sub:'TEAM_CLOVER', ai:AI_TYPES.KITE, sizeMult:0.92, teamOnly:true},
-            {t:'C', e:'🎺', n:'전투악사', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 주변 아군의 공격/스킬 준비속도를 잠깐 증가',
-             sub:'TEAM_BUGLE', ai:AI_TYPES.KITE, sizeMult:0.95, teamOnly:true},
-            {t:'C', e:'🛎️', n:'수호종', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 주변 아군에게 약한 피해 감소 버프',
-             sub:'TEAM_BELL', ai:AI_TYPES.KITE, sizeMult:0.98, teamOnly:true},
-
-            {t:'F', e:'🩹', n:'초보 구급병', type:ABILITY_TYPES.BUFF,
-             desc:'팀전 전용 · 가장 다친 아군 한 명을 조금 응급처치',
-             sub:'TEAM_BANDAGE', ai:AI_TYPES.KITE, sizeMult:0.9, teamOnly:true}
-        );
-
-        const TEAM_SUPPORT_SUBS = new Set([
-            'TEAM_SANCTUARY','TEAM_MEDIC','TEAM_BLOOM','TEAM_HASTE_A',
-            'TEAM_GUARD','TEAM_TONIC','TEAM_BARRIER',
-            'TEAM_RALLY','TEAM_CLOVER','TEAM_BUGLE','TEAM_BELL',
-            'TEAM_BANDAGE'
-        ]);
+        const BR_ROSTER_INDEX = new Map(EMOJI_DB.map((a,i)=>[a.id,i]));
+        // Metadata only. Retired characters never enter selection or combat; old records keep their labels.
+        const BR_LEGACY_ROSTER = [
+            {"id":"emoji-000","legacyIndex":0,"t":"S","n":"용의 분노","e":"🐲"},
+            {"id":"emoji-001","legacyIndex":1,"t":"S","n":"천둥군주","e":"⚡"},
+            {"id":"emoji-002","legacyIndex":2,"t":"S","n":"우주 납치범","e":"🛸"},
+            {"id":"emoji-003","legacyIndex":3,"t":"S","n":"대마법사","e":"🧙‍♂️"},
+            {"id":"emoji-004","legacyIndex":4,"t":"S","n":"공허 암살자","e":"🥷"},
+            {"id":"emoji-005","legacyIndex":5,"t":"S","n":"지옥불","e":"🌋"},
+            {"id":"emoji-006","legacyIndex":6,"t":"S","n":"검성","e":"⚔️"},
+            {"id":"emoji-007","legacyIndex":7,"t":"S","n":"폴아웃","e":"☢️"},
+            {"id":"emoji-008","legacyIndex":8,"t":"S","n":"폴터가이스트","e":"👻"},
+            {"id":"emoji-009","legacyIndex":9,"t":"S","n":"오염물질","e":"💩"},
+            {"id":"emoji-010","legacyIndex":10,"t":"S","n":"블랙홀","e":"🪐"},
+            {"id":"emoji-011","legacyIndex":11,"t":"S","n":"뇌신","e":"🌩️"},
+            {"id":"emoji-012","legacyIndex":12,"t":"S","n":"지니","e":"🧞"},
+            {"id":"emoji-013","legacyIndex":13,"t":"S","n":"블러드로드","e":"🩸"},
+            {"id":"emoji-014","legacyIndex":14,"t":"S","n":"역병군주","e":"🦠"},
+            {"id":"emoji-015","legacyIndex":15,"t":"S","n":"유성 돌진","e":"🌠"},
+            {"id":"emoji-016","legacyIndex":16,"t":"S","n":"드래곤 다이브","e":"🐉"},
+            {"id":"emoji-017","legacyIndex":17,"t":"S","n":"모함 호출","e":"🚁"},
+            {"id":"emoji-018","legacyIndex":18,"t":"S","n":"운석 폭격","e":"☄️"},
+            {"id":"emoji-019","legacyIndex":19,"t":"S","n":"폭주기관차","e":"🚂"},
+            {"id":"emoji-020","legacyIndex":20,"t":"S","n":"초신성","e":"🌟"},
+            {"id":"emoji-021","legacyIndex":21,"t":"S","n":"기계공학자","e":"⚙️"},
+            {"id":"emoji-022","legacyIndex":22,"t":"S","n":"요요 마스터","e":"🪀"},
+            {"id":"emoji-023","legacyIndex":23,"t":"A","n":"헤드슈터","e":"🔫"},
+            {"id":"emoji-024","legacyIndex":24,"t":"A","n":"윈드워커","e":"🌪️"},
+            {"id":"emoji-025","legacyIndex":25,"t":"A","n":"핵주먹","e":"🥊"},
+            {"id":"emoji-026","legacyIndex":26,"t":"A","n":"아이스킹","e":"❄️"},
+            {"id":"emoji-027","legacyIndex":27,"t":"A","n":"로드킬","e":"🏎️"},
+            {"id":"emoji-028","legacyIndex":28,"t":"A","n":"아이언월","e":"🛡️"},
+            {"id":"emoji-029","legacyIndex":29,"t":"A","n":"스카이 하이","e":"🦅"},
+            {"id":"emoji-030","legacyIndex":30,"t":"A","n":"크라켄","e":"🦑"},
+            {"id":"emoji-031","legacyIndex":31,"t":"A","n":"스컹크 대쉬","e":"🦨"},
+            {"id":"emoji-032","legacyIndex":32,"t":"A","n":"볼트","e":"🐆"},
+            {"id":"emoji-033","legacyIndex":33,"t":"A","n":"불도저","e":"🚜"},
+            {"id":"emoji-034","legacyIndex":34,"t":"A","n":"볼링 챔피언","e":"🎳"},
+            {"id":"emoji-035","legacyIndex":35,"t":"A","n":"전기톱 투척","e":"🪚"},
+            {"id":"emoji-036","legacyIndex":36,"t":"A","n":"뱀파이어 떼","e":"🦇"},
+            {"id":"emoji-037","legacyIndex":37,"t":"S","n":"힐링 팩터","e":"🚑"},
+            {"id":"emoji-038","legacyIndex":38,"t":"B","n":"암살자","e":"🔪"},
+            {"id":"emoji-039","legacyIndex":39,"t":"B","n":"다이너마이트","e":"🧨"},
+            {"id":"emoji-040","legacyIndex":40,"t":"B","n":"성난 멧돼지","e":"🐗"},
+            {"id":"emoji-041","legacyIndex":41,"t":"B","n":"킬러비","e":"🐝"},
+            {"id":"emoji-042","legacyIndex":42,"t":"B","n":"뿅망치","e":"🔨"},
+            {"id":"emoji-043","legacyIndex":43,"t":"B","n":"로켓 점프","e":"🚀"},
+            {"id":"emoji-044","legacyIndex":44,"t":"B","n":"스노우보더","e":"🏂"},
+            {"id":"emoji-045","legacyIndex":45,"t":"B","n":"테니스 챔피언","e":"🎾"},
+            {"id":"emoji-046","legacyIndex":46,"t":"B","n":"피자 배달","e":"🍕"},
+            {"id":"emoji-047","legacyIndex":47,"t":"B","n":"파워 슛","e":"⚽"},
+            {"id":"emoji-048","legacyIndex":48,"t":"B","n":"카트 질주","e":"🛒"},
+            {"id":"emoji-049","legacyIndex":49,"t":"F","n":"개복치","e":"🥚"},
+            {"id":"emoji-050","legacyIndex":50,"t":"F","n":"민달팽이","e":"🐌"},
+            {"id":"emoji-051","legacyIndex":51,"t":"F","n":"평화주의자","e":"🏳️"},
+            {"id":"emoji-052","legacyIndex":52,"t":"F","n":"벽돌","e":"🧱"},
+            {"id":"emoji-053","legacyIndex":53,"t":"F","n":"낙엽","e":"🍂"},
+            {"id":"emoji-054","legacyIndex":54,"t":"F","n":"비누","e":"🧼"},
+            {"id":"emoji-055","legacyIndex":55,"t":"F","n":"잠만보","e":"💤"},
+            {"id":"emoji-056","legacyIndex":56,"t":"F","n":"비눗방울 놀이","e":"🫧"},
+            {"id":"emoji-057","legacyIndex":57,"t":"F","n":"초보 부메랑","e":"🪃"},
+            {"id":"emoji-058","legacyIndex":58,"t":"S","n":"고래 캐논","e":"🐳"},
+            {"id":"emoji-059","legacyIndex":59,"t":"S","n":"스시 폭풍","e":"🍣"},
+            {"id":"emoji-060","legacyIndex":60,"t":"S","n":"궤도 폭격","e":"🛰️"},
+            {"id":"emoji-061","legacyIndex":61,"t":"S","n":"불꽃축제","e":"🎆"},
+            {"id":"emoji-062","legacyIndex":62,"t":"S","n":"로켓 사령관","e":"🚀"},
+            {"id":"emoji-063","legacyIndex":63,"t":"A","n":"버거 캐논","e":"🍔"},
+            {"id":"emoji-064","legacyIndex":64,"t":"A","n":"코코넛 포병","e":"🥥"},
+            {"id":"emoji-065","legacyIndex":65,"t":"A","n":"자석포","e":"🧲"},
+            {"id":"emoji-066","legacyIndex":66,"t":"A","n":"프로 부메랑","e":"🪃"},
+            {"id":"emoji-067","legacyIndex":67,"t":"A","n":"소화기 난사","e":"🧯"},
+            {"id":"emoji-068","legacyIndex":68,"t":"B","n":"핫도그 투척","e":"🌭"},
+            {"id":"emoji-069","legacyIndex":69,"t":"B","n":"의자 투척","e":"🪑"},
+            {"id":"emoji-070","legacyIndex":70,"t":"B","n":"다트 챔피언","e":"🎯"},
+            {"id":"emoji-071","legacyIndex":71,"t":"B","n":"생선 부메랑","e":"🐟"},
+            {"id":"emoji-072","legacyIndex":72,"t":"B","n":"탄산 폭탄","e":"🥤"},
+            {"id":"emoji-073","legacyIndex":73,"t":"C","n":"교과서 투척","e":"📚"},
+            {"id":"emoji-074","legacyIndex":74,"t":"C","n":"슬리퍼 스나이퍼","e":"🥿"},
+            {"id":"emoji-075","legacyIndex":75,"t":"C","n":"사과 투척","e":"🍎"},
+            {"id":"emoji-076","legacyIndex":76,"t":"C","n":"휴지 대포","e":"🧻"},
+            {"id":"emoji-077","legacyIndex":77,"t":"C","n":"크루아상 부메랑","e":"🥐"},
+            {"id":"emoji-078","legacyIndex":78,"t":"F","n":"숟가락 투척","e":"🥄"},
+            {"id":"emoji-079","legacyIndex":79,"t":"F","n":"곰인형 던지기","e":"🧸"},
+            {"id":"emoji-080","legacyIndex":80,"t":"F","n":"삼각김밥","e":"🍙"},
+            {"id":"emoji-081","legacyIndex":81,"t":"F","n":"깃털 사격","e":"🪶"},
+            {"id":"emoji-082","legacyIndex":82,"t":"F","n":"땅콩 투척","e":"🥜"},
+            {"id":"emoji-083","legacyIndex":83,"t":"S","n":"메갈로돈 어택","e":"🦈"},
+            {"id":"emoji-084","legacyIndex":84,"t":"S","n":"쓰나미","e":"🌊"},
+            {"id":"emoji-085","legacyIndex":85,"t":"S","n":"심연의 눈","e":"🧿"},
+            {"id":"emoji-086","legacyIndex":86,"t":"A","n":"악어 어뢰","e":"🐊"},
+            {"id":"emoji-087","legacyIndex":87,"t":"A","n":"사냥꾼","e":"🏹"},
+            {"id":"emoji-088","legacyIndex":88,"t":"A","n":"빙하 파편","e":"🧊"},
+            {"id":"emoji-089","legacyIndex":89,"t":"B","n":"프리스비 마스터","e":"🥏"},
+            {"id":"emoji-090","legacyIndex":90,"t":"B","n":"치킨 런처","e":"🐔"},
+            {"id":"emoji-091","legacyIndex":91,"t":"B","n":"주스 폭탄","e":"🧃"},
+            {"id":"emoji-092","legacyIndex":92,"t":"C","n":"프라이팬 투척","e":"🍳"},
+            {"id":"emoji-093","legacyIndex":93,"t":"C","n":"감자 투척","e":"🥔"},
+            {"id":"emoji-094","legacyIndex":94,"t":"C","n":"크레파스 난사","e":"🖍️"},
+            {"id":"emoji-095","legacyIndex":95,"t":"F","n":"양말 투척","e":"🧦"},
+            {"id":"emoji-096","legacyIndex":96,"t":"F","n":"사탕총","e":"🍬"},
+            {"id":"emoji-097","legacyIndex":97,"t":"F","n":"수세미 부메랑","e":"🧽"},
+            {"id":"emoji-098","legacyIndex":98,"t":"S","n":"성역술사","e":"👼"},
+            {"id":"emoji-099","legacyIndex":99,"t":"A","n":"전투 의무병","e":"🧑‍⚕️"},
+            {"id":"emoji-100","legacyIndex":100,"t":"A","n":"생명술사","e":"🪷"},
+            {"id":"emoji-101","legacyIndex":101,"t":"A","n":"가속마도사","e":"🪄"},
+            {"id":"emoji-102","legacyIndex":102,"t":"B","n":"보호술사","e":"🔰"},
+            {"id":"emoji-103","legacyIndex":103,"t":"B","n":"약제사","e":"🧴"},
+            {"id":"emoji-104","legacyIndex":104,"t":"B","n":"결계술사","e":"🪬"},
+            {"id":"emoji-105","legacyIndex":105,"t":"C","n":"응원단장","e":"📣"},
+            {"id":"emoji-106","legacyIndex":106,"t":"C","n":"응급지원가","e":"🍀"},
+            {"id":"emoji-107","legacyIndex":107,"t":"C","n":"전투악사","e":"🎺"},
+            {"id":"emoji-108","legacyIndex":108,"t":"C","n":"수호종","e":"🛎️"},
+            {"id":"emoji-109","legacyIndex":109,"t":"F","n":"초보 구급병","e":"🩹"},
+            {"id":"emoji-110","legacyIndex":110,"t":"S","n":"철갑 코뿔소","e":"🦏"},
+            {"id":"emoji-111","legacyIndex":111,"t":"A","n":"가디언 고릴라","e":"🦍"},
+            {"id":"emoji-112","legacyIndex":112,"t":"B","n":"철갑 거북","e":"🐢"},
+            {"id":"emoji-113","legacyIndex":113,"t":"C","n":"갑옷 게","e":"🦀"},
+            {"id":"emoji-114","legacyIndex":114,"t":"F","n":"초보 가시탱커","e":"🦔"},
+            {"id":"emoji-115","legacyIndex":115,"t":"C","n":"긍정적인 시민","e":"😀"},
+            {"id":"emoji-116","legacyIndex":116,"t":"C","n":"활발한 시민","e":"😃"},
+            {"id":"emoji-117","legacyIndex":117,"t":"C","n":"행복한 시민","e":"😄"},
+            {"id":"emoji-118","legacyIndex":118,"t":"C","n":"건치 시민","e":"😁"},
+            {"id":"emoji-119","legacyIndex":119,"t":"C","n":"빵터진 시민","e":"😆"},
+            {"id":"emoji-120","legacyIndex":120,"t":"C","n":"당황한 시민","e":"😅"},
+            {"id":"emoji-121","legacyIndex":121,"t":"C","n":"빗자루 기사","e":"🧹"},
+            {"id":"emoji-122","legacyIndex":122,"t":"C","n":"화분 투척","e":"🪴"},
+            {"id":"emoji-123","legacyIndex":123,"t":"C","n":"연날리기 고수","e":"🪁"},
+            {"id":"emoji-124","legacyIndex":124,"t":"C","n":"풍선포","e":"🎈"},
+            {"id":"emoji-125","legacyIndex":125,"t":"C","n":"프레첼 투척","e":"🥨"},
+            {"id":"emoji-126","legacyIndex":126,"t":"C","n":"압정 난사","e":"📌"},
+            {"id":"emoji-127","legacyIndex":127,"t":"C","n":"롤러스케이트","e":"🛼"},
+            {"id":"emoji-128","legacyIndex":128,"t":"C","n":"먹물 대쉬","e":"🐙"},
+            {"id":"emoji-129","legacyIndex":129,"t":"C","n":"바리스타","e":"☕"},
+            {"id":"emoji-130","legacyIndex":130,"t":"C","n":"직장인","e":"💼"},
+            {"id":"emoji-131","legacyIndex":131,"t":"S","n":"가위 수호자","e":"✂️"},
+            {"id":"emoji-132","legacyIndex":132,"t":"S","n":"공허 파괴자","e":"🌌"},
+            {"id":"emoji-133","legacyIndex":133,"t":"A","n":"영혼 검사","e":"🗡️"},
+            {"id":"emoji-134","legacyIndex":134,"t":"A","n":"원형 칼날","e":"🛞"},
+            {"id":"emoji-135","legacyIndex":135,"t":"B","n":"폭광 포병","e":"💥"},
+            {"id":"emoji-136","legacyIndex":136,"t":"B","n":"철퇴 경호대","e":"🪓"},
+            {"id":"emoji-137","legacyIndex":137,"t":"B","n":"BB 스나이퍼","e":"🔭"},
+            {"id":"emoji-138","legacyIndex":138,"t":"B","n":"적색 의무단","e":"💉"}
+        ];
+        const BR_LEGACY_REPLACEMENTS = {"0":"emoji-000","1":"emoji-001","2":"emoji-002","3":"emoji-003","4":"emoji-004","5":"emoji-014","6":"emoji-006","7":"emoji-007","8":"emoji-008","9":"emoji-014","10":"emoji-010","11":"emoji-011","12":"emoji-012","13":"emoji-013","14":"emoji-014","15":"emoji-011","16":"emoji-001","17":"emoji-012","18":"emoji-000","19":"emoji-019","20":"emoji-020","21":"emoji-006","22":"emoji-022","23":"emoji-023","24":"emoji-024","25":"emoji-025","26":"emoji-026","27":"emoji-027","28":"emoji-028","29":"emoji-029","30":"emoji-030","31":"emoji-031","32":"emoji-027","33":"emoji-033","34":"emoji-034","35":"emoji-035","36":"emoji-036","37":"emoji-037","38":"emoji-038","39":"emoji-039","40":"emoji-040","41":"emoji-041","42":"emoji-042","43":"emoji-043","44":"emoji-044","45":"emoji-045","46":"emoji-070","47":"emoji-047","48":"emoji-048","49":"emoji-114","50":"emoji-050","51":"emoji-050","52":"emoji-052","53":"emoji-054","54":"emoji-054","55":"emoji-050","56":"emoji-056","57":"emoji-057","58":"emoji-019","59":"emoji-085","60":"emoji-085","61":"emoji-020","62":"emoji-000","63":"emoji-063","64":"emoji-034","65":"emoji-065","66":"emoji-066","67":"emoji-063","68":"emoji-072","69":"emoji-047","70":"emoji-070","71":"emoji-089","72":"emoji-072","73":"emoji-073","74":"emoji-074","75":"emoji-075","76":"emoji-076","77":"emoji-077","78":"emoji-082","79":"emoji-056","80":"emoji-096","81":"emoji-096","82":"emoji-082","83":"emoji-085","84":"emoji-019","85":"emoji-085","86":"emoji-035","87":"emoji-087","88":"emoji-026","89":"emoji-089","90":"emoji-045","91":"emoji-072","92":"emoji-092","93":"emoji-075","94":"emoji-094","95":"emoji-056","96":"emoji-096","97":"emoji-057","98":"emoji-098","99":"emoji-099","100":"emoji-099","101":"emoji-101","102":"emoji-102","103":"emoji-103","104":"emoji-102","105":"emoji-105","106":"emoji-105","107":"emoji-107","108":"emoji-108","109":"emoji-109","110":"emoji-110","111":"emoji-028","112":"emoji-112","113":"emoji-113","114":"emoji-114","115":"emoji-113","116":"emoji-126","117":"emoji-113","118":"emoji-074","119":"emoji-119","120":"emoji-094","121":"emoji-121","122":"emoji-122","123":"emoji-077","124":"emoji-076","125":"emoji-075","126":"emoji-126","127":"emoji-127","128":"emoji-128","129":"emoji-122","130":"emoji-073","131":"emoji-131","132":"emoji-132","133":"emoji-133","134":"emoji-024","135":"emoji-039","136":"emoji-040","137":"emoji-137","138":"emoji-138"};
+        const TEAM_SUPPORT_SUBS = new Set(EMOJI_DB.filter(a=>a.teamOnly).map(a=>a.sub));
         function isTeamSupportAbility(ability) {
             return !!ability && ability.teamOnly === true && TEAM_SUPPORT_SUBS.has(ability.sub);
         }
-
-        // ============================================================
-        // 🛡️ 전용 탱커 랭크별 1종 + 기존 로스터 랭크별 2종을 탱커 카테고리로 재분류.
-        // ============================================================
-        EMOJI_DB.push(
-            {t:'S', e:'🦏', n:'철갑 코뿔소', type:ABILITY_TYPES.MELEE, desc:'초중량 탱커 · 강한 밀치기와 공격 후 철갑 방어', sub:'TANK_RHINO', ai:AI_TYPES.RUSH, sizeMult:1.72, tankRole:true},
-            {t:'A', e:'🦍', n:'가디언 고릴라', type:ABILITY_TYPES.MELEE, desc:'근접 탱커 · 강타와 짧은 피해 감소', sub:'TANK_GORILLA', ai:AI_TYPES.RUSH, sizeMult:1.35, tankRole:true},
-            {t:'B', e:'🐢', n:'철갑 거북', type:ABILITY_TYPES.MELEE, desc:'방어형 탱커 · 낮은 화력 대신 단단한 등껍질', sub:'TANK_TURTLE', ai:AI_TYPES.RUSH, sizeMult:1.20, tankRole:true},
-            {t:'C', e:'🦀', n:'갑옷 게', type:ABILITY_TYPES.MELEE, desc:'근접 탱커 · 집게 강타와 짧은 방어', sub:'TANK_CRAB', ai:AI_TYPES.RUSH, sizeMult:1.05, tankRole:true},
-            {t:'F', e:'🦔', n:'초보 가시탱커', type:ABILITY_TYPES.MELEE, desc:'약한 근접 탱커 · 잠깐 웅크려 피해를 줄임', sub:'TANK_HEDGEHOG', ai:AI_TYPES.RUSH, sizeMult:0.90, tankRole:true}
-        );
-        // 전용 탱커 5종은 공격 후 방어태세를 사용.
-        // legacyTank는 기존 능력을 그대로 유지하면서 탱커 스탯/AI만 부여한다.
-        const TANK_MELEE_SUBS = new Set(['TANK_RHINO','TANK_GORILLA','TANK_TURTLE','TANK_CRAB','TANK_HEDGEHOG']);
+        const TANK_MELEE_SUBS = new Set(['TANK_RHINO','TANK_TURTLE','TANK_CRAB','TANK_HEDGEHOG']);
         function isTankAbility(ability) { return !!ability && ability.tankRole===true; }
-
-        // v21.17: BASIC 능력을 공유하던 시민 시리즈를 12명 → 6명으로 축소.
-        // 기존 교대 배정 방식으로 3명은 기본 근접, 3명은 기본 원거리 역할을 유지한다.
-        const CITIZENS = [
-            {e:'😀', n:'긍정적인 시민'}, {e:'😃', n:'활발한 시민'}, {e:'😄', n:'행복한 시민'},
-            {e:'😁', n:'건치 시민'}, {e:'😆', n:'빵터진 시민'}, {e:'😅', n:'당황한 시민'}
-        ];
-        
-        CITIZENS.forEach((c, i) => {
-            let isMelee = i % 2 === 0;
-            let type = isMelee ? ABILITY_TYPES.MELEE : ABILITY_TYPES.PROJ;
-            let ai = isMelee ? AI_TYPES.RUSH : (i % 3 === 0 ? AI_TYPES.PATROL : AI_TYPES.KITE);
-            const citizenTank = (i===0 || i===2); // 😀 긍정적인 시민, 😄 행복한 시민
-            EMOJI_DB.push({
-                t:'C', e:c.e, n:c.n, type:type,
-                desc: citizenTank ? '기본 근접 공격 · 시민 탱커' : '기본 공격',
-                sub:'BASIC', ai:ai, sizeMult:1.0,
-                ...(citizenTank ? {tankRole:true, legacyTank:true} : {})
-            });
-        });
-
-        // ✨ v21.17 시민 6명 감축분을 대체하는 C급 신규 6종
-        // 모두 같은 BASIC을 쓰지 않고, 서로 다른 투사체 성질을 갖는다.
-        EMOJI_DB.push({t:'C', e:'🧹', n:'빗자루 기사', type:ABILITY_TYPES.PROJ,
-            desc:'긴 빗자루 2개가 적을 관통하며 밀어냄', projEmoji:'🧹', pCount:2, pSize:17, pSpeed:15,
-            pDmg:5.5, pierce:true, knockback:10, faceDir:true, pTrail:'#c4b5fd', pImpact:'#ede9fe',
-            ai:AI_TYPES.RUSH, sizeMult:1.05, customCooldown:138});
-
-        EMOJI_DB.push({t:'C', e:'🪴', n:'화분 투척', type:ABILITY_TYPES.PROJ,
-            desc:'화분이 깨지며 작은 범위에 폭발 피해', projEmoji:'🪴', pCount:2, pSize:17, pSpeed:12,
-            pDmg:5.0, pExplode:42, knockback:8, spinRate:0.18, pTrail:'#86efac', pImpact:'#dcfce7',
-            ai:AI_TYPES.KITE, sizeMult:1.0, customCooldown:145});
-
-        EMOJI_DB.push({t:'C', e:'🪁', n:'연날리기 고수', type:ABILITY_TYPES.PROJ,
-            desc:'연이 날아갔다 돌아오며 두 번 타격', projEmoji:'🪁', projType:'BOOMERANG', pCount:2,
-            pSize:14, pSpeed:16, pDmg:4.2, spinRate:0.32, wobble:true, knockback:6,
-            pTrail:'#7dd3fc', pImpact:'#e0f2fe', ai:AI_TYPES.KITE, sizeMult:0.95, customCooldown:132});
-
-        EMOJI_DB.push({t:'C', e:'🎈', n:'풍선포', type:ABILITY_TYPES.PROJ,
-            desc:'느린 풍선 5개가 퍼지며 적을 밀어냄', projEmoji:'🎈', pCount:5, pSize:14, pSpeed:9,
-            pDmg:3.0, knockback:9, wobble:true, spinRate:0.12, pTrail:'#f9a8d4', pImpact:'#fce7f3',
-            ai:AI_TYPES.KITE, sizeMult:0.95, customCooldown:118});
-
-        EMOJI_DB.push({t:'C', e:'🥨', n:'프레첼 투척', type:ABILITY_TYPES.PROJ,
-            desc:'프레첼 3개가 벽을 튕기며 날아감', projEmoji:'🥨', pCount:3, pSize:13, pSpeed:14,
-            pDmg:4.0, pBounce:3, spinRate:0.42, knockback:5, pTrail:'#d97706', pImpact:'#fef3c7',
-            ai:AI_TYPES.KITE, sizeMult:1.0, customCooldown:124});
-
-        EMOJI_DB.push({t:'C', e:'📌', n:'압정 난사', type:ABILITY_TYPES.PROJ,
-            desc:'작고 빠른 압정 6개를 좁게 연사', projEmoji:'📌', pCount:6, pSize:8, pSpeed:20,
-            pDmg:2.5, faceDir:true, pTrail:'#f87171', pImpact:'#fee2e2',
-            ai:AI_TYPES.KITE, sizeMult:0.9, customCooldown:108});
-
-        // ✨ 신규 C급 (다이내믹 및 투사체 수동 등록)
-        EMOJI_DB.push({t:'C', e:'🛼', n:'롤러스케이트', type:ABILITY_TYPES.DASH, desc:'적 주변을 스쳐 지나가며 접근 감지 폭탄을 연속 설치', sub:'BOMB_TRAIL', ai:AI_TYPES.KITE, sizeMult: 1.0, dashSpeed: 29, dashDuration: 30});
-        EMOJI_DB.push({t:'C', e:'🐙', n:'먹물 대쉬', type:ABILITY_TYPES.DASH, desc:'먹물 길을 가로질러 만들며 맞은 적의 이동과 조준을 방해', sub:'INK_TRAIL', ai:AI_TYPES.PATROL, sizeMult: 1.0, dashSpeed: 30, dashDuration: 25});
-        EMOJI_DB.push({t:'C', e:'☕', n:'바리스타', type:ABILITY_TYPES.PROJ, desc:'뜨거운 커피잔 투척', projEmoji:'☕', pSize: 12, pSpeed: 10, pDmg: 10, spinRate: 0.1, ai:AI_TYPES.KITE, sizeMult: 1.0});
-        EMOJI_DB.push({t:'C', e:'💼', n:'직장인', type:ABILITY_TYPES.PROJ, desc:'무거운 서류가방', projEmoji:'💼', pSize: 16, pSpeed: 9, pDmg: 12, spinRate: 0.1, ai:AI_TYPES.KITE, sizeMult: 1.0});
-
-        // ============================================================
-        // v23 참고 전투 시스템 이식: 선명한 궤적과 역할이 분명한 8종
-        // 제공된 v3.9의 가위 연격·공허 광선·영혼 보호막·회전 칼날·
-        // 화약 탄막·운동에너지 돌격·정조준·독 주사 메커니즘을 현재 규칙에 맞게 재구성했다.
-        // ============================================================
-        EMOJI_DB.push(
-            {t:'S', e:'✂️', n:'가위 수호자', type:ABILITY_TYPES.MELEE,
-             desc:'가위 돌진 후 최대 5연속 부채꼴 참격', sub:'SCISSOR_DASH', ai:AI_TYPES.RUSH, sizeMult:1.34},
-            {t:'S', e:'🌌', n:'공허 파괴자', type:ABILITY_TYPES.LASER,
-             desc:'넓은 공허 광선으로 직선상의 적을 관통하고 피해 일부 회복', sub:'VOID_DESTRUCTION', ai:AI_TYPES.KITE, sizeMult:1.52},
-            {t:'A', e:'🗡️', n:'영혼 검사', type:ABILITY_TYPES.MELEE,
-             desc:'영혼 가르기 적중 시 짧은 보호막 획득', sub:'SOUL_CLEAVE', ai:AI_TYPES.RUSH, sizeMult:1.22},
-            {t:'A', e:'🛞', n:'원형 칼날', type:ABILITY_TYPES.ORBIT,
-             desc:'롤링 블레이드 3개를 전개하고 전방으로 압박', sub:'ROLLING_BLADE', ai:AI_TYPES.RUSH, sizeMult:1.18},
-            {t:'B', e:'💥', n:'폭광 포병', type:ABILITY_TYPES.PROJ,
-             desc:'부채꼴 화약탄 5발이 짧은 범위로 연쇄 폭발', sub:'POWDER_BARRAGE', projEmoji:'✦', pCount:5, pSize:12, pSpeed:15, pDmg:10, pExplode:44, knockback:12, pTrail:'#fb7185', pImpact:'#fecdd3', ai:AI_TYPES.KITE, sizeMult:1.02},
-            {t:'B', e:'🪓', n:'철퇴 경호대', type:ABILITY_TYPES.DASH,
-             desc:'전진 돌격으로 적을 크게 밀치고 기절시키는 운동에너지 공격', sub:'KINETIC_CHARGE', ai:AI_TYPES.RUSH, sizeMult:1.28, dashSpeed:39, dashDuration:20, tankRole:true},
-            {t:'B', e:'🔭', n:'BB 스나이퍼', type:ABILITY_TYPES.PROJ,
-             desc:'빠르고 가는 정조준 탄환이 적을 관통', sub:'AIMED_SHOT', projEmoji:'•', pSize:9, pSpeed:26, pDmg:27, pierce:true, faceDir:true, knockback:14, pTrail:'#fde68a', pImpact:'#fff7cc', ai:AI_TYPES.CAMP, sizeMult:0.94},
-            {t:'B', e:'💉', n:'적색 의무단', type:ABILITY_TYPES.PROJ,
-             desc:'독 주사 2발로 지속 피해를 주고 적의 진입을 차단', sub:'TOXIC_INJECTION', projEmoji:'💉', pCount:2, pSize:12, pSpeed:18, pDmg:11, pStatus:'poison', pStatusPower:150, faceDir:true, knockback:5, pTrail:'#fb7185', pImpact:'#fecaca', ai:AI_TYPES.KITE, sizeMult:1.0}
-        );
 
         // --- MATH & UTILS ---
         let seedState = 1;
@@ -1381,6 +1349,7 @@
                 this.cooldown = 0; this.shotCount = 0;
             }
             update(game) {
+                if(!this.owner.alive){this.life=0;return;}
                 this.life--;
                 if(this.cooldown > 0) this.cooldown--;
                 else {
@@ -1441,8 +1410,8 @@
 
                 this.damage = damage; this.size = size; this.type = type;
                 this.color = color; this.explodeRadius = explodeRadius;
-                this.emoji = emoji;
-                this.life = 120; this.bounces = opts.bounces || ((type === 'BOUNCE_BALL') ? 3 : 0); this.returning = false; 
+                this.emoji = emoji || (owner?.humanControlled ? getIdentityProjectileEmoji(owner.ability) : null);
+                this.life = 120; this.returnAfterLife=90; this.hitOncePerPass=!!opts.hitOncePerPass; this.bounces = opts.bounces || ((type === 'BOUNCE_BALL') ? 3 : 0); this.returning = false; 
                 
                 this.pierce = opts.pierce || false;
                 this.wobble = opts.wobble || false;
@@ -1501,7 +1470,7 @@
                     if (this.spinRate) this.spinAngle += this.spinRate;
 
                     this.pos = this.pos.add(this.vel); this.life--;
-                    if (!this.returning && this.life < 90) this.returning = true;
+                    if (!this.returning && this.life < this.returnAfterLife) {this.returning = true;if(this.hitOncePerPass)this.hitMemory=Object.create(null);}
                     if (this.returning) {
                         if (!this.owner.alive) { this.life = 0; return; }
                         let dirToOwner = this.owner.pos.sub(this.pos).norm();
@@ -1564,6 +1533,7 @@
                         }
                         if(t===null||(wallContact&&t>=wallContact.t))continue;
                         const repeatDelay=orbit?(this.owner?.ability?.sub==='SWORD_ORBIT'?12:10):((this.pierce||this.type==='BOOMERANG')?10:0);
+                        if(this.hitOncePerPass&&this.hitMemory[p.id]!=null)continue;
                         if(repeatDelay>0&&game.frame-(this.hitMemory[p.id]??-99999)<repeatDelay)continue;
                         contacts.push({p,t});
                     }
@@ -1666,16 +1636,16 @@
                 }
             }
             draw(ctx) { 
-                if (this.type === 'nuke') {
-                    ctx.save(); ctx.translate(this.pos.x, this.pos.y); ctx.rotate(Math.atan2(this.vel.y, this.vel.x)); 
-                    ctx.drawImage(imgFireball, -this.size*1.5, -this.size*1.5, this.size*3, this.size*3);
-                    ctx.restore();
-                } else if (this.emoji) {
+                if (this.emoji) {
                     ctx.save(); ctx.translate(this.pos.x, this.pos.y);
                     if (this.faceDir) ctx.rotate(Math.atan2(this.vel.y, this.vel.x));
                     else if (this.spinRate) ctx.rotate(this.spinAngle);
-                    ctx.font = `${this.size * 2}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText(this.emoji, 0, 0);
+                    const glyphRadius=this.size*1.33;
+                    ctx.drawImage(window.brCombatVisual.emojiSprite(this.emoji),-glyphRadius,-glyphRadius,glyphRadius*2,glyphRadius*2);
+                    ctx.restore();
+                } else if (this.type === 'nuke') {
+                    ctx.save(); ctx.translate(this.pos.x, this.pos.y); ctx.rotate(Math.atan2(this.vel.y, this.vel.x));
+                    ctx.drawImage(imgFireball, -this.size*1.5, -this.size*1.5, this.size*3, this.size*3);
                     ctx.restore();
                 } else if (this.vfx === 'slash') {
                     // 검성 궤도 전용 이펙트
@@ -1733,7 +1703,7 @@
 
             // 능력명에서 아주 작은 고유 편차를 만들어 같은 AI 타입끼리도 완전히 똑같이 움직이지 않게 한다.
             let h = 0;
-            for (const ch of ability.n) h = ((h * 31) + ch.charCodeAt(0)) >>> 0;
+            for (const ch of (ability.timingSeed||ability.n)) h = ((h * 31) + ch.charCodeAt(0)) >>> 0;
             const v1 = ((h % 21) - 10) / 100;
             const v2 = (((h >>> 5) % 21) - 10) / 100;
             p.aggression = Math.max(0.1, Math.min(1, p.aggression + v1));
@@ -1822,8 +1792,8 @@
         function getAbilityTiming(ability) {
             const type = ability.type;
             const tier = ability.t;
-            const key = ability.sub || ability.n;
-            const h = abilityTimingHash(ability.n + ':' + key);
+            const key = ability.sub || ability.timingSeed || ability.n;
+            const h = abilityTimingHash((ability.timingSeed||ability.n) + ':' + key);
             const v = (h % 1000) / 1000;
 
             const firstBase = {S:2.2, A:2.7, B:3.2, C:3.8, F:4.5}[tier] || 3.4;
@@ -1911,8 +1881,8 @@
         // 대부분은 5~10초 동안 거리를 재고 측면 이동을 하며, 공격성이 높은 일부는 2~4초부터 사냥을 시작한다.
         // 원거리/장판/포탑형은 거리가 충분하면 교전 개시 전에도 먼저 견제 사격이나 설치를 할 수 있다.
         function getOpeningPlan(ability, personality, id=0) {
-            const key = ability.sub || ability.n;
-            const h = abilityTimingHash(`${ability.n}:${key}:opening`);
+            const key = ability.sub || ability.timingSeed || ability.n;
+            const h = abilityTimingHash(`${ability.timingSeed||ability.n}:${key}:opening`);
             const v = (h % 1000) / 1000;
             const idJitter = (Math.abs(id) % 9) * 0.07;
             const type = ability.type;
@@ -2143,6 +2113,7 @@
                 this.teamHasteBonus = 0;
                 // 학생 직접 조작 전용 기동/연사 버프. 스킬 횟수 대신 쿨타임으로 반복 사용한다.
                 this.playerMoveBoostFrames = 0;
+                this.playerChaseFrames = 0;
                 this.playerAttackHasteFrames = 0;
                 this.supportPulseFrames = 0;
                 this.supportPulseKind = null;
@@ -2269,6 +2240,7 @@
                     if(this.teamHasteFrames <= 0) this.teamHasteBonus = 0;
                 }
                 if(this.playerMoveBoostFrames > 0) this.playerMoveBoostFrames--;
+                if(this.playerChaseFrames > 0) this.playerChaseFrames--;
                 if(this.playerAttackHasteFrames > 0) this.playerAttackHasteFrames--;
                 if(this.poisonFrames > 0) {
                     this.poisonFrames--;
@@ -2282,8 +2254,8 @@
                 if (this.ability.sub === 'REGEN' && this.hp < this.maxHp && game.frame % 60 === 0) {
                     this.hp = Math.min(this.hp + (4.2 * this.damageMult), this.maxHp); game.addText(this.pos, "✚", "#0f0");
                 }
-                if (this.ability.sub === 'SLEEP' && rand() < 0.005) { this.stunned = 120; game.addText(this.pos, "Zzz...", "#fff"); }
-                if (this.ability.sub === 'SLIP' && rand() < 0.05) this.vel = new Vec2((rand()-0.5)*20, (rand()-0.5)*20);
+                if (!this.humanControlled && this.ability.sub === 'SLEEP' && rand() < 0.005) { this.stunned = 120; game.addText(this.pos, "Zzz...", "#fff"); }
+                if (!this.humanControlled && this.ability.sub === 'SLIP' && rand() < 0.05) this.vel = new Vec2((rand()-0.5)*20, (rand()-0.5)*20);
                 if (this.ability.sub === 'GHOST_MOVE') {
                     if (this.ghostTimer > 0) { this.ghostTimer--; this.invisible = true; } else { this.invisible = false; }
                 }
@@ -2343,6 +2315,8 @@
                         game.spawnImpact(this.pos,38,'#fde047',0.35);
                     }
                     if (this.dashType === 'TURRET_TRAIL' && this.dashFrames % 6 === 0) {
+                        let ownCount=0;for(const t of game.turrets)if(t.owner===this)ownCount++;
+                        if(ownCount>=3){const oldest=game.turrets.findIndex(t=>t.owner===this);if(oldest>=0)game.turrets.splice(oldest,1);}
                         game.turrets.push(new Turret(this, this.pos));
                     }
                     if (this.dashType === 'BULLDOZER_DASH' && this.dashFrames % 5 === 0) {
@@ -3310,6 +3284,13 @@
                     }
                     
                     if (pCount >= 5 && sub !== 'NOVA' && sub !== 'ARCANE_BARRAGE') pSpread = 0.15;
+                    if(manualAim) {
+                        const signature=getPlayerSignatureProjectileProfile(this.ability);
+                        pCount=signature.count;pSpeed=signature.speed;pDmg=signature.damage*this.damageMult;pSize=signature.size;
+                        pSpread=signature.spread;pEmoji=signature.emoji;pExplode=signature.explode;projType=signature.type;
+                        Object.assign(opts,{bounces:signature.bounces,pierce:signature.pierce,spinRate:signature.spin,faceDir:signature.face,
+                            knockback:signature.push,status:signature.status,statusPower:signature.statusPower});
+                    }
                     let startAngle = sub === 'NOVA' ? 0 : -pSpread * (pCount - 1) / 2;
 
                     for (let i = 0; i < pCount; i++) {
@@ -3323,7 +3304,7 @@
                         game.projectiles.push(proj);
                     }
                     // 대마법사: 넓은 탄막 뒤에 유도 마력구 3발을 섞어 카이팅 중에도 압박을 유지.
-                    if(sub === 'ARCANE_BARRAGE' && target?.alive) {
+                    if(sub === 'ARCANE_BARRAGE' && target?.alive && !manualAim) {
                         for(const a of [-0.16,0,0.16]) {
                             const md=aimDir.rotate(a);
                             const missile=new Projectile(
@@ -3337,7 +3318,7 @@
                         game.addText(this.pos,'✨ ARCANE BARRAGE!','#e9d5ff',28,26);
                     }
                     // v21.4 초신성: 난전용 8방향은 유지하면서 1:1에서도 무력하지 않게 타깃 방향 별 3발 추가.
-                    if(sub === 'NOVA' && target?.alive) {
+                    if(sub === 'NOVA' && target?.alive && !manualAim) {
                         for(const a of [-0.09,0,0.09]) {
                             const fd=aimDir.rotate(a);
                             const focusStar=new Projectile(
@@ -3879,13 +3860,14 @@
                             if(game.checkWallCollision(turretPos,18)) turretPos=this.pos;
                             game.addText(turretPos,'🧞 GOLD TURRET!','#fde047',24,22);
                         }
+                        for(let i=game.turrets.length-1;i>=0;i--)if(game.turrets[i].owner===this)game.turrets.splice(i,1);
                         game.turrets.push(new Turret(this,turretPos));
                         break;
                     }
                     case ABILITY_TYPES.LASER: {
                         if(sub==='VOID_DESTRUCTION') {
                             const beamRange=Math.max(260,manualRange||900),beamEnd=this.pos.add(aimDir.mult(beamRange));
-                            game.drawLaser(this.pos,beamEnd,'#a78bfa',72);
+                            game.drawLaser(this.pos,beamEnd,'#a78bfa',144);
                             let totalDealt=0,hitCount=0;
                             for(const victim of game.getNearbyParticipants(this.pos,beamRange+120)) {
                                 if(!victim.alive||victim===this||victim.id===999||(this.team!==0&&victim.team===this.team)) continue;
@@ -3916,9 +3898,10 @@
                             target.vel = dir.mult(20);
                             this.setAbilityCooldown();
                         } else if (sub === 'MULTI_GRAB') {
-                            const candidates = manualAim ? [target] : game.getNearbyParticipants(this.pos,470)
+                            const candidates = game.getNearbyParticipants(this.pos,470)
                                 .filter(p=>p.alive && p!==this && p.id!==999 && (this.team===0 || p.team!==this.team) &&
-                                    !game.checkWallBetween(this.pos,p.pos) && !game.isConcealedFrom(p,this))
+                                    !game.checkWallBetween(this.pos,p.pos) && !game.isConcealedFrom(p,this) &&
+                                    (!manualAim || (p.pos.sub(this.pos).norm().x*aimDir.x+p.pos.sub(this.pos).norm().y*aimDir.y)>.5))
                                 .sort((a,b)=>a.pos.dist(this.pos)-b.pos.dist(this.pos))
                                 .slice(0,3);
                             const grabs = candidates.length ? candidates : [target];
@@ -4033,8 +4016,8 @@
                 if(this.teamGuardFrames > 0 && this.teamGuardStrength > 0) {
                     amt *= Math.max(0.55, 1 - this.teamGuardStrength);
                 }
-                if (this.ability.sub === 'DRIFT') this.vel = this.vel.add(new Vec2(rand()-0.5, rand()-0.5).mult(50));
-                if (!reflected && (this.ability.sub === 'REFLECT' || this.ability.sub === 'SPIKE_REFLECT') && attacker && attacker !== this && attacker.id !== 999) {
+                if (!this.humanControlled && this.ability.sub === 'DRIFT') this.vel = this.vel.add(new Vec2(rand()-0.5, rand()-0.5).mult(50));
+                if (!reflected && (this.ability.sub === 'REFLECT' || this.ability.sub === 'SPIKE_REFLECT' || (this.ability.combat?.skill==='counter' && this.teamGuardFrames>0)) && attacker && attacker !== this && attacker.id !== 999) {
                     attacker.takeDamage(amt * 0.5, this, true); game.drawLaser(this.pos, attacker.pos, '#fff');
                 }
 
@@ -5956,7 +5939,7 @@
             // 생존자가 많은 초반 호스트 화면. 판정에 필요한 오브젝트는 모두 유지하고
             // 장식 효과와 복잡한 캐릭터 드로잉만 줄인다.
             drawHostLite() {
-                const cw=canvas.width,ch=canvas.height,worldRadius=2700;
+                const cw=canvas.width,ch=canvas.height,worldRadius=this.worldRadius||2700;
                 const scale=Math.min(cw,ch)/(worldRadius*2+180),cx=cw/2,cy=ch/2;
                 ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#101a30';ctx.fillRect(0,0,cw,ch);
                 ctx.fillStyle='#1e293b';ctx.beginPath();ctx.arc(cx,cy,worldRadius*scale,0,Math.PI*2);ctx.fill();
@@ -5964,23 +5947,23 @@
                 const grid=400*scale;
                 for(let x=cx-worldRadius*scale;x<=cx+worldRadius*scale;x+=grid){ctx.beginPath();ctx.moveTo(x,cy-worldRadius*scale);ctx.lineTo(x,cy+worldRadius*scale);ctx.stroke();}
                 for(let y=cy-worldRadius*scale;y<=cy+worldRadius*scale;y+=grid){ctx.beginPath();ctx.moveTo(cx-worldRadius*scale,y);ctx.lineTo(cx+worldRadius*scale,y);ctx.stroke();}
-                ctx.strokeStyle='#fb4b63';ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx+(this.center.x||0)*scale,cy+(this.center.y||0)*scale,Math.max(1,this.mapRadius*scale),0,Math.PI*2);ctx.stroke();
-                // 장애물은 윤곽만 일부 그린다.
-                ctx.fillStyle='rgba(148,163,184,.28)';
-                for(let wi=0;wi<this.walls.length;wi+=2){const w=this.walls[wi];ctx.fillRect(cx+(w.x-w.w*.5)*scale,cy+(w.y-w.h*.5)*scale,Math.max(1,w.w*scale),Math.max(1,w.h*scale));}
-                for(let zi=Math.max(0,this.zones.length-28);zi<this.zones.length;zi++) {const z=this.zones[zi];
+                const ringX=cx+(this.center.x||0)*scale,ringY=cy+(this.center.y||0)*scale;
+                window.brCombatVisual.dangerFill(ctx,ringX,ringY,this.mapRadius*scale,worldRadius*scale);
+                window.brCombatVisual.dangerBoundary(ctx,ringX,ringY,this.mapRadius*scale,1,this.frame*(1000/60));
+                ctx.fillStyle='rgba(34,130,85,.30)';
+                for(const bush of this.bushes){ctx.beginPath();ctx.arc(cx+bush.x*scale,cy+bush.y*scale,Math.max(1,bush.radius*scale),0,Math.PI*2);ctx.fill();}
+                this.drawCombatBeams(ctx,scale,cx,cy);
+                ctx.fillStyle='rgba(148,163,184,.42)';
+                for(const wall of this.walls){ctx.save();ctx.translate(cx+wall.x*scale,cy+wall.y*scale);ctx.rotate(wall.angle||0);ctx.fillRect(-wall.w*scale*.5,-wall.h*scale*.5,wall.w*scale,wall.h*scale);ctx.restore();}
+                for(const z of this.zones) {
                     if(z.duration<=0||!z.pos)continue;
-                    ctx.globalAlpha=.28;ctx.fillStyle=z.color||'#64748b';ctx.beginPath();ctx.arc(cx+z.pos.x*scale,cy+z.pos.y*scale,Math.max(2,z.radius*scale),0,Math.PI*2);ctx.fill();
+                    window.brCombatVisual.hazard(ctx,cx+z.pos.x*scale,cy+z.pos.y*scale,Math.max(1,z.radius*scale),z.color,z.type,z.owner?.ability?.e||'',1,false);
                 }
-                ctx.globalAlpha=1;
-                const shotStart=Math.max(0,this.projectiles.length-120),shotCount=this.projectiles.length-shotStart;
-                for(let si=shotStart;si<this.projectiles.length;si++) {
-                    const q=this.projectiles[si];if(!q.pos||q.life<=0)continue;
-                    const important=!!q.playerSkillBlast||String(q.weaponStyle||'').indexOf('skill-')===0||q.type==='ORBIT';
-                    if(!important&&shotCount>80&&(si-shotStart)%2)continue;
-                    const x=cx+q.pos.x*scale,y=cy+q.pos.y*scale,vx=Number(q.vel?.x||0),vy=Number(q.vel?.y||0),vm=Math.hypot(vx,vy)||1;
-                    ctx.strokeStyle=q.trailColor||q.color||'#fff';ctx.lineWidth=important?3:1.5;ctx.beginPath();ctx.moveTo(x-vx/vm*(important?12:6),y-vy/vm*(important?12:6));ctx.lineTo(x,y);ctx.stroke();
-                    ctx.fillStyle=important?'#fff':(q.color||'#fff');ctx.beginPath();ctx.arc(x,y,important?3.5:2,0,Math.PI*2);ctx.fill();
+                for(const turret of this.turrets)if(turret.life>0)window.brCombatVisual.turret(ctx,cx+turret.pos.x*scale,cy+turret.pos.y*scale,turret.owner?.ability?.e||'',turret.isGolden,1);
+                for(const q of this.projectiles) {
+                    if(!q.pos||q.life<=0)continue;
+                    const rotation=q.faceDir?Math.atan2(q.vel?.y||0,q.vel?.x||0):q.spinAngle||0;
+                    window.brCombatVisual.projectile(ctx,cx+q.pos.x*scale,cy+q.pos.y*scale,Number(q.vel?.x||0)*scale,Number(q.vel?.y||0)*scale,Math.max(1.5,q.size*scale),q.emoji||'',q.trailColor||q.color||'#fff',q.weaponStyle||'',1,1,rotation);
                 }
                 const swingColors={S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'};
                 for(let swi=Math.max(0,this.swings.length-34);swi<this.swings.length;swi++) {const swing=this.swings[swi];
@@ -6000,6 +5983,7 @@
                         continue;
                     }
                     ctx.fillStyle=tierColor[p.ability?.t]||'#fff';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+                    ctx.drawImage(window.brCombatVisual.emojiSprite(p.ability?.e||'👤'),x-r*1.4,y-r*1.4,r*2.8,r*2.8);
                     if(p.humanControlled){ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#e2e8f0';ctx.font='700 8px sans-serif';ctx.textAlign='center';ctx.fillText(String(p.name||''),x,y-9);}
                     const hp=Math.max(0,p.hp/Math.max(1,p.maxHp)),barW=14;
                     ctx.fillStyle='rgba(20,30,45,.92)';ctx.fillRect(x-barW/2,y+8,barW,2.5);ctx.fillStyle=hp>.35?'#4ade80':'#fb4b63';ctx.fillRect(x-barW/2,y+8,barW*hp,2.5);
@@ -6058,9 +6042,9 @@
                 ctx.scale(this.zoom, this.zoom);
                 ctx.translate(-this.lookAt.x + shakeX + this.cameraKick.x, -this.lookAt.y + shakeY + this.cameraKick.y);
 
-                ctx.beginPath(); ctx.arc(this.center.x, this.center.y, this.mapRadius, 0, Math.PI*2);
-                ctx.strokeStyle = '#ef4444'; ctx.lineWidth=10; ctx.stroke();
-                ctx.fillStyle = '#1e293b'; ctx.fill();
+                ctx.beginPath();ctx.arc(this.center.x,this.center.y,this.worldRadius||2700,0,Math.PI*2);
+                ctx.fillStyle='#1e293b';ctx.fill();
+                window.brCombatVisual.dangerFill(ctx,this.center.x,this.center.y,this.mapRadius,this.worldRadius||2700);
 
                 ctx.strokeStyle = '#334155'; ctx.lineWidth=2;
                 for(let i=-3200; i<=3200; i+=200) {
@@ -6069,6 +6053,7 @@
                 }
 
                 this.bushes.forEach(b => b.draw(ctx,false));
+                this.drawCombatBeams(ctx);
                 this.walls.forEach(w => w.draw(ctx));
                 this.zones.forEach(z => z.draw(ctx));
                 this.turrets.forEach(t => t.draw(ctx));
@@ -6223,6 +6208,7 @@
                 this.bushes.forEach(b => b.draw(ctx,true));
 
                 // v22.2 draw LOD: 30명 이상에서는 작은 장식 파티클을 절반만 그리되 실제 전투 오브젝트는 모두 유지.
+                window.brCombatVisual.dangerBoundary(ctx,this.center.x,this.center.y,this.mapRadius,this.zoom,this.frame*(1000/60));
                 this.projectiles.forEach(p => p.draw(ctx));
                 this.swings.forEach((s,i) => { if(this.getPerformanceTier()<3 || i%2===0 || s.tier==='S') s.draw(ctx); });
                 this.particles.forEach((p,i) => { if(this.getPerformanceTier()<3 || i%2===0) p.draw(ctx); });
@@ -6316,10 +6302,18 @@
                     this.screenFlashColor = '255,245,220';
                 }
             }
+            drawCombatBeams(c,scale=1,offsetX=0,offsetY=0) {
+                // Authoritative hitscan events are gameplay cues, independent of particle budgets.
+                for(const e of this.studentFx) {
+                    const age=this.frame-e.frame;if(e.type!=='laser'||age<0||age>=12)continue;
+                    window.brCombatVisual.beam(c,offsetX+e.x*scale,offsetY+e.y*scale,e.dx,e.dy,e.size*scale,e.amount*scale,e.color,1-age/12);
+                }
+            }
             drawLaser(from, to, color, width=6) {
                 const delta=to.sub(from),length=delta.mag(),dir=length>0?delta.norm():new Vec2(1,0);
                 this.emitStudentFx('laser',from,{dx:dir.x,dy:dir.y,size:length,color:color||'#ffffff',amount:width});
-                if(this.isVisualPerformanceMode() || (!this.hasParticleRoom(1) && this.getPerformanceTier()>=2)) return;
+                // Online hosts draw the one event in both quality modes; do not create a second beam.
+                if(window.BRMP?.active)return;
                 this.particles.push({
                     life: 5, maxLife: 5, update: function() { this.life--; },
                     draw: function(c) {
@@ -6673,29 +6667,74 @@
         }
         
 
-        // --- 📊 전투 통계 / 전적 시스템 ---
-        // v21.19: 지금까지 누적된 전적은 한 번만 초기화하고 이후 기록은 새 키에 다시 누적한다.
-        const STATS_KEY = 'battleRoyaleAbilityStats_v21_19';
-        const STATS_RESET_MARKER = 'battleRoyaleStatsReset_v21_19';
-        try {
-            if(!localStorage.getItem(STATS_RESET_MARKER)) {
-                localStorage.removeItem('battleRoyaleAbilityStats_v12');
-                localStorage.removeItem(STATS_KEY);
-                localStorage.setItem(STATS_RESET_MARKER, '1');
+        // Stable identity survives roster ordering and keeps retired match records intact.
+        function brLegacyAbility(index) {
+            index=Number(index);
+            return Number.isInteger(index)&&index>=0?BR_LEGACY_ROSTER[index]||null:null;
+        }
+        function brLegacyReplacementId(index) {
+            return BR_LEGACY_REPLACEMENTS instanceof Map?BR_LEGACY_REPLACEMENTS.get(Number(index)):BR_LEGACY_REPLACEMENTS[index];
+        }
+        function brResolveAbilityIndex(record) {
+            if(!record||typeof record!=='object')return -1;
+            var id=record.abilityId;
+            if(id) {
+                if(BR_ROSTER_INDEX.has(id))return BR_ROSTER_INDEX.get(id);
+                var retired=BR_LEGACY_ROSTER.find(function(a){return a.id===id;});
+                var replacement=retired&&brLegacyReplacementId(retired.legacyIndex);
+                return replacement&&BR_ROSTER_INDEX.has(replacement)?BR_ROSTER_INDEX.get(replacement):-1;
             }
-        } catch(e) {}
+            if(record.abilityIndex==null||record.abilityIndex==='')return -1;
+            var index=Number(record.abilityIndex);
+            if(!Number.isInteger(index)||index<0)return -1;
+            if(record.rosterVersion===BR_ROSTER_VERSION)return EMOJI_DB[index]?index:-1;
+            if(record.rosterVersion)return -1;
+            var legacy=brLegacyAbility(index),legacyId=legacy&&(BR_ROSTER_INDEX.has(legacy.id)?legacy.id:brLegacyReplacementId(index));
+            return legacyId&&BR_ROSTER_INDEX.has(legacyId)?BR_ROSTER_INDEX.get(legacyId):-1;
+        }
+        function brResultAbility(record,resultVersion) {
+            record=record||{};
+            // Historical rows are never relabelled as their replacement character.
+            var current=record.abilityId&&BR_ROSTER_INDEX.has(record.abilityId)?EMOJI_DB[BR_ROSTER_INDEX.get(record.abilityId)]:null;
+            var legacy=record.abilityId?BR_LEGACY_ROSTER.find(function(a){return a.id===record.abilityId;}):null;
+            var version=record.rosterVersion||resultVersion,index=record.abilityIndex==null||record.abilityIndex===''?-1:Number(record.abilityIndex);
+            var indexed=!record.abilityId&&Number.isInteger(index)&&index>=0?EMOJI_DB[index]:null;
+            var ability=version===BR_ROSTER_VERSION?current||legacy||indexed:legacy||(!version&&record.abilityIndex!=null?brLegacyAbility(record.abilityIndex):null);
+            return {id:record.abilityId||ability&&ability.id||'',t:record.tier||ability&&ability.t||'?',
+                n:record.abilityName||ability&&ability.n||'이전 캐릭터',e:record.abilityEmoji||ability&&ability.e||'❔'};
+        }
 
+        // --- 📊 전투 통계 / 전적 시스템 ---
+        const STATS_KEY = 'battleRoyaleAbilityStats_v21_19';
         function loadAbilityStats() {
-            try { return JSON.parse(localStorage.getItem(STATS_KEY) || '{}'); }
-            catch(e) { return {}; }
+            try {
+                var source=JSON.parse(localStorage.getItem(STATS_KEY)||'{}');
+                if(!source||typeof source!=='object'||Array.isArray(source))return {};
+                var stats={},changed=false,totals=['games','wins','kills','damage','damageTaken','survival','uses'];
+                Object.keys(source).forEach(function(key){
+                    var row=source[key];if(!row||typeof row!=='object')return;
+                    var legacy=BR_LEGACY_ROSTER.find(function(a){return a.id===key||a.t+'|'+a.n===key;});
+                    var id=row.abilityId||legacy&&legacy.id||key;
+                    var current=BR_ROSTER_INDEX.has(id)?EMOJI_DB[BR_ROSTER_INDEX.get(id)]:null;
+                    var ability=current||legacy,target=stats[id];
+                    if(!target){target=Object.assign({},row);totals.forEach(function(field){target[field]=0;});stats[id]=target;}
+                    totals.forEach(function(field){target[field]+=Number(row[field])||0;});
+                    if(ability) {
+                        target.abilityId=id;target.tier=ability.t;target.name=ability.n;target.emoji=ability.e;target.retired=!current;
+                        if(key!==id||row.name!==ability.n||row.retired!==!current||row.abilityId!==id)changed=true;
+                    }
+                });
+                if(changed)localStorage.setItem(STATS_KEY,JSON.stringify(stats));
+                return stats;
+            } catch(e) { return {}; }
         }
 
         function saveMatchStats(participants, winner) {
             const stats = loadAbilityStats();
             participants.filter(p => p.id !== 999).forEach(p => {
-                const key = `${p.ability.t}|${p.ability.n}`;
+                const key = p.ability.id || `${p.ability.t}|${p.ability.n}`;
                 if(!stats[key]) stats[key] = {
-                    tier:p.ability.t, name:p.ability.n, emoji:p.ability.e,
+                    abilityId:p.ability.id || null, tier:p.ability.t, name:p.ability.n, emoji:p.ability.e, retired:false,
                     games:0, wins:0, kills:0, damage:0, damageTaken:0,
                     survival:0, uses:0
                 };
@@ -7655,51 +7694,64 @@
         }
         function brGetPlayableSkillInfo(ability) {
             if(!ability||isTeamSupportAbility(ability))return null;
-            var tier=ability.t||'C',type=ability.type,sub=ability.sub||'',hash=abilityTimingHash((ability.n||'emoji')+'|player-skill');
-            var cooldownExtra=brTierValue(tier,{S:0,A:45,B:90,C:135,F:180});
-            function skill(key,label,desc,baseCooldown){return {key:key,label:label,desc:desc,cooldown:baseCooldown+cooldownExtra};}
-
+            var tier=ability.t||'C',type=ability.type,sub=ability.sub||'',extra=brTierValue(tier,{S:0,A:45,B:90,C:135,F:180});
+            function info(key,label,desc,cd){return {key:key,label:label,desc:desc,cooldown:cd+extra};}
+            if((ability.combat&&ability.combat.skill==='counter')||sub==='REFLECT'||sub==='SPIKE_REFLECT')return info('guard-counter',sub==='REFLECT'||sub==='SPIKE_REFLECT'?'방패 반격':'프라이팬 반격','짧게 방어하며 받은 피해를 되돌림',720);
+            if(sub==='SLIP')return info('slip-dash','비눗길','조준 방향으로 짧게 미끄러져 회피',600);
+            if(sub==='STONE')return info('guard-pulse','벽돌 요새','주변을 밀어내고 잠시 피해를 줄임',720);
+            if(sub==='SLOW_TANK')return info('guard-shell','등껍질 가드','2초간 피해를 줄여 버팀',660);
+            if(type===ABILITY_TYPES.PROJ||type===ABILITY_TYPES.LASER||type===ABILITY_TYPES.ORBIT)
+                return info('native',ability.skillLabel||({SWORD_ORBIT:'검무 전개',GEAR_ORBIT:'톱니 전개',TORNADO_ORBIT:'회오리 전개',ROLLING_BLADE:'회전 바퀴',SNIPE:'정밀 저격',ARCANE_BARRAGE:'마력 탄막',NOVA:'별빛 난사',VOID_DESTRUCTION:'공허 광선'})[sub]||'고유 스킬',ability.skillDesc||ability.desc||'고유 능력을 사용',type===ABILITY_TYPES.ORBIT?810:900);
             if(type===ABILITY_TYPES.TELEPORT) {
-                if(sub==='THUNDER')return skill('teleport-thunder','낙뢰 강림','조준한 곳으로 번개 이동 후 주변을 폭발시킴',900);
-                if(sub==='DIVE_LAVA')return skill('teleport-lava','용암 강하','조준한 곳에 착지해 폭발과 용암을 남김',960);
-                return skill('teleport-assassin',sub==='VOID_ASSASSIN'?'공허 처형':'그림자 기습','조준한 곳으로 순간이동해 착지 범위의 적을 암살',810);
+                if(sub==='THUNDER')return info('teleport-thunder','낙뢰 강림','순간이동 후 착지 주변에 낙뢰',900);
+                if(sub==='DIVE_LAVA')return info('teleport-lava','용암 강하','순간이동 후 착지 지점에 용암',960);
+                return info('teleport-assassin','그림자 기습','순간이동 후 가장 가까운 적을 처형',810);
             }
-            // 탱커는 충돌, 제어, 초중량 한 방으로 세 가지 손맛을 갖는다.
-            if(isTankAbility(ability)) {
-                if(type===ABILITY_TYPES.DASH||IMPACT_CHARGE_SUBS.has(sub)||/RUSH|CHARGE|DASH/.test(sub))
-                    return skill('tank-charge','철벽 돌진','직선으로 충돌해 적을 멀리 날리고 기절시킴',780);
-                if(sub==='HAMMER'||sub==='TANK_TURTLE'||sub==='TANK_CRAB'||hash%3===1)
-                    return skill('tank-stun','대지 진압','주변을 내려쳐 다수의 적을 기절시킴',900);
-                return skill('tank-punch','초중량 펀치','앞의 적 하나를 강하게 때려 크게 날려보냄',750);
+            if(type===ABILITY_TYPES.DASH)return null; // Native dash retains trail/contact mechanics.
+            if(isTankAbility(ability)&&type===ABILITY_TYPES.MELEE&&!['HAMMER','HEAVY_PUNCH','VAMPIRE_SLASH','SCISSOR_DASH','SOUL_CLEAVE'].includes(sub)) {
+                if(sub==='TANK_RHINO')return info('tank-charge','철벽 돌진','충돌로 진입한 뒤 짧게 방어',780);
+                if(sub==='TANK_TURTLE'||sub==='TANK_CRAB')return info('tank-stun','대지 진압','주변을 밀어내고 짧게 방어',900);
+                return info('tank-punch','초중량 펀치','전방 한 명을 멀리 날리고 짧게 방어',750);
             }
-
-            // 근접형은 진입, 어퍼컷, 연격으로 플레이 방식이 갈린다.
-            if(type===ABILITY_TYPES.MELEE||type===ABILITY_TYPES.ORBIT) {
-                if(sub==='SOUL_CLEAVE'||sub==='BASIC')
-                    return skill('melee-lunge','순간 진입','짧게 질주하며 진로의 적을 베어 내침',690);
-                if(sub==='HEAVY_PUNCH'||sub==='HAMMER'||hash%3===1)
-                    return skill('melee-uppercut','어퍼컷','한 명을 강하게 띄워 날리고 잠시 움직이지 못하게 함',750);
-                if(sub==='SCISSOR_DASH'||sub==='VAMPIRE_SLASH'||type===ABILITY_TYPES.ORBIT||hash%3===2)
-                    return skill('melee-combo','폭풍 연격','앞의 적들을 세 번 빠르게 베어 내침',810);
-                return skill('melee-lunge','순간 진입','짧게 질주하며 진로의 적을 베어 내침',690);
-            }
-
-            // 원거리는 무기 콘셉을 따라 초강타, 연사 버프, 기동 버프 중 하나를 가진다.
-            if(type===ABILITY_TYPES.PROJ||type===ABILITY_TYPES.LASER) {
-                var style=getRangedWeaponStyle(ability);
-                if(style==='sniper'||style==='bomber'||style==='heavy')
-                    return skill('ranged-power',brRangedPowerProfile(ability).label,'선명한 대형 강탄 · 적중하거나 사거리 끝에서 폭발',900);
-                if(style==='machine'||hash%3===1)
-                    return skill('ranged-overdrive','초가속 연사','5초간 일반 공격 재사용 속도가 대폭 증가',840);
-                if(hash%3===2)return skill('ranged-sprint','기동 부스트','4초간 이동 속도가 대폭 증가',780);
-                return skill('ranged-power',brRangedPowerProfile(ability).label,'선명한 대형 강탄 · 적중하거나 사거리 끝에서 폭발',900);
+            if(type===ABILITY_TYPES.MELEE) {
+                if(sub==='HEAVY_PUNCH'||sub==='HAMMER')return info('melee-uppercut',sub==='HAMMER'?'망치 충격':'어퍼컷',sub==='HAMMER'?'전방 한 명을 확실하게 기절':'전방 한 명을 크게 밀어냄',750);
+                if(sub==='VAMPIRE_SLASH')return info('melee-drain','피의 갈증','흡혈 베기 · 저체력 광란 중 연속 흡혈',810);
+                if(sub==='SCISSOR_DASH')return info('melee-combo','연속 가위질','앞의 적을 베고 짧은 연속타로 압박',810);
+                return info('melee-lunge',sub==='SOUL_CLEAVE'?'영혼 진입':'순간 진입',sub==='SOUL_CLEAVE'?'짧게 진입하고 적중하면 방어':'짧게 질주하며 진로의 적을 베기',690);
             }
             return null;
         }
+        function brBasicCombatProfile(ability) {
+            if(ability._basicIdentity)return ability._basicIdentity;
+            var tier=ability.t||'C',sub=ability.sub||'',close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].includes(ability.type)||((sub==='REFLECT'||sub==='SLOW_TANK')&&isTankAbility(ability));
+            var base=getRangedCombatProfile(ability,'basic'),p={close:close,rangeBonus:86,halfAngle:Math.acos(.05),cooldownScale:1,damageScale:1,pushScale:1,stun:0,reward:'',style:'slash'};
+            if(close) {
+                if(sub==='HEAVY_PUNCH'||sub==='TANK_GORILLA')Object.assign(p,{halfAngle:1.02,cooldownScale:1.15,damageScale:1.15,style:'punch'});
+                else if(sub==='HAMMER')Object.assign(p,{rangeBonus:92,halfAngle:.96,cooldownScale:1.18,damageScale:1.08,pushScale:.8,stun:11,style:'hammer'});
+                else if(isTankAbility(ability)&&!['VAMPIRE_SLASH','SCISSOR_DASH','SOUL_CLEAVE'].includes(sub))Object.assign(p,{halfAngle:1.22,pushScale:.62,stun:5,reward:'guard',style:'punch'});
+                else if(sub==='VAMPIRE_SLASH')Object.assign(p,{cooldownScale:.91,damageScale:.91,pushScale:.26,stun:3,reward:'drain'});
+                else if(sub==='SCISSOR_DASH')Object.assign(p,{halfAngle:1.14,cooldownScale:.84,damageScale:.84,pushScale:.22,stun:3,reward:'chase',style:'scissor'});
+                else if(sub==='SOUL_CLEAVE')Object.assign(p,{halfAngle:1.24,pushScale:.35,stun:4,reward:'guard',style:'soul'});
+                else if(ability.type===ABILITY_TYPES.TELEPORT)Object.assign(p,{halfAngle:.95,cooldownScale:1.08,damageScale:1.08,pushScale:.27,stun:3});
+                else Object.assign(p,{pushScale:.40,stun:4,reward:ability.type===ABILITY_TYPES.MELEE?'chase':''});
+            } else {
+                Object.assign(p,base,{emoji:getIdentityProjectileEmoji(ability),type:'bullet',count:1,spread:0,pierce:false,bounces:0,explode:0,status:null,statusPower:0,spin:Number(ability.spinRate||0),face:!!ability.faceDir});
+                if(ability.projType==='BOOMERANG'||sub==='BOOMERANG')Object.assign(p,{type:'BOOMERANG',style:'boomerang',damageScale:base.damageScale*.70});
+                else if(ability.projType==='missile'||sub==='GHOST_MOVE')Object.assign(p,{type:'missile',style:'homing'});
+                else if(Number(ability.pBounce||0)>0)Object.assign(p,{bounces:Math.min(2,Number(ability.pBounce)),pierce:!!ability.pierce,style:'bounce'});
+                else if(ability.pierce||sub==='AIMED_SHOT')Object.assign(p,{pierce:true,style:'pierce'});
+                else if(base.style==='bomber')Object.assign(p,{explode:Math.min(60,base.explodeRadius*.72),style:'bomber'});
+                else if(Number(ability.pCount||0)>=2&&base.style!=='machine')Object.assign(p,{count:Math.min(3,Number(ability.pCount)),spread:.13,style:'spread'});
+                if(sub==='STING'||ability.pStatus==='poison')Object.assign(p,{status:'poison',statusPower:54});
+                // Split the existing damage budget over the spread; extra glyphs are real shots, not decorative particles.
+                p.damageScale/=p.count;
+            }
+            Object.defineProperty(ability,'_basicIdentity',{value:p,configurable:true,writable:true});return p;
+        }
         function brBasicAttackFrames(ability) {
-            var cd=({S:34,A:38,B:43,C:48,F:56}[ability.t]||46)+Math.abs(abilityTimingHash((ability.n||'emoji')+'|basic'))%11-5;
+            var cd=({S:34,A:38,B:43,C:48,F:56}[ability.t]||46)+Math.abs(abilityTimingHash((ability.timingSeed||ability.n||'emoji')+'|basic'))%11-5;
             var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].includes(ability.type);
-            return close?cd:Math.round(cd*getRangedCombatProfile(ability,'basic').cooldownScale);
+            return Math.max(12,Math.round(cd*brBasicCombatProfile(ability).cooldownScale));
         }
         function brBasicShotSize(ability,rendered) {
             var style=getRangedCombatProfile(ability,'basic').style;
@@ -7713,19 +7765,22 @@
             var type=ability.type,tier=ability.t||'C',sub=ability.sub||'';
             var label=kind==='attack'?'일반 공격':(ability.n||'스킬');
             if(kind==='attack') {
-                var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].indexOf(type)>=0;
-                if(close)return {shape:'cone',range:playerRadius+86,halfAngle:Math.acos(.05),width:playerRadius*.8,label:label};
-                var basicProfile=getRangedCombatProfile(ability,'basic');
+                var close=brBasicCombatProfile(ability).close;
+                if(close){var melee=brBasicCombatProfile(ability);return {shape:'cone',range:playerRadius+melee.rangeBonus,halfAngle:melee.halfAngle,width:playerRadius*.8,label:label};}
+                var basicProfile=brBasicCombatProfile(ability);
+                if(basicProfile.count>1)return {shape:'cone',range:playerRadius*.7+Math.ceil(basicProfile.range/basicProfile.speed)*basicProfile.speed,halfAngle:basicProfile.spread*(basicProfile.count-1)*.5+.025,width:brBasicShotSize(ability,true)*2,label:'일반 공격 · 산탄'};
                 return {shape:'line',range:playerRadius*.7+Math.ceil(basicProfile.range/basicProfile.speed)*basicProfile.speed,width:brBasicShotSize(ability,true)*2,label:label+' · '+({sniper:'저격',machine:'연사',bomber:'폭격',heavy:'중포',homing:'유도',boomerang:'왕복',standard:'사격'}[basicProfile.style]||'사격')};
             }
             var playable=brGetPlayableSkillInfo(ability);
             if(playable) {
                 label=playable.label;
+                if(playable.key==='slip-dash')return {shape:'dash',range:280*(.4+.6*power),width:playerRadius*1.5,label:label};
+                if(playable.key.indexOf('guard-')===0)return {shape:'circle',range:playable.key==='guard-pulse'?165:playerRadius+48,radius:playable.key==='guard-pulse'?165:playerRadius+48,label:label};
                 if(playable.key==='tank-charge')return {shape:'dash',range:brTierValue(tier,{S:620,A:570,B:520,C:470,F:400})*(.34+.66*power),width:playerRadius*1.9,impactRadius:playerRadius*1.45,label:label};
                 if(playable.key==='tank-stun')return {shape:'circle',range:brTierValue(tier,{S:245,A:228,B:210,C:192,F:170}),radius:brTierValue(tier,{S:245,A:228,B:210,C:192,F:170}),label:label};
                 if(playable.key==='tank-punch'||playable.key==='melee-uppercut')return {shape:'cone',range:playerRadius+brTierValue(tier,{S:190,A:176,B:162,C:148,F:128}),halfAngle:.62,width:playerRadius*1.2,label:label};
                 if(playable.key==='melee-lunge')return {shape:'dash',range:brTierValue(tier,{S:500,A:460,B:420,C:380,F:330})*(.38+.62*power),width:playerRadius*1.5,impactRadius:playerRadius*1.1,label:label};
-                if(playable.key==='melee-combo')return {shape:'cone',range:playerRadius+brTierValue(tier,{S:210,A:195,B:180,C:165,F:145}),halfAngle:.86,width:playerRadius*1.45,label:label};
+                if(playable.key==='melee-combo'||playable.key==='melee-drain')return {shape:'cone',range:playerRadius+brTierValue(tier,{S:210,A:195,B:180,C:165,F:145}),halfAngle:.86,width:playerRadius*1.45,label:label};
                 if(playable.key.indexOf('teleport-')===0) {
                     var blinkMax=sub==='DIVE_LAVA'?560:sub==='BACKSTAB'?520:650;
                     var blinkRadius=sub==='THUNDER'?220:sub==='DIVE_LAVA'?205:sub==='VOID_ASSASSIN'?180:140;
@@ -7753,10 +7808,13 @@
                 return {shape:'target',range:700*(.22+.78*power),radius:zoneR,label:label};
             }
             if(type===ABILITY_TYPES.TURRET) return {shape:'target',range:470*(.22+.78*power),radius:64,label:label};
-            if(type===ABILITY_TYPES.PULL) return {shape:'line',range:500,width:125,label:label};
-            if(type===ABILITY_TYPES.LASER) return {shape:'line',range:800,width:36,label:label};
+            if(type===ABILITY_TYPES.PULL)return sub==='MULTI_GRAB'?{shape:'cone',range:470,halfAngle:Math.PI/3,label:label}:{shape:'line',range:500,width:125,label:label};
+            if(type===ABILITY_TYPES.LASER) return {shape:'line',range:800,width:sub==='VOID_DESTRUCTION'?144:36,label:label};
             if(type===ABILITY_TYPES.PROJ) {
                 var profile=getRangedCombatProfile(ability,'skill');
+                if(sub==='NOVA')return {shape:'circle',range:profile.range,radius:profile.range,label:label};
+                var signature=getPlayerSignatureProjectileProfile(ability);
+                if(signature.count>1&&sub!=='SNIPE')return {shape:'cone',range:profile.range,halfAngle:signature.spread*(signature.count-1)*.5+.025,label:label};
                 return {shape:'line',range:profile.range,width:Math.max(44,Number(ability.pSize||12)*3.4),label:label+' · '+({sniper:'저격',machine:'연사',bomber:'폭격',heavy:'중포',homing:'유도',boomerang:'왕복',standard:'사격'}[profile.style]||'사격')};
             }
             if(type===ABILITY_TYPES.AREA) {
@@ -7878,7 +7936,7 @@
                 BRMP.role='host'; BRMP.backend='firebase'; BRMP.roomCode=code;
                 BRMP.playerId=(BRMP.auth&&BRMP.auth.currentUser&&BRMP.auth.currentUser.uid)||brUid('host'); BRMP.players={}; BRMP.inputs={}; BRMP.results=null;
                 BRMP.roomMeta={
-                    phase:'lobby',hostId:BRMP.playerId,hostConnected:true,createdAt:brNow(),
+                    phase:'lobby',rosterVersion:BR_ROSTER_VERSION,hostId:BRMP.playerId,hostConnected:true,createdAt:brNow(),
                     updatedAt:brNow(),expiresAt:brNow()+1000*60*60*6,mode:'solo',teamCount:0,
                     quizSeconds:60,matchSeconds:180,mapIndex:-1,rerollEvery:3,seed:brUid('seed')
                 };
@@ -7897,7 +7955,7 @@
             BRMP.role='host'; BRMP.backend='local'; BRMP.roomCode='DEMO';
             BRMP.playerId='host-demo'; BRMP.players={}; BRMP.inputs={}; BRMP.results=null;
             BRMP.roomMeta={
-                phase:'lobby',hostId:'host-demo',hostConnected:true,createdAt:brNow(),updatedAt:brNow(),
+                phase:'lobby',rosterVersion:BR_ROSTER_VERSION,hostId:'host-demo',hostConnected:true,createdAt:brNow(),updatedAt:brNow(),
                 mode:'solo',teamCount:0,quizSeconds:60,matchSeconds:180,mapIndex:-1,rerollEvery:3,seed:'demo-'+brNow()
             };
             BRMP.localDemoHumanId='demo-human';
@@ -7913,7 +7971,7 @@
                 BRMP.joinUrl='이 기기 전용 데모';
             } else {
                 // Firebase 설정은 파일에 내장되어 있으므로 짧고 인식이 빠른 직접 참가 QR만 만든다.
-                BRMP.joinUrl=BR_PUBLIC_URL+'?room='+encodeURIComponent(BRMP.roomCode)+'&join=1';
+                BRMP.joinUrl=BR_PUBLIC_URL+'?room='+encodeURIComponent(BRMP.roomCode)+'&join=1&v='+encodeURIComponent(BR_ROSTER_VERSION);
             }
             brEl('br-join-link').value=BRMP.joinUrl;
             brEl('br-room-code').textContent=BRMP.roomCode;
@@ -7964,6 +8022,7 @@
                 var metaSnap=await BRMP.db.ref(base+'/meta').once('value');
                 if(!metaSnap.exists())throw new Error('방을 찾을 수 없습니다. 방 번호를 확인해 주세요.');
                 var meta=metaSnap.val();
+                if(meta.rosterVersion!==BR_ROSTER_VERSION)throw new Error('캐릭터 버전이 다릅니다. 선생님과 같은 최신 파일로 새 방에 참가해 주세요.');
                 if(meta.phase==='closed')throw new Error('이미 종료된 방입니다.');
                 var storedId=sessionStorage.getItem('br_player_'+code);
                 var pid=(BRMP.auth&&BRMP.auth.currentUser&&BRMP.auth.currentUser.uid)||storedId||brUid('p');
@@ -7976,7 +8035,7 @@
                 if(duplicate)throw new Error('같은 이름의 학생이 이미 참가했습니다. 이름을 구분해 주세요.');
                 var previous=list[pid]||{};
                 var record=Object.assign({},previous,{
-                    name:name,connected:true,bot:false,joinedAt:previous.joinedAt||brNow(),lastSeen:brNow()
+                    name:name,connected:true,bot:false,rosterVersion:BR_ROSTER_VERSION,joinedAt:previous.joinedAt||brNow(),lastSeen:brNow()
                 });
                 await BRMP.db.ref(base+'/players/'+pid).set(record);
                 try{BRMP.db.ref(base+'/players/'+pid+'/connected').onDisconnect().set(false);}catch(e){}
@@ -8064,8 +8123,8 @@
             if(!box)return;
             var txt='<b>'+brEscape(p.name||'학생')+'</b><br>';
             if(BRMP.roomMeta&&BRMP.roomMeta.phase==='quiz')txt+='정답 '+Number(p.quizScore||0)+'개 · 예상 리롤권 '+Math.floor(Number(p.quizScore||0)/3)+'개';
-            else if(BRMP.roomMeta&&BRMP.roomMeta.phase==='draft'&&Number.isInteger(p.abilityIndex)) {
-                var a=EMOJI_DB[p.abilityIndex]; txt+=(a?a.e+' '+brEscape(a.n):'이모지 배정 중');
+            else if(BRMP.roomMeta&&BRMP.roomMeta.phase==='draft') {
+                var a=EMOJI_DB[brResolveAbilityIndex(p)]; txt+=(a?a.e+' '+brEscape(a.n):'이모지 배정 중');
             } else txt+='참가 완료';
             box.innerHTML=txt;
             if(BRMP.roomMeta&&BRMP.roomMeta.phase==='draft')brRenderDraft();
@@ -8100,7 +8159,7 @@
                 var detail='', icon=p.bot?'🤖':'🙂';
                 if(phase==='quiz')detail='정답 '+Number(p.quizScore||0)+'개';
                 else if(phase==='draft') {
-                    var a=Number.isInteger(p.abilityIndex)?EMOJI_DB[p.abilityIndex]:null;
+                    var a=EMOJI_DB[brResolveAbilityIndex(p)]||null;
                     detail=(a?a.t+'급 '+a.n:'배정 중')+(p.ready?' · 확정':' · 선택 중');
                     icon=a?a.e:icon;
                 } else if(p.team) detail=BR_TEAM_LABELS[p.team]||('팀 '+p.team);
@@ -8189,6 +8248,7 @@
                 updates['players/'+p._id+'/quizScore']=0;
                 updates['players/'+p._id+'/rerolls']=0;
                 updates['players/'+p._id+'/ready']=false;
+                updates['players/'+p._id+'/abilityId']=null;updates['players/'+p._id+'/rosterVersion']=BR_ROSTER_VERSION;
                 updates['players/'+p._id+'/abilityIndex']=null;
                 if(p.bot)updates['players/'+p._id+'/botQuizTarget']=3+Math.floor(Math.random()*16);
             });
@@ -8240,6 +8300,8 @@
                 var rerolls=Math.floor(Number(p.quizScore||0)/Number(BRMP.roomMeta.rerollEvery||3));
                 updates['players/'+p._id+'/team']=teams[p._id];
                 updates['players/'+p._id+'/abilityIndex']=idx;
+                updates['players/'+p._id+'/abilityId']=EMOJI_DB[idx].id;
+                updates['players/'+p._id+'/rosterVersion']=BR_ROSTER_VERSION;
                 updates['players/'+p._id+'/rerolls']=rerolls;
                 updates['players/'+p._id+'/rerollRequest']=0;
                 updates['players/'+p._id+'/rerollProcessed']=0;
@@ -8260,9 +8322,11 @@
                     return;
                 }
                 // 구형 요청을 받은 경우에도 다른 학생 데이터를 모으지 않고 즉시 한 번만 교체한다.
-                var idx=brAbilityIndex(BRMP.roomMeta.mode,Number(p.abilityIndex),null,Math.random);
+                var idx=brAbilityIndex(BRMP.roomMeta.mode,brResolveAbilityIndex(p),null,Math.random);
                 var up={};
                 up['players/'+id+'/abilityIndex']=idx;
+                up['players/'+id+'/abilityId']=EMOJI_DB[idx].id;
+                up['players/'+id+'/rosterVersion']=BR_ROSTER_VERSION;
                 up['players/'+id+'/rerolls']=Math.max(0,Number(p.rerolls||0)-1);
                 up['players/'+id+'/rerollProcessed']=req;
                 brHostUpdate(up);
@@ -8364,7 +8428,7 @@
         }
         function brRenderDraft() {
             if(!BRMP.selfPlayer)return;
-            var p=BRMP.selfPlayer, idx=Number(p.abilityIndex), a=Number.isInteger(idx)?EMOJI_DB[idx]:null;
+            var p=BRMP.selfPlayer, idx=brResolveAbilityIndex(p), a=EMOJI_DB[idx]||null;
             brEl('br-draft-room').textContent='ROOM '+BRMP.roomCode;
             brEl('br-reroll-count').textContent=Number(p.rerolls||0);
             if(!a)return;
@@ -8374,8 +8438,8 @@
             brEl('br-draft-name').textContent=a.n;
             var playable=brGetPlayableSkillInfo(a),skillLabel=playable?playable.label:a.n,skillDesc=playable?playable.desc:(a.desc||a.n);
             var skillFrames=playable?playable.cooldown:getAbilityTiming(a).cooldown,skillSeconds=Math.max(1,Math.round(skillFrames/60));
-            brEl('br-draft-desc').textContent=skillDesc;
-            brEl('br-draft-skill').innerHTML='<b>'+brEscape(skillLabel)+'</b> · '+skillSeconds+'초';
+            brEl('br-draft-desc').textContent=(a.concept?a.concept+' · ':'')+(a.basicSummary||'조준한 방향으로 일반 공격');
+            brEl('br-draft-skill').innerHTML='<b>'+brEscape(skillLabel)+'</b> · '+skillSeconds+'초<br>'+brEscape(a.skillSummary||skillDesc);
             brEl('br-reroll-btn').disabled=Number(p.rerolls||0)<=0||!!p.ready;
             brEl('br-ready-btn').disabled=!!p.ready;
             brEl('br-draft-actions').classList.toggle('br-hidden',!!p.ready);
@@ -8385,8 +8449,8 @@
             var p=BRMP.selfPlayer||{};
             if(p.ready||Number(p.rerolls||0)<=0)return;
             var req=Math.max(Number(p.rerollRequest||0),Number(p.rerollProcessed||0))+1;
-            var idx=brAbilityIndex(BRMP.roomMeta&&BRMP.roomMeta.mode,Number(p.abilityIndex),null,Math.random);
-            var fields={abilityIndex:idx,rerolls:Math.max(0,Number(p.rerolls||0)-1),rerollRequest:req,rerollProcessed:req,lastSeen:brNow()};
+            var idx=brAbilityIndex(BRMP.roomMeta&&BRMP.roomMeta.mode,brResolveAbilityIndex(p),null,Math.random);
+            var fields={abilityIndex:idx,abilityId:EMOJI_DB[idx].id,rosterVersion:BR_ROSTER_VERSION,rerolls:Math.max(0,Number(p.rerolls||0)-1),rerollRequest:req,rerollProcessed:req,lastSeen:brNow()};
             // 화면은 Firebase 왕복 전에 즉시 바꾸고, 빠른 연속 탭은 같은 순서로 직렬 저장한다.
             BRMP.rerollOptimistic=Object.assign({},fields);
             Object.assign(p,fields);BRMP.selfPlayer=p;brRenderDraft();
@@ -8417,10 +8481,10 @@
             teamMode=Number(BRMP.roomMeta.teamCount||0);
             seedRandom(String(BRMP.roomMeta.seed||'class-battle')+'|participants');
             generatedParticipants=entries.map(function(rec,i){
-                var idx=Number(rec.abilityIndex);
+                var idx=brResolveAbilityIndex(rec);
                 if(!Number.isInteger(idx)||!EMOJI_DB[idx])idx=brAbilityIndex(BRMP.roomMeta.mode,-1,null,Math.random);
                 var p=new Participant(i,rec.name,EMOJI_DB[idx],new Vec2(0,0),Number(rec.team||0));
-                p.remoteId=rec._id;p.abilityIndex=idx;p.isBot=!!rec.bot;p.deaths=0;p.placement=null;
+                p.remoteId=rec._id;p.abilityIndex=idx;p.abilityId=EMOJI_DB[idx].id;p.rosterVersion=BR_ROSTER_VERSION;p.isBot=!!rec.bot;p.deaths=0;p.placement=null;
                 p.maxSkillUses=-1;p.skillUsesLeft=-1;
                 p.basicCooldown=0;p.basicCooldownMax=brBasicAttackFrames(p.ability);p.skillCooldownMax=Math.max(1,Number(p.maxCooldown||1));
                 p.lastRemoteAttack=0;p.lastRemoteSkill=0;p.lastAimDir=new Vec2(1,0);p.manualAimCast=false;
@@ -8512,14 +8576,14 @@
             return point;
         }
         function brMakeAimTarget(p,point,victim) {
-            var fake={id:-100000-Number(p.id||0),name:'aim',pos:point,vel:new Vec2(0,0),radius:victim?Number(victim.radius||30):30,
+            var fake={id:victim?victim.id:-100000-Number(p.id||0),name:'aim',pos:point,vel:new Vec2(0,0),radius:victim?Number(victim.radius||30):30,
                 hp:victim?Number(victim.hp||1):1,maxHp:victim?Number(victim.maxHp||1):1,alive:true,manualAim:true,stunned:0};
             if(victim) {
-                ['vel','stunned','hp','maxHp','alive'].forEach(function(key){
+                ['pos','vel','stunned','hp','maxHp','alive'].forEach(function(key){
                     Object.defineProperty(fake,key,{configurable:true,enumerable:true,get:function(){return victim[key];},set:function(v){victim[key]=v;}});
                 });
             }
-            fake.takeDamage=function(amount,attacker){if(victim&&victim.alive)victim.takeDamage(amount,attacker);};
+            fake.takeDamage=function(amount,attacker){if(victim&&victim.alive)victim.takeDamage(amount,attacker,false,point.sub(p.pos));};
             return fake;
         }
         function brPlayableEnemiesInCone(p,g,aim,range,halfAngle,maxCount) {
@@ -8556,17 +8620,25 @@
                     var touch=from.add(segment.mult(along));
                     if(o.pos.dist(touch)>p.radius+o.radius||g.checkWallBetween(touch,o.pos))return;
                     hits.add(o.id);brApplyPlayableHit(p,g,o,damage,push,stun,direction,style,color);
+                    if(p.ability.sub==='SOUL_CLEAVE'){p.teamGuardFrames=Math.max(p.teamGuardFrames,90);p.teamGuardStrength=Math.max(p.teamGuardStrength,.25);}
                     o.bodyHitCooldown=Math.max(o.bodyHitCooldown||0,24);
                 });
             }};
             p.vel=direction.mult(Math.min(speed,range));p.dashFrames=Math.ceil(range/speed);
         }
         function brCastPlayableSkill(p,g,aim,power,info,spec) {
-            if(!info)return false;
+            if(!info||info.key==='native')return false;
             var tier=p.ability.t||'C',color=BR_TIER_COLOR[tier]||'#fff',key=info.key;
             var sourceId=p.remoteId||('ai-'+p.id),range=Number(spec.range||0),targets=[];
             p.attackCommitFrames=Math.max(p.attackCommitFrames,20);p.lastAimDir=aim;
-            if(key==='tank-charge') {
+            if(key.indexOf('guard-')===0) {
+                p.teamGuardFrames=Math.max(p.teamGuardFrames,120);p.teamGuardStrength=Math.max(p.teamGuardStrength,key==='guard-counter'?.28:.35);
+                if(key==='guard-pulse')g.getNearbyParticipants(p.pos,220).forEach(function(o){if(o!==p&&o.alive&&o.id!==999&&!(p.team&&p.team===o.team)&&o.pos.dist(p.pos)<=165+o.radius*.3&&!g.checkWallBetween(p.pos,o.pos)){o.vel=o.vel.add(o.pos.sub(p.pos).norm().mult(22*(o.knockbackResist||1)));o.stunned=Math.max(o.stunned,8);}});
+                g.emitStudentFx('impact',p.pos,{size:Number(spec.radius),color:'#93c5fd',style:key,sourceId:sourceId});
+            } else if(key==='slip-dash') {
+                p.playerDash={dir:aim.norm(),speed:28,remaining:range,contact:function(){}};p.dashFrames=Math.ceil(range/28);p.dashType='PLAYER_SLIP';
+                g.emitStudentFx('dash',p.pos,{dx:aim.x,dy:aim.y,size:range,color:'#bae6fd',style:key,sourceId:sourceId});
+            } else if(key==='tank-charge') {
                 var chargeSpeed=brTierValue(tier,{S:40,A:37,B:34,C:31,F:27});
                 p.dashType='PLAYER_TANK_CHARGE';
                 brStartPlayerDash(p,aim,chargeSpeed,range,brTierValue(tier,{S:48,A:42,B:36,C:30,F:23}),brTierValue(tier,{S:48,A:43,B:38,C:33,F:27}),brTierValue(tier,{S:26,A:23,B:20,C:17,F:13}),'tank-charge',color);
@@ -8583,18 +8655,19 @@
                 g.addSwingEffect(p,p.pos,aim,Number(spec.range||220),key==='tank-punch'?'punch':'hammer',Number(spec.halfAngle||.62));
                 if(targets[0])brApplyPlayableHit(p,g,targets[0],brTierValue(tier,key==='tank-punch'?{S:60,A:52,B:44,C:36,F:27}:{S:52,A:46,B:40,C:34,F:26}),
                     brTierValue(tier,key==='tank-punch'?{S:58,A:52,B:46,C:40,F:32}:{S:48,A:43,B:38,C:33,F:27}),
-                    brTierValue(tier,key==='tank-punch'?{S:15,A:13,B:11,C:9,F:7}:{S:30,A:27,B:24,C:20,F:16}),aim,key,color);
+                    brTierValue(tier,key==='tank-punch'?{S:15,A:13,B:11,C:9,F:7}:p.ability.sub==='HAMMER'?{S:38,A:35,B:31,C:27,F:22}:{S:24,A:21,B:18,C:16,F:12}),aim,key,color);
             } else if(key==='melee-lunge') {
                 var lungeSpeed=brTierValue(tier,{S:36,A:34,B:31,C:29,F:25});
                 p.dashType='PLAYER_MELEE_LUNGE';
                 brStartPlayerDash(p,aim,lungeSpeed,range,brTierValue(tier,{S:43,A:38,B:33,C:28,F:22}),brTierValue(tier,{S:34,A:30,B:26,C:22,F:17}),brTierValue(tier,{S:12,A:10,B:8,C:7,F:5}),'melee-lunge',color);
                 g.emitStudentFx('dash',p.pos,{dx:aim.x,dy:aim.y,size:range,color:color,style:'melee-lunge',sourceId:sourceId});
-            } else if(key==='melee-combo') {
+            } else if(key==='melee-combo'||key==='melee-drain') {
                 targets=brPlayableEnemiesInCone(p,g,aim,Number(spec.range||220),Number(spec.halfAngle||.86),3);
                 g.addSwingEffect(p,p.pos,aim,Number(spec.range||220),'slash',Number(spec.halfAngle||.86));
                 g.addSwingEffect(p,p.pos,aim,Number(spec.range||220)*.78,'slash',Number(spec.halfAngle||.86));
                 targets.forEach(function(o,idx){brApplyPlayableHit(p,g,o,brTierValue(tier,{S:48,A:43,B:38,C:33,F:26})*(idx?0.74:1),brTierValue(tier,{S:30,A:27,B:24,C:20,F:16}),7,aim,'melee-combo',color);});
-                if(p.ability.sub==='VAMPIRE_SLASH'&&targets.length)p.hp=Math.min(p.maxHp,p.hp+brTierValue(tier,{S:30,A:24,B:20,C:16,F:12}));
+                if(p.ability.sub==='VAMPIRE_SLASH'&&targets.length){p.hp=Math.min(p.maxHp,p.hp+brTierValue(tier,{S:24,A:20,B:16,C:13,F:10}));if(p.frenzyFrames>0){p.comboTargetId=targets[0].id;p.comboHitsRemaining=2;p.comboTimer=6;p.comboKind='blood';}}
+                if(p.ability.sub==='SCISSOR_DASH'&&targets.length){p.comboTargetId=targets[0].id;p.comboHitsRemaining=2;p.comboTimer=4;p.comboKind='scissor';}
             } else if(key==='ranged-sprint') {
                 p.playerMoveBoostFrames=Math.max(p.playerMoveBoostFrames,240);p.vel=p.vel.add(aim.mult(5));
                 g.emitStudentFx('impact',p.pos,{dx:aim.x,dy:aim.y,size:120,color:'#67e8f9',style:'move-boost',sourceId:sourceId});
@@ -8627,6 +8700,7 @@
                 powerShot.life=Math.max(12,Math.ceil((profile.range-muzzle)/profile.speed)+1);g.projectiles.push(powerShot);
                 g.emitStudentFx('muzzle',p.pos.add(aim.mult(muzzle)),{dx:aim.x,dy:aim.y,size:148,color:profile.color,style:profile.style,sourceId:sourceId});
             } else return false;
+            if(isTankAbility(p.ability)&&key.indexOf('tank-')===0){p.teamGuardFrames=Math.max(p.teamGuardFrames,72);p.teamGuardStrength=Math.max(p.teamGuardStrength,.20);}
             p.cooldown=Math.max(60,Math.round(info.cooldown));p.maxCooldown=Math.max(p.maxCooldown||1,p.cooldown);
             return true;
         }
@@ -8639,7 +8713,9 @@
             var victim=selfCast?null:brFindDirectionalTarget(p,g,aim,spec,endpointOnly);
             var victimPointTypes=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.PULL,ABILITY_TYPES.LASER];
             var targetPoint=victim&&victimPointTypes.indexOf(p.ability.type)>=0?victim.pos:point;
-            var actual=selfCast?p:brMakeAimTarget(p,targetPoint,victim);
+            var actual=selfCast?p:(victim&&victimPointTypes.includes(p.ability.type)?victim:brMakeAimTarget(p,targetPoint,victim));
+            if(p.ability.sub==='GHOST_MOVE')actual=brMakeAimTarget(p,p.pos.add(aim.mult(700)),null);
+            if(p.ability.type===ABILITY_TYPES.PROJ||p.ability.type===ABILITY_TYPES.LASER)point=p.pos.add(aim.mult(Number(spec.range||0)));
             p.manualAimCast=true;p.manualAimPoint=point;
             if(p.ability.type===ABILITY_TYPES.DASH) {
                 var speed=Math.max(1,Number(p.ability.dashSpeed||35));
@@ -8649,16 +8725,19 @@
                 p.useAbility(g,actual,aim,selfCast?0:actual.pos.dist(p.pos));
                 if(p.ability.type===ABILITY_TYPES.DASH){
                     var tier=p.ability.t||'C';
+                    var contact={THUNDER_DASH:[24,38,24],LIGHTNING_DASH:[19,33,19],CAR_RUSH:[21,36,21],BOAR_CHARGE:[17,31,17],KINETIC_CHARGE:[22,42,25]}[p.ability.sub];
                     brStartPlayerDash(p,aim,Math.max(1,Number(p.ability.dashSpeed||35)),Number(spec.range||360),
-                        brTierValue(tier,{S:34,A:30,B:26,C:22,F:16}),brTierValue(tier,{S:32,A:29,B:26,C:23,F:18}),8,'native-dash',BR_TIER_COLOR[tier]||'#fff');
+                        contact?contact[0]*Math.min(1.25,Math.max(.9,p.damageMult)):brTierValue(tier,{S:34,A:30,B:26,C:22,F:16}),
+                        contact?contact[1]:brTierValue(tier,{S:32,A:29,B:26,C:23,F:18}),contact?contact[2]:8,'native-dash',BR_TIER_COLOR[tier]||'#fff');
                 }
+                if(playable&&playable.key==='native')p.cooldown=Math.max(60,playable.cooldown);
             } finally {
                 p.manualAimCast=false;p.manualAimPoint=null;p.manualDashFrames=0;
             }
             return true;
         }
         function brHumanMoveSpeed(p) {
-            return .7*Math.max(5.6,p.speed*4.05)*(p.teamHasteFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*(p.ability.sub==='STONE'?.48:1);
+            return .7*Math.max(5.6,p.speed*4.05)*(p.teamHasteFrames>0?1.12:1)*(p.playerChaseFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*(p.ability.sub==='STONE'?.48:1);
         }
         function brRunHumanControl(p,g) {
             var input;
@@ -8712,40 +8791,41 @@
         }
         function brBasicAttack(p,g,aim) {
             aim=aim&&aim.mag()>.05?aim.norm():new Vec2(1,0);
-            var tier=p.ability.t,cd=brBasicAttackFrames(p.ability);
-            var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].indexOf(p.ability.type)>=0;
+            var tier=p.ability.t,cd=brBasicAttackFrames(p.ability),profile=brBasicCombatProfile(p.ability),color=p.ability.pTrail||BR_TIER_COLOR[tier]||'#fff';
             p.attackCommitFrames=Math.max(p.attackCommitFrames,10);
-            if(close) {
-                var range=p.radius+86,damage={S:27,A:24,B:21,C:18,F:13}[tier],push={S:39,A:35,B:30,C:25,F:19}[tier];
-                var hit=false;
-                g.addSwingEffect(p,p.pos,aim,range,'slash',Math.acos(.05));
-                g.getNearbyParticipants(p.pos,range+60).forEach(function(o){
-                    if(!o.alive||o===p||o.id===999||(p.team&&o.team===p.team))return;
-                    var d=o.pos.sub(p.pos),dist=d.mag(),dot=dist?d.norm().x*aim.x+d.norm().y*aim.y:1;
-                    if(dist<range+o.radius*.4&&dot>.05&&!g.checkWallBetween(p.pos,o.pos)) {
-                        o.takeDamage(damage*p.damageMult*.72,p,false,aim);
-                        o.vel=o.vel.add(aim.mult(push*(o.knockbackResist||1)));
-                        if(push>=18)g.markLaunched(o,p,16+Math.floor(push*.45));
-                        o.stunned=Math.max(o.stunned,push>=34?11:push>=25?8:6);
-                        g.emitStudentFx('impact',o.pos,{dx:aim.x,dy:aim.y,size:74+push*1.8,color:BR_TIER_COLOR[tier],amount:damage,style:'melee-smash',sourceId:p.remoteId||('ai-'+p.id)});
-                        hit=true;
-                    }
-                });
-                if(hit)g.spawnImpact(p.pos.add(aim.mult(range*.75)),range*.8,BR_TIER_COLOR[tier],.75);
+            if(profile.close) {
+                var range=p.radius+profile.rangeBonus,damage=brTierValue(tier,{S:27,A:24,B:21,C:18,F:13})*profile.damageScale;
+                var push=brTierValue(tier,{S:39,A:35,B:30,C:25,F:19})*profile.pushScale,hit=false,totalDealt=0;
+                g.addSwingEffect(p,p.pos,aim,range,profile.style,profile.halfAngle);
+                for(var o of g.getNearbyParticipants(p.pos,range+100)) {
+                    if(!o.alive||o===p||o.id===999||(p.team&&o.team===p.team))continue;
+                    var dx=o.pos.x-p.pos.x,dy=o.pos.y-p.pos.y,dist=Math.hypot(dx,dy),dot=dist?(dx*aim.x+dy*aim.y)/dist:1;
+                    if(dist>=range+o.radius*.4||dot<=Math.cos(profile.halfAngle)||g.checkWallBetween(p.pos,o.pos))continue;
+                    var before=o.hp,previous=p.currentImpactStyle;p.currentImpactStyle='basic-'+profile.style;
+                    try{o.takeDamage(damage*p.damageMult*.72,p,false,aim);}finally{p.currentImpactStyle=previous||'';}
+                    totalDealt+=Math.max(0,before-o.hp);o.vel=o.vel.add(aim.mult(push*(o.knockbackResist||1)));
+                    if(push>=24)g.markLaunched(o,p,16+Math.floor(push*.45));
+                    o.stunned=Math.max(o.stunned,profile.stun||(push>=34?11:push>=25?8:4));
+                    g.emitStudentFx('impact',o.pos,{dx:aim.x,dy:aim.y,size:65+push*1.5,color:color,amount:damage,style:'basic-'+profile.style,sourceId:p.remoteId||('ai-'+p.id)});hit=true;
+                }
+                if(hit) {
+                    if(profile.reward==='drain')p.hp=Math.min(p.maxHp,p.hp+totalDealt*(p.frenzyFrames>0?.20:.12));
+                    if(profile.reward==='guard'&&(p.teamGuardFrames<=0||p.teamGuardStrength<=.14)){p.teamGuardFrames=Math.max(p.teamGuardFrames,40);p.teamGuardStrength=.14;}
+                    if(profile.reward==='chase')p.playerChaseFrames=Math.max(p.playerChaseFrames,42);
+                    g.spawnImpact(p.pos.add(aim.mult(range*.75)),range*.65,color,.65);
+                }
             } else {
-                var profile=getRangedCombatProfile(p.ability,'basic');
-                var dmg={S:21,A:18,B:15,C:12,F:8}[tier]*profile.damageScale;
-                var speed=profile.speed,size=brBasicShotSize(p.ability,false);
-                var shotColor=p.ability.pTrail||BR_TIER_COLOR[tier]||'#ffffff';
-                var basicProjectile=new Projectile(
-                    p,p.pos.add(aim.mult(p.radius*.7)),aim,speed,dmg*p.damageMult*.72,size,'bullet',
-                    shotColor,0,null,
-                    {knockback:profile.knockback,trailColor:shotColor,impactColor:shotColor,weaponStyle:'orb',impactStyle:'ranged-basic'}
-                );
-                basicProjectile.life=Math.max(8,Math.ceil(profile.range/speed));g.projectiles.push(basicProjectile);
+                var damage=brTierValue(tier,{S:21,A:18,B:15,C:12,F:8})*profile.damageScale*p.damageMult*.72,size=brBasicShotSize(p.ability,false);
+                for(var i=0;i<profile.count;i++) {
+                    var dir=aim.rotate((i-(profile.count-1)/2)*profile.spread),shot=new Projectile(p,p.pos.add(dir.mult(p.radius*.7)),dir,profile.speed,damage,size,profile.type,color,profile.explode,profile.emoji,
+                        {knockback:profile.knockback,trailColor:color,impactColor:color,weaponStyle:profile.style,impactStyle:'ranged-basic',pierce:profile.pierce,bounces:profile.bounces,status:profile.status,statusPower:profile.statusPower,spinRate:profile.spin,faceDir:profile.face,hitOncePerPass:true});
+                    var outward=Math.max(8,Math.ceil(profile.range/profile.speed));shot.life=profile.type==='BOOMERANG'?outward+60:outward;shot.returnAfterLife=60;
+                    g.projectiles.push(shot);
+                }
             }
             p.basicCooldown=cd;p.basicCooldownMax=cd;
         }
+
         function brStartHostMatchTimers() {
             if(BRMP.viewTimer)clearInterval(BRMP.viewTimer);
             if(BRMP.monitorTimer)clearInterval(BRMP.monitorTimer);
@@ -8800,7 +8880,7 @@
                 brHumanMoveSpeed(p),
                 (p.stunned>0?1:0)|(p.dashFrames>0?2:0)|(p.ringRecoveryActive?4:0)|(p.playerMoveBoostFrames>0?8:0)|(p.playerAttackHasteFrames>0?16:0),
                 Number(p.lastInputSeq||0),Math.max(0,Number(p.stunned||0)),Math.max(0,Number(p.dashFrames||0)),Number(p.warpSeq||0),
-                Number(p.resolvedAttackSeq||0),Number(p.resolvedSkillSeq||0),Number(p.firedAttackSeq||0),Number(p.firedSkillSeq||0)
+                Number(p.resolvedAttackSeq||0),Number(p.resolvedSkillSeq||0),Number(p.firedAttackSeq||0),Number(p.firedSkillSeq||0),p.ability.id
             ];
         }
         function brPublishViews() {
@@ -8810,7 +8890,7 @@
             if(!BRMP.wireParticipants) {
                 BRMP.wireParticipants=[];BRMP.wireHumans=[];
                 for(const p of game.participants)if(p.id!==999){BRMP.wireParticipants.push(p);if(p.humanControlled&&p.remoteId)BRMP.wireHumans.push(p);}
-                BRMP.wireRoster=BRMP.wireParticipants.map(function(p){return [p.remoteId||('ai-'+p.id),p.name,Number(p.abilityIndex||0),Number(p.team||0),Number(p.radius),p.humanControlled?1:0];});
+                BRMP.wireRoster=BRMP.wireParticipants.map(function(p){return [p.remoteId||('ai-'+p.id),p.name,Number(p.abilityIndex||0),Number(p.team||0),Number(p.radius),p.humanControlled?1:0,p.ability.id];});
             }
             var humans=BRMP.wireHumans;if(!humans.length)return;
             var now=brNow(),viewers=humans;
@@ -8828,7 +8908,7 @@
             for(const q of game.projectiles)if(q.life>0&&q.pos) {
                 if(!q._brNetId)q._brNetId='q'+(++BRMP.projectileSeq);
                 shots.push({q:q,row:[Math.round(q.pos.x),Math.round(q.pos.y),Math.round(q.size||7),q.emoji||'',q.color||q.impactColor||'#fff',Number(q.owner&&q.owner.team||0),q._brNetId,
-                    Math.round(Number(q.vel&&q.vel.x||0)*100)/100,Math.round(Number(q.vel&&q.vel.y||0)*100)/100,q.weaponStyle||getRangedWeaponStyle(q.owner&&q.owner.ability||{}),q.owner&&q.owner.ability&&q.owner.ability.t||'C',q.owner?.remoteId||('ai-'+q.owner?.id),q.inputKind||'',Number(q.inputSeq||0),Number(q.life||0),q.type||'bullet']});
+                    Math.round(Number(q.vel&&q.vel.x||0)*100)/100,Math.round(Number(q.vel&&q.vel.y||0)*100)/100,q.weaponStyle||getRangedWeaponStyle(q.owner&&q.owner.ability||{}),q.owner&&q.owner.ability&&q.owner.ability.t||'C',q.owner?.remoteId||('ai-'+q.owner?.id),q.inputKind||'',Number(q.inputSeq||0),Number(q.life||0),q.type||'bullet',Math.round((q.faceDir?Math.atan2(q.vel?.y||0,q.vel?.x||0):Number(q.spinAngle||0))*1000)/1000]});
             }
             if(!BRMP.wireArena)BRMP.wireArena={
                 walls:game.walls.map(function(w){return [Math.round(w.x),Math.round(w.y),Math.round(w.w),Math.round(w.h),Math.round((w.angle||0)*1000)/1000,w.kind||'wall'];}),
@@ -8848,20 +8928,24 @@
                 }
                 var projectiles=[];
                 for(const shot of shots)if(near(shot.q.pos.x,shot.q.pos.y,sight+130))projectiles.push(shot.row);
-                if(projectiles.length>42)projectiles.splice(0,projectiles.length-42);
+                // All nearby gameplay projectiles are sent. Only cosmetic FX below have a count budget.
                 var zones=[];
-                for(const z of game.zones)if(z.duration>0&&z.pos&&near(z.pos.x,z.pos.y,sight+Number(z.radius||0)))zones.push([Math.round(z.pos.x),Math.round(z.pos.y),Math.round(z.radius||40),z.color||'#64748b',z.type||'dmg']);
-                if(zones.length>12)zones.splice(0,zones.length-12);
-                var lastFx=Number(BRMP.viewFxCursor[id]||-1),fxCandidates=[];
-                for(const e of game.studentFx||[])if(e.frame>lastFx&&game.frame-e.frame<=90&&near(e.x,e.y,sight+Math.max(90,Number(e.size||0))))fxCandidates.push(e);
+                for(const z of game.zones)if(z.duration>0&&z.pos&&near(z.pos.x,z.pos.y,sight+Number(z.radius||0)))zones.push([Math.round(z.pos.x),Math.round(z.pos.y),Math.round(z.radius||40),z.color||'#64748b',z.type||'dmg',Number(z.owner?.team||0),z.owner?.ability?.e||'']);
+                var turrets=[];
+                for(const t of game.turrets)if(t.life>0&&t.pos&&near(t.pos.x,t.pos.y,sight+60))turrets.push([Math.round(t.pos.x),Math.round(t.pos.y),t.owner?.ability?.e||'🗼',t.isGolden?1:0]);
+                var lastFx=Number(BRMP.viewFxCursor[id]||-1),fxCandidates=[],beamEvents=[];
+                for(const e of game.studentFx||[])if(e.frame>lastFx&&game.frame-e.frame<=90&&near(e.x,e.y,sight+Math.max(90,Number(e.size||0))))(e.type==='laser'?beamEvents:fxCandidates).push(e);
                 fxCandidates.sort(function(a,b){
                     function priority(e){return (e.targetId===id||e.sourceId===id?8:0)+(e.type==='hit'?3:0)+(Number(e.impactLevel||0));}
                     return priority(b)-priority(a)||b.frame-a.frame;
                 });
-                if(fxCandidates.length>24)fxCandidates.length=24;fxCandidates.sort(function(a,b){return a.id-b.id;});
+                if(fxCandidates.length>24)fxCandidates.length=24;
+                // Hitscan beams carry the attack itself; the 24-event limit applies only to other feedback.
+                for(const beam of beamEvents)fxCandidates.push(beam);
+                fxCandidates.sort(function(a,b){return a.id-b.id;});
                 var fx=new Array(fxCandidates.length);
                 for(var fi=0;fi<fxCandidates.length;fi++){var e=fxCandidates[fi];fx[fi]=[e.id,e.type,Math.round(e.x),Math.round(e.y),Math.round(e.dx*1000)/1000,Math.round(e.dy*1000)/1000,Math.round(e.size),e.color||'#fff',Math.round(e.amount*10)/10,e.targetId||'',e.style||'',e.sourceId||'',Number(e.impactLevel||0)];}
-                var payload={v:2,at:now,frame:game.frame,worldRadius:game.worldRadius||2600,mapRadius:Math.round(game.mapRadius),mapName:game.mapName,mode:BRMP.roomMeta.mode,clock:Math.round(remaining*10)/10,alive:alive,total:all.length,players:visible,projectiles:projectiles,zones:zones,fx:fx};
+                var payload={v:2,rosterVersion:BR_ROSTER_VERSION,at:now,frame:game.frame,worldRadius:game.worldRadius||2600,mapRadius:Math.round(game.mapRadius),mapName:game.mapName,mode:BRMP.roomMeta.mode,clock:Math.round(remaining*10)/10,alive:alive,total:all.length,players:visible,projectiles:projectiles,zones:zones,turrets:turrets,fx:fx};
                 if(!BRMP.staticSent[id]||(BRMP.inputs[id]&&BRMP.inputs[id].needsArena)) {
                     payload.roster=roster;payload.walls=BRMP.wireArena.walls;payload.bushes=BRMP.wireArena.bushes;payload.smokes=BRMP.wireArena.smokes;pendingStatic.push(id);
                 }
@@ -8890,8 +8974,10 @@
             });
             if(incoming.v===2) {
                 var roster=incoming.roster;
-                incoming.players=incoming.players.map(function(r){var m=roster[r[0]];if(!m)return null;return [m[0],m[1],m[2],r[1],r[2],r[3],r[4],r[5],m[3],r[6],r[7],r[8],r[9],-1,r[10],m[4],m[5],r[11],r[12],r[13],r[14],r[15],r[16],r[17],r[18],r[19],r[20],r[21],r[22],r[23],r[24],r[25]];}).filter(Boolean);
+                incoming.players=incoming.players.map(function(r){var m=roster[r[0]];if(!m)return null;var abilityIndex=brResolveAbilityIndex({abilityId:m[6],abilityIndex:m[2],rosterVersion:incoming.rosterVersion});if(abilityIndex<0)return null;return [m[0],m[1],abilityIndex,r[1],r[2],r[3],r[4],r[5],m[3],r[6],r[7],r[8],r[9],-1,r[10],m[4],m[5],r[11],r[12],r[13],r[14],r[15],r[16],r[17],r[18],r[19],r[20],r[21],r[22],r[23],r[24],r[25],EMOJI_DB[abilityIndex].id];}).filter(Boolean);
             }
+            else incoming.players=incoming.players.map(function(r){var index=brResolveAbilityIndex({abilityId:r[32],abilityIndex:r[2],rosterVersion:incoming.rosterVersion});if(index<0)return null;r[2]=index;r[32]=EMOJI_DB[index].id;return r;}).filter(Boolean);
+            incoming.rosterVersion=BR_ROSTER_VERSION;
             return incoming;
         }
 
@@ -9005,26 +9091,31 @@
             command=command||BRMP.inputState||{};
             var ax=Number(command.ax??1),ay=Number(command.ay??0),am=Math.hypot(ax,ay)||1;
             ax/=am;ay/=am;var dir={x:ax,y:ay},x=Number(self.predX==null?self.x:self.predX),y=Number(self.predY==null?self.y:self.predY),rad=Number(r[15]||38);
-            var close=[ABILITY_TYPES.MELEE,ABILITY_TYPES.ORBIT,ABILITY_TYPES.DASH,ABILITY_TYPES.TELEPORT,ABILITY_TYPES.PULL].indexOf(a.type)>=0;
+            var close=brBasicCombatProfile(a).close;
             if(kind==='attack'&&close) {
-                brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:rad+86,amount:Math.acos(.05),color:color,style:'melee-local',sourceId:BRMP.playerId});
+                var basicMelee=brBasicCombatProfile(a);
+                brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:rad+basicMelee.rangeBonus,amount:basicMelee.halfAngle,color:color,style:'melee-local',sourceId:BRMP.playerId});
                 brPushLocalFx('muzzle',x+ax*rad,y+ay*rad,{dx:ax,dy:ay,size:62,color:'#ffffff',style:'melee'});brPlaySfx('melee',tier==='S'||tier==='A');
             } else if(kind==='attack') {
-                var profile=getRangedCombatProfile(a,'basic'),shotColor=a.pTrail||color;
-                var sz=brBasicShotSize(a,true);
-                brSpawnLocalProjectile(x+ax*rad*.7,y+ay*rad*.7,dir,profile.speed,sz,shotColor,'','orb',Number(r[8]||0),Math.max(8,Math.ceil(profile.range/profile.speed))*(1000/60));
-                brPushLocalFx('muzzle',x+ax*rad*.8,y+ay*rad*.8,{dx:ax,dy:ay,size:profile.style==='sniper'?96:70,color:shotColor,style:'orb'});
+                var profile=brBasicCombatProfile(a),shotColor=a.pTrail||color,sz=brBasicShotSize(a,true);
+                for(var bi=0;bi<profile.count;bi++) {
+                    var angle=(bi-(profile.count-1)/2)*profile.spread,c=Math.cos(angle),sn=Math.sin(angle),bd={x:ax*c-ay*sn,y:ax*sn+ay*c};
+                    var outward=Math.max(8,Math.ceil(profile.range/profile.speed)),lifeFrames=profile.type==='BOOMERANG'?outward+60:outward;
+                    brSpawnLocalProjectile(x+bd.x*rad*.7,y+bd.y*rad*.7,bd,profile.speed,sz,shotColor,profile.emoji,profile.style,Number(r[8]||0),lifeFrames*(1000/60));
+                    var local=BRMP.localProjectiles[BRMP.localProjectiles.length-1];local.bounces=profile.bounces;local.pierce=profile.pierce;local.type=profile.type;local.returnAt=outward*(1000/60);
+                }
+                brPushLocalFx('muzzle',x+ax*rad*.8,y+ay*rad*.8,{dx:ax,dy:ay,size:profile.style==='sniper'?96:70,color:shotColor,style:profile.style});
                 brPlaySfx('shoot',profile.style==='sniper'||profile.style==='bomber');
             } else {
                 var spec=brAimSpec(a,'skill',rad,Number(command.ap??command.aimPower??1)),playable=brGetPlayableSkillInfo(a),playKey=playable&&playable.key;
-                if(playKey==='tank-charge'||playKey==='melee-lunge') {
+                if(playKey==='tank-charge'||playKey==='melee-lunge'||playKey==='slip-dash') {
                     brPushLocalFx('dash',x,y,{dx:ax,dy:ay,size:spec.range,color:color,style:playKey,sourceId:BRMP.playerId});
-                    var localDashSpeed=playKey==='tank-charge'?brTierValue(tier,{S:40,A:37,B:34,C:31,F:27}):brTierValue(tier,{S:36,A:34,B:31,C:29,F:25});
+                    var localDashSpeed=playKey==='slip-dash'?28:playKey==='tank-charge'?brTierValue(tier,{S:40,A:37,B:34,C:31,F:27}):brTierValue(tier,{S:36,A:34,B:31,C:29,F:25});
                     BRMP.localDash={vx:ax*localDashSpeed,vy:ay*localDashSpeed,remaining:Number(spec.range||360),until:performance.now()+(Math.ceil(Number(spec.range||360)/localDashSpeed)+2)*16.667};
                     self.predVx=ax*localDashSpeed;self.predVy=ay*localDashSpeed;
-                } else if(playKey==='tank-stun') {
+                } else if(playKey==='tank-stun'||(playKey&&playKey.indexOf('guard-')===0)) {
                     brPushLocalFx('explosion',x,y,{dx:ax,dy:ay,size:Number(spec.radius||190),color:color,style:playKey,sourceId:BRMP.playerId});
-                } else if(playKey==='tank-punch'||playKey==='melee-uppercut'||playKey==='melee-combo') {
+                } else if(playKey==='tank-punch'||playKey==='melee-uppercut'||playKey==='melee-combo'||playKey==='melee-drain') {
                     brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:Number(spec.range||190),amount:Number(spec.halfAngle||.86),color:color,style:playKey,sourceId:BRMP.playerId});
                 } else if(playKey==='ranged-sprint'||playKey==='ranged-overdrive') {
                     brPushLocalFx('impact',x,y,{dx:ax,dy:ay,size:128,color:playKey==='ranged-sprint'?'#67e8f9':'#fbbf24',style:playKey,sourceId:BRMP.playerId});
@@ -9047,12 +9138,15 @@
                     self.predVx=ax*nativeDashSpeed;self.predVy=ay*nativeDashSpeed;
                 }
                 else if(a.type===ABILITY_TYPES.TELEPORT)brPushLocalFx('teleport',x,y,{dx:ax,dy:ay,size:spec.range,color:color,style:a.sub||'teleport'});
-                else if(a.type===ABILITY_TYPES.LASER)brPushLocalFx('laser',x,y,{dx:ax,dy:ay,size:spec.range,color:color,amount:24,style:'laser'});
+                else if(a.type===ABILITY_TYPES.LASER)brPushLocalFx('laser',x,y,{dx:ax,dy:ay,size:spec.range,color:color,amount:Number(spec.width||6),style:'laser'});
                 else if(a.type===ABILITY_TYPES.PROJ) {
-                    var skillProfile=getRangedCombatProfile(a,'skill'),skillCount=Math.min(3,skillProfile.count||1);
-                    for(var j=0;j<skillCount;j++) {
-                        var sang=(j-(skillCount-1)/2)*(skillProfile.style==='machine'?.075:.035),c2=Math.cos(sang),s2=Math.sin(sang),d2={x:ax*c2-ay*s2,y:ax*s2+ay*c2};
-                        brSpawnLocalProjectile(x+d2.x*rad*.72,y+d2.y*rad*.72,d2,skillProfile.speed,Math.max(12,Number(a.pSize||10)*1.2),color,a.projEmoji||'',skillProfile.style,Number(r[8]||0));
+                    var skillProfile=getPlayerSignatureProjectileProfile(a);
+                    if(a.sub==='SNIPE')brPushLocalFx('laser',x,y,{dx:ax,dy:ay,size:spec.range,color:'#67e8f9',amount:10,style:'laser'});
+                    else for(var j=0;j<skillProfile.count;j++) {
+                        var sang=a.sub==='NOVA'?j*skillProfile.spread:(j-(skillProfile.count-1)/2)*skillProfile.spread,c2=Math.cos(sang),s2=Math.sin(sang),d2={x:ax*c2-ay*s2,y:ax*s2+ay*c2};
+                        var skillSize=skillProfile.size*(tier==='S'?1.14:tier==='A'?1.08:1),frames=skillProfile.type==='BOOMERANG'?120:Math.max(8,Math.ceil(skillProfile.range/skillProfile.speed));
+                        brSpawnLocalProjectile(x,y,d2,skillProfile.speed,skillSize,a.pImpact||color,skillProfile.emoji,skillProfile.style,Number(r[8]||0),frames*(1000/60));
+                        var localSkill=BRMP.localProjectiles[BRMP.localProjectiles.length-1];localSkill.bounces=skillProfile.bounces;localSkill.pierce=skillProfile.pierce;localSkill.type=skillProfile.type;localSkill.returnAt=30*(1000/60);
                     }
                 } else if(a.type===ABILITY_TYPES.MELEE||a.type===ABILITY_TYPES.ORBIT||a.type===ABILITY_TYPES.PULL)
                     brPushLocalFx('swing',x+ax*rad*.45,y+ay*rad*.45,{dx:ax,dy:ay,size:Math.max(155,spec.range||180),color:color,style:'melee-skill',sourceId:BRMP.playerId});
@@ -9077,6 +9171,8 @@
         }
 
         function brIngestView(view) {
+            // A repeated/out-of-order view must not move the interpolation clock.
+            if(!view||(BRMP.lastViewFrame!=null&&view.frame<=BRMP.lastViewFrame))return;
             if(!BRMP.drawPlayers)BRMP.drawPlayers=new Map();
             if(!BRMP.drawProjectiles)BRMP.drawProjectiles=new Map();
             if(!BRMP.drawFx)BRMP.drawFx=new Map();
@@ -9091,10 +9187,12 @@
             BRMP.netClockOffset+=clockCorrection;
             if(clockCorrection){for(var actors of [BRMP.drawPlayers,BRMP.drawProjectiles])actors.forEach(function(p){(p.samples||[]).forEach(function(s){s.t+=clockCorrection;});});}
             var sampleTime=serverTime+BRMP.netClockOffset;
-            if(BRMP.lastViewFrame!=null&&view.frame<=BRMP.lastViewFrame)return;
             if(BRMP.lastViewFrame!=null)BRMP.viewGap=Number(BRMP.viewGap||180)*.8+Math.min(500,(view.frame-BRMP.lastViewFrame)*(1000/60))*.2;
             BRMP.lastViewFrame=view.frame;
-            BRMP.remoteBuffer=brClamp(Number(BRMP.viewGap||180)+35,120,320);
+            // A short interpolation interval; the existing bounded velocity
+            // prediction fills the remainder instead of displaying melee targets a full tick late.
+            var deliveryJitter=Math.max.apply(null,BRMP.clockSamples)-Math.min.apply(null,BRMP.clockSamples);
+            BRMP.remoteBuffer=brClamp(Number(BRMP.viewGap||180)*.55+20+Math.min(70,deliveryJitter*.85),80,220);
             var packetHits=new Set((view.fx||[]).filter(function(e){return String(e[1])==='hit';}).map(function(e){return String(e[9]||'');}));
             (view.players||[]).forEach(function(r){
                 var id=String(r[0]), old=BRMP.drawPlayers.get(id),sx=Number(r[3]),sy=Number(r[4]),svx=Number(r[18]||0),svy=Number(r[19]||0);
@@ -9121,6 +9219,16 @@
                     var ack=Number(r[24]||0),sentAt=BRMP.inputSentAt&&BRMP.inputSentAt.get(ack);
                     if(sentAt!=null){var rtt=now-sentAt;BRMP.minInputRtt=Math.min(Number(BRMP.minInputRtt||1000),Math.max(20,rtt));}
                     old.inputAck=ack;
+                    // A refreshed/rejoined browser starts its counters at zero while the host
+                    // keeps this player's counters. Resume from the acknowledged values so
+                    // fresh movement/actions are not rejected as old commands.
+                    if(BRMP.inputState) {
+                        var inputWasBehind=Number(BRMP.inputSeq||0)<ack;
+                        BRMP.inputSeq=Math.max(Number(BRMP.inputSeq||0),ack);
+                        BRMP.inputState.attackSeq=Math.max(Number(BRMP.inputState.attackSeq||0),Number(r[28]||0),Number(r[30]||0));
+                        BRMP.inputState.skillSeq=Math.max(Number(BRMP.inputState.skillSeq||0),Number(r[29]||0),Number(r[31]||0));
+                        if(inputWasBehind)brSendInput(true);
+                    }
                     var statusAge=Math.max(0,now-sampleTime);
                     old.stunUntil=now+Math.max(0,Number(r[25]||0)*(1000/60)-statusAge);old.dashUntil=now+Math.max(0,Number(r[26]||0)*(1000/60)-statusAge);
                     for(var actionKind of ['attack','skill']) {
@@ -9188,7 +9296,7 @@
             BRMP.pendingLocalActions={};BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;
             if(!Number.isFinite(BRMP.inputState.aimPower))BRMP.inputState.aimPower=1;
             BRMP.drawPlayers=new Map();BRMP.drawProjectiles=new Map();BRMP.localProjectiles=[];BRMP.drawFx=new Map();BRMP.hitStates=new Map();BRMP.seenFxIds=new Map();
-            BRMP.netClockOffset=undefined;BRMP.lastViewFrame=null;BRMP.viewGap=180;BRMP.remoteBuffer=215;BRMP.minInputRtt=undefined;BRMP.inputSentAt=new Map();BRMP.localTeleportUntil=0;BRMP.localDashGraceUntil=0;
+            BRMP.netClockOffset=undefined;BRMP.lastViewFrame=null;BRMP.viewGap=180;BRMP.remoteBuffer=119;BRMP.minInputRtt=undefined;BRMP.inputSentAt=new Map();BRMP.localTeleportUntil=0;BRMP.localDashGraceUntil=0;
             BRMP.studentCamera=null;BRMP.lastStudentFrameAt=0;BRMP.aimGesture=null;BRMP.localCastFx=null;BRMP.localDash=null;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.staticView=BRMP.staticView||{};BRMP.studentShake=null;BRMP.studentRecoil=null;BRMP.hitConfirm=null;BRMP.damageFlash=null;
             // 고해상도 태블릿에서 2~3배 DPR로 거대한 캔버스를 만드는 대신 CSS 기준 선명도를 유지한다.
             BRMP.renderQuality=window.innerWidth<1100?.84:.92;BRMP.studentFrameEma=16.7;BRMP.studentFrameSamples=0;BRMP.lastQualityChangeAt=performance.now();
@@ -9417,9 +9525,7 @@
                         cc.beginPath();cc.moveTo(Math.cos(ra)*inner,Math.sin(ra)*inner);cc.lineTo(Math.cos(ra)*outer,Math.sin(ra)*outer);cc.stroke();
                     }
                 } else if(type==='laser') {
-                    var len=size,beamW=Math.max(4,Number(r[8]||6));
-                    cc.strokeStyle='rgba(255,255,255,.9)';cc.lineWidth=Math.max(2,beamW*.34/zoom);cc.beginPath();cc.moveTo(x,y);cc.lineTo(x+dx*len,y+dy*len);cc.stroke();
-                    cc.globalAlpha=alpha*.72;cc.strokeStyle=color;cc.lineWidth=Math.max(3,beamW/zoom);cc.beginPath();cc.moveTo(x,y);cc.lineTo(x+dx*len,y+dy*len);cc.stroke();
+                    brDrawBeam(cc,x,y,dx,dy,size,Number(r[8]||6),color,alpha);
                 } else if(type==='explosion') {
                     var skillBlast=String(r[10]||'').indexOf('skill-')===0;
                     cc.globalAlpha=alpha*(skillBlast?.32:.15);cc.fillStyle=color;cc.beginPath();cc.arc(x,y,size*(.40+.60*Math.min(1,p*2.8)),0,Math.PI*2);cc.fill();
@@ -9452,18 +9558,52 @@
                 cc.restore();
             });
         }
-        function brDrawProjectileGlyph(cc,x,y,vx,vy,size,emoji,color,style,zoom,alpha) {
-            var speed=Math.hypot(vx,vy)||1,ux=vx/speed,uy=vy/speed,r=Math.max(1,Number(size||7)),opacity=alpha==null?1:alpha;
-            var skillShot=String(style||'').indexOf('skill-')===0,tail=Math.min(style==='sniper'||style==='skill-sniper'?150:85,speed*4.4);
-            cc.save();cc.lineCap='round';cc.globalAlpha=opacity*.30;cc.strokeStyle=color;cc.lineWidth=Math.max(1/zoom,r*.70);
-            cc.beginPath();cc.moveTo(x-ux*tail,y-uy*tail);cc.lineTo(x,y);cc.stroke();
-            cc.globalAlpha=opacity*.16;cc.fillStyle=color;cc.beginPath();cc.arc(x,y,Math.max(r*1.45,(skillShot?10:5)/zoom),0,Math.PI*2);cc.fill();
-            cc.globalAlpha=opacity;cc.fillStyle=color;cc.beginPath();cc.arc(x,y,r,0,Math.PI*2);cc.fill();
-            cc.strokeStyle='#ffffff';cc.lineWidth=Math.min(r*.25,2/zoom);cc.beginPath();cc.arc(x,y,r*.83,0,Math.PI*2);cc.stroke();
-            cc.fillStyle='#fff';cc.beginPath();cc.arc(x+ux*r*.12,y+uy*r*.12,r*.33,0,Math.PI*2);cc.fill();
-            if(emoji){cc.drawImage(brGetEmojiSprite(emoji),x-r,y-r,r*2,r*2);}
+        function brDrawDangerFill(cc,x,y,radius,worldRadius) {
+            if(radius>=worldRadius)return;
+            cc.save();cc.fillStyle='rgba(192,38,72,.28)';cc.beginPath();
+            cc.arc(x,y,worldRadius,0,Math.PI*2);cc.arc(x,y,Math.max(0,radius),0,Math.PI*2,true);cc.fill('evenodd');cc.restore();
+        }
+        function brDrawDangerBoundary(cc,x,y,radius,zoom,time) {
+            var pulse=.78+.16*Math.sin(Number(time||0)*.004);
+            cc.save();cc.beginPath();cc.arc(x,y,Math.max(0,radius),0,Math.PI*2);
+            cc.strokeStyle='rgba(30,5,16,.92)';cc.lineWidth=7/zoom;cc.stroke();
+            cc.strokeStyle='#ff607d';cc.globalAlpha=pulse;cc.lineWidth=3.5/zoom;cc.stroke();
+            cc.globalAlpha=.92;cc.strokeStyle='#ffe3aa';cc.lineWidth=1/zoom;cc.stroke();cc.restore();
+        }
+        function brDrawHazardCircle(cc,x,y,radius,color,type,emoji,zoom,friendly) {
+            cc.save();cc.beginPath();cc.arc(x,y,radius,0,Math.PI*2);cc.fillStyle=color||'#64748b';cc.globalAlpha=.19;cc.fill();
+            cc.globalAlpha=.82;cc.strokeStyle=color||'#94a3b8';cc.lineWidth=2/zoom;
+            if(friendly)cc.setLineDash([8/zoom,5/zoom]);cc.stroke();
+            // The boundary remains at the actual damage radius. One cached glyph identifies its source.
+            if(emoji){var r=Math.min(radius*.38,14/zoom);cc.globalAlpha=.75;cc.drawImage(brGetEmojiSprite(emoji),x-r,y-r,r*2,r*2);}
             cc.restore();
         }
+        function brDrawTurretGlyph(cc,x,y,emoji,golden,zoom) {
+            var r=Math.max(15,5/zoom);cc.save();cc.fillStyle=golden?'#fbbf24':'#94a3b8';
+            cc.fillRect(x-r*.8,y+r*.45,r*1.6,r*.38);cc.drawImage(brGetEmojiSprite(emoji||'🗼'),x-r,y-r,r*2,r*2);cc.restore();
+        }
+        function brDrawBeam(cc,x,y,dx,dy,length,width,color,alpha) {
+            // Width is in world units, just like the damage geometry; zoom scales both together.
+            cc.save();cc.lineCap='butt';cc.beginPath();cc.moveTo(x,y);cc.lineTo(x+dx*length,y+dy*length);
+            cc.globalAlpha=alpha*.65;cc.strokeStyle=color||'#ffffff';cc.lineWidth=Math.max(.5,width);cc.stroke();
+            cc.globalAlpha=alpha*.9;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(.5,width*.16);cc.stroke();cc.restore();
+        }
+        function brDrawProjectileGlyph(cc,x,y,vx,vy,size,emoji,color,style,zoom,alpha,rotation) {
+            var speed=Math.hypot(vx,vy)||1,ux=vx/speed,uy=vy/speed,r=Math.max(1,Number(size||7)),opacity=alpha==null?1:alpha;
+            var tail=Math.min(style==='sniper'||style==='skill-sniper'?100:62,speed*3.2);
+            cc.save();cc.lineCap='round';cc.globalAlpha=opacity*.45;cc.strokeStyle=color;cc.lineWidth=Math.max(1/zoom,r*.50);
+            cc.beginPath();cc.moveTo(x-ux*tail,y-uy*tail);cc.lineTo(x,y);cc.stroke();cc.globalAlpha=opacity;
+            if(emoji) {
+                // Rasterize once, then draw the emoji itself at the hitbox diameter (sprite has transparent padding).
+                var glyphRadius=Math.max(r,3.5/zoom)*1.33;cc.translate(x,y);if(rotation)cc.rotate(rotation);
+                cc.drawImage(brGetEmojiSprite(emoji),-glyphRadius,-glyphRadius,glyphRadius*2,glyphRadius*2);
+            } else {
+                cc.fillStyle=color;cc.beginPath();cc.arc(x,y,r,0,Math.PI*2);cc.fill();
+                cc.strokeStyle='#ffffff';cc.lineWidth=Math.min(r*.25,1.5/zoom);cc.stroke();
+            }
+            cc.restore();
+        }
+        window.brCombatVisual={beam:brDrawBeam,emojiSprite:brGetEmojiSprite,dangerFill:brDrawDangerFill,dangerBoundary:brDrawDangerBoundary,hazard:brDrawHazardCircle,turret:brDrawTurretGlyph,projectile:brDrawProjectileGlyph};
         function brUpdateAndDrawLocalProjectiles(cc,dt,zoom,onScreen,frameNow) {
             var list=BRMP.localProjectiles||[],frames=dt/(1000/60),draw=BRMP.drawPlayers,self=draw&&draw.get(String(BRMP.playerId)),selfTeam=Number(self&&self.row&&self.row[8]||0);
             for(var i=list.length-1;i>=0;i--) {
@@ -9472,15 +9612,23 @@
                 p.px=p.x;p.py=p.y;
                 var liveFrames=Math.min(frames,Math.max(0,(p.life+dt)/(1000/60)));
                 if(p.rangeRemaining!=null)liveFrames=Math.min(liveFrames,p.rangeRemaining/Math.max(.01,Math.hypot(p.vx,p.vy)));
+                if(p.type==='BOOMERANG'&&age>Number(p.returnAt||500)&&self){
+                    var bx=self.x-p.x,by=self.y-p.y,bm=Math.hypot(bx,by)||1;p.vx+=bx/bm*1.5*liveFrames;p.vy+=by/bm*1.5*liveFrames;
+                    var bv=Math.hypot(p.vx,p.vy);if(bv>15){p.vx=p.vx/bv*15;p.vy=p.vy/bv*15;}if(bm<20){list.splice(i,1);continue;}
+                }
                 p.x+=p.vx*liveFrames;p.y+=p.vy*liveFrames;
                 if(p.rangeRemaining!=null)p.rangeRemaining=Math.max(0,p.rangeRemaining-Math.hypot(p.vx,p.vy)*liveFrames);
-                var from={x:p.px,y:p.py},to={x:p.x,y:p.y},wallHit=combatTraceWalls(from,to,p.size,BRMP.latestView?.walls||[]);
+                var from={x:p.px,y:p.py},to={x:p.x,y:p.y},wallHit=p.type==='BOOMERANG'||p.type==='GHOST'?null:combatTraceWalls(from,to,p.size,BRMP.latestView?.walls||[]);
                 var touched=false;if(draw)draw.forEach(function(o,id){
                     if(touched||String(id)===String(BRMP.playerId)||!o.row?.[7]||(selfTeam&&Number(o.row[8])===selfTeam))return;
                     touched=combatSegmentCircleTime(p.px-o.x,p.py-o.y,p.x-p.px,p.y-p.py,Number(o.row[15]||38)+p.size)!==null;
                 });
                 // Hiding the prediction at contact avoids flying through an enemy; damage feedback waits for authority.
-                if(wallHit||touched||p.rangeRemaining===0){list.splice(i,1);continue;}
+                if(wallHit&&p.bounces>0){
+                    p.x=p.px+(p.x-p.px)*wallHit.t+wallHit.nx*.01;p.y=p.py+(p.y-p.py)*wallHit.t+wallHit.ny*.01;
+                    var vn=p.vx*wallHit.nx+p.vy*wallHit.ny;p.vx-=2*vn*wallHit.nx;p.vy-=2*vn*wallHit.ny;p.bounces--;wallHit=null;
+                }
+                if(wallHit||(touched&&!p.pierce&&p.type!=='BOOMERANG')||p.rangeRemaining===0){list.splice(i,1);continue;}
                 if(onScreen(p.x,p.y,120))brDrawProjectileGlyph(cc,p.x,p.y,p.vx,p.vy,p.size,p.emoji,p.color,p.style,zoom,brClamp(p.life/60,0,1));
             }
         }
@@ -9571,8 +9719,8 @@
                 else if(ema>22.5)nextQuality=Math.min(currentQuality,.78);
                 if(Math.abs(nextQuality-currentQuality)>.04){BRMP.renderQuality=nextQuality;BRMP.lastQualityChangeAt=frameNow;c._lastResizeCheck=0;}
             }
-            // 다른 플레이어는 약 150ms 과거의 두 스냅샷 사이를 보간한다. 내 캐릭터만 즉시 예측한다.
-            var frameUnits=dt/(1000/60),renderTime=frameNow-Number(BRMP.remoteBuffer||215);
+            // 다른 플레이어는 짧게 보간하고 스냅샷 사이를 제한적으로 예측한다. 내 캐릭터는 즉시 예측한다.
+            var frameUnits=dt/(1000/60),renderTime=frameNow-Number(BRMP.remoteBuffer||119);
             draw.forEach(function(p,id){
                 if(String(id)===String(BRMP.playerId)&&BRMP.inputState) {
                     brPredictSelf(p,view,dt,frameNow);
@@ -9627,13 +9775,14 @@
             for(var gx=minX;gx<=maxX;gx+=160){cc.moveTo(gx,minY);cc.lineTo(gx,maxY);}
             for(var gy=minY;gy<=maxY;gy+=160){cc.moveTo(minX,gy);cc.lineTo(maxX,gy);}
             cc.stroke();
+            brDrawDangerFill(cc,0,0,radius,worldRadius);
             (view.bushes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentBush(cc,r,false);});
             (view.walls||[]).forEach(function(r){if(onScreen(r[0],r[1],Math.hypot(r[2],r[3])*.5))brDrawStudentWall(cc,r);});
             (view.zones||[]).forEach(function(r){
                 if(!onScreen(r[0],r[1],r[2]))return;
-                cc.save();cc.globalAlpha=.28;cc.fillStyle=r[3]||'#64748b';cc.beginPath();cc.arc(r[0],r[1],r[2],0,Math.PI*2);cc.fill();
-                cc.globalAlpha=.7;cc.strokeStyle=r[3]||'#94a3b8';cc.lineWidth=3;cc.stroke();cc.restore();
+                brDrawHazardCircle(cc,r[0],r[1],r[2],r[3],r[4],r[6]||'',zoom,Number(self.row[8])>0&&Number(r[5])===Number(self.row[8]));
             });
+            (view.turrets||[]).forEach(function(r){if(onScreen(r[0],r[1],50))brDrawTurretGlyph(cc,r[0],r[1],r[2],!!r[3],zoom);});
             var selfSpeed=Math.hypot(Number(self.predVx||0),Number(self.predVy||0));
             if(selfSpeed>3.2&&self.row&&self.row[7]) {
                 var sux=self.predVx/selfSpeed,suy=self.predVy/selfSpeed,snx=-suy,sny=sux;
@@ -9644,8 +9793,8 @@
                 cc.restore();
             }
             if(shots)shots.forEach(function(s){
-                var r=s.row;if(s.expired||!onScreen(s.x,s.y,60))return;
-                brDrawProjectileGlyph(cc,s.x,s.y,Number(s.vx||0),Number(s.vy||0),Number(r[2]||7),r[3]||'',r[4]||'#fff',String(r[9]||'standard'),zoom,1);
+                var r=s.row;if(s.expired||!onScreen(s.x,s.y,Math.max(100,Number(r[2]||7)*1.33)))return;
+                brDrawProjectileGlyph(cc,s.x,s.y,Number(s.vx||0),Number(s.vy||0),Number(r[2]||7),r[3]||'',r[4]||'#fff',String(r[9]||'standard'),zoom,1,Number(r[16]||0));
             });
             brUpdateAndDrawLocalProjectiles(cc,dt,zoom,onScreen,frameNow);
             function drawStudentPlayer(s){
@@ -9700,12 +9849,16 @@
             (view.bushes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentBush(cc,r,true);});
             (view.smokes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentSmoke(cc,r);});
             brDrawAimPreview(cc,self,zoom);
-            // 위험 지역에서도 내 캐릭터와 장애물은 계속 보인다. 원 밖은 가벼운 색면만 덧씌운다.
-            cc.fillStyle='rgba(116,39,144,.25)';cc.beginPath();cc.arc(0,0,worldRadius,0,Math.PI*2);cc.arc(0,0,radius,0,Math.PI*2,true);cc.fill('evenodd');
             cc.restore();
-            cc.strokeStyle='#fb4b63';cc.lineWidth=10/zoom;cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.stroke();
+            brDrawDangerBoundary(cc,0,0,radius,zoom,frameNow);
             cc.restore();
             brDrawHitConfirm(cc,w,h,frameNow);
+            if(self.row[7]&&self.x*self.x+self.y*self.y>radius*radius) {
+                // Only the endangered student sees this small edge cue; no particles or full-screen overlay.
+                cc.save();cc.strokeStyle='rgba(255,79,110,'+(.60+.18*Math.sin(frameNow*.006))+')';cc.lineWidth=5;cc.strokeRect(2.5,2.5,w-5,h-5);
+                var ringWarning=brGetNameSprite('자기장 밖 · 안전구역으로!','#ffe3aa',true),warningW=Math.min(230,w*.66);
+                cc.fillStyle='rgba(49,8,23,.90)';cc.fillRect((w-warningW)/2,86,warningW,28);cc.drawImage(ringWarning,(w-warningW)/2,83,warningW,35);cc.restore();
+            }
             // 약 12칸은 온전히 읽히되 화면 가장자리만 어둡게 해 제한된 전술 시야의 긴장감은 유지한다.
             if(!c._brVignette||c._brVignetteW!==w||c._brVignetteH!==h) {
                 var screenReach=Math.hypot(w,h)*.5,visionRadius=screenReach*1.04;
@@ -9787,13 +9940,13 @@
                 });
             }
             var rows=players.map(function(p,i){
-                return {rank:i+1,id:p.remoteId||('ai-'+p.id),name:p.name,abilityIndex:Number(p.abilityIndex||0),
+                return {rank:i+1,id:p.remoteId||('ai-'+p.id),name:p.name,abilityIndex:Number(p.abilityIndex||0),abilityId:p.ability.id,abilityName:p.ability.n,abilityEmoji:p.ability.e,rosterVersion:BR_ROSTER_VERSION,
                     tier:p.ability.t,team:Number(p.team||0),kills:Number(p.kills||0),deaths:Number(p.deaths||0),
                     damage:Math.round(p.damageDealt||0),taken:Math.round(p.damageTaken||0),
                     survival:Math.round((p.alive?game.frame:Number(p.deathFrame||p.survivalFrames||0))/60),alive:!!p.alive};
             });
             var winningPool=teamWinner?rows.filter(function(r){return r.team===teamWinner;}):rows;
-            var champion=winningPool.slice().sort(function(a,b){return (b.kills-a.kills)||(b.damage-a.damage)||(a.rank-b.rank);})[0]||rows[0];
+            var champion=mode==='solo'?rows[0]:(winningPool.slice().sort(function(a,b){return (b.kills-a.kills)||(b.damage-a.damage)||(a.rank-b.rank);})[0]||rows[0]);
             var mostKills=rows.slice().sort(function(a,b){return (b.kills-a.kills)||(b.damage-a.damage);})[0];
             var mostDamage=rows.slice().sort(function(a,b){return (b.damage-a.damage)||(b.kills-a.kills);})[0];
             var ironWall=rows.slice().sort(function(a,b){return (b.taken-a.taken)||(a.deaths-b.deaths);})[0];
@@ -9803,7 +9956,7 @@
                 {icon:'💥',label:'MOST DAMAGE',id:mostDamage&&mostDamage.id,detail:(mostDamage?mostDamage.damage:0)+' Damage'},
                 {icon:'🛡️',label:'IRON WALL',id:ironWall&&ironWall.id,detail:(ironWall?ironWall.taken:0)+' 막아냄'}
             ];
-            return {mode:mode,teamWinner:teamWinner,winnerId:champion&&champion.id,players:rows,awards:awards,
+            return {rosterVersion:BR_ROSTER_VERSION,mode:mode,teamWinner:teamWinner,winnerId:champion&&champion.id,players:rows,awards:awards,
                 duration:Math.round(game.frame/60),createdAt:brNow()};
         }
         async function brFinishMatch(winner,options) {
@@ -9828,13 +9981,13 @@
             brShow('br-results');
             var rows=Array.isArray(result.players)?result.players:Object.values(result.players||{});
             var winner=rows.find(function(r){return String(r.id)===String(result.winnerId);})||rows[0];
-            var win=brEl('br-result-winner');
+            var win=brEl('br-result-winner'),winnerAbility=brResultAbility(winner,result.rosterVersion);
             if(Number(result.teamWinner||0)>0) {
-                win.innerHTML='<div class="br-big-emoji">'+(winner?EMOJI_DB[winner.abilityIndex].e:'🏆')+'</div><h1 style="margin:5px 0;color:#fde68a">'+
+                win.innerHTML='<div class="br-big-emoji">'+(winner?brEscape(winnerAbility.e):'🏆')+'</div><h1 style="margin:5px 0;color:#fde68a">'+
                     brEscape(BR_TEAM_LABELS[Number(result.teamWinner)]||('팀 '+result.teamWinner))+' 우승!</h1><p class="br-small">우승팀 에이스 · '+brEscape(winner?winner.name:'-')+'</p>';
             } else {
-                win.innerHTML='<div class="br-big-emoji">'+(winner?EMOJI_DB[winner.abilityIndex].e:'🏆')+'</div><h1 style="margin:5px 0;color:#fde68a">'+
-                    brEscape(winner?winner.name:'-')+' 우승!</h1><p class="br-small">'+(winner?winner.tier+'급 · '+brEscape(EMOJI_DB[winner.abilityIndex].n):'')+'</p>';
+                win.innerHTML='<div class="br-big-emoji">'+(winner?brEscape(winnerAbility.e):'🏆')+'</div><h1 style="margin:5px 0;color:#fde68a">'+
+                    brEscape(winner?winner.name:'-')+' 우승!</h1><p class="br-small">'+(winner?winner.tier+'급 · '+brEscape(winnerAbility.n):'')+'</p>';
             }
             var awardBox=brEl('br-awards');awardBox.innerHTML='';
             var awards=Array.isArray(result.awards)?result.awards:Object.values(result.awards||{});
@@ -9847,11 +10000,11 @@
             });
             var list=brEl('br-ranking');list.innerHTML='';
             rows.sort(function(a,b){return Number(a.rank)-Number(b.rank);}).forEach(function(r){
-                var a=EMOJI_DB[Number(r.abilityIndex)]||EMOJI_DB[0], row=document.createElement('div');
+                var a=brResultAbility(r,result.rosterVersion), row=document.createElement('div');
                 row.className='br-rank '+(Number(r.rank)===1?'top1':'');
                 var badge=Number(r.rank)===1?'🥇':Number(r.rank)===2?'🥈':Number(r.rank)===3?'🥉':String(r.rank);
-                row.innerHTML='<div class="br-rank-num">'+badge+'</div><div style="font-size:29px">'+a.e+'</div>'+
-                    '<div><b>'+brEscape(r.name)+'</b><div class="br-small">'+a.t+'급 · '+brEscape(a.n)+(r.team?' · '+brEscape(BR_TEAM_LABELS[r.team]||('팀 '+r.team)):'')+'</div></div>'+
+                row.innerHTML='<div class="br-rank-num">'+badge+'</div><div style="font-size:29px">'+brEscape(a.e)+'</div>'+
+                    '<div><b>'+brEscape(r.name)+'</b><div class="br-small">'+brEscape(a.t)+'급 · '+brEscape(a.n)+(r.team?' · '+brEscape(BR_TEAM_LABELS[r.team]||('팀 '+r.team)):'')+'</div></div>'+
                     '<b style="color:#fb7185">⚔ '+Number(r.kills||0)+'</b><span class="br-small br-hide-mobile">💥 '+Number(r.damage||0)+'</span>'+
                     '<span class="br-small br-hide-mobile">'+(result.mode==='team-respawn'?'☠ '+Number(r.deaths||0):brFormatTime(Number(r.survival||0)))+'</span>';
                 list.appendChild(row);
@@ -9866,6 +10019,7 @@
             var updates={'meta/phase':'lobby','meta/updatedAt':brNow(),'meta/summary':null,'results':null,'views':null,'inputs':null};
             brGetPlayerEntries(true).forEach(function(p){
                 updates['players/'+p._id+'/quizScore']=0;updates['players/'+p._id+'/quizFinished']=false;
+                updates['players/'+p._id+'/abilityId']=null;updates['players/'+p._id+'/rosterVersion']=BR_ROSTER_VERSION;
                 updates['players/'+p._id+'/abilityIndex']=null;updates['players/'+p._id+'/rerolls']=0;
                 updates['players/'+p._id+'/ready']=false;updates['players/'+p._id+'/team']=0;
             });
