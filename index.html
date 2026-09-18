@@ -727,6 +727,41 @@
             if(w._contactAngle!==angle){w._contactAngle=angle;w._contactCos=Math.cos(angle);w._contactSin=Math.sin(angle);}
             return w;
         }
+        // Static classroom maps are queried by every player and projectile. Keep exact
+        // rotated-rectangle tests, but feed them only walls whose AABB overlaps the sweep.
+        // Rotating legacy walls deliberately fall back to the full list.
+        const combatWallGridCache = new WeakMap();
+        let combatWallQuerySeq = 0;
+        function combatGridKey(x,y) { return x*65536+y; }
+        function combatWallGrid(walls) {
+            if(!walls||walls.length<9)return null;
+            for(const wall of walls)if(!Array.isArray(wall)&&Math.abs(Number(wall.spinSpeed||0))>1e-10)return null;
+            let cached=combatWallGridCache.get(walls);
+            if(cached&&cached.length===walls.length)return cached;
+            const cellSize=420,grid=new Map();
+            for(let index=0;index<walls.length;index++) {
+                const wall=walls[index],w=combatWallShape(wall),c=w._contactCos,s=w._contactSin;
+                w._combatWallOrder=index;
+                const ex=Math.abs(c)*w.w*.5+Math.abs(s)*w.h*.5,ey=Math.abs(s)*w.w*.5+Math.abs(c)*w.h*.5;
+                const minX=Math.floor((w.x-ex)/cellSize),maxX=Math.floor((w.x+ex)/cellSize);
+                const minY=Math.floor((w.y-ey)/cellSize),maxY=Math.floor((w.y+ey)/cellSize);
+                for(let x=minX;x<=maxX;x++)for(let y=minY;y<=maxY;y++) {
+                    const key=combatGridKey(x,y);let bucket=grid.get(key);
+                    if(!bucket){bucket=[];grid.set(key,bucket);}bucket.push(wall);
+                }
+            }
+            cached={length:walls.length,cellSize,grid};combatWallGridCache.set(walls,cached);return cached;
+        }
+        function combatWallCandidates(walls,minX,minY,maxX,maxY,out=[]) {
+            const indexed=combatWallGrid(walls);if(!indexed)return walls;
+            out.length=0;const cs=indexed.cellSize,seq=++combatWallQuerySeq;
+            for(let x=Math.floor(minX/cs);x<=Math.floor(maxX/cs);x++)for(let y=Math.floor(minY/cs);y<=Math.floor(maxY/cs);y++) {
+                const bucket=indexed.grid.get(combatGridKey(x,y));if(!bucket)continue;
+                for(const wall of bucket){const w=combatWallShape(wall);if(w._combatWallQuery===seq)continue;w._combatWallQuery=seq;out.push(wall);}
+            }
+            if(out.length>1)out.sort((a,b)=>combatWallShape(a)._combatWallOrder-combatWallShape(b)._combatWallOrder);
+            return out;
+        }
         function combatWallContact(x,y,r,wall) {
             const w=combatWallShape(wall),c=w._contactCos,s=w._contactSin;
             const dx=x-w.x,dy=y-w.y,lx=dx*c+dy*s,ly=-dx*s+dy*c,hx=w.w/2,hy=w.h/2;
@@ -753,9 +788,10 @@
             }
             return enter;
         }
-        function combatTraceWalls(from,to,r,walls) {
+        function combatTraceWalls(from,to,r,walls,scratch=[]) {
             let best=null;const vx=to.x-from.x,vy=to.y-from.y;
-            for(const wall of walls) {
+            const candidates=combatWallCandidates(walls,Math.min(from.x,to.x)-r,Math.min(from.y,to.y)-r,Math.max(from.x,to.x)+r,Math.max(from.y,to.y)+r,scratch);
+            for(const wall of candidates) {
                 const w=combatWallShape(wall),c=w._contactCos,s=w._contactSin,hx=w.w/2,hy=w.h/2;
                 const x=(from.x-w.x)*c+(from.y-w.y)*s,y=-(from.x-w.x)*s+(from.y-w.y)*c,dx=vx*c+vy*s,dy=-vx*s+vy*c;
                 if(Math.min(x,x+dx)>hx+r||Math.max(x,x+dx)<-hx-r||Math.min(y,y+dy)>hy+r||Math.max(y,y+dy)<-hy-r)continue;
@@ -771,19 +807,22 @@
             }
             return best;
         }
-        function combatMoveCircle(pos,vel,r,walls,stopOnWall=false) {
-            const out={x:pos.x,y:pos.y,vx:vel.x,vy:vel.y,hit:null};
+        function combatMoveCircle(pos,vel,r,walls,stopOnWall=false,reuse=null) {
+            const out=reuse||{x:0,y:0,vx:0,vy:0,hit:null,_wallCandidates:[]};
+            out.x=pos.x;out.y=pos.y;out.vx=vel.x;out.vy=vel.y;out.hit=null;
+            const wallCandidates=out._wallCandidates||(out._wallCandidates=[]);
             // Resolve full penetration (including a centre inside cover), then slide along contact normals.
             for(let pass=0;pass<4;pass++) {
                 let changed=false;
-                for(const w of walls){const h=combatWallContact(out.x,out.y,r,w);if(!h)continue;
+                const candidates=combatWallCandidates(walls,out.x-r,out.y-r,out.x+r,out.y+r,wallCandidates);
+                for(const w of candidates){const h=combatWallContact(out.x,out.y,r,w);if(!h)continue;
                     out.x+=h.nx*(h.depth+.001);out.y+=h.ny*(h.depth+.001);out.hit=h;changed=true;
                     const vn=out.vx*h.nx+out.vy*h.ny;if(vn<0){out.vx-=h.nx*vn;out.vy-=h.ny*vn;}}
                 if(!changed)break;
             }
             let dx=out.vx,dy=out.vy;
             for(let pass=0;pass<4&&Math.hypot(dx,dy)>1e-7;pass++) {
-                const h=combatTraceWalls(out,{x:out.x+dx,y:out.y+dy},r,walls);
+                const h=combatTraceWalls(out,{x:out.x+dx,y:out.y+dy},r,walls,wallCandidates);
                 if(!h){out.x+=dx;out.y+=dy;break;}
                 out.hit=h;out.x+=dx*h.t+h.nx*.001;out.y+=dy*h.t+h.ny*.001;
                 if(stopOnWall){out.vx=0;out.vy=0;break;}
@@ -1426,6 +1465,8 @@
                 // v22.2: 유도탄이 매 프레임 전체 적을 다시 탐색하지 않도록 타깃을 잠시 캐시.
                 this.homingTarget = null;
                 this.nextHomingRefresh = 0;
+                this._wallCandidates = [];
+                this._shotStart = new Vec2(0,0);this._shotEnd = new Vec2(0,0);this._travel = new Vec2(0,0);this._contacts=[];
 
                 // ✨ 검성 투사체가 더 밖에서 돌도록 orbitDist를 옵션으로 받거나 기본값을 높임
                 if(type === 'ORBIT') { 
@@ -1447,7 +1488,7 @@
             }
             update(game) {
                 if(this.life<=0)return;
-                const shotStart=new Vec2(this.pos.x,this.pos.y);let wallContact=null;
+                const shotStart=this._shotStart;shotStart.x=this.pos.x;shotStart.y=this.pos.y;let wallContact=null;
                 if(this.type === 'ORBIT') {
                     if(!this.owner.alive) { this.life = 0; return; }
                     this.life--;
@@ -1475,7 +1516,7 @@
                     let travel=this.vel;
                     if(this.rangeRemaining!==null&&travel.mag()>this.rangeRemaining)travel=travel.norm().mult(this.rangeRemaining);
                     let nextPos = this.pos.add(travel);
-                    if(this.type!=='GHOST')wallContact=combatTraceWalls(this.pos,nextPos,this.size,game.walls);
+                    if(this.type!=='GHOST')wallContact=combatTraceWalls(this.pos,nextPos,this.size,game.walls,this._wallCandidates);
                     this.pos = nextPos;
                     this.life--;
                     if(this.rangeRemaining!==null)this.rangeRemaining=Math.max(0,this.rangeRemaining-travel.mag());
@@ -1505,12 +1546,14 @@
 
                 // Test the travelled segment against moving targets, in impact order.
                 // ORBIT remains a contact weapon and retains its existing repeat-hit interval.
-                const shotEnd=new Vec2(this.pos.x,this.pos.y),travel=shotEnd.sub(shotStart),orbit=this.type==='ORBIT';
+                const shotEnd=this._shotEnd;shotEnd.x=this.pos.x;shotEnd.y=this.pos.y;
+                const travel=this._travel;travel.x=shotEnd.x-shotStart.x;travel.y=shotEnd.y-shotStart.y;
+                const orbit=this.type==='ORBIT';
                 const padding=this.size+150+Number(game.maxParticipantStep||0),cs=game.spatialCellSize;
                 const minX=Math.floor((Math.min(shotStart.x,shotEnd.x)-padding)/cs),maxX=Math.floor((Math.max(shotStart.x,shotEnd.x)+padding)/cs);
-                const minY=Math.floor((Math.min(shotStart.y,shotEnd.y)-padding)/cs),maxY=Math.floor((Math.max(shotStart.y,shotEnd.y)+padding)/cs),contacts=[];
+                const minY=Math.floor((Math.min(shotStart.y,shotEnd.y)-padding)/cs),maxY=Math.floor((Math.max(shotStart.y,shotEnd.y)+padding)/cs),contacts=this._contacts;contacts.length=0;
                 for(let gx=minX;gx<=maxX;gx++)for(let gy=minY;gy<=maxY;gy++) {
-                    const bucket=game.spatialGrid.get(`${gx},${gy}`);if(!bucket)continue;
+                    const bucket=game.spatialGrid.get(combatGridKey(gx,gy));if(!bucket)continue;
                     for(const p of bucket) {
                         if(p===this.owner||!p.alive||(this.owner.team!==0&&p.team===this.owner.team))continue;
                         let t;
@@ -1939,7 +1982,7 @@
 
                 this.accuracy = ability.t === 'F' ? 0.62 : (ability.t === 'S' ? 0.99 : 0.95);
                 if(this.rangedElite) this.accuracy = ability.t === 'S' ? 0.997 : 0.978;
-                this.vel = new Vec2(0,0); this.alive = true; this.cooldown = 0; this.abilityTiming = getAbilityTiming(ability); this.maxCooldown = this.abilityTiming.cooldown; 
+                this.vel = new Vec2(0,0); this._combatMoveResult={x:0,y:0,vx:0,vy:0,hit:null,_wallCandidates:[]}; this.alive = true; this.cooldown = 0; this.abilityTiming = getAbilityTiming(ability); this.maxCooldown = this.abilityTiming.cooldown; 
                 this.stunned = 0; this.aiType = ability.ai || AI_TYPES.HYBRID;
                 
                 this.dashFrames = 0; this.dashType = null;
@@ -2332,16 +2375,16 @@
                 let nextPos = this.pos.add(this.vel);
                 if (isNaN(nextPos.x) || isNaN(nextPos.y)) { this.vel = new Vec2(0,0); return; }
 
-                let wallHit = game.checkWallCollision(nextPos, this.radius);
+                let wallHit = null;
                 if(this.humanControlled) {
                     const phasesWalls=this.ability.sub==='GHOST_MOVE'||(this.ability.sub==='FLY_DASH'&&this.dashFrames>0);
-                    const moved=combatMoveCircle(this.pos,this.vel,this.radius,phasesWalls?[]:game.walls,!!playerDashStep);
+                    const moved=combatMoveCircle(this.pos,this.vel,this.radius,phasesWalls?[]:game.walls,!!playerDashStep,this._combatMoveResult);
                     wallHit=moved.hit;
                     if(wallHit&&!playerDashStep)game.handleWallCrash(this,this.vel.mag());
-                    this.pos=new Vec2(moved.x,moved.y);this.vel=this.alive?new Vec2(moved.vx,moved.vy):new Vec2(0,0);
+                    this.pos.x=moved.x;this.pos.y=moved.y;this.vel.x=this.alive?moved.vx:0;this.vel.y=this.alive?moved.vy:0;
                     if(wallHit&&playerDashStep)playerDashStep.remaining=0;
                 }
-                else if(wallHit&&playerDashStep){playerDashStep.remaining=0;this.vel=new Vec2(0,0);}
+                else if((wallHit=game.checkWallCollision(nextPos,this.radius))&&playerDashStep){playerDashStep.remaining=0;this.vel=new Vec2(0,0);}
                 else if(wallHit && this.ability.sub !== 'GHOST_MOVE' && !(this.ability.sub === 'FLY_DASH' && this.dashFrames > 0)) {
                     game.handleWallCrash(this, this.vel.mag());
                     const n = wallHit.normal || this.pos.sub(new Vec2(wallHit.x,wallHit.y)).norm();
@@ -4145,7 +4188,12 @@
                 this.teamAliveCounts = new Map();
                 this.teamFormationCache = new Map();
                 this.spatialGrid = new Map();
+                this.activeSpatialBuckets = [];
                 this.spatialCellSize = 260;
+                this.activeParticipants = [];
+                this.bodyMovedParticipants = [];
+                this._wallCollisionCandidates = [];
+                this._wallTraceCandidates = [];
                 this.firstBloodDone = false;
                 this.eventFeed = [];
                 this.eventCounter = 0;
@@ -4357,7 +4405,8 @@
 
             checkWallCollision(pos, radius) {
                 const radiusSq=radius*radius;
-                for(let w of this.walls) {
+                const candidates=combatWallCandidates(this.walls,pos.x-radius,pos.y-radius,pos.x+radius,pos.y+radius,this._wallCollisionCandidates);
+                for(let w of candidates) {
                     // Recompute trigonometry only when a wall actually changes. An AABB test
                     // rejects distant cover before the exact rotated-rectangle collision test.
                     if(w._collisionAngle!==w.angle || w._collisionW!==w.w || w._collisionH!==w.h) {
@@ -4393,7 +4442,7 @@
             }
 
             checkWallBetween(p1, p2) {
-                if(window.BRMP?.active)return !!combatTraceWalls(p1,p2,8,this.walls);
+                if(window.BRMP?.active)return !!combatTraceWalls(p1,p2,8,this.walls,this._wallTraceCandidates);
                 // Legacy AI pathfinding retains its existing sampling.
                 const steps = 7;
                 for(let i=1; i<steps; i++) {
@@ -4454,7 +4503,8 @@
             }
 
             refreshAliveCache() {
-                this.aliveRealPlayers = this.participants.filter(p => p.alive && p.id !== 999);
+                this.aliveRealPlayers.length=0;this.activeParticipants.length=0;
+                for(const p of this.participants)if(p.alive){this.activeParticipants.push(p);if(p.id!==999)this.aliveRealPlayers.push(p);}
                 this.teamAliveCounts.clear();
                 for(const p of this.aliveRealPlayers) this.teamAliveCounts.set(p.team, (this.teamAliveCounts.get(p.team)||0)+1);
             }
@@ -4474,24 +4524,27 @@
             }
 
             rebuildSpatialGrid() {
-                this.spatialGrid.clear();
+                for(const bucket of this.activeSpatialBuckets)bucket.length=0;
+                this.activeSpatialBuckets.length=0;
                 const cs = this.spatialCellSize;
-                for(const p of this.participants) {
+                for(const p of this.activeParticipants) {
                     if(!p.alive) continue;
-                    const key = `${Math.floor(p.pos.x/cs)},${Math.floor(p.pos.y/cs)}`;
-                    if(!this.spatialGrid.has(key)) this.spatialGrid.set(key, []);
-                    this.spatialGrid.get(key).push(p);
+                    const key = combatGridKey(Math.floor(p.pos.x/cs),Math.floor(p.pos.y/cs));
+                    let bucket=this.spatialGrid.get(key);
+                    if(!bucket){bucket=[];this.spatialGrid.set(key,bucket);}
+                    if(bucket.length===0)this.activeSpatialBuckets.push(bucket);
+                    bucket.push(p);
                 }
             }
 
             getNearbyParticipants(pos, radius=350) {
                 const cs = this.spatialCellSize;
-                if(!this.spatialGrid.size) return this.participants.filter(p=>p.alive);
+                if(!this.spatialGrid.size) return this.activeParticipants.slice();
                 const minX=Math.floor((pos.x-radius)/cs), maxX=Math.floor((pos.x+radius)/cs);
                 const minY=Math.floor((pos.y-radius)/cs), maxY=Math.floor((pos.y+radius)/cs);
                 const out=[];
                 for(let x=minX;x<=maxX;x++) for(let y=minY;y<=maxY;y++) {
-                    const bucket=this.spatialGrid.get(`${x},${y}`);
+                    const bucket=this.spatialGrid.get(combatGridKey(x,y));
                     if(bucket) out.push(...bucket);
                 }
                 return out;
@@ -4617,9 +4670,11 @@
             }
 
             resolveParticipantCollisions() {
-                const alive=this.participants.filter(p=>p.alive);
+                const alive=this.activeParticipants;
+                this.bodyMovedParticipants.length=0;
                 for(let i=0;i<alive.length;i++) {
                     const p1=alive[i];
+                    if(!p1.alive)continue;
                     const near=this.getNearbyParticipants(p1.pos,p1.radius+150);
                     for(const p2 of near) {
                         if(!p2.alive || p2===p1 || p2.id < p1.id) continue;
@@ -4635,6 +4690,8 @@
                         // 평상시에는 약한 분리 속도만 주어 서로 계속 비비며 벽에 눌리는 현상을 줄인다.
                         p1.vel=p1.vel.add(n.mult(0.18));
                         p2.vel=p2.vel.sub(n.mult(0.18));
+                        if(p1._bodyMovedFrame!==this.frame){p1._bodyMovedFrame=this.frame;this.bodyMovedParticipants.push(p1);}
+                        if(p2._bodyMovedFrame!==this.frame){p2._bodyMovedFrame=this.frame;this.bodyMovedParticipants.push(p2);}
 
                         const enemy = p1.team===0 || p1.team!==p2.team;
                         if(!enemy) continue;
@@ -4725,6 +4782,15 @@
                             this.spawnImpact(hit.pos,70,'#fb7185',1.15);
                         }
                     }
+                }
+                // Separation can push a circle a few pixels into cover. Correct only the
+                // participants that were actually separated, instead of rescanning every wall
+                // for every student on every frame.
+                for(const p of this.bodyMovedParticipants)if(p.humanControlled&&p.alive&&p.ability.sub!=='GHOST_MOVE'&&!(p.ability.sub==='FLY_DASH'&&p.dashFrames>0)) {
+                    const corrected=combatMoveCircle(p.pos,{x:0,y:0},p.radius,this.walls,false,p._combatMoveResult);
+                    p.pos.x=corrected.x;p.pos.y=corrected.y;
+                    const edge=(this.worldRadius||2600)-p.radius-4,dx=p.pos.x-this.center.x,dy=p.pos.y-this.center.y,d=Math.hypot(dx,dy);
+                    if(d>edge){p.pos.x=this.center.x+dx*edge/d;p.pos.y=this.center.y+dy*edge/d;}
                 }
             }
 
@@ -5639,7 +5705,8 @@
                 for(let i=this.eventFeed.length-1;i>=0;i--) { this.eventFeed[i].life--; if(this.eventFeed[i].life<=0) this.eventFeed.splice(i,1); }
                 if(this.studentFx.length) {
                     const cutoff=this.frame-54;
-                    while(this.studentFx.length&&this.studentFx[0].frame<cutoff)this.studentFx.shift();
+                    let expired=0;while(expired<this.studentFx.length&&this.studentFx[expired].frame<cutoff)expired++;
+                    if(expired)this.studentFx.splice(0,expired);
                     if(this.studentFx.length>96)this.studentFx.splice(0,this.studentFx.length-96);
                 }
                 if(this.feverFrames > 0) this.feverFrames--;
@@ -5720,7 +5787,7 @@
                     this.refreshAliveCache();
                     this.rebuildSpatialGrid();
                     this.maxParticipantStep=0;
-                    for(const p of this.participants){p.combatPreviousX=p.pos.x;p.combatPreviousY=p.pos.y;p.combatPreviousWarp=Number(p.warpSeq||0);}
+                    for(const p of this.activeParticipants){p.combatPreviousX=p.pos.x;p.combatPreviousY=p.pos.y;p.combatPreviousWarp=Number(p.warpSeq||0);}
                     const idleFrames = this.frame - this.lastCombatFrame;
                     // v18: 초반 정찰/간보기 시간을 Battle Fever가 억지로 깨지 않도록 최소 13초 이후부터 개입.
                     if(this.frame > 780 && idleFrames > 360) this.triggerBattleFever();
@@ -5751,7 +5818,7 @@
                     }
                     
                     // v21.16: 한 캐릭터의 AI/능력 런타임 오류가 경기 전체 requestAnimationFrame을 죽이지 않게 격리.
-                    for(const p of this.participants) {
+                    for(const p of this.activeParticipants) {
                         try {
                             p.update(this);
                         } catch(err) {
@@ -5773,7 +5840,7 @@
                             }
                         }
                     }
-                    for(const p of this.participants) {
+                    for(const p of this.activeParticipants) {
                         if(!Number.isFinite(p.combatPreviousX)||Number(p.warpSeq||0)!==p.combatPreviousWarp){p.combatPreviousX=p.pos.x;p.combatPreviousY=p.pos.y;}
                         this.maxParticipantStep=Math.max(this.maxParticipantStep,Math.hypot(p.pos.x-p.combatPreviousX,p.pos.y-p.combatPreviousY));
                     }
@@ -5805,19 +5872,9 @@
                         if(this.swings[i].life <= 0) this.swings.splice(i, 1);
                     }
                     
-                    // v21.5 PERFORMANCE LOD: 렌더링뿐 아니라 실제 시뮬레이션 객체 수도 제한.
-                    const zoneCap = this.isPerformanceMode() ? 34 : this.aliveRealPlayers.length > 10 ? 50 : 68;
-                    if(this.zones.length > zoneCap) this.zones.splice(0, this.zones.length-zoneCap);
-
-                    const projectileCap = this.aliveRealPlayers.length>=30 ? 150 : this.aliveRealPlayers.length>=22 ? 180 : this.isPerformanceMode() ? 220 : this.aliveRealPlayers.length > 10 ? 270 : 360;
-                    if(this.projectiles.length > projectileCap) {
-                        let remove = this.projectiles.length - projectileCap;
-                        for(let i=0;i<this.projectiles.length && remove>0;) {
-                            if(this.projectiles[i].type !== 'ORBIT') { this.projectiles.splice(i,1); remove--; }
-                            else i++;
-                        }
-                    }
-
+                    // Gameplay entities expire only by their own lifetime/hit rules. Performance
+                    // budgets below apply solely to presentation, so no projectile or zone vanishes
+                    // early during a crowded classroom fight.
                     const particleCap = this.getParticleBudget();
                     if(this.particles.length > particleCap) this.particles.splice(0, this.particles.length - particleCap);
                     const swingCap = this.aliveRealPlayers.length>=30 ? 26 : this.aliveRealPlayers.length>=22 ? 32 : this.isPerformanceMode() ? 38 : 80;
@@ -5831,15 +5888,10 @@
                     const collisionCadence=this.getCollisionCadence();
                     if(collisionCadence===1 || this.frame % collisionCadence === 0) {
                         this.resolveParticipantCollisions();
-                        for(const p of this.participants)if(p.humanControlled&&p.alive&&p.ability.sub!=='GHOST_MOVE'&&!(p.ability.sub==='FLY_DASH'&&p.dashFrames>0)) {
-                            const corrected=combatMoveCircle(p.pos,{x:0,y:0},p.radius,this.walls);
-                            p.pos=new Vec2(corrected.x,corrected.y);
-                            const edge=(this.worldRadius||2600)-p.radius-4,delta=p.pos.sub(this.center),d=delta.mag();
-                            if(d>edge)p.pos=this.center.add(delta.mult(edge/d));
-                        }
                     }
 
-                    let alive = this.participants.filter(p => p.alive && p.id !== 999);
+                    this.refreshAliveCache();
+                    let alive = this.aliveRealPlayers;
                     this.updateBroadcastStage(alive.length);
                     if(!window.BRMP?.active||this.frame%30===0) {
                         updateHUD(alive.length, this.realParticipantCount || (this.realParticipantCount=this.participants.filter(p=>p.id!==999).length), this.frame);
@@ -5916,22 +5968,22 @@
                 // 장애물은 윤곽만 일부 그린다.
                 ctx.fillStyle='rgba(148,163,184,.28)';
                 for(let wi=0;wi<this.walls.length;wi+=2){const w=this.walls[wi];ctx.fillRect(cx+(w.x-w.w*.5)*scale,cy+(w.y-w.h*.5)*scale,Math.max(1,w.w*scale),Math.max(1,w.h*scale));}
-                for(const z of this.zones.slice(-28)) {
+                for(let zi=Math.max(0,this.zones.length-28);zi<this.zones.length;zi++) {const z=this.zones[zi];
                     if(z.duration<=0||!z.pos)continue;
                     ctx.globalAlpha=.28;ctx.fillStyle=z.color||'#64748b';ctx.beginPath();ctx.arc(cx+z.pos.x*scale,cy+z.pos.y*scale,Math.max(2,z.radius*scale),0,Math.PI*2);ctx.fill();
                 }
                 ctx.globalAlpha=1;
-                const shots=this.projectiles.slice(-120);
-                for(let si=0;si<shots.length;si++) {
-                    const q=shots[si];if(!q.pos||q.life<=0)continue;
+                const shotStart=Math.max(0,this.projectiles.length-120),shotCount=this.projectiles.length-shotStart;
+                for(let si=shotStart;si<this.projectiles.length;si++) {
+                    const q=this.projectiles[si];if(!q.pos||q.life<=0)continue;
                     const important=!!q.playerSkillBlast||String(q.weaponStyle||'').indexOf('skill-')===0||q.type==='ORBIT';
-                    if(!important&&shots.length>80&&si%2)continue;
+                    if(!important&&shotCount>80&&(si-shotStart)%2)continue;
                     const x=cx+q.pos.x*scale,y=cy+q.pos.y*scale,vx=Number(q.vel?.x||0),vy=Number(q.vel?.y||0),vm=Math.hypot(vx,vy)||1;
                     ctx.strokeStyle=q.trailColor||q.color||'#fff';ctx.lineWidth=important?3:1.5;ctx.beginPath();ctx.moveTo(x-vx/vm*(important?12:6),y-vy/vm*(important?12:6));ctx.lineTo(x,y);ctx.stroke();
                     ctx.fillStyle=important?'#fff':(q.color||'#fff');ctx.beginPath();ctx.arc(x,y,important?3.5:2,0,Math.PI*2);ctx.fill();
                 }
                 const swingColors={S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'};
-                for(const swing of this.swings.slice(-34)) {
+                for(let swi=Math.max(0,this.swings.length-34);swi<this.swings.length;swi++) {const swing=this.swings[swi];
                     if(!swing.pos||swing.life<=0)continue;
                     const x=cx+swing.pos.x*scale,y=cy+swing.pos.y*scale,r=Math.max(4,Number(swing.size||60)*scale),alpha=Math.max(.18,swing.life/Math.max(1,swing.maxLife));
                     ctx.globalAlpha=alpha;ctx.strokeStyle=swingColors[swing.tier]||'#fff';ctx.lineWidth=swing.tier==='S'?3:2;
@@ -8361,7 +8413,7 @@
             if(entries.length<2){brToast('최소 2명이 필요합니다.');return;}
             BRMP.active=true;BRMP.matchFinished=false;BRMP.respawnMode=BRMP.roomMeta.mode==='team-respawn';
             BRMP.lastDeaths={};BRMP.deathCounter=0;BRMP.inputs=BRMP.inputs||{};BRMP.projectileSeq=0;BRMP.staticSent={};
-            BRMP.publishInFlight=0;BRMP.publishCursor=0;BRMP.lastSmallPublishAt=0;BRMP.viewFxCursor={};BRMP.wireRoster=null;BRMP.publishEpoch=Number(BRMP.publishEpoch||0)+1;
+            BRMP.publishInFlight=0;BRMP.publishCursor=0;BRMP.lastSmallPublishAt=0;BRMP.viewFxCursor={};BRMP.wireRoster=null;BRMP.wireParticipants=null;BRMP.wireHumans=null;BRMP.wireArena=null;BRMP.publishEpoch=Number(BRMP.publishEpoch||0)+1;
             teamMode=Number(BRMP.roomMeta.teamCount||0);
             seedRandom(String(BRMP.roomMeta.seed||'class-battle')+'|participants');
             generatedParticipants=entries.map(function(rec,i){
@@ -8753,60 +8805,71 @@
         }
         function brPublishViews() {
             if(!BRMP.active||!game||BRMP.backend!=='firebase'||Number(BRMP.publishInFlight||0)>=3)return;
-            var humans=game.participants.filter(function(p){return p.humanControlled&&p.remoteId&&p.id!==999;});
-            if(!humans.length)return;
-            // Performance Pass note: per-view visibility scans, FX sorting and JSON serialization remain unchanged.
-            // Keep this pass's 60Hz input/movement/hit tests; optimize snapshot work separately.
+            // Match participants are stable (temporary clones use id 999), so keep the immutable
+            // roster references and arena rows instead of rebuilding them for every 60 ms batch.
+            if(!BRMP.wireParticipants) {
+                BRMP.wireParticipants=[];BRMP.wireHumans=[];
+                for(const p of game.participants)if(p.id!==999){BRMP.wireParticipants.push(p);if(p.humanControlled&&p.remoteId)BRMP.wireHumans.push(p);}
+                BRMP.wireRoster=BRMP.wireParticipants.map(function(p){return [p.remoteId||('ai-'+p.id),p.name,Number(p.abilityIndex||0),Number(p.team||0),Number(p.radius),p.humanControlled?1:0];});
+            }
+            var humans=BRMP.wireHumans;if(!humans.length)return;
             var now=brNow(),viewers=humans;
             if(humans.length>=12) {
                 var count=Math.min(8,humans.length),start=Number(BRMP.publishCursor||0)%humans.length;viewers=[];
                 for(var i=0;i<count;i++)viewers.push(humans[(start+i)%humans.length]);
                 BRMP.publishCursor=(start+count)%humans.length;
             } else {if(now-Number(BRMP.lastSmallPublishAt||0)<95)return;BRMP.lastSmallPublishAt=now;}
-            var all=game.participants.filter(function(p){return p.id!==999;}),alive=0,wired=new Map();
-            // 이름·등급 등 불변 데이터는 별도 사전으로 보낸다. 매 프레임에는 작은 숫자 행만 전송한다.
-            var roster=all.map(function(p){return [p.remoteId||('ai-'+p.id),p.name,Number(p.abilityIndex||0),Number(p.team||0),Number(p.radius),p.humanControlled?1:0];});
-            all.forEach(function(p,index){var r=brWirePlayer(p);if(p.alive)alive++;wired.set(p,[index,r[3],r[4],r[5],r[6],r[7],r[9],r[10],r[11],r[12],r[14],r[17],r[18],r[19],r[20],r[21],r[22],r[23],r[24],r[25],r[26],r[27],r[28],r[29],r[30],r[31]]);});
-            var shots=game.projectiles.filter(function(q){return q.life>0&&q.pos;}).map(function(q){
+            var all=BRMP.wireParticipants,roster=BRMP.wireRoster,alive=0,wired=new Array(all.length);
+            for(var ai=0;ai<all.length;ai++) {
+                var p=all[ai],r=brWirePlayer(p);if(p.alive)alive++;
+                wired[ai]=[ai,r[3],r[4],r[5],r[6],r[7],r[9],r[10],r[11],r[12],r[14],r[17],r[18],r[19],r[20],r[21],r[22],r[23],r[24],r[25],r[26],r[27],r[28],r[29],r[30],r[31]];
+            }
+            var shots=[];
+            for(const q of game.projectiles)if(q.life>0&&q.pos) {
                 if(!q._brNetId)q._brNetId='q'+(++BRMP.projectileSeq);
-                return {q:q,row:[Math.round(q.pos.x),Math.round(q.pos.y),Math.round(q.size||7),q.emoji||'',q.color||q.impactColor||'#fff',Number(q.owner&&q.owner.team||0),q._brNetId,
-                    Math.round(Number(q.vel&&q.vel.x||0)*100)/100,Math.round(Number(q.vel&&q.vel.y||0)*100)/100,q.weaponStyle||getRangedWeaponStyle(q.owner&&q.owner.ability||{}),q.owner&&q.owner.ability&&q.owner.ability.t||'C',q.owner?.remoteId||('ai-'+q.owner?.id),q.inputKind||'',Number(q.inputSeq||0),Number(q.life||0),q.type||'bullet']};
-            });
+                shots.push({q:q,row:[Math.round(q.pos.x),Math.round(q.pos.y),Math.round(q.size||7),q.emoji||'',q.color||q.impactColor||'#fff',Number(q.owner&&q.owner.team||0),q._brNetId,
+                    Math.round(Number(q.vel&&q.vel.x||0)*100)/100,Math.round(Number(q.vel&&q.vel.y||0)*100)/100,q.weaponStyle||getRangedWeaponStyle(q.owner&&q.owner.ability||{}),q.owner&&q.owner.ability&&q.owner.ability.t||'C',q.owner?.remoteId||('ai-'+q.owner?.id),q.inputKind||'',Number(q.inputSeq||0),Number(q.life||0),q.type||'bullet']});
+            }
+            if(!BRMP.wireArena)BRMP.wireArena={
+                walls:game.walls.map(function(w){return [Math.round(w.x),Math.round(w.y),Math.round(w.w),Math.round(w.h),Math.round((w.angle||0)*1000)/1000,w.kind||'wall'];}),
+                bushes:game.bushes.map(function(b){return [Math.round(b.x),Math.round(b.y),Math.round(b.radius)];}),
+                smokes:game.smokes.map(function(b){return [Math.round(b.x),Math.round(b.y),Math.round(b.radius),Number(b.seed||0)];})
+            };
             var elapsed=Math.max(0,(now-Number(BRMP.roomMeta.battleStartedAt||now))/1000),remaining=BRMP.respawnMode?Math.max(0,(Number(BRMP.roomMeta.battleEndsAt||now)-now)/1000):elapsed;
             BRMP.viewFxCursor=BRMP.viewFxCursor||{};BRMP.staticSent=BRMP.staticSent||{};
             var updates={},pendingStatic=[],pendingFx=[],epoch=BRMP.publishEpoch;
-            viewers.forEach(function(viewer){
+            for(const viewer of viewers) {
                 var id=viewer.remoteId,sight=1250,vx=viewer.pos.x,vy=viewer.pos.y;
                 function near(x,y,r){var dx=x-vx,dy=y-vy;return dx*dx+dy*dy<r*r;}
-                var visible=all.filter(function(p){
-                    var deathFade=!p.alive&&p.deathFrame!=null&&game.frame-Number(p.deathFrame)<=45;
-                    return p===viewer||((p.alive||deathFade)&&near(p.pos.x,p.pos.y,sight+p.radius)&&!game.isConcealedFrom(p,viewer));
-                }).map(function(p){return wired.get(p);});
-                var projectiles=shots.filter(function(s){return near(s.q.pos.x,s.q.pos.y,sight+130);}).slice(-42).map(function(s){return s.row;});
-                var zones=game.zones.filter(function(z){return z.duration>0&&z.pos&&near(z.pos.x,z.pos.y,sight+Number(z.radius||0));}).slice(-12).map(function(z){return [Math.round(z.pos.x),Math.round(z.pos.y),Math.round(z.radius||40),z.color||'#64748b',z.type||'dmg'];});
-                var lastFx=Number(BRMP.viewFxCursor[id]||-1);
-                var fx=(game.studentFx||[]).filter(function(e){return e.frame>lastFx&&game.frame-e.frame<=90&&near(e.x,e.y,sight+Math.max(90,Number(e.size||0)));}).sort(function(a,b){
+                var visible=[];
+                for(var pi=0;pi<all.length;pi++) {
+                    var candidate=all[pi],deathFade=!candidate.alive&&candidate.deathFrame!=null&&game.frame-Number(candidate.deathFrame)<=45;
+                    if(candidate===viewer||((candidate.alive||deathFade)&&near(candidate.pos.x,candidate.pos.y,sight+candidate.radius)&&!game.isConcealedFrom(candidate,viewer)))visible.push(wired[pi]);
+                }
+                var projectiles=[];
+                for(const shot of shots)if(near(shot.q.pos.x,shot.q.pos.y,sight+130))projectiles.push(shot.row);
+                if(projectiles.length>42)projectiles.splice(0,projectiles.length-42);
+                var zones=[];
+                for(const z of game.zones)if(z.duration>0&&z.pos&&near(z.pos.x,z.pos.y,sight+Number(z.radius||0)))zones.push([Math.round(z.pos.x),Math.round(z.pos.y),Math.round(z.radius||40),z.color||'#64748b',z.type||'dmg']);
+                if(zones.length>12)zones.splice(0,zones.length-12);
+                var lastFx=Number(BRMP.viewFxCursor[id]||-1),fxCandidates=[];
+                for(const e of game.studentFx||[])if(e.frame>lastFx&&game.frame-e.frame<=90&&near(e.x,e.y,sight+Math.max(90,Number(e.size||0))))fxCandidates.push(e);
+                fxCandidates.sort(function(a,b){
                     function priority(e){return (e.targetId===id||e.sourceId===id?8:0)+(e.type==='hit'?3:0)+(Number(e.impactLevel||0));}
                     return priority(b)-priority(a)||b.frame-a.frame;
-                }).slice(0,24).sort(function(a,b){return a.id-b.id;}).map(function(e){
-                    return [e.id,e.type,Math.round(e.x),Math.round(e.y),Math.round(e.dx*1000)/1000,Math.round(e.dy*1000)/1000,Math.round(e.size),e.color||'#fff',Math.round(e.amount*10)/10,e.targetId||'',e.style||'',e.sourceId||'',Number(e.impactLevel||0)];
                 });
+                if(fxCandidates.length>24)fxCandidates.length=24;fxCandidates.sort(function(a,b){return a.id-b.id;});
+                var fx=new Array(fxCandidates.length);
+                for(var fi=0;fi<fxCandidates.length;fi++){var e=fxCandidates[fi];fx[fi]=[e.id,e.type,Math.round(e.x),Math.round(e.y),Math.round(e.dx*1000)/1000,Math.round(e.dy*1000)/1000,Math.round(e.size),e.color||'#fff',Math.round(e.amount*10)/10,e.targetId||'',e.style||'',e.sourceId||'',Number(e.impactLevel||0)];}
                 var payload={v:2,at:now,frame:game.frame,worldRadius:game.worldRadius||2600,mapRadius:Math.round(game.mapRadius),mapName:game.mapName,mode:BRMP.roomMeta.mode,clock:Math.round(remaining*10)/10,alive:alive,total:all.length,players:visible,projectiles:projectiles,zones:zones,fx:fx};
-                var sent=BRMP.staticSent[id];
-                if(!sent||now-sent.at>5000||(BRMP.inputs[id]&&BRMP.inputs[id].needsArena)) {
-                    payload.roster=roster;
-                    // 고정 맵 전체는 최초/재연결용으로만 보낸다. 멀리 이동해도 벽 예측이 빠지지 않는다.
-                    payload.walls=game.walls.map(function(w){return [Math.round(w.x),Math.round(w.y),Math.round(w.w),Math.round(w.h),Math.round((w.angle||0)*1000)/1000,w.kind||'wall'];});
-                    payload.bushes=game.bushes.map(function(b){return [Math.round(b.x),Math.round(b.y),Math.round(b.radius)];});
-                    payload.smokes=game.smokes.map(function(b){return [Math.round(b.x),Math.round(b.y),Math.round(b.radius),Number(b.seed||0)];});
-                    pendingStatic.push(id);
+                if(!BRMP.staticSent[id]||(BRMP.inputs[id]&&BRMP.inputs[id].needsArena)) {
+                    payload.roster=roster;payload.walls=BRMP.wireArena.walls;payload.bushes=BRMP.wireArena.bushes;payload.smokes=BRMP.wireArena.smokes;pendingStatic.push(id);
                 }
                 pendingFx.push([id,game.frame]);
-                // RTDB에 수천 개의 개별 노드 대신 학생별 단일 문자열을 전달해 SDK 처리량을 줄인다.
                 updates['views/'+id]=JSON.stringify(payload);
-            });
+            }
             if(now-Number(BRMP.lastSummaryAt||0)>900) {
-                BRMP.lastSummaryAt=now;var teamScores={};all.forEach(function(p){if(p.team)teamScores[p.team]=Number(teamScores[p.team]||0)+Number(p.kills||0);});
+                BRMP.lastSummaryAt=now;var teamScores={};for(const p of all)if(p.team)teamScores[p.team]=Number(teamScores[p.team]||0)+Number(p.kills||0);
                 updates['meta/summary']={alive:alive,total:all.length,clock:Math.round(remaining),teamScores:teamScores,updatedAt:now};
             }
             BRMP.publishInFlight=Number(BRMP.publishInFlight||0)+1;
@@ -9004,7 +9067,8 @@
         }
 
         function brResolvePredictedCollision(p,view,radius,from,stopOnWall) {
-            var result=combatMoveCircle(from||p,from?{x:p.vx,y:p.vy}:{x:0,y:0},radius,view?.walls||[],!!stopOnWall);
+            p._combatMoveResult=p._combatMoveResult||{x:0,y:0,vx:0,vy:0,hit:null,_wallCandidates:[]};
+            var result=combatMoveCircle(from||p,from?{x:p.vx,y:p.vy}:{x:0,y:0},radius,view?.walls||[],!!stopOnWall,p._combatMoveResult);
             p.x=result.x;p.y=result.y;
             if(from){p.vx=result.vx;p.vy=result.vy;}
             var mapR=Math.max(radius+8,Number(view?.worldRadius||2600)-radius-4),d=Math.hypot(p.x,p.y);
