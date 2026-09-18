@@ -898,31 +898,7 @@
             }
         }
 
-        // 충돌은 없지만 안으로 들어가면 멀리 있는 적에게 보이지 않는 수풀.
-        class BushCover {
-            constructor(x,y,radius,seed=0) {
-                this.pos=new Vec2(x,y); this.x=x; this.y=y; this.radius=radius; this.seed=seed;
-            }
-            contains(pos,padding=0) {
-                const rr=Math.max(12,this.radius+padding),dx=pos.x-this.x,dy=pos.y-this.y;
-                return dx*dx+dy*dy<=rr*rr;
-            }
-            draw(ctx,foreground=false) {
-                ctx.save();ctx.translate(this.x,this.y);
-                if(!foreground) {
-                    ctx.globalAlpha=.26;ctx.fillStyle='#052e16';ctx.beginPath();ctx.arc(0,0,this.radius,0,Math.PI*2);ctx.fill();
-                    ctx.globalAlpha=.32;ctx.strokeStyle='#4ade80';ctx.lineWidth=3;ctx.stroke();
-                } else {
-                    // 모바일에서 비싼 여러 원·이모지 합성 대신 단일 실루엣으로 은폐만 표시한다.
-                    ctx.globalAlpha=.54;ctx.fillStyle='#15803d';ctx.beginPath();ctx.arc(0,0,this.radius*.92,0,Math.PI*2);ctx.fill();
-                    ctx.globalAlpha=.38;ctx.fillStyle='#4ade80';ctx.beginPath();ctx.arc(-this.radius*.18,-this.radius*.16,this.radius*.55,0,Math.PI*2);ctx.fill();
-                    ctx.globalAlpha=.58;ctx.strokeStyle='#86efac';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,this.radius*.30);ctx.lineTo(0,-this.radius*.28);ctx.stroke();
-                }
-                ctx.restore();
-            }
-        }
-
-        // 고정 연막 지대. 안쪽 인물뿐 아니라 연막 너머의 시야도 차단한다.
+        // 고정 연막 지대. 은신은 이 단일 메커니즘으로 처리하며 화면 반경과 판정 반경이 같다.
         class SmokeCover {
             constructor(x,y,radius,seed=0) {
                 this.pos=new Vec2(x,y); this.x=x; this.y=y; this.radius=radius; this.seed=seed; this.phase=seed*.31;
@@ -934,9 +910,9 @@
             update() {}
             draw(ctx) {
                 ctx.save();ctx.translate(this.x,this.y);
-                ctx.globalAlpha=.34;ctx.fillStyle='#94a3b8';ctx.beginPath();ctx.arc(0,0,this.radius*.94,0,Math.PI*2);ctx.fill();
+                ctx.globalAlpha=.34;ctx.fillStyle='#94a3b8';ctx.beginPath();ctx.arc(0,0,this.radius,0,Math.PI*2);ctx.fill();
                 ctx.globalAlpha=.24;ctx.fillStyle='#e2e8f0';ctx.beginPath();ctx.arc(-this.radius*.17,-this.radius*.12,this.radius*.58,0,Math.PI*2);ctx.fill();
-                ctx.globalAlpha=.42;ctx.strokeStyle='#e2e8f0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,this.radius*.72,0,Math.PI*2);ctx.stroke();
+                ctx.globalAlpha=.42;ctx.strokeStyle='#e2e8f0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,this.radius,0,Math.PI*2);ctx.stroke();
                 ctx.restore();
             }
         }
@@ -2051,6 +2027,8 @@
                 
                 this.kills = 0;
                 this.deathFrame = null;
+                this.eliminationSeq = 0;
+                this.placement = null;
                 this.deathVisualUntilFrame = null;
                 this.deathVisualUntilAt = null;
                 this.killTimes = [];
@@ -4087,7 +4065,7 @@
                     this.deathFrame = game ? game.frame : this.survivalFrames;
                     this.deathVisualUntilFrame = this.deathFrame + 45;
                     this.deathVisualUntilAt = performance.now() + 750;
-                    if (this.id !== 999) game.deadParticipants.push(this);
+                    if (this.id !== 999 && game) game.recordElimination(this);
                     if(attacker && attacker !== this && attacker.id !== 999) {
                         attacker.kills++;
                         game.registerKillEvent(attacker, this);
@@ -4131,8 +4109,9 @@
             constructor(participants) {
                 this.participants = participants;
                 this.deadParticipants = [];
+                this.eliminationCounter = 0;
                 this.projectiles = []; this.particles = []; this.zones = []; this.turrets = []; this.texts = []; this.swings = []; this.walls = [];
-                this.bushes = []; this.smokes = [];
+                this.smokes = [];
                 this.rings = [];
                 this.signatureEffects = [];
                 // 학생 화면에는 무거운 파티클 대신 짧은 선/호/피격 이벤트만 전송한다.
@@ -4144,7 +4123,7 @@
                 this.worldRadius = 2600; this.mapRadius = 2600; this.center = new Vec2(0, 0);
                 const requestedMap=window.BRMP?.active ? window.BRMP.roomMeta?.mapIndex : -1;
                 this.mapIndex=Number.isInteger(requestedMap)&&requestedMap>=0&&requestedMap<5 ? requestedMap : Math.floor(rand()*5);
-                this.mapNames=['🌪️ 유동 폐허','➕ 십자로','🌿 안개 수풀','🏟️ 네 갈래 광장','📦 화물 기지'];
+                this.mapNames=['🌪️ 유동 폐허','➕ 십자로','🌫️ 연막 폐허','🏟️ 네 갈래 광장','📦 화물 기지'];
                 this.mapName = this.mapNames[this.mapIndex];
                 this.cam = new Vec2(0,0); this.lookAt = new Vec2(0,0); this.zoom = 0.5; 
                 this.frame = 0; this.speed = 1; this.paused = false;
@@ -4230,7 +4209,7 @@
                     }
                     addCrates(8,620,2200);
                 } else if(this.mapIndex===2) {
-                    // 넓은 수풀 사이에 바위와 짧은 폐벽을 흩어 놓은 은폐 중심 맵.
+                    // 연막 사이에 바위와 짧은 폐벽을 흩어 놓은 은폐 중심 맵.
                     for(let i=0;i<14;i++) {
                         const p=polarPoint(420,2200);
                         addWall(p.x,p.y,105+rand()*125,58+rand()*44,rand()*Math.PI,0,'rock');
@@ -4267,28 +4246,48 @@
                     }
                 }
 
-                // 모든 맵에 실제 은폐 판정이 있는 부쉬와 시야를 끊는 고정 연막을 배치한다.
-                const placeCover=(type,count,minR,maxR)=>{
+                // 화면과 판정 반경이 같은 Small / Medium / Large 연막만 둔다.
+                const smokeRadii=[118,150,182];
+                const placeSmoke=(count,minR,maxR)=>{
                     for(let i=0;i<count;i++) {
                         let placed=false;
                         for(let tries=0;tries<70&&!placed;tries++) {
                             const p=polarPoint(minR,maxR);
-                            const radius=type==='bush' ? 94+rand()*58 : 132+rand()*62;
+                            const radius=smokeRadii[Math.floor(rand()*smokeRadii.length)];
                             const pos=new Vec2(p.x,p.y);
                             if(this.checkWallCollision(pos,radius*.32)) continue;
-                            if(this.bushes.some(b=>b.pos.dist(pos)<b.radius+radius*.62)) continue;
                             if(this.smokes.some(s=>s.pos.dist(pos)<s.radius+radius*.72)) continue;
-                            if(type==='bush') this.bushes.push(new BushCover(p.x,p.y,radius,i+this.mapIndex*41));
-                            else this.smokes.push(new SmokeCover(p.x,p.y,radius,i+this.mapIndex*53));
+                            this.smokes.push(new SmokeCover(p.x,p.y,radius,i+this.mapIndex*53));
                             placed=true;
                         }
                     }
                 };
-                // 실전 은폐 선택지는 남기고, 학생 기기가 동시에 합성하는 개체 수는 줄인다.
-                placeCover('bush',[16,18,22,18,16][this.mapIndex],260,2260);
-                placeCover('smoke',[3,4,5,3,3][this.mapIndex],520,2180);
+                // 물리 엄폐를 소수만 보강해 추격을 끊되 이동 통로를 미로로 만들지 않는다.
+                const tacticalCoverCounts=[4,4,3,4,3],coverKinds=['rock','crate','wall','rock'];
+                for(let i=0;i<tacticalCoverCounts[this.mapIndex];i++) {
+                    for(let tries=0;tries<50;tries++) {
+                        const p=polarPoint(540,2100),kind=coverKinds[(i+this.mapIndex)%coverKinds.length];
+                        const w=kind==='wall'?150+rand()*70:82+rand()*42,h=kind==='wall'?24+rand()*10:70+rand()*36;
+                        const clearance=Math.hypot(w,h)*.62,pos=new Vec2(p.x,p.y);
+                        if(this.checkWallCollision(pos,clearance)) continue;
+                        addWall(p.x,p.y,w,h,rand()*Math.PI,0,kind);break;
+                    }
+                }
+                // 연막은 시야를 끊으므로 개수를 제한해 전장을 답답하게 만들지 않는다.
+                placeSmoke([8,9,10,8,7][this.mapIndex],480,2200);
                 // Fixed cover keeps collision prediction identical on the host and every student.
                 if(window.BRMP?.active) this.walls.forEach(w=>{w.spinSpeed=0;});
+            }
+
+            recordElimination(participant) {
+                if(!participant||participant.id===999||participant.eliminationSeq>0)return participant&&participant.eliminationSeq||0;
+                participant.eliminationSeq=++this.eliminationCounter;
+                if(!window.BRMP?.isRespawnMode()) {
+                    const total=this.realParticipantCount||(this.realParticipantCount=this.participants.filter(p=>p.id!==999).length);
+                    participant.placement=Math.max(2,total-participant.eliminationSeq+1);
+                }
+                this.deadParticipants.push(participant);
+                return participant.eliminationSeq;
             }
 
             findSafeMapPoint(minRadius=120,maxRadius=2000,clearance=80) {
@@ -4438,7 +4437,6 @@
 
             getCoverTypeAt(pos) {
                 if(this.smokes.some(s=>s.contains(pos,-10))) return 'smoke';
-                if(this.bushes.some(b=>b.contains(pos,-10))) return 'bush';
                 return '';
             }
 
@@ -4455,7 +4453,6 @@
                 if(target.team!==0&&target.team===viewer.team) return false;
                 const distance=target.pos.dist(viewer.pos);
                 if(distance<=125) return false;
-                if(this.bushes.some(b=>b.contains(target.pos,-12))) return distance>155;
                 for(const smoke of this.smokes) {
                     if(smoke.contains(target.pos,-8)||smoke.contains(viewer.pos,-8)) return distance>125;
                     if(distance>165&&this.segmentDistanceToPoint(viewer.pos,target.pos,smoke.pos)<smoke.radius*.78) return true;
@@ -5895,7 +5892,7 @@
                         // 수업 모드에서는 마지막 장시간 연출을 생략하고 곧바로 결과로 넘어간다.
                         if(!onlineClass) for(let i=0; i<120; i++) this.confetti.push(new ConfettiParticle(canvas.width/2, canvas.height + 50));
                         
-                        let winner = alive[0] || this.participants[0];
+                        let winner = alive[0] || this.participants.filter(p=>p.id!==999).sort(compareSurvivalOrder)[0] || this.participants[0];
                         this.winner = winner;
                         this.matchEndedAt = this.frame;
                         if(winner) {
@@ -5950,8 +5947,8 @@
                 const ringX=cx+(this.center.x||0)*scale,ringY=cy+(this.center.y||0)*scale;
                 window.brCombatVisual.dangerFill(ctx,ringX,ringY,this.mapRadius*scale,worldRadius*scale);
                 window.brCombatVisual.dangerBoundary(ctx,ringX,ringY,this.mapRadius*scale,1,this.frame*(1000/60));
-                ctx.fillStyle='rgba(34,130,85,.30)';
-                for(const bush of this.bushes){ctx.beginPath();ctx.arc(cx+bush.x*scale,cy+bush.y*scale,Math.max(1,bush.radius*scale),0,Math.PI*2);ctx.fill();}
+                ctx.fillStyle='rgba(148,163,184,.27)';
+                for(const smoke of this.smokes){ctx.beginPath();ctx.arc(cx+smoke.x*scale,cy+smoke.y*scale,Math.max(1,smoke.radius*scale),0,Math.PI*2);ctx.fill();}
                 this.drawCombatBeams(ctx,scale,cx,cy);
                 ctx.fillStyle='rgba(148,163,184,.42)';
                 for(const wall of this.walls){ctx.save();ctx.translate(cx+wall.x*scale,cy+wall.y*scale);ctx.rotate(wall.angle||0);ctx.fillRect(-wall.w*scale*.5,-wall.h*scale*.5,wall.w*scale,wall.h*scale);ctx.restore();}
@@ -6052,7 +6049,6 @@
                     ctx.beginPath(); ctx.moveTo(-3200,i); ctx.lineTo(3200,i); ctx.stroke();
                 }
 
-                this.bushes.forEach(b => b.draw(ctx,false));
                 this.drawCombatBeams(ctx);
                 this.walls.forEach(w => w.draw(ctx));
                 this.zones.forEach(z => z.draw(ctx));
@@ -6203,9 +6199,6 @@
                     let label = p.name; if(p.kills > 0) label += ` [⚔️${p.kills}]`;
                     ctx.fillText(label,p.pos.x,p.pos.y-p.radius-(autoBroadcast?35:25));ctx.shadowBlur=0;
                 });
-
-                // 잎사귀 앞면이 캐릭터 일부를 덮어 실제로 숨어 있는 느낌을 준다.
-                this.bushes.forEach(b => b.draw(ctx,true));
 
                 // v22.2 draw LOD: 30명 이상에서는 작은 장식 파티클을 절반만 그리되 실제 전투 오브젝트는 모두 유지.
                 window.brCombatVisual.dangerBoundary(ctx,this.center.x,this.center.y,this.mapRadius,this.zoom,this.frame*(1000/60));
@@ -6763,6 +6756,15 @@
             return `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;
         }
 
+        function compareSurvivalOrder(a,b) {
+            if(!!a.alive!==!!b.alive)return a.alive?-1:1;
+            if(a.alive&&b.alive)return Number(b.survivalFrames||0)-Number(a.survivalFrames||0)||String(a.remoteId??a.id).localeCompare(String(b.remoteId??b.id));
+            const aSeq=Number(a.eliminationSeq||0),bSeq=Number(b.eliminationSeq||0);
+            if(aSeq!==bSeq)return bSeq-aSeq;
+            const ad=Number(a.deathFrame??a.survivalFrames??0),bd=Number(b.deathFrame??b.survivalFrames??0);
+            return bd-ad||String(a.remoteId??a.id).localeCompare(String(b.remoteId??b.id));
+        }
+
         function clearBattleStats() {
             if(confirm('저장된 능력 전적을 모두 삭제할까요?')) {
                 localStorage.removeItem(STATS_KEY);
@@ -6818,13 +6820,14 @@
                 const totalDamage = members.reduce((n,p)=>n+(p.damageDealt||0),0);
                 const totalDamageTaken = members.reduce((n,p)=>n+(p.damageTaken||0),0);
                 const lastMember = [...members].sort((a,b) => {
-                    const af = a.alive ? Infinity : (a.deathFrame ?? a.survivalFrames ?? 0);
-                    const bf = b.alive ? Infinity : (b.deathFrame ?? b.survivalFrames ?? 0);
-                    return (bf-af) || ((b.survivalFrames||0)-(a.survivalFrames||0));
+                    return compareSurvivalOrder(a,b);
                 })[0];
                 const eliminationFrame = aliveMembers.length
                     ? Infinity
                     : Math.max(...members.map(p => p.deathFrame ?? p.survivalFrames ?? 0));
+                const eliminationSeq = aliveMembers.length
+                    ? Infinity
+                    : Math.max(...members.map(p => Number(p.eliminationSeq||0)));
 
                 // 조기 종료 시에는 기존 조기 종료 팀 판정식과 동일한 기준을 사용한다.
                 const avgEarlyScore = members.reduce((n,p)=>n+(p.earlyScore ?? getEarlyPlayerScore(p)),0) / members.length;
@@ -6833,7 +6836,7 @@
 
                 teams.push({
                     team:t, members, aliveMembers, totalKills, totalDamage, totalDamageTaken,
-                    lastMember, eliminationFrame, manualScore
+                    lastMember, eliminationFrame, eliminationSeq, manualScore
                 });
             }
 
@@ -6842,8 +6845,8 @@
                 const aAlive = a.aliveMembers.length > 0;
                 const bAlive = b.aliveMembers.length > 0;
                 if(aAlive !== bAlive) return aAlive ? -1 : 1;
-                if(aAlive && bAlive) return (b.aliveMembers.length-a.aliveMembers.length) || (b.totalKills-a.totalKills);
-                return (b.eliminationFrame-a.eliminationFrame) || (b.totalKills-a.totalKills);
+                if(aAlive && bAlive) return (b.aliveMembers.length-a.aliveMembers.length) || (a.team-b.team);
+                return (b.eliminationSeq-a.eliminationSeq) || (b.eliminationFrame-a.eliminationFrame) || (a.team-b.team);
             });
             return teams;
         }
@@ -6914,25 +6917,14 @@
 
                 // MVP 계산을 위해 개인 생존순위도 내부적으로만 유지한다.
                 topList = [...realPlayers].sort((a,b) => {
-                    if(a.alive !== b.alive) return a.alive ? -1 : 1;
-                    const ad=a.alive ? Infinity : (a.deathFrame ?? a.survivalFrames ?? 0);
-                    const bd=b.alive ? Infinity : (b.deathFrame ?? b.survivalFrames ?? 0);
-                    return (bd-ad) || ((b.survivalFrames||0)-(a.survivalFrames||0));
+                    return compareSurvivalOrder(a,b);
                 });
             } else {
                 if(manual && options.ranking) {
                     topList = options.ranking;
                 } else {
                     // 개인전 최종 랭킹은 생존 순위가 최우선이다.
-                    topList = [...realPlayers].sort((a,b) => {
-                        if(a.alive !== b.alive) return a.alive ? -1 : 1;
-                        if(a.alive && b.alive) {
-                            const ah=a.hp/Math.max(1,a.maxHp), bh=b.hp/Math.max(1,b.maxHp);
-                            return (bh-ah) || (b.survivalFrames-a.survivalFrames);
-                        }
-                        const ad=a.deathFrame ?? a.survivalFrames, bd=b.deathFrame ?? b.survivalFrames;
-                        return (bd-ad) || (b.survivalFrames-a.survivalFrames) || (b.kills-a.kills);
-                    });
+                    topList = [...realPlayers].sort(compareSurvivalOrder);
                 }
 
                 topList.slice(0, 5).forEach((p, i) => {
@@ -7278,7 +7270,7 @@
                             <div class="br-grid2">
                                 <div class="br-field"><label class="br-label">경기 모드</label><select id="br-mode" class="br-select"><option value="solo">👑 최후의 1인</option><option value="team-elim">🛡️ 팀 생존전</option><option value="team-respawn">♻️ 팀 킬 대결</option></select></div>
                                 <div class="br-field"><label class="br-label">팀 수</label><select id="br-team-count" class="br-select"><option value="2">2팀</option><option value="3">3팀</option><option value="4">4팀</option></select></div>
-                                <div class="br-field"><label class="br-label" for="br-map">전장</label><select id="br-map" class="br-select"><option value="random">🎲 무작위</option><option value="0">🌪️ 유동 폐허</option><option value="1">➕ 십자로</option><option value="2">🌿 안개 수풀</option><option value="3">🏟️ 네 갈래 광장</option><option value="4">📦 화물 기지</option></select></div>
+                                <div class="br-field"><label class="br-label" for="br-map">전장</label><select id="br-map" class="br-select"><option value="random">🎲 무작위</option><option value="0">🌪️ 유동 폐허</option><option value="1">➕ 십자로</option><option value="2">🌫️ 연막 폐허</option><option value="3">🏟️ 네 갈래 광장</option><option value="4">📦 화물 기지</option></select></div>
                                 <div class="br-field"><label class="br-label">퀴즈 시간</label><select id="br-quiz-seconds" class="br-select"><option value="45">45초</option><option value="60" selected>60초</option><option value="90">90초</option></select></div>
                                 <div class="br-field"><label class="br-label">팀 킬 대결 시간</label><select id="br-match-seconds" class="br-select"><option value="120">2분</option><option value="180" selected>3분</option><option value="300">5분</option></select></div>
                             </div>
@@ -7938,7 +7930,7 @@
                 BRMP.roomMeta={
                     phase:'lobby',rosterVersion:BR_ROSTER_VERSION,hostId:BRMP.playerId,hostConnected:true,createdAt:brNow(),
                     updatedAt:brNow(),expiresAt:brNow()+1000*60*60*6,mode:'solo',teamCount:0,
-                    quizSeconds:60,matchSeconds:180,mapIndex:-1,rerollEvery:3,seed:brUid('seed')
+                    quizSeconds:60,matchSeconds:180,mapIndex:-1,rerollEvery:3,matchRound:0,seed:brUid('seed')
                 };
                 await roomRef.set({meta:BRMP.roomMeta,players:{},inputs:{},views:{}});
                 try{roomRef.child('meta/hostConnected').onDisconnect().set(false);}catch(e){}
@@ -7956,7 +7948,7 @@
             BRMP.playerId='host-demo'; BRMP.players={}; BRMP.inputs={}; BRMP.results=null;
             BRMP.roomMeta={
                 phase:'lobby',rosterVersion:BR_ROSTER_VERSION,hostId:'host-demo',hostConnected:true,createdAt:brNow(),updatedAt:brNow(),
-                mode:'solo',teamCount:0,quizSeconds:60,matchSeconds:180,mapIndex:-1,rerollEvery:3,seed:'demo-'+brNow()
+                mode:'solo',teamCount:0,quizSeconds:60,matchSeconds:180,mapIndex:-1,rerollEvery:3,matchRound:0,seed:'demo-'+brNow()
             };
             BRMP.localDemoHumanId='demo-human';
             BRMP.players[BRMP.localDemoHumanId]={name:'교사 체험',connected:true,bot:false,demoHuman:true,joinedAt:brNow(),quizScore:0,ready:false};
@@ -8090,6 +8082,7 @@
             }
             BRMP.phaseHandled=phase;
             if(phase==='lobby') {
+                brStopQuiz();brStopStudentBattle();BRMP.results=null;BRMP.latestView=null;BRMP.lastViewFrame=null;
                 brShow('br-student-wait');
                 brRenderStudentWait('🙌','참가 완료!','선생님이 퀴즈를 시작할 때까지 기다려 주세요.');
             } else if(phase==='quiz') {
@@ -8233,6 +8226,8 @@
             var entries=brGetPlayerEntries(false);
             if(entries.length<2){brToast('최소 2명이 필요합니다.');return;}
             var now=brNow(), seconds=parseInt(brEl('br-quiz-seconds').value,10)||60;
+            var matchRound=Number(BRMP.roomMeta.matchRound||0)+1;
+            var quizShuffleSeed=String(BRMP.roomMeta.seed||'seed')+'|quiz|'+matchRound+'|'+now;
             var mode=brEl('br-mode').value, teamCount=mode==='solo'?0:(parseInt(brEl('br-team-count').value,10)||2);
             var matchSeconds=parseInt(brEl('br-match-seconds').value,10)||180;
             var mapIndex=parseInt(brEl('br-map').value,10);
@@ -8242,10 +8237,11 @@
                 'meta/phase':'quiz','meta/mode':mode,'meta/teamCount':teamCount,
                 'meta/quizSeconds':seconds,'meta/matchSeconds':matchSeconds,'meta/mapIndex':mapIndex,
                 'meta/quizStartedAt':now,'meta/quizEndsAt':now+seconds*1000,
-                'meta/quizBank':bank,'meta/updatedAt':now
+                'meta/quizBank':bank,'meta/matchRound':matchRound,'meta/quizShuffleSeed':quizShuffleSeed,'meta/updatedAt':now
             };
             entries.forEach(function(p){
                 updates['players/'+p._id+'/quizScore']=0;
+                updates['players/'+p._id+'/quizRound']=matchRound;
                 updates['players/'+p._id+'/rerolls']=0;
                 updates['players/'+p._id+'/ready']=false;
                 updates['players/'+p._id+'/abilityId']=null;updates['players/'+p._id+'/rosterVersion']=BR_ROSTER_VERSION;
@@ -8255,6 +8251,7 @@
             BRMP.roomMeta.phase='quiz'; BRMP.roomMeta.mode=mode; BRMP.roomMeta.teamCount=teamCount;
             BRMP.roomMeta.quizSeconds=seconds; BRMP.roomMeta.matchSeconds=matchSeconds; BRMP.roomMeta.mapIndex=mapIndex;
             BRMP.roomMeta.quizStartedAt=now; BRMP.roomMeta.quizEndsAt=now+seconds*1000; BRMP.roomMeta.quizBank=bank;
+            BRMP.roomMeta.matchRound=matchRound;BRMP.roomMeta.quizShuffleSeed=quizShuffleSeed;
             await brHostUpdate(updates);
             brStartHostQuizTimer();
             brRenderHost();
@@ -8290,14 +8287,16 @@
             if(BRMP.hostTimer){clearInterval(BRMP.hostTimer);BRMP.hostTimer=null;}
             BRMP.lastDraftRequests={};
             var entries=brGetPlayerEntries(false);
-            var rnd=brHashRandom(String(BRMP.roomMeta.seed||'seed')+'|draft|'+brNow());
+            var rnd=brHashRandom(String(BRMP.roomMeta.seed||'seed')+'|draft|'+Number(BRMP.roomMeta.matchRound||0));
             var order=brShuffle(entries,rnd), teams={}, tc=Number(BRMP.roomMeta.teamCount||0);
             order.forEach(function(p,i){teams[p._id]=tc?((i%tc)+1):0;});
             var updates={'meta/phase':'draft','meta/draftStartedAt':brNow(),'meta/updatedAt':brNow()};
             order.forEach(function(p){
                 // 같은 이모지는 여러 학생에게 나올 수 있다. 참가자 전체 중복 검사는 하지 않는다.
-                var idx=brAbilityIndex(BRMP.roomMeta.mode,-1,null,rnd);
-                var rerolls=Math.floor(Number(p.quizScore||0)/Number(BRMP.roomMeta.rerollEvery||3));
+                var previousIndex=brResolveAbilityIndex({abilityId:p.lastAbilityId,rosterVersion:p.rosterVersion||BR_ROSTER_VERSION});
+                var idx=brAbilityIndex(BRMP.roomMeta.mode,previousIndex,null,rnd);
+                var roundScore=Number(p.quizRound||0)===Number(BRMP.roomMeta.matchRound||0)?Number(p.quizScore||0):0;
+                var rerolls=Math.floor(roundScore/Number(BRMP.roomMeta.rerollEvery||3));
                 updates['players/'+p._id+'/team']=teams[p._id];
                 updates['players/'+p._id+'/abilityIndex']=idx;
                 updates['players/'+p._id+'/abilityId']=EMOJI_DB[idx].id;
@@ -8337,11 +8336,18 @@
             brShow('br-quiz');
             var rawBank=meta.quizBank,bank=Array.isArray(rawBank)?rawBank:(rawBank&&typeof rawBank==='object'?Object.keys(rawBank).sort(function(a,b){return Number(a)-Number(b);}).map(function(key){return rawBank[key];}):[]);
             if(!bank.length)bank=BR_DEFAULT_QUESTIONS;
-            var rnd=brHashRandom(String(meta.seed||'seed')+'|'+BRMP.playerId);
+            var rnd=brHashRandom(String(meta.quizShuffleSeed||meta.seed||'seed')+'|'+Number(meta.matchRound||0)+'|'+BRMP.playerId);
             var prepared=bank.map(function(q,i){return brPrepareQuizQuestion(q,i);}).filter(Boolean);
             if(!prepared.length)prepared=BR_DEFAULT_QUESTIONS.map(function(q,i){return brPrepareQuizQuestion(q,i);}).filter(Boolean);
+            var questions=brShuffle(prepared.slice(),rnd),signature=questions.map(function(q){return q.id;}).join('|');
+            if(questions.length>1&&signature===BRMP.lastQuizOrderSignature) {
+                questions=brShuffle(prepared.slice(),rnd);signature=questions.map(function(q){return q.id;}).join('|');
+                if(signature===BRMP.lastQuizOrderSignature){questions.push(questions.shift());signature=questions.map(function(q){return q.id;}).join('|');}
+            }
+            BRMP.lastQuizOrderSignature=signature;
             BRMP.quizWriteChain=Promise.resolve();
-            BRMP.quizState={score:Number(BRMP.selfPlayer&&BRMP.selfPlayer.quizScore||0),index:0,shown:0,token:0,locked:false,done:false,rnd:rnd,questions:brShuffle(prepared,rnd),pendingTimer:null,cooldownUntil:0};
+            var currentScore=Number(BRMP.selfPlayer&&Number(BRMP.selfPlayer.quizRound||0)===Number(meta.matchRound||0)&&BRMP.selfPlayer.quizScore||0);
+            BRMP.quizState={score:currentScore,index:0,shown:0,token:0,locked:false,done:false,rnd:rnd,questions:questions,pendingTimer:null,cooldownUntil:0};
             brEl('br-quiz-room').textContent='ROOM '+BRMP.roomCode;
             brEl('br-quiz-score').textContent=BRMP.quizState.score;
             brEl('br-quiz-rerolls').textContent=Math.floor(BRMP.quizState.score/Number(meta.rerollEvery||3));
@@ -8362,7 +8368,7 @@
             feedback.className='br-quiz-feedback'+(state?' '+state:'');
         }
         function brQueueQuizScoreWrite(score,finished) {
-            var payload={quizScore:Number(score||0),lastSeen:brNow()};
+            var payload={quizScore:Number(score||0),quizRound:Number(BRMP.roomMeta&&BRMP.roomMeta.matchRound||0),lastSeen:brNow()};
             if(finished)payload.quizFinished=true;
             BRMP.quizWriteChain=(BRMP.quizWriteChain||Promise.resolve()).catch(function(){}).then(function(){return brWriteSelf(payload);});
             return BRMP.quizWriteChain;
@@ -8840,8 +8846,7 @@
                 var key=String(p.id), df=p.deathFrame;
                 if(!p.alive&&df!=null&&BRMP.lastDeaths[key]!==df) {
                     BRMP.lastDeaths[key]=df;p.deaths=Number(p.deaths||0)+1;BRMP.deathCounter++;
-                    if(!BRMP.respawnMode)p.placement=real.length-BRMP.deathCounter+1;
-                    else p.respawnAtFrame=game.frame+180;
+                    if(BRMP.respawnMode)p.respawnAtFrame=game.frame+180;
                 }
                 if(BRMP.respawnMode&&!p.alive&&p.respawnAtFrame&&game.frame>=p.respawnAtFrame)brRespawnPlayer(p);
             });
@@ -8912,7 +8917,6 @@
             }
             if(!BRMP.wireArena)BRMP.wireArena={
                 walls:game.walls.map(function(w){return [Math.round(w.x),Math.round(w.y),Math.round(w.w),Math.round(w.h),Math.round((w.angle||0)*1000)/1000,w.kind||'wall'];}),
-                bushes:game.bushes.map(function(b){return [Math.round(b.x),Math.round(b.y),Math.round(b.radius)];}),
                 smokes:game.smokes.map(function(b){return [Math.round(b.x),Math.round(b.y),Math.round(b.radius),Number(b.seed||0)];})
             };
             var elapsed=Math.max(0,(now-Number(BRMP.roomMeta.battleStartedAt||now))/1000),remaining=BRMP.respawnMode?Math.max(0,(Number(BRMP.roomMeta.battleEndsAt||now)-now)/1000):elapsed;
@@ -8947,7 +8951,7 @@
                 for(var fi=0;fi<fxCandidates.length;fi++){var e=fxCandidates[fi];fx[fi]=[e.id,e.type,Math.round(e.x),Math.round(e.y),Math.round(e.dx*1000)/1000,Math.round(e.dy*1000)/1000,Math.round(e.size),e.color||'#fff',Math.round(e.amount*10)/10,e.targetId||'',e.style||'',e.sourceId||'',Number(e.impactLevel||0)];}
                 var payload={v:2,rosterVersion:BR_ROSTER_VERSION,at:now,frame:game.frame,worldRadius:game.worldRadius||2600,mapRadius:Math.round(game.mapRadius),mapName:game.mapName,mode:BRMP.roomMeta.mode,clock:Math.round(remaining*10)/10,alive:alive,total:all.length,players:visible,projectiles:projectiles,zones:zones,turrets:turrets,fx:fx};
                 if(!BRMP.staticSent[id]||(BRMP.inputs[id]&&BRMP.inputs[id].needsArena)) {
-                    payload.roster=roster;payload.walls=BRMP.wireArena.walls;payload.bushes=BRMP.wireArena.bushes;payload.smokes=BRMP.wireArena.smokes;pendingStatic.push(id);
+                    payload.roster=roster;payload.walls=BRMP.wireArena.walls;payload.smokes=BRMP.wireArena.smokes;pendingStatic.push(id);
                 }
                 pendingFx.push([id,game.frame]);
                 updates['views/'+id]=JSON.stringify(payload);
@@ -8968,7 +8972,7 @@
             if(typeof incoming==='string') {try {incoming=JSON.parse(incoming);}catch(e){return null;}}
             if(!incoming||typeof incoming!=='object'||!Array.isArray(incoming.players))return null;
             BRMP.staticView=BRMP.staticView||{};
-            ['walls','bushes','smokes','roster'].forEach(function(key){
+            ['walls','smokes','roster'].forEach(function(key){
                 if(Object.prototype.hasOwnProperty.call(incoming,key))BRMP.staticView[key]=incoming[key]||[];
                 else incoming[key]=BRMP.staticView[key]||[];
             });
@@ -9257,7 +9261,7 @@
                 old.last=now;
                 BRMP.drawPlayers.set(id,old);seen.add(id);
             });
-            // 수풀·연막에 숨은 적의 잔상이 오래 남지 않도록 두 번의 전송 주기 안에 제거한다.
+            // 연막에 숨은 적의 잔상이 오래 남지 않도록 두 번의 전송 주기 안에 제거한다.
             BRMP.drawPlayers.forEach(function(v,k){if(!seen.has(k))BRMP.drawPlayers.delete(k);});
             var shotSeen=new Set();
             (view.projectiles||[]).forEach(function(r,i){
@@ -9313,6 +9317,8 @@
             if(BRMP.inputTimer){clearInterval(BRMP.inputTimer);BRMP.inputTimer=null;}
             if(BRMP.renderFrame){cancelAnimationFrame(BRMP.renderFrame);BRMP.renderFrame=null;}
             BRMP.drawPlayers=null;BRMP.drawProjectiles=null;BRMP.localProjectiles=null;BRMP.drawFx=null;BRMP.hitStates=null;BRMP.seenFxIds=null;BRMP.currentSelf=null;BRMP.aimGesture=null;BRMP.localCastFx=null;BRMP.localDash=null;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.staticView=null;BRMP.studentShake=null;BRMP.studentRecoil=null;BRMP.hitConfirm=null;BRMP.damageFlash=null;
+            BRMP.latestView=null;BRMP.lastViewFrame=null;BRMP.inputState=null;BRMP.inputMatchKey=null;BRMP.inputSeq=0;BRMP.lastMoveSeq=0;BRMP.lastInputKey=null;BRMP.lastInputSent=0;
+            BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;BRMP.pendingLocalActions={};BRMP.studentCamera=null;
             ['br-attack','br-skill'].forEach(function(id){var el=brEl(id);if(el)el.classList.remove('aiming');});
         }
         function brSendInput(force) {
@@ -9374,36 +9380,11 @@
             }
             cc.restore();
         }
-        function brGetGrassSprite(variant,foreground) {
-            BRMP.grassSpriteCache=BRMP.grassSpriteCache||new Map();
-            var key=variant+'|'+(foreground?1:0);if(BRMP.grassSpriteCache.has(key))return BRMP.grassSpriteCache.get(key);
-            var sprite=document.createElement('canvas');sprite.width=256;sprite.height=256;var gc=sprite.getContext('2d');
-            gc.translate(128,128);
-            if(!foreground){gc.fillStyle='#123e26';gc.beginPath();gc.ellipse(0,12,120,104,0,0,Math.PI*2);gc.fill();}
-            var colors=foreground?['#38a84c','#51bc51','#7bce62']:['#1b6534','#247b38','#319443'];
-            // Deterministic overlapping leaf clumps: no random animation, filters or shadows.
-            for(var i=0;i<70;i++) {
-                var angle=i*2.399963+variant*.7,dist=Math.sqrt((i+.5)/70)*108;
-                var bx=Math.cos(angle)*dist,by=Math.sin(angle)*dist*.86+18;
-                if(foreground&&i%3===0)continue;
-                var height=18+(i*13+variant*7)%23,width=7+(i*7)%8;
-                gc.fillStyle=colors[i%3];gc.beginPath();
-                gc.moveTo(bx-width,by+7);gc.lineTo(bx-width*1.9,by-height*.8);gc.lineTo(bx-3,by-5);
-                gc.lineTo(bx+(i%2?3:-3),by-height);gc.lineTo(bx+4,by-5);gc.lineTo(bx+width*1.8,by-height*.72);gc.lineTo(bx+width,by+7);gc.closePath();gc.fill();
-            }
-            BRMP.grassSpriteCache.set(key,sprite);return sprite;
-        }
-        function brDrawStudentBush(cc,r,foreground) {
-            var radius=r[2],variant=Math.abs(Math.round(r[0]*.03+r[1]*.07))%3;
-            var self=BRMP.drawPlayers&&BRMP.drawPlayers.get(String(BRMP.playerId)),inside=self&&Math.hypot(self.x-r[0],self.y-r[1])<radius;
-            cc.save();cc.globalAlpha=foreground?(inside?.29:.58):.98;
-            cc.drawImage(brGetGrassSprite(variant,foreground),r[0]-radius,r[1]-radius,radius*2,radius*2);cc.restore();
-        }
         function brDrawStudentSmoke(cc,r) {
             var radius=r[2];cc.save();cc.translate(r[0],r[1]);
-            cc.globalAlpha=.30;cc.fillStyle='#94a3b8';cc.beginPath();cc.arc(0,0,radius*.92,0,Math.PI*2);cc.fill();
+            cc.globalAlpha=.30;cc.fillStyle='#94a3b8';cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.fill();
             cc.globalAlpha=.20;cc.fillStyle='#e2e8f0';cc.beginPath();cc.arc(-radius*.17,-radius*.12,radius*.56,0,Math.PI*2);cc.fill();
-            cc.globalAlpha=.42;cc.strokeStyle='#e2e8f0';cc.lineWidth=2;cc.beginPath();cc.arc(0,0,radius*.70,0,Math.PI*2);cc.stroke();cc.restore();
+            cc.globalAlpha=.42;cc.strokeStyle='#e2e8f0';cc.lineWidth=2;cc.beginPath();cc.arc(0,0,radius,0,Math.PI*2);cc.stroke();cc.restore();
         }
         function brDrawAimPreview(cc,self,zoom) {
             var gesture=BRMP.aimGesture,input=BRMP.inputState,now=performance.now(),castFx=BRMP.localCastFx;
@@ -9603,6 +9584,10 @@
             }
             cc.restore();
         }
+        function brStudentProjectileVisualSize(size) {
+            var radius=Math.max(1,Number(size||7));
+            return radius<10?radius*1.22:radius<16?radius*1.14:radius*1.08;
+        }
         window.brCombatVisual={beam:brDrawBeam,emojiSprite:brGetEmojiSprite,dangerFill:brDrawDangerFill,dangerBoundary:brDrawDangerBoundary,hazard:brDrawHazardCircle,turret:brDrawTurretGlyph,projectile:brDrawProjectileGlyph};
         function brUpdateAndDrawLocalProjectiles(cc,dt,zoom,onScreen,frameNow) {
             var list=BRMP.localProjectiles||[],frames=dt/(1000/60),draw=BRMP.drawPlayers,self=draw&&draw.get(String(BRMP.playerId)),selfTeam=Number(self&&self.row&&self.row[8]||0);
@@ -9629,7 +9614,7 @@
                     var vn=p.vx*wallHit.nx+p.vy*wallHit.ny;p.vx-=2*vn*wallHit.nx;p.vy-=2*vn*wallHit.ny;p.bounces--;wallHit=null;
                 }
                 if(wallHit||(touched&&!p.pierce&&p.type!=='BOOMERANG')||p.rangeRemaining===0){list.splice(i,1);continue;}
-                if(onScreen(p.x,p.y,120))brDrawProjectileGlyph(cc,p.x,p.y,p.vx,p.vy,p.size,p.emoji,p.color,p.style,zoom,brClamp(p.life/60,0,1));
+                if(onScreen(p.x,p.y,120))brDrawProjectileGlyph(cc,p.x,p.y,p.vx,p.vy,brStudentProjectileVisualSize(p.size),p.emoji,p.color,p.style,zoom,brClamp(p.life/60,0,1));
             }
         }
         function brDrawHitConfirm(cc,w,h,now) {
@@ -9776,7 +9761,6 @@
             for(var gy=minY;gy<=maxY;gy+=160){cc.moveTo(minX,gy);cc.lineTo(maxX,gy);}
             cc.stroke();
             brDrawDangerFill(cc,0,0,radius,worldRadius);
-            (view.bushes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentBush(cc,r,false);});
             (view.walls||[]).forEach(function(r){if(onScreen(r[0],r[1],Math.hypot(r[2],r[3])*.5))brDrawStudentWall(cc,r);});
             (view.zones||[]).forEach(function(r){
                 if(!onScreen(r[0],r[1],r[2]))return;
@@ -9794,7 +9778,7 @@
             }
             if(shots)shots.forEach(function(s){
                 var r=s.row;if(s.expired||!onScreen(s.x,s.y,Math.max(100,Number(r[2]||7)*1.33)))return;
-                brDrawProjectileGlyph(cc,s.x,s.y,Number(s.vx||0),Number(s.vy||0),Number(r[2]||7),r[3]||'',r[4]||'#fff',String(r[9]||'standard'),zoom,1,Number(r[16]||0));
+                brDrawProjectileGlyph(cc,s.x,s.y,Number(s.vx||0),Number(s.vy||0),brStudentProjectileVisualSize(Number(r[2]||7)),r[3]||'',r[4]||'#fff',String(r[9]||'standard'),zoom,1,Number(r[16]||0));
             });
             brUpdateAndDrawLocalProjectiles(cc,dt,zoom,onScreen,frameNow);
             function drawStudentPlayer(s){
@@ -9846,7 +9830,6 @@
             draw.forEach(function(s,id){if(String(id)!==String(BRMP.playerId))drawStudentPlayer(s);});
             drawStudentPlayer(self);
             brDrawStudentFx(cc,frameNow,zoom,onScreen);
-            (view.bushes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentBush(cc,r,true);});
             (view.smokes||[]).forEach(function(r){if(onScreen(r[0],r[1],r[2]))brDrawStudentSmoke(cc,r);});
             brDrawAimPreview(cc,self,zoom);
             cc.restore();
@@ -9884,7 +9867,7 @@
             brSetText(brEl('br-battle-self'),a.e+' '+r[1]+' · '+a.t+'급');
             var playableSkill=brGetPlayableSkillInfo(a);brSetText(brEl('br-skill-label'),playableSkill?playableSkill.label:'스킬');
             var hpWidth=brClamp(hp/max*100,0,100).toFixed(1)+'%',hpBar=brEl('br-battle-hp');if(hpBar.style.width!==hpWidth)hpBar.style.width=hpWidth;
-            var cover=String(r[17]||''),coverText=cover==='bush'?' · 🌿 은폐 중':cover==='smoke'?' · 🌫️ 연막 은폐':'';
+            var cover=String(r[17]||''),coverText=cover==='smoke'?' · 🌫️ 연막 은폐':'';
             brSetText(brEl('br-battle-status'),'HP '+Math.round(hp)+' / '+Math.round(max)+' · KILL '+Number(r[9]||0)+coverText);
             brSetText(brEl('br-battle-mode'),(BR_MODE_LABELS[view.mode]||'전투')+(view.mapName?' · '+view.mapName:''));
             brSetText(brEl('br-battle-time'),(view.mode==='team-respawn'?'남은 ':'경과 ')+brFormatTime(Number(view.clock||0)));
@@ -9925,28 +9908,25 @@
                 players.sort(function(a,b){return (b.kills-a.kills)||(a.deaths-b.deaths)||(b.damageDealt-a.damageDealt);});
             } else {
                 if(mode==='team-elim') {
-                    var teamPower={};
+                    var aliveTeams=new Set(players.filter(function(p){return p.alive&&p.team;}).map(function(p){return Number(p.team);}));
+                    var teamLastElimination={};
                     players.forEach(function(p){
                         var t=Number(p.team||0);if(!t)return;
-                        if(!teamPower[t])teamPower[t]=0;
-                        teamPower[t]+=(p.alive?100000:0)+(Math.max(0,p.hp)/Math.max(1,p.maxHp))*1000+Number(p.kills||0)*500+Number(p.damageDealt||0);
+                        teamLastElimination[t]=Math.max(Number(teamLastElimination[t]||0),Number(p.eliminationSeq||0));
                     });
-                    teamWinner=Number(Object.keys(teamPower).sort(function(a,b){return teamPower[b]-teamPower[a]||Number(a)-Number(b);})[0]||0);
+                    teamWinner=aliveTeams.size===1?Number(Array.from(aliveTeams)[0]):Number(Object.keys(teamLastElimination).sort(function(a,b){return teamLastElimination[b]-teamLastElimination[a]||Number(a)-Number(b);})[0]||0);
                 }
-                players.sort(function(a,b){
-                    if(a.alive!==b.alive)return a.alive?-1:1;
-                    var af=a.alive?Infinity:Number(a.deathFrame||0),bf=b.alive?Infinity:Number(b.deathFrame||0);
-                    return (bf-af)||(b.kills-a.kills)||(b.damageDealt-a.damageDealt);
-                });
+                players.sort(compareSurvivalOrder);
             }
             var rows=players.map(function(p,i){
+                if(mode!=='team-respawn')p.placement=i+1;
                 return {rank:i+1,id:p.remoteId||('ai-'+p.id),name:p.name,abilityIndex:Number(p.abilityIndex||0),abilityId:p.ability.id,abilityName:p.ability.n,abilityEmoji:p.ability.e,rosterVersion:BR_ROSTER_VERSION,
                     tier:p.ability.t,team:Number(p.team||0),kills:Number(p.kills||0),deaths:Number(p.deaths||0),
                     damage:Math.round(p.damageDealt||0),taken:Math.round(p.damageTaken||0),
-                    survival:Math.round((p.alive?game.frame:Number(p.deathFrame||p.survivalFrames||0))/60),alive:!!p.alive};
+                    survival:Math.round((p.alive?game.frame:Number(p.deathFrame||p.survivalFrames||0))/60),alive:!!p.alive,eliminationSeq:Number(p.eliminationSeq||0)};
             });
             var winningPool=teamWinner?rows.filter(function(r){return r.team===teamWinner;}):rows;
-            var champion=mode==='solo'?rows[0]:(winningPool.slice().sort(function(a,b){return (b.kills-a.kills)||(b.damage-a.damage)||(a.rank-b.rank);})[0]||rows[0]);
+            var champion=mode==='team-respawn'?(winningPool.slice().sort(function(a,b){return (b.kills-a.kills)||(b.damage-a.damage)||(a.rank-b.rank);})[0]||rows[0]):(winningPool.slice().sort(function(a,b){return a.rank-b.rank;})[0]||rows[0]);
             var mostKills=rows.slice().sort(function(a,b){return (b.kills-a.kills)||(b.damage-a.damage);})[0];
             var mostDamage=rows.slice().sort(function(a,b){return (b.damage-a.damage)||(b.kills-a.kills);})[0];
             var ironWall=rows.slice().sort(function(a,b){return (b.taken-a.taken)||(a.deaths-b.deaths);})[0];
@@ -10018,24 +9998,44 @@
             brTearDownGame();
             var updates={'meta/phase':'lobby','meta/updatedAt':brNow(),'meta/summary':null,'results':null,'views':null,'inputs':null};
             brGetPlayerEntries(true).forEach(function(p){
+                var previousAbilityId=p.abilityId||(brResolveAbilityIndex(p)>=0?EMOJI_DB[brResolveAbilityIndex(p)].id:null)||p.lastAbilityId||null;
+                p.lastAbilityId=previousAbilityId;p.abilityId=null;p.abilityIndex=null;p.quizScore=0;p.quizFinished=false;p.rerolls=0;p.ready=false;p.team=0;
+                p.alive=true;p.eliminated=false;p.placement=null;p.kills=0;p.damage=0;p.survival=0;p.spectator=false;
                 updates['players/'+p._id+'/quizScore']=0;updates['players/'+p._id+'/quizFinished']=false;
+                updates['players/'+p._id+'/lastAbilityId']=previousAbilityId;
                 updates['players/'+p._id+'/abilityId']=null;updates['players/'+p._id+'/rosterVersion']=BR_ROSTER_VERSION;
                 updates['players/'+p._id+'/abilityIndex']=null;updates['players/'+p._id+'/rerolls']=0;
                 updates['players/'+p._id+'/ready']=false;updates['players/'+p._id+'/team']=0;
+                updates['players/'+p._id+'/alive']=true;updates['players/'+p._id+'/eliminated']=false;
+                updates['players/'+p._id+'/placement']=null;updates['players/'+p._id+'/kills']=0;
+                updates['players/'+p._id+'/damage']=0;updates['players/'+p._id+'/survival']=0;
+                updates['players/'+p._id+'/spectator']=false;
             });
-            BRMP.roomMeta.phase='lobby';BRMP.results=null;BRMP.matchFinished=false;
+            BRMP.roomMeta.phase='lobby';BRMP.results=null;BRMP.matchFinished=false;BRMP.inputs={};
             await brHostUpdate(updates);
             brShow('br-host-room');brRenderHost();
         }
         function brTearDownGame() {
             BRMP.active=false;BRMP.respawnMode=false;
             if(animationId){cancelAnimationFrame(animationId);animationId=null;}
-            if(game&&game.endTimer)clearTimeout(game.endTimer);
+            if(game) {
+                if(game.endTimer){clearTimeout(game.endTimer);game.endTimer=null;}
+                ['projectiles','particles','zones','turrets','texts','swings','rings','signatureEffects','studentFx','confetti','deadParticipants','smokes','walls'].forEach(function(key){if(Array.isArray(game[key]))game[key].length=0;});
+                if(Array.isArray(game.participants))game.participants.length=0;
+            }
             game=null;
+            generatedParticipants=[];
             document.getElementById('game-screen').classList.add('hidden');
             brEl('br-host-live').classList.add('br-hidden');
+            if(BRMP.hostTimer){clearInterval(BRMP.hostTimer);BRMP.hostTimer=null;}
             if(BRMP.viewTimer){clearInterval(BRMP.viewTimer);BRMP.viewTimer=null;}
             if(BRMP.monitorTimer){clearInterval(BRMP.monitorTimer);BRMP.monitorTimer=null;}
+            if(BRMP.summaryTimer){clearInterval(BRMP.summaryTimer);BRMP.summaryTimer=null;}
+            BRMP.publishEpoch=Number(BRMP.publishEpoch||0)+1;BRMP.publishInFlight=0;BRMP.publishCursor=0;BRMP.lastSmallPublishAt=0;
+            BRMP.lastDeaths={};BRMP.deathCounter=0;BRMP.projectileSeq=0;BRMP.staticSent={};BRMP.viewFxCursor={};
+            BRMP.wireArena=null;BRMP.wireRoster=null;BRMP.wireParticipants=null;BRMP.wireHumans=null;
+            BRMP.latestView=null;BRMP.lastViewFrame=null;BRMP.staticView=null;BRMP.focusPlayer=false;
+            loopLastTime=0;loopAccumulator=0;hostLastDrawAt=0;hostRenderMode='';
         }
         async function brCloseRoom(skipConfirm) {
             if(BRMP.role!=='host'){brReturnHome();return;}
