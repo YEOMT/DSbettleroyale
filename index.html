@@ -9649,6 +9649,20 @@
                 p.vel=p.vel.mult(1-response).add(desired.mult(response));
             }
         }
+        function brMeleeTargetIntersectsCone(origin,target,aim,range,halfAngle) {
+            var dx=target.pos.x-origin.x,dy=target.pos.y-origin.y,distSq=dx*dx+dy*dy;
+            var targetRadius=Math.max(0,Number(target.radius||0)),reach=range+targetRadius;
+            if(distSq>reach*reach)return false;
+            if(distSq<=targetRadius*targetRadius)return true;
+            var dist=Math.sqrt(distSq),dot=(dx*aim.x+dy*aim.y)/dist,minDot=Math.cos(halfAngle);
+            if(dot>=minDot)return true;
+            // The visible target is a circle, not a point. Near either cone edge, test the
+            // target's full collision circle against that edge without extending the attack.
+            var side=dx*aim.y-dy*aim.x,angle=side>0?-halfAngle:halfAngle;
+            var ca=Math.cos(angle),sa=Math.sin(angle),edgeX=aim.x*ca-aim.y*sa,edgeY=aim.x*sa+aim.y*ca;
+            var along=brClamp(dx*edgeX+dy*edgeY,0,range),edgeDx=dx-edgeX*along,edgeDy=dy-edgeY*along;
+            return edgeDx*edgeDx+edgeDy*edgeDy<=targetRadius*targetRadius;
+        }
         function brBasicAttack(p,g,aim) {
             aim=aim&&aim.mag()>.05?aim.norm():new Vec2(1,0);
             var mods=p.run?.mods||{},tier=p.ability.t,cd=brBasicAttackFrames(p.ability,mods),profile=brRunBasicProfile(p.ability,mods),color=p.ability.pTrail||BR_TIER_COLOR[tier]||'#fff';
@@ -9659,10 +9673,10 @@
                 var push=brTierValue(tier,{S:39,A:35,B:30,C:25,F:19})*profile.pushScale,hit=false,totalDealt=0;
                 g.addSwingEffect(p,p.pos,aim,range,profile.style,profile.halfAngle);
                 window.brFarm.cone(g,p,aim,range,profile.halfAngle,farmUnits,farmToken);
-                for(var o of g.getNearbyParticipants(p.pos,range+100)) {
+                // Broad phase must include the full target circle used by the exact cone test.
+                for(var o of g.getNearbyParticipants(p.pos,range+128)) {
                     if(!o.alive||o===p||o.id===999||(p.team&&o.team===p.team))continue;
-                    var dx=o.pos.x-p.pos.x,dy=o.pos.y-p.pos.y,dist=Math.hypot(dx,dy),dot=dist?(dx*aim.x+dy*aim.y)/dist:1;
-                    if(dist>=range+o.radius*.4||dot<=Math.cos(profile.halfAngle)||g.checkWallBetween(p.pos,o.pos))continue;
+                    if(!brMeleeTargetIntersectsCone(p.pos,o,aim,range,profile.halfAngle)||g.checkWallBetween(p.pos,o.pos))continue;
                     var before=o.hp,previous=p.currentImpactStyle;p.currentImpactStyle='basic-'+profile.style;
                     try{o.takeDamage(damage*p.damageMult*.72,p,false,aim);}finally{p.currentImpactStyle=previous||'';}
                     totalDealt+=Math.max(0,before-o.hp);o.vel=o.vel.add(aim.mult(push*(o.knockbackResist||1)));
