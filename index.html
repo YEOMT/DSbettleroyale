@@ -394,7 +394,7 @@
             else if(sub==='STING')Object.assign(p,{count:5,speed:17,damage:7.2,size:6,spread:.15,push:1.5,status:'poison',statusPower:96});
             else if(sub==='SODA_BOMB')Object.assign(p,{count:3,speed:13,damage:10.5,size:17,explode:62,spread:.14,push:18});
             else if(sub==='POWDER_BARRAGE')Object.assign(p,{count:5,speed:15,damage:10,size:12,explode:44,spread:.15,push:12});
-            else if(sub==='AIMED_SHOT')Object.assign(p,{count:1,speed:26,damage:27,size:9,spread:0,pierce:true,face:true,push:14});
+            else if(sub==='AIMED_SHOT')Object.assign(p,{count:1,speed:32,damage:34,size:9,spread:0,pierce:true,face:true,push:14});
             else if(sub==='TOXIC_INJECTION')Object.assign(p,{count:2,speed:18,damage:11,size:12,spread:.09,status:'poison',statusPower:150,push:5,face:true});
             else if(sub==='BOOMERANG')p.type='BOOMERANG';
             // Four low-rank skills keep their damage budget and gain a readable
@@ -2395,6 +2395,7 @@
                 this.cachedTargetId = null;
                 this.nextTargetRefresh = 0;
                 this.bodyHitCooldown = 0;
+                this.basicContactUntilFrame = -1;
                 this.wallCrashCooldown = 0;
                 this.launchedFrames = 0;
                 this.launchedById = null;
@@ -2672,7 +2673,7 @@
                     if (this.dashType === 'BULLDOZER_DASH' && this.dashFrames % 5 === 0) {
                         let dir = new Vec2(rand()-0.5, rand()-0.5).norm();
                         game.projectiles.push(new Projectile(this, this.pos, dir, 8, 15*this.damageMult, 12, 'bullet', '#888', 0, '🪨'));
-                        game.applyAoE(this.pos, 80, 10 * this.damageMult*cast.damage, this, 25*cast.control);
+                        // Rocks and swept body contact carry the damage; no invisible radial hit.
                     }
                     if(!this.playerDash && this.dashFrames===1)this.finishDashImpact(game);
                     if(this.dashFrames === 0 && TRAIL_DASH_SUBS.has(this.dashType)) this.finishTrailDash(game);
@@ -3589,7 +3590,7 @@
                         window.brFarm.line(game,this,this.pos,visibleEnd,5,.65,'snipe:'+game.frame);
                         let hit = game.raycast(this.pos, aimDir, sniperRange, this);
                         if(hit) {
-                            hit.takeDamage(48 * this.damageMult, this);
+                            hit.takeDamage(55 * this.damageMult, this);
                             hit.vel=hit.vel.add(aimDir.mult(18*(hit.knockbackResist||1)));
                             game.markLaunched(hit,this,20);
                         }
@@ -3617,7 +3618,7 @@
                         opts.trailColor = '#fb7185'; opts.impactColor = '#fecdd3'; opts.knockback = 12;
                         game.addText(this.pos,'💥 POWDER BARRAGE!','#fecdd3',24,23);
                     } else if(sub === 'AIMED_SHOT') {
-                        pCount = 1; pSpeed = 26; pDmg = 27 * this.damageMult; pSize = 9; pSpread = 0;
+                        pCount = 1; pSpeed = 32; pDmg = 34 * this.damageMult; pSize = 9; pSpread = 0;
                         opts.pierce = true; opts.faceDir = true; opts.knockback = 14;
                         opts.trailColor = '#fde68a'; opts.impactColor = '#fff7cc';
                         game.drawLaser(this.pos,this.pos.add(aimDir.mult(manualRange||900)),'#fde68a');
@@ -4894,7 +4895,7 @@
                 if(!eliminated)return;
                 eliminated.vel=new Vec2(0,0);eliminated.invisible=false;eliminated.attackCommitFrames=0;
                 eliminated.cachedTargetId=null;eliminated.comboTargetId=null;eliminated.rivalId=null;
-                eliminated.pendingAttack=null;eliminated.pendingSkill=null;eliminated.playerDash=null;eliminated.dashFrames=0;
+                eliminated.pendingAttack=null;eliminated.pendingSkill=null;eliminated.playerDash=null;eliminated.dashFrames=0;eliminated.basicContactUntilFrame=-1;
                 for(const p of this.participants) {
                     if(p===eliminated)continue;
                     if(p.cachedTargetId===eliminated.id){p.cachedTargetId=null;p.nextTargetRefresh=0;}
@@ -5080,17 +5081,28 @@
                         // Keep separation above, but never add another BODY CHECK for that same contact.
                         if(p1.playerDash||p2.playerDash||p1.playerDashContactFrame===this.frame||p2.playerDashContactFrame===this.frame)continue;
                         const s1=p1.vel.mag(), s2=p2.vel.mag();
-                        const p1Attacking = p1.attackCommitFrames>0 || p1.dashFrames>0 || p1.comboHitsRemaining>0;
-                        const p2Attacking = p2.attackCommitFrames>0 || p2.dashFrames>0 || p2.comboHitsRemaining>0;
-                        const p1SpecialCharge = p1Attacking && (IMPACT_CHARGE_SUBS.has(p1.ability.sub)||p1.dashType==='PLAYER_TANK_CHARGE');
-                        const p2SpecialCharge = p2Attacking && (IMPACT_CHARGE_SUBS.has(p2.ability.sub)||p2.dashType==='PLAYER_TANK_CHARGE');
-                        const striker = p1SpecialCharge && !p2SpecialCharge ? p1
+                        // A basic strike has already resolved its one damage hit. Its small
+                        // forward step never grants an additional collision-damage window.
+                        const p1Attacking = (p1.attackCommitFrames>0 || p1.dashFrames>0 || p1.comboHitsRemaining>0) &&
+                            !(p1.humanControlled && this.frame<=Number(p1.basicContactUntilFrame??-1) && p1.dashFrames<=0);
+                        const p2Attacking = (p2.attackCommitFrames>0 || p2.dashFrames>0 || p2.comboHitsRemaining>0) &&
+                            !(p2.humanControlled && this.frame<=Number(p2.basicContactUntilFrame??-1) && p2.dashFrames<=0);
+                        const p1SpecialCharge = p1.dashFrames>0 && (IMPACT_CHARGE_SUBS.has(p1.ability.sub)||p1.dashType==='PLAYER_TANK_CHARGE');
+                        const p2SpecialCharge = p2.dashFrames>0 && (IMPACT_CHARGE_SUBS.has(p2.ability.sub)||p2.dashType==='PLAYER_TANK_CHARGE');
+                        const p1Close = isTankAbility(p1.ability) || p1.ability.type===ABILITY_TYPES.MELEE || p1.ability.type===ABILITY_TYPES.ORBIT || p1.ability.type===ABILITY_TYPES.DASH || p1.dashType==='PLAYER_TANK_CHARGE' || p1.dashType==='PLAYER_MELEE_LUNGE';
+                        const p2Close = isTankAbility(p2.ability) || p2.ability.type===ABILITY_TYPES.MELEE || p2.ability.type===ABILITY_TYPES.ORBIT || p2.ability.type===ABILITY_TYPES.DASH || p2.dashType==='PLAYER_TANK_CHARGE' || p2.dashType==='PLAYER_MELEE_LUNGE';
+                        const p1BodyEligible = p1Attacking && p1Close && s1>7.2 && (!p1.humanControlled ||
+                            (p1.stunned<=0 && p1.launchedFrames<=0 && -(p1.vel.x*n.x+p1.vel.y*n.y)/s1>.25));
+                        const p2BodyEligible = p2Attacking && p2Close && s2>7.2 && (!p2.humanControlled ||
+                            (p2.stunned<=0 && p2.launchedFrames<=0 && (p2.vel.x*n.x+p2.vel.y*n.y)/s2>.25));
+                        const striker = p1BodyEligible && !p2BodyEligible ? p1
+                            : p2BodyEligible && !p1BodyEligible ? p2
+                            : p1SpecialCharge && !p2SpecialCharge ? p1
                             : p2SpecialCharge && !p1SpecialCharge ? p2
                             : (s1>=s2?p1:p2);
                         const target=striker===p1?p2:p1;
                         const strikerSpeed=striker.vel.mag();
-                        const closeType=striker.ability.type===ABILITY_TYPES.MELEE || striker.ability.type===ABILITY_TYPES.ORBIT || striker.ability.type===ABILITY_TYPES.DASH ||
-                            striker.dashType==='PLAYER_TANK_CHARGE'||striker.dashType==='PLAYER_MELEE_LUNGE'||(this.finalPhase && striker.ability.sub==='REFLECT');
+                        const bodyEligible=striker===p1?p1BodyEligible:p2BodyEligible;
 
                         // 일반 고속 교차는 CLASH. 특수 돌진 4종은 아래 BODY CHECK 전용 판정을 우선한다.
                         if(s1>10 && s2>10 && (p1Attacking || p2Attacking) && !(p1SpecialCharge || p2SpecialCharge)
@@ -5101,15 +5113,15 @@
                             this.spawnImpact(p1.pos.add(p2.pos).mult(0.5),95,'#ffffff',1.35);
                         }
                         // 근접/돌진형의 몸통박치기. 속도가 높을수록 밀어내고 던진다.
-                        else if(closeType && (striker.attackCommitFrames>0 || striker.dashFrames>0 || striker.comboHitsRemaining>0)
-                            && strikerSpeed>7.2 && striker.bodyHitCooldown<=0 && target.bodyHitCooldown<=0) {
+                        else if(bodyEligible && striker.bodyHitCooldown<=0 && target.bodyHitCooldown<=0) {
                             striker.bodyHitCooldown=18; target.bodyHitCooldown=20;
                             const dir=target.pos.sub(striker.pos).norm();
                             const tierBonus={S:1.35,A:1.18,B:1.0,C:0.82,F:0.45}[striker.ability.t]||1;
-                            const specialCharge = IMPACT_CHARGE_SUBS.has(striker.ability.sub)||striker.dashType==='PLAYER_TANK_CHARGE';
+                            const specialCharge = striker.dashFrames>0 && (IMPACT_CHARGE_SUBS.has(striker.ability.sub)||striker.dashType==='PLAYER_TANK_CHARGE');
 
                             let dmg=Math.min(18, Math.max(3,(strikerSpeed-5)*0.72*tierBonus));
                             let force=Math.min(26,7+strikerSpeed*0.75*tierBonus);
+                            if(isTankAbility(striker.ability))force=Math.min(29,force+3);
                             let stun=0;
                             let impactColor='#fbbf24';
                             let impactLabel='💥 BODY CHECK!';
@@ -5153,7 +5165,11 @@
                         // 날아가던 캐릭터가 다른 적과 충돌하면 연쇄 충돌 피해.
                         const thrown = p1.launchedFrames>0 ? p1 : (p2.launchedFrames>0 ? p2 : null);
                         const hit = thrown===p1?p2:(thrown===p2?p1:null);
-                        if(thrown && hit && thrown.vel.mag()>9 && thrown.bodyHitCooldown<=0 && hit.bodyHitCooldown<=0) {
+                        // Ignore only the basic strike's immediate recoil into its source;
+                        // launching that victim into another opponent still works immediately.
+                        const basicRecoil = thrown && hit && hit.id===thrown.launchedById && hit.humanControlled &&
+                            this.frame<=Number(hit.basicContactUntilFrame??-1);
+                        if(thrown && hit && !basicRecoil && thrown.vel.mag()>9 && thrown.bodyHitCooldown<=0 && hit.bodyHitCooldown<=0) {
                             const launcher=this.participants.find(x=>x.id===thrown.launchedById) || null;
                             const chainDmg=Math.min(15,4+thrown.vel.mag()*0.55);
                             thrown.bodyHitCooldown=hit.bodyHitCooldown=22;
@@ -6332,11 +6348,11 @@
                 const ringX=cx+(this.center.x||0)*scale,ringY=cy+(this.center.y||0)*scale;
                 window.brCombatVisual.dangerFill(ctx,ringX,ringY,this.mapRadius*scale,worldRadius*scale);
                 window.brCombatVisual.dangerBoundary(ctx,ringX,ringY,this.mapRadius*scale,1,this.frame*(1000/60));
-                ctx.fillStyle='rgba(34,211,238,.28)';
-                for(const smoke of this.smokes){ctx.beginPath();ctx.arc(cx+smoke.x*scale,cy+smoke.y*scale,Math.max(1,smoke.radius*scale),0,Math.PI*2);ctx.fill();}
+                ctx.fillStyle='rgba(34,211,238,.28)';ctx.strokeStyle='rgba(103,232,249,.76)';ctx.lineWidth=1.25;
+                for(const smoke of this.smokes){ctx.beginPath();ctx.arc(cx+smoke.x*scale,cy+smoke.y*scale,Math.max(1,smoke.radius*scale),0,Math.PI*2);ctx.fill();ctx.stroke();}
                 this.drawCombatBeams(ctx,scale,cx,cy,1);
-                ctx.fillStyle='rgba(148,163,184,.42)';
-                for(const wall of this.walls){ctx.save();ctx.translate(cx+wall.x*scale,cy+wall.y*scale);ctx.rotate(wall.angle||0);ctx.fillRect(-wall.w*scale*.5,-wall.h*scale*.5,wall.w*scale,wall.h*scale);ctx.restore();}
+                ctx.fillStyle='#64748b';ctx.strokeStyle='#cbd5e1';ctx.lineWidth=1;
+                for(const wall of this.walls){ctx.save();ctx.translate(cx+wall.x*scale,cy+wall.y*scale);ctx.rotate(wall.angle||0);ctx.fillRect(-wall.w*scale*.5,-wall.h*scale*.5,wall.w*scale,wall.h*scale);ctx.strokeRect(-wall.w*scale*.5,-wall.h*scale*.5,wall.w*scale,wall.h*scale);ctx.restore();}
                 ctx.save();ctx.translate(cx,cy);ctx.scale(scale,scale);window.brFarm.drawStudent(ctx,window.brFarm.snapshot(this),null,scale);ctx.restore();
                 for(const z of this.zones) {
                     if(z.duration<=0||!z.pos)continue;
@@ -6346,7 +6362,7 @@
                 for(const q of this.projectiles) {
                     if(!q.pos||q.life<=0)continue;
                     const rotation=q.faceDir?Math.atan2(q.vel?.y||0,q.vel?.x||0):q.spinAngle||0;
-                    window.brCombatVisual.projectile(ctx,cx+q.pos.x*scale,cy+q.pos.y*scale,Number(q.vel?.x||0)*scale,Number(q.vel?.y||0)*scale,Math.max(1.5,q.size*scale),q.emoji||'',q.trailColor||q.color||'#fff',q.weaponStyle||'',1,1,rotation);
+                    window.brCombatVisual.projectile(ctx,cx+q.pos.x*scale,cy+q.pos.y*scale,Number(q.vel?.x||0)*scale,Number(q.vel?.y||0)*scale,Math.max(3,q.size*scale),q.emoji||'',q.trailColor||q.color||'#fff',q.weaponStyle||'',1,1,rotation);
                 }
                 const swingColors={S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'};
                 for(let swi=Math.max(0,this.swings.length-34);swi<this.swings.length;swi++) {const swing=this.swings[swi];
@@ -6359,17 +6375,23 @@
                 const tierColor={S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'};
                 for(const p of this.participants) {
                     if(p.id===999)continue;
-                    const x=cx+(p.pos.x||0)*scale,y=cy+(p.pos.y||0)*scale,r=p.humanControlled?6:4;
+                    const x=cx+(p.pos.x||0)*scale,y=cy+(p.pos.y||0)*scale,r=p.humanControlled?7:5;
                     if(!p.alive) {
                         const fade=Math.max(0,Math.min(1,(Number(p.deathVisualUntilAt||0)-performance.now())/750));
                         if(fade>0){ctx.globalAlpha=fade;ctx.strokeStyle='#fb4b63';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,3+8*(1-fade),0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
                         continue;
                     }
                     ctx.fillStyle=tierColor[p.ability?.t]||'#fff';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+                    ctx.strokeStyle='rgba(5,12,24,.9)';ctx.lineWidth=2;ctx.stroke();
                     ctx.drawImage(window.brCombatVisual.emojiSprite(p.ability?.e||'👤'),x-r*1.4,y-r*1.4,r*2.8,r*2.8);
-                    if(p.humanControlled){ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#e2e8f0';ctx.font='700 8px sans-serif';ctx.textAlign='center';ctx.fillText(String(p.name||''),x,y-9);}
-                    const hp=Math.max(0,p.hp/Math.max(1,p.maxHp)),barW=14;
-                    ctx.fillStyle='rgba(20,30,45,.92)';ctx.fillRect(x-barW/2,y+8,barW,2.5);ctx.fillStyle=hp>.35?'#4ade80':'#fb4b63';ctx.fillRect(x-barW/2,y+8,barW*hp,2.5);
+                    if(p.humanControlled){
+                        const label=Array.from(String(p.name||'')).slice(0,7).join('');
+                        ctx.font='800 10px sans-serif';ctx.textAlign='center';ctx.lineJoin='round';ctx.lineWidth=3;
+                        ctx.strokeStyle='rgba(3,8,18,.96)';ctx.strokeText(label,x,y-r-5);ctx.fillStyle='#f8fafc';ctx.fillText(label,x,y-r-5);
+                    }
+                    const hp=Math.max(0,p.hp/Math.max(1,p.maxHp)),barW=p.humanControlled?19:15,barY=y+r+3;
+                    ctx.fillStyle='rgba(8,17,32,.96)';ctx.fillRect(x-barW/2-1,barY-1,barW+2,5);
+                    ctx.fillStyle=hp>.35?'#4ade80':'#fb4b63';ctx.fillRect(x-barW/2,barY,barW*hp,3);
                 }
                 this.drawBroadcastOverlay();
             }
@@ -8260,7 +8282,7 @@
             if(sub==='STONE')return info('guard-pulse','벽돌 요새','주변을 밀어내고 잠시 피해를 줄임',720);
             if(sub==='SLOW_TANK')return info('guard-shell','등껍질 가드','2초간 피해를 줄여 버팀',660);
             if(type===ABILITY_TYPES.PROJ||type===ABILITY_TYPES.LASER||type===ABILITY_TYPES.ORBIT)
-                return info('native',ability.skillLabel||({SWORD_ORBIT:'검무 전개',GEAR_ORBIT:'톱니 전개',TORNADO_ORBIT:'회오리 전개',ROLLING_BLADE:'회전 바퀴',SNIPE:'정밀 저격',ARCANE_BARRAGE:'마력 탄막',NOVA:'별빛 난사',VOID_DESTRUCTION:'공허 광선'})[sub]||'고유 스킬',ability.skillDesc||ability.desc||'고유 능력을 사용',type===ABILITY_TYPES.ORBIT?810:900);
+                return info('native',ability.skillLabel||({SWORD_ORBIT:'검무 전개',GEAR_ORBIT:'톱니 전개',TORNADO_ORBIT:'회오리 전개',ROLLING_BLADE:'회전 바퀴',SNIPE:'정밀 저격',ARCANE_BARRAGE:'마력 탄막',NOVA:'별빛 난사',VOID_DESTRUCTION:'공허 광선'})[sub]||'고유 스킬',ability.skillDesc||ability.desc||'고유 능력을 사용',sub==='SNIPE'?1050-extra:sub==='AIMED_SHOT'?1080-extra:type===ABILITY_TYPES.ORBIT?810:900);
             if(type===ABILITY_TYPES.TELEPORT) {
                 if(sub==='THUNDER')return info('teleport-thunder','낙뢰 강림','순간이동 후 착지 주변에 낙뢰',900);
                 if(sub==='DIVE_LAVA')return info('teleport-lava','용암 강하','순간이동 후 착지 지점에 용암',960);
@@ -8355,11 +8377,28 @@
             if(rendered&&ability.type===ABILITY_TYPES.PROJ)size*=ability.t==='S'?1.14:ability.t==='A'?1.08:1;
             return size;
         }
+        function brBasicStepDistance(ability,mods,haste) {
+            // A short attack step, not a skill dash: no damage, velocity, CC or wall phasing.
+            if(!brBasicCombatProfile(ability).close||[ABILITY_TYPES.ORBIT,ABILITY_TYPES.PULL].includes(ability.type))return 0;
+            var distance=isTankAbility(ability)?8:ability.category==='암살자'?16:12;
+            // Rapid/haste builds keep their full attack rate without turning taps into a travel skill.
+            return distance*Math.min(1,brBasicAttackFrames(ability,mods)/(haste?3:1)/24);
+        }
+        function brMoveBasicStep(pos,aim,distance,radius,walls,worldRadius,center,reuse) {
+            var moved=combatMoveCircle(pos,{x:aim.x*distance,y:aim.y*distance},radius,walls||[],true,reuse);
+            var cx=Number(center&&center.x||0),cy=Number(center&&center.y||0),dx=moved.x-cx,dy=moved.y-cy,d=Math.hypot(dx,dy);
+            var edge=Math.max(radius+8,Number(worldRadius||2800)-radius-4);
+            if(d>edge){moved.x=cx+dx*edge/d;moved.y=cy+dy*edge/d;}
+            return moved;
+        }
         function brAimSpec(ability,kind,playerRadius,power,mods) {
             mods=mods||brRunClientMods();
             var spec=brBaseAimSpec(ability,kind,playerRadius,power),caps=brRunCapabilities(ability);
             if(kind==='attack'){
-                if(caps.basic.melee)spec.range*=Number(mods.basicRange||1);
+                if(caps.basic.melee){
+                    spec.step=brBasicStepDistance(ability,mods,false);
+                    spec.range=Math.max(playerRadius,(spec.range*Number(mods.basicRange||1))-spec.step);
+                }
                 else{
                     var profile=brRunBasicProfile(ability,mods);
                     spec.width=brBasicShotSize(ability,true)*2*Number(mods.basicSize||1);
@@ -9586,6 +9625,7 @@
             return brWithRunSkill(p,g,function(){return brCastHumanSkillBase(p,g,aim,power);});
         }
         function brCastHumanSkillBase(p,g,aim,power) {
+            p.basicContactUntilFrame=-1;
             var spec=brAimSpec(p.ability,'skill',p.radius,power,p.run?.mods||{}),point=brAimEndpoint(p,g,aim,Number(spec.range||0));
             var playable=brGetPlayableSkillInfo(p.ability);
             if(playable&&brCastPlayableSkill(p,g,aim,power,playable,spec))return true;
@@ -9691,7 +9731,13 @@
             var farmToken='basic:'+(p.farmActionSeq=(p.farmActionSeq||0)+1),farmUnits=window.brFarm.basicUnits(cd);
             p.attackCommitFrames=Math.max(p.attackCommitFrames,10);
             if(profile.close) {
-                var range=(p.radius+profile.rangeBonus)*Number(mods.basicRange||1),damage=brTierValue(tier,{S:27,A:24,B:21,C:18,F:13})*profile.damageScale;
+                var stepDistance=brBasicStepDistance(p.ability,mods,p.playerAttackHasteFrames>0);
+                var range=Math.max(p.radius,(p.radius+profile.rangeBonus)*Number(mods.basicRange||1)-stepDistance),damage=brTierValue(tier,{S:27,A:24,B:21,C:18,F:13})*profile.damageScale;
+                p.basicContactUntilFrame=g.frame+10;
+                if(stepDistance>0&&p.alive&&p.stunned<=0&&!p.playerDash&&p.dashFrames<=0&&p.launchedFrames<=0) {
+                    var stepped=brMoveBasicStep(p.pos,aim,stepDistance,p.radius,g.walls,g.worldRadius,g.center,p._combatMoveResult);
+                    p.pos.x=stepped.x;p.pos.y=stepped.y;
+                }
                 var push=brTierValue(tier,{S:39,A:35,B:30,C:25,F:19})*profile.pushScale,hit=false,totalDealt=0;
                 g.addSwingEffect(p,p.pos,aim,range,profile.style,profile.halfAngle);
                 window.brFarm.cone(g,p,aim,range,profile.halfAngle,farmUnits,farmToken);
@@ -9699,12 +9745,14 @@
                 for(var o of g.getNearbyParticipants(p.pos,range+128)) {
                     if(!o.alive||o===p||o.id===999||(p.team&&o.team===p.team))continue;
                     if(!brMeleeTargetIntersectsCone(p.pos,o,aim,range,profile.halfAngle)||g.checkWallBetween(p.pos,o.pos))continue;
+                    var bodyContact=isTankAbility(p.ability)&&o.pos.dist(p.pos)<=p.radius+o.radius+.5;
+                    var hitPush=push+(bodyContact?3:0),hitStyle=bodyContact?'body-check':'basic-'+profile.style;
                     var before=o.hp,previous=p.currentImpactStyle;p.currentImpactStyle='basic-'+profile.style;
                     try{o.takeDamage(damage*p.damageMult*.72,p,false,aim);}finally{p.currentImpactStyle=previous||'';}
-                    totalDealt+=Math.max(0,before-o.hp);o.vel=o.vel.add(aim.mult(push*(o.knockbackResist||1)));
+                    totalDealt+=Math.max(0,before-o.hp);o.vel=o.vel.add(aim.mult(hitPush*(o.knockbackResist||1)));
                     if(push>=24)g.markLaunched(o,p,16+Math.floor(push*.45));
                     o.stunned=Math.max(o.stunned,profile.stun||(push>=34?11:push>=25?8:4));
-                    g.emitStudentFx('impact',o.pos,{dx:aim.x,dy:aim.y,size:65+push*1.5,color:color,amount:damage,style:'basic-'+profile.style,sourceId:p.remoteId||('ai-'+p.id)});hit=true;
+                    g.emitStudentFx('impact',o.pos,{dx:aim.x,dy:aim.y,size:65+hitPush*1.5+(bodyContact?12:0),color:bodyContact?'#fef3c7':color,amount:damage,style:hitStyle,sourceId:p.remoteId||('ai-'+p.id),targetId:o.remoteId||('ai-'+o.id),impactLevel:bodyContact?2:1});hit=true;
                 }
                 if(hit&&p.alive) {
                     if(profile.reward==='drain')p.hp=Math.min(p.maxHp,p.hp+totalDealt*(p.frenzyFrames>0?.20:.12));
@@ -9754,7 +9802,7 @@
             if(p.run){p.run.lastDamageFrame=game.frame;brRunOffer(p);p.run.revision++;}
             var respawnInput=BRMP.inputs[p.remoteId]||{};p.lastRemoteAttack=Number(respawnInput.attackSeq||p.lastRemoteAttack||0);p.lastRemoteSkill=Number(respawnInput.skillSeq||p.lastRemoteSkill||0);
             p.resolvedAttackSeq=p.lastRemoteAttack;p.resolvedSkillSeq=p.lastRemoteSkill;p.pendingAttack=null;p.pendingSkill=null;
-            p.deathFrame=null;p.deathVisualUntilFrame=null;p.deathVisualUntilAt=null;p.respawnAtFrame=null;p.ringRecoveryActive=false;p.dashFrames=0;p.playerDash=null;p.playerDashContactFrame=-1;p.comboHitsRemaining=0;
+            p.deathFrame=null;p.deathVisualUntilFrame=null;p.deathVisualUntilAt=null;p.respawnAtFrame=null;p.ringRecoveryActive=false;p.dashFrames=0;p.playerDash=null;p.playerDashContactFrame=-1;p.basicContactUntilFrame=-1;p.comboHitsRemaining=0;
             p.basicCooldown=30;p.basicCooldownMax=30;p.cooldown=Math.min(p.cooldown||0,60);
             p.skillCooldownMax=Math.max(1,Number(p.cooldown||p.maxCooldown||1));
             var tc=Math.max(2,Number(BRMP.roomMeta.teamCount||2));
@@ -9934,8 +9982,13 @@
         function brGetNameSprite(text,color,bold) {
             var key=String(text)+'|'+String(color)+'|'+(bold?'1':'0');BRMP.nameSpriteCache=BRMP.nameSpriteCache||new Map();
             if(BRMP.nameSpriteCache.has(key))return BRMP.nameSpriteCache.get(key);
-            var sprite=document.createElement('canvas');sprite.width=220;sprite.height=40;var sc=sprite.getContext('2d');
-            sc.font=(bold?'900 ':'700 ')+'18px sans-serif';sc.textAlign='center';sc.textBaseline='middle';sc.lineWidth=5;sc.strokeStyle='rgba(2,6,15,.92)';sc.strokeText(String(text),110,20);sc.fillStyle=color;sc.fillText(String(text),110,20);
+            var sprite=document.createElement('canvas'),sc=sprite.getContext('2d'),font=(bold?'900 ':'700 ')+'18px sans-serif';
+            sc.font=font;
+            // Tight bounds prevent short Korean names from being squeezed out of a fixed 220px bitmap.
+            var labelWidth=Math.min(260,Math.max(26,Math.ceil(sc.measureText(String(text)).width)+14));
+            sprite.width=labelWidth*2;sprite.height=64;sprite._labelW=labelWidth;sprite._labelH=32;
+            sc=sprite.getContext('2d');sc.scale(2,2);sc.font=font;sc.textAlign='center';sc.textBaseline='middle';
+            sc.lineWidth=3;sc.strokeStyle='rgba(2,6,15,.92)';sc.strokeText(String(text),labelWidth/2,16);sc.fillStyle=color;sc.fillText(String(text),labelWidth/2,16);
             BRMP.nameSpriteCache.set(key,sprite);return sprite;
         }
         function brRegisterHitFeedback(targetId,amount,x,y,sourceId,style,confirmed,impactLevel) {
@@ -10008,7 +10061,7 @@
             }
             return point;
         }
-        function brImmediateCastFeedback(kind,command) {
+        function brImmediateCastFeedback(kind,command,confirmed) {
             var self=BRMP.drawPlayers&&BRMP.drawPlayers.get(String(BRMP.playerId));if(!self||!self.row)return;
             var r=self.row,a=EMOJI_DB[Number(r[2])]||EMOJI_DB[0],tier=a.t||'C',color=BR_TIER_COLOR[tier]||'#ffffff';
             command=command||BRMP.inputState||{};
@@ -10017,7 +10070,17 @@
             var mods=brRunClientMods(),close=brBasicCombatProfile(a).close;
             if(kind==='attack'&&close) {
                 var basicMelee=brBasicCombatProfile(a);
-                brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:(rad+basicMelee.rangeBonus)*Number(mods.basicRange||1),amount:basicMelee.halfAngle,color:color,style:'melee-local',sourceId:BRMP.playerId});
+                var now=performance.now(),haste=(Number(r[23]||0)&16)||now<Number(BRMP.localAttackHasteUntil||0),stepDistance=brBasicStepDistance(a,mods,haste);
+                if(!confirmed&&stepDistance>0&&r[7]&&now>=Number(self.stunUntil||0)&&now>=Number(self.dashUntil||0)&&!BRMP.localDash&&now>=Number(self.hitCorrectionUntil||0)) {
+                    var stepped=brMoveBasicStep({x:x,y:y},dir,stepDistance,rad,BRMP.latestView?.walls,BRMP.latestView?.worldRadius,null,self._combatMoveResult);
+                    var stepX=stepped.x-x,stepY=stepped.y-y;
+                    self.predX=stepped.x;self.predY=stepped.y;
+                    if(self.predState){self.predState.x=stepped.x;self.predState.y=stepped.y;}
+                    var action=BRMP.pendingLocalActions&&BRMP.pendingLocalActions.attack;
+                    if(action&&action.seq===Number(command.seq))action.basicStep={x:stepX,y:stepY};
+                    x=stepped.x;y=stepped.y;
+                }
+                brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:Math.max(rad,(rad+basicMelee.rangeBonus)*Number(mods.basicRange||1)-stepDistance),amount:basicMelee.halfAngle,color:color,style:'melee-local',sourceId:BRMP.playerId});
                 brPushLocalFx('muzzle',x+ax*rad,y+ay*rad,{dx:ax,dy:ay,size:62,color:'#ffffff',style:'melee'});brPlaySfx('melee',tier==='S'||tier==='A');
             } else if(kind==='attack') {
                 var profile=brRunBasicProfile(a,mods),shotColor=a.pTrail||color,sz=brBasicShotSize(a,true)*Number(mods.basicSize||1);
@@ -10152,6 +10215,9 @@
                     var ack=Number(r[24]||0),sentAt=BRMP.inputSentAt&&BRMP.inputSentAt.get(ack);
                     if(sentAt!=null){var rtt=now-sentAt;BRMP.minInputRtt=Math.min(Number(BRMP.minInputRtt||1000),Math.max(20,rtt));}
                     old.inputAck=ack;
+                    // An acknowledged 8–16 unit step is smaller than the normal idle
+                    // correction threshold. Reconcile that action gently, including late previews.
+                    if(Number(r[30]||0)>Number(priorRow[30]||0)&&brBasicCombatProfile(EMOJI_DB[Number(r[2])]||EMOJI_DB[0]).close)old.basicStepCorrectionUntil=now+350;
                     // A refreshed/rejoined browser starts its counters at zero while the host
                     // keeps this player's counters. Resume from the acknowledged values so
                     // fresh movement/actions are not rejected as old commands.
@@ -10167,9 +10233,13 @@
                         var action=BRMP.pendingLocalActions&&BRMP.pendingLocalActions[actionKind],resolved=Number(r[actionKind==='attack'?28:29]||0);
                         if(!action||resolved<action.seq)continue;
                         var accepted=Number(r[actionKind==='attack'?30:31]||0)===action.seq;
-                        if(accepted&&!action.previewed){BRMP.feedbackCommand={kind:actionKind,seq:action.seq};try{brImmediateCastFeedback(actionKind,action.command);}finally{BRMP.feedbackCommand=null;}}
+                        if(accepted&&!action.previewed){BRMP.feedbackCommand={kind:actionKind,seq:action.seq};try{brImmediateCastFeedback(actionKind,action.command,true);}finally{BRMP.feedbackCommand=null;}}
                         if(actionKind==='attack')BRMP.localAttackLockUntil=0;else BRMP.localSkillLockUntil=0;
                         if(!accepted){
+                            if(actionKind==='attack'&&action.basicStep&&!warpChanged&&!respawned&&now>=Number(BRMP.localTeleportUntil||0)) {
+                                old.predX-=action.basicStep.x;old.predY-=action.basicStep.y;
+                                if(Number.isFinite(old.previousX)){old.previousX-=action.basicStep.x;old.previousY-=action.basicStep.y;}
+                            }
                             BRMP.localProjectiles=(BRMP.localProjectiles||[]).filter(function(q){return q.kind!==actionKind||q.seq!==action.seq;});
                             if(actionKind==='skill'){BRMP.localDash=null;BRMP.localTeleportUntil=0;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;}
                         }
@@ -10179,6 +10249,7 @@
                     if(nextHp<previousHp&&packetHits.has(id))old.hitCorrectionUntil=now+160;
                     if((Number(r[23]||0)&2)&&!(Number(priorRow[23]||0)&2)&&!BRMP.localDash&&now>=Number(BRMP.localDashGraceUntil||0)){old.predVx=svx;old.predVy=svy;}
                     if(warpChanged||respawned||!Number.isFinite(old.predX)) {
+                        old.basicStepCorrectionUntil=0;
                         old.predX=sx;old.predY=sy;old.x=sx;old.y=sy;old.predVx=svx;old.predVy=svy;old.predAccumulator=0;old.previousX=sx;old.previousY=sy;
                         BRMP.localTeleportUntil=0;BRMP.localDash=null;
                     } else if((Number(r[23]||0)&1)&&nextHp<previousHp) {
@@ -10292,12 +10363,16 @@
         function brResizeStudentCanvas() {
             var c=brEl('br-student-canvas'),now=performance.now();
             var quality=brClamp(Number(BRMP.renderQuality||1),.68,1);
-            if(c._cssW&&Math.abs(Number(c._quality||1)-quality)<.01&&now-Number(c._lastResizeCheck||0)<240)return;
+            // Keep healthy mobile text/emoji at CSS-pixel resolution; retain the existing
+            // adaptive downscale on slow devices instead of allocating a 2x/3x backing store.
+            var viewportW=window.innerWidth,viewportH=window.innerHeight,mobile=viewportW<1100;
+            var clarityLift=brClamp((quality-.68)/.16,0,1);
+            var dpr=Math.min(window.devicePixelRatio||1,mobile?1.05:1.18,(mobile?1:1.12)*quality+(mobile?.21:.15)*clarityLift);
+            if(c._cssW&&c._viewportW===viewportW&&c._viewportH===viewportH&&Math.abs(Number(c._dpr||0)-dpr)<.01&&Math.abs(Number(c._quality||1)-quality)<.01&&now-Number(c._lastResizeCheck||0)<240)return;
             c._lastResizeCheck=now;
-            var dpr=Math.min((window.innerWidth<1100?1.0:1.12)*quality,window.devicePixelRatio||1);
             var w=Math.max(1,c.clientWidth),h=Math.max(1,c.clientHeight);
             if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);}
-            c._cssW=w;c._cssH=h;c._dpr=dpr;c._quality=quality;
+            c._cssW=w;c._cssH=h;c._viewportW=viewportW;c._viewportH=viewportH;c._dpr=dpr;c._quality=quality;
         }
         function brDrawStudentWall(cc,r) {
             var kind=r[5]||'wall';cc.save();cc.translate(r[0],r[1]);cc.rotate(r[4]||0);cc.lineWidth=3;
@@ -10329,6 +10404,15 @@
             aimX/=mag;aimY/=mag;
             var spec=brAimSpec(ability,kind,Number(self.row[15]||38),Number(source.aimPower||1));
             var x=self.x,y=self.y,angle=Math.atan2(aimY,aimX),range=Math.max(1,Number(spec.range||0));
+            if(kind==='attack'&&spec.step>0) {
+                var haste=(Number(self.row[23]||0)&16)||now<Number(BRMP.localAttackHasteUntil||0);
+                var aimStep=brBasicStepDistance(ability,brRunClientMods(),haste);
+                range+=spec.step-aimStep;
+                if(gesture&&!BRMP.localDash&&now>=Number(self.dashUntil||0)&&now>=Number(self.stunUntil||0)) {
+                    var stepPoint=brMoveBasicStep({x:x,y:y},{x:aimX,y:aimY},aimStep,Number(self.row[15]||38),BRMP.latestView?.walls,BRMP.latestView?.worldRadius);
+                    x=stepPoint.x;y=stepPoint.y;
+                }
+            }
             var endX=x+aimX*range,endY=y+aimY*range;
             if(spec.teleport){var landing=brLocalAimEndpoint(x,y,aimX,aimY,range,Number(self.row[15]||38),BRMP.latestView);endX=landing.x;endY=landing.y;}
             var rgb=kind==='attack'?'251,113,133':'96,165,250';
@@ -10513,12 +10597,25 @@
             cc.globalAlpha=alpha*.65;cc.strokeStyle=color||'#ffffff';cc.lineWidth=Math.max(.5,width);cc.stroke();
             cc.globalAlpha=alpha*.9;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(.5,width*.16);cc.stroke();cc.restore();
         }
-        function brDrawProjectileGlyph(cc,x,y,vx,vy,size,emoji,color,style,zoom,alpha,rotation) {
+        function brDrawProjectileGlyph(cc,x,y,vx,vy,size,emoji,color,style,zoom,alpha,rotation,detail=false,emphasis=false) {
             zoom=Math.max(.18,Number(zoom||1));
             var speed=Math.hypot(vx,vy)||1,ux=vx/speed,uy=vy/speed,r=Math.max(3/zoom,Number(size||7)),opacity=alpha==null?1:alpha;
             var fastFloor=speed>=14?18/zoom:0,tail=Math.min(style==='sniper'||style==='skill-sniper'?100:62,Math.max(speed*3.2,fastFloor));
             cc.save();cc.lineCap='round';cc.globalAlpha=opacity*.52;cc.strokeStyle=color;cc.lineWidth=Math.max(1.2/zoom,r*.50);
             cc.beginPath();cc.moveTo(x-ux*tail,y-uy*tail);cc.lineTo(x,y);cc.stroke();cc.globalAlpha=opacity;
+            if(detail&&(style==='sniper'||style==='heavy')) {
+                // One thin core makes deliberate, heavy shots distinct without particles.
+                cc.globalAlpha=opacity*(style==='sniper'?.78:.52);cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(.7/zoom,r*.14);
+                cc.beginPath();cc.moveTo(x-ux*tail,y-uy*tail);cc.lineTo(x,y);cc.stroke();cc.globalAlpha=opacity;
+            }
+            if(emphasis) {
+                // Skill projectiles keep one stable ring even when optional detail is reduced.
+                cc.globalAlpha=opacity*.72;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(.8/zoom,r*.13);
+                cc.beginPath();cc.arc(x,y,r*1.42,0,Math.PI*2);cc.stroke();cc.globalAlpha=opacity;
+            } else if(detail&&(style==='bomber'||style==='heavy')) {
+                cc.globalAlpha=opacity*.56;cc.strokeStyle=style==='bomber'?'#fde68a':'#ffffff';cc.lineWidth=Math.max(.7/zoom,r*.12);
+                cc.beginPath();cc.arc(x,y,r*1.30,0,Math.PI*2);cc.stroke();cc.globalAlpha=opacity;
+            }
             if(emoji) {
                 // Rasterize once, then draw the emoji itself at the hitbox diameter (sprite has transparent padding).
                 var glyphRadius=Math.max(r,3.5/zoom)*1.33;cc.translate(x,y);if(rotation)cc.rotate(rotation);
@@ -10526,6 +10623,11 @@
             } else {
                 cc.fillStyle=color;cc.beginPath();cc.arc(x,y,r,0,Math.PI*2);cc.fill();
                 cc.strokeStyle='#ffffff';cc.lineWidth=Math.min(r*.25,1.5/zoom);cc.stroke();
+                if(detail&&style==='homing') {
+                    var nx=-uy,ny=ux,back=Math.max(r*.8,4/zoom);cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(.7/zoom,r*.11);
+                    cc.beginPath();cc.moveTo(x-ux*back+nx*r*.65,y-uy*back+ny*r*.65);cc.lineTo(x,y);
+                    cc.lineTo(x-ux*back-nx*r*.65,y-uy*back-ny*r*.65);cc.stroke();
+                }
             }
             cc.restore();
         }
@@ -10533,9 +10635,13 @@
             var radius=Math.max(1,Number(size||7));
             return radius<10?radius*1.22:radius<16?radius*1.14:radius*1.08;
         }
+        function brStudentVisualDetail() {
+            // Optional accents switch off before gameplay-critical rendering or input can suffer.
+            return Number(BRMP.studentFrameEma||16.7)<24&&Number(BRMP.renderQuality||1)>=.78;
+        }
         window.brCombatVisual={beam:brDrawBeam,emojiSprite:brGetEmojiSprite,dangerFill:brDrawDangerFill,dangerBoundary:brDrawDangerBoundary,hazard:brDrawHazardCircle,turret:brDrawTurretGlyph,projectile:brDrawProjectileGlyph};
         function brUpdateAndDrawLocalProjectiles(cc,dt,zoom,onScreen,frameNow) {
-            var list=BRMP.localProjectiles||[],frames=dt/(1000/60),draw=BRMP.drawPlayers,self=draw&&draw.get(String(BRMP.playerId)),selfTeam=Number(self&&self.row&&self.row[8]||0);
+            var list=BRMP.localProjectiles||[],frames=dt/(1000/60),draw=BRMP.drawPlayers,self=draw&&draw.get(String(BRMP.playerId)),selfTeam=Number(self&&self.row&&self.row[8]||0),detail=brStudentVisualDetail();
             for(var i=list.length-1;i>=0;i--) {
                 var p=list[i],age=frameNow-p.born;p.life=p.maxLife-age;
                 if(p.life<=0){list.splice(i,1);continue;}
@@ -10568,7 +10674,7 @@
                     var vn=p.vx*wallHit.nx+p.vy*wallHit.ny;p.vx-=2*vn*wallHit.nx;p.vy-=2*vn*wallHit.ny;p.bounces--;wallHit=null;
                 }
                 if(wallHit||(touched&&!p.pierce&&p.type!=='BOOMERANG')||p.rangeRemaining===0){list.splice(i,1);continue;}
-                if(onScreen(p.x,p.y,120))brDrawProjectileGlyph(cc,p.x,p.y,p.vx,p.vy,brStudentProjectileVisualSize(p.size),p.emoji,p.color,p.style,zoom,brClamp(p.life/60,0,1));
+                if(onScreen(p.x,p.y,120))brDrawProjectileGlyph(cc,p.x,p.y,p.vx,p.vy,brStudentProjectileVisualSize(p.size),p.emoji,p.color,p.style,zoom,brClamp(p.life/60,0,1),0,detail,p.kind==='skill');
             }
         }
         function brDrawHitConfirm(cc,w,h,now) {
@@ -10611,11 +10717,12 @@
             }
             var age=now-Number(p.authAt||0),ackReady=Number(p.inputAck||0)>=Number(BRMP.lastMoveSeq||0);
             var hitCorrection=now<Number(p.hitCorrectionUntil||0);
-            if(p.row[7]&&age<500&&(ackReady||hitCorrection)&&now>=Number(BRMP.localTeleportUntil||0)&&!localDashActive&&(now>=Number(BRMP.localDashGraceUntil||0)||hitCorrection)) {
+            var stepCorrection=amount<=.05&&now<Number(p.basicStepCorrectionUntil||0);
+            if(p.row[7]&&age<500&&(ackReady||hitCorrection||stepCorrection)&&now>=Number(BRMP.localTeleportUntil||0)&&!localDashActive&&(now>=Number(BRMP.localDashGraceUntil||0)||hitCorrection)) {
                 var travel=Math.min(100,Math.max(0,age))/step,authX=p.authX+Number(p.vx||0)*travel,authY=p.authY+Number(p.vy||0)*travel;
-                var ex=authX-p.predX,ey=authY-p.predY,error=Math.hypot(ex,ey),threshold=hitCorrection?4:amount>.05?80:12;
+                var ex=authX-p.predX,ey=authY-p.predY,error=Math.hypot(ex,ey),threshold=hitCorrection?4:stepCorrection?.25:amount>.05?80:12;
                 if(error>threshold) {
-                    var fix=1-Math.exp(-dt/(hitCorrection?90:amount>.05?480:180));
+                    var fix=1-Math.exp(-dt/(hitCorrection?90:stepCorrection?80:amount>.05?480:180));
                     var fx=ex*fix,fy=ey*fix,previousX=Number.isFinite(p.previousX)?p.previousX:p.predX,previousY=Number.isFinite(p.previousY)?p.previousY:p.predY;
                     p.predX+=fx;p.predY+=fy;p.previousX=previousX+fx;p.previousY=previousY+fy;
                 }
@@ -10733,9 +10840,10 @@
                     cc.beginPath();cc.moveTo(mx,my);cc.lineTo(mx-sux*(24+ml*3)/zoom,my-suy*(24+ml*3)/zoom);cc.stroke();}
                 cc.restore();
             }
+            var studentDetail=brStudentVisualDetail();
             if(shots)shots.forEach(function(s){
                 var r=s.row;if(s.expired||!onScreen(s.x,s.y,Math.max(100,Number(r[2]||7)*1.33)))return;
-                brDrawProjectileGlyph(cc,s.x,s.y,Number(s.vx||0),Number(s.vy||0),brStudentProjectileVisualSize(Number(r[2]||7)),r[3]||'',r[4]||'#fff',String(r[9]||'standard'),zoom,1,Number(r[16]||0));
+                brDrawProjectileGlyph(cc,s.x,s.y,Number(s.vx||0),Number(s.vy||0),brStudentProjectileVisualSize(Number(r[2]||7)),r[3]||'',r[4]||'#fff',String(r[9]||'standard'),zoom,1,Number(r[16]||0),studentDetail,String(r[12]||'')==='skill');
             });
             brUpdateAndDrawLocalProjectiles(cc,dt,zoom,onScreen,frameNow);
             function drawStudentPlayer(s){
@@ -10745,13 +10853,31 @@
                 if(!alive&&deathRatio<=0)return;
                 var rad=Math.max(1,Number(r[15]||38));
                 if(!onScreen(s.x,s.y,rad+50))return;
+                var displayX=s.x,displayY=s.y;
+                if(alive&&!isSelf&&self.row&&self.row[7]) {
+                    // The local player is predicted immediately, while opponents are shown from
+                    // buffered snapshots. Separate only visually coincident icons at that seam;
+                    // attacks, collision, aim and network positions continue to use s.x/s.y.
+                    var apartX=s.x-self.x,apartY=s.y-self.y,apart=Math.hypot(apartX,apartY);
+                    var screenGap=Math.min(22,Math.max(16,(rad+Number(self.row[15]||38))*zoom*.8));
+                    if(apart*zoom<screenGap) {
+                        if(apart<4/zoom) {
+                            var sourceX=Number(r[3]||0)-Number(self.row[3]||0),sourceY=Number(r[4]||0)-Number(self.row[4]||0),sourceD=Math.hypot(sourceX,sourceY);
+                            if(sourceD>1){apartX=sourceX/sourceD;apartY=sourceY/sourceD;}
+                            else {var idText=String(r[0]),angle=0;for(var ai=0;ai<idText.length;ai++)angle=(angle*31+idText.charCodeAt(ai))%360;
+                                apartX=Math.cos(angle*Math.PI/180);apartY=Math.sin(angle*Math.PI/180);}
+                        } else {apartX/=apart;apartY/=apart;}
+                        var shift=Math.min(22/zoom,screenGap/zoom-apart);
+                        displayX+=apartX*shift;displayY+=apartY*shift;
+                    }
+                }
                 var hitState=BRMP.hitStates&&BRMP.hitStates.get(String(r[0])),hitRatio=0,hitX=0,hitY=0;
                 if(hitState&&frameNow<hitState.until) {
                     hitRatio=Math.min(1,(hitState.until-frameNow)/Math.max(1,Number(hitState.duration||155)));
                     hitX=BRMP.reducedMotion?0:Math.sin(frameNow*.19+hitState.seed)*hitState.strength*hitRatio/zoom;
                     hitY=BRMP.reducedMotion?0:Math.sin(frameNow*.27+hitState.seed*1.3)*hitState.strength*.52*hitRatio/zoom;
                 } else if(hitState&&BRMP.hitStates)BRMP.hitStates.delete(String(r[0]));
-                cc.save();cc.translate(s.x+hitX,s.y+hitY);
+                cc.save();cc.translate(displayX+hitX,displayY+hitY);
                 if(!alive){cc.scale(.42+.58*deathRatio,.42+.58*deathRatio);cc.globalAlpha=deathRatio;}
                 if(isSelf&&alive){cc.save();cc.strokeStyle='rgba(253,224,71,.7)';cc.lineWidth=2/zoom;cc.setLineDash([5/zoom,4/zoom]);cc.beginPath();cc.arc(0,0,Math.max(rad*1.4,26/zoom),0,Math.PI*2);cc.stroke();cc.restore();}
                 // Self/allies and nearby opponents can still read a phased ghost.
@@ -10769,6 +10895,11 @@
                     cc.save();cc.globalAlpha=.78;cc.strokeStyle=(statusFlags&16)?'#fbbf24':'#67e8f9';cc.lineWidth=Math.max(2,4/zoom);
                     cc.beginPath();cc.arc(0,0,rad*1.36,0,Math.PI*2);cc.stroke();cc.restore();
                 }
+                if(studentDetail) {
+                    // A single crisp inner rim separates the emoji from dark maps and smoke.
+                    cc.save();cc.globalAlpha=isSelf?.42:.24;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(.7/zoom,1.1);
+                    cc.beginPath();cc.arc(0,0,rad*1.04,0,Math.PI*2);cc.stroke();cc.restore();
+                }
                 var emojiSprite=brGetEmojiSprite(a.e),emojiR=rad*.98;cc.drawImage(emojiSprite,-emojiR,-emojiR,emojiR*2,emojiR*2);
                 if(!alive){cc.restore();return;}
                 if(hitRatio>0) {
@@ -10783,7 +10914,8 @@
                 cc.fillStyle='#1f2937';cc.fillRect(-bw/2,by,bw,bh);
                 cc.fillStyle='#ef4444';cc.fillRect(-bw/2,by,bw*brClamp(trailHp/max,0,1),bh);
                 cc.fillStyle=hp/max>.35?'#34d399':'#fb4b63';cc.fillRect(-bw/2,by,bw*brClamp(hp/max,0,1),bh);
-                var nameColor=isSelf?'#fde68a':'#f8fafc',nameSprite=brGetNameSprite(r[1],nameColor,isSelf),nameW=Math.min(136,54+String(r[1]||'').length*13)/zoom,nameH=25/zoom;
+                var nameColor=isSelf?'#fde68a':'#f8fafc',nameText=String(r[1]||''),nameSprite=brGetNameSprite(nameText,nameColor,isSelf);
+                var nameW=Math.min(156,nameSprite._labelW||136)/zoom,nameH=28/zoom;
                 cc.shadowBlur=0;cc.drawImage(nameSprite,-nameW/2,-rad-12/zoom-nameH,nameW,nameH);
                 brDrawStunCue(cc,s,rad,zoom,frameNow);cc.restore();
             }
