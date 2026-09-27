@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="br-build" content="team-kill-quiz-respawn-v1 / 2026-09-24">
+    <meta name="br-build" content="polish-v14 / 2026-09-27">
     <title>클래스 이모지 배틀로얄 · 팀 킬 배틀</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.20.1/dist/pixi.min.js"></script>
@@ -1066,6 +1066,35 @@
                 p.line(x,y,ex,ey,'#ffffff',alpha*.65,Math.min(width*.12,3/z));
                 return true;
             }
+            if(type==='heal'&&geo.shape==='heal') {
+                const radius=length*(.8+.2*(1-alpha)),arm=Math.max(9/z,length*.22);
+                p.circle(x,y,radius,color,alpha*.58,2/z);
+                p.line(x-arm,y,x+arm,y,color,alpha*.95,5/z);p.line(x,y-arm,x,y+arm,color,alpha*.95,5/z);
+                return true;
+            }
+            if(type==='teleport'&&geo.shape==='blink') {
+                const radius=length*(.7+.3*(1-alpha));
+                p.arc(x,y,radius,angle-.7,angle+1.2,color,alpha*.85,3/z);
+                p.arc(x,y,radius,angle+Math.PI-.7,angle+Math.PI+1.2,color,alpha*.85,3/z);
+                p.line(x-dx*radius*.6,y-dy*radius*.6,x+dx*radius*.6,y+dy*radius*.6,'#ffffff',alpha*.55,2/z);
+                return true;
+            }
+            if(type==='swing'&&geo.shape==='front-impact') {
+                const width=Math.max(1,Number(geo.width)||60),half=width*.5,nx=-dy*half,ny=dx*half;
+                const points=[[x+nx,y+ny],[ex+nx,ey+ny],[ex-nx,ey-ny],[x-nx,y-ny]];
+                p.polygon(points,color,alpha*.16);p.polygon(points,color,alpha*.75,2/z);
+                const hammer=geo.part==='hammer',tx=Number.isFinite(geo.targetX)?geo.targetX:ex,ty=Number.isFinite(geo.targetY)?geo.targetY:ey;
+                if(hammer){
+                    const reach=Math.min(width*.38,42),head=Math.min(width*.16,18);
+                    p.line(x,y,tx,ty,color,alpha*.8,Math.max(4/z,width*.075));
+                    p.polygon([[tx-dy*reach-dx*head,ty+dx*reach-dy*head],[tx+dy*reach-dx*head,ty-dx*reach-dy*head],[tx+dy*reach+dx*head,ty-dx*reach+dy*head],[tx-dy*reach+dx*head,ty+dx*reach+dy*head]],'#fff7ed',alpha*.95);
+                    p.line(tx-dy*width*.42,ty+dx*width*.42,tx+dy*width*.42,ty-dx*width*.42,'#ffffff',alpha*.9,3/z);
+                }else{
+                    p.line(x+nx*.65,y+ny*.65,ex-nx*.65,ey-ny*.65,'#ffffff',alpha*.9,4/z);
+                    p.line(x-nx*.65,y-ny*.65,ex+nx*.65,ey+ny*.65,color,alpha*.6,3/z);
+                }
+                return true;
+            }
             if(type==='swing') {
                 if(geo.shape==='target-strike') {
                     // A lock-on follow-up hits one target; do not depict it as a large AoE cone.
@@ -1347,6 +1376,34 @@
         }
         function brCrateX(box){return Number(Array.isArray(box)?box[1]:box.pos.x);}
         function brCrateY(box){return Number(Array.isArray(box)?box[2]:box.pos.y);}
+        // Movement uses the same square body as crate attacks. Keep destructible
+        // farming objects out of static combat walls: their damage/drop path remains separate.
+        const BR_BODY_WALL_CACHE=new WeakMap(),BR_NO_BODY_WALLS=[];
+        function brBodyWalls(walls,boxes,revision=0) {
+            walls=walls||BR_NO_BODY_WALLS;
+            if(!boxes?.length)return walls;
+            const old=BR_BODY_WALL_CACHE.get(walls);
+            if(old&&old.boxes===boxes&&old.revision===revision&&old.count===boxes.length&&old.wallCount===walls.length)return old.walls;
+            const combined=walls.slice();
+            for(const box of boxes){
+                // Serialized HP is a rounded percentage and can be zero before death;
+                // membership in the authoritative list is the serialized lifetime flag.
+                if(!Array.isArray(box)&&!(box.hp>0))continue;
+                const x=brCrateX(box),y=brCrateY(box),size=brCrateHalf(box)*2;
+                if(!Number.isFinite(x)||!Number.isFinite(y))continue;
+                combined.push({x,y,w:size,h:size,angle:0,spinSpeed:0,kind:'farm',farmId:Array.isArray(box)?box[0]:box.id});
+            }
+            BR_BODY_WALL_CACHE.set(walls,{boxes,revision,count:boxes.length,wallCount:walls.length,walls:combined});
+            return combined;
+        }
+        function brHostBodyWalls(g){return brBodyWalls(g?.walls,g?.farmBoxes,Number(g?.farmRevision||0));}
+        function brStudentBodyWalls(view){
+            if(view?._bodyPhasing)return BR_NO_BODY_WALLS;
+            const farm=window.BRMP?.farmView;
+            // Farm state already has a match/revision gate. Keep old-room data out of predictions.
+            const current=!!farm&&(!view?.matchKey||view.matchKey===farm.matchKey);
+            return brBodyWalls(view?.walls,current?farm.b:null,Number(farm?.r||0));
+        }
         function brCrateCircleTouches(box,pos,radius) {
             if(!Number.isFinite(radius)||radius<0)return false;
             const h=brCrateHalf(box),dx=Math.max(0,Math.abs(pos.x-brCrateX(box))-h),dy=Math.max(0,Math.abs(pos.y-brCrateY(box))-h);
@@ -2838,7 +2895,7 @@
                 if(dash.remaining<=.001&&this.playerDash===dash) {
                     this.playerDash=null;this.dashFrames=0;this.vel=new Vec2(0,0);
                     if(this.dashType==='FLY_DASH') {
-                        const landed=combatMoveCircle(this.pos,this.vel,this.radius,game.walls,false,this._combatMoveResult);
+                        const landed=combatMoveCircle(this.pos,this.vel,this.radius,brHostBodyWalls(game),false,this._combatMoveResult);
                         this.pos.x=landed.x;this.pos.y=landed.y;
                     }
                     this.finishDashImpact(game);
@@ -2938,7 +2995,7 @@
                 if (isNaN(nextPos.x) || isNaN(nextPos.y)) { this.vel = new Vec2(0,0); return; }
 
                 const phasesWalls=this.ability.sub==='GHOST_MOVE'||(this.ability.sub==='FLY_DASH'&&this.dashFrames>0);
-                const moved=combatMoveCircle(this.pos,this.vel,this.radius,phasesWalls?[]:game.walls,!!playerDashStep,this._combatMoveResult);
+                const moved=combatMoveCircle(this.pos,this.vel,this.radius,phasesWalls?[]:brHostBodyWalls(game),!!playerDashStep,this._combatMoveResult);
                 const wallHit=moved.hit;
                 if(wallHit&&!playerDashStep)game.handleWallCrash(this,this.vel.mag());
                 this.pos.x=moved.x;this.pos.y=moved.y;this.vel.x=this.alive?moved.vx:0;this.vel.y=this.alive?moved.vy:0;
@@ -3134,6 +3191,8 @@
                                     game.addText(lowest.pos,'🧑‍⚕️ HEAL +22%','#86efac',30,25);
                                     game.rings.push(new ImpactRing(lowest.pos,30,105,'#4ade80',26,4));
                                     game.spawnImpact(lowest.pos,82,'#4ade80',0.75);
+                                    const healVisual=window.BRRework.context(this,game,this.lastAimDir);
+                                    window.BRRework.confirmedSkillFx(healVisual,lowest.pos,'heal',Math.max(40,lowest.radius*1.4),{shape:'heal'},'#86efac');
                                 }
                             }
                             else if(sub==='TEAM_BLOOM') {
@@ -4084,7 +4143,7 @@
 
             checkWallCollision(pos, radius) {
                 const radiusSq=radius*radius;
-                const candidates=combatWallCandidates(this.walls,pos.x-radius,pos.y-radius,pos.x+radius,pos.y+radius,this._wallCollisionCandidates);
+                const candidates=combatWallCandidates(brHostBodyWalls(this),pos.x-radius,pos.y-radius,pos.x+radius,pos.y+radius,this._wallCollisionCandidates);
                 for(let w of candidates) {
                     // Recompute trigonometry only when a wall actually changes. An AABB test
                     // rejects distant cover before the exact rotated-rectangle collision test.
@@ -4353,7 +4412,7 @@
                 // participants that were actually separated, instead of rescanning every wall
                 // for every student on every frame.
                 for(const p of this.bodyMovedParticipants)if(p.humanControlled&&p.alive&&p.ability.sub!=='GHOST_MOVE'&&!(p.ability.sub==='FLY_DASH'&&p.dashFrames>0)) {
-                    const corrected=combatMoveCircle(p.pos,{x:0,y:0},p.radius,this.walls,false,p._combatMoveResult);
+                    const corrected=combatMoveCircle(p.pos,{x:0,y:0},p.radius,brHostBodyWalls(this),false,p._combatMoveResult);
                     p.pos.x=corrected.x;p.pos.y=corrected.y;
                     const edge=(this.worldRadius||BR_WORLD_RADIUS)-p.radius-4,dx=p.pos.x-this.center.x,dy=p.pos.y-this.center.y,d=Math.hypot(dx,dy);
                     if(d>edge){p.pos.x=this.center.x+dx*edge/d;p.pos.y=this.center.y+dy*edge/d;}
@@ -5156,7 +5215,7 @@
                 for(const e of this.studentFx) {
                     const age=this.frame-e.frame;if(age<0)continue;
                     const life=e.type==='laser'?17:e.geometry?.shape==='dynamite-impact'?46:26;
-                    if(e.type!=='swing'&&e.type!=='shot'&&age<life){
+                    if((e.type!=='swing'||e.geometry?.shape==='front-impact')&&e.type!=='shot'&&age<life){
                         c.save();c.translate(offsetX,offsetY);c.scale(scale,scale);
                         const painted=brPaintAttack(brCombatPainter(c,false),brFxRow(e),1-age/life,scale===1?this.zoom:scale*screenScale);
                         c.restore();if(painted)continue;
@@ -5231,7 +5290,7 @@
                     world.addChild(ground,smoke,danger,walls,farm,hazards,rwWorld,players,projectiles,effects,rwStatus);app.stage.addChild(world,screen);
                     app.canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:block;';wrapper.appendChild(app.canvas);
                     const overlay=document.createElement('div');overlay.style.cssText='position:absolute;inset:0;pointer-events:none;color:white;font:900 22px Noto Sans KR,sans-serif;text-align:center;text-shadow:0 2px 10px black;';
-                    const headline=document.createElement('div'),feed=document.createElement('div');feed.style.cssText='position:absolute;right:16px;top:55px;text-align:right;font-size:13px;line-height:1.8;';if(window.BRMP?.isRespawnMode())feed.style.top='112px';overlay.append(headline,feed);wrapper.appendChild(overlay);
+                    const headline=document.createElement('div'),feed=document.createElement('div');feed.className='br-host-kill-feed';feed.style.cssText='position:absolute;right:16px;top:55px;text-align:right;font-size:13px;line-height:1.8;';if(window.BRMP?.isRespawnMode())feed.style.top='112px';overlay.append(headline,feed);wrapper.appendChild(overlay);
                     brPixiHost={app,world,ground,danger,walls,farm,hazards,players,projectiles,effects,rwWorld,rwStatus,smoke,screen,overlay,headline,feed,wallObjects:new Map(),units:new Map(),shots:new Map(),freeUnits:[],freeShots:[],textures:new Map(),staticKey:'',width:0,height:0,resolution:app.renderer.resolution};
                     brPixiHostPending=null;canvas.style.visibility='hidden';
                 }catch(err){console.warn('[PIXI HOST FALLBACK]',err);brPixiHostPending=null;try{app.destroy(true,{children:true});}catch(_){}}
@@ -5347,7 +5406,7 @@
             g.swings.forEach(q=>{if(q.life>0&&q.pos)brPaintAttack(painter,[0,'swing',q.pos.x,q.pos.y,Math.cos(q.dir),Math.sin(q.dir),q.size,
                 {S:'#fb4b63',A:'#fbbf24',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'}[q.tier]||'#fff',q.halfAngle,'',q.style,'',0,q.geometry],q.life/q.maxLife,g.zoom);});
             g.studentFx.forEach(q=>{const age=g.frame-q.frame,life=q.type==='laser'?17:q.geometry?.shape==='dynamite-impact'?46:26;
-                if(age<0||age>=life||q.type==='swing')return;
+                if(age<0||age>=life||(q.type==='swing'&&q.geometry?.shape!=='front-impact'))return;
                 if(brPaintAttack(painter,brFxRow(q),1-age/life,g.zoom))return;
                 if(q.type==='shot'&&age<12)painter.line(q.x,q.y,q.x+q.dx*q.size,q.y+q.dy*q.size,q.color,1-age/12,Math.max(1,q.amount*.5));
             });
@@ -5568,7 +5627,17 @@
             function hit(c,p,damage,opts={}){if(!validContext(c)||!hostile(c,p))return {valid:false,hpDamage:0,absorbed:0,killed:false};let result;if(p.isReworkTurret){const final=opts.scaled?damage:damage*c.damageMult*(c.run.damage??1),actual=Math.min(p.hp,Math.max(0,final));p.hp-=actual;result={valid:true,hpDamage:0,turretDamage:actual,absorbed:0,killed:false};if(p.hp<=0)end(p,'destroyed');}else{const amount=Math.max(0,opts.scaled?damage:damage*c.damageMult*(c.run.damage??1));if(R.damageResolver)result=R.damageResolver(c,p,amount,{...opts,ctx:c,scaled:true,rw:true});else{const hp=p.hp;const n=amount>0?p.takeDamage(amount,c.owner,!!opts.reflected,opts.direction||c.aim,{...opts,scaled:true,rw:true,ctx:c}):0;result={valid:true,hpDamage:Number(n)||Math.max(0,hp-p.hp),absorbed:0,killed:!p.alive};}if(typeof result==='number')result={valid:true,hpDamage:result,absorbed:0,killed:!p.alive};if(!result)result={valid:false,hpDamage:0,absorbed:0,killed:false};}
                 if(result.valid&&!p.isReworkTurret){if(opts.stun>0)applyStun(c,p,opts.stun,opts.stunCap);if(opts.knockback>0){const key=targetKey(p);if(!opts.onceKnockback||!c.knockbackHits.has(key)){c.knockbackHits.add(key);impulse(c,p,opts.direction||p.pos.sub(c.owner.pos),opts.knockback,opts);}}if(opts.slow!=null)buff(c,p,'slow',opts.slow,opts.slowFrames??30);}
                 if(result.valid&&opts.onHit)opts.onHit(c,p,result,opts.entity);return result;}
-            function area(c,pos,radius,damage,opts={}){const r=opts.geometryScaled?radius:sized(c,radius),out=[];for(const p of targets(c,pos,r)){if(dist(pos,p.pos)>r+(p.radius||0)||c.g.checkWallBetween(pos,p.pos))continue;const result=hit(c,p,opts.damageAt?opts.damageAt(p):typeof damage==='function'?damage(p):damage,{...opts,direction:opts.direction||p.pos.sub(pos)});if(result.valid)out.push({target:p,...result});}const farmDamage=typeof damage==='function'?(defs[c.abilityId]?.skill?.damage??20):damage;if(farmDamage>0&&window.brFarm)window.brFarm.area(c.g,c.owner,pos,r,Math.max(.15,farmDamage/60),c.castId+':area:'+frame(c.g));return out;}
+            // Retained, life-scoped presentation for an instantaneous skill resolution.
+            // These records do not own damage, collision, cooldown or simulation timers.
+            function confirmedSkillFx(c,pos,type,size,geometry={},color) {
+                if(!c.g?.emitStudentFx||!validContext(c,true))return;
+                c.visualSeq=(c.visualSeq||0)+1;
+                c.g.emitStudentFx(type,pos,{dx:c.aim.x,dy:c.aim.y,size,color:color||defs[c.abilityId]?.skill?.color||'#c4b5fd',style:'rw:'+String(defs[c.abilityId]?.skill?.kind||'skill'),sourceId:c.ownerId,
+                    geometry:{...geometry,confirmed:true,castId:c.castId,effectId:c.castId+':visual:'+c.visualSeq,
+                        matchKey:window.BRMP?.roomCode+'|'+Number(window.BRMP?.roomMeta?.matchRound||0)+'|'+Number(window.BRMP?.roomMeta?.battleStartedAt||0),
+                        lifeSeq:c.ownerLifeSeq,hostFrame:frame(c.g),displayMs:430}});
+            }
+            function area(c,pos,radius,damage,opts={}){const r=opts.geometryScaled?radius:sized(c,radius),out=[];for(const p of targets(c,pos,r)){if(dist(pos,p.pos)>r+(p.radius||0)||c.g.checkWallBetween(pos,p.pos))continue;const result=hit(c,p,opts.damageAt?opts.damageAt(p):typeof damage==='function'?damage(p):damage,{...opts,direction:opts.direction||p.pos.sub(pos)});if(result.valid)out.push({target:p,...result});}const farmDamage=typeof damage==='function'?(defs[c.abilityId]?.skill?.damage??20):damage;if(farmDamage>0&&window.brFarm)window.brFarm.area(c.g,c.owner,pos,r,Math.max(.15,farmDamage/60),c.castId+':area:'+frame(c.g));if(!opts.periodic&&opts.visual!==false)confirmedSkillFx(c,pos,'explosion',r,{shape:'circle'},opts.color);return out;}
             function confirmedBlast(c,pos,radius,innerRadius,effectId,color){
                 if(!c.g?.emitStudentFx)return;
                 // A confirmed single impact is a retained visual record, not a damaging entity.
@@ -5578,14 +5647,14 @@
                         lifeSeq:c.ownerLifeSeq,hostFrame:frame(c.g),displayMs:760}});
             }
             function sweepTime(from,to,pos,r){return combatSegmentCircleTime(from.x-pos.x,from.y-pos.y,to.x-from.x,to.y-from.y,r);}
-            function front(c,o){const range=ranged(c,o.range??150),width=sized(c,o.width??80),from=copy(o.pos||c.owner.pos),dir=norm(o.dir||c.aim),to=from.add(dir.mult(range)),wall=combatTraceWalls(from,to,width/2,c.g.walls,[]),endAt=wall?.t??1,candidates=[];for(const p of targets(c,from,range+width)){const rel=p.pos.sub(from),along=rel.x*dir.x+rel.y*dir.y,lateral=Math.abs(rel.x*dir.y-rel.y*dir.x);if(along<0||along>range*endAt+p.radius||lateral>width/2+p.radius||c.g.checkWallBetween(from,p.pos))continue;candidates.push({p,t:Math.max(0,along-p.radius)});}candidates.sort((a,b)=>a.t-b.t||pid(a.p).localeCompare(pid(b.p)));const out=[];for(const {p} of candidates.slice(0,o.maxTargets??Infinity)){const r=hit(c,p,o.damage??0,{...o,direction:dir});if(r.valid)out.push({target:p,...r});}if((o.damage??0)>0&&window.brFarm)window.brFarm.line(c.g,c.owner,from,to,width/2,Math.max(.15,o.damage/60),c.castId+':front','beam');return out;}
+            function front(c,o){const range=ranged(c,o.range??150),width=sized(c,o.width??80),from=copy(o.pos||c.owner.pos),dir=norm(o.dir||c.aim),to=from.add(dir.mult(range)),wall=combatTraceWalls(from,to,width/2,c.g.walls,[]),endAt=wall?.t??1,candidates=[];for(const p of targets(c,from,range+width)){const rel=p.pos.sub(from),along=rel.x*dir.x+rel.y*dir.y,lateral=Math.abs(rel.x*dir.y-rel.y*dir.x);if(along<0||along>range*endAt+p.radius||lateral>width/2+p.radius||c.g.checkWallBetween(from,p.pos))continue;candidates.push({p,t:Math.max(0,along-p.radius)});}candidates.sort((a,b)=>a.t-b.t||pid(a.p).localeCompare(pid(b.p)));const out=[];for(const {p} of candidates.slice(0,o.maxTargets??Infinity)){const r=hit(c,p,o.damage??0,{...o,direction:dir});if(r.valid)out.push({target:p,...r});}if((o.damage??0)>0&&window.brFarm)window.brFarm.line(c.g,c.owner,from,to,width/2,Math.max(.15,o.damage/60),c.castId+':front','beam');if((o.damage??0)>0&&!o.periodic&&o.visual!==false){const target=out[0]?.target;confirmedSkillFx(c,from,'swing',range*endAt,{shape:'front-impact',width,part:c.abilityId==='emoji-042'?'hammer':'sweep',targetX:target?.pos.x,targetY:target?.pos.y},o.color);}return out;}
             function bounded(g,pos,r=0){const center=g.center||v(),edge=Math.max(10,(g.worldRadius||BR_WORLD_RADIUS)-r-4),d=pos.sub(center),n=d.mag();return n>edge?center.add(d.mult(edge/n)):pos;}
-            function safe(g,pos,r,owner=null){const m=combatMoveCircle(pos,v(),r,g.walls,false),base=bounded(g,v(m.x,m.y),r);for(let i=0;i<4;i++){let moved=false;for(const q of nearby(g,base,r+100)){if(q===owner||!q.alive)continue;const d=base.sub(q.pos),len=d.mag(),need=r+q.radius+5;if(len<need){const n=len>.01?d.mult(1/len):v(Math.cos(i*2.3),Math.sin(i*2.3));base.x=q.pos.x+n.x*need;base.y=q.pos.y+n.y*need;moved=true;}}if(!moved)break;const z=combatMoveCircle(base,v(),r,g.walls,false);base.x=z.x;base.y=z.y;}return bounded(g,base,r);}
+            function safe(g,pos,r,owner=null){const m=combatMoveCircle(pos,v(),r,brHostBodyWalls(g),false),base=bounded(g,v(m.x,m.y),r);for(let i=0;i<4;i++){let moved=false;for(const q of nearby(g,base,r+100)){if(q===owner||!q.alive)continue;const d=base.sub(q.pos),len=d.mag(),need=r+q.radius+5;if(len<need){const n=len>.01?d.mult(1/len):v(Math.cos(i*2.3),Math.sin(i*2.3));base.x=q.pos.x+n.x*need;base.y=q.pos.y+n.y*need;moved=true;}}if(!moved)break;const z=combatMoveCircle(base,v(),r,brHostBodyWalls(g),false);base.x=z.x;base.y=z.y;}return bounded(g,base,r);}
             function targetPoint(c,range){return safe(c.g,bounded(c.g,c.owner.pos.add(c.aim.mult(ranged(c,range))),c.owner.radius||0),c.owner.radius||0,c.owner);}
             function safePoint(c,pos,radius=0){return safe(c.g,copy(pos),radius,c.owner);}
             function armWallCrash(c,p,o={}){const q=state(p).impulse;if(q&&q.ctx.castId===c.castId){q.wallDamage=o.damage??0;q.end=Math.max(q.end,frame(c.g)+(o.duration??60));q.wallDone=false;return true;}return false;}
             function applySlow(p,mult,frames,source){if(!source||!p?.alive)return null;const g=source.rw?.lastGame||p.rw?.lastGame||(typeof game!=='undefined'?game:null);if(!g)return null;const c=context(source,g,source.lastAimDir);if(!hostile(c,p))return null;return buff(c,p,'slow',mult,frames);}
-            function teleport(c,pos){const p=c.owner,to=safe(c.g,copy(pos),p.radius,p);p.pos.x=to.x;p.pos.y=to.y;p.vel=v();p.warpSeq=(p.warpSeq||0)+1;c.warpSeq=p.warpSeq;world(c.g).spatialDirty=true;c.g.rebuildSpatialGrid?.();return to;}
+            function teleport(c,pos){const p=c.owner,to=safe(c.g,copy(pos),p.radius,p);confirmedSkillFx(c,p.pos,'teleport',p.radius*1.4,{shape:'blink'},'#a5b4fc');confirmedSkillFx(c,to,'teleport',p.radius*1.4,{shape:'blink'},'#c4b5fd');p.pos.x=to.x;p.pos.y=to.y;p.vel=v();p.warpSeq=(p.warpSeq||0)+1;c.warpSeq=p.warpSeq;world(c.g).spatialDirty=true;c.g.rebuildSpatialGrid?.();return to;}
             function aimTurn(dir,wanted,limit){const a=Math.atan2(dir.y,dir.x),b=Math.atan2(wanted.y,wanted.x),d=Math.atan2(Math.sin(b-a),Math.cos(b-a)),n=a+clamp(d,-limit,limit);return v(Math.cos(n),Math.sin(n));}
             function chooseHoming(c,e){const s=state(c.owner),marked=s.markedTarget;if(marked?.end>frame(c.g)&&marked.life===life(marked.p)&&!e.excludedTargets?.has(pid(marked.p))&&hostile(c,marked.p)&&visible(c,marked.p,e.pos)&&dist(e.pos,marked.p.pos)<e.homingRange){const d=norm(marked.p.pos.sub(e.pos));if(d.x*e.dir.x+d.y*e.dir.y>=e.homingCone)return marked.p;}let best=null,bestD=Infinity;for(const p of enemies(c,e.pos,e.homingRange)){if(e.excludedTargets?.has(pid(p))||!visible(c,p,e.pos))continue;const d=p.pos.sub(e.pos),n=d.mag();if(n<=0||d.x/n*e.dir.x+d.y/n*e.dir.y<e.homingCone)continue;if(n<bestD){bestD=n;best=p;}}return best;}
             function projectile(c,o){const range=ranged(c,o.range??600),speed=Math.max(.1,o.speed??15),e=entity(c,'projectile',{...o,pos:o.pos||c.owner.pos,dir:o.dir||c.aim,range,radius:sized(c,o.radius??12),speed,damage:o.damage??0,duration:o.duration??Math.ceil(range/speed)*(o.boomerang?4:1)+90,cancelOnStun:false,ownerBound:o.ownerBound!==false},stepProjectile);e.distance=0;e.phase='out';e.hits=new Set();e.excludedTargets=new Set();e.homingRange=ranged(c,o.homingRange??650);e.homingCone=o.homingCone??-.15;e.nextSearch=frame(c.g)+(world(c.g).seq%6);e.bounces=Math.max(0,o.bounces??0);e.bounceCount=0;e.lastBounceFrame=-100;e.wallScratch=[];e.previousPos=copy(e.pos);e._stepTo=copy(e.pos);e._contacts=[];e.owner=c.owner;e.size=e.radius;e._farmHitIds=new Map();e.hitOptions={stun:e.stun??0,stunCap:e.stunCap,knockback:e.knockback??0,slow:e.slow,slowFrames:e.slowFrames,wallDamage:e.wallDamage,onceKnockback:e.onceKnockback,periodic:!!e.periodic,reflected:!!e.reflected,scaled:!!e.scaled,style:e.style||'rw-projectile'};event(c,e);return e;}
@@ -5657,10 +5726,10 @@
                     if(now%4===0&&window.brFarm){const token=e.id+':orbit-farm:'+Math.floor(now/e.tickEvery);for(let i=0;i<n;i++){const blade=e.blades[i].to;if(!ctx.g.checkWallBetween(e.pos,blade))window.brFarm.area(ctx.g,ctx.owner,blade,e.bladeRadius,Math.max(.15,(e.damage??17)/60),token);}}
                 });e.nextHits=new Map();e.blades=[];e.tickEvery=Math.max(1,o.tickEvery??24);return e;
             }
-            function moveExternal(g,p,delta,stop=true){const moved=combatMoveCircle(p.pos,delta,p.radius,g.walls,stop),to=bounded(g,v(moved.x,moved.y),p.radius);p.pos.x=to.x;p.pos.y=to.y;p.vel=v();state(p).movedFrame=frame(g);world(g).spatialDirty=true;return moved;}
+            function moveExternal(g,p,delta,stop=true){const moved=combatMoveCircle(p.pos,delta,p.radius,brHostBodyWalls(g),stop),to=bounded(g,v(moved.x,moved.y),p.radius);p.pos.x=to.x;p.pos.y=to.y;p.vel=v();state(p).movedFrame=frame(g);world(g).spatialDirty=true;return moved;}
             function dash(c,o){const s=state(c.owner);if(s.dash)end(s.dash,'replaced');const range=ranged(c,o.range??350),speed=Math.max(.1,o.speed??15),e=entity(c,'dash',{...o,pos:c.owner.pos,dir:o.dir||c.aim,range,width:sized(c,o.width??c.owner.radius*2),duration:Math.ceil(range/speed)+2,speed,cancelOnStun:true},stepDash);e.distance=0;e.hits=new Set();s.dash=e;return e;}
-            function stepDash(c,e){const p=c.owner,from=copy(p.pos),step=Math.min(e.speed,e.range-e.distance),to=from.add(e.dir.mult(step)),wall=combatTraceWalls(from,to,p.radius,c.g.walls,[]),limit=wall?.t??1,contacts=[];for(const q of targets(c,from,step+e.width+100)){const t=sweepTime(from,to,q.pos,(e.width/2)+(q.radius||0));if(t!=null&&t<=limit&&!e.hits.has(targetKey(q)))contacts.push({q,t});}contacts.sort((a,b)=>a.t-b.t);let stop=limit,reason=wall?'wall':null;for(const h of contacts){e.pos=from.add(to.sub(from).mult(h.t));const r=hit(c,h.q,e.damage??0,{...e,direction:e.dir,onHit:null,entity:e});if(!r.valid)continue;e.hits.add(targetKey(h.q));if(e.onHit)e.onHit(c,h.q,r,e);if(e.stopOnEnemy){stop=h.t;reason='hit';break;}}moveExternal(c.g,p,to.sub(from).mult(stop),true);state(p).motionFrame=frame(c.g);e.pos=copy(p.pos);e.distance+=dist(from,p.pos);if(e.push>0)for(const q of enemies(c,p.pos,e.width+80))if(e.hits.has(targetKey(q)))impulse(c,q,e.dir,e.push);if(reason||e.distance>=e.range-.1)end(e,reason||'expired');}
-            function leap(c,o){const p=c.owner,s=state(p),from=copy(p.pos),to=safe(c.g,copy(o.pos||targetPoint(c,o.range??420)),p.radius,p),frames=duration(c,o.duration??35);const e=entity(c,'leap',{...o,pos:from,from,to,duration:frames+1,cancelOnStun:true},(ctx,e)=>{const t=Math.min(1,e.age/frames);p.pos.x=from.x+(to.x-from.x)*t;p.pos.y=from.y+(to.y-from.y)*t;p.vel=v();e.pos=copy(p.pos);e.height=Math.sin(t*Math.PI)*Math.max(75,dist(from,to)*.20);state(p).movedFrame=frame(c.g);state(p).motionFrame=frame(c.g);world(c.g).spatialDirty=true;const test=combatMoveCircle(p.pos,v(),p.radius,c.g.walls,false);if(Math.hypot(test.x-p.pos.x,test.y-p.pos.y)<.01)e.lastSafe=copy(p.pos);if(t>=1){p.pos=copy(to);if(o.damage>0)area(c,to,o.radius??120,o.damage,o);end(e,'expired');}});e.lastSafe=from;e.speed=dist(from,to)/frames;e.dir=norm(to.sub(from));const oldEnd=e.onEnd;e.onEnd=(ctx,entity,reason)=>{if(reason!=='expired'){const q=safe(c.g,entity.lastSafe,p.radius,p);p.pos=copy(q);p.vel=v();}if(oldEnd)oldEnd(ctx,entity,reason);};s.dash=e;return e;}
+            function stepDash(c,e){const p=c.owner,from=copy(p.pos),step=Math.min(e.speed,e.range-e.distance),to=from.add(e.dir.mult(step)),wall=combatTraceWalls(from,to,p.radius,brHostBodyWalls(c.g),[]),limit=wall?.t??1,contacts=[];for(const q of targets(c,from,step+e.width+100)){const t=sweepTime(from,to,q.pos,(e.width/2)+(q.radius||0));if(t!=null&&t<=limit&&!e.hits.has(targetKey(q)))contacts.push({q,t});}contacts.sort((a,b)=>a.t-b.t);let stop=limit,reason=wall?'wall':null;for(const h of contacts){e.pos=from.add(to.sub(from).mult(h.t));const r=hit(c,h.q,e.damage??0,{...e,direction:e.dir,onHit:null,entity:e});if(!r.valid)continue;e.hits.add(targetKey(h.q));if(e.onHit)e.onHit(c,h.q,r,e);if(e.stopOnEnemy){stop=h.t;reason='hit';break;}}moveExternal(c.g,p,to.sub(from).mult(stop),true);state(p).motionFrame=frame(c.g);e.pos=copy(p.pos);e.distance+=dist(from,p.pos);if(e.push>0)for(const q of enemies(c,p.pos,e.width+80))if(e.hits.has(targetKey(q)))impulse(c,q,e.dir,e.push);if(reason||e.distance>=e.range-.1)end(e,reason||'expired');}
+            function leap(c,o){const p=c.owner,s=state(p),from=copy(p.pos),to=safe(c.g,copy(o.pos||targetPoint(c,o.range??420)),p.radius,p),frames=duration(c,o.duration??35);const e=entity(c,'leap',{...o,pos:from,from,to,duration:frames+1,cancelOnStun:true},(ctx,e)=>{const t=Math.min(1,e.age/frames);p.pos.x=from.x+(to.x-from.x)*t;p.pos.y=from.y+(to.y-from.y)*t;p.vel=v();e.pos=copy(p.pos);e.height=Math.sin(t*Math.PI)*Math.max(75,dist(from,to)*.20);state(p).movedFrame=frame(c.g);state(p).motionFrame=frame(c.g);world(c.g).spatialDirty=true;const test=combatMoveCircle(p.pos,v(),p.radius,brHostBodyWalls(c.g),false);if(Math.hypot(test.x-p.pos.x,test.y-p.pos.y)<.01)e.lastSafe=copy(p.pos);if(t>=1){p.pos=copy(to);if(o.damage>0)area(c,to,o.radius??120,o.damage,o);end(e,'expired');}});e.lastSafe=from;e.speed=dist(from,to)/frames;e.dir=norm(to.sub(from));const oldEnd=e.onEnd;e.onEnd=(ctx,entity,reason)=>{if(reason!=='expired'){const q=safe(c.g,entity.lastSafe,p.radius,p);p.pos=copy(q);p.vel=v();}if(oldEnd)oldEnd(ctx,entity,reason);};s.dash=e;return e;}
             function hook(c,o){const n=clamp(Math.floor(o.maxTargets??1),1,3),captured=new Set(),list=[];for(let i=0;i<n;i++){const angle=(i-(n-1)/2)*(n>1?(o.spread??.15):0),a=Math.atan2(c.aim.y,c.aim.x)+angle,dir=v(Math.cos(a),Math.sin(a)),range=ranged(c,o.range??600),speed=o.speed??24;const e=entity(c,'hook',{...o,dir,pos:c.owner.pos,range,width:sized(c,o.width??24),radius:sized(c,o.width??24)/2,duration:Math.ceil(range/speed)+2,speed,distance:0,cancelOnStun:true},(ctx,e)=>{e.previousPos=copy(e.pos);const from=copy(e.pos),to=from.add(e.dir.mult(Math.min(e.speed,e.range-e.distance))),wall=combatTraceWalls(from,to,e.radius,c.g.walls,[]),hits=[];for(const q of enemies(c,from,e.speed+e.radius+100)){if(captured.has(targetKey(q)))continue;const t=sweepTime(from,to,q.pos,e.radius+q.radius);if(t!=null&&(!wall||t<=wall.t))hits.push({q,t});}let block=wall?.t??Infinity;for(const b of c.g.farmBoxes||[]){const t=brCrateSweepTime(b,from,to,e.radius);if(t!=null)block=Math.min(block,t);}hits.sort((a,b)=>a.t-b.t);const h=hits.find(h=>h.t<=block);if(h){e.pos=from.add(to.sub(from).mult(h.t));const result=hit(c,h.q,o.damage??0,{knockback:0});if(result.valid){captured.add(targetKey(h.q));capture(c,h.q,{...o,slot:i,total:n,dir:c.aim});end(e,'hit');return;}}if(block<=1){e.pos=from.add(to.sub(from).mult(block));end(e,'wall');return;}e.pos=to;e.distance+=e.speed;if(e.distance>=e.range)end(e,'range');});event(c,e);list.push(e);}return list;}
             function capture(c,target,o){const s=state(target);if(s.force&&!s.force.dead)return null;cancelAction(target,c.g,'forced');s.impulse=null;const ownerStart=copy(c.owner.pos),front=norm(o.dir||c.aim),side=((o.slot??0)-((o.total??1)-1)/2)*(target.radius*2+14),desired=c.owner.pos.add(front.mult(c.owner.radius+target.radius+15)).add(v(-front.y,front.x).mult(side)),to=safe(c.g,desired,target.radius,target);const e=entity(c,'capture',{pos:copy(target.pos),from:ownerStart,to,target,targetLife:life(target),duration:70,cancelOnStun:true,range:o.range??900,arrivalStun:o.arrivalStun??0,stunCap:o.stunCap,ownerWarp:Number(c.owner.warpSeq||0),speed:o.pullSpeed??24,width:4},(ctx,e)=>{if(!target.alive||life(target)!==e.targetLife){end(e,'life');return;}if(Number(c.owner.warpSeq||0)!==e.ownerWarp||dist(c.owner.pos,ownerStart)>Math.max(200,e.range*.6)||dist(target.pos,c.owner.pos)>e.range+250){end(e,'source-moved');return;}const delta=e.to.sub(target.pos),n=delta.mag();if(n<=3){if(e.arrivalStun>0)applyStun(c,target,e.arrivalStun,e.stunCap);end(e,'arrived');return;}const moved=moveExternal(c.g,target,delta.mult(Math.min(n,e.speed)/n),true);e.pos=copy(target.pos);e.from=copy(c.owner.pos);if(moved.hit){if(e.arrivalStun>0)applyStun(c,target,e.arrivalStun,e.stunCap);end(e,'wall');}});s.force=e;return e;}
             function channel(c,o){const s=state(c.owner);if(s.channel)end(s.channel,'replaced');const e=entity(c,'beam',{...o,pos:c.owner.pos,dir:c.aim,range:ranged(c,o.range??1000),width:sized(c,o.width??75),duration:duration(c,o.duration??150),cancelOnStun:true},(ctx,e)=>{if(state(c.owner).force||state(c.owner).impulse?.hard){end(e,'forced');return;}e.dir=aimTurn(e.dir,e.desiredAim,e.turnRate??.038);c.owner.lastAimDir=copy(e.dir);e.pos=copy(c.owner.pos);const target=e.pos.add(e.dir.mult(e.range)),wall=combatTraceWalls(e.pos,target,e.width/2,c.g.walls,[]);e.length=e.range*(wall?.t??1);e.to=e.pos.add(e.dir.mult(e.length));if(frame(c.g)>=e.nextTick){e.nextTick+=e.tickEvery;for(const p of targets(c,e.pos,e.length+e.width)){const rel=p.pos.sub(e.pos),along=rel.x*e.dir.x+rel.y*e.dir.y,lat=Math.abs(rel.x*e.dir.y-rel.y*e.dir.x);if(along>=0&&along<=e.length+p.radius&&lat<=e.width/2+p.radius&&!c.g.checkWallBetween(e.pos,p.pos))hit(c,p,e.damage??5,{periodic:true,knockback:0,stun:0,direction:e.dir});}window.brFarm?.line(c.g,c.owner,e.pos,e.to,e.width/2,Math.max(.08,(e.damage??5)/60),e.id+':'+frame(c.g),'beam');}});e.desiredAim=copy(c.aim);e.tickEvery=Math.max(1,o.tickEvery??6);e.nextTick=frame(c.g)+e.tickEvery;e.length=e.range;s.channel=e;return e;}
@@ -5689,7 +5758,7 @@
             function wirePlayer(p,g){const s=state(p),now=frame(g),motion=s.dash&&!s.dash.dead?s.dash:null,channel=s.channel&&!s.channel.dead?s.channel:null,recast=s.recast,force=s.force&&!s.force.dead?s.force:null;return {life:life(p),stunEnd:now+(p.stunned||0),shield:s.shields.reduce((n,a)=>n+a.amount,0),slow:strongest(p,'slow'),moveRate:moveRate(p),attackRate:cooldownRate(p,'attack'),skillRate:cooldownRate(p,'skill'),locks:inputLocks(p,g),motion:motion?{id:motion.id,kind:motion.kind,start:motion.start,end:motion.end,x:p.pos.x,y:p.pos.y,dx:motion.dir.x,dy:motion.dir.y,speed:motion.speed||0,remaining:Math.max(0,(motion.range||0)-(motion.distance||0)),airborne:motion.kind==='leap',height:motion.height||0,fromX:motion.from?.x??null,fromY:motion.from?.y??null,toX:motion.to?.x??null,toY:motion.to?.y??null}:null,lockEnd:Math.max(now+(p.stunned||0),s.lock?.end||0,s.dash?.end||0,s.channel?.end||0,s.force?.end||0),rateLayers:rateLayers(p,g),channel:channel?{id:channel.ctx.castId,end:channel.end,dx:channel.dir.x,dy:channel.dir.y}:null,recast:recast?{id:recast.ctx.castId,end:recast.end,left:recast.left}:null,capture:force?{id:force.id,end:force.end,x:p.pos.x,y:p.pos.y,toX:force.to.x,toY:force.to.y,speed:force.speed}:null,bleed:s.dots.reduce((n,d)=>n+(d.kind==='bleed'?d.stacks:0),0),mark:s.marks.length,buffs:s.buffs.filter(b=>b.end>now).map(b=>({kind:b.kind,value:b.value,end:b.end,proc:b.procFrame||0}))};}
             function entityVisible(g,e,viewer,bounds){if(e.hidden||e.visible===false)return false;if(!viewer||!bounds)return true;const end=e.to||e.pos.add((e.dir||v(1,0)).mult(e.kind==='beam'?(e.length??e.range):e.range||0)),r=e.pullRadius||e.maxRadius||e.radius||e.width||20;const within=typeof brViewSegment==='function'?brViewSegment(bounds,e.pos.x,e.pos.y,end.x,end.y,r):true;if(!within)return false;if(e.kind==='capture'&&e.target&&g.isConcealedFrom?.(e.target,viewer))return false;return true;}
             function wireEntities(g,viewer=null,bounds=null){const dynamic=world(g).entities.filter(e=>!e.dead&&entityVisible(g,e,viewer,bounds)).map(e=>({id:e.id,kind:e.kind,shape:e.shape||null,armAt:e.armFrames!=null?e.start+e.armFrames:null,height:e.height||0,shotIndex:e.shotIndex??null,castId:e.ctx.castId,x:e.pos.x,y:e.pos.y,dx:e.dir?.x||0,dy:e.dir?.y||0,length:e.length??e.range??0,width:e.width||0,speed:e.speed||0,count:e.count||1,nextHeavy:e.kind==='turret'?(4-e.shots%4):0,collapseRadius:e.collapseRadius?sized(e.ctx,e.collapseRadius):0,radius:e.radius||0,bladeRadius:e.bladeRadius||0,pullRadius:e.pullRadius||0,maxRadius:e.maxRadius||0,color:e.color||'#a5b4fc',emoji:e.emoji||null,start:e.start,end:e.end,hp:e.hp??null,maxHp:e.maxHp??null,team:e.ctx.owner.team||0,owner:e.ctx.ownerId,life:e.ctx.ownerLifeSeq,cast:e.ctx.castId,phase:e.phase||null,shots:e.shots||0,fx:e.from?.x??null,fy:e.from?.y??null,tx:e.to?.x??e.targetPos?.x??null,ty:e.to?.y??e.targetPos?.y??null,endX:e.to?.x??e.targetPos?.x??null,endY:e.to?.y??e.targetPos?.y??null}));for(const ev of world(g).events){if(ev.kind!=='end'||!['projectile','hook'].includes(ev.type)||ev.end<=frame(g))continue;const a=v(ev.fromX,ev.fromY),b=v(ev.x,ev.y),d=b.sub(a),length=d.mag();if(bounds&&typeof brViewSegment==='function'&&!brViewSegment(bounds,a.x,a.y,b.x,b.y,ev.radius||12))continue;dynamic.push({id:ev.id,kind:'transit',x:a.x,y:a.y,dx:length?d.x/length:0,dy:length?d.y/length:0,length,width:Math.max(2,(ev.radius||8)*.4),radius:ev.radius||8,color:ev.color,start:ev.start,end:ev.end,team:ev.team,owner:ev.owner,tx:b.x,ty:b.y,endX:b.x,endY:b.y});}return dynamic;}
-            Object.assign(R,{world,state,context,validContext,hostile,register,cast,tick,cleanup,reset,entity,end,event,schedule,marker,projectile,zone,orbit,dash,leap,hook,capture,channel,turret,hit,area,confirmedBlast,front,heal,shield,absorb,buff,dot,mark,cleanse,lock,impulse,applyStun,damageReduction,cooldownRate,moveRate,basicAttempt,basicDamage,basicHit,onHpDamage,afterHit,inputLocks,ownsMovement,steer,openRecast,recast,closeRecast,cancelAction,wirePlayer,wireEntities,enemies,allies,targets,turrets,basicTurrets,projectileTurretHit,damageTurret,targetPoint,teleport,safe,count,duration,ranged,sized,norm,copy,frame,pid,life,aid,safePoint,armWallCrash,applySlow,clearWorld:reset,visible,rateLayers});R.enemies=(c,pos,radius)=>enemies(c,pos,sized(c,radius));R.allies=(c,pos,radius)=>allies(c,pos,sized(c,radius));
+            Object.assign(R,{world,state,context,validContext,hostile,register,cast,tick,cleanup,reset,entity,end,event,schedule,marker,projectile,zone,orbit,dash,leap,hook,capture,channel,turret,hit,area,confirmedBlast,confirmedSkillFx,front,heal,shield,absorb,buff,dot,mark,cleanse,lock,impulse,applyStun,damageReduction,cooldownRate,moveRate,basicAttempt,basicDamage,basicHit,onHpDamage,afterHit,inputLocks,ownsMovement,steer,openRecast,recast,closeRecast,cancelAction,wirePlayer,wireEntities,enemies,allies,targets,turrets,basicTurrets,projectileTurretHit,damageTurret,targetPoint,teleport,safe,count,duration,ranged,sized,norm,copy,frame,pid,life,aid,safePoint,armWallCrash,applySlow,clearWorld:reset,visible,rateLayers});R.enemies=(c,pos,radius)=>enemies(c,pos,sized(c,radius));R.allies=(c,pos,radius)=>allies(c,pos,sized(c,radius));
             return R;
         })();
 
@@ -6019,7 +6088,7 @@
     add('emoji-039','다이너마이트','B','원거리형',{},
         {kind:'lob',shape:'target',cooldown:frames(11),range:740,radius:205,innerRadius:92,damage:29,centerDamage:47,flightFrames:48,duration:48,knockback:8,color:'#f97316',emoji:'🧨',caps:{...aoeCaps,cc:true,signatureRange:true},
          description:'목표 지점을 표시한 뒤 0.8초 포물선 비행 후 한 번 폭발합니다. 중심부 피해가 더 크며 폭발 지점과 적 사이의 벽은 피해를 막습니다.',strength:'넓은 지점 폭격',success:'느린 착탄을 예측해 조준',failure:'피할 수 있는 긴 비행 시간',counterplay:'경고 원에서 이탈하거나 벽 뒤로 이동'},
-        (ctx,s)=>{const start=copy(ctx.owner.pos),end=groundPoint(ctx,R.targetPoint(ctx,s.range),18);R.marker(ctx,{pos:end,shape:'circle',radius:s.radius,duration:s.flightFrames,color:s.color});R.entity(ctx,'lob',{pos:start,targetPos:end,endPos:end,radius:18,height:0,damage:0,cancelOnStun:false,duration:s.flightFrames,color:s.color,emoji:s.emoji,onEnd:(c,e,why)=>{if(why!=='expired')return;R.area(c,end,s.radius,t=>end.dist(t.pos)<=R.sized(c,s.innerRadius)?s.centerDamage:s.damage,{knockback:s.knockback});R.confirmedBlast(c,end,s.radius,s.innerRadius,e.id,s.color);}},(c,e)=>{const t=Math.min(1,e.age/s.flightFrames);e.pos=new Vec2(start.x+(end.x-start.x)*t,start.y+(end.y-start.y)*t);e.height=Math.sin(t*Math.PI)*125;});});
+        (ctx,s)=>{const start=copy(ctx.owner.pos),end=groundPoint(ctx,R.targetPoint(ctx,s.range),18);R.marker(ctx,{pos:end,shape:'circle',radius:s.radius,duration:s.flightFrames,color:s.color});R.entity(ctx,'lob',{pos:start,targetPos:end,endPos:end,radius:18,height:0,damage:0,cancelOnStun:false,duration:s.flightFrames,color:s.color,emoji:s.emoji,onEnd:(c,e,why)=>{if(why!=='expired')return;R.area(c,end,s.radius,t=>end.dist(t.pos)<=R.sized(c,s.innerRadius)?s.centerDamage:s.damage,{knockback:s.knockback,visual:false});R.confirmedBlast(c,end,s.radius,s.innerRadius,e.id,s.color);}},(c,e)=>{const t=Math.min(1,e.age/s.flightFrames);e.pos=new Vec2(start.x+(end.x-start.x)*t,start.y+(end.y-start.y)*t);e.height=Math.sin(t*Math.PI)*125;});});
     // B03: exactly one target after preparation, stays close.
     add('emoji-042','뿅망치','B','탱커',melee('hammer',{rangeBonus:92,halfAngle:.96,cooldownScale:1.18,damageScale:1.08,pushScale:.2}),
         {kind:'hammer',shape:'rect',cooldown:frames(10),windup:16,range:168,width:115,damage:28,stun:60,stunCap:78,knockback:1,color:'#fde68a',caps:{damage:true,area:true,expandable:true,cc:true},
@@ -6455,6 +6524,11 @@
         .br-music-controls {position:fixed;top:calc(59px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:160;display:flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid rgba(148,163,184,.42);border-radius:12px;background:rgba(8,18,34,.88);color:#e2e8f0;font:700 11px sans-serif;max-width:92vw;}
         .br-music-controls button {min-height:40px;padding:5px 9px;border:1px solid #64748b;border-radius:9px;background:#26334d;color:#fff;font:inherit;touch-action:manipulation;white-space:nowrap;}
         .br-music-controls input {width:74px;accent-color:#a78bfa;touch-action:manipulation;}
+        .br-music-controls.br-music-host {top:calc(8px + env(safe-area-inset-top));right:calc(10px + env(safe-area-inset-right));left:auto;transform:none;}
+        #br-host-room .br-topline > .br-actions {align-self:flex-end;}
+        body.br-host-music-visible #hud-overlay > .hud-box:last-child {transform:translateY(56px);}
+        body.br-host-music-visible .br-tk-host-bar {top:calc(66px + env(safe-area-inset-top));}
+        body.br-host-music-visible .br-host-kill-feed {transform:translateY(56px);}
         #br-music-status {max-width:105px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fde68a;font-size:10px;}
         #br-stream-status {position:absolute;left:50%;top:64px;transform:translateX(-50%);padding:6px 12px;border-radius:12px;background:rgba(41,24,6,.92);color:#fde68a;font:700 12px sans-serif;pointer-events:none;z-index:5;white-space:nowrap;}
         @media(max-width:1100px){.br-play-prefs{top:auto;bottom:calc(12px + env(safe-area-inset-bottom,0px));}.br-play-prefs button{min-height:44px;padding:5px 8px;font-size:10px;}#br-stream-status{top:150px;max-width:85%;white-space:normal;text-align:center;}}
@@ -6507,7 +6581,7 @@
         #br-joystick-knob { position:absolute; z-index:4; width:58px; height:58px; left:37px; top:37px; border-radius:50%;
             border:2px solid rgba(203,213,225,.62); background:radial-gradient(circle at 38% 30%,#dbeafe,#64748b 85%);
             box-shadow:0 5px 15px rgba(0,0,0,.38),inset 0 -5px 9px rgba(15,23,42,.22); transform:translate(0,0); will-change:transform; }
-        #br-attack { --br-ring-color:#ff4969; right:calc(22px + env(safe-area-inset-right)); left:auto; bottom:calc(22px + env(safe-area-inset-bottom));
+        #br-attack { --br-ring-color:#ff4969; width:106px; height:106px; right:calc(22px + env(safe-area-inset-right)); left:auto; bottom:calc(22px + env(safe-area-inset-bottom));
             border:2px solid rgba(251,113,133,.72); background:radial-gradient(circle at 36% 28%,#be3b58,#901e42 74%,#511330);
             color:#fff; display:grid; place-items:center; box-shadow:inset 0 -8px 12px rgba(95,10,36,.30),0 8px 18px rgba(225,29,72,.27); }
         #br-skill { --br-ring-color:#fde047; right:calc(122px + env(safe-area-inset-right)); left:auto; bottom:calc(137px + env(safe-area-inset-bottom)); width:88px; height:88px;
@@ -6611,7 +6685,7 @@
             .br-awards { grid-template-columns:1fr 1fr; }
             .br-rank { grid-template-columns:38px 38px minmax(80px,1fr) auto; }
             .br-rank .br-hide-mobile { display:none; }
-            #br-attack { width:106px; height:106px; }
+            #br-attack { width:98px; height:98px; }
             #br-joystick { width:118px; height:118px; }
             #br-joystick-knob { width:54px; height:54px; left:32px; top:32px; }
             #br-skill { right:calc(102px + env(safe-area-inset-right)); left:auto; bottom:calc(126px + env(safe-area-inset-bottom)); width:80px; height:80px; }
@@ -8999,7 +9073,7 @@
                 var range=Math.max(p.radius,(p.radius+profile.rangeBonus)*Number(mods.basicRange||1)-stepDistance),damage=brTierValue(tier,{S:27,A:24,B:21,C:18,F:13})*profile.damageScale;
                 p.basicContactUntilFrame=g.frame+10;
                 if(stepDistance>0&&p.alive&&p.stunned<=0&&!p.playerDash&&p.dashFrames<=0&&p.launchedFrames<=0) {
-                    var stepped=brMoveBasicStep(p.pos,aim,stepDistance,p.radius,g.walls,g.worldRadius,g.center,p._combatMoveResult);
+                    var stepped=brMoveBasicStep(p.pos,aim,stepDistance,p.radius,brHostBodyWalls(g),g.worldRadius,g.center,p._combatMoveResult);
                     p.pos.x=stepped.x;p.pos.y=stepped.y;
                 }
                 var push=brTierValue(tier,{S:39,A:35,B:30,C:25,F:19})*profile.pushScale,hit=false,totalDealt=0;
@@ -9422,9 +9496,19 @@
             for(const e of wire.entities)if(!e||typeof e.id!=='string'||typeof e.kind!=='string'||!Number.isFinite(e.x)||!Number.isFinite(e.y)||!Number.isFinite(e.end))return false;
             return true;
         }
+        // Snapshot simulation time can fall behind wall time after a host pause or
+        // dropped catch-up steps. Bound transport lead before predicting action
+        // clocks so a fresh 12-second cooldown never becomes ready immediately.
+        function brActionSnapshotElapsed(actor,now=performance.now()) {
+            if(BRMP.ringView&&!BRMP.ringView.running)return 0;
+            const received=Number.isFinite(actor?.rwReceivedAt)?actor.rwReceivedAt:Number.isFinite(actor?.last)?actor.last:now;
+            const sampled=Number.isFinite(actor?.rwAt)?actor.rwAt:received;
+            const transportAge=brClamp(received-sampled,0,250);
+            return (transportAge+Math.max(0,now-received))/(1000/60);
+        }
         function brReworkClientFrame(actor,now=performance.now()) {
             const state=actor?.rw;if(!state)return Number(BRMP.latestView?.frame||0);
-            return Number(actor.rwFrame||0)+(BRMP.ringView&&!BRMP.ringView.running?0:Math.max(0,now-Number(actor.rwAt??now))/(1000/60));
+            return Number(actor.rwFrame||0)+brActionSnapshotElapsed(actor,now);
         }
         function brReworkClientState(actor,now=performance.now()) {
             actor=actor||BRMP.drawPlayers?.get(String(BRMP.playerId));
@@ -9766,8 +9850,10 @@
         function brMusicRole(){var role=BRMP.role;if(role!=='host'&&role!=='student')return false;
             if(brBgm.role!==role){brMusicStop();brBgm.role=role;brBgm.pref=brMusicPref(role);}return true;}
         function brMusicSave(){try{localStorage.setItem('br_bgm_'+brBgm.role+'_v1',JSON.stringify(brBgm.pref));}catch(_){}brMusicUi();}
-        function brMusicUi(){var box=brEl('br-music-controls'),visible=!!(BRMP.roomCode&&brBgm.role&&BRMP.roomMeta?.phase!=='results');
-            box.classList.toggle('br-hidden',!visible);if(!brBgm.pref)return;
+        function brMusicUi(){var box=brEl('br-music-controls'),host=BRMP.role==='host',phase=BRMP.roomMeta?.phase,
+                visible=!!(BRMP.roomCode&&brBgm.role&&(host?['lobby','quiz','draft','battle'].includes(phase):BRMP.role==='student'&&phase==='lobby'));
+            box.classList.toggle('br-hidden',!visible);box.classList.toggle('br-music-host',host);
+            document.body.classList.toggle('br-host-music-visible',host&&visible);if(!brBgm.pref)return;
             var button=brEl('br-pref-music');button.textContent=!brBgm.pref.enabled||brBgm.blocked?'음악 켜기':'음악 끄기';
             button.setAttribute('aria-pressed',String(!!brBgm.pref.enabled&&!brBgm.blocked));
             var slider=brEl('br-music-volume');slider.value=String(brBgm.pref.volume);slider.disabled=!brBgm.pref.enabled;
@@ -9977,11 +10063,7 @@
             view=view||BRMP.latestView||{};
             var edge=Math.max(20,Number(view.worldRadius||view.mapRadius||BR_WORLD_RADIUS)-radius-18),point={x:x+ax*range,y:y+ay*range};
             var length=Math.hypot(point.x,point.y);if(length>edge){point.x*=edge/length;point.y*=edge/length;}
-            function blocked(q){return (view.walls||[]).some(function(w){
-                var dx=q.x-w[0],dy=q.y-w[1],angle=-Number(w[4]||0),ca=Math.cos(angle),sa=Math.sin(angle);
-                var lx=dx*ca-dy*sa,ly=dx*sa+dy*ca,cx=brClamp(lx,-w[2]/2,w[2]/2),cy=brClamp(ly,-w[3]/2,w[3]/2);
-                return Math.hypot(lx-cx,ly-cy)<radius;
-            });}
+            function blocked(q){return brStudentBodyWalls(view).some(function(w){return !!combatWallContact(q.x,q.y,radius,w);});}
             if(blocked(point)) {
                 var found=false;
                 var safeDx=point.x-x,safeDy=point.y-y;
@@ -10024,7 +10106,7 @@
                 var basicMelee=brBasicCombatProfile(a);
                 var now=performance.now(),haste=brClientActionRate(self,'attack',now),stepDistance=brBasicStepDistance(a,mods,haste);
                 if(!confirmed&&stepDistance>0&&r[7]&&now>=Number(self.stunUntil||0)&&now>=Number(self.dashUntil||0)&&!BRMP.localDash&&now>=Number(self.hitCorrectionUntil||0)) {
-                    var stepped=brMoveBasicStep({x:x,y:y},dir,stepDistance,rad,BRMP.latestView?.walls,BRMP.latestView?.worldRadius,null,self._combatMoveResult);
+                    var stepped=brMoveBasicStep({x:x,y:y},dir,stepDistance,rad,brStudentBodyWalls(BRMP.latestView),BRMP.latestView?.worldRadius,null,self._combatMoveResult);
                     var stepX=stepped.x-x,stepY=stepped.y-y;
                     self.predX=stepped.x;self.predY=stepped.y;
                     if(self.predState){self.predState.x=stepped.x;self.predState.y=stepped.y;}
@@ -10112,7 +10194,7 @@
 
         function brResolvePredictedCollision(p,view,radius,from,stopOnWall) {
             p._combatMoveResult=p._combatMoveResult||{x:0,y:0,vx:0,vy:0,hit:null,_wallCandidates:[]};
-            var result=combatMoveCircle(from||p,from?{x:p.vx,y:p.vy}:{x:0,y:0},radius,view?.walls||[],!!stopOnWall,p._combatMoveResult);
+            var result=combatMoveCircle(from||p,from?{x:p.vx,y:p.vy}:{x:0,y:0},radius,brStudentBodyWalls(view),!!stopOnWall,p._combatMoveResult);
             p.x=result.x;p.y=result.y;
             if(from){p.vx=result.vx;p.vy=result.vy;}
             var mapR=Math.max(radius+8,Number(view?.worldRadius||BR_WORLD_RADIUS)-radius-4),d=Math.hypot(p.x,p.y);
@@ -10163,7 +10245,7 @@
                 if(!old)old={x:sx,y:sy,tx:sx,ty:sy,vx:svx,vy:svy,row:r,last:now,trailHp:Number(r[5]||0),trailHold:0,
                     samples:[],predX:sx,predY:sy,predVx:svx,predVy:svy,authX:sx,authY:sy,authAt:now};
                 const nextRW=rwStates.get(id)||null,lifeChanged=!!(old.rw&&nextRW&&old.rw.life!==nextRW.life);
-                old.rw=nextRW;old.rwFrame=Number(view.frame||0);old.rwAt=sampleTime;
+                old.rw=nextRW;old.rwFrame=Number(view.frame||0);old.rwAt=sampleTime;old.rwReceivedAt=now;
                 var priorRow=old.row||r,warpChanged=Number(r[27]||0)!==Number(priorRow[27]||0),respawned=(!priorRow[7]&&r[7])||lifeChanged,eliminated=!!priorRow[7]&&!r[7];
                 var previousHp=old.row?Number(old.row[5]||0):Number(r[5]||0),nextHp=Number(r[5]||0);
                 if(nextHp<previousHp) {
@@ -10184,10 +10266,10 @@
                 if(id===String(BRMP.playerId)&&(eliminated||respawned)){BRMP.pendingLocalActions={};BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;BRMP.localDash=null;BRMP.localTeleportUntil=0;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.localProjectiles=[];}
                 old.samples=old.samples||[];if(warpChanged||respawned)old.samples=[];old.samples.push({x:sx,y:sy,vx:svx,vy:svy,t:sampleTime});if(old.samples.length>6)old.samples.shift();
                 old.tx=sx;old.ty=sy;old.vx=svx;old.vy=svy;old.row=r;
-                var statusAge=Math.max(0,now-sampleTime),stunFrames=nextRW?Math.max(0,nextRW.stunEnd-view.frame):Math.max(0,Number(r[25]||0));
+                var statusAge=brActionSnapshotElapsed(old,now)*(1000/60),stunFrames=nextRW?Math.max(0,nextRW.stunEnd-view.frame):Math.max(0,Number(r[25]||0));
                 // Remote players need the same expiring status cue as self. Do
                 // not retain a stale STUN label between network snapshots.
-                old.combatStatus=combatStatuses.get(id)||null;old.combatStatusAt=sampleTime;
+                old.combatStatus=combatStatuses.get(id)||null;old.combatStatusAt=now-statusAge;
                 old.stunVisualUntil=r[7]&&stunFrames>0?now+Math.max(0,stunFrames*(1000/60)-statusAge):0;
                 var leadFrames=brClamp(Number(BRMP.minInputRtt||100)/2/(1000/60),0,8);old.authX=sx+svx*leadFrames;old.authY=sy+svy*leadFrames;old.authAt=now;
                 if(id===String(BRMP.playerId)) {
@@ -10267,13 +10349,15 @@
             // 30명 방은 각 학생 스냅샷이 약 0.3초 간격이므로, 그 사이 투사체를 삭제해 깜빡이지 않게 한다.
             BRMP.drawProjectiles.forEach(function(v,k){if(!shotSeen.has(k))BRMP.drawProjectiles.delete(k);});
             (view.fx||[]).forEach(function(r){
-                var geometry=r[13]||{},blast=geometry.shape==='dynamite-impact';
-                if(blast&&geometry.matchKey!==view.matchKey) return;
-                var id=blast?'confirmed:'+view.matchKey+':'+String(geometry.effectId||r[0]):String(r[0]);
+                var geometry=r[13]||{},blast=geometry.shape==='dynamite-impact',confirmed=blast||geometry.confirmed===true;
+                if(confirmed&&geometry.matchKey!==view.matchKey)return;
+                const sourceLife=BRMP.drawPlayers?.get(String(r[11]||''))?.rw?.life;
+                if(confirmed&&Number.isFinite(Number(sourceLife))&&Number(sourceLife)!==Number(geometry.lifeSeq))return;
+                var id=confirmed?'confirmed:'+view.matchKey+':'+String(geometry.effectId||r[0]):String(r[0]);
                 if(BRMP.seenFxIds.has(id))return;
-                var type=String(r[1]||'hit'),life=blast?brClamp(Number(geometry.displayMs||760),600,900):brFxLife(type);
+                var type=String(r[1]||'hit'),life=confirmed?brClamp(Number(geometry.displayMs||(blast?760:430)),260,900):brFxLife(type);
                 const own=String(r[11]||'')===String(BRMP.playerId);
-                let start=blast?now-Math.min(300,Math.max(0,Number(view.frame||0)-Number(geometry.hostFrame||view.frame))*1000/60):now;
+                let start=confirmed?now-Math.min(blast?300:Math.max(0,Math.min(300,life-220)),Math.max(0,Number(view.frame||0)-Number(geometry.hostFrame||view.frame))*1000/60):now;
                 if(own&&geometry.seq>0&&geometry.kind){
                     BRMP.drawFx.forEach((fx,key)=>{const m=fx.row[13]||{};
                         if(fx.local&&fx.row[1]===type&&m.kind===geometry.kind&&m.seq===geometry.seq){start=Math.max(fx.start,now-life*.65);BRMP.drawFx.delete(key);}
@@ -10426,9 +10510,9 @@
                 const edge=Math.max(radius+8,Number(view.worldRadius||BR_WORLD_RADIUS)-radius-4),dot=x*aim.x+y*aim.y;
                 const discriminant=dot*dot+edge*edge-x*x-y*y;
                 const boundary=discriminant>=0?Math.max(0,-dot+Math.sqrt(discriminant)):0;
-                const distance=Math.min(range,boundary),moved=combatMoveCircle(origin,{x:aim.x*distance,y:aim.y*distance},radius,spec.phases?[]:view.walls||[],true);
+                const distance=Math.min(range,boundary),moved=combatMoveCircle(origin,{x:aim.x*distance,y:aim.y*distance},radius,spec.phases?[]:brStudentBodyWalls(view),true);
                 const result={x:moved.x,y:moved.y,range:Math.hypot(moved.x-x,moved.y-y)};
-                if(spec.phases){const landed=combatMoveCircle(moved,{x:0,y:0},radius,view.walls||[],false);result.landingX=landed.x;result.landingY=landed.y;}
+                if(spec.phases){const landed=combatMoveCircle(moved,{x:0,y:0},radius,brStudentBodyWalls(view),false);result.landingX=landed.x;result.landingY=landed.y;}
                 return result;
             }
             if(spec.pullRadius){const point=brLocalAimEndpoint(x,y,aim.x,aim.y,range,radius,view);return {x:point.x,y:point.y,range};}
@@ -10467,7 +10551,7 @@
                 var aimStep=brBasicStepDistance(ability,brRunClientMods(),haste);
                 range+=spec.step-aimStep;
                 if(gesture&&!BRMP.localDash&&now>=Number(self.dashUntil||0)&&now>=Number(self.stunUntil||0)) {
-                    var stepPoint=brMoveBasicStep({x:x,y:y},{x:aimX,y:aimY},aimStep,Number(self.row[15]||38),BRMP.latestView?.walls,BRMP.latestView?.worldRadius);
+                    var stepPoint=brMoveBasicStep({x:x,y:y},{x:aimX,y:aimY},aimStep,Number(self.row[15]||38),brStudentBodyWalls(BRMP.latestView),BRMP.latestView?.worldRadius);
                     x=stepPoint.x;y=stepPoint.y;
                 }
             }
@@ -10753,7 +10837,7 @@
             const approved=brReworkMotionPoint(p,now);
             if(approved&&p.row[7]){
                 BRMP.localDash=null;p.predAccumulator=0;
-                const from={x:Number(p.row[3]),y:Number(p.row[4])},moved=combatMoveCircle(from,{x:approved.x-from.x,y:approved.y-from.y},Number(p.row[15]||38),approved.airborne?[]:view.walls||[],true);
+                const from={x:Number(p.row[3]),y:Number(p.row[4])},moved=combatMoveCircle(from,{x:approved.x-from.x,y:approved.y-from.y},Number(p.row[15]||38),approved.airborne?[]:brStudentBodyWalls(view),true);
                 const edge=Math.max(1,Number(view.worldRadius||BR_WORLD_RADIUS)-Number(p.row[15]||38)),dist=Math.hypot(moved.x,moved.y),bound=dist>edge?edge/dist:1;
                 p.predX=moved.x*bound;p.predY=moved.y*bound;p.previousX=p.predX;p.previousY=p.predY;p.x=p.predX;p.y=p.predY;p.predVx=0;p.predVy=0;return;
             }
@@ -10783,7 +10867,7 @@
                 }
                 state.x=p.predX;state.y=p.predY;state.vx=p.predVx;state.vy=p.predVy;
                 var ability=EMOJI_DB[Number(p.row[2])]||{},phases=ability.sub==='GHOST_MOVE'||(ability.sub==='FLY_DASH'&&(localDashActive||now<Number(p.dashUntil||0)));
-                var collision=brResolvePredictedCollision(state,phases?{walls:[],worldRadius:view.worldRadius}:view,Number(p.row[15]||38),{x:p.predX,y:p.predY},localDashActive);
+                var collision=brResolvePredictedCollision(state,phases?{walls:[],worldRadius:view.worldRadius,_bodyPhasing:true}:view,Number(p.row[15]||38),{x:p.predX,y:p.predY},localDashActive);
                 if(collision&&localDashActive)localDash.remaining=0;
                 p.predX=state.x;p.predY=state.y;
                 var contact=brPredictPlayerContact(p,view,now);
@@ -11013,7 +11097,7 @@
                 var ability=EMOJI_DB[Number(self.row[2])]||EMOJI_DB[0],spec=brAimSpec(ability,kind,Number(self.row[15]||38),Number(source.aimPower||1)),range=Math.max(1,Number(spec.range||0)),col=kind==='attack'?0xfb7185:0x60a5fa,x=self.x,y=self.y;
                 if(kind==='attack'&&spec.step>0){var haste=brClientActionRate(self,'attack',frameNow),aimStep=brBasicStepDistance(ability,brRunClientMods(),haste);range+=spec.step-aimStep;
                     if(gesture&&!BRMP.localDash&&frameNow>=Number(self.dashUntil||0)&&frameNow>=Number(self.stunUntil||0)){
-                        var stepPoint=brMoveBasicStep({x,y},{x:aimX,y:aimY},aimStep,Number(self.row[15]||38),view.walls,view.worldRadius);x=stepPoint.x;y=stepPoint.y;
+                        var stepPoint=brMoveBasicStep({x,y},{x:aimX,y:aimY},aimStep,Number(self.row[15]||38),brStudentBodyWalls(view),view.worldRadius);x=stepPoint.x;y=stepPoint.y;
                     }
                 }
                 var endpoint=brClarityPreviewEndpoint(spec,x,y,aim,Number(self.row[15]||38),view),endX=endpoint.x,endY=endpoint.y;
@@ -11060,6 +11144,7 @@
         function brDrawStudentFrame() {
             BRMP.renderFrame=requestAnimationFrame(brDrawStudentFrame);
             var c=brEl('br-student-canvas');if(brEl('br-student-battle').classList.contains('br-hidden'))return;
+            brSmoothAimGesture(performance.now());
             brAdvanceLocalActions();
             brResizeStudentCanvas();
             var w=c._cssW,h=c._cssH,dpr=c._dpr,cc=brPixiBattle?null:(c._brCtx||(c._brCtx=c.getContext('2d',{alpha:false,desynchronized:true})));
@@ -11441,7 +11526,7 @@
             var elapsedFrames=Math.max(0,(performance.now()-Number(selfObj&&selfObj.last||performance.now()))/16.667),playerFlags=Number(r[23]||0);
             var localHaste=performance.now()<Number(BRMP.localAttackHasteUntil||0),basicRate=selfObj?.rw?brClientActionRate(selfObj,'attack'):((playerFlags&16)||localHaste?3:1),skillRate=selfObj?.rw?brClientActionRate(selfObj,'skill'):1;
             var basicCd=brActionRemaining('attack',selfObj),skillCd=brActionRemaining('skill',selfObj),skillLeft=Number(r[13]||0);
-            var uiNow=brNow();
+            var uiNow=performance.now();
             basicCd=Math.max(basicCd,Math.max(0,Number(BRMP.localAttackLockUntil||0)-uiNow)/16.667);
             skillCd=Math.max(skillCd,Math.max(0,Number(BRMP.localSkillLockUntil||0)-uiNow)/16.667);
             var basicMax=Math.max(1,Number(r[20]||r[11]||1)/basicRate),skillMax=Math.max(1,Number(r[21]||r[12]||1)/skillRate);
@@ -11879,7 +11964,7 @@
         }
         function brActionRemaining(kind,self) {
             self=self||(BRMP.drawPlayers&&BRMP.drawPlayers.get(String(BRMP.playerId)));if(!self)return Infinity;
-            const r=self.row,now=performance.now(),elapsed=Math.max(0,(now-Number(self.rw?self.rwAt??now:self.last??now))/(1000/60));
+            const r=self.row,now=performance.now(),elapsed=brActionSnapshotElapsed(self,now);
             const status=brCombatStatusAt(self,Number(self.last??now));
             if(kind==='attack'&&now<Number(BRMP.localAttackHasteUntil||0))status.playerAttackHasteFrames=Math.max(status.playerAttackHasteFrames,(BRMP.localAttackHasteUntil-Number(self.last??now))/(1000/60));
             const remaining=brReworkCooldownWait(self,kind,elapsed)??brCooldownWait(r[kind==='attack'?11:12],kind,status,elapsed);
@@ -11888,7 +11973,7 @@
             if(rw&&(kind==='attack'?rw.attack:rw.skill))return Infinity;
             if(kind==='skill'&&rw?.recast)return 0;
             const stunned=Math.max(0,Number(self.stunUntil||0)-now)/(1000/60);
-            return Math.max(remaining,Math.max(0,Number(deadline||0)-brNow())/(1000/60),stunned);
+            return Math.max(remaining,Math.max(0,Number(deadline||0)-now)/(1000/60),stunned);
         }
         function brRequestAction(kind) {
             if(!brCanStartAim(kind))return false;
@@ -11911,13 +11996,24 @@
                 if(action.previewed||brActionRemaining(kind,self)>.5)continue;
                 action.previewed=true;
                 var a=EMOJI_DB[Number(self.row[2])]||EMOJI_DB[0],haste=brClientActionRate(self,'attack');
-                if(kind==='attack')BRMP.localAttackLockUntil=brNow()+brBasicAttackFrames(a,brRunClientMods())*(1000/60)/haste;
-                else {const frames=brSkillCooldownFrames(a,brRunClientMods(),(Number(self.row[23]||0)&64)?.7:1);BRMP.localSkillLockUntil=brNow()+brCooldownWait(frames,'skill',brCombatStatusAt(self))*(1000/60);}
+                if(kind==='attack')BRMP.localAttackLockUntil=performance.now()+brBasicAttackFrames(a,brRunClientMods())*(1000/60)/haste;
+                else {const frames=brSkillCooldownFrames(a,brRunClientMods(),(Number(self.row[23]||0)&64)?.7:1);BRMP.localSkillLockUntil=performance.now()+brCooldownWait(frames,'skill',brCombatStatusAt(self))*(1000/60);}
                 BRMP.localCastFx={kind:kind,ax:action.command.ax,ay:action.command.ay,aimPower:action.command.ap,until:performance.now()+170};
                 BRMP.feedbackCommand={kind:kind,seq:action.seq};
                 try {brImmediateCastFeedback(kind,action.command);} finally {BRMP.feedbackCommand=null;}
                 if(navigator.vibrate&&!BRMP.reducedMotion)try{navigator.vibrate(kind==='attack'?8:16);}catch(_){}
             }
+        }
+        function brSmoothAimGesture(now=performance.now()) {
+            var g=BRMP.aimGesture,input=BRMP.inputState;if(!g||!input||!Number.isFinite(g.aimTargetAngle))return;
+            var dt=brClamp(now-Number(g.aimAt??now),0,50);g.aimAt=now;
+            var delta=Math.atan2(Math.sin(g.aimTargetAngle-g.aimAngle),Math.cos(g.aimTargetAngle-g.aimAngle)),blend=1-Math.exp(-dt/65);
+            g.aimAngle+=brClamp(delta*blend,-12*dt/1000,12*dt/1000);
+            g.aimPower+=(g.targetPower-g.aimPower)*(1-Math.exp(-dt/45));
+            g.knobDistance+=(g.targetDistance-g.knobDistance)*(1-Math.exp(-dt/45));
+            input.ax=Math.cos(g.aimAngle);input.ay=Math.sin(g.aimAngle);input.aimPower=brClamp(g.aimPower,.18,1);
+            if(g.knob)g.knob.style.transform='translate('+(input.ax*g.knobDistance).toFixed(2)+'px,'+(input.ay*g.knobDistance).toFixed(2)+'px)';
+            if(g.kind==='skill'&&brReworkClientState()?.channel)brReworkSteer(false);
         }
         function brSetupControls() {
             var joy=brEl('br-joystick'),knob=brEl('br-joystick-knob'),joyPointer=null,joyRect=null;
@@ -11936,16 +12032,13 @@
             function setupAimButton(id,kind) {
                 var button=brEl(id),aimKnob=button.querySelector('.br-aim-knob');
                 function updateAim(e,gesture) {
-                    var rect=gesture.rect||(gesture.rect=button.getBoundingClientRect()),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+                    var rect=gesture.rect||(gesture.rect=button.getBoundingClientRect());
                     var dx=Number(e.clientX)-gesture.startX,dy=Number(e.clientY)-gesture.startY,mag=Math.hypot(dx,dy);
-                    if(mag>7) {BRMP.inputState.ax=dx/mag;BRMP.inputState.ay=dy/mag;gesture.moved=true;}
-                    else {dx=Number(BRMP.inputState.ax??1);dy=Number(BRMP.inputState.ay||0);mag=0;}
-                    BRMP.inputState.aimPower=mag>7?brClamp(mag/(Math.max(rect.width,rect.height)*.92),.18,1):1;
-                    var knobDistance=Math.min(Math.max(rect.width,rect.height)*.56,mag),dirMag=Math.hypot(dx,dy)||1;
-                    aimKnob.style.transform='translate('+(dx/dirMag*knobDistance)+'px,'+(dy/dirMag*knobDistance)+'px)';
-                    // 조준 미리보기는 기기 안에서 즉시 처리하고, 실제 방향은 발사 순간 한 번에 전송한다.
-                    gesture.moved=gesture.moved||mag>7;
-                    if(kind==='skill'&&brReworkClientState()?.channel)brReworkSteer(false);
+                    // A small central dead zone prevents fingertip jitter from flipping direction.
+                    if(mag>10){gesture.aimTargetAngle=Math.atan2(dy,dx);gesture.moved=true;}
+                    gesture.targetPower=gesture.moved?brClamp(mag/(Math.max(rect.width,rect.height)*.92),.18,1):1;
+                    gesture.targetDistance=Math.min(Math.max(rect.width,rect.height)*.56,mag>10?mag:0);
+                    brSmoothAimGesture(performance.now());
                 }
                 function clearAim(gesture) {
                     if(BRMP.aimGesture===gesture)BRMP.aimGesture=null;
@@ -11955,7 +12048,9 @@
                     e.preventDefault();
                     brEnsureAudio();
                     if(e.button>0||BRMP.aimGesture||!brCanStartAim(kind))return;
-                    var gesture={kind:kind,pointerId:e.pointerId,button:button,moved:false,startX:e.clientX,startY:e.clientY};BRMP.aimGesture=gesture;
+                    var angle=Math.atan2(Number(BRMP.inputState.ay||0),Number(BRMP.inputState.ax??1));
+                    var gesture={kind:kind,pointerId:e.pointerId,button:button,knob:aimKnob,moved:false,startX:e.clientX,startY:e.clientY,
+                        aimAngle:angle,aimTargetAngle:angle,aimAt:performance.now(),aimPower:1,targetPower:1,knobDistance:0,targetDistance:0};BRMP.aimGesture=gesture;
                     button.classList.add('aiming');if(button.setPointerCapture)button.setPointerCapture(e.pointerId);
                     updateAim(e,gesture);
                 });
