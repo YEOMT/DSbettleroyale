@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="br-build" content="combat-response-v16 / 2026-09-28">
+    <meta name="br-build" content="hp-melee-ring-v18 / 2026-09-28">
     <title>클래스 이모지 배틀로얄 · 팀 킬 배틀</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.20.1/dist/pixi.min.js"></script>
@@ -896,7 +896,7 @@
             return {pull:g.pull,burst:g.burst,soon:z.duration<=36,ownerId:z.owner?.remoteId||''};
         }
         function brFxCommand(owner,shape,extra={}) {
-            return Object.assign({shape,kind:owner?.activeInputCommand?.kind||'',seq:Number(owner?.activeInputCommand?.seq||0)},extra);
+            return Object.assign({shape,kind:owner?.activeInputCommand?.kind||'',seq:Number(owner?.activeInputCommand?.seq||0),matchKey:brRingKey(),lifeSeq:Number(owner?.lifeSeq||0),hostFrame:game?.frame||0},extra);
         }
         function brFxRow(e){return [e.id,e.type,e.x,e.y,e.dx,e.dy,e.size,e.color,e.amount,e.targetId||'',e.style||'',e.sourceId||'',Number(e.impactLevel||0),e.geometry||null];}
         function brCoreFx(e){return ['laser','shot','swing','dash'].includes(e.type)||String(e.style||'').startsWith('farm')||!!e.geometry?.shape;}
@@ -1132,8 +1132,11 @@
                     p.polygon([[tx-dy*reach-dx*head,ty+dx*reach-dy*head],[tx+dy*reach-dx*head,ty-dx*reach-dy*head],[tx+dy*reach+dx*head,ty-dx*reach+dy*head],[tx-dy*reach+dx*head,ty+dx*reach+dy*head]],'#fff7ed',alpha*.95);
                     p.line(tx-dy*width*.42,ty+dx*width*.42,tx+dy*width*.42,ty-dx*width*.42,'#ffffff',alpha*.9,3/z);
                 }else{
-                    p.line(x+nx*.65,y+ny*.65,ex-nx*.65,ey-ny*.65,'#ffffff',alpha*.9,4/z);
-                    p.line(x-nx*.65,y-ny*.65,ex+nx*.65,ey+ny*.65,color,alpha*.6,3/z);
+                    const progress=Math.min(1,(1-alpha)*2.5),sx=x+dx*length*progress,sy=y+dy*length*progress;
+                    p.line(sx+nx*.94,sy+ny*.94,sx-nx*.94,sy-ny*.94,'#ffffff',alpha*.9,4/z);
+                    for(const lane of [-.55,0,.55]){const bx=x+nx*lane,by=y+ny*lane;p.line(bx,by,sx+nx*lane,sy+ny*lane,color,alpha*.55,2/z);}
+                    p.line(ex-dx*16-dy*12,ey-dy*16+dx*12,ex,ey,color,alpha*.8,2/z);
+                    p.line(ex-dx*16+dy*12,ey-dy*16-dx*12,ex,ey,color,alpha*.8,2/z);
                 }
                 return true;
             }
@@ -2830,6 +2833,7 @@
                 
                 if(rwDef?.stats){const st=rwDef.stats;if(Number.isFinite(st.maxHp))this.maxHp=st.maxHp;if(Number.isFinite(st.speed))this.speed=st.speed;this.maxHp*=Number(st.hpMultiplier??1);this.speed*=Number(st.speedMultiplier??1);this.damageMult*=Number(st.damageMultiplier??1);if(st.knockbackResist!=null)this.knockbackResist=st.knockbackResist;}
                 // Run HP augments multiply this already adjusted base exactly once.
+                if(Object.prototype.hasOwnProperty.call(BR_BASE_HP_OVERRIDES_BY_ID,ability.id))this.maxHp=BR_BASE_HP_OVERRIDES_BY_ID[ability.id];
                 this.modeHpMultiplier=window.BRMP?.isRespawnMode()?BR_TEAM_KILL_RULES.hpMultiplier:1;
                 this.maxHp*=this.modeHpMultiplier;this.hp=this.maxHp;
                 this.spawnProtectionUntilFrame=0;
@@ -3740,7 +3744,7 @@
         let hostLastDrawAt = 0;
         let hostRenderMode = '';
 
-        // Danger ring v1. The host owns the plan and damage; all renderers sample this same plan.
+        // Danger ring v2. The host owns the plan and damage; all renderers sample this same plan.
         // Clock units are monotonic match milliseconds, never a client's wall clock or render FPS.
         const BR_RING_RULES=Object.freeze({stepMs:1000/60,startTick:1200,noticeTicks:90,compressTicks:48,repeatTicks:600,
             entryGraceMs:300,maxExtrapolateMs:1200,staleMs:900,channelMs:100,shrinkSpeed:.70,soloMultiplier:1.4});
@@ -3860,31 +3864,41 @@
             p.takeDamage(brRingDamage(r.radius,depth,Math.max(18,p.outsideZoneFrames)),null);
             const dealt=Math.max(0,Math.min(Math.max(0,before),before-p.hp));
             if(dealt>0){p.ringDamageTotal=Number(p.ringDamageTotal||0)+dealt;
-                p.ringLastHit={time:r.time,x:p.pos.x,y:p.pos.y,radius:r.radius,cx:r.cx,cy:r.cy,amount:dealt};}
+                p.ringLastHit={time:r.time,x:p.pos.x,y:p.pos.y,radius:r.radius,cx:r.cx,cy:r.cy,amount:dealt};
+                brCombatTrace('ring-hit',{frame:g.frame,matchKey:g.ring?.key,life:p.lifeSeq,id:p.remoteId,...p.ringLastHit});}
         }
         function brRingSelfSnapshot(g,p) {
             const r=g.ringGeometry||brRingHostRender(g),outside=!!p.alive&&brRingOutside(p.pos.x,p.pos.y,r);
-            return {frame:g.frame,time:r.time,outside,total:Number(p.ringDamageTotal||0),
+            return {frame:g.frame,time:r.time,outside,total:Number(p.ringDamageTotal||0),position:[p.pos.x,p.pos.y,r.radius,r.cx,r.cy,Number(p.lifeSeq||0)],
                 graceMs:outside&&p.ringEnteredAt!=null?Math.max(0,BR_RING_RULES.entryGraceMs-(r.time-p.ringEnteredAt)):0,
                 hit:p.ringLastHit||null};
         }
         function brRingMakePacket(g,now=performance.now()) {
             brRingPause(g,!!(g.paused||g.ringSuspended||g.isGameOver),now);
             const s=g.ring,time=brRingHostTime(g,now);
-            return {v:1,matchKey:s.key,seq:++s.sequence,revision:s.revision,hostAt:now,time,frame:g.frame,
+            return {v:2,matchKey:s.key,seq:++s.sequence,revision:s.revision,hostAt:now,time,frame:g.frame,
                 running:s.running,clockEpoch:s.clockEpoch,worldRadius:g.worldRadius,
                 plan:brRingAdvance(brRingCopy(s.plan),Math.floor(time/BR_RING_RULES.stepMs+1e-8))};
         }
         function brRingValidPacket(s) {
-            if(!s||s.v!==1||typeof s.matchKey!=='string'||typeof s.running!=='boolean'||!s.plan)return false;
-            const p=s.plan,nums=[s.seq,s.revision,s.hostAt,s.time,s.clockEpoch,s.worldRadius,p.tick,p.radius,p.minRadius,p.cx,p.cy];
-            if(!nums.every(Number.isFinite)||!Number.isSafeInteger(s.seq)||!Number.isSafeInteger(s.revision)||!Number.isSafeInteger(s.clockEpoch)||s.seq<1||s.hostAt<0||s.time>21600000||s.time<0||p.tick<0||!Number.isInteger(p.tick)||s.worldRadius<=0||s.worldRadius>100000||p.radius<0||p.radius>s.worldRadius+1||p.minRadius<0||p.minRadius>p.radius+1)return false;
+            if(!s||s.v!==2||typeof s.matchKey!=='string'||typeof s.running!=='boolean'||!s.plan)return false;
+            const p=s.plan,nums=[s.seq,s.revision,s.hostAt,s.time,s.clockEpoch,s.frame,s.worldRadius,p.tick,p.radius,p.minRadius,p.cx,p.cy];
+            if(!nums.every(Number.isFinite)||!Number.isSafeInteger(s.frame)||s.frame<0||!Number.isSafeInteger(s.seq)||!Number.isSafeInteger(s.revision)||!Number.isSafeInteger(s.clockEpoch)||s.seq<1||s.hostAt<0||s.time>21600000||s.time<0||p.tick<0||!Number.isInteger(p.tick)||s.worldRadius<=0||s.worldRadius>100000||p.radius<0||p.radius>s.worldRadius+1||p.minRadius<0||p.minRadius>p.radius+1)return false;
             if(Math.abs(p.tick-Math.floor(s.time/BR_RING_RULES.stepMs+1e-8))>1||typeof p.pressure!=='boolean')return false;
-            if(p.mode!=null&&(!['solo','team','team-respawn'].includes(p.mode)||Math.abs(p.shrinkRate-(p.mode==='solo'?.98:.70))>1e-9||!Number.isFinite(p.shrinkRate)))return false;
+            if((!['solo','team','team-respawn'].includes(p.mode)||Math.abs(p.shrinkRate-(p.mode==='solo'?.98:.70))>1e-9||!Number.isFinite(p.shrinkRate)))return false;
             if(p.nextPressure&&(!Number.isInteger(p.nextPressure.tick)||p.nextPressure.tick<p.tick||p.nextPressure.tick>p.tick+600||typeof p.nextPressure.value!=='boolean'))return false;
             if(p.compression){const c=p.compression;if(![c.start,c.end,c.amount,c.floor].every(Number.isFinite)||!Number.isSafeInteger(c.start)||!Number.isSafeInteger(c.end)||c.end<=c.start||c.end<p.tick||c.start>p.tick+600||c.end-c.start>600||c.amount<0||c.amount>1000||c.floor<0)return false;}
             return true;
         }
+        function brRingPaintBoundary(p,r,zoom=1){
+            if(r.stale||r.calibrated===false)p.dashedCircle(r.cx,r.cy,r.radius,'#fbbf24',.60,2/zoom);
+            else p.circle(r.cx,r.cy,r.radius,'#ff607d',.88,2/zoom);
+        }
+        function brRingPaintSelf(p,self,r,zoom=1){
+            if(!r||!self?.row?.[7]||Math.abs(Math.hypot(self.x-r.cx,self.y-r.cy)-r.radius)>100)return;
+            p.circle(self.x,self.y,2.5/zoom,brRingOutside(self.x,self.y,r)?'#fb7185':'#f8fafc',.9);
+        }
+        function brCombatTrace(event,data){if(!window.BR_COMBAT_DEBUG)return;const q=window.BR_COMBAT_TRACE||(window.BR_COMBAT_TRACE=[]);q.push({event,...data});if(q.length>256)q.shift();}
         function brRingPaintPreview(painter,r,zoom=1) {
             if(!Number.isFinite(r.previewRadius)||r.previewRadius<0||r.previewRadius>=r.radius-.01)return;
             const radius=Math.max(0,r.previewRadius),width=2/Math.max(.01,zoom),count=Math.min(96,Math.max(16,Math.ceil(radius*zoom/9)));
@@ -4861,7 +4875,7 @@
                     const particleCap = this.getParticleBudget();
                     if(this.particles.length > particleCap) this.particles.splice(0, this.particles.length - particleCap);
                     const swingCap = this.aliveRealPlayers.length>=30 ? 26 : this.aliveRealPlayers.length>=22 ? 32 : this.isPerformanceMode() ? 38 : 80;
-                    if(this.swings.length > swingCap) this.swings.splice(0, this.swings.length - swingCap);
+                    // Essential swings retain their short lifetime even at24/30players.
                     if(this.texts.length > 40) this.texts.splice(0, this.texts.length - 40);
                     if(this.rings.length > 45) this.rings.splice(0, this.rings.length - 45);
                     if(this.signatureEffects.length>20) this.signatureEffects.splice(0,this.signatureEffects.length-20);
@@ -5368,11 +5382,11 @@
             addSwingEffect(owner, pos, dir, size, style='slash',halfAngle=Math.PI*.48,geometry=null) {
                 // 베기 궤적은 저비용 객체라 호스트에도 제한된 개수만 유지해 근접 교전을 읽을 수 있게 한다.
                 const swing=new SwingEffect(owner,pos,dir,size,style,halfAngle);
-                swing.geometry=geometry||brFxCommand(owner,'sector',{halfAngle});this.swings.push(swing);
+                swing.life=swing.maxLife=/punch|hammer/.test(style)?16:12;swing.geometry=geometry||brFxCommand(owner,'sector',{halfAngle});swing.geometry.displayMs=swing.maxLife*1000/60;this.swings.push(swing);
                 const color=({S:'#fb4b63',A:'#fbbf24',B:'#60a5fa',C:'#4ade80',F:'#cbd5e1'})[owner?.ability?.t]||'#fff';
                 this.emitStudentFx('swing',pos,{dx:dir.x,dy:dir.y,size,color,style,amount:halfAngle,sourceId:owner?.remoteId||('player-'+owner?.id),targetId:owner?.remoteId||('player-'+owner?.id),geometry:swing.geometry});
                 const cap = this.isVisualPerformanceMode() ? 36 : 80;
-                if(this.swings.length > cap) this.swings.splice(0, this.swings.length-cap);
+                // Active cast geometry is essential; natural expiry limits this short list.
             }
             addText(pos, t, c, life=36, size=26) { if(!this.isVisualPerformanceMode()) this.texts.push({pos:new Vec2(pos.x,pos.y), text:t, color:c, life, maxLife:life, size, rise:1.15}); }
         }
@@ -5693,6 +5707,24 @@
             return skill.shape==='target'||skill.shape==='dash'||(skill.shape==='rect'&&!!caps.dash)||
                 (['line','cone'].includes(skill.shape)&&(!!caps.projectile||skill.kind==='pin-traps'||['hook','channel','channel-beam','continuous-laser'].includes(skill.kind)));
         }
+        const BR_BASE_HP_OVERRIDES_BY_ID=Object.freeze({
+            'emoji-041':250,'emoji-039':290,'emoji-045':290,'emoji-047':290,'emoji-073':270,'emoji-075':270,
+            'emoji-077':270,'emoji-126':255,'emoji-096':245,'emoji-052':240,'emoji-050':300,'emoji-010':500,
+            'emoji-000':540,'emoji-014':460,'emoji-012':450,'emoji-025':480,'emoji-133':450,'emoji-110':560
+        });
+        const BR_TRAIN_DISTANCE=Object.freeze({min:80,tap:220,max:1480,deadZone:10});
+        function brTrainDistance(power=1,rangeScale=1,request){
+            const max=BR_TRAIN_DISTANCE.max*Math.max(0,Number(rangeScale)||1);
+            return Number.isFinite(request)?Math.max(80,Math.min(max,request)):80+(max-80)*Math.max(0,Math.min(1,(Number(power)-.18)/.82));
+        }
+        function brTrainPower(distance,scale=1){return .18+.82*Math.max(0,Math.min(1,(distance-80)/(1480*scale-80)));}
+        function brClipTrainTravel(from,dir,range,radius,worldRadius,center,walls){
+            const cx=Number(center?.x||0),cy=Number(center?.y||0),x=from.x-cx,y=from.y-cy;
+            const edge=Math.max(1,worldRadius-radius-4),dot=x*dir.x+y*dir.y,disc=dot*dot+edge*edge-x*x-y*y;
+            const boundary=disc>=0?Math.max(0,-dot+Math.sqrt(disc)):0,distance=Math.max(0,Math.min(range,boundary));
+            const moved=combatMoveCircle(from,{x:dir.x*distance,y:dir.y*distance},radius,walls||[],true);
+            return {x:moved.x,y:moved.y,range:Math.max(0,Math.min(distance,Math.hypot(moved.x-from.x,moved.y-from.y))),reason:moved.hit?'wall':boundary<range?'boundary':null};
+        }
         const BR_MELEE_SKILL_TUNING=Object.freeze({
             'emoji-025':Object.freeze({damage:1.05,push:1.15}),
             'emoji-026':Object.freeze({damage:1.05,push:1}),
@@ -5714,7 +5746,7 @@
             const frame=g=>Math.max(0,Number(g?.frame||0));
             function world(g) { if(!g.rw)g.rw={entities:[],seq:0,castSeq:0,lastFrame:-1,events:[],turretGrid:new Map(),turretFrame:-1,matchKey:String(g?.runMatchKey||window.BRMP?.roomMeta?.seed||'match')+':'+String(window.BRMP?.roomMeta?.matchRound||0)};return g.rw; }
             function state(p){if(!p.rw||p.rw.life!==life(p))p.rw={life:life(p),shields:[],buffs:[],dots:[],marks:[],basicSeq:0,lastBasic:null};return p.rw;}
-            function context(p,g,aim,power=1){const rw=world(g),run=typeof brRunSkillSnapshot==='function'?brRunSkillSnapshot(p):{};return {owner:p,g,aim:norm(aim||p.lastAimDir),power:finite(power,1),run:{damage:run.damage??1,size:run.size??1,control:run.control??1,restore:run.restore??1,duration:run.duration??1,cooldown:run.cooldown??1,count:typeof brRunMod==='function'?brRunMod(p,'skillCount',0):0,range:typeof brRunMod==='function'?brRunMod(p,'signatureRange',1):1},damageMult:finite(p.damageMult,1),actionKind:p.activeInputCommand?.kind||'skill',actionSeq:Number(p.activeInputCommand?.seq||0),displayEmoji:p.ability.e,shotSeq:0,aimRangeFactor:brSkillUsesAimDistance(defs[aid(p)]?.skill)?brSkillReachFraction(power):1,castId:rw.matchKey+':'+pid(p)+':'+life(p)+':'+(++rw.castSeq),ownerId:pid(p),ownerLifeSeq:life(p),abilityId:aid(p),matchKey:rw.matchKey,startedFrame:frame(g),controlHits:new Set(),knockbackHits:new Set(),warpSeq:Number(p.warpSeq||0)};}
+            function context(p,g,aim,power=1){const rw=world(g),run=typeof brRunSkillSnapshot==='function'?brRunSkillSnapshot(p):{};return {owner:p,g,aim:norm(aim||p.lastAimDir),power:finite(power,1),run:{damage:run.damage??1,size:run.size??1,control:run.control??1,restore:run.restore??1,duration:run.duration??1,cooldown:run.cooldown??1,count:typeof brRunMod==='function'?brRunMod(p,'skillCount',0):0,range:typeof brRunMod==='function'?brRunMod(p,'signatureRange',1):1},damageMult:finite(p.damageMult,1),actionKind:p.activeInputCommand?.kind||'skill',actionSeq:Number(p.activeInputCommand?.seq||0),displayEmoji:p.ability.e,shotSeq:0,aimRangeFactor:aid(p)==='emoji-019'?brTrainDistance(power,run.range??(typeof brRunMod==='function'?brRunMod(p,'signatureRange',1):1),p.activeInputCommand?.distance)/(1480*(typeof brRunMod==='function'?brRunMod(p,'signatureRange',1):1)):brSkillUsesAimDistance(defs[aid(p)]?.skill)?brSkillReachFraction(power):1,castId:rw.matchKey+':'+pid(p)+':'+life(p)+':'+(++rw.castSeq),ownerId:pid(p),ownerLifeSeq:life(p),abilityId:aid(p),matchKey:rw.matchKey,startedFrame:frame(g),controlHits:new Set(),knockbackHits:new Set(),warpSeq:Number(p.warpSeq||0)};}
             function validContext(c,deathAllowed=false){return !!c?.g&&world(c.g).matchKey===c.matchKey&&life(c.owner)===c.ownerLifeSeq&&aid(c.owner)===c.abilityId&&(c.owner.alive||c.allowPosthumous||deathAllowed);}
             function hostile(c,p){return !!p&&p.id!==999&&p!==c.owner&&p.alive!==false&&p.hp!==0&&!(c.owner.team&&p.team===c.owner.team)&&(!p.isReworkTurret?brCanHostileTarget(p,c.owner):p.owner!==c.owner);}
             function visible(c,p,origin=c.owner.pos){if(p.invisible&&p!==c.owner)return false;const observer={pos:origin,team:c.owner.team,id:c.owner.id};return !(c.g.isConcealedFrom?.(p,observer))&&!c.g.checkWallBetween(origin,p.pos);}
@@ -5731,8 +5763,8 @@
             function count(c,base,max=24){return Math.min(max,base+Math.max(0,Math.min(3,Math.floor(c.run.count||0))));}
             function cooldown(c,n){return Math.max(1,Math.round(n*(c.run.cooldown??1)*(c.owner.cooldownRateMult||1)));}
             function finishCooldown(c,n){const p=c.owner;p.cooldown=cooldown(c,n);p.skillCooldownMax=p.cooldown;p.maxCooldown=p.cooldown;}
-            function cast(p,g,aim,power=1){const id=aid(p),fn=handlers[id];if(!fn)return false;const s=state(p);if(!p.alive||p.stunned>0||s.force)return true;if(s.channel){steer(p,g,aim,s.channel.ctx.castId);return true;}if(s.recast){recast(p,g,aim,s.recast.ctx.castId);return true;}if(p.cooldown>0)return true;p.abilityUses=(p.abilityUses||0)+1;p.spawnProtectionUntilFrame=0;const c=context(p,g,aim,power),def=defs[id],cd=def.skill?.cooldownFrames??def.skill?.cooldown??600;p.lastAimDir=copy(c.aim);p._rwCast=c;s.lastCast=c;fn(c);if(!s.recast)finishCooldown(c,cd);p._runLastSkill=c.run;p._rwCast=null;return true;}
-            function end(e,reason='expired'){if(!e||e.dead)return;e.dead=true;e.reason=reason;const c=e.ctx,p=c?.owner,s=p?.rw;if(s){if(s.dash===e)s.dash=null;if(s.channel===e)s.channel=null;}if(e.kind==='capture'&&e.target?.rw?.force===e)e.target.rw.force=null;if(e.kind==='turret')world(c.g).turretFrame=-1;if(e.onEnd)e.onEnd(c,e,reason);if(c?.g&&(['projectile','hook'].includes(e.kind)||reason==='destroyed'))event(c,e,'end');}
+            function cast(p,g,aim,power=1){const id=aid(p),fn=handlers[id];if(!fn)return false;const s=state(p);if(!p.alive||p.stunned>0||s.force)return false;if(s.channel)return steer(p,g,aim,s.channel.ctx.castId);if(s.recast)return recast(p,g,aim,s.recast.ctx.castId,power);if(p.cooldown>0||inputLocks(p,g).skill)return false;p.abilityUses=(p.abilityUses||0)+1;p.spawnProtectionUntilFrame=0;const c=context(p,g,aim,power),def=defs[id],cd=def.skill?.cooldownFrames??def.skill?.cooldown??600;p.lastAimDir=copy(c.aim);p._rwCast=c;s.lastCast=c;fn(c);if(!s.recast)finishCooldown(c,cd);p._runLastSkill=c.run;p._rwCast=null;return true;}
+            function end(e,reason='expired'){if(!e||e.dead)return;e.dead=true;e.reason=reason;const c=e.ctx,p=c?.owner,s=p?.rw;if(s){if(s.dash===e){s.dash=null;if(c?.abilityId==='emoji-019')p.vel=v();}if(s.channel===e)s.channel=null;}if(e.kind==='capture'&&e.target?.rw?.force===e)e.target.rw.force=null;if(e.kind==='turret')world(c.g).turretFrame=-1;if(e.onEnd)e.onEnd(c,e,reason);if(c?.g&&(['projectile','hook'].includes(e.kind)||reason==='destroyed'))event(c,e,'end');}
             function entity(c,kind,opts={},tickFn=null){const rw=world(c.g);if(Number.isFinite(opts.maxPerOwner)){const active=rw.entities.filter(e=>!e.dead&&e.kind===kind&&e.ctx.ownerId===c.ownerId);while(active.length>=opts.maxPerOwner&&active.length)end(active.shift(),'replaced');}const dur=finite(opts.duration,60),e={...opts,ctx:c,kind,id:c.castId+':'+(++rw.seq),pos:copy(opts.pos||c.owner.pos),dir:norm(opts.dir||c.aim),start:frame(c.g),end:frame(c.g)+Math.max(1,Math.round(dur)),duration:Math.max(1,Math.round(dur)),age:0,dead:false,cancelOnStun:opts.cancelOnStun!==false,ownerBound:opts.ownerBound!==false,tick:tickFn};e.origin=copy(e.pos);if(['projectile','lob','bomb'].includes(kind)){e.actionKind=opts.actionKind||c.actionKind;e.actionSeq=c.actionSeq;e.ordinal=c.shotSeq++;e.displayEmoji=e.actionKind==='summon'?'':c.displayEmoji;}rw.entities.push(e);if(kind==='turret')rw.turretFrame=-1;return e;}
             function event(c,e,kind='start'){
                 // Live geometry and short transit records already carry every attack.
@@ -5744,7 +5776,7 @@
                 }else if(e.kind==='turret'&&c.g.emitStudentFx)c.g.emitStudentFx('impact',e.pos,{size:Math.max(18,(e.radius||30)*2),color:e.color||'#a5b4fc',sourceId:c.ownerId,style:'rw:turret-destroyed'});
             }
             function schedule(c,delay,fn,opts={}){if(delay<=0){if(validContext(c)&&(!opts.cancelOnStun||c.owner.stunned<=0))fn(c,null);return null;}return entity(c,'scheduled',{duration:Math.max(1,Math.round(delay))+1,cancelOnStun:opts.cancelOnStun!==false,hidden:true},(ctx,e)=>{if(e.age>=Math.max(0,Math.round(delay))){fn(ctx,e);end(e,'fired');}});}
-            function marker(c,o={}){return entity(c,'warning',{...o,pos:o.pos||c.owner.pos,duration:o.duration??15,radius:sized(c,o.radius??0),range:ranged(c,o.range??0)*(c.aimRangeFactor??1),width:sized(c,o.width??0),cancelOnStun:o.cancelOnStun!==false},(o.followOwner||!o.pos)?(ctx,e)=>{e.pos=copy(ctx.owner.pos);}:null);}
+            function marker(c,o={}){if(c.abilityId==='emoji-121'&&o.range){const from=o.pos||c.owner.pos,to=from.add(c.aim.mult(ranged(c,o.range))),wall=combatTraceWalls(from,to,sized(c,o.width??0)/2,c.g.walls,[]);o={...o,range:o.range*(wall?.t??1)};}if(c.abilityId==='emoji-019'&&o.range){const clip=brClipTrainTravel(o.pos||c.owner.pos,c.aim,ranged(c,o.range)*(c.aimRangeFactor??1),c.owner.radius,c.g.worldRadius,c.g.center,brHostBodyWalls(c.g));o={...o,range:clip.range/Math.max(.00001,(c.run.range??1)*(c.aimRangeFactor??1))};}return entity(c,'warning',{...o,pos:o.pos||c.owner.pos,duration:o.duration??15,radius:sized(c,o.radius??0),range:ranged(c,o.range??0)*(c.aimRangeFactor??1),width:sized(c,o.width??0),cancelOnStun:o.cancelOnStun!==false},(o.followOwner||!o.pos)?(ctx,e)=>{e.pos=copy(ctx.owner.pos);}:null);}
             function damageReduction(p){const now=frame(p.rw?.lastGame),s=state(p);let n=0;for(const b of s.buffs)if(b.end>now&&b.kind==='damageReduction')n=Math.max(n,b.value);return clamp(n,0,.65);}
             function shield(c,p,amount,frames){if(!p?.alive)return 0;const s=state(p),now=frame(c.g),key=c.ownerId+':'+c.ownerLifeSeq+':'+c.abilityId,capacity=Math.max(0,amount*(c.run.restore??1)),endAt=now+duration(c,frames);s.lastGame=c.g;const old=s.shields.find(x=>x.key===key);if(old){old.amount=capacity;old.end=endAt;old.ctx=c;}else s.shields.push({key,amount:capacity,end:endAt,ctx:c});s.shields.sort((a,b)=>a.end-b.end||a.key.localeCompare(b.key));let total=s.shields.reduce((n,a)=>n+a.amount,0),excess=Math.max(0,total-p.maxHp*.60);for(const a of s.shields){const take=Math.min(excess,a.amount);a.amount-=take;excess-=take;if(excess<=0)break;}s.shields=s.shields.filter(a=>a.amount>0);return s.shields.reduce((n,a)=>n+a.amount,0);}
             function absorb(p,amount){const s=state(p),now=frame(s.lastGame);let left=amount;for(const a of s.shields){if(a.end<=now)continue;const take=Math.min(left,a.amount);left-=take;a.amount-=take;if(left<=0)break;}s.shields=s.shields.filter(a=>a.amount>0&&a.end>now);return amount-left;}
@@ -5765,7 +5797,7 @@
                 if(tune&&!opts.periodic&&!opts.reflected&&!opts.scaled&&!opts.secondary){damage*=tune.damage;if(opts.knockback>0)opts={...opts,knockback:opts.knockback*tune.push};}
                 if(!validContext(c)||!hostile(c,p))return {valid:false,hpDamage:0,absorbed:0,killed:false};let result;if(p.isReworkTurret){const final=opts.scaled?damage:damage*c.damageMult*(c.run.damage??1),actual=Math.min(p.hp,Math.max(0,final));p.hp-=actual;result={valid:true,hpDamage:0,turretDamage:actual,absorbed:0,killed:false};if(p.hp<=0)end(p,'destroyed');}else{const amount=Math.max(0,opts.scaled?damage:damage*c.damageMult*(c.run.damage??1));if(R.damageResolver)result=R.damageResolver(c,p,amount,{...opts,ctx:c,scaled:true,rw:true});else{const hp=p.hp;const n=amount>0?p.takeDamage(amount,c.owner,!!opts.reflected,opts.direction||c.aim,{...opts,scaled:true,rw:true,ctx:c}):0;result={valid:true,hpDamage:Number(n)||Math.max(0,hp-p.hp),absorbed:0,killed:!p.alive};}if(typeof result==='number')result={valid:true,hpDamage:result,absorbed:0,killed:!p.alive};if(!result)result={valid:false,hpDamage:0,absorbed:0,killed:false};}
                 if(result.valid&&!p.isReworkTurret){if(opts.stun>0)applyStun(c,p,opts.stun,opts.stunCap);if(opts.knockback>0){const key=targetKey(p);if(!opts.onceKnockback||!c.knockbackHits.has(key)){c.knockbackHits.add(key);impulse(c,p,opts.direction||p.pos.sub(c.owner.pos),opts.knockback,opts);}}if(opts.slow!=null)buff(c,p,'slow',opts.slow,opts.slowFrames??30);}
-                if(result.valid&&opts.onHit)opts.onHit(c,p,result,opts.entity);return result;}
+                brCombatTrace('skill-hit',{frame:frame(c.g),castId:c.castId,life:c.ownerLifeSeq,id:c.abilityId,target:pid(p),...result});if(result.valid&&opts.onHit)opts.onHit(c,p,result,opts.entity);return result;}
             // Retained, life-scoped presentation for an instantaneous skill resolution.
             // These records do not own damage, collision, cooldown or simulation timers.
             function confirmedSkillFx(c,pos,type,size,geometry={},color) {
@@ -5786,7 +5818,7 @@
                         lifeSeq:c.ownerLifeSeq,hostFrame:frame(c.g),displayMs:760}});
             }
             function sweepTime(from,to,pos,r){return combatSegmentCircleTime(from.x-pos.x,from.y-pos.y,to.x-from.x,to.y-from.y,r);}
-            function front(c,o){const range=ranged(c,o.range??150),width=sized(c,o.width??80),from=copy(o.pos||c.owner.pos),dir=norm(o.dir||c.aim),to=from.add(dir.mult(range)),wall=combatTraceWalls(from,to,width/2,c.g.walls,[]),endAt=wall?.t??1,candidates=[];for(const p of targets(c,from,range+width)){const rel=p.pos.sub(from),along=rel.x*dir.x+rel.y*dir.y,lateral=Math.abs(rel.x*dir.y-rel.y*dir.x);if(along<0||along>range*endAt+p.radius||lateral>width/2+p.radius||c.g.checkWallBetween(from,p.pos))continue;candidates.push({p,t:Math.max(0,along-p.radius)});}candidates.sort((a,b)=>a.t-b.t||pid(a.p).localeCompare(pid(b.p)));const out=[];for(const {p} of candidates.slice(0,o.maxTargets??Infinity)){const r=hit(c,p,o.damage??0,{...o,direction:dir});if(r.valid)out.push({target:p,...r});}if((o.damage??0)>0&&window.brFarm)window.brFarm.line(c.g,c.owner,from,to,width/2,Math.max(.15,o.damage/60),c.castId+':front','beam');if((o.damage??0)>0&&!o.periodic&&o.visual!==false){const target=out[0]?.target;confirmedSkillFx(c,from,'swing',range*endAt,{shape:'front-impact',width,part:c.abilityId==='emoji-042'?'hammer':'sweep',targetX:target?.pos.x,targetY:target?.pos.y},o.color);}return out;}
+            function front(c,o){const range=ranged(c,o.range??150),width=sized(c,o.width??80),from=copy(o.pos||c.owner.pos),dir=norm(o.dir||c.aim),to=from.add(dir.mult(range)),wall=combatTraceWalls(from,to,width/2,c.g.walls,[]),endAt=wall?.t??1,candidates=[];for(const p of targets(c,from,range+width)){const rel=p.pos.sub(from),along=rel.x*dir.x+rel.y*dir.y,lateral=Math.abs(rel.x*dir.y-rel.y*dir.x);if(along<0||Math.hypot(Math.max(0,along-range*endAt),Math.max(0,lateral-width/2))>p.radius||c.g.checkWallBetween(from,p.pos))continue;candidates.push({p,t:Math.max(0,along-p.radius)});}candidates.sort((a,b)=>a.t-b.t||pid(a.p).localeCompare(pid(b.p)));const out=[];for(const {p} of candidates.slice(0,o.maxTargets??Infinity)){const r=hit(c,p,o.damage??0,{...o,direction:dir});if(r.valid)out.push({target:p,...r});}if((o.damage??0)>0&&window.brFarm)window.brFarm.line(c.g,c.owner,from,from.add(dir.mult(range*endAt)),width/2,Math.max(.15,o.damage/60),c.castId+':front','beam');if((o.damage??0)>0&&!o.periodic&&o.visual!==false){const target=out[0]?.target;confirmedSkillFx(c,from,'swing',range*endAt,{shape:'front-impact',width,part:c.abilityId==='emoji-042'?'hammer':'sweep',targetX:target?.pos.x,targetY:target?.pos.y},o.color);}return out;}
             function bounded(g,pos,r=0){const center=g.center||v(),edge=Math.max(10,(g.worldRadius||BR_WORLD_RADIUS)-r-4),d=pos.sub(center),n=d.mag();return n>edge?center.add(d.mult(edge/n)):pos;}
             function safe(g,pos,r,owner=null){const m=combatMoveCircle(pos,v(),r,brHostBodyWalls(g),false),base=bounded(g,v(m.x,m.y),r);for(let i=0;i<4;i++){let moved=false;for(const q of nearby(g,base,r+100)){if(q===owner||!q.alive)continue;const d=base.sub(q.pos),len=d.mag(),need=r+q.radius+5;if(len<need){const n=len>.01?d.mult(1/len):v(Math.cos(i*2.3),Math.sin(i*2.3));base.x=q.pos.x+n.x*need;base.y=q.pos.y+n.y*need;moved=true;}}if(!moved)break;const z=combatMoveCircle(base,v(),r,brHostBodyWalls(g),false);base.x=z.x;base.y=z.y;}return bounded(g,base,r);}
             function targetPoint(c,range){return safe(c.g,bounded(c.g,c.owner.pos.add(c.aim.mult(ranged(c,range)*(c.aimRangeFactor??1))),c.owner.radius||0),c.owner.radius||0,c.owner);}
@@ -5866,8 +5898,8 @@
                 });e.nextHits=new Map();e.blades=[];e.tickEvery=Math.max(1,o.tickEvery??24);return e;
             }
             function moveExternal(g,p,delta,stop=true){const moved=combatMoveCircle(p.pos,delta,p.radius,brHostBodyWalls(g),stop),to=bounded(g,v(moved.x,moved.y),p.radius);p.pos.x=to.x;p.pos.y=to.y;p.vel=v();state(p).movedFrame=frame(g);world(g).spatialDirty=true;return moved;}
-            function dash(c,o){const s=state(c.owner);if(s.dash)end(s.dash,'replaced');const range=ranged(c,o.range??350)*(c.aimRangeFactor??1),speed=Math.max(.1,o.speed??15),e=entity(c,'dash',{...o,pos:c.owner.pos,dir:o.dir||c.aim,range,width:sized(c,o.width??c.owner.radius*2),duration:Math.ceil(range/speed)+2,speed,cancelOnStun:true},stepDash);e.distance=0;e.hits=new Set();s.dash=e;return e;}
-            function stepDash(c,e){const p=c.owner,from=copy(p.pos),step=Math.min(e.speed,e.range-e.distance),to=from.add(e.dir.mult(step)),wall=combatTraceWalls(from,to,p.radius,brHostBodyWalls(c.g),[]),limit=wall?.t??1,contacts=[];for(const q of targets(c,from,step+e.width+100)){const t=sweepTime(from,to,q.pos,(e.width/2)+(q.radius||0));if(t!=null&&t<=limit&&!e.hits.has(targetKey(q)))contacts.push({q,t});}contacts.sort((a,b)=>a.t-b.t);let stop=limit,reason=wall?'wall':null;for(const h of contacts){e.pos=from.add(to.sub(from).mult(h.t));const r=hit(c,h.q,e.damage??0,{...e,direction:e.dir,onHit:null,entity:e});if(!r.valid)continue;e.hits.add(targetKey(h.q));if(e.onHit)e.onHit(c,h.q,r,e);if(e.stopOnEnemy){stop=h.t;reason='hit';break;}}moveExternal(c.g,p,to.sub(from).mult(stop),true);state(p).motionFrame=frame(c.g);e.pos=copy(p.pos);e.distance+=dist(from,p.pos);if(e.push>0)for(const q of enemies(c,p.pos,e.width+80))if(e.hits.has(targetKey(q)))impulse(c,q,e.dir,e.push);if(reason||e.distance>=e.range-.1)end(e,reason||'expired');}
+            function dash(c,o){const s=state(c.owner);if(s.dash)end(s.dash,'replaced');const requestedRange=ranged(c,o.range??350)*(c.aimRangeFactor??1),clip=c.abilityId==='emoji-019'?brClipTrainTravel(c.owner.pos,o.dir||c.aim,requestedRange,c.owner.radius,c.g.worldRadius,c.g.center,brHostBodyWalls(c.g)):null,range=clip?clip.range:requestedRange,speed=Math.max(.1,o.speed??15),e=entity(c,'dash',{...o,pos:c.owner.pos,dir:o.dir||c.aim,range,width:sized(c,o.width??c.owner.radius*2),duration:Math.ceil(range/speed)+2,speed,cancelOnStun:true},stepDash);e.distance=0;e.requestedRange=requestedRange;e.clipReason=clip?.reason;e.hits=new Set();s.dash=e;return e;}
+            function stepDash(c,e){const p=c.owner,from=copy(p.pos),requestedStep=Math.min(e.speed,Math.max(0,e.range-e.distance)),segment=c.abilityId==='emoji-019'?brClipTrainTravel(from,e.dir,requestedStep,p.radius,c.g.worldRadius,c.g.center,brHostBodyWalls(c.g)):null,step=segment?segment.range:requestedStep,to=from.add(e.dir.mult(step)),wall=combatTraceWalls(from,to,p.radius,brHostBodyWalls(c.g),[]),limit=wall?.t??1,contacts=[];for(const q of targets(c,from,step+e.width+100)){const t=sweepTime(from,to,q.pos,(e.width/2)+(q.radius||0));if(t!=null&&t<=limit&&!e.hits.has(targetKey(q)))contacts.push({q,t});}contacts.sort((a,b)=>a.t-b.t);let stop=limit,reason=segment?.reason||(wall?'wall':null);for(const h of contacts){e.pos=from.add(to.sub(from).mult(h.t));const r=hit(c,h.q,e.damage??0,{...e,direction:e.dir,onHit:null,entity:e});if(!r.valid)continue;e.hits.add(targetKey(h.q));if(e.onHit)e.onHit(c,h.q,r,e);if(e.stopOnEnemy){stop=h.t;reason='hit';break;}}moveExternal(c.g,p,to.sub(from).mult(stop),true);state(p).motionFrame=frame(c.g);e.pos=copy(p.pos);e.distance+=dist(from,p.pos);if(e.push>0)for(const q of enemies(c,p.pos,e.width+80))if(e.hits.has(targetKey(q)))impulse(c,q,e.dir,e.push);if(reason||e.distance>=e.range-.1)end(e,reason||e.clipReason||'expired');}
             function leap(c,o){const p=c.owner,s=state(p),from=copy(p.pos),to=safe(c.g,copy(o.pos||targetPoint(c,o.range??420)),p.radius,p),frames=duration(c,o.duration??35);const e=entity(c,'leap',{...o,pos:from,from,to,duration:frames+1,cancelOnStun:true},(ctx,e)=>{const t=Math.min(1,e.age/frames);p.pos.x=from.x+(to.x-from.x)*t;p.pos.y=from.y+(to.y-from.y)*t;p.vel=v();e.pos=copy(p.pos);e.height=Math.sin(t*Math.PI)*Math.max(75,dist(from,to)*.20);state(p).movedFrame=frame(c.g);state(p).motionFrame=frame(c.g);world(c.g).spatialDirty=true;const test=combatMoveCircle(p.pos,v(),p.radius,brHostBodyWalls(c.g),false);if(Math.hypot(test.x-p.pos.x,test.y-p.pos.y)<.01)e.lastSafe=copy(p.pos);if(t>=1){p.pos=copy(to);if(o.damage>0)area(c,to,o.radius??120,o.damage,o);end(e,'expired');}});e.lastSafe=from;e.speed=dist(from,to)/frames;e.dir=norm(to.sub(from));const oldEnd=e.onEnd;e.onEnd=(ctx,entity,reason)=>{if(reason!=='expired'){const q=safe(c.g,entity.lastSafe,p.radius,p);p.pos=copy(q);p.vel=v();}if(oldEnd)oldEnd(ctx,entity,reason);};s.dash=e;return e;}
             function hook(c,o){const n=clamp(Math.floor(o.maxTargets??1),1,3),captured=new Set(),list=[];for(let i=0;i<n;i++){const angle=(i-(n-1)/2)*(n>1?(o.spread??.15):0),a=Math.atan2(c.aim.y,c.aim.x)+angle,dir=v(Math.cos(a),Math.sin(a)),range=ranged(c,o.range??600)*(c.aimRangeFactor??1),speed=o.speed??24;const e=entity(c,'hook',{...o,dir,pos:c.owner.pos,range,width:sized(c,o.width??24),radius:sized(c,o.width??24)/2,duration:Math.ceil(range/speed)+2,speed,distance:0,cancelOnStun:true},(ctx,e)=>{e.previousPos=copy(e.pos);const from=copy(e.pos),to=from.add(e.dir.mult(Math.min(e.speed,e.range-e.distance))),wall=combatTraceWalls(from,to,e.radius,c.g.walls,[]),hits=[];for(const q of enemies(c,from,e.speed+e.radius+100)){if(captured.has(targetKey(q)))continue;const t=sweepTime(from,to,q.pos,e.radius+q.radius);if(t!=null&&(!wall||t<=wall.t))hits.push({q,t});}let block=wall?.t??Infinity;for(const b of c.g.farmBoxes||[]){const t=brCrateSweepTime(b,from,to,e.radius);if(t!=null)block=Math.min(block,t);}hits.sort((a,b)=>a.t-b.t);const h=hits.find(h=>h.t<=block);if(h){e.pos=from.add(to.sub(from).mult(h.t));const result=hit(c,h.q,o.damage??0,{knockback:0});if(result.valid){captured.add(targetKey(h.q));capture(c,h.q,{...o,slot:i,total:n,dir:c.aim});end(e,'hit');return;}}if(block<=1){e.pos=from.add(to.sub(from).mult(block));end(e,'wall');return;}e.pos=to;e.distance+=e.speed;if(e.distance>=e.range)end(e,'range');});event(c,e);list.push(e);}return list;}
             function capture(c,target,o){const s=state(target);if(s.force&&!s.force.dead)return null;cancelAction(target,c.g,'forced');s.impulse=null;const ownerStart=copy(c.owner.pos),front=norm(o.dir||c.aim),side=((o.slot??0)-((o.total??1)-1)/2)*(target.radius*2+14),desired=c.owner.pos.add(front.mult(c.owner.radius+target.radius+15)).add(v(-front.y,front.x).mult(side)),to=safe(c.g,desired,target.radius,target);const e=entity(c,'capture',{pos:copy(target.pos),from:ownerStart,to,target,targetLife:life(target),duration:70,cancelOnStun:true,range:o.range??900,arrivalStun:o.arrivalStun??0,stunCap:o.stunCap,ownerWarp:Number(c.owner.warpSeq||0),speed:o.pullSpeed??24,width:4},(ctx,e)=>{if(!target.alive||life(target)!==e.targetLife){end(e,'life');return;}if(Number(c.owner.warpSeq||0)!==e.ownerWarp||dist(c.owner.pos,ownerStart)>Math.max(200,e.range*.6)||dist(target.pos,c.owner.pos)>e.range+250){end(e,'source-moved');return;}const delta=e.to.sub(target.pos),n=delta.mag();if(n<=3){if(e.arrivalStun>0)applyStun(c,target,e.arrivalStun,e.stunCap);end(e,'arrived');return;}const moved=moveExternal(c.g,target,delta.mult(Math.min(n,e.speed)/n),true);e.pos=copy(target.pos);e.from=copy(c.owner.pos);if(moved.hit){if(e.arrivalStun>0)applyStun(c,target,e.arrivalStun,e.stunCap);end(e,'wall');}});s.force=e;return e;}
@@ -6046,7 +6078,7 @@
 
     register('emoji-019','폭주기관차','근접형',melee({style:'punch',cooldownScale:1.12,damageScale:1.1,pushScale:.30}),{
         kind:'train-charge',shape:'rect',cooldownFrames:1200,range:1480,width:150,speed:36,damage:92,windupFrames:24,knockback:44,count:1,countCap:1,
-        description:'0.4초 출발 예고 후 1480 직선 관통 돌진 · 대상별 피해 92 한 번과 강한 밀침 · 벽에서 정지, 기절 없음',
+        description:'0.4초 출발 예고 후 80~1480 거리 선택(탭 220) 직선 관통 돌진 · 대상별 피해 92 한 번과 강한 밀침 · 벽에서 정지, 기절 없음',
         capabilities:caps({area:true,dash:true,cc:true,signatureRange:true})
     },function(c,s){R.lock(c,{move:true,attack:true},s.windupFrames);R.marker(c,{shape:'rect',range:s.range,width:s.width,duration:s.windupFrames,color:'#f59e0b'});R.schedule(c,s.windupFrames,function(){R.dash(c,{range:s.range,speed:s.speed,width:s.width,damage:s.damage,knockback:s.knockback,stun:0,stopOnEnemy:false,color:'#f59e0b'});},{cancelOnStun:true});},
     {statType:'MELEE',tankRole:false,basicSummary:'무거운 차체 근접 타격',stats:{maxHp:620,speed:1.9}});
@@ -6425,7 +6457,7 @@
             halfAngle:Math.max(0,finite(s.halfAngle,.5)),rework:true};
         if(s.shape==='self'){spec.scope='self';spec.range=0;if(!spec.radius)spec.radius=Math.max(24,finite(playerRadius,38));}
         if(shape==='circle'&&!spec.radius)spec.radius=spec.range||Math.max(24,finite(playerRadius,38));
-        if(brSkillUsesAimDistance(s))spec.range*=brSkillReachFraction(power);
+        if(ability.id==='emoji-019'){spec.range=brTrainDistance(power,rangeScale);spec.train=true;spec.dash=true;spec.speed=s.speed;spec.windup=s.windupFrames;}else if(brSkillUsesAimDistance(s))spec.range*=brSkillReachFraction(power);
         if(shape==='target'&&caps.dash)spec.teleport=s.kind!=='leap'&&s.kind!=='flight';
         if(shape==='dash'){spec.dash=true;spec.phases=!!s.airborne;}
         if(s.kind==='channel'||s.kind==='channel-beam'||s.kind==='continuous-laser'||s.beam){spec.beam=true;}
@@ -7135,7 +7167,7 @@
             'team-respawn':'팀 킬 대결'
         };
         var BR_TIER_COLOR = {S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'};
-        var BR_ROOM_PROTOCOL=4; // A room must not mix the old client-owned draft write protocol with this one.
+        var BR_ROOM_PROTOCOL=5; // A room must not mix the old client-owned draft write protocol with this one.
         var BR_TIER_CHANCES=Object.freeze([['S',.10],['A',.20],['B',.25],['C',.30],['F',.15]]);
         // 수업용 지정 어휘 54개. 정답과 오답의 품사를 맞춰 의미가 겹치지 않게 구성한다.
         var BR_DEFAULT_QUESTIONS = [
@@ -9183,7 +9215,7 @@
                     p[seenKey]=seq;
                     const command=input[kind],valid=command&&command.seq===seq&&command.life===life&&['cast','recast'].includes(command.kind)&&typeof command.castId==='string';
                     const blocked=isAttack?locks.attack:locks.skill;
-                    if(!fresh||!valid||blocked||(isAttack&&command.kind!=='cast')){p[resolvedKey]=seq;p[pendingKey]=null;}
+                    if(!fresh||!valid||blocked||(isAttack&&command.kind!=='cast')){brCombatTrace('action-rejected',{frame:g.frame,life,kind,seq,reason:!fresh?'stale-life-match':!valid?'command':blocked?'locked':'kind'});p[resolvedKey]=seq;p[pendingKey]=null;}
                     else {const dir=brValidateAimHelp(p,g,kind,command);
                         p[pendingKey]={seq,aim:dir.norm(),power:brClamp(Number(command.ap??input.ap??1),.18,1),expires:g.frame+6,life,kind:command.kind,castId:command.castId,command};}
                 }
@@ -9195,15 +9227,16 @@
                 if(pending.kind==='cast'&&pending.castId!==''){p[resolvedKey]=pending.seq;p[pendingKey]=null;continue;}
                 pending.aim=brValidateAimHelp(p,g,kind,pending.command).norm();
                 const protection=p.spawnProtectionUntilFrame;if(BRMP.respawnMode)p.spawnProtectionUntilFrame=0;
-                p.activeInputCommand={kind,seq:pending.seq,life,castId:pending.castId};
+                p.activeInputCommand={kind,seq:pending.seq,life,castId:pending.castId,distance:!isAttack&&p.ability.id==='emoji-019'&&Number.isFinite(pending.command?.distance)?brTrainDistance(pending.power,brRunMod(p,'signatureRange',1),pending.command.distance):undefined};
                 try {
                     let accepted=true;
-                    if(isAttack)brBasicAttack(p,g,pending.aim);
+                    if(isAttack)accepted=brBasicAttack(p,g,pending.aim)===true;
                     else if(pending.kind==='recast')accepted=!!R?.recast(p,g,pending.aim,pending.castId,pending.power);
                     else accepted=brCastPlayerSkill(p,g,pending.aim,pending.power)!==false;
                     if(accepted){if(BRMP.respawnMode)p.spawnProtectionUntilFrame=0;p[isAttack?'firedAttackSeq':'firedSkillSeq']=pending.seq;
                         if(!isAttack)p.skillCooldownMax=Math.max(1,Number(p.cooldown||p.maxCooldown||1));}
                     else p.spawnProtectionUntilFrame=protection;
+                    brCombatTrace('action-resolved',{matchKey:brRingKey(),frame:g.frame,life,id:p.ability.id,kind,seq:pending.seq,accepted});
                 } finally {p.activeInputCommand=null;p[resolvedKey]=pending.seq;p[pendingKey]=null;}
             }
             const afterLocks=R?.inputLocks(p,g)||locks;
@@ -9237,7 +9270,7 @@
                 window.brFarm.cone(g,p,aim,range,profile.halfAngle,farmUnits,farmToken);
                 window.BRRework?.nativeMeleeTurrets(g,p,aim,range,profile.halfAngle,damage*p.damageMult*.72*brCombatPower(p));
                 // Broad phase must include the full target circle used by the exact cone test.
-                for(var o of g.getNearbyParticipants(p.pos,range+128)) {
+                for(var o of g.getNearbyParticipants(p.pos,range+Math.max(128,Number(g.maxBodyRadius||0)))) {
                     if(!o.alive||o===p||o.id===999||(p.team&&o.team===p.team)||!brCanHostileTarget(o,p))continue;
                     if(!brMeleeTargetIntersectsCone(p.pos,o,aim,range,profile.halfAngle)||g.checkWallBetween(p.pos,o.pos))continue;
                     var bodyContact=isTankAbility(p.ability)&&o.pos.dist(p.pos)<=p.radius+o.radius+.5;
@@ -9267,6 +9300,7 @@
                 }
             }
             p.basicCooldown=cd;p.basicCooldownMax=cd;
+            brCombatTrace('basic-executed',{frame:g.frame,life:p.lifeSeq,seq:p.activeInputCommand?.seq,id:p.ability.id,profile:profile.close?'melee':'ranged',x:p.pos.x,y:p.pos.y,dx:aim.x,dy:aim.y});return true;
         }
 
         // Dedicated shared ring stream: it never waits for the next eight-student movement batch.
@@ -9282,7 +9316,7 @@
             }).finally(function(){if(BRMP.ringPublishPending===pending)BRMP.ringPublishPending=null;});
         }
         function brResetRingClient() {
-            BRMP.ringState=null;BRMP.pendingRingState=null;BRMP.ringReceivedAt=0;BRMP.ringClockSamples=[];
+            BRMP.ringSyncRequestedAt=0;BRMP.ringState=null;BRMP.pendingRingState=null;BRMP.ringReceivedAt=0;BRMP.ringClockSamples=[];
             BRMP.ringClockOffset=null;BRMP.ringEchoSeq=-1;BRMP.ringRenderTime=null;BRMP.ringRenderEpoch=null;
             BRMP.ringDamageTotal=null;BRMP.ringDamageNoticeUntil=0;BRMP.ringSelf=null;BRMP.ringView=null;BRMP.ringReadError=false;
             const el=brEl('br-zone-status');if(el){el.className='br-zone-status sync';brSetText(brEl('br-zone-text'),'위험구역 동기화 중');brSetText(brEl('br-zone-detail'),'');brEl('br-zone-arrow').hidden=true;}
@@ -9297,8 +9331,8 @@
                 return false;
             }
             const old=BRMP.ringState;
-            if(old&&old.matchKey===packet.matchKey&&packet.seq<=old.seq)return false;
-            BRMP.ringState=packet;BRMP.ringReceivedAt=performance.now();BRMP.ringReadError=false;
+            if(old&&old.matchKey===packet.matchKey&&(packet.seq<=old.seq||packet.revision<old.revision||packet.clockEpoch<old.clockEpoch||packet.time+1e-6<old.time))return false;
+            BRMP.ringState=packet;BRMP.ringReceivedAt=performance.now();BRMP.ringReadError=false;BRMP.ringSyncRequestedAt=0;
             if(BRMP.role==='student'&&BRMP.roomMeta?.phase==='battle')brMusicSetPause(!packet.running||document.hidden);
             return true;
         }
@@ -9334,7 +9368,7 @@
             const calibrated=Number.isFinite(BRMP.ringClockOffset),arrivalAge=Math.max(0,now-BRMP.ringReceivedAt);
             const transportAge=calibrated?Math.max(0,now+BRMP.ringClockOffset-s.hostAt):arrivalAge;
             const uncertaintyMs=BRMP.ringClockSamples?.length?Math.min(...BRMP.ringClockSamples.map(x=>x.rtt))*.5:0;
-            const stale=arrivalAge>BR_RING_RULES.staleMs||transportAge>BR_RING_RULES.maxExtrapolateMs||uncertaintyMs>BR_RING_RULES.entryGraceMs||BRMP.roomMeta?.hostConnected===false;
+            const stale=!calibrated||arrivalAge>BR_RING_RULES.staleMs||transportAge>BR_RING_RULES.maxExtrapolateMs||uncertaintyMs>BR_RING_RULES.entryGraceMs||BRMP.roomMeta?.hostConnected===false;
             const elapsed=s.running?Math.min(BR_RING_RULES.maxExtrapolateMs,transportAge):0;
             let time=s.time+elapsed;
             // Clock refinements do not make a live shrinking ring expand. Pause epochs re-anchor explicitly.
@@ -9343,6 +9377,12 @@
             BRMP.ringRenderTime=time;BRMP.ringRenderEpoch=s.clockEpoch;
             const r=Object.assign(brRingSample(s.plan,time),{stale,calibrated,running:s.running,packetAge:transportAge,uncertaintyMs,revision:s.revision});
             BRMP.ringView=r;
+            if(stale&&now-Number(BRMP.ringSyncRequestedAt||0)>1500&&BRMP.role==='student'&&BRMP.backend==='firebase'&&BRMP.roomCode){
+                // A one-shot resync of the existing shared stream; never one write per player/frame.
+                BRMP.ringSyncRequestedAt=now;const key=brRingKey();
+                BRMP.db.ref('rooms/'+BRMP.roomCode+'/meta/zoneState').once('value').then(snap=>{if(brRingKey()===key)brReceiveRing(snap.val());}).catch(()=>{});
+                brSendInput(true);
+            }
             return {...view,mapRadius:r.radius,centerX:r.cx,centerY:r.cy,_ring:r};
         }
         function brUpdateRingHud(self,view,now=performance.now()) {
@@ -9665,7 +9705,11 @@
             if(BRMP.ringView&&!BRMP.ringView.running)return 0;
             const received=Number.isFinite(actor?.rwReceivedAt)?actor.rwReceivedAt:Number.isFinite(actor?.last)?actor.last:now;
             const sampled=Number.isFinite(actor?.rwAt)?actor.rwAt:received;
-            const transportAge=brClamp(received-sampled,0,250);
+            const own=String(actor?.row?.[0])===String(BRMP.playerId);
+            // Frame interpolation anchors include delivery latency. For self, use the same
+            // calibrated host clock as the ring, including the last physics sample's age.
+            const transportAge=own&&Number.isFinite(BRMP.ringClockOffset)&&Number.isFinite(actor?.authorityHostAt)?
+                brClamp(received+BRMP.ringClockOffset-actor.authorityHostAt,0,250):brClamp(received-sampled,0,250);
             return (transportAge+Math.max(0,now-received))/(1000/60);
         }
         function brReworkClientFrame(actor,now=performance.now()) {
@@ -9692,7 +9736,7 @@
         function brReworkMotionPoint(actor,now=performance.now()) {
             const s=brReworkClientState(actor,now);if(!s)return null;
             const m=s.motion,c=s.capture;if(!m&&!c)return null;
-            const age=Math.min(12,Math.max(0,s.frame-Number(actor.rwFrame||0)));
+            const age=Math.min(15,Math.max(0,s.frame-Number(actor.rwFrame||0)));
             if(m?.airborne&&[m.fromX,m.fromY,m.toX,m.toY].every(Number.isFinite)){
                 const t=brClamp((s.frame-m.start)/Math.max(1,m.end-m.start-1),0,1);
                 return {x:m.fromX+(m.toX-m.fromX)*t,y:m.fromY+(m.toY-m.fromY)*t,airborne:true};
@@ -9911,14 +9955,14 @@
                 [p.tick,p.radius,p.minRadius,p.cx,p.cy,p.pressure,p.nextPressure,p.compression,p.mode,p.shrinkRate]];
         }
         function brUnpackRingWire(a,key){
-            if(!Array.isArray(a)||a.length!==10||!Array.isArray(a[9])||![8,10].includes(a[9].length))return null;
+            if(!Array.isArray(a)||a.length!==10||!Array.isArray(a[9])||a[9].length!==10)return null;
             const p=a[9];return {v:a[0],matchKey:key,seq:a[1],revision:a[2],hostAt:a[3],time:a[4],frame:a[5],running:a[6],clockEpoch:a[7],worldRadius:a[8],
                 plan:{tick:p[0],radius:p[1],minRadius:p[2],cx:p[3],cy:p[4],pressure:p[5],nextPressure:p[6],compression:p[7],mode:p[8],shrinkRate:p[9]??BR_RING_RULES.shrinkSpeed}};
         }
-        function brPackSelfZone(s){const h=s.hit;return [s.frame,s.time,s.outside,s.total,s.graceMs,h?[h.time,h.x,h.y,h.radius,h.cx,h.cy,h.amount]:null];}
+        function brPackSelfZone(s){const h=s.hit;return [s.frame,s.time,s.outside,s.total,s.graceMs,h?[h.time,h.x,h.y,h.radius,h.cx,h.cy,h.amount]:null,s.position];}
         function brUnpackSelfZone(a){
-            if(!Array.isArray(a)||a.length!==6)return null;const h=a[5];if(h!==null&&(!Array.isArray(h)||h.length!==7))return null;
-            return {frame:a[0],time:a[1],outside:a[2],total:a[3],graceMs:a[4],hit:h?{time:h[0],x:h[1],y:h[2],radius:h[3],cx:h[4],cy:h[5],amount:h[6]}:null};
+            if(!Array.isArray(a)||a.length!==7||![a[0],a[1],a[3],a[4]].every(n=>Number.isFinite(n)&&n>=0)||typeof a[2]!=='boolean'||!Array.isArray(a[6])||a[6].length!==6||!a[6].every(Number.isFinite)||a[6][2]<0||!Number.isInteger(a[6][5])||a[6][5]<0)return null;const h=a[5];if(h!==null&&(!Array.isArray(h)||h.length!==7||!h.every(Number.isFinite)||h[0]>a[1]+1e-6||h[3]<0||h[6]<0))return null;
+            return {frame:a[0],time:a[1],outside:a[2],total:a[3],graceMs:a[4],position:a[6],hit:h?{time:h[0],x:h[1],y:h[2],radius:h[3],cx:h[4],cy:h[5],amount:h[6]}:null};
         }
         function brResetStreamHost(){BRMP.viewLastSent={};BRMP.viewShotKnown={};BRMP.viewFlightIds=new Set();BRMP.viewCursorId=0;BRMP.streamStats={packets:0,characters:0,skippedBusy:0,writeMs:0};}
 
@@ -10069,7 +10113,7 @@
             if(!brValidReworkWire(incoming.rw,incoming.frame))return null;
             if(incoming.v===4){
                 incoming.zoneState=brUnpackRingWire(incoming.ringWire,incoming.matchKey);incoming.zoneSelf=brUnpackSelfZone(incoming.selfZoneWire);
-                if(!incoming.zoneState||!brRingValidPacket(incoming.zoneState)||!incoming.zoneSelf)return null;
+                if(!incoming.zoneState||!brRingValidPacket(incoming.zoneState)||!incoming.zoneSelf||incoming.zoneSelf.frame!==incoming.frame||incoming.zoneSelf.time>incoming.zoneState.time+1e-6)return null;
                 delete incoming.ringWire;delete incoming.selfZoneWire;
                 const rows=incoming.players.map(brUnpackPlayer),shots=brUnpackShots(incoming.projectiles,incoming.shotStyles);
                 if(rows.some(r=>!r)||!shots)return null;
@@ -10374,6 +10418,8 @@
         }
         function brReworkLocalStart(a,self,command,v){
             const s=brReworkDefinition(a).skill,spec=brAimSpec(a,'skill',v.rad,Number(command.ap??1),v.mods),windup=Number(s.windupFrames??s.windup??0);
+            if(a.id==='emoji-019'&&Number.isFinite(command.distance))spec.range=brTrainDistance(command.ap,Number(v.mods.signatureRange||1),command.distance);
+            if(a.id==='emoji-019'){const end=brClarityPreviewEndpoint(spec,v.x,v.y,new Vec2(v.ax,v.ay),v.rad,BRMP.latestView);spec.range=end.range;}
             const duration=Math.max(220,windup*1000/60),point=spec.shape==='target'?brLocalAimEndpoint(v.x,v.y,v.ax,v.ay,spec.range,v.rad,BRMP.latestView):{x:v.x,y:v.y};
             brPushLocalFx('cast-start',point.x,point.y,{dx:v.ax,dy:v.ay,size:spec.range||spec.radius,color:s.color||v.color,sourceId:BRMP.playerId,life:duration,
                 geometry:{shape:spec.shape,width:spec.width,radius:spec.radius,halfAngle:spec.halfAngle,windup:windup>0,scope:spec.scope,harmless:!(s.capabilities||s.caps||{}).damage}});
@@ -10410,7 +10456,7 @@
                     if(action&&action.seq===Number(command.seq))action.basicStep={x:stepX,y:stepY};
                     x=stepped.x;y=stepped.y;
                 }
-                brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:Math.max(rad,(rad+basicMelee.rangeBonus)*Number(mods.basicRange||1)-stepDistance),amount:basicMelee.halfAngle,color:color,style:'basic-'+basicMelee.style,sourceId:BRMP.playerId});
+                brPushLocalFx('swing',x,y,{dx:ax,dy:ay,size:Math.max(rad,(rad+basicMelee.rangeBonus)*Number(mods.basicRange||1)-stepDistance),amount:basicMelee.halfAngle,color:color,style:'basic-'+basicMelee.style,sourceId:BRMP.playerId,life:/punch|hammer/.test(basicMelee.style)?267:200,geometry:{shape:'sector',halfAngle:basicMelee.halfAngle,preview:!confirmed}});
                 brPushLocalFx('muzzle',x+ax*rad,y+ay*rad,{dx:ax,dy:ay,size:62,color:'#ffffff',style:'melee'});brPlaySfx('melee',tier==='S'||tier==='A');
             } else if(kind==='attack') {
                 var profile=brRunBasicProfile(a,mods),shotColor=a.pTrail||color,sz=brBasicShotSize(a,true,mods)*Number(mods.basicSize||1);
@@ -10493,8 +10539,8 @@
             var result=combatMoveCircle(from||p,from?{x:p.vx,y:p.vy}:{x:0,y:0},radius,brStudentBodyWalls(view),!!stopOnWall,p._combatMoveResult);
             p.x=result.x;p.y=result.y;
             if(from){p.vx=result.vx;p.vy=result.vy;}
-            var mapR=Math.max(radius+8,Number(view?.worldRadius||BR_WORLD_RADIUS)-radius-4),d=Math.hypot(p.x,p.y);
-            if(d>mapR){p.x=p.x/d*mapR;p.y=p.y/d*mapR;var nx=p.x/mapR,ny=p.y/mapR,vn=p.vx*nx+p.vy*ny;if(vn>0){p.vx-=nx*vn;p.vy-=ny*vn;}}
+            var mapR=Math.max(radius+8,Number(view?.worldRadius||BR_WORLD_RADIUS)-radius-4),cx=Number(view?.centerX??view?._ring?.cx??0),cy=Number(view?.centerY??view?._ring?.cy??0),d=Math.hypot(p.x-cx,p.y-cy);
+            if(d>mapR){p.x=cx+(p.x-cx)/d*mapR;p.y=cy+(p.y-cy)/d*mapR;var nx=(p.x-cx)/mapR,ny=(p.y-cy)/mapR,vn=p.vx*nx+p.vy*ny;if(vn>0){p.vx-=nx*vn;p.vy-=ny*vn;}}
             return result.hit;
         }
 
@@ -10538,9 +10584,11 @@
             var packetHits=new Set((view.fx||[]).filter(function(e){return String(e[1])==='hit';}).map(function(e){return String(e[9]||'');}));
             (view.players||[]).forEach(function(r){
                 var id=String(r[0]), old=BRMP.drawPlayers.get(id),sx=Number(r[3]),sy=Number(r[4]),svx=Number(r[18]||0),svy=Number(r[19]||0);
+                if(id===String(BRMP.playerId)&&view.zoneSelf?.frame===view.frame&&view.zoneSelf.position){sx=view.zoneSelf.position[0];sy=view.zoneSelf.position[1];r[3]=sx;r[4]=sy;}
                 if(!old)old={x:sx,y:sy,tx:sx,ty:sy,vx:svx,vy:svy,row:r,last:now,trailHp:Number(r[5]||0),trailHold:0,
                     samples:[],predX:sx,predY:sy,predVx:svx,predVy:svy,authX:sx,authY:sy,authAt:now};
                 const nextRW=rwStates.get(id)||null,lifeChanged=!!(old.rw&&nextRW&&old.rw.life!==nextRW.life);
+                old.authorityHostAt=view.zoneState&&view.zoneSelf?view.zoneState.hostAt-Math.max(0,view.zoneState.time-view.zoneSelf.time):null;
                 old.rw=nextRW;old.rwFrame=Number(view.frame||0);old.rwAt=sampleTime;old.rwReceivedAt=now;
                 var priorRow=old.row||r,warpChanged=Number(r[27]||0)!==Number(priorRow[27]||0),respawned=(!priorRow[7]&&r[7])||lifeChanged,eliminated=!!priorRow[7]&&!r[7];
                 var previousHp=old.row?Number(old.row[5]||0):Number(r[5]||0),nextHp=Number(r[5]||0);
@@ -10648,13 +10696,13 @@
             BRMP.localProjectiles=(BRMP.localProjectiles||[]).filter(q=>q.rework||!authoritySelf||q.seq>Number(authoritySelf.row[q.kind==='attack'?28:29]||0)||q.seq===Number(authoritySelf.row[q.kind==='attack'?30:31]||0)&&now-q.born<600);
             (view.fx||[]).forEach(function(r){
                 var geometry=r[13]||{},blast=geometry.shape==='dynamite-impact',confirmed=blast||geometry.confirmed===true;
-                if(confirmed&&geometry.matchKey!==view.matchKey)return;
+                if((confirmed||geometry.matchKey)&&geometry.matchKey!==view.matchKey)return;
                 if(geometry.shape==='contact'){const targetLife=BRMP.drawPlayers?.get(String(r[9]))?.rw?.life;if(targetLife!=null&&targetLife!==geometry.targetLife)return;}
                 const sourceLife=BRMP.drawPlayers?.get(String(r[11]||''))?.rw?.life;
-                if(confirmed&&Number.isFinite(Number(sourceLife))&&Number(sourceLife)!==Number(geometry.lifeSeq))return;
+                if((confirmed||geometry.lifeSeq!=null)&&Number.isFinite(Number(sourceLife))&&Number(sourceLife)!==Number(geometry.lifeSeq))return;
                 var id=confirmed?'confirmed:'+view.matchKey+':'+String(geometry.effectId||r[0]):String(r[0]);
                 if(BRMP.seenFxIds.has(id))return;
-                var type=String(r[1]||'hit'),life=confirmed?brClamp(Number(geometry.displayMs||(blast?760:430)),geometry.shape==='contact'?100:260,900):brFxLife(type);
+                var type=String(r[1]||'hit'),life=confirmed?brClamp(Number(geometry.displayMs||(blast?760:430)),geometry.shape==='contact'?100:260,900):Number(geometry.displayMs||brFxLife(type));
                 const own=String(r[11]||'')===String(BRMP.playerId);
                 let start=confirmed?now-Math.min(blast?300:Math.max(0,Math.min(300,life-220)),Math.max(0,Number(view.frame||0)-Number(geometry.hostFrame||view.frame))*1000/60):now;
                 if(own&&geometry.seq>0&&geometry.kind){
@@ -10819,6 +10867,13 @@
             view=view||{};const origin=new Vec2(x,y),range=Math.max(0,Number(spec.range)||0);
             if(spec.beam){if(spec.rework){const to=origin.add(aim.mult(range)),wall=combatTraceWalls(origin,to,Math.max(0,Number(spec.width||0)/2),view.walls||[]),distance=range*(wall?.t??1);return {x:x+aim.x*distance,y:y+aim.y*distance,range:distance};}const beam=brTraceBeam(origin,aim,range,view.walls);return {x:beam.end.x,y:beam.end.y,range:beam.length};}
             if(spec.dash){
+                if(spec.train){
+                    const result=brClipTrainTravel(origin,aim,range,radius,Number(view.worldRadius||BR_WORLD_RADIUS),{x:view._ring?.cx??view.centerX??0,y:view._ring?.cy??view.centerY??0},brStudentBodyWalls(view));
+                    const ring=BRMP.ringView,packet=BRMP.ringState;
+                    const arrival=(Number(spec.windup||24)+result.range/Math.max(1,spec.speed||36))*1000/60;
+                    const future=ring&&packet&&!ring.stale?brRingSample(packet.plan,ring.time+(ring.running?arrival:0)):null;
+                    result.outside=future?brRingOutside(result.x,result.y,future):false;result.uncertain=!future;return result;
+                }
                 const edge=Math.max(radius+8,Number(view.worldRadius||BR_WORLD_RADIUS)-radius-4),dot=x*aim.x+y*aim.y;
                 const discriminant=dot*dot+edge*edge-x*x-y*y;
                 const boundary=discriminant>=0?Math.max(0,-dot+Math.sqrt(discriminant)):0;
@@ -10833,6 +10888,13 @@
             }
             return {x:x+aim.x*range,y:y+aim.y*range,range};
         }
+        function brTrainEdgeCue(p,x,y,end,color,alpha,zoom){
+            const cam=BRMP.studentCamera;if(!cam)return;
+            const canvas=brEl('br-student-canvas'),hw=Math.max(30,(canvas._cssW||window.innerWidth)/2-32)/zoom,hh=Math.max(30,(canvas._cssH||window.innerHeight)/2-48)/zoom;
+            const dx=end.x-cam.x,dy=end.y-cam.y;if(Math.abs(dx)<=hw&&Math.abs(dy)<=hh)return;
+            const k=Math.min(hw/Math.max(.001,Math.abs(dx)),hh/Math.max(.001,Math.abs(dy))),px=cam.x+dx*k,py=cam.y+dy*k,n=Math.hypot(dx,dy)||1,ax=dx/n,ay=dy/n,r=10/zoom,col=end.outside?'#fb7185':end.uncertain?'#fbbf24':color;
+            p.polygon([[px+ax*r,py+ay*r],[px-ax*r-ay*r*.7,py-ay*r+ax*r*.7],[px-ax*r+ay*r*.7,py-ay*r-ax*r*.7]],col,alpha);
+        }
         function brPaintClarityPreview(p,spec,x,y,aim,endpoint,color,alpha,zoom) {
             if(spec.pullRadius){
                 p.line(x,y,endpoint.x,endpoint.y,color,alpha*.55,2/zoom);
@@ -10840,6 +10902,7 @@
                 return true;
             }
             if(spec.beam||spec.dash){
+                if(spec.train){brTrainEdgeCue(p,x,y,endpoint,color,alpha,zoom);p.circle(endpoint.x,endpoint.y,7/zoom,endpoint.outside?'#fb7185':endpoint.uncertain?'#fbbf24':color,alpha,2/zoom);p.line(x+aim.x*endpoint.range*.8,y+aim.y*endpoint.range*.8,endpoint.x,endpoint.y,endpoint.outside?'#fb7185':color,alpha,4/zoom);}
                 brPaintAttack(p,[0,spec.beam?'laser':'dash',x,y,aim.x,aim.y,endpoint.range,color,spec.width,'','','',0,{width:spec.width}],alpha,zoom);
                 if(spec.impactRadius>0){
                     const ex=endpoint.landingX??endpoint.x,ey=endpoint.landingY??endpoint.y;
@@ -11151,8 +11214,8 @@
             if(approved&&p.row[7]){
                 BRMP.localDash=null;p.predAccumulator=0;
                 const from={x:Number(p.row[3]),y:Number(p.row[4])},moved=combatMoveCircle(from,{x:approved.x-from.x,y:approved.y-from.y},Number(p.row[15]||38),approved.airborne?[]:brStudentBodyWalls(view),true);
-                const edge=Math.max(1,Number(view.worldRadius||BR_WORLD_RADIUS)-Number(p.row[15]||38)),dist=Math.hypot(moved.x,moved.y),bound=dist>edge?edge/dist:1;
-                p.predX=moved.x*bound;p.predY=moved.y*bound;p.previousX=p.predX;p.previousY=p.predY;p.x=p.predX;p.y=p.predY;p.predVx=0;p.predVy=0;return;
+                const edge=Math.max(1,Number(view.worldRadius||BR_WORLD_RADIUS)-Number(p.row[15]||38)-4),cx=Number(view.centerX??view._ring?.cx??0),cy=Number(view.centerY??view._ring?.cy??0),dist=Math.hypot(moved.x-cx,moved.y-cy),bound=dist>edge?edge/dist:1;
+                p.predX=cx+(moved.x-cx)*bound;p.predY=cy+(moved.y-cy)*bound;p.previousX=p.predX;p.previousY=p.predY;p.x=p.predX;p.y=p.predY;p.predVx=0;p.predVy=0;return;
             }
             var speed=Number(p.row[22]||4.27),moveX=0,moveY=0;
             if(now<Number(BRMP.localMoveBoostUntil||0)&&!(flags&8))speed*=1.48;
@@ -11202,7 +11265,7 @@
             const impulse=brApprovedImpulseProjection(p,now);
             var hitCorrection=now<Number(p.hitCorrectionUntil||0)||impulse.active;
             var stepCorrection=amount<=.05&&now<Number(p.basicStepCorrectionUntil||0);
-            const ring=view._ring,edgeCorrection=ring&&!ring.stale&&ring.calibrated&&age<350&&ackReady&&
+            const ring=view._ring,edgeCorrection=ring&&!ring.stale&&ring.calibrated&&age<500&&(ackReady||hitCorrection)&&
                 (Math.abs(Math.hypot(p.predX-ring.cx,p.predY-ring.cy)-ring.radius)<160||Math.abs(Math.hypot(p.authX-ring.cx,p.authY-ring.cy)-ring.radius)<160);
             if(p.row[7]&&age<500&&(ackReady||hitCorrection||stepCorrection)&&now>=Number(BRMP.localTeleportUntil||0)&&!localDashActive&&(now>=Number(BRMP.localDashGraceUntil||0)||hitCorrection)) {
                 var travel=Math.min(100,Math.max(0,age))/step;
@@ -11211,9 +11274,10 @@
                 var authX=baseAuthX+Number(p.vx||0)*travel+impulse.x,authY=baseAuthY+Number(p.vy||0)*travel+impulse.y;
                 var ex=authX-p.predX,ey=authY-p.predY,error=Math.hypot(ex,ey);
                 const nearContact=brPredictPlayerContact(p,view,now),contacted=Math.hypot(nearContact.x-p.predX,nearContact.y-p.predY)>.25;
-                var threshold=impulse.active?.25:hitCorrection?4:stepCorrection?.25:edgeCorrection?2:contacted?5:amount>.05?24:12;
+                const edgeConflict=edgeCorrection&&brRingOutside(authX,authY,ring)!==brRingOutside(p.predX,p.predY,ring);
+                var threshold=edgeConflict?.1:impulse.active?.25:hitCorrection?4:stepCorrection?.25:edgeCorrection?2:contacted?5:amount>.05?24:12;
                 if(error>threshold) {
-                    var fix=1-Math.exp(-dt/(impulse.active?32:hitCorrection?90:stepCorrection?80:edgeCorrection?90:amount>.05?260:180));
+                    var fix=1-Math.exp(-dt/(edgeConflict?24:impulse.active?32:hitCorrection?90:stepCorrection?80:edgeCorrection?90:amount>.05?260:180));
                     // Reconcile only the excess beyond the dead zone. Correcting the
                     // entire error at the threshold made a straight run saw back and forth.
                     var fraction=(error-threshold)*fix/error;
@@ -11227,7 +11291,7 @@
             var correctionX=state.x-p.predX,correctionY=state.y-p.predY;p.predX=state.x;p.predY=state.y;
             if(Number.isFinite(p.previousX)){p.previousX+=correctionX;p.previousY+=correctionY;}
             // 30/60/90/120Hz에서도 물리는 정확히 60Hz. 그 사이 화면은 이전/현재 위치를 보간한다.
-            var blend=brClamp(p.predAccumulator/step,0,1);
+            var blend=edgeCorrection?1:brClamp(p.predAccumulator/step,0,1);
             p.x=Number.isFinite(p.previousX)?p.previousX+(p.predX-p.previousX)*blend:p.predX;
             p.y=Number.isFinite(p.previousY)?p.previousY+(p.predY-p.previousY)*blend:p.predY;
         }
@@ -11450,11 +11514,12 @@
             if(scene.smokeRows!==view.smokes){scene.smokeRows=view.smokes;scene.smoke.clear();
                 (view.smokes||[]).forEach(r=>brPaintSmoke(brCombatPainter(scene.smoke,true),r[0],r[1],r[2]));
             }
-            const ringKey=[ring.cx,ring.cy,radius,zoom,ring.previewRadius,ring.previewRadius==null?0:Math.floor(ring.time/50)].join('|');
+            const ringKey=[ring.cx,ring.cy,radius,zoom,ring.stale,ring.calibrated,ring.previewRadius,ring.previewRadius==null?0:Math.floor(ring.time/50)].join('|');
             if(scene.ringEdgeKey!==ringKey){scene.ringEdgeKey=ringKey;scene.ringEdge.clear();
-                brCombatPainter(scene.ringEdge,true).circle(ring.cx,ring.cy,radius,'#ff607d',.88,3.5/zoom);
+                brRingPaintBoundary(brCombatPainter(scene.ringEdge,true),ring,zoom);
                 brRingPaintPreview(brCombatPainter(scene.ringEdge,true),ring,zoom);
             }
+            brRingPaintSelf(brCombatPainter(scene.fx,true),self,ring,zoom);
             scene.screen.clear();var flash=BRMP.damageFlash;if(flash&&frameNow<flash.until){scene.screen.rect(0,0,w,h).fill({color:0xff2d44,alpha:flash.alpha*Math.max(0,(flash.until-frameNow)/235)});}else if(flash)BRMP.damageFlash=null;
             var hit=BRMP.killConfirm||BRMP.hitConfirm;if(hit&&frameNow<hit.until){var remain=Math.max(0,(hit.until-frameNow)/Math.max(1,hit.duration||105)),s=hit.heavy?19:14;
                 scene.screen.moveTo(w/2-s,h/2-s).lineTo(w/2-s*.4,h/2-s*.4).moveTo(w/2+s,h/2-s).lineTo(w/2+s*.4,h/2-s*.4).moveTo(w/2-s,h/2+s).lineTo(w/2-s*.4,h/2+s*.4).moveTo(w/2+s,h/2+s).lineTo(w/2+s*.4,h/2+s*.4).stroke({color:hit.heavy?0xfde047:0xffffff,width:hit.heavy?4:3,alpha:remain});
@@ -11643,7 +11708,8 @@
             brDrawStudentFx(cc,frameNow,zoom,onScreen);
             brDrawAimPreview(cc,self,zoom);
             cc.restore();
-            brDrawDangerBoundary(cc,Number(view.centerX||0),Number(view.centerY||0),radius,zoom,frameNow);
+            brRingPaintBoundary(brCombatPainter(cc,false),view._ring||{cx:Number(view.centerX||0),cy:Number(view.centerY||0),radius,stale:true},zoom);
+            brRingPaintSelf(brCombatPainter(cc,false),self,view._ring,zoom);
             if(view._ring)brRingPaintPreview(brCombatPainter(cc,false),view._ring,zoom);
             cc.restore();
             brDrawHitConfirm(cc,w,h,frameNow);
@@ -12396,6 +12462,8 @@
             return proposed; // Never acquire another target or apply correction twice.
         }
 
+        function brIsTrainSkill(kind){const self=BRMP.drawPlayers?.get(String(BRMP.playerId));return kind==='skill'&&(EMOJI_DB[Number(self?.row?.[2])]?.id==='emoji-019');}
+        function brTrainGesturePower(mag,extent,moved){const scale=Number(brRunClientMods().signatureRange||1);return moved ? .18+.82*brClamp((mag-10)/Math.max(1,extent*.92-10),0,1):brTrainPower(220,scale);}
         function brCanStartAim(kind) {
             const self=BRMP.drawPlayers?.get(String(BRMP.playerId)),r=self?.row,state=brReworkClientState(self);
             if(!BRMP.inputState||!r?.[7]||!state||(BRMP.ringView&&!BRMP.ringView.running))return false;
@@ -12420,11 +12488,13 @@
             if(!brCanStartAim(kind))return false;
             const rw=brReworkClientState();if(kind==='skill'&&rw?.channel){if(releaseAim){const aim=brNormalizeAimVector(releaseAim.ax,releaseAim.ay);BRMP.inputState.ax=aim.x;BRMP.inputState.ay=aim.y;}return brReworkSteer(true);}
             if(brActionRemaining(kind)>6)return false;
+            if(brIsTrainSkill(kind)&&!releaseAim)releaseAim={ax:BRMP.lastRawAim?.x??BRMP.inputState.ax,ay:BRMP.lastRawAim?.y??BRMP.inputState.ay,ap:brTrainPower(220,Number(brRunClientMods().signatureRange||1))};
             var input=BRMP.inputState,now=brNow(),pending=BRMP.pendingLocalActions||(BRMP.pendingLocalActions={});
             if(pending[kind]&&!pending[kind].previewed)return false;
             var seq=++input[kind+'Seq'],raw=brNormalizeAimVector(releaseAim?.ax??BRMP.lastRawAim?.x??input.ax,releaseAim?.ay??BRMP.lastRawAim?.y??input.ay),aim=brResolveAimHelp(kind,raw,Number(releaseAim?.ap??input.aimPower??1),!!releaseAim?.tap,true);
             BRMP.lastRawAim={x:raw.x,y:raw.y};if(kind==='attack')BRMP.lastAttackRaw={x:raw.x,y:raw.y};input.ax=aim.x;input.ay=aim.y;
             input[kind]={seq:seq,ax:aim.x,ay:aim.y,rax:aim.rawX,ray:aim.rawY,assist:aim.assist,ap:Number(releaseAim?.ap??input.aimPower??1),life:rw.life,kind:kind==='skill'&&rw.recast?'recast':'cast',castId:kind==='skill'&&rw.recast?rw.recast.id:''};
+            if(brIsTrainSkill(kind))input[kind].distance=brTrainDistance(input[kind].ap,Number(brRunClientMods().signatureRange||1));
             pending[kind]={seq:seq,command:input[kind],at:performance.now(),previewed:false};
             brAdvanceLocalActions();brSendInput(true);return true;
         }
@@ -12480,7 +12550,8 @@
                     var dx=Number(e.clientX)-gesture.startX,dy=Number(e.clientY)-gesture.startY,mag=Math.hypot(dx,dy);
                     // A small central dead zone prevents fingertip jitter from flipping direction.
                     if(mag>10){gesture.aimTargetAngle=Math.atan2(dy,dx);gesture.moved=true;}
-                    gesture.targetPower=gesture.moved?brClamp(mag/(Math.max(rect.width,rect.height)*.92),.18,1):1;
+                    gesture.targetPower=brIsTrainSkill(kind)?brTrainGesturePower(mag,Math.max(rect.width,rect.height),gesture.moved):gesture.moved?brClamp(mag/(Math.max(rect.width,rect.height)*.92),.18,1):1;
+                    if(brIsTrainSkill(kind))gesture.aimPower=gesture.targetPower;
                     gesture.targetDistance=Math.min(Math.max(rect.width,rect.height)*.56,mag>10?mag:0);
                     brSmoothAimGesture(performance.now(),gesture);
                 }
@@ -12508,7 +12579,7 @@
                     // The released thumb distance is the cast distance; visual damping
                     // must not leave a quick drag at its previous range.
                     BRMP.inputState.aimPower=gesture.targetPower;
-                    brRequestAction(kind,{ax:Math.cos(gesture.aimTargetAngle),ay:Math.sin(gesture.aimTargetAngle),ap:gesture.targetPower,tap:kind==='attack'&&!gesture.moved&&performance.now()-gesture.startedAt<=BR_AIM_HELP.tapMs});
+                    brRequestAction(kind,{ax:Math.cos(brIsTrainSkill(kind)?gesture.aimAngle:gesture.aimTargetAngle),ay:Math.sin(brIsTrainSkill(kind)?gesture.aimAngle:gesture.aimTargetAngle),ap:gesture.targetPower,tap:kind==='attack'&&!gesture.moved&&performance.now()-gesture.startedAt<=BR_AIM_HELP.tapMs});
                     clearAim(gesture);
                 });
                 button.addEventListener('pointercancel',function(e){
