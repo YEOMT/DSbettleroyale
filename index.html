@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="br-build" content="polish-v14 / 2026-09-27">
+    <meta name="br-build" content="polish-v15 / 2026-09-27">
     <title>클래스 이모지 배틀로얄 · 팀 킬 배틀</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.20.1/dist/pixi.min.js"></script>
@@ -3148,6 +3148,7 @@
                         const shot=new Projectile(this,this.pos,shotDir,signature.speed,signature.damage*this.damageMult,
                             signature.size,signature.type,this.ability.pImpact||'#ff0',signature.explode,signature.emoji,opts);
                         if(signature.type!=='BOOMERANG')shot.life=Math.max(8,Math.ceil((manualRange||signature.range)/Math.max(1,signature.speed)));
+                        else shot.returnAfterLife=Math.max(1,shot.life-Math.ceil((manualRange||31*signature.speed)/Math.max(1,signature.speed))+1);
                         game.projectiles.push(shot);
                     }
                     return;
@@ -5564,6 +5565,14 @@
         window.addEventListener('resize', resizeGameCanvas);
 
 
+        // The thumbstick length controls travel distance, never damage, radius or cooldown.
+        function brSkillReachFraction(power){return .18+.82*Math.max(.18,Math.min(1,Number(power??1)||1));}
+        function brSkillUsesAimDistance(skill){
+            if(!skill)return false;
+            const caps=skill.capabilities||skill.caps||{};
+            return skill.shape==='target'||skill.shape==='dash'||(skill.shape==='rect'&&!!caps.dash)||
+                (['line','cone'].includes(skill.shape)&&(!!caps.projectile||skill.kind==='pin-traps'||['hook','channel','channel-beam','continuous-laser'].includes(skill.kind)));
+        }
         // BEGIN ID-KEYED COMBAT REWORK
         // Character rework simulation: fixed-step, host-authoritative and life scoped.
         // Durations are 60 Hz simulation frames. Visual consumers only read these records.
@@ -5578,7 +5587,7 @@
             const frame=g=>Math.max(0,Number(g?.frame||0));
             function world(g) { if(!g.rw)g.rw={entities:[],seq:0,castSeq:0,lastFrame:-1,events:[],turretGrid:new Map(),turretFrame:-1,matchKey:String(g?.runMatchKey||window.BRMP?.roomMeta?.seed||'match')+':'+String(window.BRMP?.roomMeta?.matchRound||0)};return g.rw; }
             function state(p){if(!p.rw||p.rw.life!==life(p))p.rw={life:life(p),shields:[],buffs:[],dots:[],marks:[],basicSeq:0,lastBasic:null};return p.rw;}
-            function context(p,g,aim,power=1){const rw=world(g),run=typeof brRunSkillSnapshot==='function'?brRunSkillSnapshot(p):{};return {owner:p,g,aim:norm(aim||p.lastAimDir),power:finite(power,1),run:{damage:run.damage??1,size:run.size??1,control:run.control??1,restore:run.restore??1,duration:run.duration??1,cooldown:run.cooldown??1,count:typeof brRunMod==='function'?brRunMod(p,'skillCount',0):0,range:typeof brRunMod==='function'?brRunMod(p,'signatureRange',1):1},damageMult:finite(p.damageMult,1),castId:rw.matchKey+':'+pid(p)+':'+life(p)+':'+(++rw.castSeq),ownerId:pid(p),ownerLifeSeq:life(p),abilityId:aid(p),matchKey:rw.matchKey,startedFrame:frame(g),controlHits:new Set(),knockbackHits:new Set(),warpSeq:Number(p.warpSeq||0)};}
+            function context(p,g,aim,power=1){const rw=world(g),run=typeof brRunSkillSnapshot==='function'?brRunSkillSnapshot(p):{};return {owner:p,g,aim:norm(aim||p.lastAimDir),power:finite(power,1),run:{damage:run.damage??1,size:run.size??1,control:run.control??1,restore:run.restore??1,duration:run.duration??1,cooldown:run.cooldown??1,count:typeof brRunMod==='function'?brRunMod(p,'skillCount',0):0,range:typeof brRunMod==='function'?brRunMod(p,'signatureRange',1):1},damageMult:finite(p.damageMult,1),aimRangeFactor:brSkillUsesAimDistance(defs[aid(p)]?.skill)?brSkillReachFraction(power):1,castId:rw.matchKey+':'+pid(p)+':'+life(p)+':'+(++rw.castSeq),ownerId:pid(p),ownerLifeSeq:life(p),abilityId:aid(p),matchKey:rw.matchKey,startedFrame:frame(g),controlHits:new Set(),knockbackHits:new Set(),warpSeq:Number(p.warpSeq||0)};}
             function validContext(c,deathAllowed=false){return !!c?.g&&world(c.g).matchKey===c.matchKey&&life(c.owner)===c.ownerLifeSeq&&aid(c.owner)===c.abilityId&&(c.owner.alive||c.allowPosthumous||deathAllowed);}
             function hostile(c,p){return !!p&&p.id!==999&&p!==c.owner&&p.alive!==false&&p.hp!==0&&!(c.owner.team&&p.team===c.owner.team)&&(!p.isReworkTurret?brCanHostileTarget(p,c.owner):p.owner!==c.owner);}
             function visible(c,p,origin=c.owner.pos){if(p.invisible&&p!==c.owner)return false;const observer={pos:origin,team:c.owner.team,id:c.owner.id};return !(c.g.isConcealedFrom?.(p,observer))&&!c.g.checkWallBetween(origin,p.pos);}
@@ -5608,7 +5617,7 @@
                 }else if(e.kind==='turret'&&c.g.emitStudentFx)c.g.emitStudentFx('impact',e.pos,{size:Math.max(18,(e.radius||30)*2),color:e.color||'#a5b4fc',sourceId:c.ownerId,style:'rw:turret-destroyed'});
             }
             function schedule(c,delay,fn,opts={}){if(delay<=0){if(validContext(c)&&(!opts.cancelOnStun||c.owner.stunned<=0))fn(c,null);return null;}return entity(c,'scheduled',{duration:Math.max(1,Math.round(delay))+1,cancelOnStun:opts.cancelOnStun!==false,hidden:true},(ctx,e)=>{if(e.age>=Math.max(0,Math.round(delay))){fn(ctx,e);end(e,'fired');}});}
-            function marker(c,o={}){return entity(c,'warning',{...o,pos:o.pos||c.owner.pos,duration:o.duration??15,radius:sized(c,o.radius??0),range:ranged(c,o.range??0),width:sized(c,o.width??0),cancelOnStun:o.cancelOnStun!==false},(o.followOwner||!o.pos)?(ctx,e)=>{e.pos=copy(ctx.owner.pos);}:null);}
+            function marker(c,o={}){return entity(c,'warning',{...o,pos:o.pos||c.owner.pos,duration:o.duration??15,radius:sized(c,o.radius??0),range:ranged(c,o.range??0)*(c.aimRangeFactor??1),width:sized(c,o.width??0),cancelOnStun:o.cancelOnStun!==false},(o.followOwner||!o.pos)?(ctx,e)=>{e.pos=copy(ctx.owner.pos);}:null);}
             function damageReduction(p){const now=frame(p.rw?.lastGame),s=state(p);let n=0;for(const b of s.buffs)if(b.end>now&&b.kind==='damageReduction')n=Math.max(n,b.value);return clamp(n,0,.65);}
             function shield(c,p,amount,frames){if(!p?.alive)return 0;const s=state(p),now=frame(c.g),key=c.ownerId+':'+c.ownerLifeSeq+':'+c.abilityId,capacity=Math.max(0,amount*(c.run.restore??1)),endAt=now+duration(c,frames);s.lastGame=c.g;const old=s.shields.find(x=>x.key===key);if(old){old.amount=capacity;old.end=endAt;old.ctx=c;}else s.shields.push({key,amount:capacity,end:endAt,ctx:c});s.shields.sort((a,b)=>a.end-b.end||a.key.localeCompare(b.key));let total=s.shields.reduce((n,a)=>n+a.amount,0),excess=Math.max(0,total-p.maxHp*.60);for(const a of s.shields){const take=Math.min(excess,a.amount);a.amount-=take;excess-=take;if(excess<=0)break;}s.shields=s.shields.filter(a=>a.amount>0);return s.shields.reduce((n,a)=>n+a.amount,0);}
             function absorb(p,amount){const s=state(p),now=frame(s.lastGame);let left=amount;for(const a of s.shields){if(a.end<=now)continue;const take=Math.min(left,a.amount);left-=take;a.amount-=take;if(left<=0)break;}s.shields=s.shields.filter(a=>a.amount>0&&a.end>now);return amount-left;}
@@ -5650,14 +5659,14 @@
             function front(c,o){const range=ranged(c,o.range??150),width=sized(c,o.width??80),from=copy(o.pos||c.owner.pos),dir=norm(o.dir||c.aim),to=from.add(dir.mult(range)),wall=combatTraceWalls(from,to,width/2,c.g.walls,[]),endAt=wall?.t??1,candidates=[];for(const p of targets(c,from,range+width)){const rel=p.pos.sub(from),along=rel.x*dir.x+rel.y*dir.y,lateral=Math.abs(rel.x*dir.y-rel.y*dir.x);if(along<0||along>range*endAt+p.radius||lateral>width/2+p.radius||c.g.checkWallBetween(from,p.pos))continue;candidates.push({p,t:Math.max(0,along-p.radius)});}candidates.sort((a,b)=>a.t-b.t||pid(a.p).localeCompare(pid(b.p)));const out=[];for(const {p} of candidates.slice(0,o.maxTargets??Infinity)){const r=hit(c,p,o.damage??0,{...o,direction:dir});if(r.valid)out.push({target:p,...r});}if((o.damage??0)>0&&window.brFarm)window.brFarm.line(c.g,c.owner,from,to,width/2,Math.max(.15,o.damage/60),c.castId+':front','beam');if((o.damage??0)>0&&!o.periodic&&o.visual!==false){const target=out[0]?.target;confirmedSkillFx(c,from,'swing',range*endAt,{shape:'front-impact',width,part:c.abilityId==='emoji-042'?'hammer':'sweep',targetX:target?.pos.x,targetY:target?.pos.y},o.color);}return out;}
             function bounded(g,pos,r=0){const center=g.center||v(),edge=Math.max(10,(g.worldRadius||BR_WORLD_RADIUS)-r-4),d=pos.sub(center),n=d.mag();return n>edge?center.add(d.mult(edge/n)):pos;}
             function safe(g,pos,r,owner=null){const m=combatMoveCircle(pos,v(),r,brHostBodyWalls(g),false),base=bounded(g,v(m.x,m.y),r);for(let i=0;i<4;i++){let moved=false;for(const q of nearby(g,base,r+100)){if(q===owner||!q.alive)continue;const d=base.sub(q.pos),len=d.mag(),need=r+q.radius+5;if(len<need){const n=len>.01?d.mult(1/len):v(Math.cos(i*2.3),Math.sin(i*2.3));base.x=q.pos.x+n.x*need;base.y=q.pos.y+n.y*need;moved=true;}}if(!moved)break;const z=combatMoveCircle(base,v(),r,brHostBodyWalls(g),false);base.x=z.x;base.y=z.y;}return bounded(g,base,r);}
-            function targetPoint(c,range){return safe(c.g,bounded(c.g,c.owner.pos.add(c.aim.mult(ranged(c,range))),c.owner.radius||0),c.owner.radius||0,c.owner);}
+            function targetPoint(c,range){return safe(c.g,bounded(c.g,c.owner.pos.add(c.aim.mult(ranged(c,range)*(c.aimRangeFactor??1))),c.owner.radius||0),c.owner.radius||0,c.owner);}
             function safePoint(c,pos,radius=0){return safe(c.g,copy(pos),radius,c.owner);}
             function armWallCrash(c,p,o={}){const q=state(p).impulse;if(q&&q.ctx.castId===c.castId){q.wallDamage=o.damage??0;q.end=Math.max(q.end,frame(c.g)+(o.duration??60));q.wallDone=false;return true;}return false;}
             function applySlow(p,mult,frames,source){if(!source||!p?.alive)return null;const g=source.rw?.lastGame||p.rw?.lastGame||(typeof game!=='undefined'?game:null);if(!g)return null;const c=context(source,g,source.lastAimDir);if(!hostile(c,p))return null;return buff(c,p,'slow',mult,frames);}
             function teleport(c,pos){const p=c.owner,to=safe(c.g,copy(pos),p.radius,p);confirmedSkillFx(c,p.pos,'teleport',p.radius*1.4,{shape:'blink'},'#a5b4fc');confirmedSkillFx(c,to,'teleport',p.radius*1.4,{shape:'blink'},'#c4b5fd');p.pos.x=to.x;p.pos.y=to.y;p.vel=v();p.warpSeq=(p.warpSeq||0)+1;c.warpSeq=p.warpSeq;world(c.g).spatialDirty=true;c.g.rebuildSpatialGrid?.();return to;}
             function aimTurn(dir,wanted,limit){const a=Math.atan2(dir.y,dir.x),b=Math.atan2(wanted.y,wanted.x),d=Math.atan2(Math.sin(b-a),Math.cos(b-a)),n=a+clamp(d,-limit,limit);return v(Math.cos(n),Math.sin(n));}
             function chooseHoming(c,e){const s=state(c.owner),marked=s.markedTarget;if(marked?.end>frame(c.g)&&marked.life===life(marked.p)&&!e.excludedTargets?.has(pid(marked.p))&&hostile(c,marked.p)&&visible(c,marked.p,e.pos)&&dist(e.pos,marked.p.pos)<e.homingRange){const d=norm(marked.p.pos.sub(e.pos));if(d.x*e.dir.x+d.y*e.dir.y>=e.homingCone)return marked.p;}let best=null,bestD=Infinity;for(const p of enemies(c,e.pos,e.homingRange)){if(e.excludedTargets?.has(pid(p))||!visible(c,p,e.pos))continue;const d=p.pos.sub(e.pos),n=d.mag();if(n<=0||d.x/n*e.dir.x+d.y/n*e.dir.y<e.homingCone)continue;if(n<bestD){bestD=n;best=p;}}return best;}
-            function projectile(c,o){const range=ranged(c,o.range??600),speed=Math.max(.1,o.speed??15),e=entity(c,'projectile',{...o,pos:o.pos||c.owner.pos,dir:o.dir||c.aim,range,radius:sized(c,o.radius??12),speed,damage:o.damage??0,duration:o.duration??Math.ceil(range/speed)*(o.boomerang?4:1)+90,cancelOnStun:false,ownerBound:o.ownerBound!==false},stepProjectile);e.distance=0;e.phase='out';e.hits=new Set();e.excludedTargets=new Set();e.homingRange=ranged(c,o.homingRange??650);e.homingCone=o.homingCone??-.15;e.nextSearch=frame(c.g)+(world(c.g).seq%6);e.bounces=Math.max(0,o.bounces??0);e.bounceCount=0;e.lastBounceFrame=-100;e.wallScratch=[];e.previousPos=copy(e.pos);e._stepTo=copy(e.pos);e._contacts=[];e.owner=c.owner;e.size=e.radius;e._farmHitIds=new Map();e.hitOptions={stun:e.stun??0,stunCap:e.stunCap,knockback:e.knockback??0,slow:e.slow,slowFrames:e.slowFrames,wallDamage:e.wallDamage,onceKnockback:e.onceKnockback,periodic:!!e.periodic,reflected:!!e.reflected,scaled:!!e.scaled,style:e.style||'rw-projectile'};event(c,e);return e;}
+            function projectile(c,o){const range=ranged(c,o.range??600)*(o.pos?1:(c.aimRangeFactor??1)),speed=Math.max(.1,o.speed??15),e=entity(c,'projectile',{...o,pos:o.pos||c.owner.pos,dir:o.dir||c.aim,range,radius:sized(c,o.radius??12),speed,damage:o.damage??0,duration:o.duration??Math.ceil(range/speed)*(o.boomerang?4:1)+90,cancelOnStun:false,ownerBound:o.ownerBound!==false},stepProjectile);e.distance=0;e.phase='out';e.hits=new Set();e.excludedTargets=new Set();e.homingRange=ranged(c,o.homingRange??650);e.homingCone=o.homingCone??-.15;e.nextSearch=frame(c.g)+(world(c.g).seq%6);e.bounces=Math.max(0,o.bounces??0);e.bounceCount=0;e.lastBounceFrame=-100;e.wallScratch=[];e.previousPos=copy(e.pos);e._stepTo=copy(e.pos);e._contacts=[];e.owner=c.owner;e.size=e.radius;e._farmHitIds=new Map();e.hitOptions={stun:e.stun??0,stunCap:e.stunCap,knockback:e.knockback??0,slow:e.slow,slowFrames:e.slowFrames,wallDamage:e.wallDamage,onceKnockback:e.onceKnockback,periodic:!!e.periodic,reflected:!!e.reflected,scaled:!!e.scaled,style:e.style||'rw-projectile'};event(c,e);return e;}
             function stepProjectile(c,e){
                 const from=e.previousPos;from.x=e.pos.x;from.y=e.pos.y;
                 if(e.phase==='dwell'){if(e.age>=e.returnAt){e.phase='return';e.hits.clear();e._farmHitIds.clear();}else return;}
@@ -5727,18 +5736,18 @@
                 });e.nextHits=new Map();e.blades=[];e.tickEvery=Math.max(1,o.tickEvery??24);return e;
             }
             function moveExternal(g,p,delta,stop=true){const moved=combatMoveCircle(p.pos,delta,p.radius,brHostBodyWalls(g),stop),to=bounded(g,v(moved.x,moved.y),p.radius);p.pos.x=to.x;p.pos.y=to.y;p.vel=v();state(p).movedFrame=frame(g);world(g).spatialDirty=true;return moved;}
-            function dash(c,o){const s=state(c.owner);if(s.dash)end(s.dash,'replaced');const range=ranged(c,o.range??350),speed=Math.max(.1,o.speed??15),e=entity(c,'dash',{...o,pos:c.owner.pos,dir:o.dir||c.aim,range,width:sized(c,o.width??c.owner.radius*2),duration:Math.ceil(range/speed)+2,speed,cancelOnStun:true},stepDash);e.distance=0;e.hits=new Set();s.dash=e;return e;}
+            function dash(c,o){const s=state(c.owner);if(s.dash)end(s.dash,'replaced');const range=ranged(c,o.range??350)*(c.aimRangeFactor??1),speed=Math.max(.1,o.speed??15),e=entity(c,'dash',{...o,pos:c.owner.pos,dir:o.dir||c.aim,range,width:sized(c,o.width??c.owner.radius*2),duration:Math.ceil(range/speed)+2,speed,cancelOnStun:true},stepDash);e.distance=0;e.hits=new Set();s.dash=e;return e;}
             function stepDash(c,e){const p=c.owner,from=copy(p.pos),step=Math.min(e.speed,e.range-e.distance),to=from.add(e.dir.mult(step)),wall=combatTraceWalls(from,to,p.radius,brHostBodyWalls(c.g),[]),limit=wall?.t??1,contacts=[];for(const q of targets(c,from,step+e.width+100)){const t=sweepTime(from,to,q.pos,(e.width/2)+(q.radius||0));if(t!=null&&t<=limit&&!e.hits.has(targetKey(q)))contacts.push({q,t});}contacts.sort((a,b)=>a.t-b.t);let stop=limit,reason=wall?'wall':null;for(const h of contacts){e.pos=from.add(to.sub(from).mult(h.t));const r=hit(c,h.q,e.damage??0,{...e,direction:e.dir,onHit:null,entity:e});if(!r.valid)continue;e.hits.add(targetKey(h.q));if(e.onHit)e.onHit(c,h.q,r,e);if(e.stopOnEnemy){stop=h.t;reason='hit';break;}}moveExternal(c.g,p,to.sub(from).mult(stop),true);state(p).motionFrame=frame(c.g);e.pos=copy(p.pos);e.distance+=dist(from,p.pos);if(e.push>0)for(const q of enemies(c,p.pos,e.width+80))if(e.hits.has(targetKey(q)))impulse(c,q,e.dir,e.push);if(reason||e.distance>=e.range-.1)end(e,reason||'expired');}
             function leap(c,o){const p=c.owner,s=state(p),from=copy(p.pos),to=safe(c.g,copy(o.pos||targetPoint(c,o.range??420)),p.radius,p),frames=duration(c,o.duration??35);const e=entity(c,'leap',{...o,pos:from,from,to,duration:frames+1,cancelOnStun:true},(ctx,e)=>{const t=Math.min(1,e.age/frames);p.pos.x=from.x+(to.x-from.x)*t;p.pos.y=from.y+(to.y-from.y)*t;p.vel=v();e.pos=copy(p.pos);e.height=Math.sin(t*Math.PI)*Math.max(75,dist(from,to)*.20);state(p).movedFrame=frame(c.g);state(p).motionFrame=frame(c.g);world(c.g).spatialDirty=true;const test=combatMoveCircle(p.pos,v(),p.radius,brHostBodyWalls(c.g),false);if(Math.hypot(test.x-p.pos.x,test.y-p.pos.y)<.01)e.lastSafe=copy(p.pos);if(t>=1){p.pos=copy(to);if(o.damage>0)area(c,to,o.radius??120,o.damage,o);end(e,'expired');}});e.lastSafe=from;e.speed=dist(from,to)/frames;e.dir=norm(to.sub(from));const oldEnd=e.onEnd;e.onEnd=(ctx,entity,reason)=>{if(reason!=='expired'){const q=safe(c.g,entity.lastSafe,p.radius,p);p.pos=copy(q);p.vel=v();}if(oldEnd)oldEnd(ctx,entity,reason);};s.dash=e;return e;}
-            function hook(c,o){const n=clamp(Math.floor(o.maxTargets??1),1,3),captured=new Set(),list=[];for(let i=0;i<n;i++){const angle=(i-(n-1)/2)*(n>1?(o.spread??.15):0),a=Math.atan2(c.aim.y,c.aim.x)+angle,dir=v(Math.cos(a),Math.sin(a)),range=ranged(c,o.range??600),speed=o.speed??24;const e=entity(c,'hook',{...o,dir,pos:c.owner.pos,range,width:sized(c,o.width??24),radius:sized(c,o.width??24)/2,duration:Math.ceil(range/speed)+2,speed,distance:0,cancelOnStun:true},(ctx,e)=>{e.previousPos=copy(e.pos);const from=copy(e.pos),to=from.add(e.dir.mult(Math.min(e.speed,e.range-e.distance))),wall=combatTraceWalls(from,to,e.radius,c.g.walls,[]),hits=[];for(const q of enemies(c,from,e.speed+e.radius+100)){if(captured.has(targetKey(q)))continue;const t=sweepTime(from,to,q.pos,e.radius+q.radius);if(t!=null&&(!wall||t<=wall.t))hits.push({q,t});}let block=wall?.t??Infinity;for(const b of c.g.farmBoxes||[]){const t=brCrateSweepTime(b,from,to,e.radius);if(t!=null)block=Math.min(block,t);}hits.sort((a,b)=>a.t-b.t);const h=hits.find(h=>h.t<=block);if(h){e.pos=from.add(to.sub(from).mult(h.t));const result=hit(c,h.q,o.damage??0,{knockback:0});if(result.valid){captured.add(targetKey(h.q));capture(c,h.q,{...o,slot:i,total:n,dir:c.aim});end(e,'hit');return;}}if(block<=1){e.pos=from.add(to.sub(from).mult(block));end(e,'wall');return;}e.pos=to;e.distance+=e.speed;if(e.distance>=e.range)end(e,'range');});event(c,e);list.push(e);}return list;}
+            function hook(c,o){const n=clamp(Math.floor(o.maxTargets??1),1,3),captured=new Set(),list=[];for(let i=0;i<n;i++){const angle=(i-(n-1)/2)*(n>1?(o.spread??.15):0),a=Math.atan2(c.aim.y,c.aim.x)+angle,dir=v(Math.cos(a),Math.sin(a)),range=ranged(c,o.range??600)*(c.aimRangeFactor??1),speed=o.speed??24;const e=entity(c,'hook',{...o,dir,pos:c.owner.pos,range,width:sized(c,o.width??24),radius:sized(c,o.width??24)/2,duration:Math.ceil(range/speed)+2,speed,distance:0,cancelOnStun:true},(ctx,e)=>{e.previousPos=copy(e.pos);const from=copy(e.pos),to=from.add(e.dir.mult(Math.min(e.speed,e.range-e.distance))),wall=combatTraceWalls(from,to,e.radius,c.g.walls,[]),hits=[];for(const q of enemies(c,from,e.speed+e.radius+100)){if(captured.has(targetKey(q)))continue;const t=sweepTime(from,to,q.pos,e.radius+q.radius);if(t!=null&&(!wall||t<=wall.t))hits.push({q,t});}let block=wall?.t??Infinity;for(const b of c.g.farmBoxes||[]){const t=brCrateSweepTime(b,from,to,e.radius);if(t!=null)block=Math.min(block,t);}hits.sort((a,b)=>a.t-b.t);const h=hits.find(h=>h.t<=block);if(h){e.pos=from.add(to.sub(from).mult(h.t));const result=hit(c,h.q,o.damage??0,{knockback:0});if(result.valid){captured.add(targetKey(h.q));capture(c,h.q,{...o,slot:i,total:n,dir:c.aim});end(e,'hit');return;}}if(block<=1){e.pos=from.add(to.sub(from).mult(block));end(e,'wall');return;}e.pos=to;e.distance+=e.speed;if(e.distance>=e.range)end(e,'range');});event(c,e);list.push(e);}return list;}
             function capture(c,target,o){const s=state(target);if(s.force&&!s.force.dead)return null;cancelAction(target,c.g,'forced');s.impulse=null;const ownerStart=copy(c.owner.pos),front=norm(o.dir||c.aim),side=((o.slot??0)-((o.total??1)-1)/2)*(target.radius*2+14),desired=c.owner.pos.add(front.mult(c.owner.radius+target.radius+15)).add(v(-front.y,front.x).mult(side)),to=safe(c.g,desired,target.radius,target);const e=entity(c,'capture',{pos:copy(target.pos),from:ownerStart,to,target,targetLife:life(target),duration:70,cancelOnStun:true,range:o.range??900,arrivalStun:o.arrivalStun??0,stunCap:o.stunCap,ownerWarp:Number(c.owner.warpSeq||0),speed:o.pullSpeed??24,width:4},(ctx,e)=>{if(!target.alive||life(target)!==e.targetLife){end(e,'life');return;}if(Number(c.owner.warpSeq||0)!==e.ownerWarp||dist(c.owner.pos,ownerStart)>Math.max(200,e.range*.6)||dist(target.pos,c.owner.pos)>e.range+250){end(e,'source-moved');return;}const delta=e.to.sub(target.pos),n=delta.mag();if(n<=3){if(e.arrivalStun>0)applyStun(c,target,e.arrivalStun,e.stunCap);end(e,'arrived');return;}const moved=moveExternal(c.g,target,delta.mult(Math.min(n,e.speed)/n),true);e.pos=copy(target.pos);e.from=copy(c.owner.pos);if(moved.hit){if(e.arrivalStun>0)applyStun(c,target,e.arrivalStun,e.stunCap);end(e,'wall');}});s.force=e;return e;}
-            function channel(c,o){const s=state(c.owner);if(s.channel)end(s.channel,'replaced');const e=entity(c,'beam',{...o,pos:c.owner.pos,dir:c.aim,range:ranged(c,o.range??1000),width:sized(c,o.width??75),duration:duration(c,o.duration??150),cancelOnStun:true},(ctx,e)=>{if(state(c.owner).force||state(c.owner).impulse?.hard){end(e,'forced');return;}e.dir=aimTurn(e.dir,e.desiredAim,e.turnRate??.038);c.owner.lastAimDir=copy(e.dir);e.pos=copy(c.owner.pos);const target=e.pos.add(e.dir.mult(e.range)),wall=combatTraceWalls(e.pos,target,e.width/2,c.g.walls,[]);e.length=e.range*(wall?.t??1);e.to=e.pos.add(e.dir.mult(e.length));if(frame(c.g)>=e.nextTick){e.nextTick+=e.tickEvery;for(const p of targets(c,e.pos,e.length+e.width)){const rel=p.pos.sub(e.pos),along=rel.x*e.dir.x+rel.y*e.dir.y,lat=Math.abs(rel.x*e.dir.y-rel.y*e.dir.x);if(along>=0&&along<=e.length+p.radius&&lat<=e.width/2+p.radius&&!c.g.checkWallBetween(e.pos,p.pos))hit(c,p,e.damage??5,{periodic:true,knockback:0,stun:0,direction:e.dir});}window.brFarm?.line(c.g,c.owner,e.pos,e.to,e.width/2,Math.max(.08,(e.damage??5)/60),e.id+':'+frame(c.g),'beam');}});e.desiredAim=copy(c.aim);e.tickEvery=Math.max(1,o.tickEvery??6);e.nextTick=frame(c.g)+e.tickEvery;e.length=e.range;s.channel=e;return e;}
+            function channel(c,o){const s=state(c.owner);if(s.channel)end(s.channel,'replaced');const e=entity(c,'beam',{...o,pos:c.owner.pos,dir:c.aim,range:ranged(c,o.range??1000)*(c.aimRangeFactor??1),width:sized(c,o.width??75),duration:duration(c,o.duration??150),cancelOnStun:true},(ctx,e)=>{if(state(c.owner).force||state(c.owner).impulse?.hard){end(e,'forced');return;}e.dir=aimTurn(e.dir,e.desiredAim,e.turnRate??.038);c.owner.lastAimDir=copy(e.dir);e.pos=copy(c.owner.pos);const target=e.pos.add(e.dir.mult(e.range)),wall=combatTraceWalls(e.pos,target,e.width/2,c.g.walls,[]);e.length=e.range*(wall?.t??1);e.to=e.pos.add(e.dir.mult(e.length));if(frame(c.g)>=e.nextTick){e.nextTick+=e.tickEvery;for(const p of targets(c,e.pos,e.length+e.width)){const rel=p.pos.sub(e.pos),along=rel.x*e.dir.x+rel.y*e.dir.y,lat=Math.abs(rel.x*e.dir.y-rel.y*e.dir.x);if(along>=0&&along<=e.length+p.radius&&lat<=e.width/2+p.radius&&!c.g.checkWallBetween(e.pos,p.pos))hit(c,p,e.damage??5,{periodic:true,knockback:0,stun:0,direction:e.dir});}window.brFarm?.line(c.g,c.owner,e.pos,e.to,e.width/2,Math.max(.08,(e.damage??5)/60),e.id+':'+frame(c.g),'beam');}});e.desiredAim=copy(c.aim);e.tickEvery=Math.max(1,o.tickEvery??6);e.nextTick=frame(c.g)+e.tickEvery;e.length=e.range;s.channel=e;return e;}
             function steer(p,g,aim,castId){const e=state(p).channel;if(!e||e.dead||castId&&e.ctx.castId!==castId||!validContext(e.ctx))return false;e.desiredAim=norm(aim);return true;}
             function turret(c,o={}){const own=world(c.g).entities.filter(e=>!e.dead&&e.kind==='turret'&&e.ctx.ownerId===c.ownerId),max=o.maxPerOwner??3;while(own.length>=max&&own.length)end(own.shift(),'replaced');const pos=safe(c.g,copy(o.pos||c.owner.pos.add(c.aim.mult(c.owner.radius+52))),30,null),e=entity(c,'turret',{...o,pos,radius:o.radius??30,duration:duration(c,o.duration??1800),cancelOnStun:false},stepTurret);e.hp=o.hp??138;e.maxHp=e.hp;e.range=ranged(c,o.range??650);e.damage=o.damage??14;e.cooldown=Math.max(6,o.cooldown??45);e.nextShot=frame(c.g)+e.cooldown;e.nextSearch=frame(c.g)+(world(c.g).seq%12);e.shots=0;e.alive=true;e.isReworkTurret=true;e.owner=c.owner;e.team=c.owner.team;e.remoteId=e.id;e.lifeSeq=0;e.id=e.id;return e;}
             function stepTurret(c,e){if(e.hp<=0){end(e,'destroyed');return;}if(e.target&&(!hostile(c,e.target)||life(e.target)!==e.targetLife||dist(e.target.pos,e.pos)>e.range||!visible(c,e.target,e.pos)))e.target=null;if(frame(c.g)>=e.nextSearch){e.nextSearch=frame(c.g)+15;let best=e.target,near=best?dist(e.pos,best.pos):Infinity;for(const p of enemies(c,e.pos,e.range)){const d=dist(p.pos,e.pos);if(d<near&&visible(c,p,e.pos)){best=p;near=d;}}e.target=best;e.targetLife=best?life(best):null;}if(e.target&&frame(c.g)>=e.nextShot){e.nextShot=frame(c.g)+e.cooldown;e.shots++;e.dir=norm(e.target.pos.sub(e.pos));const heavy=e.shots%4===0;projectile(c,{pos:e.pos,dir:e.dir,speed:heavy?18:21,range:e.range,radius:heavy?17:9,damage:heavy?(e.heavyDamage??e.damage*1.8):e.damage,knockback:heavy?5:1,stun:0,color:heavy?'#fbbf24':'#67e8f9',emoji:heavy?'💥':'✦',noFarm:true});}}
             function openRecast(c,o){const s=state(c.owner);s.recast={ctx:c,end:frame(c.g)+Math.max(1,o.duration??120),left:1,handler:o.handler,cooldownFrames:o.cooldownFrames??defs[c.abilityId]?.skill?.cooldownFrames??720};c.owner.cooldown=0;c.owner.skillCooldownMax=s.recast.cooldownFrames;return s.recast;}
             function closeRecast(p,g,reason){const s=state(p),r=s.recast;if(!r)return;s.recast=null;finishCooldown(r.ctx,r.cooldownFrames);r.reason=reason;}
-            function recast(p,g,aim,castId){const s=state(p),r=s.recast;if(!r||r.left!==1||r.end<=frame(g)||castId&&castId!==r.ctx.castId||p.stunned>0||!validContext(r.ctx))return false;r.left=0;s.recast=null;const c={...r.ctx,aim:norm(aim),startedFrame:frame(g),castId:r.ctx.castId+':recast',controlHits:new Set(),knockbackHits:new Set()};r.handler?.(c);finishCooldown(c,r.cooldownFrames);return true;}
+            function recast(p,g,aim,castId,power=1){const s=state(p),r=s.recast;if(!r||r.left!==1||r.end<=frame(g)||castId&&castId!==r.ctx.castId||p.stunned>0||!validContext(r.ctx))return false;r.left=0;s.recast=null;const c={...r.ctx,aim:norm(aim),power,aimRangeFactor:brSkillUsesAimDistance(defs[aid(p)]?.skill)?brSkillReachFraction(power):1,startedFrame:frame(g),castId:r.ctx.castId+':recast',controlHits:new Set(),knockbackHits:new Set()};r.handler?.(c);finishCooldown(c,r.cooldownFrames);return true;}
             function inputLocks(p,g){const s=state(p),stun=(p.stunned||0)>0,force=!!s.force&&!s.force.dead,dash=!!s.dash&&!s.dash.dead,channel=!!s.channel&&!s.channel.dead,locked=s.lock&&s.lock.end>frame(g)?s.lock:null;return {move:stun||force||dash||channel||!!locked?.move,attack:stun||force||dash||channel||!!locked?.attack,skill:stun||force||dash||channel||!!locked?.skill,steerAllowed:channel&&!stun&&!force};}
             function ownsMovement(p){const s=p?.rw;return !!s&&(s.motionFrame===frame(s.lastGame)||!!s.force&&!s.force.dead||!!s.dash&&!s.dash.dead||!!s.channel&&!s.channel.dead);}
             function cancelAction(p,g,reason){const s=state(p);const canceled=s.buffs.filter(b=>b.kind==='counterDeferred');if(canceled.length){const ids=new Set(canceled.map(b=>b.ctx.castId));s.buffs=s.buffs.filter(b=>!ids.has(b.ctx.castId));}for(const e of world(g).entities)if(!e.dead&&e.ctx.owner===p&&e.cancelOnStun&&['stun','forced'].includes(reason))end(e,reason);if(s.recast)closeRecast(p,g,reason);if(s.lock?.cancelOnStun)s.lock=null;p.pendingAttack=null;p.pendingSkill=null;p.comboHitsRemaining=0;p.playerDash=null;p.dashFrames=0;}
@@ -6174,7 +6183,7 @@
     add('emoji-126','압정 난사','C','원거리형',{},
         {kind:'pin-traps',shape:'line',cooldown:frames(10),range:600,radius:25,damage:15,count:3,countCap:3,duration:480,armFrames:18,trapCap:3,color:'#fda4af',emoji:'📌',caps:{damage:true,trap:true,duration:true,utility:true,signatureRange:true},
          description:'조준한 직선에 압정 함정 3개를 놓습니다. 0.3초 후 활성화되고 각각 한 번만 피해를 준 뒤 사라집니다. 최대 3개·수명 8초입니다.',strength:'적의 진입 경로에 준비',success:'적이 지나는 선에 함정 설치',failure:'설치 지연과 제한된 개수',counterplay:'보이는 함정을 우회'},
-        (ctx,s)=>{for(let i=1;i<=s.count;i++){const own=R.world(ctx.g).entities.filter(e=>!e.dead&&e.kind==='pin-trap'&&e.ctx.ownerId===ctx.ownerId);while(own.length>=s.trapCap)R.end(own.shift(),'replaced');const raw=ctx.owner.pos.add(ctx.aim.mult(R.ranged(ctx,s.range)*i/(s.count+1))),pos=groundPoint(ctx,raw,R.sized(ctx,s.radius));R.entity(ctx,'pin-trap',{pos,radius:R.sized(ctx,s.radius),damage:s.damage,duration:R.duration(ctx,s.duration),armFrames:s.armFrames,maxPerOwner:s.trapCap,cancelOnStun:false,trap:true,color:s.color,emoji:s.emoji},(c,e)=>{if(e.age<s.armFrames)return;for(const t of R.enemies(c,e.pos,e.radius+85)){if(e.pos.dist(t.pos)>e.radius+Number(t.radius||0))continue;if(c.g.checkWallBetween(e.pos,t.pos))continue;const hit=R.hit(c,t,s.damage,{knockback:0,stun:0});if(hit.valid){R.end(e,'hit');break;}}});}});
+        (ctx,s)=>{for(let i=1;i<=s.count;i++){const own=R.world(ctx.g).entities.filter(e=>!e.dead&&e.kind==='pin-trap'&&e.ctx.ownerId===ctx.ownerId);while(own.length>=s.trapCap)R.end(own.shift(),'replaced');const raw=ctx.owner.pos.add(ctx.aim.mult(R.ranged(ctx,s.range)*ctx.aimRangeFactor*i/(s.count+1))),pos=groundPoint(ctx,raw,R.sized(ctx,s.radius));R.entity(ctx,'pin-trap',{pos,radius:R.sized(ctx,s.radius),damage:s.damage,duration:R.duration(ctx,s.duration),armFrames:s.armFrames,maxPerOwner:s.trapCap,cancelOnStun:false,trap:true,color:s.color,emoji:s.emoji},(c,e)=>{if(e.age<s.armFrames)return;for(const t of R.enemies(c,e.pos,e.radius+85)){if(e.pos.dist(t.pos)>e.radius+Number(t.radius||0))continue;if(c.g.checkWallBetween(e.pos,t.pos))continue;const hit=R.hit(c,t,s.damage,{knockback:0,stun:0});if(hit.valid){R.end(e,'hit');break;}}});}});
     // C11: the simplest short dash, nothing is spawned behind it.
     add('emoji-127','롤러스케이트','C','기동형',melee('punch',{pushScale:.25}),
         {kind:'simple-dash',shape:'dash',cooldown:frames(7),range:370,width:64,speed:23,damage:17,knockback:5,color:'#f9a8d4',caps:dashCaps,
@@ -6282,7 +6291,7 @@
             halfAngle:Math.max(0,finite(s.halfAngle,.5)),rework:true};
         if(s.shape==='self'){spec.scope='self';spec.range=0;if(!spec.radius)spec.radius=Math.max(24,finite(playerRadius,38));}
         if(shape==='circle'&&!spec.radius)spec.radius=spec.range||Math.max(24,finite(playerRadius,38));
-        if(shape==='target'&&s.powerScale){const lo=finite(s.powerScale[0],.22),hi=finite(s.powerScale[1],.78);spec.range*=lo+hi*Math.max(.18,Math.min(1,finite(power,1)));}
+        if(brSkillUsesAimDistance(s))spec.range*=brSkillReachFraction(power);
         if(shape==='target'&&caps.dash)spec.teleport=s.kind!=='leap'&&s.kind!=='flight';
         if(shape==='dash'){spec.dash=true;spec.phases=!!s.airborne;}
         if(s.kind==='channel'||s.kind==='channel-beam'||s.kind==='continuous-laser'||s.beam){spec.beam=true;}
@@ -7539,6 +7548,7 @@
                 spec.width=shot.size*2*(ability.t==='S'?1.14:ability.t==='A'?1.08:1)*Number(mods.skillSize||1);
                 if(shot.type==='BOOMERANG')spec.range=31*shot.speed; // Native outbound phase is 31 ticks, not the generic weapon range.
             }
+            if(kind==='skill'&&ability.type===ABILITY_TYPES.PROJ&&ability.sub!=='NOVA')spec.range*=brSkillReachFraction(power);
             if(kind==='skill'&&ability.sub==='GRAVITY_WELL') {
                 var geometry=brZoneGeometry(spec.radius,'pull',ability.sub);spec.pullRadius=geometry.pull;spec.burstRadius=geometry.burst;
             }
@@ -7876,21 +7886,25 @@
             brClearRefs('studentRefs');
             brMusicSync(BRMP.roomMeta);
             var base=BRMP.db.ref('rooms/'+BRMP.roomCode);
-            brSubscribeRunStudent(base);
-            brRefOn(base.child('meta/zoneState'),'value',function(s){brReceiveRing(s.val());},BRMP.studentRefs);
+            var subscribedRoom=BRMP.roomCode,subscribedPlayer=BRMP.playerId;
+            function currentRoom(){return BRMP.role==='student'&&BRMP.roomCode===subscribedRoom&&BRMP.playerId===subscribedPlayer;}
+            brSubscribeRunStudent(base,currentRoom);
+            brRefOn(base.child('meta/zoneState'),'value',function(s){if(currentRoom())brReceiveRing(s.val());},BRMP.studentRefs);
             brRefOn(base.child('meta'),'value',function(s){
+                if(!currentRoom())return;
                 if(BRMP.phaseHandled==='battle'&&s.exists()&&s.child('phase').val()==='battle'&&
                     s.child('updatedAt').val()===BRMP.roomMeta?.updatedAt&&s.child('hostConnected').val()===BRMP.roomMeta?.hostConnected&&
                     s.child('battleStartedAt').val()===BRMP.roomMeta?.battleStartedAt&&s.child('matchRound').val()===BRMP.roomMeta?.matchRound&&
                     s.child('battleEndsAt').val()===BRMP.roomMeta?.battleEndsAt)return;
                 var meta=s.val();if(meta)delete meta.zoneState;
-                if(!meta){brToast('방이 종료되었습니다.');brReturnHome();return;}
+                if(!meta){brToast('방이 종료되었습니다.');brReturnHome('closed');return;}
                 var oldMeta=BRMP.roomMeta,round=Number(meta.matchRound||0),priorRound=Number(oldMeta?.matchRound||0);
                 if(oldMeta&&round<priorRound)return;
                 if(oldMeta&&round===priorRound&&BR_PHASES.indexOf(meta.phase)<BR_PHASES.indexOf(oldMeta.phase))return;
                 BRMP.roomMeta=meta; brHandleStudentPhase(meta);
             },BRMP.studentRefs);
             brRefOn(base.child('players/'+BRMP.playerId),'value',function(s){
+                if(!currentRoom())return;
                 var incoming=s.val()||BRMP.selfPlayer||{},optimistic=BRMP.rerollOptimistic;
                 // 연속 리롤 저장 중 먼저 도착한 이전 스냅샷이 화면을 되감지 않게 한다.
                 if(optimistic&&BRMP.roomMeta&&BRMP.roomMeta.phase==='draft'&&Number(incoming.draftRound||0)===Number(BRMP.roomMeta.matchRound||0)&&Number(incoming.rerollProcessed||0)<Number(optimistic.rerollProcessed||0)) {
@@ -7903,12 +7917,14 @@
                 brRenderSelfState();
             },BRMP.studentRefs);
             brRefOn(base.child('views/'+BRMP.playerId),'value',function(s){
+                if(!currentRoom())return;
                 var incoming=brDecodeView(s.val());
                 if(!incoming)return;
                 if(BRMP.lastViewFrame==null||incoming.frame>BRMP.lastViewFrame)BRMP.latestView=incoming;
                 brIngestView(incoming);
             },BRMP.studentRefs);
             brRefOn(base.child('results'),'value',function(s){
+                if(!currentRoom())return;
                 var result=s.val();
                 if(!result||!BRMP.roomMeta||result.matchKey!==brRingKey())return;
                 BRMP.results=result;
@@ -7917,7 +7933,7 @@
         }
         function brHandleStudentPhase(meta) {
             var phase=meta.phase||'lobby';
-            if(phase==='closed'){brToast('선생님이 방을 닫았습니다.');brReturnHome();return;}
+            if(phase==='closed'){brToast('선생님이 방을 닫았습니다.');brReturnHome('closed');return;}
             brMusicSync(meta);
             if(BRMP.phaseHandled===phase&&BRMP.phaseHandledRound===Number(meta.matchRound||0)) {
                 if(phase==='quiz')brUpdateQuizClock();
@@ -8204,10 +8220,10 @@
                 BRMP.farmView=state;
             }
         }
-        function brSubscribeRunStudent(base){
-            brRefOn(base.child('runState/players/'+BRMP.playerId),'value',function(s){brReceiveRunState(s.val());},BRMP.studentRefs);
-            brRefOn(base.child('runState/farm'),'value',function(s){brReceiveFarmState(s.val());},BRMP.studentRefs);
-            brRefOn(base.child('upgradeAcks/'+BRMP.playerId),'value',function(s){var ack=s.val(),pending=BRMP.runChoicePending;if(!ack||!pending||ack.matchKey!==brRunMatchKey()||ack.requestId!==pending.id||
+        function brSubscribeRunStudent(base,currentRoom){
+            brRefOn(base.child('runState/players/'+BRMP.playerId),'value',function(s){if(currentRoom())brReceiveRunState(s.val());},BRMP.studentRefs);
+            brRefOn(base.child('runState/farm'),'value',function(s){if(currentRoom())brReceiveFarmState(s.val());},BRMP.studentRefs);
+            brRefOn(base.child('upgradeAcks/'+BRMP.playerId),'value',function(s){if(!currentRoom())return;var ack=s.val(),pending=BRMP.runChoicePending;if(!ack||!pending||ack.matchKey!==brRunMatchKey()||ack.requestId!==pending.id||
                 Number(ack.lifeSeq)!==Number(pending.lifeSeq)||ack.abilityId!==pending.abilityId||ack.offerId!==pending.offerId)return;
                 clearTimeout(pending.timer);BRMP.runChoicePending=null;
                 if(ack.accepted){(BRMP.runAcceptedNotices||(BRMP.runAcceptedNotices=[])).push(ack);brTryRunChoiceNotice();pending.resolve();}
@@ -8352,14 +8368,14 @@
             const prior=BRMP.graphicsWriteChain||Promise.resolve();
             const next=prior.catch(()=>{}).then(async function(){
                 const ref=BRMP.db.ref('rooms/'+room+'/meta');
-                const result=await ref.transaction(function(meta){
-                    if(!meta||meta.phase!=='lobby'||Number(meta.matchRound||0)!==round)return;
-                    meta.graphicsPreset=choice;meta.updatedAt=brNow();return meta;
-                },undefined,false);
-                if(!result.committed)throw new Error('로비 설정이 변경되어 그래픽 저장을 취소했습니다.');
-                if(BRMP.roomCode===room&&Number(BRMP.roomMeta?.matchRound||0)===round){
-                    BRMP.roomMeta.graphicsPreset=brGraphicsPreset(result.snapshot.val()?.graphicsPreset);
-                }
+                const snapshot=await ref.once('value'),meta=snapshot.val();
+                if(BRMP.role!=='host'||BRMP.roomCode!==room||!meta||meta.phase!=='lobby'||Number(meta.matchRound||0)!==round)
+                    throw new Error('로비 상태가 변경되었습니다. 다시 확인해 주세요.');
+                // A transaction on all of /meta is aborted by the heartbeat and quiz-bank
+                // updates. Only this setting is written; quiz start awaits this chain.
+                await ref.child('graphicsPreset').set(choice);
+                if(BRMP.role==='host'&&BRMP.roomCode===room&&Number(BRMP.roomMeta?.matchRound||0)===round)
+                    BRMP.roomMeta.graphicsPreset=choice;
                 return true;
             });
             BRMP.graphicsWriteChain=next;
@@ -9043,7 +9059,7 @@
                 try {
                     let accepted=true;
                     if(isAttack)brBasicAttack(p,g,pending.aim);
-                    else if(pending.kind==='recast')accepted=!!R?.recast(p,g,pending.aim,pending.castId);
+                    else if(pending.kind==='recast')accepted=!!R?.recast(p,g,pending.aim,pending.castId,pending.power);
                     else accepted=brCastPlayerSkill(p,g,pending.aim,pending.power)!==false;
                     if(accepted){if(BRMP.respawnMode)p.spawnProtectionUntilFrame=0;p[isAttack?'firedAttackSeq':'firedSkillSeq']=pending.seq;
                         if(!isAttack)p.skillCooldownMax=Math.max(1,Number(p.cooldown||p.maxCooldown||1));}
@@ -10396,7 +10412,7 @@
             BRMP.pendingLocalActions={};BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;
             if(!Number.isFinite(BRMP.inputState.aimPower))BRMP.inputState.aimPower=1;
             BRMP.drawPlayers=new Map();BRMP.drawProjectiles=new Map();BRMP.localProjectiles=[];BRMP.drawFx=new Map();BRMP.hitStates=new Map();BRMP.seenFxIds=new Map();BRMP.crateHits=new Map();
-            BRMP.netClockOffset=undefined;BRMP.lastViewFrame=null;BRMP.viewGap=180;BRMP.remoteBuffer=130;BRMP.remoteBufferTarget=130;BRMP.lastRemoteRenderTime=null;BRMP.lastActorPacketAt=0;BRMP.minInputRtt=undefined;BRMP.inputSentAt=new Map();BRMP.localTeleportUntil=0;BRMP.localDashGraceUntil=0;
+            BRMP.netClockOffset=undefined;BRMP.lastViewFrame=null;BRMP.viewGap=180;BRMP.remoteBuffer=130;BRMP.remoteBufferTarget=130;BRMP.lastRemoteRenderTime=null;BRMP.lastActorPacketAt=0;BRMP.minInputRtt=undefined;BRMP.inputSentAt=new Map();BRMP.localTeleportUntil=0;BRMP.localDashGraceUntil=0;BRMP.moveTarget=null;BRMP.moveKnob=null;
             BRMP.studentCamera=null;BRMP.lastStudentFrameAt=0;BRMP.aimGesture=null;BRMP.localCastFx=null;BRMP.localDash=null;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.staticView=BRMP.staticView||{};BRMP.studentShake=null;BRMP.studentRecoil=null;BRMP.hitConfirm=null;BRMP.killConfirm=null;BRMP.damageFlash=null;
             // 고해상도 태블릿에서 2~3배 DPR로 거대한 캔버스를 만드는 대신 CSS 기준 선명도를 유지한다.
             brLoadPlayPrefs();
@@ -10422,7 +10438,7 @@
             if(BRMP.renderFrame){cancelAnimationFrame(BRMP.renderFrame);BRMP.renderFrame=null;}
             BRMP.drawPlayers=null;BRMP.drawProjectiles=null;BRMP.localProjectiles=null;BRMP.drawFx=null;BRMP.hitStates=null;BRMP.seenFxIds=null;BRMP.crateHits=null;BRMP.currentSelf=null;BRMP.aimGesture=null;BRMP.localCastFx=null;BRMP.localDash=null;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.staticView=null;BRMP.studentShake=null;BRMP.studentRecoil=null;BRMP.hitConfirm=null;BRMP.killConfirm=null;BRMP.damageFlash=null;
             BRMP.latestView=null;BRMP.lastViewFrame=null;BRMP.inputState=null;BRMP.inputMatchKey=null;BRMP.inputSeq=0;BRMP.lastMoveSeq=0;BRMP.lastInputKey=null;BRMP.lastInputSent=0;
-            BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;BRMP.pendingLocalActions={};BRMP.studentCamera=null;BRMP.lastReworkSteer=null;BRMP.rwDisplayCache=null;BRMP.rwDisplaySource=null;BRMP.rwDisplayList=null;
+            BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;BRMP.pendingLocalActions={};BRMP.studentCamera=null;BRMP.lastReworkSteer=null;BRMP.rwDisplayCache=null;BRMP.rwDisplaySource=null;BRMP.rwDisplayList=null;BRMP.moveTarget=null;BRMP.moveKnob=null;
             ['br-attack','br-skill'].forEach(function(id){var el=brEl(id);if(el)el.classList.remove('aiming');});
         }
         function brSendInput(force) {
@@ -10453,17 +10469,30 @@
             var before=Math.hypot(px,py),after=Math.hypot(dx,dy);
             return (before>.12)!==(after>.12)||(before>.12&&after>.12&&(px*dx+py*dy)/(before*after)<.15);
         }
+        function brSmoothMoveInput(now=performance.now()) {
+            const target=BRMP.moveTarget,input=BRMP.inputState;if(!target||!input)return;
+            if(brReworkClientState()?.move){target.x=0;target.y=0;}
+            const dt=brClamp(now-target.at,0,50);target.at=now;
+            const px=Number(input.dx||0),py=Number(input.dy||0);
+            const blend=1-Math.exp(-dt/58);
+            let x=px+(target.x-px)*blend,y=py+(target.y-py)*blend;
+            if(Math.hypot(x-target.x,y-target.y)<.012){x=target.x;y=target.y;}
+            input.dx=x;input.dy=y;
+            if(BRMP.moveKnob)BRMP.moveKnob.style.transform='translate('+(x*BRMP.moveKnobMax).toFixed(2)+'px,'+(y*BRMP.moveKnobMax).toFixed(2)+'px)';
+            if(Math.abs(x-px)+Math.abs(y-py)>.001)brSendInput(brUrgentMoveChange(px,py,x,y));
+        }
         function brSetMove(dx,dy) {
             if(!BRMP.inputState)return;
             if(brReworkClientState()?.move){dx=0;dy=0;}
-            var previousX=Number(BRMP.inputState.dx||0),previousY=Number(BRMP.inputState.dy||0),m=Math.hypot(dx,dy);
-            if(m>.12) {
-                // 8방향 반올림을 제거해 손가락 각도와 스틱 크기를 그대로 사용한다.
-                var scale=Math.min(1,m)/m;
-                BRMP.inputState.dx=dx*scale;BRMP.inputState.dy=dy*scale;
-            } else {BRMP.inputState.dx=0;BRMP.inputState.dy=0;}
-            // 스틱을 처음 누르거나 놓는 순간은 전송 제한을 무시해 출발/정지 지연을 없앤다.
-            brSendInput(brUrgentMoveChange(previousX,previousY,BRMP.inputState.dx,BRMP.inputState.dy));
+            var m=Math.hypot(dx,dy),scale=m>1?1/m:1,now=performance.now();
+            var target=BRMP.moveTarget||(BRMP.moveTarget={x:0,y:0,at:now-16.67});
+            target.x=m>.12?dx*scale:0;target.y=m>.12?dy*scale:0;
+            if(!target.x&&!target.y){
+                var oldX=BRMP.inputState.dx,oldY=BRMP.inputState.dy;
+                BRMP.inputState.dx=0;BRMP.inputState.dy=0;target.at=now;
+                brSendInput(brUrgentMoveChange(oldX,oldY,0,0));return;
+            }
+            brSmoothMoveInput(now);
         }
         function brStudentResolution(){
             const c=brEl('br-student-canvas'),w=Math.max(1,c.clientWidth||window.innerWidth),h=Math.max(1,c.clientHeight||window.innerHeight);
@@ -10515,7 +10544,10 @@
                 if(spec.phases){const landed=combatMoveCircle(moved,{x:0,y:0},radius,brStudentBodyWalls(view),false);result.landingX=landed.x;result.landingY=landed.y;}
                 return result;
             }
-            if(spec.pullRadius){const point=brLocalAimEndpoint(x,y,aim.x,aim.y,range,radius,view);return {x:point.x,y:point.y,range};}
+            if(spec.pullRadius||spec.rework&&spec.shape==='target'){
+                const point=brLocalAimEndpoint(x,y,aim.x,aim.y,range,radius,view);
+                return {x:point.x,y:point.y,range:Math.hypot(point.x-x,point.y-y)};
+            }
             return {x:x+aim.x*range,y:y+aim.y*range,range};
         }
         function brPaintClarityPreview(p,spec,x,y,aim,endpoint,color,alpha,zoom) {
@@ -10897,10 +10929,13 @@
                 var authX=baseAuthX+Number(p.vx||0)*travel,authY=baseAuthY+Number(p.vy||0)*travel;
                 var ex=authX-p.predX,ey=authY-p.predY,error=Math.hypot(ex,ey);
                 const nearContact=brPredictPlayerContact(p,view,now),contacted=Math.hypot(nearContact.x-p.predX,nearContact.y-p.predY)>.25;
-                var threshold=hitCorrection?4:stepCorrection?.25:edgeCorrection?2:contacted?5:amount>.05?80:12;
+                var threshold=hitCorrection?4:stepCorrection?.25:edgeCorrection?2:contacted?5:amount>.05?24:12;
                 if(error>threshold) {
-                    var fix=1-Math.exp(-dt/(hitCorrection?90:stepCorrection?80:edgeCorrection?90:amount>.05?480:180));
-                    var fx=ex*fix,fy=ey*fix,previousX=Number.isFinite(p.previousX)?p.previousX:p.predX,previousY=Number.isFinite(p.previousY)?p.previousY:p.predY;
+                    var fix=1-Math.exp(-dt/(hitCorrection?90:stepCorrection?80:edgeCorrection?90:amount>.05?260:180));
+                    // Reconcile only the excess beyond the dead zone. Correcting the
+                    // entire error at the threshold made a straight run saw back and forth.
+                    var fraction=(error-threshold)*fix/error;
+                    var fx=ex*fraction,fy=ey*fraction,previousX=Number.isFinite(p.previousX)?p.previousX:p.predX,previousY=Number.isFinite(p.previousY)?p.previousY:p.predY;
                     p.predX+=fx;p.predY+=fy;p.previousX=previousX+fx;p.previousY=previousY+fy;
                 }
             }
@@ -11145,6 +11180,7 @@
             BRMP.renderFrame=requestAnimationFrame(brDrawStudentFrame);
             var c=brEl('br-student-canvas');if(brEl('br-student-battle').classList.contains('br-hidden'))return;
             brSmoothAimGesture(performance.now());
+            brSmoothMoveInput(performance.now());
             brAdvanceLocalActions();
             brResizeStudentCanvas();
             var w=c._cssW,h=c._cssH,dpr=c._dpr,cc=brPixiBattle?null:(c._brCtx||(c._brCtx=c.getContext('2d',{alpha:false,desynchronized:true})));
@@ -11941,9 +11977,9 @@
             }
             brReturnHome();
         }
-        function brReturnHome() {
+        function brReturnHome(reason) {
             brMusicStop();
-            if(BRMP.role==='student'&&BRMP.backend==='firebase'&&BRMP.db&&BRMP.roomCode&&BRMP.playerId) {
+            if(reason!=='closed'&&BRMP.role==='student'&&BRMP.backend==='firebase'&&BRMP.db&&BRMP.roomCode&&BRMP.playerId) {
                 BRMP.db.ref('rooms/'+BRMP.roomCode+'/players/'+BRMP.playerId).update({connected:false,lastSeen:brNow()}).catch(function(){});
                 BRMP.db.ref('rooms/'+BRMP.roomCode+'/inputs/'+BRMP.playerId).remove().catch(function(){});
             }
@@ -11952,6 +11988,13 @@
             BRMP.role=null;BRMP.backend=null;BRMP.roomCode='';BRMP.playerId='';BRMP.roomMeta=null;BRMP.players={};BRMP.inputs={};BRMP.results=null;BRMP.phaseHandled=null;BRMP.phaseHandledRound=null;BRMP.rerollOptimistic=null;BRMP.rerollWriteChain=null;BRMP.draftReadyPending=false;
             brBgm.role='';brBgm.pref=null;brMusicUi();
             brCloseEncyclopedia();brUseDefaultQuiz();BRMP.lastPublishedQuizSignature='';
+            brEl('br-home').classList.remove('br-room-invite');
+            brEl('br-join-code').value='';brEl('br-join-btn').textContent='방에 참가하기';
+            try{if(window.history?.replaceState&&location.search){
+                const query=new URLSearchParams(location.search);
+                if(query.has('room')){query.delete('room');query.delete('join');query.delete('v');
+                    const suffix=query.toString();window.history.replaceState(null,'',location.pathname+(suffix?'?'+suffix:'')+(location.hash||''));}
+            }}catch(_){}
             brShow('br-home');
         }
 
@@ -12022,12 +12065,12 @@
                 var rect=joyRect||(joyRect=joy.getBoundingClientRect()),cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
                 var dx=e.clientX-cx,dy=e.clientY-cy,max=rect.width*.31,m=Math.hypot(dx,dy);
                 if(m>max){dx=dx/m*max;dy=dy/m*max;}
-                knob.style.transform='translate('+dx+'px,'+dy+'px)';
+                BRMP.moveKnob=knob;BRMP.moveKnobMax=max;
                 brSetMove(dx/max,dy/max);
             }
             joy.addEventListener('pointerdown',function(e){e.preventDefault();if(joyPointer!==null||e.button>0)return;joyPointer=e.pointerId;joyRect=joy.getBoundingClientRect();if(joy.setPointerCapture)joy.setPointerCapture(e.pointerId);moveJoy(e);});
             joy.addEventListener('pointermove',function(e){if(e.pointerId===joyPointer){e.preventDefault();moveJoy(e);}});
-            function endJoy(e){if(e.pointerId!==joyPointer)return;joyPointer=null;knob.style.transform='translate(0,0)';brSetMove(0,0);}
+            function endJoy(e){if(e.pointerId!==joyPointer)return;joyPointer=null;BRMP.moveKnob=null;knob.style.transform='translate(0,0)';brSetMove(0,0);}
             joy.addEventListener('pointerup',endJoy);joy.addEventListener('pointercancel',endJoy);joy.addEventListener('lostpointercapture',endJoy);
             function setupAimButton(id,kind) {
                 var button=brEl(id),aimKnob=button.querySelector('.br-aim-knob');
@@ -12061,6 +12104,9 @@
                 button.addEventListener('pointerup',function(e){
                     var gesture=BRMP.aimGesture;if(!gesture||gesture.button!==button||gesture.pointerId!==e.pointerId)return;
                     e.preventDefault();updateAim(e,gesture);
+                    // The released thumb distance is the cast distance; visual damping
+                    // must not leave a quick drag at its previous range.
+                    BRMP.inputState.aimPower=gesture.targetPower;
                     brRequestAction(kind);
                     clearAim(gesture);
                 });
@@ -12073,10 +12119,10 @@
             }
             setupAimButton('br-attack','attack');setupAimButton('br-skill','skill');
             BRMP.resetControls=function(){
-                joyPointer=null;knob.style.transform='translate(0,0)';
+                joyPointer=null;BRMP.moveKnob=null;knob.style.transform='translate(0,0)';
                 var gesture=BRMP.aimGesture;if(gesture){gesture.button.classList.remove('aiming');gesture.button.querySelector('.br-aim-knob').style.transform='translate(0,0)';}BRMP.aimGesture=null;
                 BRMP.keys={};
-                if(BRMP.inputState){BRMP.inputState.dx=0;BRMP.inputState.dy=0;brSendInput(true);}
+                if(BRMP.inputState){BRMP.inputState.dx=0;BRMP.inputState.dy=0;BRMP.moveTarget=null;brSendInput(true);}
             };
             window.addEventListener('blur',BRMP.resetControls);window.addEventListener('pagehide',BRMP.resetControls);
             document.addEventListener('visibilitychange',function(){if(document.hidden)BRMP.resetControls();brRingVisibilityChanged();});
@@ -12107,10 +12153,8 @@
             var m=Math.hypot(dx,dy);if(m){dx/=m;dy/=m;}
             if(student&&BRMP.inputState) {
                 const rw=brReworkClientState();if(rw?.move){dx=0;dy=0;}
-                var previousX=Number(BRMP.inputState.dx||0),previousY=Number(BRMP.inputState.dy||0);
-                BRMP.inputState.dx=dx;BRMP.inputState.dy=dy;
                 if(m&&!BRMP.aimGesture&&!rw?.channel&&!rw?.move){BRMP.inputState.ax=dx;BRMP.inputState.ay=dy;BRMP.inputState.aimPower=1;}
-                brSendInput(brUrgentMoveChange(previousX,previousY,BRMP.inputState.dx,BRMP.inputState.dy));
+                brSetMove(dx,dy);
             }
         }
         function brCopyJoinLink() {
