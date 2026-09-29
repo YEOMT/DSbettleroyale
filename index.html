@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="br-build" content="hp-melee-ring-v18 / 2026-09-28">
+    <meta name="br-build" content="input-visibility-balance-v19 / 2026-09-29">
     <title>클래스 이모지 배틀로얄 · 팀 킬 배틀</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.20.1/dist/pixi.min.js"></script>
@@ -791,6 +791,7 @@
             const hh=aspect>=1?BR_VIEW_SPAN/(2*aspect):BR_VIEW_SPAN/2;
             return {x:viewer.pos.x,y:viewer.pos.y,hw:hw+BR_VIEW_PAD,hh:hh+BR_VIEW_PAD};
         }
+        function brIncomingLeadFrames(bounds){return Math.max(9,Math.min(30,(Number(bounds?.snapshotGapMs||150)+100)/(1000/60)));}
         function brViewContains(b,x,y,pad=0){return Math.abs(x-b.x)<=b.hw+pad&&Math.abs(y-b.y)<=b.hh+pad;}
         function brViewSegment(b,x,y,ex,ey,pad=0){
             return combatSegmentBoxTime(x-b.x,y-b.y,ex-x,ey-y,b.hw+pad,b.hh+pad)!==null;
@@ -2834,6 +2835,7 @@
                 if(rwDef?.stats){const st=rwDef.stats;if(Number.isFinite(st.maxHp))this.maxHp=st.maxHp;if(Number.isFinite(st.speed))this.speed=st.speed;this.maxHp*=Number(st.hpMultiplier??1);this.speed*=Number(st.speedMultiplier??1);this.damageMult*=Number(st.damageMultiplier??1);if(st.knockbackResist!=null)this.knockbackResist=st.knockbackResist;}
                 // Run HP augments multiply this already adjusted base exactly once.
                 if(Object.prototype.hasOwnProperty.call(BR_BASE_HP_OVERRIDES_BY_ID,ability.id))this.maxHp=BR_BASE_HP_OVERRIDES_BY_ID[ability.id];
+                this.maxHp=brCloseBaseHp(ability,this.maxHp);
                 this.modeHpMultiplier=window.BRMP?.isRespawnMode()?BR_TEAM_KILL_RULES.hpMultiplier:1;
                 this.maxHp*=this.modeHpMultiplier;this.hp=this.maxHp;
                 this.spawnProtectionUntilFrame=0;
@@ -5707,6 +5709,10 @@
             return skill.shape==='target'||skill.shape==='dash'||(skill.shape==='rect'&&!!caps.dash)||
                 (['line','cone'].includes(skill.shape)&&(!!caps.projectile||skill.kind==='pin-traps'||['hook','channel','channel-beam','continuous-laser'].includes(skill.kind)));
         }
+        // v19: final close profile only; never changes radius, speed, skills or S/soap.
+        const BR_CLOSE_BALANCE=Object.freeze({A:{hp:1.05,cap:500,damage:1.05},B:{hp:1.08,cap:500,damage:1.07},C:{hp:1.10,cap:430,damage:1.09},F:{hp:1.12,cap:380,damage:1.12}});
+        function brCloseBalance(a,close){return close&&a.id!=='emoji-054'?BR_CLOSE_BALANCE[a.t]||null:null;}
+        function brCloseBaseHp(a,hp){const b=brCloseBalance(a,window.brProgressionCombat?.basicProfile(a)?.close);return b&&hp<b.cap?Math.min(b.cap,hp*b.hp):hp;}
         const BR_BASE_HP_OVERRIDES_BY_ID=Object.freeze({
             'emoji-041':250,'emoji-039':290,'emoji-045':290,'emoji-047':290,'emoji-073':270,'emoji-075':270,
             'emoji-077':270,'emoji-126':255,'emoji-096':245,'emoji-052':240,'emoji-050':300,'emoji-010':500,
@@ -5927,7 +5933,7 @@
             function damageTurret(t,owner,damage,g,token){if(!t||t.dead||t.hp<=0||owner===t.owner||owner.team&&owner.team===t.team)return 0;t.hitTokens=t.hitTokens||new Map();if(token&&t.hitTokens.has(token))return 0;if(token)t.hitTokens.set(token,frame(g));const actual=Math.min(t.hp,Math.max(0,damage));t.hp-=actual;if(t.hp<=0)end(t,'destroyed');return actual;}
             function rateLayers(p,g){const s=state(p),now=frame(g),layers=s.buffs.filter(b=>b.end>now&&['basicHaste','teamBasicHaste','teamSkillHaste'].includes(b.kind)),ends=Array.from(new Set(layers.map(b=>b.end))).sort((a,b)=>a-b),out=[];let at=now;for(const endAt of ends){let own=1,team=1,both=1;for(const b of layers)if(b.end>at){if(b.kind==='basicHaste')own=Math.max(own,b.value);if(b.kind==='teamBasicHaste')team=Math.max(team,b.value);if(b.kind==='teamSkillHaste')both=Math.max(both,b.value);}out.push([endAt,Math.min(3,own*Math.max(team,both)),Math.min(1.75,both)]);at=endAt;}return out;}
             function wirePlayer(p,g){const s=state(p),now=frame(g),motion=s.dash&&!s.dash.dead?s.dash:null,channel=s.channel&&!s.channel.dead?s.channel:null,recast=s.recast,force=s.force&&!s.force.dead?s.force:null;return {life:life(p),impulseX:s.impulse?.x||0,impulseY:s.impulse?.y||0,impulseEnd:s.impulse?.end||0,stunEnd:now+(p.stunned||0),shield:s.shields.reduce((n,a)=>n+a.amount,0),slow:strongest(p,'slow'),moveRate:moveRate(p),attackRate:cooldownRate(p,'attack'),skillRate:cooldownRate(p,'skill'),locks:inputLocks(p,g),motion:motion?{id:motion.id,kind:motion.kind,start:motion.start,end:motion.end,x:p.pos.x,y:p.pos.y,dx:motion.dir.x,dy:motion.dir.y,speed:motion.speed||0,remaining:Math.max(0,(motion.range||0)-(motion.distance||0)),airborne:motion.kind==='leap',height:motion.height||0,fromX:motion.from?.x??null,fromY:motion.from?.y??null,toX:motion.to?.x??null,toY:motion.to?.y??null}:null,lockEnd:Math.max(now+(p.stunned||0),s.lock?.end||0,s.dash?.end||0,s.channel?.end||0,s.force?.end||0),rateLayers:rateLayers(p,g),channel:channel?{id:channel.ctx.castId,end:channel.end,dx:channel.dir.x,dy:channel.dir.y}:null,recast:recast?{id:recast.ctx.castId,end:recast.end,left:recast.left}:null,capture:force?{id:force.id,end:force.end,x:p.pos.x,y:p.pos.y,toX:force.to.x,toY:force.to.y,speed:force.speed}:null,bleed:s.dots.reduce((n,d)=>n+(d.kind==='bleed'?d.stacks:0),0),mark:s.marks.length,buffs:s.buffs.filter(b=>b.end>now).map(b=>({kind:b.kind,value:b.value,end:b.end,proc:b.procFrame||0}))};}
-            function entityVisible(g,e,viewer,bounds){if(e.hidden||e.visible===false)return false;if(!viewer||!bounds)return true;const end=e.to||e.pos.add((e.dir||v(1,0)).mult(e.kind==='beam'?(e.length??e.range):e.range||0)),r=e.pullRadius||e.maxRadius||e.radius||e.width||20;const within=typeof brViewSegment==='function'?brViewSegment(bounds,e.pos.x,e.pos.y,end.x,end.y,r):true;if(!within)return false;if(e.kind==='capture'&&e.target&&g.isConcealedFrom?.(e.target,viewer))return false;return true;}
+            function entityVisible(g,e,viewer,bounds){if(e.hidden||e.visible===false)return false;if(!viewer||!bounds)return true;const flying=['projectile','hook','boomerang','bomb'].includes(e.kind),reach=flying?Math.min(Math.max(0,e.range==null?Infinity:(e.phase==='return'?Infinity:e.range-(e.distance||0))),(e.speed||0)*brIncomingLeadFrames(bounds)):e.kind==='beam'?(e.length??e.range):e.range||0,end=flying?e.pos.add((e.dir||v(1,0)).mult(reach)):e.to||e.pos.add((e.dir||v(1,0)).mult(reach)),r=e.pullRadius||e.maxRadius||e.radius||e.width||20;const within=typeof brViewSegment==='function'?brViewSegment(bounds,e.pos.x,e.pos.y,end.x,end.y,r):true;if(!within)return false;if(e.kind==='capture'&&e.target&&g.isConcealedFrom?.(e.target,viewer))return false;return true;}
             function prepareEntityWire(g){return {rows:wireEntities(g),sources:new Map(world(g).entities.map(e=>[e.id,e]))};}
             function wireEntities(g,viewer=null,bounds=null,prepared=null){
                 if(prepared)return prepared.rows.filter(row=>{const e=prepared.sources.get(row.id);if(e)return entityVisible(g,e,viewer,bounds);
@@ -6671,25 +6677,25 @@
         #br-run-xp-text { color:#cbd5e1; font-size:10px; white-space:nowrap; }
         .br-run-owned { display:flex; gap:4px; margin-top:3px; min-height:0; }
         .br-run-chip { border:1px solid #536078; background:#19243b; color:#e2e8f0; border-radius:5px; padding:1px 4px; font-size:10px; line-height:14px; white-space:nowrap; }
-        .br-run-ui { position:absolute; top:calc(108px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); width:min(690px,calc(100% - 20px)); z-index:6; pointer-events:none; }
+        .br-run-ui { position:absolute; top:calc(108px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); width:min(760px,calc(100% - 16px)); z-index:6; pointer-events:none; }
         .br-run-applied { position:absolute; top:calc(153px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:7; max-width:min(500px,78vw); padding:6px 10px; border:1px solid #a78bfa; border-radius:9px; background:rgba(23,32,54,.88); color:#f5f3ff; font-size:12px; font-weight:700; pointer-events:none; text-align:center; }
-        .br-run-ui button { font:inherit; color:inherit; cursor:pointer; pointer-events:auto; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
-        .br-run-ready { display:block; margin:0 auto; min-height:46px; padding:10px 18px; border:2px solid #ddd6fe; border-radius:12px; background:#4c2d89; color:#fff!important; font-size:14px!important; font-weight:1000!important; box-shadow:0 0 0 3px rgba(167,139,250,.20),0 6px 18px #020617aa; }
-        .br-run-panel { padding:12px; background:rgba(5,10,24,.97); border:2px solid #a78bfa; border-radius:15px; box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 30px #020617c0; }
-        .br-run-heading { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 3px 9px; font-size:16px; color:#f5f3ff; }
+        .br-run-ui button { font:inherit; color:inherit; cursor:pointer; pointer-events:auto; touch-action:none; -webkit-tap-highlight-color:transparent; }
+        .br-run-ready { display:block; margin:0 auto; min-height:52px; padding:11px 20px; border:2px solid #ddd6fe; border-radius:12px; background:#4c2d89; color:#fff!important; font-size:16px!important; font-weight:1000!important; box-shadow:0 0 0 3px rgba(167,139,250,.20),0 6px 18px #020617aa; }
+        .br-run-panel { padding:13px; max-height:calc(100dvh - 240px); overflow-y:auto; pointer-events:auto; background:rgba(5,10,24,.97); border:2px solid #a78bfa; border-radius:15px; box-shadow:0 0 0 3px rgba(139,92,246,.18),0 10px 30px #020617c0; }
+        .br-run-heading { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 3px 10px; font-size:clamp(17px,2vw,18px); color:#f5f3ff; }
         .br-run-heading button { min-height:36px; min-width:58px; padding:5px 9px; background:#273552; border:1px solid #7180a3; border-radius:8px; font-size:12px; }
         .br-run-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
-        .br-run-card { min-width:0; text-align:left; padding:12px 11px; border:2px solid #64748b; border-radius:10px; background:#17233b; transition:background .1s,border-color .1s; }
+        .br-run-card { min-width:0; text-align:left; padding:13px 12px; border:2px solid #64748b; border-radius:10px; background:#17233b; transition:background .1s,border-color .1s; }
         .br-run-card:hover,.br-run-card:focus-visible { background:#263458; border-color:#ddd6fe; outline:2px solid #c4b5fd; outline-offset:1px; }
         .br-run-card:disabled { cursor:wait; opacity:.65; }
         .br-run-card.is-selected { border-color:#c4b5fd; background:#3a2d65; opacity:1; }
         .br-run-card-family { display:block; font-size:11px; color:#c4b5fd; line-height:1.25; font-weight:800; }
-        .br-run-card-name { display:block; font-size:16px; line-height:1.3; font-weight:1000; color:#fff; margin:5px 0; overflow-wrap:anywhere; }
+        .br-run-card-name { display:block; font-size:clamp(16px,2.3vw,17px); line-height:1.3; font-weight:1000; color:#fff; margin:5px 0; overflow-wrap:anywhere; }
         .br-run-card-tier { color:#c4b5fd; white-space:nowrap; }
-        .br-run-card-effect { display:block; font-size:14px; line-height:1.45; color:#f1f5f9; word-break:keep-all; }
+        .br-run-card-effect { display:block; font-size:clamp(14px,1.8vw,15px); line-height:1.45; color:#f1f5f9; word-break:keep-all; overflow-wrap:anywhere; }
         .br-run-card.is-max-tier { border-color:#fbbf24; background:linear-gradient(125deg,#292113,#152134); }
         .br-run-card.is-max-tier .br-run-card-tier { color:#fde68a; }
-        .br-run-card-detail { display:block; margin-top:5px; font-size:12px; line-height:1.35; color:#cbd5e1; word-break:keep-all; }
+        .br-run-card-detail { display:block; margin-top:5px; font-size:12px; line-height:1.35; color:#cbd5e1; word-break:keep-all; overflow-wrap:anywhere; }
         #br-run-choice-status { margin:7px 3px 0; font-size:13px; line-height:1.35; color:#e2e8f0; }
         #br-run-choice-status:empty { display:none; }
         #br-student-battle > .br-control { z-index:4; }
@@ -6720,9 +6726,16 @@
         .br-zone-status.warn { color:#fde68a; }.br-zone-status.danger { color:#fda4af;font-weight:800; }.br-zone-status.sync { color:#fcd34d; }
         #br-zone-detail { font-size:10px;font-weight:400;opacity:.92; }#br-zone-arrow { display:inline-block;margin-right:6px;font-size:18px;line-height:1; }#br-zone-arrow[hidden] { display:none; }
         @media (max-height:500px) and (min-width:620px) {
-            .br-run-ui { top:calc(98px + env(safe-area-inset-top)); left:calc(158px + env(safe-area-inset-left)); right:calc(225px + env(safe-area-inset-right)); width:auto; transform:none; }
-            .br-run-panel { padding:8px; }.br-run-cards { gap:6px; }.br-run-card { padding:8px 7px; }
-            .br-run-heading { font-size:14px; margin-bottom:6px; }.br-run-card-name { font-size:13px; }.br-run-card-effect { font-size:12px; }.br-run-card-detail { display:none; }
+            .br-run-ui { top:calc(76px + env(safe-area-inset-top));left:calc(158px + env(safe-area-inset-left));right:calc(222px + env(safe-area-inset-right));width:auto;transform:none; }
+            .br-run-panel { padding:9px; max-height:calc(100dvh - 125px);box-sizing:border-box; }.br-run-cards { gap:7px; }.br-run-card { padding:9px 8px; }
+            .br-run-heading { font-size:17px; margin-bottom:6px; }.br-run-card-name { font-size:16px; }.br-run-card-effect { font-size:14px; }
+            .br-run-level-alert { top:46px!important; }
+        }
+        .br-run-level-alert { position:absolute;top:calc(76px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:8;pointer-events:none;width:max-content;max-width:calc(100% - 16px);padding:7px 12px;border:2px solid #fde68a;border-radius:10px;background:#392654eb;color:#fff6c6;font-size:clamp(14px,2vw,17px);font-weight:900;text-align:center;box-shadow:0 0 14px #c4b5fd66;animation:br-level-pulse .7s ease-in-out 2; }
+        @keyframes br-level-pulse {50%{transform:translateX(-50%) scale(1.035);border-color:#fff;}}
+        .br-run-level-alert.br-no-motion{animation:none;}
+        @media(prefers-reduced-motion:reduce){.br-run-level-alert{animation:none;}}
+        @media(max-width:420px){.br-run-panel{padding:9px;}.br-run-cards{gap:6px;}.br-run-card{padding:10px 7px;}
         }
         @media (prefers-reduced-motion:reduce) { .br-run-xp > i,.br-run-card { transition:none; } }
         .br-control { --br-cd-angle:360deg; --br-ring-color:#fff; position:absolute; width:116px; height:116px; border-radius:50%;
@@ -7082,6 +7095,7 @@
             </div>
         </div>
         <div id="br-tk-student-feed"></div>
+        <div id="br-run-level-alert" class="br-run-level-alert br-hidden" role="status" aria-live="polite">⬆ LEVEL UP! 강화 1개를 선택하세요</div>
         <div id="br-run-ui" class="br-run-ui br-hidden">
             <button id="br-run-ready" type="button" class="br-run-ready br-hidden" aria-controls="br-run-panel" aria-expanded="false">⬆ LEVEL UP · 강화 선택</button>
             <section id="br-run-panel" class="br-run-panel br-hidden" aria-label="레벨 업 강화 선택">
@@ -7597,6 +7611,9 @@
             // All basic attacks retain impact feedback without hidden control locks.
             p.stun=0;
             if(p.close){p.damageScale*=1.08;p.pushScale*=1.20;}
+            const closeBalance=brCloseBalance(ability,p.close);if(closeBalance)p.damageScale*=closeBalance.damage;
+            // Basic profile is never used by the three skill bats or the shared pDmg stat.
+            if(ability.id==='emoji-036')p.damageScale*=.70;
             Object.defineProperty(ability,'_basicIdentityDefinition',{value:rework,configurable:true,writable:true});
             Object.defineProperty(ability,'_basicIdentity',{value:p,configurable:true,writable:true});return p;
         }
@@ -9774,10 +9791,16 @@
             if(!ignoreFarm)for(const box of BRMP.farmView?.b||[]){if(box[3]<=0)continue;const hit=brCrateSweepTime(box,from,to,radius);if(hit!==null)t=Math.min(t,Math.max(0,hit-.001));}
             return {x:from.x+(to.x-from.x)*t,y:from.y+(to.y-from.y)*t};
         }
+        function brCombatPresentationTime(view,now=performance.now(),curved=false){
+            const offset=Number(BRMP.netClockOffset||0),sample=Number(view.frame||0)*(1000/60)+offset;
+            if(BRMP.ringView?.running===false)return sample;
+            const delay=curved?brClamp(Number(BRMP.viewGap||150)*.24,30,65):brClamp(Number(BRMP.viewGap||150)*.12,18,35);
+            return now+Number(BRMP.presentationLead||0)-delay;
+        }
         function brFlightHorizon(curved=false) {
             // Measured snapshot interval/jitter, not a longer fixed prediction timeout.
             const gap=Number(BRMP.viewGap||150),samples=BRMP.clockSamples||[],jitter=samples.length?Math.max(...samples)-Math.min(...samples):0;
-            return brClamp(gap*1.35+Math.min(100,jitter),curved?65:100,curved?150:350);
+            return brClamp(gap*1.35+Math.min(100,jitter)+Number(BRMP.presentationLead||0),curved?90:120,curved?240:450);
         }
         function brFlightPoint(track,view,time,now,dt,cfg) {
             const samples=track.samples||[],last=samples.at(-1),step=1000/60;if(!last)return null;
@@ -9838,7 +9861,7 @@
             const received=Number(BRMP.lastActorPacketAt||now),self=BRMP.drawPlayers?.get(String(BRMP.playerId));
             const lead=BRMP.ringView?.running===false?0:Math.min(15,Math.max(0,(now-received)/step));
             const offset=Number.isFinite(BRMP.netClockOffset)?BRMP.netClockOffset:received-Number(view.frame||0)*step;
-            const remoteTime=Number.isFinite(BRMP.lastRemoteRenderTime)?BRMP.lastRemoteRenderTime:now-Number(BRMP.remoteBuffer||130);
+            const remoteTime=brCombatPresentationTime(view,now);
             const ownFrame=(now-offset)/step,remoteFrame=(remoteTime-offset)/step;
             if(BRMP.rwDisplaySource!==source){
                 BRMP.rwDisplaySource=source;const seen=new Set();
@@ -9863,7 +9886,7 @@
                 if(frame>e.end+1)return;
                 const age=Math.max(0,Math.min(15,frame-item.frame,e.end-item.frame)),moving=['projectile','hook','boomerang','bomb'].includes(e.kind);
                 let x=e.x,y=e.y;
-                if(moving){const dest=brFlightPoint(item,view,own?now:remoteTime,now,dt,{radius:e.radius,life:Math.max(0,e.end-item.frame),remaining:e.remaining,curved:!!e.curved,throughWalls:!!e.throughWalls,throughFarm:!!e.throughFarm});if(!dest)return;x=dest.x;y=dest.y;}
+                if(moving){const dest=brFlightPoint(item,view,(own?now+Number(BRMP.presentationLead||0):brCombatPresentationTime(view,now,!!e.curved)),now,dt,{radius:e.radius,life:Math.max(0,e.end-item.frame),remaining:e.remaining,curved:!!e.curved,throughWalls:!!e.throughWalls,throughFarm:!!e.throughFarm});if(!dest)return;x=dest.x;y=dest.y;}
                 Object.assign(draw,e);
                 if(e.kind==='lob'&&[e.fx,e.fy,e.endX,e.endY].every(Number.isFinite)){
                     const t=brClamp((frame-e.start)/Math.max(1,e.end-e.start),0,1);x=e.fx+(e.endX-e.fx)*t;y=e.fy+(e.endY-e.fy)*t;draw.height=Math.sin(t*Math.PI)*125;
@@ -10018,13 +10041,14 @@
             const rwBatch=window.BRRework.prepareEntityWire(game),rwStates=all.map(p=>window.BRRework.wirePlayer(p,game)),combatStates=all.map(p=>brCombatStatusWire(p));
             for(const viewer of viewers) {
                 var id=viewer.remoteId,bounds=brViewerBounds(viewer,BRMP.inputs[viewer.remoteId]);
+                bounds.snapshotGapMs=brClamp(tickAt-Number(BRMP.viewLastSent[id]?.at??(tickAt-(humans.length<12?100:150))),100,350);
                 var visible=[];
                 for(var pi=0;pi<all.length;pi++) {
                     var candidate=all[pi],deathFade=!candidate.alive&&candidate.deathFrame!=null&&game.frame-Number(candidate.deathFrame)<=45;
                     if(candidate===viewer||((candidate.alive||deathFade)&&brViewContains(bounds,candidate.pos.x,candidate.pos.y,candidate.radius)&&!game.isConcealedFrom(candidate,viewer)))visible.push(wired[pi]);
                 }
                 var projectiles=[];
-                for(const shot of shots){const q=shot.q,lead=12; // incoming trajectory margin, never a hitbox change
+                for(const shot of shots){const q=shot.q,lead=Math.min(Number(q.life||0),brIncomingLeadFrames(bounds)); // incoming trajectory margin, never a hitbox change
                     if(brViewSegment(bounds,q.pos.x,q.pos.y,q.pos.x+Number(q.vel?.x||0)*lead,q.pos.y+Number(q.vel?.y||0)*lead,Number(q.size||0)+80))projectiles.push(shot.row);
                 }
                 // All nearby gameplay projectiles are sent. Only cosmetic FX below have a count budget.
@@ -10061,6 +10085,7 @@
                 const shotWire=brPackShots(projectiles);
                 var payload={v:4,rosterVersion:BR_ROSTER_VERSION,at:now,frame:game.frame,worldRadius:game.worldRadius||BR_WORLD_RADIUS,mapRadius:game.mapRadius,mapName:game.mapName,mode:BRMP.roomMeta.mode,clock:Math.round(remaining*10)/10,alive:alive,total:all.length,players:visible.map(r=>brPackPlayer(r,r[0]===all.indexOf(viewer))),projectiles:shotWire.packed,shotStyles:shotWire.table,zones:zones,turrets:turrets,fx:fx};
                 payload.shotEnds=shotEnds;
+                if(window.BR_COMBAT_DEBUG)brCombatTrace('host-view',{frame:game.frame,viewer:id,players:visible.map(r=>[r[0],r[1],r[2]]),shots:projectiles.map(r=>({id:r[6],x:r[0],y:r[1],vx:r[7],vy:r[8],ordinal:r[17],path:r[22]})),ends:shotEnds});
                 payload.rw=brPackReworkWire({v:1,frame:game.frame,states:visible.map(r=>[r[0],rwStates[r[0]]]),entities:window.BRRework.wireEntities(game,viewer,bounds,rwBatch)});
                 payload.matchKey=brRingKey();payload.ringWire=brPackRingWire(ringPacket);payload.selfZoneWire=brPackSelfZone(brRingSelfSnapshot(game,viewer));
                 if(BRMP.respawnMode) {
@@ -10573,7 +10598,13 @@
             // A short interpolation interval; the existing bounded velocity
             // prediction fills the remainder instead of displaying melee targets a full tick late.
             var deliveryJitter=Math.max.apply(null,BRMP.clockSamples)-Math.min.apply(null,BRMP.clockSamples);
-            BRMP.remoteBufferTarget=brClamp(Number(BRMP.viewGap||150)*.72+20+Math.min(65,deliveryJitter*.65),90,235);
+            BRMP.remoteBufferTarget=brClamp(Number(BRMP.viewGap||150)*.24+12+Math.min(25,deliveryJitter*.20),40,85);
+            const hostAt=view.zoneState&&view.zoneSelf?view.zoneState.hostAt-Math.max(0,view.zoneState.time-view.zoneSelf.time):null;
+            const measuredLead=Number.isFinite(hostAt)&&Number.isFinite(BRMP.ringClockOffset)?brClamp(sampleTime-(hostAt-BRMP.ringClockOffset),0,250):0;
+            // The ring clock is already filtered. Apply its mapping once so a network-offset correction
+            // cannot shift a constant-velocity projectile backwards relative to simulation time.
+            BRMP.presentationLead=measuredLead;
+            if(window.BR_COMBAT_DEBUG)brCombatTrace('view-clock',{frame:view.frame,received:now,netClockOffset:BRMP.netClockOffset,hostAt,lead:BRMP.presentationLead,actorBuffer:BRMP.remoteBufferTarget,projectileTime:brCombatPresentationTime(view,now),hits:(view.fx||[]).filter(r=>r[1]==='hit').map(r=>({hostFrame:r[13]?.hostFrame,x:r[2],y:r[3],target:r[9],shot:r[13]?.projectileId}))});
             const combatStatuses=new Map();
             if(Array.isArray(view.combatStatus))for(const row of view.combatStatus){
                 if(!Array.isArray(row)||row.length!==11||!Number.isInteger(row[0])||!view.roster?.[row[0]])continue;
@@ -10606,8 +10637,8 @@
                 } else if(nextHp>Number(old.trailHp||0)) old.trailHp=nextHp;
                 if(eliminated){old.deathFadeStartedAt=now;old.deathFadeUntil=now+750;old.samples=[];}
                 if(respawned){old.deathFadeStartedAt=0;old.deathFadeUntil=0;old.snapshotHit=null;}
-                if(id===String(BRMP.playerId)&&(eliminated||respawned)){BRMP.sustainFeedbackAt=new Map();BRMP.aimHelpCache=null;BRMP.aimHelpHeld={};BRMP.lastRawAim=null;BRMP.lastAttackRaw=null;BRMP.pendingLocalActions={};BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;BRMP.localDash=null;BRMP.localTeleportUntil=0;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.localProjectiles=[];}
-                old.samples=old.samples||[];if(warpChanged||respawned)old.samples=[];old.samples.push({x:sx,y:sy,vx:svx,vy:svy,t:sampleTime});if(old.samples.length>6)old.samples.shift();
+                if(id===String(BRMP.playerId)&&(eliminated||respawned)){BRMP.sustainFeedbackAt=new Map();BRMP.aimHelpCache=null;BRMP.aimHelpHeld={};BRMP.lastRawAim=null;BRMP.lastAttackRaw=null;BRMP.lastMeaningfulMoveAim=null;BRMP.lastManualAttackAim=null;BRMP.pendingLocalActions={};BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;BRMP.localDash=null;BRMP.localTeleportUntil=0;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.localProjectiles=[];}
+                old.samples=old.samples||[];if(warpChanged||respawned){old.samples=[];old.remoteRenderAt=null;old.remoteRenderFrame=null;old.remoteOffsetX=old.remoteOffsetY=0;}old.samples.push({x:sx,y:sy,vx:svx,vy:svy,t:sampleTime});if(old.samples.length>6)old.samples.shift();
                 old.tx=sx;old.ty=sy;old.vx=svx;old.vy=svy;old.row=r;
                 var statusAge=brActionSnapshotElapsed(old,now)*(1000/60),stunFrames=nextRW?Math.max(0,nextRW.stunEnd-view.frame):Math.max(0,Number(r[25]||0));
                 // Remote players need the same expiring status cue as self. Do
@@ -10742,8 +10773,8 @@
             if(BRMP.resetControls)BRMP.resetControls();
             BRMP.pendingLocalActions={};BRMP.localAttackLockUntil=0;BRMP.localSkillLockUntil=0;
             if(!Number.isFinite(BRMP.inputState.aimPower))BRMP.inputState.aimPower=1;
-            BRMP.sustainFeedbackAt=new Map();BRMP.aimHelpCache=null;BRMP.aimHelpHeld={};BRMP.lastRawAim=null;BRMP.lastAttackRaw=null;BRMP.projectileTombstones=new Map();BRMP.localShotSerial=0;BRMP.rwDisplayCache=null;BRMP.rwDisplaySource=null;BRMP.drawPlayers=new Map();BRMP.drawProjectiles=new Map();BRMP.localProjectiles=[];BRMP.drawFx=new Map();BRMP.hitStates=new Map();BRMP.seenFxIds=new Map();BRMP.crateHits=new Map();
-            BRMP.netClockOffset=undefined;BRMP.lastViewFrame=null;BRMP.viewGap=180;BRMP.remoteBuffer=130;BRMP.remoteBufferTarget=130;BRMP.lastRemoteRenderTime=null;BRMP.lastActorPacketAt=0;BRMP.minInputRtt=undefined;BRMP.inputSentAt=new Map();BRMP.localTeleportUntil=0;BRMP.localDashGraceUntil=0;BRMP.moveTarget=null;BRMP.moveKnob=null;
+            BRMP.sustainFeedbackAt=new Map();BRMP.aimHelpCache=null;BRMP.aimHelpHeld={};BRMP.lastRawAim=null;BRMP.lastAttackRaw=null;BRMP.lastMeaningfulMoveAim=null;BRMP.lastManualAttackAim=null;BRMP.projectileTombstones=new Map();BRMP.localShotSerial=0;BRMP.rwDisplayCache=null;BRMP.rwDisplaySource=null;BRMP.drawPlayers=new Map();BRMP.drawProjectiles=new Map();BRMP.localProjectiles=[];BRMP.drawFx=new Map();BRMP.hitStates=new Map();BRMP.seenFxIds=new Map();BRMP.crateHits=new Map();
+            BRMP.netClockOffset=undefined;BRMP.lastViewFrame=null;BRMP.viewGap=180;BRMP.remoteBuffer=55;BRMP.remoteBufferTarget=55;BRMP.presentationLead=undefined;BRMP.lastRemoteRenderTime=null;BRMP.lastActorPacketAt=0;BRMP.minInputRtt=undefined;BRMP.inputSentAt=new Map();BRMP.localTeleportUntil=0;BRMP.localDashGraceUntil=0;BRMP.moveTarget=null;BRMP.moveKnob=null;
             BRMP.studentCamera=null;BRMP.lastStudentFrameAt=0;BRMP.aimGesture=null;BRMP.localCastFx=null;BRMP.localDash=null;BRMP.localMoveBoostUntil=0;BRMP.localAttackHasteUntil=0;BRMP.staticView=BRMP.staticView||{};BRMP.studentShake=null;BRMP.studentRecoil=null;BRMP.hitConfirm=null;BRMP.killConfirm=null;BRMP.damageFlash=null;
             // 고해상도 태블릿에서 2~3배 DPR로 거대한 캔버스를 만드는 대신 CSS 기준 선명도를 유지한다.
             brLoadPlayPrefs();
@@ -10800,6 +10831,14 @@
             var before=Math.hypot(px,py),after=Math.hypot(dx,dy);
             return (before>.12)!==(after>.12)||(before>.12&&after>.12&&(px*dx+py*dy)/(before*after)<.15);
         }
+        function brRememberMoveAim(x,y){const n=Math.hypot(x,y);if(n>.12)BRMP.lastMeaningfulMoveAim={x:x/n,y:y/n};}
+        function brDefaultAttackAim(){
+            brSmoothMoveInput(performance.now());
+            const i=BRMP.inputState||{},n=Math.hypot(i.dx||0,i.dy||0);
+            if(n>.12){brRememberMoveAim(i.dx,i.dy);return {x:i.dx/n,y:i.dy/n};}
+            const a=BRMP.lastMeaningfulMoveAim||BRMP.lastManualAttackAim||BRMP.lastAttackRaw||{x:i.ax??1,y:i.ay??0};
+            return brNormalizeAimVector(a.x,a.y);
+        }
         function brSmoothMoveInput(now=performance.now()) {
             const target=BRMP.moveTarget,input=BRMP.inputState;if(!target||!input)return;
             if(brReworkClientState()?.move){target.x=0;target.y=0;}
@@ -10808,7 +10847,7 @@
             const blend=1-Math.exp(-dt/58);
             let x=px+(target.x-px)*blend,y=py+(target.y-py)*blend;
             if(Math.hypot(x-target.x,y-target.y)<.012){x=target.x;y=target.y;}
-            input.dx=x;input.dy=y;
+            input.dx=x;input.dy=y;brRememberMoveAim(x,y);
             if(BRMP.moveKnob)BRMP.moveKnob.style.transform='translate('+(x*BRMP.moveKnobMax).toFixed(2)+'px,'+(y*BRMP.moveKnobMax).toFixed(2)+'px)';
             if(Math.abs(x-px)+Math.abs(y-py)>.001)brSendInput(brUrgentMoveChange(px,py,x,y));
         }
@@ -11296,16 +11335,42 @@
             p.y=Number.isFinite(p.previousY)?p.previousY+(p.predY-p.previousY)*blend:p.predY;
         }
         function brSampleProjectile(s,view,now,renderTime,dt){
-            const r=s.row,own=String(r[11])===String(BRMP.playerId),point=brFlightPoint(s,view,own?now:renderTime,now,dt,
+            const r=s.row,own=String(r[11])===String(BRMP.playerId),point=brFlightPoint(s,view,(own?now+Number(BRMP.presentationLead||0):brCombatPresentationTime(view,now,r[15]==='missile'||r[15]==='BOOMERANG')),now,dt,
                 {radius:Number(r[2]),life:Number(r[14]||0),remaining:r[21]??Infinity,curved:r[15]==='missile'||r[15]==='BOOMERANG',throughWalls:!!(r[19]&2),throughFarm:!!(r[19]&1)});
             s.expired=!point;if(point){s.x=point.x;s.y=point.y;}
         }
-        function brSampleRemote(p,renderTime) {
-            var samples=p.samples||[],a=null,b=null;
-            for(var i=0;i<samples.length;i++){if(samples[i].t<=renderTime)a=samples[i];if(samples[i].t>=renderTime){b=samples[i];break;}}
-            if(!a)a=samples[0];if(!b)b=samples[samples.length-1];if(!a||!b)return;
-            if(a!==b){var mix=brClamp((renderTime-a.t)/Math.max(1,b.t-a.t),0,1);p.x=a.x+(b.x-a.x)*mix;p.y=a.y+(b.y-a.y)*mix;}
-            else {var extra=brClamp((renderTime-a.t)/(1000/60),0,8);const impulse=brApprovedImpulseProjection(p,renderTime);p.x=a.x+a.vx*extra+impulse.x;p.y=a.y+a.vy*extra+impulse.y;}
+        function brSampleRemote(p,renderTime,view=BRMP.latestView||{}) {
+            const samples=p.samples||[],last=samples.at(-1);if(!last)return;
+            if(BRMP.ringView?.running===false)renderTime=last.t;
+            let a=samples[0],b=null;for(const point of samples){if(point.t<=renderTime)a=point;if(point.t>=renderTime){b=point;break;}}
+            let x=a.x,y=a.y;
+            if(b&&b!==a){const mix=brClamp((renderTime-a.t)/Math.max(1,b.t-a.t),0,1);x=a.x+(b.x-a.x)*mix;y=a.y+(b.y-a.y)*mix;}
+            else if(renderTime>=last.t){
+                const ticks=brClamp((renderTime-last.t)/(1000/60),0,Math.min(15,brFlightHorizon(false)/(1000/60))),rw=p.rw||{},motion=rw.motion,capture=rw.capture;
+                // Explicit authority motion ends/range supersede ordinary velocity. Stun does not freeze forced motion.
+                if(motion){
+                    const age=Math.min(ticks,Math.max(0,motion.end-Number(p.rwFrame||0)));
+                    if(motion.airborne&&[motion.fromX,motion.fromY,motion.toX,motion.toY].every(Number.isFinite)){
+                        const t=brClamp((Number(p.rwFrame||0)+age-motion.start)/Math.max(1,motion.end-motion.start-1),0,1);x=motion.fromX+(motion.toX-motion.fromX)*t;y=motion.fromY+(motion.toY-motion.fromY)*t;
+                    }else{const d=Math.min(motion.remaining||0,(motion.speed||0)*age);x=last.x+motion.dx*d;y=last.y+motion.dy*d;}
+                }else if(capture){const dx=capture.toX-last.x,dy=capture.toY-last.y,n=Math.hypot(dx,dy),d=Math.min(n,(capture.speed||0)*Math.min(ticks,Math.max(0,capture.end-Number(p.rwFrame||0))));x=last.x+dx/Math.max(.001,n)*d;y=last.y+dy/Math.max(.001,n)*d;}
+                else {const locked=rw.stunEnd>Number(p.rwFrame||0)||rw.locks?.move;
+                    const limit=Number(p.row?.[26]||0)>0?Math.min(ticks,Number(p.row[26])):ticks;
+                    x=last.x+(locked?0:last.vx*limit);y=last.y+(locked?0:last.vy*limit);
+                    const count=Math.max(0,Math.min(ticks,Number(rw.impulseEnd||0)-Number(p.rwFrame||0))),whole=Math.floor(count),tail=count-whole,travel=(1-Math.pow(.82,whole))/.18+tail*Math.pow(.82,whole);
+                    x+=Number(rw.impulseX||0)*travel;y+=Number(rw.impulseY||0)*travel;
+                }
+                const clipped=brVisualClip(last,{x,y},Number(p.row?.[15]||0),view,false,false);x=clipped.x;y=clipped.y;
+            }
+            // Small new-snapshot corrections decay, with no delay added to local inputs.
+            if(p.remoteRenderFrame!==last.t){
+                const elapsed=brClamp((renderTime-Number(p.remoteRenderAt??renderTime))/(1000/60),0,3),dx=Number(p.x)-x+Number(p.remoteVX||0)*elapsed,dy=Number(p.y)-y+Number(p.remoteVY||0)*elapsed;
+                const smooth=Number.isFinite(p.remoteRenderAt)&&!p.rw?.motion&&!p.rw?.capture&&Math.hypot(dx,dy)<80;
+                p.remoteOffsetX=smooth?dx:0;p.remoteOffsetY=smooth?dy:0;p.remoteOffsetAt=renderTime;p.remoteRenderFrame=last.t;
+            }
+            const decay=Math.exp(-Math.max(0,renderTime-Number(p.remoteOffsetAt||renderTime))/55);
+            const out=brVisualClip({x,y},{x:x+Number(p.remoteOffsetX||0)*decay,y:y+Number(p.remoteOffsetY||0)*decay},Number(p.row?.[15]||0),view,false,false);
+            p.x=out.x;p.y=out.y;p.remoteRenderAt=renderTime;p.remoteVX=last.vx;p.remoteVY=last.vy;
         }
         // Battlefield display objects are projections of BRMP's existing simulation state.
         // Pixi never writes player, projectile, collision, input or network data.
@@ -11558,13 +11623,13 @@
             }
             // 다른 플레이어는 짧게 보간하고 스냅샷 사이를 제한적으로 예측한다. 내 캐릭터는 즉시 예측한다.
             BRMP.remoteBuffer+=brClamp(Number(BRMP.remoteBufferTarget||130)-BRMP.remoteBuffer,-dt*.06,dt*.06);
-            var frameUnits=dt/(1000/60),renderTime=Math.max(Number(BRMP.lastRemoteRenderTime||0),frameNow-BRMP.remoteBuffer);
+            var frameUnits=dt/(1000/60),renderTime=Math.max(Number(BRMP.lastRemoteRenderTime||0),frameNow+Number(BRMP.presentationLead||0)-BRMP.remoteBuffer);
             BRMP.lastRemoteRenderTime=renderTime;
             draw.forEach(function(p,id){
                 if(String(id)===String(BRMP.playerId)&&BRMP.inputState) {
                     brPredictSelf(p,view,dt,frameNow);
                 } else {
-                    brSampleRemote(p,renderTime);
+                    brSampleRemote(p,renderTime,view);
                 }
                 var currentHp=Number(p.row&&p.row[5]||0);
                 if(frameNow>Number(p.trailHold||0)&&Number(p.trailHp||0)>currentHp) {
@@ -11578,6 +11643,7 @@
                 s.expired=Number.isFinite(s.row[14])&&(frameNow-s.last)>Number(s.row[14])*(1000/60);
                 brSampleProjectile(s,view,frameNow,renderTime,dt);
             });
+            if(window.BR_COMBAT_DEBUG&&frameNow-Number(BRMP.lastPresentationTrace||0)>=100){BRMP.lastPresentationTrace=frameNow;brCombatTrace('presentation',{viewFrame:view.frame,actorTime:renderTime,projectileTime:brCombatPresentationTime(view,frameNow),players:Array.from(draw,([id,p])=>[id,p.x,p.y,p.predX,p.predY]),shots:Array.from(shots||[],([id,p])=>[id,p.x,p.y,p.expired])});}
             var self=draw.get(String(BRMP.playerId));
             if(!self) {
                 if(cc){cc.fillStyle='#dbeafe';cc.textAlign='center';cc.font='800 18px sans-serif';cc.fillText('내 캐릭터를 찾는 중…',w/2,h/2);}
@@ -11804,11 +11870,40 @@
         }
         function brInitRunHud() {
             if(brRunHud.initialized)return;brRunHud.initialized=true;
-            brEl('br-run-ready').addEventListener('click',function(){brRunSetOpen(true);});
-            brEl('br-run-later').addEventListener('click',function(){brRunSetOpen(false);});
-            brEl('br-run-cards').addEventListener('click',function(event){
-                var card=event.target.closest('button[data-run-path]');
-                if(card&&card.dataset.runOffer===brRunHud.offerKey)brRunSubmitChoice(card.dataset.runPath);
+            function pointerButton(id,activate){
+                const el=brEl(id);let pointer=null;
+                el.addEventListener('pointerdown',function(e){if(e.button>0||pointer!==null)return;e.preventDefault();e.stopPropagation();pointer=e.pointerId;el.setPointerCapture?.(pointer);});
+                el.addEventListener('pointerup',function(e){if(e.pointerId!==pointer)return;pointer=null;e.preventDefault();e.stopPropagation();const r=el.getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom)activate();});
+                for(const type of ['pointercancel','lostpointercapture'])el.addEventListener(type,function(e){if(e.pointerId===pointer)pointer=null;});
+                el.addEventListener('click',function(e){if(e.detail>0||e.pointerType){e.preventDefault();return;}activate();});
+            }
+            pointerButton('br-run-ready',function(){brRunSetOpen(true);});
+            pointerButton('br-run-later',function(){brRunSetOpen(false);});
+            const cards=brEl('br-run-cards'),touches=new Map();brRunHud.cardPointers=touches;
+            cards.addEventListener('pointerdown',function(e){
+                const card=e.target.closest('button[data-run-path]');
+                if(!card||card.disabled||e.button>0||card.dataset.runOffer!==brRunHud.offerKey)return;
+                e.preventDefault();e.stopPropagation();
+                touches.set(e.pointerId,{card,path:card.dataset.runPath,offer:card.dataset.runOffer,epoch:brRunHud.epoch,startX:e.clientX,startY:e.clientY,lastY:e.clientY,dragged:false});
+                card.setPointerCapture?.(e.pointerId);
+            });
+            cards.addEventListener('pointermove',function(e){
+                const t=touches.get(e.pointerId);if(!t)return;e.preventDefault();e.stopPropagation();
+                if(Math.hypot(e.clientX-t.startX,e.clientY-t.startY)>8)t.dragged=true;
+                if(t.dragged)brEl('br-run-panel').scrollTop+=t.lastY-e.clientY;t.lastY=e.clientY;
+            });
+            cards.addEventListener('pointerup',function(e){
+                const t=touches.get(e.pointerId);if(!t)return;touches.delete(e.pointerId);
+                e.preventDefault();e.stopPropagation();const r=t.card.getBoundingClientRect();
+                if(t.dragged||t.epoch!==brRunHud.epoch||t.offer!==brRunHud.offerKey||t.card.disabled||e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)return;
+                brRunSubmitChoice(t.path);
+            });
+            for(const type of ['pointercancel','lostpointercapture'])cards.addEventListener(type,e=>touches.delete(e.pointerId));
+            cards.addEventListener('click',function(e){
+                // Only keyboard/assistive activation uses click. Touch/mouse already submitted on pointerup.
+                if(e.detail>0||e.pointerType){e.preventDefault();return;}
+                const card=e.target.closest('button[data-run-path]');
+                if(card&&!card.disabled&&card.dataset.runOffer===brRunHud.offerKey)brRunSubmitChoice(card.dataset.runPath);
             });
             // Enter/space activates the focused choice, without also firing a basic attack.
             // Direction keys still reach the existing keyboard movement handler.
@@ -11818,6 +11913,7 @@
         }
         function brResetRunHud() {
             brRunClearTimer('collapseTimer');brRunClearTimer('ackTimer');brRunClearTimer('noticeTimer');brEl('br-run-applied').classList.add('br-hidden');
+            brRunHud.cardPointers?.clear();brRunClearTimer('levelTimer');brEl('br-run-level-alert').classList.add('br-hidden');
             brRunHud.epoch++;brRunHud.state=null;brRunHud.offer=null;brRunHud.offerKey='';
             brRunHud.pending=null;brRunHud.opened=false;brRunHud.catalog={};brRunHud.chipKey='';
             brEl('br-run-hud').classList.add('br-hidden');brRunSetOpen(false);
@@ -11847,10 +11943,12 @@
             // Never show an incomplete/duplicate selection as a valid three-card offer.
             var valid=!!(offer&&offer.id&&cards.length===3&&offer.cards.length===3),key=valid?String(offer.id):'';
             if(key!==brRunHud.offerKey) {
-                brRunHud.epoch++;brRunClearTimer('ackTimer');brRunHud.pending=null;
+                brRunHud.cardPointers?.clear();brRunHud.epoch++;brRunClearTimer('ackTimer');brRunHud.pending=null;
                 brRunHud.offerKey=key;brRunHud.offer=valid?{id:key,cards:cards,level:offer.level}:null;
                 brSetText(brEl('br-run-choice-status'),'');
                 if(valid) {
+                    const alert=brEl('br-run-level-alert');alert.classList.remove('br-hidden');alert.classList.toggle('br-no-motion',!!BRMP.reducedMotion);
+                    brRunClearTimer('levelTimer');brRunHud.levelTimer=setTimeout(function(){alert.classList.add('br-hidden');brRunHud.levelTimer=null;},1400);
                     var families={BASIC:'일반 공격',SKILL:'고유 스킬',BODY:'기동 · 체력',SIGNATURE:'고유 강화'};
                     brSetText(brEl('br-run-offer-title'),'LV.'+(Number(offer.level)||level)+' · 강화 선택');
                     brEl('br-run-cards').innerHTML=cards.map(function(card){
@@ -12491,7 +12589,10 @@
             if(brIsTrainSkill(kind)&&!releaseAim)releaseAim={ax:BRMP.lastRawAim?.x??BRMP.inputState.ax,ay:BRMP.lastRawAim?.y??BRMP.inputState.ay,ap:brTrainPower(220,Number(brRunClientMods().signatureRange||1))};
             var input=BRMP.inputState,now=brNow(),pending=BRMP.pendingLocalActions||(BRMP.pendingLocalActions={});
             if(pending[kind]&&!pending[kind].previewed)return false;
-            var seq=++input[kind+'Seq'],raw=brNormalizeAimVector(releaseAim?.ax??BRMP.lastRawAim?.x??input.ax,releaseAim?.ay??BRMP.lastRawAim?.y??input.ay),aim=brResolveAimHelp(kind,raw,Number(releaseAim?.ap??input.aimPower??1),!!releaseAim?.tap,true);
+            const defaultAttack=kind==='attack'&&(!releaseAim||releaseAim.tap||releaseAim.defaultAim);
+            const chosen=defaultAttack?brDefaultAttackAim():null;
+            var seq=++input[kind+'Seq'],raw=chosen||brNormalizeAimVector(releaseAim?.ax??BRMP.lastRawAim?.x??input.ax,releaseAim?.ay??BRMP.lastRawAim?.y??input.ay),aim=brResolveAimHelp(kind,raw,Number(releaseAim?.ap??input.aimPower??1),!!releaseAim?.tap,true);
+            if(kind==='attack'&&!defaultAttack)BRMP.lastManualAttackAim={x:raw.x,y:raw.y};
             BRMP.lastRawAim={x:raw.x,y:raw.y};if(kind==='attack')BRMP.lastAttackRaw={x:raw.x,y:raw.y};input.ax=aim.x;input.ay=aim.y;
             input[kind]={seq:seq,ax:aim.x,ay:aim.y,rax:aim.rawX,ray:aim.rawY,assist:aim.assist,ap:Number(releaseAim?.ap??input.aimPower??1),life:rw.life,kind:kind==='skill'&&rw.recast?'recast':'cast',castId:kind==='skill'&&rw.recast?rw.recast.id:''};
             if(brIsTrainSkill(kind))input[kind].distance=brTrainDistance(input[kind].ap,Number(brRunClientMods().signatureRange||1));
@@ -12519,6 +12620,7 @@
         function brSmoothAimGesture(now=performance.now(),selected) {
             if(!selected&&BRMP.aimGestures){for(const gesture of Object.values(BRMP.aimGestures))brSmoothAimGesture(now,gesture);return;}
             var g=selected||BRMP.aimGesture,input=BRMP.inputState;if(!g||!input||!Number.isFinite(g.aimTargetAngle))return;
+            if(g.kind==='attack'&&!g.moved){const a=brDefaultAttackAim();g.aimTargetAngle=g.aimAngle=Math.atan2(a.y,a.x);}
             var dt=brClamp(now-Number(g.aimAt??now),0,50);g.aimAt=now;
             var delta=Math.atan2(Math.sin(g.aimTargetAngle-g.aimAngle),Math.cos(g.aimTargetAngle-g.aimAngle)),blend=1-Math.exp(-dt/65);
             g.aimAngle+=brClamp(delta*blend,-12*dt/1000,12*dt/1000);
@@ -12563,7 +12665,7 @@
                     e.preventDefault();
                     brEnsureAudio();
                     if(e.button>0||BRMP.aimGestures?.[kind]||!brCanStartAim(kind))return;
-                    const last=kind==='attack'?BRMP.lastAttackRaw:BRMP.lastRawAim;var angle=Math.atan2(Number(last?.y??BRMP.inputState.ay??0),Number(last?.x??BRMP.inputState.ax??1));
+                    const last=kind==='attack'?brDefaultAttackAim():BRMP.lastRawAim;var angle=Math.atan2(Number(last?.y??BRMP.inputState.ay??0),Number(last?.x??BRMP.inputState.ax??1));
                     var gesture={kind:kind,pointerId:e.pointerId,button:button,knob:aimKnob,moved:false,startedAt:performance.now(),startX:e.clientX,startY:e.clientY,
                         aimAngle:angle,aimTargetAngle:angle,aimAt:performance.now(),aimPower:1,targetPower:1,knobDistance:0,targetDistance:0};(BRMP.aimGestures||(BRMP.aimGestures={}))[kind]=gesture;BRMP.aimGesture=gesture;
                     button.classList.add('aiming');if(button.setPointerCapture)button.setPointerCapture(e.pointerId);
@@ -12579,7 +12681,7 @@
                     // The released thumb distance is the cast distance; visual damping
                     // must not leave a quick drag at its previous range.
                     BRMP.inputState.aimPower=gesture.targetPower;
-                    brRequestAction(kind,{ax:Math.cos(brIsTrainSkill(kind)?gesture.aimAngle:gesture.aimTargetAngle),ay:Math.sin(brIsTrainSkill(kind)?gesture.aimAngle:gesture.aimTargetAngle),ap:gesture.targetPower,tap:kind==='attack'&&!gesture.moved&&performance.now()-gesture.startedAt<=BR_AIM_HELP.tapMs});
+                    brRequestAction(kind,{ax:Math.cos(brIsTrainSkill(kind)?gesture.aimAngle:gesture.aimTargetAngle),ay:Math.sin(brIsTrainSkill(kind)?gesture.aimAngle:gesture.aimTargetAngle),ap:gesture.targetPower,defaultAim:kind==='attack'&&!gesture.moved,tap:kind==='attack'&&!gesture.moved&&performance.now()-gesture.startedAt<=BR_AIM_HELP.tapMs});
                     clearAim(gesture);
                 });
                 button.addEventListener('pointercancel',function(e){
