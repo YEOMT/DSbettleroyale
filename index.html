@@ -4002,24 +4002,24 @@
         }
         // END DANGER RING CORE
 
-        // CAPTURE v1: independent match accounting; no damage, XP, or RNG side effects.
-        const BR_CAPTURE_RULES=Object.freeze({version:1,mapRevision:'capture-landscape-1',seconds:[300,360],defaultSeconds:360,
-            rates:Object.freeze([0,.08,.10,.12]),epsilon:1e-8,pointRadius:260,publishMs:200,staleMs:1800});
+        // CAPTURE v2: staged objectives and scoring only; combat and RNG remain unchanged.
+        const BR_CAPTURE_RULES=Object.freeze({version:2,mapRevision:'capture-landscape-2',seconds:[300,360],defaultSeconds:360,
+            rates:Object.freeze([0,.24,.30,.36]),epsilon:1e-8,pointRadius:250,centerRadius:320,openingSeconds:120,feverSeconds:60,feverMultiplier:2,publishMs:200,staleMs:1800});
         function brRespawnMode(mode){return mode==='team-respawn'||mode==='team-capture';}
         function brCaptureMode(){return window.BRMP?.roomMeta?.mode==='team-capture';}
         const BRCapture=window.BRCapture=(()=>{
             const EPS=BR_CAPTURE_RULES.epsilon,layouts=new Map(),id=p=>String(p.remoteId??p.id),clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
             function layout(count){count=clamp(Number(count)||2,2,4);if(layouts.has(count))return layouts.get(count);
                 const boundary={kind:'rect',minX:-3600,maxX:3600,minY:-2025,maxY:2025,revision:BR_CAPTURE_RULES.mapRevision+'-'+count};
-                const bases=(count===2?[[-2400,0],[2400,0]]:count===3?[[-1900,0],[950,-1645.448267],[950,1645.448267]]:[[-3000,-1540],[3000,1540],[3000,-1540],[-3000,1540]])
+                const bases=(count===2?[[-2900,0],[2900,0]]:count===3?[[0,-1650],[-1428.941916,825],[1428.941916,825]]:[[-3000,-1540],[3000,1540],[3000,-1540],[-3000,1540]])
                     .map(([x,y],i)=>({team:i+1,x,y,rx:count===2?560:480,ry:count===2?480:320}));
-                const points=(count===2?[[0,-1050],[0,0],[0,1050]]:count===3?[[500,0],[-250,-433.012702],[-250,433.012702]]:[[-1250,0],[0,0],[1250,0]])
-                    .map(([x,y],i)=>({id:'ABC'[i],x,y,radius:BR_CAPTURE_RULES.pointRadius}));
+                const points=[[-1700,0],[0,0],[1700,0]]
+                    .map(([x,y],i)=>({id:'ABC'[i],x,y,radius:i===1?BR_CAPTURE_RULES.centerRadius:BR_CAPTURE_RULES.pointRadius}));
                 // Sparse detached cover. No closed rooms or wall inside a scoring circle.
-                const walls=(count===3?[[-1000,-1050,420,44],[-1000,1050,420,44],[1500,-600,44,400],[1500,600,44,400],[-2900,-900,420,44],[-2900,900,420,44]]:
+                const walls=(count===3?[[-850,-350,440,44],[850,-350,440,44],[-2700,-700,400,44],[2700,-700,400,44],[-2700,700,400,44],[2700,700,400,44]]:
                     [[-1520,-760,540,44],[1520,760,540,44],[-1520,760,540,44],[1520,-760,540,44],[-620,-1630,480,44],[620,1630,480,44]])
                     .map(([x,y,w,h])=>({x,y,w,h,angle:0,kind:'wall',spinSpeed:0,minX:x-w/2,maxX:x+w/2,minY:y-h/2,maxY:y+h/2}));
-                const smokes=count===3?[[-1600,-650,180],[-1600,650,180],[1700,0,180]]:[[-2200,-950,185],[2200,950,185],[-2200,950,185],[2200,-950,185]];
+                const smokes=[[-2200,-950,185],[2200,950,185],[-2200,950,185],[2200,-950,185]];
                 const out={revision:boundary.revision,count,boundary,bases,points,walls,smokes};layouts.set(count,out);return out;
             }
             function inside(p,point){return (p.x-point.x)**2+(p.y-point.y)**2<=point.radius**2+EPS;}
@@ -4029,33 +4029,45 @@
                 if(ties.length>1)return {state:'contested',team:0,delta:0,rate:0,ties};
                 const delta=n1-n2;return {state:'scoring',team,delta,rate:BR_CAPTURE_RULES.rates[Math.min(3,delta)],ties:[]};
             }
-            function create(count,seconds,key){const map=layout(count);return {version:1,key,map,count:map.count,seconds:BR_CAPTURE_RULES.seconds.includes(seconds)?seconds:360,
-                active:0,seq:0,frame:0,finalized:false,winners:[],reason:'',scores:Array(map.count+1).fill(0),rates:Array(map.count+1).fill(0),
-                points:map.points.map(p=>({...p,counts:Array(map.count+1).fill(0),members:[],state:'neutral',team:0,rate:0,ties:[]})),records:new Map(),lastFrame:-1};}
+            function phase(active,seconds){return active+EPS>=seconds-BR_CAPTURE_RULES.feverSeconds?'FEVER':active+EPS>=BR_CAPTURE_RULES.openingSeconds?'ALL_OBJECTIVES':'OPENING';}
+            function setPhase(s){s.phase=phase(s.active,s.seconds);s.activeMask=s.phase==='OPENING'?2:7;s.fever=s.phase==='FEVER';s.multiplier=s.fever?BR_CAPTURE_RULES.feverMultiplier:1;}
+            function create(count,seconds,key){const map=layout(count);return {version:BR_CAPTURE_RULES.version,key,map,count:map.count,seconds:BR_CAPTURE_RULES.seconds.includes(seconds)?seconds:360,
+                active:0,phase:'OPENING',activeMask:2,fever:false,multiplier:1,seq:0,frame:0,finalized:false,winners:[],reason:'',scores:Array(map.count+1).fill(0),rates:Array(map.count+1).fill(0),
+                points:map.points.map((p,i)=>({...p,enabled:i===1,counts:Array(map.count+1).fill(0),members:[],state:i===1?'neutral':'locked',team:0,rate:0,ties:[]})),records:new Map(),lastFrame:-1};}
             function record(s,p){const key=id(p);let r=s.records.get(key);if(!r){r={id:key,name:p.name||key,team:Number(p.team),session:String(p.sessionId||''),points:0,scoringSeconds:0,contestedSeconds:0,pointKills:0,pointAssists:0,heal:0,shield:0};s.records.set(key,r);}return r;}
             function eligible(p,g){if(!p||p.id===999||p.isReworkTurret||p.isClone||p.cloneOwner||!p.alive||!(p.hp>0)||!p.team||p.spawnProtectionUntilFrame>g.frame)return false;
                 const rec=window.BRMP?.players?.[p.remoteId];if(window.BRMP?.active&&window.BRMP?.role==='host'&&p.remoteId&&!rec)return false;return !rec||(!rec.revoked&&window.BRMP.playerConnected(rec)&&String(rec.sessionId||'')===String(p.sessionId||''));}
-            function tally(s,players,g){s.rates.fill(0);for(const z of s.points){z.counts.fill(0);z.members.length=0;}
-                for(const p of players){if(p.id===999||p.isClone||p.cloneOwner||p.isReworkTurret)continue;record(s,p);if(!eligible(p,g)||p.team>s.count)continue;for(const z of s.points)if(inside(p.pos,z)){z.counts[p.team]++;z.members.push(p);break;}}
-                for(const z of s.points){Object.assign(z,resolve(z.counts));if(z.team)s.rates[z.team]+=z.rate;}
+            function tally(s,players,g){setPhase(s);s.rates.fill(0);for(let i=0;i<s.points.length;i++){const z=s.points[i];z.enabled=!!(s.activeMask&(1<<i));z.counts.fill(0);z.members.length=0;}
+                for(const p of players){if(p.id===999||p.isClone||p.cloneOwner||p.isReworkTurret)continue;record(s,p);if(!eligible(p,g)||p.team>s.count)continue;for(const z of s.points)if(z.enabled&&inside(p.pos,z)){z.counts[p.team]++;z.members.push(p);break;}}
+                for(const z of s.points){if(!z.enabled){Object.assign(z,{state:'locked',team:0,delta:0,rate:0,ties:[]});continue;}Object.assign(z,resolve(z.counts));z.rate*=s.multiplier;if(z.team)s.rates[z.team]+=z.rate;}
             }
             function finish(s,reason){if(s.finalized)return;s.finalized=true;s.reason=reason;const best=Math.max(...s.scores.slice(1));s.winners=[];
                 for(let t=1;t<=s.count;t++)if(Math.abs(s.scores[t]-best)<=EPS)s.winners.push(t);s.seq++;}
-            function integrate(s,dt){if(s.finalized||!Number.isFinite(dt)||dt<=0)return 0;let use=Math.min(dt,Math.max(0,s.seconds-s.active)),end='';
-                for(let t=1;t<=s.count;t++)if(s.rates[t]>0)use=Math.min(use,Math.max(0,(100-s.scores[t])/s.rates[t]));
-                const added=Array(s.count+1).fill(0);for(const z of s.points){if(z.team&&z.rate){const members=z.members.filter(p=>p.team===z.team),d=z.rate*use;if(!members.length)continue;
-                        // Accumulate the exact same unrounded increment in team and individual ledgers.
-                        added[z.team]+=d;let remaining=d;members.forEach((p,i)=>{const a=i===members.length-1?remaining:d/members.length;remaining-=a;const r=record(s,p);r.points+=a;r.scoringSeconds+=use;});}
-                    else if(z.state==='contested')for(const p of z.members)record(s,p).contestedSeconds+=use;
-                }
-                for(let t=1;t<=s.count;t++){s.scores[t]+=added[t];if(s.scores[t]>100&&s.scores[t]<100+EPS)s.scores[t]=100;}
-                s.active=Math.min(s.seconds,s.active+use);if(s.scores.some((v,i)=>i&&v>=100-EPS))end='target';else if(s.active>=s.seconds-EPS)end='time';
-                s.seq++;if(end)finish(s,end);return use;
+            function integrate(s,dt,players=null,g=null){if(s.finalized||!Number.isFinite(dt)||dt<=0)return 0;let remaining=dt,total=0;
+                // Split an authority step at phase/time/100% boundaries. A render or packet never earns points.
+                while(remaining>EPS&&!s.finalized){
+                    if(players&&g)tally(s,players,g);else setPhase(s);
+                    const boundary=s.active<BR_CAPTURE_RULES.openingSeconds-EPS?BR_CAPTURE_RULES.openingSeconds:s.active<s.seconds-BR_CAPTURE_RULES.feverSeconds-EPS?s.seconds-BR_CAPTURE_RULES.feverSeconds:s.seconds;
+                    let use=Math.min(remaining,Math.max(0,boundary-s.active)),end='';
+                    for(let t=1;t<=s.count;t++)if(s.rates[t]>0)use=Math.min(use,Math.max(0,(100-s.scores[t])/s.rates[t]));
+                    const added=Array(s.count+1).fill(0);for(const z of s.points){if(z.enabled&&z.team&&z.rate){const members=z.members.filter(p=>p.team===z.team),d=z.rate*use;if(!members.length)continue;
+                            // The team's actual increment is shared exactly, including FEVER and a clipped final step.
+                            added[z.team]+=d;let rest=d;members.forEach((p,i)=>{const a=i===members.length-1?rest:d/members.length;rest-=a;const r=record(s,p);r.points+=a;r.scoringSeconds+=use;});}
+                        else if(z.enabled&&z.state==='contested')for(const p of z.members)record(s,p).contestedSeconds+=use;
+                    }
+                    for(let t=1;t<=s.count;t++){s.scores[t]+=added[t];if(s.scores[t]>100&&s.scores[t]<100+EPS)s.scores[t]=100;}
+                    s.active=Math.min(s.seconds,s.active+use);if(Math.abs(s.active-boundary)<EPS)s.active=boundary;
+                    total+=use;remaining-=use;s.seq++;
+                    if(s.scores.some((v,i)=>i&&v>=100-EPS))end='target';else if(s.active>=s.seconds-EPS)end='time';
+                    if(end)finish(s,end);
+                    const before=s.phase;setPhase(s);if(before!==s.phase&&players&&g)tally(s,players,g);
+                    if(use<=EPS&&!end)break;
+                }return total;
             }
             function tick(g){const s=g.capture;if(!s||s.finalized||g.paused||g.ringSuspended||g.isGameOver||s.lastFrame===g.frame)return 0;
-                s.lastFrame=g.frame;s.frame=g.frame;tally(s,g.participants,g);const used=integrate(s,1/60);s.hostAt=performance.now();
+                s.lastFrame=g.frame;s.frame=g.frame;const used=integrate(s,1/60,g.participants,g);s.hostAt=performance.now();
                 if(s.finalized){g.isGameOver=true;g.matchEndedAt=g.frame;window.BRMP?.captureFinished?.(s);}return used;}
-            function pointAt(s,pos){return s?.points.find(z=>inside(pos,z));}
+            function pointAt(s,pos){return s?.points.find(z=>z.enabled&&inside(pos,z));}
             function damage(g,attacker,victim,actual){const s=g?.capture;if(!s||s.finalized||actual<=0||!attacker||attacker===victim||!attacker.team||attacker.team===victim.team||attacker.id===999||victim.id===999||attacker.isClone||victim.isClone||attacker.isReworkTurret||victim.isReworkTurret)return;
                 if(!pointAt(s,attacker.pos)&&!pointAt(s,victim.pos))return;
                 if(!victim._captureDamage||victim._captureDamage.life!==victim.lifeSeq)victim._captureDamage={life:victim.lifeSeq,entries:new Map()};
@@ -4071,7 +4083,7 @@
             function support(g,source,target,amount,kind){const s=g?.capture;if(!s||s.finalized||!source||source===target||!source.team||source.team!==target.team||!Number.isFinite(amount)||amount<=0||source.id===999||target.id===999)return;record(s,source)[kind]+=amount;}
             function awards(s){const rows=[...s.records.values()];const top=value=>{const max=Math.max(0,...rows.map(value));return max>EPS?rows.filter(r=>Math.abs(value(r)-max)<=EPS).sort((a,b)=>a.id.localeCompare(b.id)).map(r=>r.id):[];};
                 return [{key:'capture',label:'점령 MVP',ids:top(r=>r.points)},{key:'combat',label:'거점 전투왕',ids:top(r=>r.pointKills+r.pointAssists)},{key:'support',label:'팀 지원왕',ids:top(r=>r.heal+r.shield)}];}
-            return {layout,inside,resolve,create,record,eligible,tally,integrate,tick,finish,damage,kill,support,awards,pointAt,id};
+            return {layout,inside,resolve,phase,setPhase,create,record,eligible,tally,integrate,tick,finish,damage,kill,support,awards,pointAt,id};
         })();
         function brArenaRect(g){if(!brCaptureMode())return null;return g?.boundary?.kind==='rect'?g.boundary:BRCapture.layout(window.BRMP?.roomMeta?.teamCount||2).boundary;}
         function brArenaContains(g,pos,r=0){const b=brArenaRect(g);return b?pos.x>=b.minX+r-1e-8&&pos.x<=b.maxX-r+1e-8&&pos.y>=b.minY+r-1e-8&&pos.y<=b.maxY-r+1e-8:true;}
@@ -4098,9 +4110,10 @@
         function brCaptureBoundaryHit(from,to,r=0){const b=brArenaRect();if(!b)return null;let hit=null;const axes=[['x',b.minX+r,b.maxX-r],['y',b.minY+r,b.maxY-r]];
             for(const [axis,lo,hi] of axes){const d=to[axis]-from[axis];if(Math.abs(d)<1e-10)continue;const edge=d>0?hi:lo;if(d>0?to[axis]<=edge:to[axis]>=edge)continue;const t=Math.max(0,(edge-from[axis])/d);if(t>1||hit&&t>=hit.t)continue;hit={t,nx:axis==='x'?(d>0?-1:1):0,ny:axis==='y'?(d>0?-1:1):0,depth:0,boundary:true};}return hit;}
 
+        function brCaptureCountdown(seconds){const n=Math.max(0,Math.ceil(seconds));return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');}
         function brCaptureSceneData(g){const host=!!g?.capture,map=host?g.capture.map:BRCapture.layout(window.BRMP?.roomMeta?.teamCount||2),packet=window.BRMP?.captureState;
             const stale=!host&&(!packet||performance.now()-Number(window.BRMP?.captureReceivedAt||0)>BR_CAPTURE_RULES.staleMs||window.BRMP?.roomMeta?.hostConnected===false);
-            return {map,stale,points:host?g.capture.points:map.points.map((p,i)=>({...p,state:packet?.z[i]?.[0]||'neutral',team:packet?.z[i]?.[1]||0,counts:[0,...(packet?.z[i]?.[2]||Array(map.count).fill(0))]}))};}
+            const active=host?g.capture.active:Number(packet?.a||0);return {map,stale,openingLeft:Math.max(0,Math.ceil(BR_CAPTURE_RULES.openingSeconds-active)),points:host?g.capture.points:map.points.map((p,i)=>({...p,enabled:packet?!!(packet.am&(1<<i)):i===1,state:packet?.z[i]?.[0]||(i===1?'neutral':'locked'),team:packet?.z[i]?.[1]||0,counts:[0,...(packet?.z[i]?.[2]||Array(map.count).fill(0))]}))};}
         function brCaptureViewPort(g,w,h){const b=g.boundary,top=Math.min(126,h*.22),bottom=48,pad=24;
             g.zoom=Math.min((w-pad*2)/(b.maxX-b.minX),(h-top-bottom)/(b.maxY-b.minY));g.lookAt.x=0;g.lookAt.y=0;
             return {x:w/2,y:top+(h-top-bottom)/2,zoom:g.zoom};}
@@ -4112,7 +4125,7 @@
             if(!scene.captureLayer){scene.captureLayer=new P.Container();scene.captureGeometry=new P.Graphics();scene.captureLabels=[];scene.captureLayer.addChild(scene.captureGeometry);scene.world.addChildAt(scene.captureLayer,1);
                 const b=map.boundary;scene.captureMask=new P.Graphics().rect(b.minX,b.minY,b.maxX-b.minX,b.maxY-b.minY).fill(0xffffff);scene.world.addChild(scene.captureMask);scene.world.mask=scene.captureMask;
             }
-            const signature=JSON.stringify([map.revision,data.stale,Math.round(zoom*1000),data.points.map(z=>[z.state,z.team,z.counts])]);if(scene.captureSignature===signature)return;scene.captureSignature=signature;
+            const signature=JSON.stringify([map.revision,data.stale,data.openingLeft,Math.round(zoom*1000),data.points.map(z=>[z.state,z.team,z.counts])]);if(scene.captureSignature===signature)return;scene.captureSignature=signature;
             const gr=scene.captureGeometry;gr.clear();let labelCount=0;
             const label=(text,x,y,color,size)=>{let t=scene.captureLabels[labelCount++];if(!t){t=new P.Text({text:'',style:{fontFamily:'Noto Sans KR,sans-serif',fontWeight:'700',fontSize:40,fill:0xffffff,stroke:{color:0x101a29,width:3}}});t.anchor.set(.5);scene.captureLabels.push(t);scene.captureLayer.addChild(t);}t.text=text;t.position.set(x,y);t.style.fill=color;t.style.fontSize=size;t.alpha=data.stale?.65:.92;t.visible=true;};
             const font=Math.max(30,11/zoom),colors=['#a5b6c6','#3b82f6','#ef4444','#22c55e','#eab308'],names=['','BLUE','RED','GREEN','YELLOW'];
@@ -4120,6 +4133,7 @@
             for(const z of data.points){const col=data.stale?'#94a3b8':z.state==='scoring'?colors[z.team]:z.state==='contested'?'#f1f5f9':'#94a3b8';
                 gr.circle(z.x,z.y,z.radius).fill({color:col,alpha:z.state==='scoring'?.09:.04}).stroke({color:col,width:Math.max(5,1.8/zoom),alpha:data.stale?.4:.85});
                 if(z.state==='contested'){for(let i=1;i<=map.count;i++)if(z.counts[i]){const a=-Math.PI/2+(i-1)*Math.PI*2/map.count;gr.arc(z.x,z.y,z.radius-12,a,a+Math.PI*1.5/map.count).stroke({color:colors[i],width:7,alpha:.7});}}
+                if(!z.enabled){label('LOCK · '+z.id+' · 비활성',z.x,z.y-35,'#94a3b8',font);label(data.stale?'현황 확인 중':brCaptureCountdown(data.openingLeft)+' 후 활성화',z.x,z.y+40,'#94a3b8',font*.9);continue;}
                 label(z.id+' · 점령 거점',z.x,z.y-75,col,font*1.2);
                 label(data.stale?'현황 확인 중':z.state==='scoring'?names[z.team]+' 우세':z.state==='contested'?'경합 · 득점 정지':'중립 · 대기',z.x,z.y+5,col,font);
                 for(let t=1;t<=map.count;t++){const x=z.x+(t-(map.count+1)/2)*Math.max(85,font*2.6);label(names[t][0]+' '+z.counts[t],x,z.y+85,colors[t],font*.88);}
@@ -4127,7 +4141,7 @@
         }
         function brCaptureCanvasPoints(cc,g,zoom){const d=brCaptureSceneData(g),colors=['#94a3b8','#3b82f6','#ef4444','#22c55e','#eab308'],names=['','BLUE','RED','GREEN','YELLOW'];cc.save();cc.textAlign='center';cc.textBaseline='middle';const font=Math.max(30,11/zoom);
             for(const b of d.map.bases){cc.fillStyle=colors[b.team]+'19';cc.strokeStyle=colors[b.team];cc.lineWidth=3;cc.fillRect(b.x-b.rx,b.y-b.ry,b.rx*2,b.ry*2);cc.strokeRect(b.x-b.rx,b.y-b.ry,b.rx*2,b.ry*2);cc.fillStyle=colors[b.team];cc.font='bold '+font+'px sans-serif';cc.fillText(names[b.team]+' BASE',b.x,b.y-b.ry+font);}
-            for(const z of d.points){const col=d.stale?'#94a3b8':z.state==='scoring'?colors[z.team]:z.state==='contested'?'#f1f5f9':'#94a3b8';cc.beginPath();cc.arc(z.x,z.y,z.radius,0,Math.PI*2);cc.fillStyle=col+'14';cc.fill();cc.strokeStyle=col;cc.lineWidth=Math.max(5,1.8/zoom);cc.stroke();cc.fillStyle=col;cc.font='bold '+font*1.2+'px sans-serif';cc.fillText(z.id+' · 점령 거점',z.x,z.y-75);cc.font='bold '+font+'px sans-serif';cc.fillText(d.stale?'현황 확인 중':z.state==='scoring'?names[z.team]+' 우세':z.state==='contested'?'경합 · 득점 정지':'중립 · 대기',z.x,z.y+5);
+            for(const z of d.points){const col=d.stale?'#94a3b8':z.state==='scoring'?colors[z.team]:z.state==='contested'?'#f1f5f9':'#94a3b8';cc.beginPath();cc.arc(z.x,z.y,z.radius,0,Math.PI*2);cc.fillStyle=col+'14';cc.fill();cc.strokeStyle=col;cc.lineWidth=Math.max(5,1.8/zoom);cc.stroke();cc.fillStyle=col;if(!z.enabled){cc.font='bold '+font+'px sans-serif';cc.fillText('LOCK · '+z.id+' · 비활성',z.x,z.y-35);cc.font='bold '+font*.9+'px sans-serif';cc.fillText(d.stale?'현황 확인 중':brCaptureCountdown(d.openingLeft)+' 후 활성화',z.x,z.y+40);continue;}cc.font='bold '+font*1.2+'px sans-serif';cc.fillText(z.id+' · 점령 거점',z.x,z.y-75);cc.font='bold '+font+'px sans-serif';cc.fillText(d.stale?'현황 확인 중':z.state==='scoring'?names[z.team]+' 우세':z.state==='contested'?'경합 · 득점 정지':'중립 · 대기',z.x,z.y+5);
                 for(let t=1;t<=d.map.count;t++){cc.fillStyle=colors[t];cc.font='bold '+font*.88+'px sans-serif';cc.fillText(names[t][0]+' '+z.counts[t],z.x+(t-(d.map.count+1)/2)*Math.max(85,font*2.6),z.y+85);}}
             cc.restore();}
         function brCaptureCanvasFrame(g){const w=canvas.width,h=canvas.height,v=brCaptureViewPort(g,w,h),b=g.boundary;ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#101a30';ctx.fillRect(0,0,w,h);ctx.save();ctx.translate(v.x,v.y);ctx.scale(g.zoom,g.zoom);ctx.beginPath();ctx.rect(b.minX,b.minY,b.maxX-b.minX,b.maxY-b.minY);ctx.clip();ctx.fillStyle='#142437';ctx.fillRect(b.minX,b.minY,b.maxX-b.minX,b.maxY-b.minY);
@@ -7061,6 +7075,13 @@
         .br-host-live { position:fixed; z-index:80; left:12px; bottom:12px; display:flex; gap:7px; align-items:center;
             background:rgba(5,10,20,.82); border:1px solid #394b70; border-radius:14px; padding:8px; backdrop-filter:blur(7px); }
         .br-host-live button { font-size:12px; padding:8px 10px; }
+        #br-live-room{gap:9px;padding:7px 12px;background:rgba(7,15,29,.92);border-color:#6e88aa;color:#fff;white-space:nowrap}
+        #br-live-room small{font-size:11px;letter-spacing:.05em;color:#c5d5e8}
+        #br-live-room [data-room-digits]{font-size:18px;line-height:1.15;letter-spacing:.13em;font-variant-numeric:tabular-nums}
+        .br-toast.br-capture-notice{top:clamp(130px,20vh,180px);bottom:auto;max-width:calc(100vw - 32px);box-sizing:border-box;text-align:center;white-space:pre-line;font-weight:800;font-size:clamp(14px,2vw,21px);border-color:#d6a540;background:rgba(10,21,38,.94)}
+        [data-cap-phase]{display:inline-block;margin-left:6px;color:#d5e5f6;font-style:normal;font-weight:700}
+        [data-cap-phase].fever{color:#ffcd6b}
+
 
         /* Team Kill HUD is updated twice a second; the closed leaderboard has no DOM work. */
         #game-screen.br-tk-host #hud-overlay { display:none; }
@@ -7387,7 +7408,7 @@
         <div class="br-tk-board-body"><h3>TEAM RANKING</h3><div id="br-tk-team-ranking"></div><h3 style="margin-top:14px">PERSONAL RANKING</h3><div id="br-tk-personal-ranking"></div></div>
     </aside>
     <div id="br-host-live" class="br-host-live br-hidden">
-        <span id="br-live-room" class="br-pill">ROOM</span>
+        <span id="br-live-room" class="br-pill"><small>ROOM</small><b data-room-digits></b></span>
         <button id="br-focus-toggle" class="br-btn br-btn-ghost">카메라: 전체</button>
         <button id="br-force-end" class="br-btn br-btn-danger">경기 종료</button>
     </div>
@@ -7430,7 +7451,7 @@
             'team-respawn':'팀 킬 대결', 'team-capture':'팀 점령전'
         };
         var BR_TIER_COLOR = {S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'};
-        var BR_ROOM_PROTOCOL=8; // A room must not mix the old client-owned draft write protocol with this one.
+        var BR_ROOM_PROTOCOL=9; // Capture v2 has locked objectives, phased rates and a new map; do not mix old clients.
         var BR_TIER_CHANCES=Object.freeze([['S',.10],['A',.20],['B',.25],['C',.30],['F',.15]]);
         // 수업용 지정 어휘 54개. 정답과 오답의 품사를 맞춰 의미가 겹치지 않게 구성한다.
         var BR_DEFAULT_QUESTIONS = [
@@ -7572,9 +7593,9 @@
             var n=crypto.getRandomValues(new Uint32Array(1))[0]%900000+100000;
             return String(n);
         }
-        function brToast(msg) {
-            var t=brEl('br-toast'); t.textContent=msg; t.classList.add('show');
-            clearTimeout(t._timer); t._timer=setTimeout(function(){t.classList.remove('show');},2300);
+        function brToast(msg,captureNotice=false) {
+            var t=brEl('br-toast');t.classList.toggle('br-capture-notice',captureNotice); t.textContent=msg; t.classList.add('show');
+            clearTimeout(t._timer); t._timer=setTimeout(function(){t.classList.remove('show','br-capture-notice');},2300);
         }
         function brShow(id) {
             Array.prototype.forEach.call(document.querySelectorAll('#br-app .br-screen'),function(s){s.classList.add('br-hidden');});
@@ -8489,7 +8510,7 @@
                 BRMP.roomMeta={
                     phase:'lobby',roomInstance:brUid('room'),rosterVersion:BR_ROSTER_VERSION,clientProtocol:BR_ROOM_PROTOCOL,hostId:BRMP.playerId,hostConnected:true,createdAt:brNow(),
                     updatedAt:brNow(),expiresAt:brNow()+1000*60*60*6,mode:'solo',teamCount:0,
-                    quizSeconds:60,matchSeconds:360,captureRulesVersion:1,mapIndex:-1,graphicsPreset:'balanced',rerollEvery:3,matchRound:0,seed:brUid('seed')
+                    quizSeconds:60,matchSeconds:360,captureRulesVersion:BR_CAPTURE_RULES.version,mapIndex:-1,graphicsPreset:'balanced',rerollEvery:3,matchRound:0,seed:brUid('seed')
                 };
                 await roomRef.set({meta:BRMP.roomMeta,players:{},inputs:{},views:{}});
                 // Per-connection host presence is registered by brSubscribeHost.
@@ -8509,7 +8530,7 @@
             BRMP.joinUrl=BR_PUBLIC_URL+'?room='+encodeURIComponent(BRMP.roomCode)+'&join=1&v='+encodeURIComponent(BR_ROSTER_VERSION);
             brEl('br-join-link').value=BRMP.joinUrl;
             brEl('br-room-code').textContent=BRMP.roomCode;
-            brEl('br-live-room').textContent='ROOM '+BRMP.roomCode;
+            brEl('br-live-room').querySelector('[data-room-digits]').textContent=BRMP.roomCode;
             var qr=brEl('br-qr');qr.innerHTML='';
             if(window.QRCode)new QRCode(qr,{text:BRMP.joinUrl,width:165,height:165,colorDark:'#07101d',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
             else qr.innerHTML='<span style="color:#111;font-size:12px;text-align:center">QR 라이브러리를 불러오지 못했습니다.<br>아래 링크를 복사하세요.</span>';
@@ -8561,7 +8582,7 @@
                 var metaSnap=await BRMP.db.ref(base+'/meta').once('value');
                 if(!metaSnap.exists())throw new Error('방을 찾을 수 없습니다. 방 번호를 확인해 주세요.');
                 var meta=metaSnap.val();
-                if(meta.rosterVersion!==BR_ROSTER_VERSION||meta.clientProtocol!==BR_ROOM_PROTOCOL||(meta.mode==='team-capture'&&meta.captureRulesVersion!==1))throw new Error('게임 버전이 다릅니다. 선생님과 같은 최신 파일로 참가해 주세요.');
+                if(meta.rosterVersion!==BR_ROSTER_VERSION||meta.clientProtocol!==BR_ROOM_PROTOCOL||(meta.mode==='team-capture'&&meta.captureRulesVersion!==BR_CAPTURE_RULES.version))throw new Error('게임 버전이 다릅니다. 선생님과 같은 최신 파일로 참가해 주세요.');
                 if(meta.phase==='closed')throw new Error('이미 종료된 방입니다.');
                 var storedId=sessionStorage.getItem('br_player_'+code);
                 var pid=(BRMP.auth&&BRMP.auth.currentUser&&BRMP.auth.currentUser.uid)||storedId||brUid('p');
@@ -9143,7 +9164,7 @@
                 if(quizSource.errors.length)brRenderQuizImport(quizSource,quizSource.fileName||'퀴즈',false);
                 var bank=brBuildMatchQuizBank(quizSource.questions,quizShuffleSeed);
                 var updates={'meta/phase':'quiz','meta/matchRound':matchRound,'meta/preparedRound':matchRound,'meta/quizSourceBank':quizSource.questions,
-                    'meta/mode':mode,'meta/captureRulesVersion':1,'meta/teamCount':teamCount,'meta/quizSeconds':seconds,'meta/matchSeconds':matchSeconds,
+                    'meta/mode':mode,'meta/captureRulesVersion':BR_CAPTURE_RULES.version,'meta/teamCount':teamCount,'meta/quizSeconds':seconds,'meta/matchSeconds':matchSeconds,
                     'meta/mapIndex':mapIndex,'meta/graphicsPreset':graphicsPreset,'meta/quizStartedAt':now,'meta/quizEndsAt':now+seconds*1000,
                     'meta/quizBank':bank,'meta/quizShuffleSeed':quizShuffleSeed,'meta/updatedAt':now};
                 var teams=brRespawnMode(mode)?brTKBalancedTeams(entries,teamCount):null;
@@ -13404,20 +13425,43 @@
             BRMP.finishMatch=brFinishMatch;
         }
         // Capture packets carry objective state only, never hidden player coordinates.
-        function brCapturePacket(g){const c=g.capture;return {v:1,k:c.key,m:c.map.revision,n:c.count,q:(c.wireSeq=Number(c.wireSeq||0)+1),f:g.frame,a:c.active,t:c.seconds,h:performance.now(),p:Number(c.hostAt||performance.now()),run:!(g.paused||g.ringSuspended||g.isGameOver),s:c.scores.slice(1),r:c.rates.slice(1),z:c.points.map(z=>[z.state,z.team,z.counts.slice(1),z.rate]),w:c.winners.slice(),end:c.reason};}
-        function brCaptureValid(p,key){return !!p&&p.v===1&&typeof p.k==='string'&&(!key||p.k===key)&&[2,3,4].includes(p.n)&&p.m===BRCapture.layout(p.n).revision&&BR_CAPTURE_RULES.seconds.includes(p.t)&&[p.q,p.f,p.a,p.h,p.p].every(Number.isFinite)&&Number.isInteger(p.q)&&Number.isInteger(p.f)&&p.q>=0&&p.f>=0&&p.a>=0&&p.a<=p.t+1e-8&&typeof p.run==='boolean'&&Array.isArray(p.s)&&p.s.length===p.n&&p.s.every(x=>Number.isFinite(x)&&x>=0&&x<=100+1e-8)&&Array.isArray(p.r)&&p.r.length===p.n&&p.r.every(x=>Number.isFinite(x)&&x>=0&&x<=.36+1e-8)&&Array.isArray(p.z)&&p.z.length===3&&p.z.every(z=>Array.isArray(z)&&z.length===4&&['neutral','scoring','contested'].includes(z[0])&&Number.isInteger(z[1])&&z[1]>=0&&z[1]<=p.n&&Array.isArray(z[2])&&z[2].length===p.n&&z[2].every(n=>Number.isInteger(n)&&n>=0&&n<=30)&&Number.isFinite(z[3])&&z[3]>=0&&z[3]<=.12&&(()=>{const r=BRCapture.resolve([0,...z[2]]);return r.state===z[0]&&r.team===z[1]&&Math.abs(r.rate-z[3])<1e-8;})())&&Array.isArray(p.w)&&p.w.every(t=>Number.isInteger(t)&&t>=1&&t<=p.n);}
+        function brCapturePacket(g){const c=g.capture;return {v:BR_CAPTURE_RULES.version,k:c.key,m:c.map.revision,n:c.count,q:(c.wireSeq=Number(c.wireSeq||0)+1),f:g.frame,a:c.active,t:c.seconds,ph:c.phase,am:c.activeMask,fv:c.fever,h:performance.now(),p:Number(c.hostAt||performance.now()),run:!(g.paused||g.ringSuspended||g.isGameOver),s:c.scores.slice(1),r:c.rates.slice(1),z:c.points.map(z=>[z.state,z.team,z.counts.slice(1),z.rate]),w:c.winners.slice(),end:c.reason};}
+        function brCaptureValid(p,key){
+            if(!p||p.v!==BR_CAPTURE_RULES.version||typeof p.k!=='string'||key&&p.k!==key||![2,3,4].includes(p.n)||p.m!==BRCapture.layout(p.n).revision||!BR_CAPTURE_RULES.seconds.includes(p.t))return false;
+            if(![p.q,p.f,p.a,p.h,p.p].every(Number.isFinite)||!Number.isInteger(p.q)||!Number.isInteger(p.f)||p.q<0||p.f<0||p.a<0||p.a>p.t+1e-8||typeof p.run!=='boolean')return false;
+            const phase=BRCapture.phase(p.a,p.t),mask=phase==='OPENING'?2:7,multiplier=phase==='FEVER'?BR_CAPTURE_RULES.feverMultiplier:1;
+            if(p.ph!==phase||p.am!==mask||p.fv!==(phase==='FEVER'))return false;
+            if(!Array.isArray(p.s)||p.s.length!==p.n||!p.s.every(x=>Number.isFinite(x)&&x>=0&&x<=100+1e-8)||!Array.isArray(p.r)||p.r.length!==p.n||!p.r.every(x=>Number.isFinite(x)&&x>=0&&x<=2.16+1e-8))return false;
+            if(!Array.isArray(p.z)||p.z.length!==3)return false;
+            const totals=Array(p.n).fill(0);
+            for(let i=0;i<3;i++){const z=p.z[i];if(!Array.isArray(z)||z.length!==4||!Number.isInteger(z[1])||z[1]<0||z[1]>p.n||!Array.isArray(z[2])||z[2].length!==p.n||!z[2].every(n=>Number.isInteger(n)&&n>=0&&n<=30)||!Number.isFinite(z[3])||z[3]<0||z[3]>.72+1e-8)return false;
+                if(!(mask&(1<<i))){if(z[0]!=='locked'||z[1]!==0||z[3]!==0||z[2].some(Boolean))return false;continue;}
+                const r=BRCapture.resolve([0,...z[2]]);if(r.state!==z[0]||r.team!==z[1]||Math.abs(r.rate*multiplier-z[3])>1e-8)return false;
+                if(z[1])totals[z[1]-1]+=z[3];
+            }
+            return p.r.every((r,i)=>Math.abs(r-totals[i])<1e-8)&&Array.isArray(p.w)&&p.w.every(t=>Number.isInteger(t)&&t>=1&&t<=p.n);
+        }
         function brReceiveCapture(packet){if(!brCaptureValid(packet))return false;const meta=BRMP.roomMeta||{},parts=packet.k.split('|');if(parts[0]!==String(BRMP.roomCode)||Number(parts[1])<Number(meta.matchRound||0))return false;
             if(packet.k!==brRingKey()){if(Number(parts[1])===Number(meta.matchRound||0)&&Number(parts[2])>Number(meta.battleStartedAt||0))BRMP.pendingCapture=packet;return false;}
             if(!brCaptureMode()||packet.n!==Number(meta.teamCount)||packet.t!==Number(meta.matchSeconds))return false;
             const old=BRMP.captureState;if(old?.k===packet.k&&(packet.q<=old.q||packet.f<old.f||packet.a+1e-8<old.a))return false;
-            BRMP.captureState=packet;BRMP.captureReceivedAt=performance.now();BRMP.ringView=null;brCaptureHUD(packet,BRMP.role==='host');
+            BRMP.captureState=packet;BRMP.captureReceivedAt=performance.now();BRMP.ringView=null;brCaptureHUD(packet,BRMP.role==='host');brCaptureNotice(packet);
             if(BRMP.role==='student'&&meta.phase==='battle')brMusicSetPause(!packet.run||document.hidden);return true;}
         function brPublishCapture(){if(!game?.capture||!BRMP.active||BRMP.role!=='host'||BRMP.capturePending)return;
             const now=performance.now();if(now-Number(BRMP.capturePublishAt||-10000)<BR_CAPTURE_RULES.publishMs)return;BRMP.capturePublishAt=now;
             const packet=brCapturePacket(game);brReceiveCapture(packet);if(BRMP.backend!=='firebase')return;
             const token={epoch:BRMP.publishEpoch,key:packet.k};BRMP.capturePending=token;BRMP.captureWireBytes=Number(BRMP.captureWireBytes||0)+JSON.stringify(packet).length;BRMP.captureWireWrites=Number(BRMP.captureWireWrites||0)+1;
             BRMP.db.ref('rooms/'+BRMP.roomCode+'/meta/captureState').set(packet).catch(err=>{if(token.epoch===BRMP.publishEpoch&&!BRMP.captureWriteWarned){BRMP.captureWriteWarned=true;brToast('점령 현황 전송을 확인해 주세요. '+brFriendlyError(err));}}).finally(()=>{if(BRMP.capturePending===token)BRMP.capturePending=null;});}
-        function brCaptureReset(){BRMP.captureState=null;BRMP.pendingCapture=null;BRMP.captureReceivedAt=0;BRMP.captureSelf=null;BRMP.capturePublishAt=-Infinity;BRMP.capturePending=null;BRMP.captureWriteWarned=false;BRMP.captureHUDKey='';BRMP.capturePerf=null;BRMP.captureDecorReduced=false;BRMP.captureAutoBalanced=false;BRMP.captureWireBytes=0;BRMP.captureWireWrites=0;
+        function brCaptureNotice(packet){
+            const prior=BRMP.captureNotice,changed=prior?.key===packet.k&&prior.phase!==packet.ph;
+            BRMP.captureNotice={key:packet.k,phase:packet.ph};
+            if(packet.end||!packet.run||document.hidden||BRMP.roomMeta?.phase!=='battle')return;
+            const start=packet.ph==='FEVER'?packet.t-BR_CAPTURE_RULES.feverSeconds:BR_CAPTURE_RULES.openingSeconds;
+            // Late join restores state immediately; don't replay long-expired milestone banners.
+            if(packet.ph==='OPENING'||(!changed&&!(prior?.key!==packet.k&&packet.a>=start&&packet.a<start+3)))return;
+            brToast(packet.ph==='FEVER'?'🔥 FEVER TIME!\n마지막 1분 · 모든 거점 점령 속도 2배!':'🚩 추가 점령지 개방!\nA · C 거점이 활성화되었습니다!',true);
+        }
+        function brCaptureReset(){BRMP.captureNotice=null;const notice=brEl('br-toast');if(notice?.classList.contains('br-capture-notice')){clearTimeout(notice._timer);notice.classList.remove('show','br-capture-notice');}BRMP.captureState=null;BRMP.pendingCapture=null;BRMP.captureReceivedAt=0;BRMP.captureSelf=null;BRMP.capturePublishAt=-Infinity;BRMP.capturePending=null;BRMP.captureWriteWarned=false;BRMP.captureHUDKey='';BRMP.capturePerf=null;BRMP.captureDecorReduced=false;BRMP.captureAutoBalanced=false;BRMP.captureWireBytes=0;BRMP.captureWireWrites=0;
             brEl('br-capture-scoreboard')?.classList.add('br-hidden');document.body?.classList.remove('br-capture-student','br-capture-host');}
         function brCombatPaused(){return brCaptureMode()?BRMP.captureState?.run===false:BRMP.ringView?.running===false;}
         function brViewPhysicsAt(view){return view.captureClock?view.captureClock[1]:view.zoneState&&view.zoneSelf?view.zoneState.hostAt-Math.max(0,view.zoneState.time-view.zoneSelf.time):null;}
@@ -13437,11 +13481,13 @@
             const stale=!isHost&&(performance.now()-Number(BRMP.captureReceivedAt||0)>BR_CAPTURE_RULES.staleMs||BRMP.roomMeta.hostConnected===false),self=BRMP.captureSelf;
             const key=[packet.k,packet.q,isHost,stale,self?.[0],BRMP.captureHostQuality||'high',BRMP.captureHostFPS||60].join('|');if(BRMP.captureHUDKey===key)return;BRMP.captureHUDKey=key;
             const structure=packet.n+':'+isHost;if(el.dataset.layout!==structure){el.dataset.layout=structure;
-                el.innerHTML='<div class="br-cap-cards">'+packet.s.map((score,i)=>{const tm=brTKTeamMeta(i+1);return '<div class="br-cap-card" style="--team:'+tm.color+'"><div><b>'+tm.dot+' '+tm.name+'</b><strong><span data-cap-value="'+i+'"></span><small>%</small></strong></div><div class="br-cap-track"><i data-cap-bar="'+i+'"></i></div></div>';}).join('')+'</div><div class="br-cap-info"><span>🚩 점령전 · <b data-cap-time></b></span><span data-cap-status></span><button type="button" data-cap-rank>순위</button>'+(isHost?'<select aria-label="호스트 관전 화질" data-cap-quality><option value="high">관전 고품질</option><option value="balanced">관전 균형</option></select>':'')+'</div>';
+                el.innerHTML='<div class="br-cap-cards">'+packet.s.map((score,i)=>{const tm=brTKTeamMeta(i+1);return '<div class="br-cap-card" style="--team:'+tm.color+'"><div><b>'+tm.dot+' '+tm.name+'</b><strong><span data-cap-value="'+i+'"></span><small>%</small></strong></div><div class="br-cap-track"><i data-cap-bar="'+i+'"></i></div></div>';}).join('')+'</div><div class="br-cap-info"><span>🚩 점령전 · <b data-cap-time></b> <em data-cap-phase></em></span><span data-cap-status></span><button type="button" data-cap-rank>순위</button>'+(isHost?'<select aria-label="호스트 관전 화질" data-cap-quality><option value="high">관전 고품질</option><option value="balanced">관전 균형</option></select>':'')+'</div>';
                 el.querySelector('[data-cap-rank]').onclick=()=>brTKToggleBoard();const q=el.querySelector('[data-cap-quality]');if(q){q.value=BRMP.captureHostQuality||'high';q.onchange=e=>{BRMP.captureHostQuality=e.target.value;BRMP.captureAutoBalanced=false;BRMP.captureDecorReduced=false;BRMP.capturePerf=null;BRMP.captureHostFPS=BRMP.captureHostQuality==='balanced'?30:60;BRMP.captureHUDKey='';brPixiHostStop();brPixiHostStart();};}
             }
+            const phaseText=packet.ph==='FEVER'?'🔥 FEVER ×2':packet.ph==='OPENING'?'B 활성 · A/C '+brFormatTime(Math.max(0,Math.ceil(BR_CAPTURE_RULES.openingSeconds-packet.a)))+' 후 개방':'A · B · C 활성';
+            brSetText(el.querySelector('[data-cap-phase]'),phaseText);el.querySelector('[data-cap-phase]').classList.toggle('fever',packet.fv);
             packet.s.forEach((score,i)=>{brSetText(el.querySelector('[data-cap-value="'+i+'"]'),brCapturePercent(score));el.querySelector('[data-cap-bar="'+i+'"]').style.width=Math.min(100,score)+'%';});
-            brSetText(el.querySelector('[data-cap-time]'),brFormatTime(Math.max(0,Math.ceil(packet.t-packet.a))));brSetText(el.querySelector('[data-cap-status]'),stale?'연결 확인 중 · 마지막 확정 점수':!packet.run?'경기 일시정지':isHost?'A · B · C / '+(BRMP.captureHostFPS||60)+' FPS 목표'+(BRMP.captureAutoBalanced?' · 자동 균형':''):self?'내 점령 기여 '+brCapturePercent(self[0])+'%p':'거점에서 가장 많은 팀이 득점');
+            brSetText(el.querySelector('[data-cap-time]'),brFormatTime(Math.max(0,Math.ceil(packet.t-packet.a))));brSetText(el.querySelector('[data-cap-status]'),stale?'연결 확인 중 · 마지막 확정 점수':!packet.run?'경기 일시정지':isHost?'전체맵 / '+(BRMP.captureHostFPS||60)+' FPS 목표'+(BRMP.captureAutoBalanced?' · 자동 균형':''):self?'내 점령 기여 '+brCapturePercent(self[0])+'%p':'거점에서 가장 많은 팀이 득점');
         }
         function brCaptureRenderLive(board,isHost){if(!board||board.matchKey!==brRingKey())return;BRMP.tkClientBoard=board;brEl('br-tk-host-bar').classList.add('br-hidden');brEl('br-tk-student-scores').innerHTML='';
             if(!isHost){brEl('br-tk-student-tools').classList.remove('br-hidden');brEl('br-tk-student-feed').innerHTML=(board.feed||[]).slice(0,2).map(e=>'<div><span style="color:'+brTKTeamMeta(e.killerTeam).color+'">'+brEscape(e.killerName)+'</span> → <span style="color:'+brTKTeamMeta(e.victimTeam).color+'">'+brEscape(e.victimName)+'</span></div>').join('');}
@@ -13449,7 +13495,7 @@
         function brCaptureRenderBoard(board){if(!BRMP.tkBoardOpen)return;const key='capture:'+board.matchKey+':'+board.revision;if(BRMP.tkPanelRendered===key)return;BRMP.tkPanelRendered=key;
             brEl('br-tk-team-ranking').innerHTML=board.teams.map(t=>{const tm=brTKTeamMeta(t.team);return '<div class="br-tk-team-row"><b>'+t.rank+'</b><b style="color:'+tm.color+'">'+tm.dot+' '+tm.name+'</b><b>'+brCapturePercent(t.score)+'%</b></div>';}).join('');
             brEl('br-tk-personal-ranking').innerHTML=board.players.map(p=>'<div class="br-tk-player-row'+(p.id===String(BRMP.playerId)?' is-self':'')+'"><b>'+p.rank+'</b><span class="br-tk-name" style="color:'+brTKTeamMeta(p.team).color+'">'+brEscape(p.name)+'</span><span><b>'+brCapturePercent(p.points||0)+'%p</b><small>'+p.kills+' K / '+p.deaths+' D · 거점 '+Number(p.pointKills||0)+' K / '+Number(p.pointAssists||0)+' A</small></span></div>').join('');}
-        function brCaptureResults(){const c=game.capture;if(!c.finalized)BRCapture.finish(c,'manual');const rows=brCaptureRows(),teams=brCaptureTeams({s:c.scores.slice(1)});return {matchKey:c.key,rosterVersion:BR_ROSTER_VERSION,captureVersion:1,mapRevision:c.map.revision,mode:'team-capture',teamWinner:c.winners.length===1?c.winners[0]:0,tiedTeams:c.winners.slice(),teams,players:rows,awards:BRCapture.awards(c),duration:c.active,reason:c.reason,createdAt:brNow()};}
+        function brCaptureResults(){const c=game.capture;if(!c.finalized)BRCapture.finish(c,'manual');const rows=brCaptureRows(),teams=brCaptureTeams({s:c.scores.slice(1)});return {matchKey:c.key,rosterVersion:BR_ROSTER_VERSION,captureVersion:BR_CAPTURE_RULES.version,mapRevision:c.map.revision,mode:'team-capture',teamWinner:c.winners.length===1?c.winners[0]:0,tiedTeams:c.winners.slice(),teams,players:rows,awards:BRCapture.awards(c),duration:c.active,reason:c.reason,createdAt:brNow()};}
         function brCaptureRenderResults(result){brShow('br-results');const rows=Array.isArray(result.players)?result.players:Object.values(result.players||{}),teams=Array.isArray(result.teams)?result.teams:Object.values(result.teams||{}),winners=result.tiedTeams||[result.teamWinner];
             brEl('br-result-winner').innerHTML='<div class="br-small">CAPTURE RESULT</div><div class="br-big-emoji">🚩</div><h1 class="br-cap-winner-name">'+(winners.length>1?'공동 1위 · 무승부':brTKTeamMeta(winners[0]).name+' 승리')+'</h1><p>'+winners.map(t=>'<b style="color:'+brTKTeamMeta(t).color+'">'+brTKTeamMeta(t).name+'</b>').join(' · ')+' · '+brFormatTime(Math.ceil(result.duration))+'</p>';
             const box=brEl('br-tk-result-teams');box.classList.remove('br-hidden');box.innerHTML=teams.map(t=>'<div class="br-tk-team-result" style="--tk-color:'+brTKTeamMeta(t.team).color+'"><b>'+t.rank+' · '+brTKTeamMeta(t.team).name+'</b><strong>'+brCapturePercent(t.score)+'%</strong></div>').join('');
@@ -13457,7 +13503,7 @@
             brSetText(brEl('br-ranking-title'),'개인 점령 기여와 경기 기록');const list=brEl('br-ranking');list.classList.add('br-tk-records');list.innerHTML='<table><thead><tr><th>이름</th><th>팀</th><th>캐릭터</th><th>점령 기여</th><th>득점 참여</th><th>경합</th><th>거점 K / A</th><th>K / D</th><th>회복 / 흡수</th><th>퀴즈 / 리롤</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+brEscape(r.name)+'</td><td style="color:'+brTKTeamMeta(r.team).color+'">'+brTKTeamMeta(r.team).name+'</td><td>'+brEscape(r.abilityEmoji||'')+' '+brEscape(r.abilityName||'')+'</td><td><b>'+Number(r.points||0).toFixed(3)+'%p</b></td><td>'+brFormatTime(Math.floor(r.scoringSeconds||0))+'</td><td>'+brFormatTime(Math.floor(r.contestedSeconds||0))+'</td><td>'+Number(r.pointKills||0)+' / '+Number(r.pointAssists||0)+'</td><td>'+r.kills+' / '+r.deaths+'</td><td>'+Math.floor(r.heal||0)+' / '+Math.floor(r.shield||0)+'</td><td>'+r.quizCorrect+' / '+r.rerollCount+'</td></tr>').join('')+'</tbody></table>';
             brEl('br-host-result-actions').classList.toggle('br-hidden',BRMP.role!=='host');brEl('br-results-home').classList.toggle('br-hidden',BRMP.role==='host');}
         function brQueueCaptureSettings(){if(BRMP.role!=='host'||BRMP.roomMeta?.phase!=='lobby'||BRMP.phaseTransition)return;
-            const room=BRMP.roomCode,round=Number(BRMP.roomMeta.matchRound||0),mode=brEl('br-mode').value,settings={mode,teamCount:mode==='solo'?0:brClamp(Number(brEl('br-team-count').value)||2,2,4),matchSeconds:[300,360].includes(Number(brEl('br-match-seconds').value))?Number(brEl('br-match-seconds').value):360,captureRulesVersion:1};
+            const room=BRMP.roomCode,round=Number(BRMP.roomMeta.matchRound||0),mode=brEl('br-mode').value,settings={mode,teamCount:mode==='solo'?0:brClamp(Number(brEl('br-team-count').value)||2,2,4),matchSeconds:[300,360].includes(Number(brEl('br-match-seconds').value))?Number(brEl('br-match-seconds').value):360,captureRulesVersion:BR_CAPTURE_RULES.version};
             const prev=BRMP.graphicsWriteChain||Promise.resolve(),next=prev.catch(()=>{}).then(async()=>{if(room!==BRMP.roomCode||BRMP.roomMeta.phase!=='lobby'||round!==Number(BRMP.roomMeta.matchRound||0))return false;await BRMP.db.ref('rooms/'+room+'/meta').update(settings);if(room===BRMP.roomCode)Object.assign(BRMP.roomMeta,settings);return true;});BRMP.graphicsWriteChain=next;
             next.catch(err=>{if(BRMP.graphicsWriteChain===next){brEl('br-mode').value=BRMP.roomMeta.mode;brEl('br-team-count').value=BRMP.roomMeta.teamCount||2;brEl('br-match-seconds').value=BRMP.roomMeta.matchSeconds||360;brToast(brFriendlyError(err));}});}
 
