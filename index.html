@@ -7543,7 +7543,7 @@
         var brNetDebug=new URLSearchParams(location.search).get('netdebug')==='1'?brCreateNetDebug():null;
         function brGetNetDebug(){return brNetDebug;}
         function brCreateNetDebug(){
-            const KEY='dsbr.netdebug.v1.reports',NAMES=['frame','snap','rtt','age','shotMean','shotOldest','write','payloadKB','batch','sendGap','resume'];
+            const KEY='dsbr.netdebug.v1.reports',NAMES=['frame','snap','rtt','age','shotMean','shotOldest','write','payloadKB','batch','sendGap','resume','sendAlive','sendDead','sendTransition','snapAlive','snapDead','snapTransition','build'];
             const LIMITS=[1000/30,50,150,200,250,300,500];
             let state=null,panel=null,title=null,body=null,actions=null,cache=null,cacheAt=-Infinity,lastSave=-Infinity,timer=null,collapsed=false,storageError=false;
             // Fixed-size histograms: 1ms bins through 1024, then <=2.5% width. Never per-frame sort.
@@ -7562,9 +7562,9 @@
                 const k=key(),role=BRMP.role;if(state?.key===k&&state.role===role)return state;
                 if(state)save();const old=read().find(x=>x.key===k&&x.role===role),now=performance.now();
                 state={key:k,role,mode:BRMP.roomMeta.mode,players:0,duration:0,ended:false,metrics:{},deaths:[],deathCount:0,backgroundEvents:document.hidden?1:0,backgroundMs:0,resumeCount:0,
-                    calls:0,views:0,batches:0,bytes:0,writeErrors:0,maxInFlight:0,skippedBusy:0,observedMs:0,ack:0,refreshes:0,
+                    calls:0,views:0,batches:0,bytes:0,writeErrors:0,maxInFlight:0,skippedBusy:0,observedMs:0,ack:0,refreshes:0,scheduler:null,streamAlive:null,
                     lastArrival:null,lastFrame:null,lastShotAt:-Infinity,lastTick:now,lastAgeAt:-Infinity,live:{},recent:[],lastHit:null,hiddenAt:document.hidden?now:null,resumeAt:null,excludeBefore:0,restored:!!old};
-                if(old){for(const field of ['mode','players','duration','deaths','deathCount','backgroundEvents','backgroundMs','resumeCount','calls','views','batches','bytes','writeErrors','maxInFlight','skippedBusy','observedMs','ack','refreshes'])if(old.totals?.[field]!=null)state[field]=old.totals[field];state.refreshes++;}
+                if(old){for(const field of ['mode','players','duration','deaths','deathCount','backgroundEvents','backgroundMs','resumeCount','calls','views','batches','bytes','writeErrors','maxInFlight','skippedBusy','observedMs','ack','refreshes','scheduler'])if(old.totals?.[field]!=null)state[field]=old.totals[field];state.refreshes++;}
                 for(const name of NAMES)state.metrics[name]=metric(old?.histograms?.[name]);
                 cache=null;cacheAt=-Infinity;lastSave=now;return state;}
             function active(){const s=ensure();return s&&!s.ended&&BRMP.roomMeta?.phase==='battle'?s:null;}
@@ -7589,8 +7589,8 @@
                 s.zoneTotal=Number(view.zoneSelf?.total||0);
                 if(!visible){s.lastArrival=null;return;}
                 if(s.resumeAt!=null){add(s.metrics.resume,now-s.resumeAt);s.resumeAt=null;}
-                if(gap!=null){add(s.metrics.snap,gap);s.live.snap=gap;s.recent.push(gap);if(s.recent.length>120)s.recent.shift();}
-                s.lastArrival=now;s.authorityFrame=view.frame;
+                if(gap!=null){add(s.metrics.snap,gap);const current=row?!!row[7]:null;add(s.metrics[s.streamAlive===current&&current!==null?(current?'snapAlive':'snapDead'):'snapTransition'],gap);s.live.snap=gap;s.recent.push(gap);if(s.recent.length>120)s.recent.shift();}
+                s.streamAlive=row?!!row[7]:null;s.lastArrival=now;s.authorityFrame=view.frame;
             }
             function ack(seq,sentAt,now){const s=active();if(!s||s.role!=='student'||seq<=s.ack)return;s.ack=seq;
                 if(foreground(s)&&sentAt>=s.excludeBefore){const rtt=now-sentAt;add(s.metrics.rtt,rtt);s.live.rtt=rtt;}}
@@ -7601,29 +7601,32 @@
                 if(shots){add(s.metrics.shotMean,shots.mean);add(s.metrics.shotOldest,shots.oldest);}}
             function publish(){const s=active();if(!s||s.role!=='host')return;s.calls++;s.duration=Math.max(s.duration,elapsed());
                 if(BRMP.streamStats)BRMP.streamStats.netdebug=s; // Extension only; policy fields stay untouched.
-                s.players=Number(BRMP.wireParticipants?.length||game?.participants?.filter(p=>p.id!==999).length||0);}
+                s.players=Number(BRMP.wireParticipants?.length||game?.participants?.filter(p=>p.id!==999).length||0);syncPolicy(s);}
+            function syncPolicy(s){const p=BRMP.streamStats?.policy;if(!p||s.role!=='host')return;const prior=s.policyRef;if(prior!==p){s.policyRef=p;s.policyBase=s.scheduler?.modeMs||{HEALTHY:0,PRESSURED:0,CONGESTED:0};}s.scheduler={profile:p.profile,aliveTarget:p.aliveTarget,deadTarget:p.deadTarget,batchLimit:p.batchLimit,alive:p.aliveCount,dead:p.deadCount,modeMs:Object.fromEntries(['HEALTHY','PRESSURED','CONGESTED'].map(k=>[k,Number(s.policyBase[k]||0)+p.modeMs[k]]))};}
+            function build(ms){const s=active();if(s&&s.role==='host')add(s.metrics.build,ms);}
             function busy(){const s=active();if(s&&s.role==='host')s.skippedBusy++;}
             function utf8Length(str){let n=0;for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);if(c<128)n++;else if(c<2048)n+=2;else if(c>=0xd800&&c<=0xdbff&&str.charCodeAt(i+1)>=0xdc00&&str.charCodeAt(i+1)<=0xdfff){n+=4;i++;}else n+=3;}return n;}
             function batch(previous,updates,at,inflight){const s=active();if(!s||s.role!=='host')return null;s.batches++;s.views+=previous.length;s.maxInFlight=Math.max(s.maxInFlight,inflight);add(s.metrics.batch,previous.length);
-                for(const v of previous){if(v.sent&&Number.isFinite(v.sent.at))add(s.metrics.sendGap,Math.max(0,at-v.sent.at));const bytes=utf8Length(updates['views/'+v.id]);s.bytes+=bytes;add(s.metrics.payloadKB,bytes/1024);}return s;}
+                for(const v of previous){if(v.sent&&Number.isFinite(v.sent.at)){const gap=Math.max(0,at-v.sent.at);add(s.metrics.sendGap,gap);add(s.metrics[v.sent.alive===v.alive?(v.alive?'sendAlive':'sendDead'):'sendTransition'],gap);}const bytes=v.bytes??utf8Length(updates['views/'+v.id]);s.bytes+=bytes;add(s.metrics.payloadKB,bytes/1024);}return s;}
             function written(token,ms,failed){if(!token||token!==state)return;add(token.metrics.write,ms);if(failed)token.writeErrors++;}
             function visibility(){const s=active();if(!s)return;const now=performance.now();if(s.role==='host')s.observedMs+=Math.max(0,now-s.lastTick);
                 if(document.hidden){if(s.hiddenAt==null){if(s.role==='student')s.observedMs+=Math.max(0,now-s.lastTick);s.hiddenAt=now;s.backgroundEvents++;}s.lastFrame=null;s.lastArrival=null;save();}
                 else if(s.hiddenAt!=null){s.backgroundMs+=Math.max(0,now-s.hiddenAt);s.hiddenAt=null;s.resumeAt=now;s.resumeCount++;s.excludeBefore=now;s.lastFrame=null;s.lastArrival=null;s.lastShotAt=-Infinity;s.recent=[];s.live={};}s.lastTick=now;}
-            function summary(){const s=state;if(!s)return null;const m={};for(const name of NAMES)m[name]=describe(s.metrics[name]);return {role:s.role,mode:s.mode,players:s.players,duration:s.duration,metrics:m,deaths:s.deaths.slice(),backgroundEvents:s.backgroundEvents,backgroundMs:s.backgroundMs+(s.hiddenAt==null?0:Math.max(0,performance.now()-s.hiddenAt)),resumeCount:s.resumeCount,refreshes:s.refreshes,calls:s.calls,views:s.views,batches:s.batches,bytes:s.bytes,maxInFlight:s.maxInFlight,skippedBusy:s.skippedBusy,writeErrors:s.writeErrors,observedMs:s.observedMs,ended:s.ended};}
-            function save(){if(!state)return;try{const totals={};for(const f of ['mode','players','duration','deaths','deathCount','backgroundEvents','backgroundMs','resumeCount','calls','views','batches','bytes','writeErrors','maxInFlight','skippedBusy','observedMs','ack','refreshes'])totals[f]=state[f];
+            function summary(){const s=state;if(!s)return null;if(s.role==='host'&&s.key===key()&&!s.ended)syncPolicy(s);const m={};for(const name of NAMES)m[name]=describe(s.metrics[name]);return {role:s.role,mode:s.mode,players:s.players,duration:s.duration,metrics:m,deaths:s.deaths.slice(),backgroundEvents:s.backgroundEvents,backgroundMs:s.backgroundMs+(s.hiddenAt==null?0:Math.max(0,performance.now()-s.hiddenAt)),resumeCount:s.resumeCount,refreshes:s.refreshes,calls:s.calls,views:s.views,batches:s.batches,bytes:s.bytes,maxInFlight:s.maxInFlight,skippedBusy:s.skippedBusy,writeErrors:s.writeErrors,observedMs:s.observedMs,ended:s.ended,scheduler:s.scheduler};}
+            function save(){if(!state)return;try{const totals={};for(const f of ['mode','players','duration','deaths','deathCount','backgroundEvents','backgroundMs','resumeCount','calls','views','batches','bytes','writeErrors','maxInFlight','skippedBusy','observedMs','ack','refreshes','scheduler'])totals[f]=state[f];
                     if(state.hiddenAt!=null)totals.backgroundMs+=Math.max(0,performance.now()-state.hiddenAt);
                     const histograms={};for(const name of NAMES)histograms[name]=pack(state.metrics[name]);
                     const record={version:1,key:state.key,role:state.role,savedAt:Date.now(),totals,histograms,summary:cache||summary()};
                     localStorage.setItem(KEY,JSON.stringify([record,...read().filter(x=>!(x.key===state.key&&x.role===state.role))].slice(0,3)));storageError=false;
                 }catch(e){storageError=true;}}
             function fmt(v,d=1){return Number.isFinite(v)?v.toFixed(d):'—';}
-            function report(){const q=summary();if(!q)return '아직 측정된 경기가 없습니다.';const m=q.metrics,lines=['DSbattleroyal '+q.role.toUpperCase()+(q.role==='host'?' STREAM REPORT':' NETWORK REPORT'),'v25 · local diagnostics · '+new Date().toISOString(),'',`Mode: ${q.mode}`,`Players: ${q.players}`,`Match duration: ${brFormatTime(q.duration)} (${fmt(q.duration)} s)`,`${q.role==='host'?'Observed wall time':'Observed foreground'}: ${fmt(q.observedMs/1000)} s`,`Refresh continuations: ${q.refreshes}`];
+            function report(){const q=summary();if(!q)return '아직 측정된 경기가 없습니다.';const m=q.metrics,lines=['DSbattleroyal '+q.role.toUpperCase()+(q.role==='host'?' STREAM REPORT':' NETWORK REPORT'),'v26 · view delivery diagnostics · '+new Date().toISOString(),'',`Mode: ${q.mode}`,`Players: ${q.players}`,`Match duration: ${brFormatTime(q.duration)} (${fmt(q.duration)} s)`,`${q.role==='host'?'Observed wall time':'Observed foreground'}: ${fmt(q.observedMs/1000)} s`,`Refresh continuations: ${q.refreshes}`];
                 function block(label,x,thresholds=[]){lines.push('',label,`samples: ${x.samples} | avg: ${fmt(x.avg)} | p50: ${fmt(x.p50)} | p95: ${fmt(x.p95)} | max: ${fmt(x.max)}`);for(const t of thresholds)lines.push(`>${t}ms: ${fmt(x.over.find(a=>a[0]===t)?.[1])}%`);}
                 if(q.role==='student'){lines.push('','RENDER',`FPS avg: ${m.frame.avg?fmt(1000/m.frame.avg):'—'}`,`FPS median: ${m.frame.p50?fmt(1000/m.frame.p50):'—'}`,`FPS 1% low (1000/P99 frame): ${m.frame.p99?fmt(1000/m.frame.p99):'—'}`,`P95 frame: ${fmt(m.frame.p95)} ms`,`Below 30 FPS time: ${fmt(m.frame.time[0][1])}%`,`Below 20 FPS time: ${fmt(m.frame.time[1][1])}%`);
-                    block('SNAPSHOT (ms)',m.snap,[150,200,300,500]);block('INPUT RTT (unique acknowledged seq, ms)',m.rtt,[150,250]);block('PACKET AGE (mapped latest authority, ms)',m.age);block('SHOT AGE (oldest visible drawProjectiles sample per observation, ms)',m.shotOldest);block('SHOT MEAN (mean visible drawProjectiles age per observation, ms)',m.shotMean);
+                    block('ALIVE / ACTIVE COMBAT SNAPSHOT (ms)',m.snapAlive,[150,200,300,500]);block('DEAD / QUIZ / SPECTATOR SNAPSHOT (ms)',m.snapDead,[150,200,300,500]);block('ALIVE↔DEAD TRANSITION GAP (ms, excluded from both groups)',m.snapTransition);block('OVERALL SNAPSHOT (ms)',m.snap,[150,200,300,500]);block('INPUT RTT (unique acknowledged seq, ms)',m.rtt,[150,250]);block('PACKET AGE (mapped latest authority, ms)',m.age);block('SHOT AGE (oldest visible drawProjectiles sample per observation, ms)',m.shotOldest);block('SHOT MEAN (mean visible drawProjectiles age per observation, ms)',m.shotMean);
                     lines.push('','DEATH SNAPSHOTS (pre-arrival network state)');for(const d of q.deaths)lines.push(`#${d.number} ${brFormatTime(d.matchTime)} | FPS ${fmt(d.fps)} | gap ${fmt(d.currentGap)}ms | recent P95 ${fmt(d.recentSnapshotP95)}ms | age ${fmt(d.packetAge)}ms | oldest shot ${fmt(d.oldestShotAge)}ms | RTT ${fmt(d.recentRTT)}ms | impact ${d.impactLevel??'—'} | ${d.hitKind}${d.background?' | BACKGROUND':''}`);
-                }else{lines.push('','VIEW DELIVERY',`publish calls: ${q.calls} | viewer payloads: ${q.views} | batches: ${q.batches}`,`views/sec (observed wall time): ${q.observedMs?fmt(q.views*1000/q.observedMs):'—'}`);block('VIEW GAP (generation, not write ACK, ms)',m.sendGap);block('VIEWERS PER BATCH (count)',m.batch);block('FIREBASE UPDATE (completion incl. failed writes, ms)',m.write);block('PAYLOAD (UTF-8 KB per viewer JSON; excludes envelope/summary)',m.payloadKB);lines.push(`Total viewer bytes: ${q.bytes}`,'','BACKPRESSURE',`max in-flight: ${q.maxInFlight} | skipped busy: ${q.skippedBusy} | failed writes: ${q.writeErrors}`);}
+                }else{lines.push('','VIEW DELIVERY',`publish calls: ${q.calls} | viewer payloads: ${q.views} | batches: ${q.batches}`,`views/sec (observed wall time): ${q.observedMs?fmt(q.views*1000/q.observedMs):'—'}`);block('ALIVE VIEW GAP (generation, ms)',m.sendAlive);block('DEAD/RESPAWN VIEW GAP (generation, ms)',m.sendDead);block('ALIVE↔DEAD TRANSITION GAP (ms)',m.sendTransition);block('OVERALL VIEW GAP (generation, not write ACK, ms)',m.sendGap);block('VIEW BUILD CPU (ms)',m.build);block('VIEWERS PER BATCH (count)',m.batch);block('FIREBASE UPDATE (completion incl. failed writes, ms)',m.write);block('PAYLOAD (UTF-8 KB per viewer JSON; excludes envelope/summary)',m.payloadKB);lines.push(`Total viewer bytes: ${q.bytes}`,`VIEW KB/s (all viewers): ${q.observedMs?fmt(q.bytes/1024/(q.observedMs/1000)):'—'}`,`viewer KB/s (per registered viewer mean): ${q.observedMs&&q.players?fmt(q.bytes/1024/(q.observedMs/1000)/q.players):'—'}`,`MB/min (MiB/60s): ${q.observedMs?fmt(q.bytes/1048576/(q.observedMs/60000)):'—'}`,`TOTAL VIEW MB (MiB): ${fmt(q.bytes/1048576)}`,'','BACKPRESSURE',`max in-flight: ${q.maxInFlight} | skipped busy: ${q.skippedBusy} | failed writes: ${q.writeErrors}`);}
+                if(q.role==='host'){const p=q.scheduler;lines.push('','SCHEDULER',`STREAM PROFILE: ${p?.profile||'—'}`,`TARGET ALIVE GAP: ${p?.aliveTarget??'—'} ms | TARGET DEAD GAP: ${p?.deadTarget??'—'} ms`,`AVG BATCH SIZE: ${fmt(m.batch.avg)} | MAX BATCH SIZE: ${fmt(m.batch.max,0)}`,`HEALTHY MODE TIME: ${fmt((p?.modeMs?.HEALTHY||0)/1000)} s`,`PRESSURE MODE TIME: ${fmt((p?.modeMs?.PRESSURED||0)/1000)} s`,`CONGESTED MODE TIME: ${fmt((p?.modeMs?.CONGESTED||0)/1000)} s`);}
                 lines.push('','BACKGROUND',`events: ${q.backgroundEvents} | duration: ${fmt(q.backgroundMs/1000)} s | resumes: ${q.resumeCount}`);block('RESUME RECOVERY (foreground → first accepted view, ms)',m.resume);
                 lines.push('','NOTES','Histograms: exact count/mean/max/threshold ratios; approximate quantiles (<=1 ms bins below 1024, <=2.5% above).','No-shot intervals are not zero samples. Shot scope: visible drawProjectiles only, not rework entities/FX/local predicted shots.','Clock age uses existing mapping; it is an estimate, not independent measured one-way latency.','Background and first resume gaps excluded from student timing; foreground old-input ACKs excluded.','No names, room numbers or session IDs in this report. No diagnostic Firebase writes.');if(storageError)lines.push('WARNING: localStorage unavailable; memory report only.');return lines.join('\n');}
             async function copy(){const text=report();try{if(!navigator.clipboard)throw Error('clipboard');await navigator.clipboard.writeText(text);brToast('진단 보고서를 복사했습니다.');}catch(e){let box=document.getElementById('br-netdebug-copy');if(!box){box=document.createElement('div');box.id='br-netdebug-copy';box.innerHTML='<label>복사가 차단되었습니다. 아래 내용을 선택해 복사하세요.<textarea readonly aria-label="진단 보고서"></textarea></label><button type="button">닫기</button>';document.body.appendChild(box);box.querySelector('button').onclick=()=>box.remove();}const ta=box.querySelector('textarea');ta.value=text;ta.focus();ta.select();try{if(document.execCommand('copy'))brToast('진단 보고서를 복사했습니다.');}catch(ignore){}}}
@@ -7635,8 +7638,8 @@
                 panel.hidden=!battle||document.hidden||(student&&!brEl('br-run-panel')?.classList.contains('br-hidden'));
                 if(!cache)cache=summary();const m=cache.metrics,s=state,small=collapsed;
                 title.textContent=small?(student?'DEBUG · FPS '+fmt(1000/Number(BRMP.studentFrameEma||16.7),0)+' · SNAP '+fmt(m.snap.avg,0):'STREAM · '+s.players+' · '+fmt(s.live.viewsPerSec,0)+' V/s'):(student?'STUDENT NET DEBUG ▾':'HOST STREAM DEBUG ▾');title.setAttribute('aria-expanded',String(!small));body.hidden=small;
-                body.textContent=student?`FPS       ${fmt(1000/Number(BRMP.studentFrameEma||16.7),0)}\nSNAP      ${fmt(m.snap.avg,0)} ms\nP95       ${fmt(m.snap.p95,0)} ms\nRTT       ${fmt(s.live.rtt,0)} ms\nAGE       ${fmt(s.live.age,0)} ms\nSHOT AGE  ${fmt(s.live.shot,0)} ms\nBUFFER    ${fmt(BRMP.remoteBuffer,0)} ms`:
-                    `PLAYERS   ${s.players}\nVIEWS/s   ${fmt(s.live.viewsPerSec,0)}\nWRITE     ${fmt(BRMP.streamStats?.writeMs,0)} ms\nWRITE P95 ${fmt(m.write.p95,0)} ms\nINFLIGHT  ${BRMP.publishInFlight||0}\nSKIPPED   ${s.skippedBusy}\nPAYLOAD   ${fmt(m.payloadKB.avg)} KB`;
+                body.textContent=student?`FPS       ${fmt(1000/Number(BRMP.studentFrameEma||16.7),0)}\nSNAP      ${fmt(m.snapAlive.samples?m.snapAlive.avg:m.snap.avg,0)} ms\nP95       ${fmt(m.snapAlive.samples?m.snapAlive.p95:m.snap.p95,0)} ms\nRTT       ${fmt(s.live.rtt,0)} ms\nAGE       ${fmt(s.live.age,0)} ms\nSHOT AGE  ${fmt(s.live.shot,0)} ms\nBUFFER    ${fmt(BRMP.remoteBuffer,0)} ms`:
+                    `PLAYERS   ${s.players}\nVIEWS/s   ${fmt(s.live.viewsPerSec,0)}\nWRITE     ${fmt(BRMP.streamStats?.writeMs,0)} ms\nWRITE P95 ${fmt(m.write.p95,0)} ms\nINFLIGHT  ${BRMP.publishInFlight||0}\nSKIPPED   ${s.skippedBusy}\nPAYLOAD   ${fmt(m.payloadKB.avg)} KB\nBUILD P95 ${fmt(m.build.p95)} ms\n${s.scheduler?.profile||'HEALTHY'} · ${s.scheduler?.aliveTarget||100} ms`;
                 if(storageError)body.textContent+='\n저장 불가 · 메모리만';}
             function finish(result){const s=ensure();if(!s)return;const now=performance.now();if(!s.ended){if(s.role==='host'||foreground(s))s.observedMs+=Math.max(0,now-s.lastTick);if(s.hiddenAt!=null){s.backgroundMs+=Math.max(0,now-s.hiddenAt);s.hiddenAt=null;}s.lastTick=now;}s.duration=Math.max(s.duration,Number(result?.duration||0));s.players=Array.isArray(result?.players)?result.players.length:s.players;s.ended=true;cache=summary();save();
                 if(!actions){actions=document.createElement('div');actions.id='br-netdebug-actions';const c=document.createElement('button'),d=document.createElement('button');c.className=d.className='br-btn br-btn-ghost';c.textContent='📋 진단 보고서 복사';d.textContent='💾 TXT 저장';c.onclick=copy;d.onclick=download;actions.append(c,d);brEl('br-result-winner').parentElement.appendChild(actions);}if(panel)panel.hidden=true;}
@@ -7645,7 +7648,7 @@
                 if(now-cacheAt>=1500){cache=summary();cacheAt=now;const dt=now-Number(s.rateAt||now);s.live.viewsPerSec=dt>0?(s.views-Number(s.rateViews||0))*1000/dt:0;s.rateAt=now;s.rateViews=s.views;}
                 paint();if(now-lastSave>=5000){save();lastSave=now;}}
             function init(){if(timer)return;timer=setInterval(()=>{try{tick();}catch(e){/* Diagnostics must not stop the game. */}},500);document.addEventListener('visibilitychange',visibility);window.addEventListener('pagehide',save);}
-            return {init,accepted,ack,frame,scene,publish,busy,batch,written,visibility,finish,tick,summary,report,save,copy,download,ensure,utf8Length,getState:()=>state};
+            return {init,accepted,ack,frame,scene,publish,busy,batch,build,written,visibility,finish,tick,summary,report,save,copy,download,ensure,utf8Length,getState:()=>state};
         }
 
 
@@ -10410,7 +10413,7 @@
         function brFlightPoint(track,view,time,now,dt,cfg) {
             const samples=track.samples||[],last=samples.at(-1),step=1000/60;if(!last)return null;
             track.flightConfig=cfg;track.flightTime=time;
-            if(track.missingSince!=null&&now-track.missingSince>=150)return null;
+            if(track.missingSince!=null&&now-track.missingSince>=Number(track.missingGraceMs??brProjectileGrace(cfg.curved)))return null;
             if(now-Number(BRMP.lastActorPacketAt??now)>900)return null;
             if(brCombatPaused())time=last.t;
             if(time>last.t+Math.max(0,cfg.life)*step)return null;
@@ -10488,20 +10491,20 @@
                         item.prev=turn?null:{row:old,frame:item.frame};item.row=e;item.frame=view.frame;
                         if(turn){item.offsetX=0;item.offsetY=0;item.dx=e.dx;item.dy=e.dy;}
                     }
-                    item.missingSince=null;Object.assign(item.draw,e);
+                    item.missingSince=null;item.missingGraceMs=null;Object.assign(item.draw,e);
                     brFlightSamples(item,{x:e.x,y:e.y,vx:e.dx*(e.phase==='dwell'?0:e.speed||0),vy:e.dy*(e.phase==='dwell'?0:e.speed||0)},view.frame,offset,e.path,Number(e.turn||0)+(e.phase==='return'?100:e.phase==='dwell'?50:0));
                     if(e.kind==='transit'&&e.owner===String(BRMP.playerId))brTakeLocalShot(e.actionKind,e.actionSeq,e.ordinal,e.life,view.matchKey);
                 }
                 // Only already-visible attack bodies get grace. Hidden players, turrets and zones are never retained.
                 cache.forEach((item,id)=>{if(!seen.has(id)){
                     if(!['projectile','hook','boomerang','bomb','lob'].includes(item.row.kind)){cache.delete(id);return;}
-                    if(item.missingSince==null)item.missingSince=now;if(now-item.missingSince>=150)cache.delete(id);
+                    if(item.missingSince==null){item.missingSince=now;item.missingGraceMs=brProjectileGrace(!!item.row.curved||item.row.kind==='boomerang');}if(now-item.missingSince>=item.missingGraceMs)cache.delete(id);
                 }});
             }
             const out=BRMP.rwDisplayList||(BRMP.rwDisplayList=[]);out.length=0;
             cache.forEach(item=>{
                 const e=item.row,draw=item.draw,own=e.owner===String(BRMP.playerId),frame=own?ownFrame:remoteFrame,dt=Math.min(50,Math.max(0,now-item.last));
-                if(frame>e.end+1||item.missingSince!=null&&now-item.missingSince>=150){cache.delete(e.id);return;}
+                if(frame>e.end+1||item.missingSince!=null&&now-item.missingSince>=item.missingGraceMs){cache.delete(e.id);return;}
                 const age=Math.max(0,Math.min(15,frame-item.frame,e.end-item.frame)),moving=['projectile','hook','boomerang','bomb'].includes(e.kind);
                 let x=e.x,y=e.y;
                 if(moving){const dest=brFlightPoint(item,view,(own?now+Number(BRMP.presentationLead||0):brCombatPresentationTime(view,now,!!e.curved)),now,dt,{radius:e.radius,life:Math.max(0,e.end-item.frame),remaining:e.remaining,curved:!!e.curved,throughWalls:!!e.throughWalls,throughFarm:!!e.throughFarm});if(!dest)return;x=dest.x;y=dest.y;}
@@ -10604,13 +10607,69 @@
             if(!Array.isArray(a)||a.length!==7||![a[0],a[1],a[3],a[4]].every(n=>Number.isFinite(n)&&n>=0)||typeof a[2]!=='boolean'||!Array.isArray(a[6])||a[6].length!==6||!a[6].every(Number.isFinite)||a[6][2]<0||!Number.isInteger(a[6][5])||a[6][5]<0)return null;const h=a[5];if(h!==null&&(!Array.isArray(h)||h.length!==7||!h.every(Number.isFinite)||h[0]>a[1]+1e-6||h[3]<0||h[6]<0))return null;
             return {frame:a[0],time:a[1],outside:a[2],total:a[3],graceMs:a[4],position:a[6],hit:h?{time:h[0],x:h[1],y:h[2],radius:h[3],cx:h[4],cy:h[5],amount:h[6]}:null};
         }
-        function brResetStreamHost(){BRMP.viewLastSent={};BRMP.viewShotKnown={};BRMP.viewFlightIds=new Set();BRMP.viewCursorId=0;BRMP.streamStats={packets:0,characters:0,skippedBusy:0,writeMs:0,writeEma:0,bytesPerView:0,encodeMs:0,relaxUntil:0,targetMs:100,viewerGaps:{}};}
+        // v26: bounded, fair latest-state scheduling. No simulation or input authority here.
+        const BR_STREAM_POLICY=Object.freeze({minGap:80,lookAhead:25,hardOverdue:180,maxBatch:15,maxPayloadBytes:256*1024,windowMs:2000,recoverMs:4000});
+        function brStreamPolicyReset(now=performance.now()){
+            return {profile:'HEALTHY',changedAt:now,windowAt:now,accountAt:now,healthySince:null,calls:0,busy:0,saturated:0,failures:0,writes:[],p95:0,
+                modeMs:{HEALTHY:0,PRESSURED:0,CONGESTED:0},aliveTarget:100,deadTarget:450,batchLimit:2,aliveCount:0,deadCount:0};
+        }
+        function brStreamPolicyObserve(now,busy){
+            const s=BRMP.streamStats,p=s.policy||(s.policy=brStreamPolicyReset(now));
+            p.modeMs[p.profile]+=Math.max(0,now-p.accountAt);p.accountAt=now;p.calls++;if(busy)p.busy++;if(Number(BRMP.publishInFlight||0)>=3)p.saturated++;
+            if(now-p.windowAt<BR_STREAM_POLICY.windowMs)return p;
+            p.writes=p.writes.filter(w=>now-w.at<=4000);const samples=p.writes.map(w=>w.ms).sort((a,b)=>a-b);
+            p.p95=samples[Math.max(0,Math.ceil(samples.length*.95)-1)]||0;
+            const busyRate=p.busy/Math.max(1,p.calls),maxRate=p.saturated/Math.max(1,p.calls),ema=Number(s.writeEma||0);
+            const congested=p.failures>0||ema>200||p.p95>280||busyRate>.18||maxRate>.60;
+            const pressured=ema>=145||p.p95>=180||busyRate>.06||maxRate>.30;
+            const healthy=samples.length>=4&&ema<130&&p.p95<160&&busyRate<.025&&maxRate<.10&&!p.failures;
+            let next=p.profile;
+            if(congested){next='CONGESTED';p.healthySince=null;}
+            else if(pressured){if(next==='HEALTHY')next='PRESSURED';p.healthySince=null;}
+            else if(healthy){if(p.healthySince==null)p.healthySince=now;if(now-p.healthySince>=BR_STREAM_POLICY.recoverMs){next=next==='CONGESTED'?'PRESSURED':'HEALTHY';p.healthySince=now;}}
+            else p.healthySince=null;
+            if(next!==p.profile&&now-p.changedAt>=BR_STREAM_POLICY.windowMs){p.profile=next;p.changedAt=now;}
+            p.windowAt=now;p.calls=p.busy=p.saturated=p.failures=0;return p;
+        }
+        function brStreamWriteDone(stats,now,ms,failed){const p=stats.policy;if(!p)return;p.writes.push({at:now,ms});if(p.writes.length>80)p.writes.shift();if(failed)p.failures++;}
+        function brStreamSelect(humans,now){
+            const stats=BRMP.streamStats,p=stats.policy,aliveCount=humans.reduce((n,a)=>n+(a.alive?1:0),0),base=aliveCount<=12?100:aliveCount<=20?110:120;
+            p.aliveCount=aliveCount;p.deadCount=humans.length-aliveCount;
+            p.aliveTarget=p.profile==='CONGESTED'?Math.max(140,base+40):base+(p.profile==='PRESSURED'?20:0);
+            p.deadTarget=BRMP.respawnMode?350:450;
+            const normal=Math.max(2,Math.min(BR_STREAM_POLICY.maxBatch,Math.ceil(aliveCount*.5)));
+            p.batchLimit=p.profile==='CONGESTED'?Math.max(2,Math.min(10,Math.ceil(aliveCount/3))):Math.max(2,normal-(p.profile==='PRESSURED'?1:0));
+            stats.targetMs=p.aliveTarget;
+            const due=[];
+            for(const viewer of humans){const id=viewer.remoteId;if(BRMP.viewFlightIds.has(id))continue;
+                const prior=BRMP.viewLastSent[id],target=viewer.alive?p.aliveTarget:p.deadTarget,age=prior?now-prior.at:Infinity;
+                const transition=!!prior&&(prior.alive!==!!viewer.alive||prior.life!==Number(viewer.lifeSeq||0));
+                // tkSelf is in the existing view. A new quiz ACK/question cannot wait for idle cadence.
+                const quizDirty=!viewer.alive&&BRMP.respawnMode&&!!prior&&prior.quizRevision!==Number(viewer.tkQuiz?.revision||0);
+                const hard=!!viewer.alive&&age>=BR_STREAM_POLICY.hardOverdue;
+                const deadline=prior?Math.max(prior.at+BR_STREAM_POLICY.minGap,Number(prior.nextAt??prior.at+target)+target-Number(prior.target??target)):now;
+                if(prior&&(age<BR_STREAM_POLICY.minGap||!transition&&!quizDirty&&!hard&&now+BR_STREAM_POLICY.lookAhead<deadline))continue;
+                due.push({p:viewer,target,deadline,age,transition,quizDirty,priority:transition?0:hard?1:quizDirty?2:3,over:(age-target)/target});
+            }
+            due.sort((a,b)=>a.priority-b.priority||b.over-a.over||String(a.p.remoteId).localeCompare(String(b.p.remoteId)));
+            return due.slice(0,p.batchLimit);
+        }
+        function brStreamSent(viewer,entry,now,frame){return {at:now,frame,alive:!!viewer.alive,life:Number(viewer.lifeSeq||0),quizRevision:Number(viewer.tkQuiz?.revision||0),target:entry.target,
+            // One bounded deadline, never a queue of old snapshots. Half-tick lookahead avoids 110ms→150ms rounding.
+            nextAt:entry.transition||entry.quizDirty?now+entry.target:Math.max(now+BR_STREAM_POLICY.minGap,Math.min(now+entry.target+BR_STREAM_POLICY.lookAhead,entry.deadline+entry.target))};}
+        function brStreamUtf8Bytes(str){let n=0;for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);if(c<128)n++;else if(c<2048)n+=2;else if(c>=0xd800&&c<=0xdbff&&str.charCodeAt(i+1)>=0xdc00&&str.charCodeAt(i+1)<=0xdfff){n+=4;i++;}else n+=3;}return n;}
+        function brProjectileGrace(curved){return curved?brClamp(Number(BRMP.viewGap||120),100,130):brClamp(Number(BRMP.viewGap||120)*1.25,140,170);}
+
+        function brResetStreamHost(){BRMP.viewLastSent={};BRMP.viewShotKnown={};BRMP.viewFlightIds=new Set();BRMP.viewCursorId=0;BRMP.streamStats={packets:0,characters:0,skippedBusy:0,writeMs:0,writeEma:0,bytesPerView:0,encodeMs:0,relaxUntil:0,targetMs:100,viewerGaps:{},policy:brStreamPolicyReset()};}
 
         function brPublishViews() {
             brFlushRunState();
             if(!BRMP.active||!game||BRMP.backend!=='firebase')return;
+            if(!BRMP.viewLastSent)brResetStreamHost();
+            const buildStartedAt=brNetDebug?performance.now():0;
+            brStreamPolicyObserve(performance.now(),Number(BRMP.publishInFlight||0)>=3);
             if(brNetDebug)brNetDebug.publish();
-            if(Number(BRMP.publishInFlight||0)>=3){if(brNetDebug)brNetDebug.busy();if(BRMP.streamStats){BRMP.streamStats.skippedBusy++;BRMP.streamStats.relaxUntil=performance.now()+2000;}return;}
+            if(Number(BRMP.publishInFlight||0)>=3){if(brNetDebug)brNetDebug.busy();BRMP.streamStats.skippedBusy++;return;}
             // Stable immutable roster/arena; newest-state batches, no unbounded outbound queue.
             if(!BRMP.wireParticipants) {
                 BRMP.wireParticipants=[];BRMP.wireHumans=[];
@@ -10627,16 +10686,8 @@
             var humans=BRMP.wireHumans;if(!humans.length)return;
             if(!BRMP.viewLastSent)brResetStreamHost();
             var now=brNow(),tickAt=performance.now(),flight=BRMP.viewFlightIds,viewers=[];
-            const stats=BRMP.streamStats,halfBatch=Math.max(2,Math.ceil(humans.length/2));
-            if(stats.writeEma>80||stats.bytesPerView*halfBatch>384*1024||Number(BRMP.publishInFlight||0)>=2)stats.relaxUntil=tickAt+2000;
-            const targetMs=tickAt<stats.relaxUntil?150:100;stats.targetMs=targetMs;
-            // One queued write per viewer, at most three batches. Never enqueue old intermediate views.
-            const due=humans.filter(p=>!flight.has(p.remoteId)).map(p=>{
-                const target=!p.alive&&!BRMP.respawnMode?450:targetMs;
-                return {p,over:tickAt-Number(BRMP.viewLastSent[p.remoteId]?.at??-10000)-target};
-            }).filter(v=>v.over>=-1).sort((a,b)=>b.over-a.over||String(a.p.remoteId).localeCompare(String(b.p.remoteId)));
-            const count=Math.min(Math.max(2,Math.ceil(humans.length/(targetMs/50))),due.length);
-            for(let i=0;i<count;i++)viewers.push(due[i].p);
+            const stats=BRMP.streamStats,selection=brStreamSelect(humans,tickAt),targetMs=stats.policy.aliveTarget;
+            viewers=selection.map(v=>v.p);
             if(!viewers.length)return;
 
             var all=BRMP.wireParticipants,roster=BRMP.wireRoster,alive=0,wired=new Array(all.length);
@@ -10656,12 +10707,13 @@
             };
             var elapsed=Math.max(0,(now-Number(BRMP.roomMeta.battleStartedAt||now))/1000),remaining=game.capture?Math.max(0,game.capture.seconds-game.capture.active):BRMP.respawnMode?Math.max(0,(Number(BRMP.roomMeta.battleEndsAt||now)-now)/1000):elapsed;
             BRMP.viewFxCursor=BRMP.viewFxCursor||{};BRMP.staticSent=BRMP.staticSent||{};
-            var updates={},pendingStatic=[],pendingFx=[],pendingTKBoards=[],previousViews=[],epoch=BRMP.publishEpoch;
+            var updates={},pendingStatic=[],pendingFx=[],pendingTKBoards=[],previousViews=[],epoch=BRMP.publishEpoch,totalViewBytes=0;
             const ringPacket=game.ring?brRingMakePacket(game):null,capturePacket=game.capture?brCapturePacket(game):null;
             // Immutable for this synchronous publish batch. Every viewer keeps its own
             // visibility filter; status objects and entity rows are built only once.
             const rwBatch=window.BRRework.prepareEntityWire(game),rwStates=all.map(p=>Object.assign(window.BRRework.wirePlayer(p,game),{driveX:p.presentationDriveX||0,driveY:p.presentationDriveY||0,driveKnown:p.presentationDriveKnown||0})),combatStates=all.map(p=>brCombatStatusWire(p));
             for(const viewer of viewers) {
+                let needsStatic=false,boardDelivery=null;
                 var id=viewer.remoteId,bounds=brViewerBounds(viewer,BRMP.inputs[viewer.remoteId]);
                 bounds.snapshotGapMs=brClamp(tickAt-Number(BRMP.viewLastSent[id]?.at??(tickAt-targetMs)),100,350);
                 var visible=[];
@@ -10715,7 +10767,7 @@
                     const board=brTKBuildBoard(false);
                     // Each recipient receives a board at most twice a second, independently of actor packets.
                     const lastBoard=BRMP.tkBoardSent&&BRMP.tkBoardSent[id];
-                    if(!lastBoard||lastBoard.revision!==board.revision||now-lastBoard.at>=1000){payload.tkBoard=brTKPackBoard(board,roster);pendingTKBoards.push([id,board.revision]);}
+                    if(!lastBoard||lastBoard.revision!==board.revision||now-lastBoard.at>=1000){payload.tkBoard=brTKPackBoard(board,roster);boardDelivery=[id,board.revision];}
                 }
                 const echoInput=BRMP.inputs[id];
                 if(echoInput?.matchKey===payload.matchKey&&Number.isFinite(echoInput._ringReceivedAt))payload.zoneEcho=[Number(echoInput.seq||0),echoInput._ringReceivedAt,performance.now()];
@@ -10723,14 +10775,18 @@
                 const combatStatuses=visible.map(r=>{const status=combatStates[r[0]];return status?[r[0],...status]:null;}).filter(Boolean);
                 if(combatStatuses.length)payload.combatStatus=combatStatuses;
                 if(!BRMP.staticSent[id]||(BRMP.inputs[id]&&BRMP.inputs[id].needsArena)) {
-                    payload.roster=roster;payload.walls=BRMP.wireArena.walls;payload.smokes=BRMP.wireArena.smokes;if(game.capture)payload.boundary=game.boundary;pendingStatic.push(id);
+                    payload.roster=roster;payload.walls=BRMP.wireArena.walls;payload.smokes=BRMP.wireArena.smokes;if(game.capture)payload.boundary=game.boundary;needsStatic=true;
                 }
-                pendingFx.push([id,game.frame]);
-                updates['views/'+id]=JSON.stringify(payload);
-                previousViews.push({id,sent:BRMP.viewLastSent[id],known:BRMP.viewShotKnown[id]});
-                flight.add(id);BRMP.viewLastSent[id]={at:tickAt,frame:game.frame};BRMP.viewShotKnown[id]=new Set(projectiles.map(q=>q[6]));
+                const text=JSON.stringify(payload),bytes=brStreamUtf8Bytes(text);
+                // Keep every field of admitted views; defer whole viewers if the byte budget is full.
+                if(previousViews.length&&totalViewBytes+bytes>BR_STREAM_POLICY.maxPayloadBytes)break;
+                totalViewBytes+=bytes;if(needsStatic)pendingStatic.push(id);if(boardDelivery)pendingTKBoards.push(boardDelivery);
+                pendingFx.push([id,game.frame]);updates['views/'+id]=text;
+                previousViews.push({id,sent:BRMP.viewLastSent[id],known:BRMP.viewShotKnown[id],alive:!!viewer.alive,bytes});
+                flight.add(id);BRMP.viewLastSent[id]=brStreamSent(viewer,selection[previousViews.length-1],tickAt,game.frame);BRMP.viewShotKnown[id]=new Set(projectiles.map(q=>q[6]));
                 BRMP.streamStats.packets++;BRMP.streamStats.characters+=updates['views/'+id].length;
             }
+            viewers=viewers.slice(0,previousViews.length);
             if(now-Number(BRMP.lastSummaryAt||0)>900) {
                 BRMP.lastSummaryAt=now;var teamScores={};for(const p of all)if(p.team)teamScores[p.team]=Number(teamScores[p.team]||0)+Number(p.kills||0);
                 if(game.capture)teamScores=Object.fromEntries(game.capture.scores.slice(1).map((v,i)=>[i+1,v]));else if(BRMP.respawnMode)teamScores=Object.assign({},brTKState(game).scores);
@@ -10738,6 +10794,7 @@
             }
             const encodedAt=performance.now(),batchBytes=viewers.reduce((n,p)=>n+updates['views/'+p.remoteId].length,0);
             stats.encodeMs=encodedAt-tickAt;stats.bytesPerView=stats.bytesPerView?stats.bytesPerView*.8+batchBytes/viewers.length*.2:batchBytes/viewers.length;
+            if(brNetDebug)brNetDebug.build(encodedAt-buildStartedAt);
             BRMP.publishInFlight=Number(BRMP.publishInFlight||0)+1;
             const debugBatch=brNetDebug?brNetDebug.batch(previousViews,updates,tickAt,BRMP.publishInFlight):null,debugWriteStart=brNetDebug?performance.now():0;let debugWriteFailed=false;
             BRMP.db.ref('rooms/'+BRMP.roomCode).update(updates).then(function(){
@@ -10751,13 +10808,14 @@
             }).catch(function(err){
                 debugWriteFailed=true;
                 if(epoch===BRMP.publishEpoch)for(const v of previousViews){if(v.sent)BRMP.viewLastSent[v.id]=v.sent;else delete BRMP.viewLastSent[v.id];BRMP.viewShotKnown[v.id]=v.known||new Set();}
-                if(epoch===BRMP.publishEpoch)stats.relaxUntil=performance.now()+2000;
+                // Retry newest state through the same scheduler; failed write contributes to pressure.
                 console.warn('[BRMP SNAPSHOT]',err);
             }).finally(function(){if(brNetDebug)brNetDebug.written(debugBatch,performance.now()-debugWriteStart,debugWriteFailed);if(epoch===BRMP.publishEpoch){
                 BRMP.publishInFlight=Math.max(0,Number(BRMP.publishInFlight||1)-1);
                 for(const v of viewers)flight.delete(v.remoteId);
                 const writeMs=performance.now()-encodedAt;stats.writeMs=writeMs;
                 stats.writeEma=stats.writeEma?stats.writeEma*.8+writeMs*.2:writeMs;
+                brStreamWriteDone(stats,performance.now(),writeMs,debugWriteFailed);
             }});
         }
 
@@ -11259,10 +11317,10 @@
             var sampleTime=serverTime+BRMP.netClockOffset;
             if(BRMP.lastViewFrame!=null)BRMP.viewGap=Number(BRMP.viewGap||180)*.8+Math.min(500,(view.frame-BRMP.lastViewFrame)*(1000/60))*.2;
             BRMP.lastViewFrame=view.frame;BRMP.lastActorPacketAt=now;
-            // Adaptive actor-only35–60ms buffer. Bounded prediction fills the remainder;
+            // Adaptive actor-only22–45ms buffer. Bounded prediction fills the remainder;
             // self controls and the ring clock keep their existing timeline.
             var deliveryJitter=Math.max.apply(null,BRMP.clockSamples)-Math.min.apply(null,BRMP.clockSamples);
-            BRMP.remoteBufferTarget=brClamp(10+Number(BRMP.viewGap||150)*.25+Math.min(100,deliveryJitter)*.20,35,60);
+            BRMP.remoteBufferTarget=brClamp(Number(BRMP.viewGap||150)*.20+Math.min(150,deliveryJitter)*.10,22,45);
             const hostAt=brViewPhysicsAt(view);
             const measuredLead=Number.isFinite(hostAt)&&Number.isFinite(BRMP.ringClockOffset)?brClamp(sampleTime-(hostAt-BRMP.ringClockOffset),0,250):0;
             // The ring clock is already filtered. Apply its mapping once so a network-offset correction
@@ -11376,7 +11434,7 @@
                 var id=String(r[6]||('legacy-'+i+'-'+r[3]));if(BRMP.projectileTombstones?.has(id))return;var old=BRMP.drawProjectiles.get(id),pvx=Number(r[7]||0),pvy=Number(r[8]||0);
                 var projectedX=Number(r[0]),projectedY=Number(r[1]);
                 if(!old)old={x:projectedX,y:projectedY,tx:projectedX,ty:projectedY,vx:pvx,vy:pvy,row:r,last:now,samples:[]};
-                old.tx=projectedX;old.ty=projectedY;old.vx=pvx;old.vy=pvy;old.row=r;old.last=now;old.missingSince=null;
+                old.tx=projectedX;old.ty=projectedY;old.vx=pvx;old.vy=pvy;old.row=r;old.last=now;old.missingSince=null;old.missingGraceMs=null;
                 brFlightSamples(old,{x:projectedX,y:projectedY,vx:pvx,vy:pvy},view.frame,BRMP.netClockOffset,r[22],Number(r[20]||0));
                 if(String(r[11])===String(BRMP.playerId)&&r[12]&&Number(r[13])>0) {
                     var local=(BRMP.localProjectiles||[]).find(function(q){return q.matchKey===view.matchKey&&q.ownerLife===Number(r[18]||0)&&q.kind===r[12]&&q.seq===Number(r[13])&&q.ordinal===Number(r[17]||0);});
@@ -11385,8 +11443,8 @@
                 }
                 BRMP.drawProjectiles.set(id,old);shotSeen.add(id);
             });
-            // One missing filtered snapshot is not a collision. Explicit ends above still win immediately.
-            BRMP.drawProjectiles.forEach(function(v,k){if(!shotSeen.has(k)){if(v.missingSince==null)v.missingSince=now;if(now-v.missingSince>=150)BRMP.drawProjectiles.delete(k);}});
+            // Display-only omission grace: straight140–170ms / curved100–130ms. Explicit ends above always win.
+            BRMP.drawProjectiles.forEach(function(v,k){if(!shotSeen.has(k)){if(v.missingSince==null){v.missingSince=now;v.missingGraceMs=brProjectileGrace(v.row[15]==='missile'||v.row[15]==='BOOMERANG');}if(now-v.missingSince>=v.missingGraceMs)BRMP.drawProjectiles.delete(k);}});
             const authoritySelf=BRMP.drawPlayers.get(String(BRMP.playerId));
             BRMP.localProjectiles=(BRMP.localProjectiles||[]).filter(q=>q.rework||!authoritySelf||q.seq>Number(authoritySelf.row[q.kind==='attack'?28:29]||0)||q.seq===Number(authoritySelf.row[q.kind==='attack'?30:31]||0)&&now-q.born<600);
             (view.fx||[]).forEach(function(r){
