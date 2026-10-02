@@ -7539,6 +7539,116 @@
         };
         window.BRMP = BRMP;BRMP.playerConnected=brPlayerConnected;
 
+        // v25: URL-opt-in, read-only diagnostics. No network calls, combat RNG or simulation writes.
+        var brNetDebug=new URLSearchParams(location.search).get('netdebug')==='1'?brCreateNetDebug():null;
+        function brGetNetDebug(){return brNetDebug;}
+        function brCreateNetDebug(){
+            const KEY='dsbr.netdebug.v1.reports',NAMES=['frame','snap','rtt','age','shotMean','shotOldest','write','payloadKB','batch','sendGap','resume'];
+            const LIMITS=[1000/30,50,150,200,250,300,500];
+            let state=null,panel=null,title=null,body=null,actions=null,cache=null,cacheAt=-Infinity,lastSave=-Infinity,timer=null,collapsed=false,storageError=false;
+            // Fixed-size histograms: 1ms bins through 1024, then <=2.5% width. Never per-frame sort.
+            function bucket(x){return Math.min(2047,x<=1024?Math.ceil(x):1024+Math.ceil(Math.log(x/1024)/Math.log(1.025)));}
+            function edge(i){return i<=1024?i:1024*Math.pow(1.025,i-1024);}
+            function metric(saved){const m={n:0,sum:0,max:0,bins:new Float64Array(2048),over:LIMITS.map(()=>0),time:LIMITS.map(()=>0)};
+                if(saved&&Number.isFinite(saved.n)&&saved.n>=0){m.n=saved.n;m.sum=saved.sum||0;m.max=saved.max||0;m.over=saved.over||m.over;m.time=saved.time||m.time;for(const [i,n] of saved.bins||[])if(Number.isInteger(i)&&i>=0&&i<2048&&Number.isFinite(n)&&n>=0)m.bins[i]=n;}return m;}
+            function add(m,x){if(!m||!Number.isFinite(x)||x<0)return;m.n++;m.sum+=x;m.max=Math.max(m.max,x);m.bins[bucket(x)]++;for(let i=0;i<LIMITS.length;i++)if(x>LIMITS[i]){m.over[i]++;m.time[i]+=x;}}
+            function quantile(m,p){if(!m.n)return null;const target=Math.ceil(m.n*p);let n=0;for(let i=0;i<2048;i++){n+=m.bins[i];if(n>=target)return Math.min(m.max,edge(i));}return m.max;}
+            function describe(m){return {samples:m.n,avg:m.n?m.sum/m.n:null,p50:quantile(m,.5),p95:quantile(m,.95),p99:quantile(m,.99),max:m.n?m.max:null,over:LIMITS.map((v,i)=>[v,m.n?100*m.over[i]/m.n:0]),time:LIMITS.map((v,i)=>[v,m.sum?100*m.time[i]/m.sum:0])};}
+            function pack(m){const bins=[];for(let i=0;i<2048;i++)if(m.bins[i])bins.push([i,m.bins[i]]);return {n:m.n,sum:m.sum,max:m.max,bins,over:m.over,time:m.time};}
+            function read(){try{const a=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(a)?a.filter(x=>x&&x.version===1).slice(0,3):[];}catch(e){return [];}}
+            function key(){return brRingKey();}
+            function elapsed(view){if(BRMP.role==='host'&&typeof game!=='undefined'&&game)return Number(game.capture?.active??game.frame/60)||0;return Number(view?.capture?.a??(Number.isFinite(view?.zoneSelf?.time)?view.zoneSelf.time/1000:view?.frame/60))||0;}
+            function ensure(){if(!['host','student'].includes(BRMP.role)||!BRMP.roomCode||!BRMP.roomMeta||!['battle','results'].includes(BRMP.roomMeta.phase))return null;
+                const k=key(),role=BRMP.role;if(state?.key===k&&state.role===role)return state;
+                if(state)save();const old=read().find(x=>x.key===k&&x.role===role),now=performance.now();
+                state={key:k,role,mode:BRMP.roomMeta.mode,players:0,duration:0,ended:false,metrics:{},deaths:[],deathCount:0,backgroundEvents:document.hidden?1:0,backgroundMs:0,resumeCount:0,
+                    calls:0,views:0,batches:0,bytes:0,writeErrors:0,maxInFlight:0,skippedBusy:0,observedMs:0,ack:0,refreshes:0,
+                    lastArrival:null,lastFrame:null,lastShotAt:-Infinity,lastTick:now,lastAgeAt:-Infinity,live:{},recent:[],lastHit:null,hiddenAt:document.hidden?now:null,resumeAt:null,excludeBefore:0,restored:!!old};
+                if(old){for(const field of ['mode','players','duration','deaths','deathCount','backgroundEvents','backgroundMs','resumeCount','calls','views','batches','bytes','writeErrors','maxInFlight','skippedBusy','observedMs','ack','refreshes'])if(old.totals?.[field]!=null)state[field]=old.totals[field];state.refreshes++;}
+                for(const name of NAMES)state.metrics[name]=metric(old?.histograms?.[name]);
+                cache=null;cacheAt=-Infinity;lastSave=now;return state;}
+            function active(){const s=ensure();return s&&!s.ended&&BRMP.roomMeta?.phase==='battle'?s:null;}
+            function foreground(s){return !document.hidden&&s.hiddenAt==null;}
+            function packetAge(now,frame){if(!Number.isFinite(frame)||!Number.isFinite(BRMP.netClockOffset))return null;return Math.max(0,now+Number(BRMP.presentationLead||0)-(frame*1000/60+BRMP.netClockOffset));}
+            function visibleAges(now,cam,w,h,zoom){let n=0,sum=0,max=0;if(!cam||!zoom)return null;
+                // Sample existing tracks only. No projectile stepping, raycasts or creation.
+                BRMP.drawProjectiles?.forEach(q=>{const r=Number(q.row?.[2]||7),t=q.samples?.at(-1)?.t;
+                    if(q.expired||!Number.isFinite(t)||Math.abs(q.x-cam.x)>w/zoom/2+r||Math.abs(q.y-cam.y)>h/zoom/2+r)return;
+                    const age=Math.max(0,now+Number(BRMP.presentationLead||0)-t);n++;sum+=age;max=Math.max(max,age);});
+                return n?{mean:sum/n,oldest:max,count:n}:null;}
+            function accepted(view,now){const s=active();if(!s||s.role!=='student')return;s.players=Number(view.total||view.roster?.length||s.players);s.duration=Math.max(s.duration,elapsed(view));
+                const visible=foreground(s);
+                // Capture pre-arrival conditions before ingest resets the authority clock and shot samples.
+                const prev=BRMP.drawPlayers?.get(String(BRMP.playerId)),row=view.players?.find(r=>String(r[0])===String(BRMP.playerId));
+                const gap=s.lastArrival==null?null:now-s.lastArrival;
+                if(prev?.row?.[7]&&row&&!row[7]){const hit=(view.fx||[]).filter(e=>e[1]==='hit'&&String(e[9])===String(BRMP.playerId)).at(-1),geo=hit?.[13],zone=Number(view.zoneSelf?.total||0)>Number(s.zoneTotal||0);
+                    const c=brEl('br-student-canvas'),shots=visible?visibleAges(now,BRMP.studentCamera,c?._cssW||0,c?._cssH||0,c?._cssW&&c?._cssH?brStudentViewport(c._cssW,c._cssH).zoom:0):null;
+                    // Sorting is bounded to 120 recent gaps and happens on death, never each frame.
+                    const recent=s.recent.slice().sort((a,b)=>a-b);
+                    s.deathCount++;s.deaths.push({number:s.deathCount,matchTime:elapsed(view),background:!visible,fps:visible?1000/Number(BRMP.studentFrameEma||16.7):null,currentGap:visible?gap:null,recentSnapshotP95:visible&&recent.length?recent[Math.ceil(recent.length*.95)-1]:null,packetAge:visible?packetAge(now,s.authorityFrame):null,oldestShotAge:shots?.oldest??null,recentRTT:visible?s.live.rtt??null:null,impactLevel:hit?Number(hit[12]||0):null,hitKind:geo?.projectileId?'projectile':zone?'zone':geo?.feel?.includes?.('melee')?'melee':'unknown'});if(s.deaths.length>8)s.deaths.shift();}
+                s.zoneTotal=Number(view.zoneSelf?.total||0);
+                if(!visible){s.lastArrival=null;return;}
+                if(s.resumeAt!=null){add(s.metrics.resume,now-s.resumeAt);s.resumeAt=null;}
+                if(gap!=null){add(s.metrics.snap,gap);s.live.snap=gap;s.recent.push(gap);if(s.recent.length>120)s.recent.shift();}
+                s.lastArrival=now;s.authorityFrame=view.frame;
+            }
+            function ack(seq,sentAt,now){const s=active();if(!s||s.role!=='student'||seq<=s.ack)return;s.ack=seq;
+                if(foreground(s)&&sentAt>=s.excludeBefore){const rtt=now-sentAt;add(s.metrics.rtt,rtt);s.live.rtt=rtt;}}
+            function frame(now){const s=active();if(!s||s.role!=='student')return;if(!foreground(s)){s.lastFrame=null;return;}if(s.lastFrame!=null)add(s.metrics.frame,now-s.lastFrame);s.lastFrame=now;}
+            function scene(now,cam,w,h,zoom){const s=active();if(!s||!foreground(s)||s.resumeAt!=null||s.role!=='student'||now-s.lastShotAt<250)return;s.lastShotAt=now;
+                const age=packetAge(now,s.authorityFrame);if(age!=null){add(s.metrics.age,age);s.live.age=age;}
+                const shots=visibleAges(now,cam,w,h,zoom);s.live.shot=shots?.oldest??null;s.live.shotMean=shots?.mean??null;
+                if(shots){add(s.metrics.shotMean,shots.mean);add(s.metrics.shotOldest,shots.oldest);}}
+            function publish(){const s=active();if(!s||s.role!=='host')return;s.calls++;s.duration=Math.max(s.duration,elapsed());
+                if(BRMP.streamStats)BRMP.streamStats.netdebug=s; // Extension only; policy fields stay untouched.
+                s.players=Number(BRMP.wireParticipants?.length||game?.participants?.filter(p=>p.id!==999).length||0);}
+            function busy(){const s=active();if(s&&s.role==='host')s.skippedBusy++;}
+            function utf8Length(str){let n=0;for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);if(c<128)n++;else if(c<2048)n+=2;else if(c>=0xd800&&c<=0xdbff&&str.charCodeAt(i+1)>=0xdc00&&str.charCodeAt(i+1)<=0xdfff){n+=4;i++;}else n+=3;}return n;}
+            function batch(previous,updates,at,inflight){const s=active();if(!s||s.role!=='host')return null;s.batches++;s.views+=previous.length;s.maxInFlight=Math.max(s.maxInFlight,inflight);add(s.metrics.batch,previous.length);
+                for(const v of previous){if(v.sent&&Number.isFinite(v.sent.at))add(s.metrics.sendGap,Math.max(0,at-v.sent.at));const bytes=utf8Length(updates['views/'+v.id]);s.bytes+=bytes;add(s.metrics.payloadKB,bytes/1024);}return s;}
+            function written(token,ms,failed){if(!token||token!==state)return;add(token.metrics.write,ms);if(failed)token.writeErrors++;}
+            function visibility(){const s=active();if(!s)return;const now=performance.now();if(s.role==='host')s.observedMs+=Math.max(0,now-s.lastTick);
+                if(document.hidden){if(s.hiddenAt==null){if(s.role==='student')s.observedMs+=Math.max(0,now-s.lastTick);s.hiddenAt=now;s.backgroundEvents++;}s.lastFrame=null;s.lastArrival=null;save();}
+                else if(s.hiddenAt!=null){s.backgroundMs+=Math.max(0,now-s.hiddenAt);s.hiddenAt=null;s.resumeAt=now;s.resumeCount++;s.excludeBefore=now;s.lastFrame=null;s.lastArrival=null;s.lastShotAt=-Infinity;s.recent=[];s.live={};}s.lastTick=now;}
+            function summary(){const s=state;if(!s)return null;const m={};for(const name of NAMES)m[name]=describe(s.metrics[name]);return {role:s.role,mode:s.mode,players:s.players,duration:s.duration,metrics:m,deaths:s.deaths.slice(),backgroundEvents:s.backgroundEvents,backgroundMs:s.backgroundMs+(s.hiddenAt==null?0:Math.max(0,performance.now()-s.hiddenAt)),resumeCount:s.resumeCount,refreshes:s.refreshes,calls:s.calls,views:s.views,batches:s.batches,bytes:s.bytes,maxInFlight:s.maxInFlight,skippedBusy:s.skippedBusy,writeErrors:s.writeErrors,observedMs:s.observedMs,ended:s.ended};}
+            function save(){if(!state)return;try{const totals={};for(const f of ['mode','players','duration','deaths','deathCount','backgroundEvents','backgroundMs','resumeCount','calls','views','batches','bytes','writeErrors','maxInFlight','skippedBusy','observedMs','ack','refreshes'])totals[f]=state[f];
+                    if(state.hiddenAt!=null)totals.backgroundMs+=Math.max(0,performance.now()-state.hiddenAt);
+                    const histograms={};for(const name of NAMES)histograms[name]=pack(state.metrics[name]);
+                    const record={version:1,key:state.key,role:state.role,savedAt:Date.now(),totals,histograms,summary:cache||summary()};
+                    localStorage.setItem(KEY,JSON.stringify([record,...read().filter(x=>!(x.key===state.key&&x.role===state.role))].slice(0,3)));storageError=false;
+                }catch(e){storageError=true;}}
+            function fmt(v,d=1){return Number.isFinite(v)?v.toFixed(d):'—';}
+            function report(){const q=summary();if(!q)return '아직 측정된 경기가 없습니다.';const m=q.metrics,lines=['DSbattleroyal '+q.role.toUpperCase()+(q.role==='host'?' STREAM REPORT':' NETWORK REPORT'),'v25 · local diagnostics · '+new Date().toISOString(),'',`Mode: ${q.mode}`,`Players: ${q.players}`,`Match duration: ${brFormatTime(q.duration)} (${fmt(q.duration)} s)`,`${q.role==='host'?'Observed wall time':'Observed foreground'}: ${fmt(q.observedMs/1000)} s`,`Refresh continuations: ${q.refreshes}`];
+                function block(label,x,thresholds=[]){lines.push('',label,`samples: ${x.samples} | avg: ${fmt(x.avg)} | p50: ${fmt(x.p50)} | p95: ${fmt(x.p95)} | max: ${fmt(x.max)}`);for(const t of thresholds)lines.push(`>${t}ms: ${fmt(x.over.find(a=>a[0]===t)?.[1])}%`);}
+                if(q.role==='student'){lines.push('','RENDER',`FPS avg: ${m.frame.avg?fmt(1000/m.frame.avg):'—'}`,`FPS median: ${m.frame.p50?fmt(1000/m.frame.p50):'—'}`,`FPS 1% low (1000/P99 frame): ${m.frame.p99?fmt(1000/m.frame.p99):'—'}`,`P95 frame: ${fmt(m.frame.p95)} ms`,`Below 30 FPS time: ${fmt(m.frame.time[0][1])}%`,`Below 20 FPS time: ${fmt(m.frame.time[1][1])}%`);
+                    block('SNAPSHOT (ms)',m.snap,[150,200,300,500]);block('INPUT RTT (unique acknowledged seq, ms)',m.rtt,[150,250]);block('PACKET AGE (mapped latest authority, ms)',m.age);block('SHOT AGE (oldest visible drawProjectiles sample per observation, ms)',m.shotOldest);block('SHOT MEAN (mean visible drawProjectiles age per observation, ms)',m.shotMean);
+                    lines.push('','DEATH SNAPSHOTS (pre-arrival network state)');for(const d of q.deaths)lines.push(`#${d.number} ${brFormatTime(d.matchTime)} | FPS ${fmt(d.fps)} | gap ${fmt(d.currentGap)}ms | recent P95 ${fmt(d.recentSnapshotP95)}ms | age ${fmt(d.packetAge)}ms | oldest shot ${fmt(d.oldestShotAge)}ms | RTT ${fmt(d.recentRTT)}ms | impact ${d.impactLevel??'—'} | ${d.hitKind}${d.background?' | BACKGROUND':''}`);
+                }else{lines.push('','VIEW DELIVERY',`publish calls: ${q.calls} | viewer payloads: ${q.views} | batches: ${q.batches}`,`views/sec (observed wall time): ${q.observedMs?fmt(q.views*1000/q.observedMs):'—'}`);block('VIEW GAP (generation, not write ACK, ms)',m.sendGap);block('VIEWERS PER BATCH (count)',m.batch);block('FIREBASE UPDATE (completion incl. failed writes, ms)',m.write);block('PAYLOAD (UTF-8 KB per viewer JSON; excludes envelope/summary)',m.payloadKB);lines.push(`Total viewer bytes: ${q.bytes}`,'','BACKPRESSURE',`max in-flight: ${q.maxInFlight} | skipped busy: ${q.skippedBusy} | failed writes: ${q.writeErrors}`);}
+                lines.push('','BACKGROUND',`events: ${q.backgroundEvents} | duration: ${fmt(q.backgroundMs/1000)} s | resumes: ${q.resumeCount}`);block('RESUME RECOVERY (foreground → first accepted view, ms)',m.resume);
+                lines.push('','NOTES','Histograms: exact count/mean/max/threshold ratios; approximate quantiles (<=1 ms bins below 1024, <=2.5% above).','No-shot intervals are not zero samples. Shot scope: visible drawProjectiles only, not rework entities/FX/local predicted shots.','Clock age uses existing mapping; it is an estimate, not independent measured one-way latency.','Background and first resume gaps excluded from student timing; foreground old-input ACKs excluded.','No names, room numbers or session IDs in this report. No diagnostic Firebase writes.');if(storageError)lines.push('WARNING: localStorage unavailable; memory report only.');return lines.join('\n');}
+            async function copy(){const text=report();try{if(!navigator.clipboard)throw Error('clipboard');await navigator.clipboard.writeText(text);brToast('진단 보고서를 복사했습니다.');}catch(e){let box=document.getElementById('br-netdebug-copy');if(!box){box=document.createElement('div');box.id='br-netdebug-copy';box.innerHTML='<label>복사가 차단되었습니다. 아래 내용을 선택해 복사하세요.<textarea readonly aria-label="진단 보고서"></textarea></label><button type="button">닫기</button>';document.body.appendChild(box);box.querySelector('button').onclick=()=>box.remove();}const ta=box.querySelector('textarea');ta.value=text;ta.focus();ta.select();try{if(document.execCommand('copy'))brToast('진단 보고서를 복사했습니다.');}catch(ignore){}}}
+            function download(){const blob=new Blob([report()],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='DSbattleroyal_'+(state?.role||'student')+'_debug_'+new Date().toISOString().slice(0,10)+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+            function ui(){if(panel)return;collapsed=innerHeight<520;const style=document.createElement('style');style.textContent='#br-netdebug{position:fixed;left:8px;top:clamp(174px,28vh,240px);z-index:141;max-width:195px;background:#07101dc9;color:#e2eefc;border:1px solid #8195ad66;border-radius:7px;font:11px/1.45 ui-monospace,monospace;pointer-events:none;padding:5px 7px;font-variant-numeric:tabular-nums}#br-netdebug[hidden]{display:none}#br-netdebug button{pointer-events:auto;background:transparent;color:inherit;border:0;padding:3px 0;font:700 10px/1.5 sans-serif;touch-action:manipulation}#br-netdebug pre{margin:2px 0;white-space:pre}#br-netdebug-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}#br-netdebug-copy{position:fixed;inset:15%;z-index:10010;padding:15px;background:#101a30;color:#fff;border:1px solid #91a8c8;border-radius:12px}#br-netdebug-copy textarea{display:block;width:100%;height:50vh;color:#fff;background:#07101d}#br-netdebug-copy button{margin-top:8px;padding:8px 20px;background:#425b83;color:white}@media(max-height:520px){#br-netdebug{top:110px;font-size:10px}}';document.head.appendChild(style);
+                panel=document.createElement('aside');panel.id='br-netdebug';panel.setAttribute('aria-label','Network performance diagnostics');title=document.createElement('button');title.type='button';title.onclick=()=>{collapsed=!collapsed;paint();};body=document.createElement('pre');panel.append(title,body);document.body.appendChild(panel);}
+            function paint(){if(!state)return;ui();const battle=BRMP.roomMeta?.phase==='battle',student=state.role==='student';
+                // Yield visual space to the existing augment choices. Never intercept their touches.
+                panel.hidden=!battle||document.hidden||(student&&!brEl('br-run-panel')?.classList.contains('br-hidden'));
+                if(!cache)cache=summary();const m=cache.metrics,s=state,small=collapsed;
+                title.textContent=small?(student?'DEBUG · FPS '+fmt(1000/Number(BRMP.studentFrameEma||16.7),0)+' · SNAP '+fmt(m.snap.avg,0):'STREAM · '+s.players+' · '+fmt(s.live.viewsPerSec,0)+' V/s'):(student?'STUDENT NET DEBUG ▾':'HOST STREAM DEBUG ▾');title.setAttribute('aria-expanded',String(!small));body.hidden=small;
+                body.textContent=student?`FPS       ${fmt(1000/Number(BRMP.studentFrameEma||16.7),0)}\nSNAP      ${fmt(m.snap.avg,0)} ms\nP95       ${fmt(m.snap.p95,0)} ms\nRTT       ${fmt(s.live.rtt,0)} ms\nAGE       ${fmt(s.live.age,0)} ms\nSHOT AGE  ${fmt(s.live.shot,0)} ms\nBUFFER    ${fmt(BRMP.remoteBuffer,0)} ms`:
+                    `PLAYERS   ${s.players}\nVIEWS/s   ${fmt(s.live.viewsPerSec,0)}\nWRITE     ${fmt(BRMP.streamStats?.writeMs,0)} ms\nWRITE P95 ${fmt(m.write.p95,0)} ms\nINFLIGHT  ${BRMP.publishInFlight||0}\nSKIPPED   ${s.skippedBusy}\nPAYLOAD   ${fmt(m.payloadKB.avg)} KB`;
+                if(storageError)body.textContent+='\n저장 불가 · 메모리만';}
+            function finish(result){const s=ensure();if(!s)return;const now=performance.now();if(!s.ended){if(s.role==='host'||foreground(s))s.observedMs+=Math.max(0,now-s.lastTick);if(s.hiddenAt!=null){s.backgroundMs+=Math.max(0,now-s.hiddenAt);s.hiddenAt=null;}s.lastTick=now;}s.duration=Math.max(s.duration,Number(result?.duration||0));s.players=Array.isArray(result?.players)?result.players.length:s.players;s.ended=true;cache=summary();save();
+                if(!actions){actions=document.createElement('div');actions.id='br-netdebug-actions';const c=document.createElement('button'),d=document.createElement('button');c.className=d.className='br-btn br-btn-ghost';c.textContent='📋 진단 보고서 복사';d.textContent='💾 TXT 저장';c.onclick=copy;d.onclick=download;actions.append(c,d);brEl('br-result-winner').parentElement.appendChild(actions);}if(panel)panel.hidden=true;}
+            function tick(){const s=ensure();if(!s){if(panel)panel.hidden=true;return;}const now=performance.now(),battle=BRMP.roomMeta?.phase==='battle';
+                if(battle&&!s.ended&&(s.role==='host'||foreground(s)))s.observedMs+=Math.max(0,now-s.lastTick);s.lastTick=now;
+                if(now-cacheAt>=1500){cache=summary();cacheAt=now;const dt=now-Number(s.rateAt||now);s.live.viewsPerSec=dt>0?(s.views-Number(s.rateViews||0))*1000/dt:0;s.rateAt=now;s.rateViews=s.views;}
+                paint();if(now-lastSave>=5000){save();lastSave=now;}}
+            function init(){if(timer)return;timer=setInterval(()=>{try{tick();}catch(e){/* Diagnostics must not stop the game. */}},500);document.addEventListener('visibilitychange',visibility);window.addEventListener('pagehide',save);}
+            return {init,accepted,ack,frame,scene,publish,busy,batch,written,visibility,finish,tick,summary,report,save,copy,download,ensure,utf8Length,getState:()=>state};
+        }
+
+
         const brElementCache=new Map();
         function brEl(id) {const old=brElementCache.get(id);if(old&&old.isConnected)return old;const el=document.getElementById(id);if(el)brElementCache.set(id,el);return el;}
         function brSetText(el,value) { value=String(value);if(el&&el.textContent!==value)el.textContent=value; }
@@ -10499,7 +10609,8 @@
         function brPublishViews() {
             brFlushRunState();
             if(!BRMP.active||!game||BRMP.backend!=='firebase')return;
-            if(Number(BRMP.publishInFlight||0)>=3){if(BRMP.streamStats){BRMP.streamStats.skippedBusy++;BRMP.streamStats.relaxUntil=performance.now()+2000;}return;}
+            if(brNetDebug)brNetDebug.publish();
+            if(Number(BRMP.publishInFlight||0)>=3){if(brNetDebug)brNetDebug.busy();if(BRMP.streamStats){BRMP.streamStats.skippedBusy++;BRMP.streamStats.relaxUntil=performance.now()+2000;}return;}
             // Stable immutable roster/arena; newest-state batches, no unbounded outbound queue.
             if(!BRMP.wireParticipants) {
                 BRMP.wireParticipants=[];BRMP.wireHumans=[];
@@ -10628,6 +10739,7 @@
             const encodedAt=performance.now(),batchBytes=viewers.reduce((n,p)=>n+updates['views/'+p.remoteId].length,0);
             stats.encodeMs=encodedAt-tickAt;stats.bytesPerView=stats.bytesPerView?stats.bytesPerView*.8+batchBytes/viewers.length*.2:batchBytes/viewers.length;
             BRMP.publishInFlight=Number(BRMP.publishInFlight||0)+1;
+            const debugBatch=brNetDebug?brNetDebug.batch(previousViews,updates,tickAt,BRMP.publishInFlight):null,debugWriteStart=brNetDebug?performance.now():0;let debugWriteFailed=false;
             BRMP.db.ref('rooms/'+BRMP.roomCode).update(updates).then(function(){
                 if(epoch!==BRMP.publishEpoch)return;
                 const ackAt=performance.now();
@@ -10637,10 +10749,11 @@
                 if(pendingTKBoards.length){BRMP.tkBoardSent=BRMP.tkBoardSent||{};for(const entry of pendingTKBoards)BRMP.tkBoardSent[entry[0]]={revision:entry[1],at:now};}
                 pendingFx.forEach(function(pair){BRMP.viewFxCursor[pair[0]]=Math.max(Number(BRMP.viewFxCursor[pair[0]]||0),pair[1]);});
             }).catch(function(err){
+                debugWriteFailed=true;
                 if(epoch===BRMP.publishEpoch)for(const v of previousViews){if(v.sent)BRMP.viewLastSent[v.id]=v.sent;else delete BRMP.viewLastSent[v.id];BRMP.viewShotKnown[v.id]=v.known||new Set();}
                 if(epoch===BRMP.publishEpoch)stats.relaxUntil=performance.now()+2000;
                 console.warn('[BRMP SNAPSHOT]',err);
-            }).finally(function(){if(epoch===BRMP.publishEpoch){
+            }).finally(function(){if(brNetDebug)brNetDebug.written(debugBatch,performance.now()-debugWriteStart,debugWriteFailed);if(epoch===BRMP.publishEpoch){
                 BRMP.publishInFlight=Math.max(0,Number(BRMP.publishInFlight||1)-1);
                 for(const v of viewers)flight.delete(v.remoteId);
                 const writeMs=performance.now()-encodedAt;stats.writeMs=writeMs;
@@ -11121,6 +11234,7 @@
             brReceiveRingClock(view);if(view.capture)brReceiveCapture(view.capture);else if(view.zoneState)brReceiveRing(view.zoneState);
             // A repeated/out-of-order view must not move the actor interpolation clock.
             if(BRMP.lastViewFrame!=null&&view.frame<=BRMP.lastViewFrame)return;
+            if(brNetDebug)brNetDebug.accepted(view,performance.now());
             if(!BRMP.drawPlayers)BRMP.drawPlayers=new Map();
             if(!BRMP.drawProjectiles)BRMP.drawProjectiles=new Map();
             if(!BRMP.drawFx)BRMP.drawFx=new Map();
@@ -11198,7 +11312,7 @@
                 var leadFrames=brClamp(Number(BRMP.minInputRtt||100)/2/(1000/60),0,8);old.authX=sx+svx*leadFrames;old.authY=sy+svy*leadFrames;old.authAt=now;
                 if(id===String(BRMP.playerId)) {
                     var ack=Number(r[24]||0),sentAt=BRMP.inputSentAt&&BRMP.inputSentAt.get(ack);
-                    if(sentAt!=null){var rtt=now-sentAt;BRMP.minInputRtt=Math.min(Number(BRMP.minInputRtt||1000),Math.max(20,rtt));}
+                    if(sentAt!=null){if(brNetDebug)brNetDebug.ack(ack,sentAt,now);var rtt=now-sentAt;BRMP.minInputRtt=Math.min(Number(BRMP.minInputRtt||1000),Math.max(20,rtt));}
                     old.inputAck=ack;
                     if(Number.isFinite(BRMP.ringClockOffset)&&Number.isFinite(brViewPhysicsAt(view))){
                         const networkAge=now+BRMP.ringClockOffset-brViewPhysicsAt(view);
@@ -12275,6 +12389,7 @@
                 return;
             }
             var frameNow=performance.now(),rawDt=Math.max(0,frameNow-Number(BRMP.lastStudentFrameAt||frameNow-16.67)),dt=brClamp(rawDt,0,80);
+            if(brNetDebug)brNetDebug.frame(frameNow);
             BRMP.lastStudentFrameAt=frameNow;
             view=brProjectRingView(view,frameNow);view.zones=brActiveZoneRows(view,frameNow);
             BRMP.studentFrameEma=Number(BRMP.studentFrameEma||16.7)*.94+Math.min(250,rawDt)*.06;
@@ -12317,6 +12432,7 @@
             BRMP.studentCamera.x+=(cameraTargetX-BRMP.studentCamera.x)*cameraFollow;BRMP.studentCamera.y+=(cameraTargetY-BRMP.studentCamera.y)*cameraFollow;
             // 긴 화면 축 1800 월드 단위(기존 기준보다 6.25% 좁게). 품질은 시야에 영향을 주지 않는다.
             var cam=BRMP.studentCamera,zoom=brStudentViewport(w,h).zoom;
+            if(brNetDebug)brNetDebug.scene(frameNow,cam,w,h,zoom);
             var shakeX=0,shakeY=0,studentShake=BRMP.studentShake;
             if(!BRMP.reducedMotion&&studentShake&&frameNow<studentShake.until) {
                 var shakeRatio=Math.min(1,(studentShake.until-frameNow)/Math.max(1,studentShake.duration||85));
@@ -12978,6 +13094,7 @@
         }
         function brRenderResults(result) {
             if(!result)return;
+            if(brNetDebug)brNetDebug.finish(result);
             brTKResetUI();
             if(result.mode==='team-capture'){brCaptureRenderResults(result);return;}
             if(result.mode==='team-respawn'){brTKRenderResults(result);return;}
@@ -13406,6 +13523,7 @@
             else {brEl('br-join-link').select();document.execCommand('copy');brToast('참가 링크를 복사했습니다.');}
         }
         function brInit() {
+            if(brNetDebug)brNetDebug.init();
             brUseDefaultQuiz();brLoadPlayPrefs();
             brEl('br-pref-music').addEventListener('click',brMusicToggle);
             brEl('br-music-volume').addEventListener('input',function(){if(!brMusicRole())return;brBgm.pref.volume=brClamp(Number(this.value),0,100);if(brBgm.audio)brBgm.audio.volume=brBgm.pref.volume/100;brMusicSave();});
