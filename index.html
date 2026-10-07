@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="br-build" content="v29-roster-wanggui-2026-10-02">
+    <meta name="br-build" content="v30-combat-continuity-ring-2026-10-07">
     <title>클래스 이모지 배틀로얄 · 팀 점령전</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.20.1/dist/pixi.min.js"></script>
@@ -769,7 +769,7 @@
             const hh=aspect>=1?BR_VIEW_SPAN/(2*aspect):BR_VIEW_SPAN/2;
             return {x:viewer.pos.x,y:viewer.pos.y,hw:hw+BR_VIEW_PAD,hh:hh+BR_VIEW_PAD};
         }
-        function brIncomingLeadFrames(bounds){return Math.max(9,Math.min(30,(Number(bounds?.snapshotGapMs||150)+100)/(1000/60)));}
+        function brIncomingLeadFrames(bounds){return Math.max(9,Math.min(18,(Number(bounds?.snapshotGapMs||150)+100)/(1000/60)));}
         function brViewContains(b,x,y,pad=0){return Math.abs(x-b.x)<=b.hw+pad&&Math.abs(y-b.y)<=b.hh+pad;}
         function brViewSegment(b,x,y,ex,ey,pad=0){
             return combatSegmentBoxTime(x-b.x,y-b.y,ex-x,ey-y,b.hw+pad,b.hh+pad)!==null;
@@ -2524,7 +2524,7 @@
                         const distance=victim.pos.dist(this.pos);
                         if(victim!==primaryTarget&&(distance>radius+victim.radius*.35||game.checkWallBetween(this.pos,victim.pos)))continue;
                         const falloff=victim===primaryTarget?1:1-.35*Math.min(1,distance/radius);
-                        victim.takeDamage(this.damage*falloff,this.owner,false,victim.pos.sub(this.pos),{scaled:true,wangguiPower:this.wangguiPower,style:this.impactStyle||'ranged-power',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:radius});
+                        victim.takeDamage(this.damage*falloff,this.owner,false,victim.pos.sub(this.pos),{scaled:true,wangguiPower:this.wangguiPower,style:this.impactStyle||'ranged-power',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:radius,projectileId:this._brNetId||'',ordinal:this.shotOrdinal||0,actionKind:this.inputKind,contact:{x:victim.pos.x,y:victim.pos.y}});
                         const outward=victim.pos.sub(this.pos),dir=outward.mag()>.01?outward.norm():this.vel.norm();
                         const push=this.knockback*falloff;
                         window.BRRework.nativeImpulse(victim,this.owner,dir,push,game,this.runSkill);
@@ -2545,7 +2545,7 @@
                 const dealDamage=(victim)=>{
                     const previousStyle=this.owner&&this.owner.currentImpactStyle;
                     if(this.owner&&this.impactStyle)this.owner.currentImpactStyle=this.impactStyle;
-                    try { return victim.takeDamage(this.damage,this.owner,false,this.explodeRadius>0?victim.pos.sub(this.pos):(this.type==='ORBIT'?victim.pos.sub(this.owner.pos):this.vel),{scaled:true,wangguiPower:this.wangguiPower,basic:this.impactStyle==='ranged-basic',attackId:this.basicAttackId,basicSnapshot:this.basicSnapshot,contact:{x:this.pos.x,y:this.pos.y},projectileId:this._brNetId||'',ordinal:this.shotOrdinal||0,visualPeriodic:this.type==='ORBIT',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:this.explodeRadius}); }
+                    try { return victim.takeDamage(this.damage,this.owner,false,this.explodeRadius>0?victim.pos.sub(this.pos):(this.type==='ORBIT'?victim.pos.sub(this.owner.pos):this.vel),{scaled:true,wangguiPower:this.wangguiPower,basic:this.impactStyle==='ranged-basic',attackId:this.basicAttackId,basicSnapshot:this.basicSnapshot,contact:{x:this.pos.x,y:this.pos.y},projectileId:this._brNetId||'',actionKind:this.inputKind,ordinal:this.shotOrdinal||0,visualPeriodic:this.type==='ORBIT',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:this.explodeRadius}); }
                     finally { if(this.owner)this.owner.currentImpactStyle=previousStyle||''; }
                 };
                 
@@ -2885,6 +2885,7 @@
                 if(Object.prototype.hasOwnProperty.call(BR_BASE_HP_OVERRIDES_BY_ID,ability.id))this.maxHp=BR_BASE_HP_OVERRIDES_BY_ID[ability.id];
                 this.maxHp=brCloseBaseHp(ability,this.maxHp);
                 if(BR_V29_FINAL_HP[ability.id]!=null)this.maxHp=BR_V29_FINAL_HP[ability.id];
+                if(ability.t==='B'||ability.t==='C')this.maxHp*=1.15; // v30: final base HP, once before mode/run multipliers
                 if(ability.id==='emoji-114')this.speed=1.5827; // median existing A tank walk; native tank-punch retained
                 this.modeHpMultiplier=brModeHpMultiplier(window.BRMP?.roomMeta?.mode);
                 this.maxHp*=this.modeHpMultiplier;this.hp=this.maxHp;
@@ -3704,6 +3705,7 @@
                 this.damageTaken += actualDamage;
                 if (attacker && attacker !== this && attacker.id !== 999) attacker.damageDealt += actualDamage;
                 this.hp = Math.max(0,this.hp-actualDamage);
+                if(this.hp===0&&actualDamage>0&&this.alive)brRecordDeathCause(this,attacker,damageContext,contactDirection,reflected,actualDamage,absorbed,impactLevel,closeImpact);
                 BRCapture.damage(game,attacker,this,actualDamage);
                 if(window.BRRework)window.BRRework.onHpDamage(this,attacker,actualDamage,{...(damageContext||{}),reflected});
 
@@ -3784,6 +3786,18 @@
             }
         }
 
+        function brRecordDeathCause(target,attacker,context,direction,reflected,damage,shield,impact,close){
+            if(!game)return;const c=context||{},cast=c.ctx||c.basicSnapshot?.ctx,e=c.entity,periodic=!!c.periodic;
+            const known=attacker&&attacker!==target&&attacker.id!==999,abilityId=String(cast?.abilityId||attacker?.ability?.id||'');
+            const def=window.BRRework?.defs[abilityId],basic=!!c.basic||c.actionKind==='attack'||cast?.actionKind==='attack'||attacker?.activeInputCommand?.kind==='attack',skillVerified=c.actionKind==='skill'||cast?.actionKind==='skill'||cast?.actionKind==='summon'||!!attacker?._runSkillCast||attacker?.activeInputCommand?.kind==='skill';
+            const kind=c.attackKind==='zone'?'zone':reflected?'reflection':periodic?'dot':c.explodeRadius>0?'explosion':e?.kind==='beam'?'beam':e?.kind==='hook'?'hook':e||c.projectileId?'projectile':close?'melee':c.attackKind==='environment'?'environment':known?'direct':'unknown';
+            const verified=direction&&Number.isFinite(direction.x)&&Number.isFinite(direction.y)&&Math.hypot(direction.x,direction.y)>.001&&!['zone','dot','reflection','environment','unknown'].includes(kind),n=verified?Math.hypot(direction.x,direction.y):1;
+            const point=c.contact&&[c.contact.x,c.contact.y].every(Number.isFinite)?c.contact:target.pos;
+            const receipt={v:1,match:brRingKey(),target:String(target.remoteId||('player-'+target.id)),life:Number(target.lifeSeq||0),id:(game.deathReceiptSeq=(game.deathReceiptSeq||0)+1),frame:game.frame,kind,damage,shield,lethal:true,
+                source:known?String(attacker.remoteId||('player-'+attacker.id)):'',ability:known?abilityId:'',skill:known?(basic?'기본 공격':String(skillVerified?(def?.skill?.label||attacker.ability?.n||'공격'):'공격')).slice(0,64):'',cast:String(cast?.castId||c.attackId||'').slice(0,160),shot:String(e?.id||c.projectileId||'').slice(0,160),ordinal:Number(e?.ordinal??c.ordinal??0),
+                x:point.x,y:point.y,dx:verified?direction.x/n:0,dy:verified?direction.y/n:0,impact:Math.max(1,Math.min(4,impact||1))};
+            target.lastDeathCause=receipt; // exactly one last cause per participant, retained across lives for results
+        }
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         let game = null;
@@ -3800,7 +3814,9 @@
         // Danger ring v2. The host owns the plan and damage; all renderers sample this same plan.
         // Clock units are monotonic match milliseconds, never a client's wall clock or render FPS.
         const BR_RING_RULES=Object.freeze({stepMs:1000/60,startTick:1200,noticeTicks:90,compressTicks:48,repeatTicks:600,
-            entryGraceMs:300,maxExtrapolateMs:1200,staleMs:900,channelMs:100,shrinkSpeed:.70,soloMultiplier:1.5});
+            entryGraceMs:300,maxExtrapolateMs:1200,staleMs:900,channelMs:100,shrinkSpeed:.70,soloMultiplier:1.6,teamElimMultiplier:1.1});
+        function brRingContinuousRate(mode){return BR_RING_RULES.shrinkSpeed*(mode==='solo'?BR_RING_RULES.soloMultiplier:mode==='team-elim'||mode==='team'?BR_RING_RULES.teamElimMultiplier:1);}
+        function brRingCompressionRate(mode){return BR_RING_RULES.shrinkSpeed*(mode==='solo'?1.5:1);}
         function brRingKey(meta=window.BRMP?.roomMeta,room=window.BRMP?.roomCode) {
             return String(room||'local')+'|'+Number(meta?.matchRound||0)+'|'+Number(meta?.battleStartedAt||0);
         }
@@ -3850,7 +3866,7 @@
         function brRingInitWorld(g,now=performance.now()) {
             if(g.capture){g.ring=null;g.ringGeometry=null;g.capture.hostAt=now;g.ringSuspended=!!document.hidden;return;}
             const fixed=!!window.BRMP?.isRespawnMode();
-            const mode=window.BRMP?.roomMeta?.mode||(teamMode>0?'team':'solo'),shrinkRate=BR_RING_RULES.shrinkSpeed*(mode==='solo'?BR_RING_RULES.soloMultiplier:1);
+            const mode=window.BRMP?.roomMeta?.mode||(teamMode>0?'team':'solo'),shrinkRate=brRingContinuousRate(mode);
             const minRadius=fixed?g.worldRadius*BR_TEAM_KILL_RULES.arenaScale:0;
             const initialRadius=fixed?minRadius:g.worldRadius;
             g.ring={key:brRingKey(),revision:1,sequence:0,anchorPerf:now,anchorTime:0,running:true,clockEpoch:1,
@@ -3875,7 +3891,7 @@
             const start=tick+BR_RING_RULES.noticeTicks,end=start+BR_RING_RULES.compressTicks;
             const before=brRingSample(s.plan,start*BR_RING_RULES.stepMs).radius;
             const floor=Math.max(s.plan.minRadius,before<150?0:140);
-            const amount=Math.min(Math.max(0,before-floor),(before<300?75:55)*2/3*1.3)*(s.plan.shrinkRate??BR_RING_RULES.shrinkSpeed);
+            const amount=Math.min(Math.max(0,before-floor),(before<300?75:55)*2/3*1.3)*brRingCompressionRate(s.plan.mode);
             if(amount<=0)return false;
             s.plan.compression={start,end,amount,floor};s.lastCompressionTick=tick;s.revision++;
             g.lastConvergenceTrigger=g.frame;
@@ -3917,7 +3933,7 @@
             if(r.time-p.ringEnteredAt+1e-7<BR_RING_RULES.entryGraceMs||g.ring&&!g.ring.running)return;
             const depth=Math.max(0,Math.hypot(p.pos.x-r.cx,p.pos.y-r.cy)-r.radius);
             const before=p.hp;
-            p.takeDamage(brRingDamage(r.radius,depth,Math.max(18,p.outsideZoneFrames)),null);
+            p.takeDamage(brRingDamage(r.radius,depth,Math.max(18,p.outsideZoneFrames)),null,false,null,{attackKind:'zone'});
             const dealt=Math.max(0,Math.min(Math.max(0,before),before-p.hp));
             if(dealt>0){p.ringDamageTotal=Number(p.ringDamageTotal||0)+dealt;
                 p.ringLastHit={time:r.time,x:p.pos.x,y:p.pos.y,radius:r.radius,cx:r.cx,cy:r.cy,amount:dealt};
@@ -3941,7 +3957,7 @@
             const p=s.plan,nums=[s.seq,s.revision,s.hostAt,s.time,s.clockEpoch,s.frame,s.worldRadius,p.tick,p.radius,p.minRadius,p.cx,p.cy];
             if(!nums.every(Number.isFinite)||!Number.isSafeInteger(s.frame)||s.frame<0||!Number.isSafeInteger(s.seq)||!Number.isSafeInteger(s.revision)||!Number.isSafeInteger(s.clockEpoch)||s.seq<1||s.hostAt<0||s.time>21600000||s.time<0||p.tick<0||!Number.isInteger(p.tick)||s.worldRadius<=0||s.worldRadius>100000||p.radius<0||p.radius>s.worldRadius+1||p.minRadius<0||p.minRadius>p.radius+1)return false;
             if(Math.abs(p.tick-Math.floor(s.time/BR_RING_RULES.stepMs+1e-8))>1||typeof p.pressure!=='boolean')return false;
-            if((!['solo','team','team-elim','team-respawn'].includes(p.mode)||Math.abs(p.shrinkRate-BR_RING_RULES.shrinkSpeed*(p.mode==='solo'?BR_RING_RULES.soloMultiplier:1))>1e-9||!Number.isFinite(p.shrinkRate)))return false;
+            if((!['solo','team','team-elim','team-respawn'].includes(p.mode)||Math.abs(p.shrinkRate-brRingContinuousRate(p.mode))>1e-9||!Number.isFinite(p.shrinkRate)))return false;
             if(p.nextPressure&&(!Number.isInteger(p.nextPressure.tick)||p.nextPressure.tick<p.tick||p.nextPressure.tick>p.tick+600||typeof p.nextPressure.value!=='boolean'))return false;
             if(p.compression){const c=p.compression;if(![c.start,c.end,c.amount,c.floor].every(Number.isFinite)||!Number.isSafeInteger(c.start)||!Number.isSafeInteger(c.end)||c.end<=c.start||c.end<p.tick||c.start>p.tick+600||c.end-c.start>600||c.amount<0||c.amount>1000||c.floor<0)return false;}
             return true;
@@ -6182,7 +6198,7 @@
             function afterHit(c,p,result,opts={}){if(result?.hpDamage>0)onHpDamage(p,c.owner,result.hpDamage,{...opts,ctx:c});}
             function tickStatus(g,p){const s=state(p),now=frame(g);s.lastGame=g;s.shields=s.shields.filter(x=>x.end>now&&x.amount>0&&validContext(x.ctx));s.marks=s.marks.filter(x=>x.end>now&&x.charges>0&&x.targetLife===life(p)&&validContext(x.ctx));for(const b of s.buffs.slice()){if(!validContext(b.ctx)){s.buffs.splice(s.buffs.indexOf(b),1);continue;}if(b.kind==='counterDeferred'&&p.stunned>0){s.buffs=s.buffs.filter(x=>x!==b&&!(x.kind==='damageReduction'&&x.ctx.castId===b.ctx.castId));continue;}if(b.kind==='regen'&&now>=b.nextTick&&now<=b.end){b.nextTick+=30;heal(b.ctx,p,b.value);}if(b.end<=now){if(b.kind==='counterDeferred'&&p.alive&&p.stunned<=0)for(const rec of b.records.values())if(rec.target.alive&&life(rec.target)===rec.life)hit(b.ctx,rec.target,rec.damage,{scaled:true,reflected:true,stun:0,knockback:0});s.buffs.splice(s.buffs.indexOf(b),1);continue;}if(b.kind==='ghost'){p.ghostTimer=Math.max(1,b.end-now);p.invisible=true;}}if(!s.buffs.some(b=>b.kind==='ghost')){if(aid(p)==='emoji-008'){p.invisible=false;p.ghostTimer=0;}}for(const d of s.dots.slice()){if(d.end<now||d.targetLife!==life(p)||!validContext(d.ctx)){s.dots.splice(s.dots.indexOf(d),1);continue;}if(now>=d.nextTick){d.nextTick+=d.tickEvery;hit(d.ctx,p,d.damage*d.stacks,{periodic:true,stun:0,knockback:0});}}if(s.lock&&(s.lock.end<=now||!validContext(s.lock.ctx)||p.stunned>0&&s.lock.cancelOnStun))s.lock=null;if(s.recast&&(s.recast.end<=now||p.stunned>0))closeRecast(p,g,p.stunned>0?'stun':'expired');if(p.stunned>0)cancelAction(p,g,'stun');if(s.impulse){const q=s.impulse;if(!validContext(q.ctx)||now>=q.end||Math.hypot(q.x,q.y)<.15)s.impulse=null;else{const moved=moveExternal(g,p,v(q.x,q.y),false);if(moved.hit&&q.wallDamage>0&&!q.wallDone){q.wallDone=true;hit(q.ctx,p,q.wallDamage,{stun:0,knockback:0,secondary:true});}q.x*=.82;q.y*=.82;}}}
             function tick(g){const rw=world(g),now=frame(g);if(rw.lastFrame===now)return;rw.lastFrame=now;for(const p of g.participants||[]){if(!p.alive)continue;tickStatus(g,p);}const active=rw.entities,len=active.length;for(let i=0;i<len;i++){const e=active[i];if(!e||e.dead)continue;if(!validContext(e.ctx)){end(e,e.ctx.owner.alive?'life':'death');continue;}if(e.cancelOnStun&&e.ctx.owner.stunned>0){end(e,'stun');continue;}e.age=now-e.start;if(now>e.end){end(e,'expired');continue;}e.tick?.(e.ctx,e);if(e.kind==='projectile'&&(e.homing||e.boomerang||e.bounces>0||e.bounceCount))brRecordFlightPath(e,now,e.pos.x,e.pos.y,Number(e.bounceCount||0)+(e.phase==='return'?100:e.phase==='dwell'?50:0));if(!e.dead&&now>=e.end)end(e,'expired');}rw.entities=rw.entities.filter(e=>!e.dead);rw.events=rw.events.filter(e=>e.end>now);if(rw.spatialDirty){rw.spatialDirty=false;g.rebuildSpatialGrid?.();}rw.turretFrame=-1;}
-            function cleanup(p,g,reason='cleanup'){if(!g)return;const rw=world(g),s=p.rw;for(const e of rw.entities){if(e.dead)continue;if(e.ctx.owner===p||e.kind==='capture'&&e.target===p)end(e,reason);else if(e.target===p){if(e.kind==='projectile'){e.excludedTargets=e.excludedTargets||new Set();e.excludedTargets.add(pid(p));}e.target=null;e.targetLife=null;}}rw.events=rw.events.filter(e=>e.owner!==pid(p));if(s){s.shields=[];s.buffs=[];s.dots=[];s.marks=[];s.force=null;s.impulse=null;s.lock=null;s.channel=null;s.dash=null;s.recast=null;s.markedTarget=null;s.lastBasic=null;}for(const q of g.participants||[])if(q.rw){q.rw.shields=q.rw.shields.filter(x=>x.ctx.owner!==p);q.rw.buffs=q.rw.buffs.filter(x=>x.ctx.owner!==p);q.rw.dots=q.rw.dots.filter(x=>x.ctx.owner!==p);q.rw.marks=q.rw.marks.filter(x=>x.ctx.owner!==p);if(q.rw.markedTarget?.p===p)q.rw.markedTarget=null;}rw.entities=rw.entities.filter(e=>!e.dead);rw.turretFrame=-1;p.invisible=false;p.ghostTimer=0;}
+            function cleanup(p,g,reason='cleanup'){if(!g)return;const rw=world(g),s=p.rw;for(const e of rw.entities){if(e.dead)continue;if(e.ctx.owner===p||e.kind==='capture'&&e.target===p)end(e,reason);else if(e.target===p){if(e.kind==='projectile'){e.excludedTargets=e.excludedTargets||new Set();e.excludedTargets.add(pid(p));}e.target=null;e.targetLife=null;}}rw.events=rw.events.filter(e=>e.owner!==pid(p)||e.kind==='end');if(s){s.shields=[];s.buffs=[];s.dots=[];s.marks=[];s.force=null;s.impulse=null;s.lock=null;s.channel=null;s.dash=null;s.recast=null;s.markedTarget=null;s.lastBasic=null;}for(const q of g.participants||[])if(q.rw){q.rw.shields=q.rw.shields.filter(x=>x.ctx.owner!==p);q.rw.buffs=q.rw.buffs.filter(x=>x.ctx.owner!==p);q.rw.dots=q.rw.dots.filter(x=>x.ctx.owner!==p);q.rw.marks=q.rw.marks.filter(x=>x.ctx.owner!==p);if(q.rw.markedTarget?.p===p)q.rw.markedTarget=null;}rw.entities=rw.entities.filter(e=>!e.dead);rw.turretFrame=-1;p.invisible=false;p.ghostTimer=0;}
             function reset(g,reason='match'){if(!g?.rw)return;for(const e of g.rw.entities)end(e,reason);for(const p of g.participants||[])cleanup(p,g,reason);g.rw=null;}
             function basicTurrets(p,g,aim,range,halfAngle,damage,opts={}){const c=opts.ctx||context(p,g,aim,1),out=[];for(const t of turrets(g,p.pos,range+40)){if(!hostile(c,t))continue;const d=t.pos.sub(p.pos),n=d.mag(),dot=n>0?(d.x*c.aim.x+d.y*c.aim.y)/n:1;if(n>range+t.radius||dot<Math.cos(halfAngle??Math.PI/3)||g.checkWallBetween(p.pos,t.pos))continue;const r=hit(c,t,damage,{scaled:opts.scaled!==false});out.push({target:t,...r});}return out;}
             function projectileTurretHit(g,shot,from,to,wall=null,contacts=null){const c={owner:shot.owner},out=contacts||[];for(const t of turrets(g,from,dist(from,to)+(shot.size||0)+40)){if(!hostile(c,t)||shot._rwTurretHits?.has(t.id))continue;const at=sweepTime(from,to,t.pos,(shot.size||0)+t.radius);if(at!=null&&(!wall||at<=wall.t))out.push({turret:t,t:at});}return out;}
@@ -6191,9 +6207,9 @@
             function wirePlayer(p,g){const s=state(p),now=frame(g),motion=s.dash&&!s.dash.dead?s.dash:null,channel=s.channel&&!s.channel.dead?s.channel:null,recast=s.recast,force=s.force&&!s.force.dead?s.force:null;return {life:life(p),impulseX:s.impulse?.x||0,impulseY:s.impulse?.y||0,impulseEnd:s.impulse?.end||0,stunEnd:now+(p.stunned||0),shield:s.shields.reduce((n,a)=>n+a.amount,0),slow:strongest(p,'slow'),moveRate:moveRate(p),attackRate:cooldownRate(p,'attack'),skillRate:cooldownRate(p,'skill'),locks:inputLocks(p,g),motion:motion?{id:motion.id,kind:motion.kind,start:motion.start,end:motion.end,x:p.pos.x,y:p.pos.y,dx:motion.dir.x,dy:motion.dir.y,speed:motion.speed||0,remaining:Math.max(0,(motion.range||0)-(motion.distance||0)),airborne:motion.kind==='leap',height:motion.height||0,fromX:motion.from?.x??null,fromY:motion.from?.y??null,toX:motion.to?.x??null,toY:motion.to?.y??null}:null,lockEnd:Math.max(now+(p.stunned||0),s.lock?.end||0,s.dash?.end||0,s.channel?.end||0,s.force?.end||0),rateLayers:rateLayers(p,g),channel:channel?{id:channel.ctx.castId,end:channel.end,dx:channel.dir.x,dy:channel.dir.y}:null,recast:recast?{id:recast.ctx.castId,end:recast.end,left:recast.left}:null,capture:force?{id:force.id,end:force.end,x:p.pos.x,y:p.pos.y,toX:force.to.x,toY:force.to.y,speed:force.speed}:null,bleed:s.dots.reduce((n,d)=>n+(d.kind==='bleed'?d.stacks:0),0),mark:s.marks.length,buffs:s.buffs.filter(b=>b.end>now).map(b=>({kind:b.kind,value:b.value,end:b.end,proc:b.procFrame||0}))};}
             function entityVisible(g,e,viewer,bounds){if(e.hidden||e.visible===false)return false;if(!viewer||!bounds)return true;const flying=['projectile','hook','boomerang','bomb'].includes(e.kind),reach=flying?Math.min(Math.max(0,e.range==null?Infinity:(e.phase==='return'?Infinity:e.range-(e.distance||0))),(e.speed||0)*brIncomingLeadFrames(bounds)):e.kind==='beam'?(e.length??e.range):e.range||0,end=flying?e.pos.add((e.dir||v(1,0)).mult(reach)):e.to||e.pos.add((e.dir||v(1,0)).mult(reach)),r=e.pullRadius||e.maxRadius||e.radius||e.width||20;const within=typeof brViewSegment==='function'?brViewSegment(bounds,e.pos.x,e.pos.y,end.x,end.y,r):true;if(!within)return false;if(e.kind==='capture'&&e.target&&g.isConcealedFrom?.(e.target,viewer))return false;return true;}
             function prepareEntityWire(g){return {rows:wireEntities(g),sources:new Map(world(g).entities.map(e=>[e.id,e]))};}
-            function wireEntities(g,viewer=null,bounds=null,prepared=null){
+            function wireEntities(g,viewer=null,bounds=null,prepared=null,known=null){
                 if(prepared)return prepared.rows.filter(row=>{const e=prepared.sources.get(row.id);if(e)return entityVisible(g,e,viewer,bounds);
-                    return !bounds||typeof brViewSegment!=='function'||brViewSegment(bounds,row.x,row.y,row.endX,row.endY,row.radius||12);});
+                    return row.kind==='transit'&&known?.has(row.terminal)||!bounds||typeof brViewSegment!=='function'||brViewSegment(bounds,row.x,row.y,row.endX,row.endY,row.radius||12);});
                 const dynamic=world(g).entities.filter(e=>!e.dead&&entityVisible(g,e,viewer,bounds)).map(e=>({id:e.id,kind:e.kind,shape:e.shape||null,armAt:e.armFrames!=null?e.start+e.armFrames:null,height:e.height||0,shotIndex:e.shotIndex??null,castId:e.ctx.castId,x:e.pos.x,y:e.pos.y,dx:e.dir?.x||0,dy:e.dir?.y||0,length:e.length??e.range??0,width:e.width||0,speed:e.speed||0,count:e.count||1,nextHeavy:e.kind==='turret'?(4-e.shots%4):0,collapseRadius:e.collapseRadius?sized(e.ctx,e.collapseRadius):0,radius:e.radius||0,bladeRadius:e.bladeRadius||0,pullRadius:e.pullRadius||0,maxRadius:e.maxRadius||0,color:e.color||'#a5b4fc',emoji:['projectile','lob','bomb'].includes(e.kind)?e.displayEmoji:(e.kind==='hook'?null:e.emoji||null),actionKind:e.actionKind||e.ctx.actionKind,actionSeq:e.actionSeq??e.ctx.actionSeq,ordinal:e.ordinal??0,remaining:e.range!=null?Math.max(0,e.phase==='return'?(e.end-frame(g))*(e.speed||0):e.range-(e.distance||0)):0,turn:e.bounceCount||0,path:e._brPath||null,curved:e.homing||e.boomerang?1:0,throughWalls:e.visualOnlyReturn?1:0,throughFarm:e.pierce||e.boomerang||e.noFarm?1:0,vx:['orbit','beam'].includes(e.kind)||e.followOwner?e.ctx.owner.vel.x:0,vy:['orbit','beam'].includes(e.kind)||e.followOwner?e.ctx.owner.vel.y:0,growth:e.growFrames?(e.maxRadius-e.startRadius)/e.growFrames:0,start:e.start,end:e.end,hp:e.hp??null,maxHp:e.maxHp??null,team:e.ctx.owner.team||0,owner:e.ctx.ownerId,life:e.ctx.ownerLifeSeq,cast:e.ctx.castId,phase:e.phase||null,shots:e.shots||0,fx:e.from?.x??(e.kind==='lob'?e.origin.x:null),fy:e.from?.y??(e.kind==='lob'?e.origin.y:null),tx:e.to?.x??e.targetPos?.x??null,ty:e.to?.y??e.targetPos?.y??null,endX:e.to?.x??e.targetPos?.x??null,endY:e.to?.y??e.targetPos?.y??null}));for(const ev of world(g).events){if(ev.kind!=='end'||!['projectile','hook'].includes(ev.type)||ev.end<=frame(g))continue;const a=v(ev.fromX,ev.fromY),b=v(ev.x,ev.y),d=b.sub(a),length=d.mag();if(bounds&&typeof brViewSegment==='function'&&!brViewSegment(bounds,a.x,a.y,b.x,b.y,ev.radius||12))continue;dynamic.push({id:ev.id,kind:'transit',terminal:ev.entity,reason:ev.reason,x:a.x,y:a.y,dx:length?d.x/length:0,dy:length?d.y/length:0,length,width:Math.max(2,(ev.radius||8)*.4),radius:ev.radius||8,color:ev.color,start:ev.start,end:ev.end,team:ev.team,owner:ev.owner,life:ev.life,actionKind:ev.actionKind,actionSeq:ev.actionSeq,ordinal:ev.ordinal,tx:b.x,ty:b.y,endX:b.x,endY:b.y});}return dynamic;}
             Object.assign(R,{world,state,context,validContext,hostile,register,cast,tick,cleanup,reset,entity,end,event,schedule,marker,projectile,zone,orbit,dash,leap,hook,capture,channel,turret,hit,area,confirmedBlast,confirmedSkillFx,front,heal,shield,absorb,buff,dot,mark,cleanse,lock,impulse,applyStun,damageReduction,cooldownRate,moveRate,basicAttempt,basicDamage,basicHit,onHpDamage,afterHit,inputLocks,ownsMovement,steer,openRecast,recast,closeRecast,cancelAction,wirePlayer,wireEntities,prepareEntityWire,enemies,allies,targets,turrets,basicTurrets,projectileTurretHit,damageTurret,targetPoint,teleport,safe,count,duration,ranged,sized,norm,copy,frame,pid,life,aid,safePoint,armWallCrash,applySlow,clearWorld:reset,visible,rateLayers});R.enemies=(c,pos,radius)=>enemies(c,pos,sized(c,radius));R.allies=(c,pos,radius)=>allies(c,pos,sized(c,radius));
             return R;
@@ -7089,6 +7105,7 @@
         #br-skill-count.br-recast-count { display:block; color:#fde68a; font-size:11px; }
         .br-control.disabled { opacity:.48; }
         .br-control.disabled::before { --br-ring-color:#64748b; }
+        #br-death-cause{position:absolute;z-index:64;top:96px;left:50%;transform:translateX(-50%);max-width:90%;padding:7px 12px;border-radius:8px;background:#24121ce8;color:#fff2f2;border:1px solid #ff758580;font:700 clamp(12px,1.4vw,16px)/1.45 'Noto Sans KR',sans-serif;text-align:center;pointer-events:none;}
         #br-hurt-edge {position:absolute;inset:0;z-index:60;pointer-events:none;}
         #br-hurt-edge::before {content:"";position:absolute;inset:0;opacity:0;border:2px solid rgba(255,65,85,var(--hurt-alpha,.25));box-shadow:inset 0 0 32px 8px rgba(255,45,68,var(--hurt-alpha,.25));animation:var(--hurt-anim,none) var(--hurt-ms,100ms) ease-out both;}
         #br-hurt-edge i {position:absolute;left:calc(50% + var(--hurt-x,0px));top:calc(50% + var(--hurt-y,0px));width:10px;height:10px;border-top:3px solid #ff586b;border-right:3px solid #ff586b;transform:translate(-50%,-50%) rotate(var(--hurt-angle,0rad));opacity:0;animation:var(--hurt-dir-anim,none) 160ms ease-out both;}
@@ -7431,6 +7448,7 @@
             <span class="br-control-content"><span class="br-skill-symbol" aria-hidden="true">★</span><span id="br-skill-label" class="br-action-name">스킬</span><span id="br-skill-count">∞</span></span><span id="br-skill-cd" class="br-cd-text ready">✓</span><span class="br-aim-knob"></span>
         </button>
         <div id="br-joystick" class="br-control"><div id="br-joystick-knob"></div></div>
+        <div id="br-death-cause" class="br-hidden" role="status" aria-live="polite"></div>
         <div id="br-hurt-edge" aria-hidden="true"><i></i></div>
         <div id="br-respawn" class="br-respawn br-hidden"><b id="br-respawn-text">탈락 · 관전 중</b></div>
         <section id="br-tk-quiz" class="br-tk-quiz br-hidden" aria-label="부활 퀴즈">
@@ -7501,7 +7519,7 @@
             'team-respawn':'팀 킬 대결', 'team-capture':'팀 점령전'
         };
         var BR_TIER_COLOR = {S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'};
-        var BR_ROOM_PROTOCOL=11; // v29 roster IDs, ranks and augment semantics: all clients must match.
+        var BR_ROOM_PROTOCOL=12; // v30 ring rates, presentation receipt and HP semantics: all clients must match.
         var BR_TIER_CHANCES=Object.freeze([['S',.10],['A',.20],['B',.25],['C',.30],['F',.15]]);
         // 수업용 지정 어휘 54개. 정답과 오답의 품사를 맞춰 의미가 겹치지 않게 구성한다.
         var BR_DEFAULT_QUESTIONS = [
@@ -7587,7 +7605,7 @@
         var brNetDebug=new URLSearchParams(location.search).get('netdebug')==='1'?brCreateNetDebug():null;
         function brGetNetDebug(){return brNetDebug;}
         function brCreateNetDebug(){
-            const KEY='dsbr.netdebug.v1.reports',NAMES=['frame','snap','rtt','age','shotMean','shotOldest','write','payloadKB','batch','sendGap','resume','sendAlive','sendDead','sendTransition','snapAlive','snapDead','snapTransition','build','flightAge','catchUpGap','aliveAge','deadAge','aliveShot','deadShot','aliveShotMean','arrivalAlive','arrivalDead','aliveRtt',...['VIEW','RUN/FARM','RING','CAPTURE','OTHER META','UPGRADE ACK'].map(k=>'lane:'+k)];
+            const KEY='dsbr.netdebug.v1.reports',NAMES=['frame','snap','rtt','age','shotMean','shotOldest','write','payloadKB','batch','sendGap','resume','sendAlive','sendDead','sendTransition','snapAlive','snapDead','snapTransition','build','flightAge','catchUpGap','aliveAge','deadAge','aliveShot','deadShot','aliveShotMean','arrivalAlive','arrivalDead','aliveRtt','presClock','presCorrection','presActorDelay','presGenerationGap','freshResume','rwShotAge','rwShotMean','firstDrawToHit','nativeVisible','rwVisible','correctionRemaining','generationAlive','generationDead',...['VIEW','RUN/FARM','RING','CAPTURE','OTHER META','UPGRADE ACK'].map(k=>'lane:'+k)];
             const LIMITS=[1000/30,50,150,200,250,300,500,1000];
             let state=null,panel=null,title=null,body=null,actions=null,cache=null,cacheAt=-Infinity,lastSave=-Infinity,timer=null,collapsed=false,storageError=false;
             // Fixed-size histograms: 1ms bins through 1024, then <=2.5% width. Never per-frame sort.
@@ -7607,7 +7625,7 @@
                 if(state)save();const old=read().find(x=>x.key===k&&x.role===role),now=performance.now();
                 state={key:k,role,mode:BRMP.roomMeta.mode,players:0,duration:0,ended:false,metrics:{},deaths:[],deathCount:0,backgroundEvents:document.hidden?1:0,backgroundMs:0,resumeCount:0,
                     calls:0,views:0,batches:0,bytes:0,writeErrors:0,maxInFlight:0,skippedBusy:0,observedMs:0,ack:0,refreshes:0,scheduler:null,streamAlive:null,delivery:deliveryState(),
-                    lastArrival:null,lastFrame:null,lastShotAt:-Infinity,lastTick:now,lastAgeAt:-Infinity,live:{},recent:[],lastHit:null,hiddenAt:document.hidden?now:null,resumeAt:null,excludeBefore:0,restored:!!old};
+                    presentationStart:now,lastArrival:null,lastFrame:null,lastShotAt:-Infinity,lastTick:now,lastAgeAt:-Infinity,live:{},recent:[],lastHit:null,hiddenAt:document.hidden?now:null,resumeAt:null,excludeBefore:0,restored:!!old};
                 if(old){for(const field of ['mode','players','duration','deaths','deathCount','backgroundEvents','backgroundMs','resumeCount','calls','views','batches','bytes','writeErrors','maxInFlight','skippedBusy','observedMs','ack','refreshes','scheduler','delivery'])if(old.totals?.[field]!=null)state[field]=old.totals[field];state.refreshes++;}
                 state.delivery=deliveryState(state.delivery);state.occupancyAt=now;state.occupancyValue=Number(BRMP.publishInFlight||0);state.liveLanes={};
                 for(const name of NAMES)state.metrics[name]=metric(old?.histograms?.[name]);
@@ -7621,6 +7639,22 @@
                     if(q.expired||!Number.isFinite(t)||Math.abs(q.x-cam.x)>w/zoom/2+r||Math.abs(q.y-cam.y)>h/zoom/2+r)return;
                     const age=Math.max(0,now+Number(BRMP.presentationLead||0)-t);n++;sum+=age;max=Math.max(max,age);});
                 return n?{mean:sum/n,oldest:max,count:n}:null;}
+            const firstDraws=new Map(),confirmedDraws=new Map();
+            function presentation(kind,value,detail={}){const s=active();if(!s||s.role!=='student'||!foreground(s))return;const d=s.delivery.presentation;
+                const key=({clock:'presClock',correction:'presCorrection',actorDelay:'presActorDelay',generationGap:'presGenerationGap',freshResume:'freshResume'})[kind];if(key)add(s.metrics[key],value);
+                if(kind==='actor'){const ms=Math.max(0,Math.min(100,value));d.modes[detail.mode]=Number(d.modes[detail.mode]||0)+ms;d.regimes=d.regimes||{};const regime=BRMP.presentationResuming?'resume':brCombatPaused()?'paused':performance.now()-s.presentationStart<600?'warmup':s.streamAlive===true?'alive':s.streamAlive===false?'dead':'transition';d.regimes[regime]=Number(d.regimes[regime]||0)+ms;}
+                if(kind==='correction'&&detail.snap)d.snaps[detail.reason]=Number(d.snaps[detail.reason]||0)+1;
+                if(kind==='counter'){d.events=d.events||{};d.events[detail.name]=Number(d.events[detail.name]||0)+value;}if(kind==='residual')add(s.metrics.correctionRemaining,value);
+                if(kind==='backward'||kind==='frozen'){if(brCombatPaused())d.pausedFrames=Number(d.pausedFrames||0)+1;else d[kind]++;}
+                if(kind==='lethal'){d.lethal++;if(detail.kind==='unknown')d.unknown++;}
+            }
+            function seenShot(id,cast,now){const s=active();if(!s||s.role!=='student'||!foreground(s))return;const key=s.key+'|'+id;if(!firstDraws.has(key))firstDraws.set(key,{at:now,cast});
+                for(const [k,v] of firstDraws){if(now-v.at>4000||firstDraws.size>256)firstDraws.delete(k);else break;}}
+            function confirmedShot(id,cast,now,frame){const s=active();if(!s||s.role!=='student'||!foreground(s)||!id)return;const key=s.key+'|'+id+'|'+Number(frame??now);if(confirmedDraws.has(key))return;confirmedDraws.set(key,now);for(const [k,t] of confirmedDraws){if(now-t>4000||confirmedDraws.size>256)confirmedDraws.delete(k);else break;}const v=firstDraws.get(s.key+'|'+id);
+                if(v&&(!cast||!v.cast||v.cast===cast)){add(s.metrics.firstDrawToHit,Math.max(0,now-v.at));}else s.delivery.presentation.unmatchedHit++;}
+            function rwScene(now,cam,w,h,zoom){const s=active();if(!s||!foreground(s)||s.role!=='student'||s.streamAlive!==true||now-Number(s.lastRwAt??-Infinity)<250)return;s.lastRwAt=now;
+                let n=0,sum=0,oldest=0;BRMP.rwDisplayCache?.forEach(q=>{const e=q.row,t=q.samples?.at(-1)?.t;if(!e||!['projectile','hook','boomerang','bomb'].includes(e.kind)||!Number.isFinite(t)||q.expired||Math.abs(q.x-cam.x)>w/zoom/2+Number(e.radius||10)||Math.abs(q.y-cam.y)>h/zoom/2+Number(e.radius||10))return;
+                    const age=Math.max(0,now+Number(BRMP.presentationLead||0)-t);n++;sum+=age;oldest=Math.max(oldest,age);});add(s.metrics.rwVisible,n);if(n){add(s.metrics.rwShotAge,oldest);add(s.metrics.rwShotMean,sum/n);}}
             function accepted(view,now){const s=active();if(!s||s.role!=='student')return;s.players=Number(view.total||view.roster?.length||s.players);s.duration=Math.max(s.duration,elapsed(view));
                 const visible=foreground(s);
                 // Capture pre-arrival conditions before ingest resets the authority clock and shot samples.
@@ -7630,7 +7664,7 @@
                     const c=brEl('br-student-canvas'),shots=visible?visibleAges(now,BRMP.studentCamera,c?._cssW||0,c?._cssH||0,c?._cssW&&c?._cssH?brStudentViewport(c._cssW,c._cssH).zoom:0):null;
                     // Sorting is bounded to 120 recent gaps and happens on death, never each frame.
                     const recent=s.recent.slice().sort((a,b)=>a-b);
-                    s.deathCount++;s.deaths.push({number:s.deathCount,matchTime:elapsed(view),background:!visible,fps:visible?1000/Number(BRMP.studentFrameEma||16.7):null,currentGap:visible?gap:null,recentSnapshotP95:visible&&recent.length?recent[Math.ceil(recent.length*.95)-1]:null,packetAge:visible?packetAge(now,s.authorityFrame):null,oldestShotAge:shots?.oldest??null,recentRTT:visible?s.live.rtt??null:null,impactLevel:hit?Number(hit[12]||0):null,hitKind:geo?.projectileId?'projectile':zone?'zone':geo?.feel?.includes?.('melee')?'melee':'unknown'});if(s.deaths.length>8)s.deaths.shift();}
+                    s.deathCount++;s.deaths.push({number:s.deathCount,matchTime:elapsed(view),background:!visible,fps:visible?1000/Number(BRMP.studentFrameEma||16.7):null,currentGap:visible?gap:null,recentSnapshotP95:visible&&recent.length?recent[Math.ceil(recent.length*.95)-1]:null,packetAge:visible?packetAge(now,s.authorityFrame):null,oldestShotAge:shots?.oldest??null,recentRTT:visible?s.live.rtt??null:null,impactLevel:hit?Number(hit[12]||0):null,hitKind:view.deathCause?.kind||(geo?.projectileId?'projectile':zone?'zone':geo?.feel?.includes?.('melee')?'melee':'unknown')});if(s.deaths.length>8)s.deaths.shift();}
                 s.zoneTotal=Number(view.zoneSelf?.total||0);
                 if(!visible){s.lastArrival=null;return;}
                 if(s.resumeAt!=null){add(s.metrics.resume,now-s.resumeAt);s.resumeAt=null;}
@@ -7642,10 +7676,10 @@
             function frame(now){const s=active();if(!s||s.role!=='student')return;if(!foreground(s)){s.lastFrame=null;return;}if(s.lastFrame!=null)add(s.metrics.frame,now-s.lastFrame);s.lastFrame=now;}
             function scene(now,cam,w,h,zoom){const s=active();if(!s||!foreground(s)||s.resumeAt!=null||s.role!=='student'||now-s.lastShotAt<250)return;s.lastShotAt=now;
                 const age=packetAge(now,s.authorityFrame);if(age!=null){add(s.metrics.age,age);if(s.streamAlive!==null)add(s.metrics[s.streamAlive?'aliveAge':'deadAge'],age);s.live.age=age;}
-                const shots=visibleAges(now,cam,w,h,zoom);s.live.shot=shots?.oldest??null;s.live.shotMean=shots?.mean??null;
+                const shots=visibleAges(now,cam,w,h,zoom);s.live.shot=shots?.oldest??null;s.live.shotMean=shots?.mean??null;add(s.metrics.nativeVisible,shots?.count||0);
                 if(shots){add(s.metrics.shotMean,shots.mean);add(s.metrics.shotOldest,shots.oldest);if(s.streamAlive!==null)add(s.metrics[s.streamAlive?'aliveShot':'deadShot'],shots.oldest);if(s.streamAlive===true)add(s.metrics.aliveShotMean,shots.mean);}}
-                        function deliveryState(old){const out={occupancyMs:[0,0,0,0,0],stalls:[0,0,0],longestBatch:0,affected500:0,criticalObserved:0,refreshWanted:0,catchUps:0,busyReasons:{},transitions:{},reasons:{},runCalls:0,lanes:{},slowWrites:[]};if(old)Object.assign(out,old);for(const k of ['VIEW','RUN/FARM','RING','CAPTURE','OTHER META','UPGRADE ACK'])if(!out.lanes[k])out.lanes[k]={writes:0,bytes:0,failures:0};return out;}
-            function arrival(view,now){const s=active();if(!s||s.role!=='student'||!foreground(s)||s.streamAlive==null||!Number.isFinite(BRMP.netClockOffset))return;const age=Math.max(0,now-(Number(view.frame)*1000/60+BRMP.netClockOffset));add(s.metrics[s.streamAlive?'arrivalAlive':'arrivalDead'],age);}
+                        function deliveryState(old){const out={occupancyMs:[0,0,0,0,0],stalls:[0,0,0],longestBatch:0,affected500:0,criticalObserved:0,refreshWanted:0,catchUps:0,busyReasons:{},transitions:{},reasons:{},runCalls:0,lanes:{},slowWrites:[]};if(old)Object.assign(out,old);for(const k of ['VIEW','RUN/FARM','RING','CAPTURE','OTHER META','UPGRADE ACK'])if(!out.lanes[k])out.lanes[k]={writes:0,bytes:0,failures:0};out.presentation=out.presentation||{modes:{},snaps:{},backward:0,frozen:0,lethal:0,unknown:0,unmatchedHit:0};return out;}
+            function arrival(view,now){const s=active();if(!s||s.role!=='student'||!foreground(s)||s.streamAlive==null||!Number.isFinite(BRMP.netClockOffset))return;const age=Math.max(0,now-(Number(view.frame)*1000/60+BRMP.netClockOffset));add(s.metrics[s.streamAlive?'arrivalAlive':'arrivalDead'],age);if(s.generationAlive===s.streamAlive&&s.generationFrame!=null&&view.frame>s.generationFrame&&!BRMP.presentationResuming)add(s.metrics[s.streamAlive?'generationAlive':'generationDead'],(view.frame-s.generationFrame)*1000/60);s.generationFrame=view.frame;s.generationAlive=s.streamAlive;}
             function occupancy(now,n){const s=active();if(!s||s.role!=='host')return;if(s.occupancyAt!=null)s.delivery.occupancyMs[Math.min(4,Math.max(0,s.occupancyValue||0))]+=Math.max(0,now-s.occupancyAt);s.occupancyAt=now;s.occupancyValue=n;}
             function refreshWanted(){const s=active();if(s?.role==='host')s.delivery.refreshWanted++;}
             function flightAge(age){const s=active();if(s?.role==='host')add(s.metrics.flightAge,age);}
@@ -7682,7 +7716,7 @@
                     localStorage.setItem(KEY,JSON.stringify([record,...read().filter(x=>!(x.key===state.key&&x.role===state.role))].slice(0,3)));storageError=false;
                 }catch(e){storageError=true;}}
             function fmt(v,d=1){return Number.isFinite(v)?v.toFixed(d):'—';}
-            function report(){const q=summary();if(!q)return '아직 측정된 경기가 없습니다.';const m=q.metrics,lines=['DSbattleroyal '+q.role.toUpperCase()+(q.role==='host'?' STREAM REPORT':' NETWORK REPORT'),'v29 · roster / v27 stall recovery diagnostics · '+new Date().toISOString(),'',`Mode: ${q.mode}`,`Players: ${q.players}`,`Match duration: ${brFormatTime(q.duration)} (${fmt(q.duration)} s)`,`${q.role==='host'?'Observed wall time':'Observed foreground'}: ${fmt(q.observedMs/1000)} s`,`Refresh continuations: ${q.refreshes}`];
+            function report(){const q=summary();if(!q)return '아직 측정된 경기가 없습니다.';const m=q.metrics,lines=['DSbattleroyal '+q.role.toUpperCase()+(q.role==='host'?' STREAM REPORT':' NETWORK REPORT'),'v30 · combat continuity / stall recovery diagnostics · '+new Date().toISOString(),'',`Mode: ${q.mode}`,`Players: ${q.players}`,`Match duration: ${brFormatTime(q.duration)} (${fmt(q.duration)} s)`,`${q.role==='host'?'Observed wall time':'Observed foreground'}: ${fmt(q.observedMs/1000)} s`,`Refresh continuations: ${q.refreshes}`];
                 function block(label,x,thresholds=[]){lines.push('',label,`samples: ${x.samples} | avg: ${fmt(x.avg)} | p50: ${fmt(x.p50)} | p95: ${fmt(x.p95)} | max: ${fmt(x.max)}`);for(const t of thresholds)lines.push(`>${t}ms: ${fmt(x.over.find(a=>a[0]===t)?.[1])}%`);}
                 if(q.role==='student'){lines.push('','RENDER',`FPS avg: ${m.frame.avg?fmt(1000/m.frame.avg):'—'}`,`FPS median: ${m.frame.p50?fmt(1000/m.frame.p50):'—'}`,`FPS 1% low (1000/P99 frame): ${m.frame.p99?fmt(1000/m.frame.p99):'—'}`,`P95 frame: ${fmt(m.frame.p95)} ms`,`Below 30 FPS time: ${fmt(m.frame.time[0][1])}%`,`Below 20 FPS time: ${fmt(m.frame.time[1][1])}%`);
                     block('ALIVE / ACTIVE COMBAT SNAPSHOT (ms)',m.snapAlive,[150,200,300,500]);block('DEAD / QUIZ / SPECTATOR SNAPSHOT (ms)',m.snapDead,[150,200,300,500]);block('ALIVE↔DEAD TRANSITION GAP (ms, excluded from both groups)',m.snapTransition);block('OVERALL SNAPSHOT (ms)',m.snap,[150,200,300,500]);block('INPUT RTT during ALIVE (ms)',m.aliveRtt,[150,250]);block('INPUT RTT (overall, unique acknowledged seq, ms)',m.rtt,[150,250]);block('ALIVE ARRIVAL AUTHORITY AGE (accepted packet, no presentation lead, ms)',m.arrivalAlive);block('DEAD ARRIVAL AUTHORITY AGE (ms)',m.arrivalDead);block('ALIVE PACKET AGE (render sampled, ms)',m.aliveAge);block('DEAD PACKET AGE (render sampled, ms)',m.deadAge);block('PACKET AGE (overall mapped latest authority, ms)',m.age);block('ALIVE SHOT AGE (oldest visible native shot, ms)',m.aliveShot);block('DEAD SHOT AGE (ms)',m.deadShot);block('ALIVE SHOT MEAN (ms)',m.aliveShotMean);block('SHOT AGE (overall oldest visible drawProjectiles sample per observation, ms)',m.shotOldest);block('SHOT MEAN (mean visible drawProjectiles age per observation, ms)',m.shotMean);
@@ -7699,6 +7733,8 @@
                     lines.push('','RECENT SLOW WRITE WINDOWS (bounded last12; correlation, not proof of causation)');for(const e of d.slowWrites)lines.push(`${e.lane} | start match ${fmt(e.matchMs)}ms / frame ${e.frame} | duration ${fmt(e.ms)}ms${e.failed?' | FAILED':''}`);
                 }
 
+                if(q.role==='student'){const p=q.delivery.presentation;block('SOURCE GENERATION GAP (accepted frame delta, ms)',m.presGenerationGap);block('ALIVE SOURCE GENERATION GAP (ms)',m.generationAlive);block('DEAD SOURCE GENERATION GAP (ms)',m.generationDead);block('NATIVE VISIBLE SHOTS (count, no local preview)',m.nativeVisible);block('RW VISIBLE SHOTS (count, alive)',m.rwVisible);block('CORRECTION REMAINING (ms)',m.correctionRemaining);block('CLOCK CORRECTION (absolute mapped source shift, ms)',m.presClock);block('ACTOR DISPLAY BUFFER (configured, not measured total positional delay, ms)',m.presActorDelay);block('REMOTE MODEL CORRECTION (world units)',m.presCorrection);block('ALIVE RW SHOT AGE (oldest visible rework projectile, ms)',m.rwShotAge);block('ALIVE RW SHOT MEAN (ms)',m.rwShotMean);block('MATCHED FIRST DRAW → CONFIRMED HIT (ms; unmatched not inferred)',m.firstDrawToHit);block('RESUME → FIRST FRESH VIEW (mapped age <=300ms, ms)',m.freshResume);
+                    lines.push('','PRESENTATION',`Motion sampled actor-ms: ${JSON.stringify(p.modes)}`,`Motion ratio %: ${JSON.stringify(Object.fromEntries(Object.entries(p.modes).map(([k,v])=>[k,Number((100*v/Math.max(1,Object.values(p.modes).reduce((n,t)=>n+t,0))).toFixed(1))])))}`,`Presentation events: ${JSON.stringify(p.events||{})}`,`Viewer regimes actor-ms (initial600ms warm-up separate): ${JSON.stringify(p.regimes||{})}`,`Paused timeline observations (excluded from freeze count): ${p.pausedFrames||0}`,`Authority snaps by reason: ${JSON.stringify(p.snaps)}`,`Backward clock frames: ${p.backward} | unchanged frames: ${p.frozen}`,`Lethal receipts: ${p.lethal} | unknown: ${p.unknown} | hit without matched visible shot: ${p.unmatchedHit}`);}
                 lines.push('','BACKGROUND',`events: ${q.backgroundEvents} | duration: ${fmt(q.backgroundMs/1000)} s | resumes: ${q.resumeCount}`);block('RESUME RECOVERY (foreground → first accepted view, ms)',m.resume);
                 lines.push('','NOTES','Histograms: exact count/mean/max/threshold ratios; approximate quantiles (<=1 ms bins below 1024, <=2.5% above).','No-shot intervals are not zero samples. Shot scope: visible drawProjectiles only, not rework entities/FX/local predicted shots.','Clock age uses existing mapping; it is an estimate, not independent measured one-way latency. Arrival age excludes presentation lead; render age retains the previous diagnostic definition.','Lane bytes are UTF-8 payload estimates, excluding transport overhead. VIEW uses viewer JSON only; summary is piggybacked, not an extra write.','Flight age is time-sampled every publisher tick; batch duration is measured at real Promise completion. One unresolved write cannot be cancelled; catch-up starts only after its settlement.','Background and first resume gaps excluded from student timing; foreground old-input ACKs excluded.','No names, room numbers or session IDs in this report. No diagnostic Firebase writes.');if(storageError)lines.push('WARNING: localStorage unavailable; memory report only.');return lines.join('\n');}
             async function copy(){const text=report();try{if(!navigator.clipboard)throw Error('clipboard');await navigator.clipboard.writeText(text);brToast('진단 보고서를 복사했습니다.');}catch(e){let box=document.getElementById('br-netdebug-copy');if(!box){box=document.createElement('div');box.id='br-netdebug-copy';box.innerHTML='<label>복사가 차단되었습니다. 아래 내용을 선택해 복사하세요.<textarea readonly aria-label="진단 보고서"></textarea></label><button type="button">닫기</button>';document.body.appendChild(box);box.querySelector('button').onclick=()=>box.remove();}const ta=box.querySelector('textarea');ta.value=text;ta.focus();ta.select();try{if(document.execCommand('copy'))brToast('진단 보고서를 복사했습니다.');}catch(ignore){}}}
@@ -7720,7 +7756,7 @@
                 if(now-cacheAt>=1500){cache=summary();cacheAt=now;const dt=now-Number(s.rateAt||now);s.live.viewsPerSec=dt>0?(s.views-Number(s.rateViews||0))*1000/dt:0;s.rateAt=now;s.rateViews=s.views;}
                 paint();if(now-lastSave>=5000){save();lastSave=now;}}
             function init(){if(timer)return;timer=setInterval(()=>{try{tick();}catch(e){/* Diagnostics must not stop the game. */}},500);document.addEventListener('visibilitychange',visibility);window.addEventListener('pagehide',save);}
-            return {init,accepted,arrival,ack,frame,scene,publish,busy,batch,build,written,visibility,finish,tick,summary,report,save,copy,download,ensure,utf8Length,occupancy,refreshWanted,flightAge,criticalStall,catchUp,batchClosed,busyReason,profileChange,laneStart,laneEnd,runCall,getState:()=>state};
+            return {presentation,seenShot,confirmedShot,rwScene,init,accepted,arrival,ack,frame,scene,publish,busy,batch,build,written,visibility,finish,tick,summary,report,save,copy,download,ensure,utf8Length,occupancy,refreshWanted,flightAge,criticalStall,catchUp,batchClosed,busyReason,profileChange,laneStart,laneEnd,runCall,getState:()=>state};
         }
 
 
@@ -10122,7 +10158,7 @@
         function brRingVisibilityChanged() {
             if(BRMP.role==='student'&&!document.hidden&&BRMP.roomMeta?.phase==='battle'){
                 // Browser sleep may change the relation between device monotonic clocks.
-                BRMP.ringClockSamples=[];BRMP.ringClockOffset=null;BRMP.ringRenderTime=null;
+                BRMP.ringClockSamples=[];BRMP.ringClockOffset=null;BRMP.ringRenderTime=null;brResetPresentationResume();
                 BRMP.ringEchoSeq=Number(BRMP.inputSeq||0);brSendInput(true);return;
             }
             if(BRMP.role!=='host'||(!game?.ring&&!game?.capture)||!BRMP.active)return;
@@ -10210,7 +10246,7 @@
             var oldRevision=Number(p.run?.revision||0),oldOfferSeq=Number(p.run?.offerSeq||0),keep={};
             // Keep the Participant identity so projectile owners and renderer references
             // continue crediting the same match statistics after each short run.
-            ['id','name','team','remoteId','sessionId','matchKey','rosterVersion','kills','deaths','damageDealt','damageTaken','abilityUses','survivalFrames','killTimes','rapidKillCount','lastKillFrame','placement','tkStats','tkTokens','tkQuiz','lifeSeq','warpSeq','lastInputSeq','lastRemoteAttack','lastRemoteSkill','resolvedAttackSeq','resolvedSkillSeq','firedAttackSeq','firedSkillSeq','_farmDropDeathSeq','deathFrame','deathVisualUntilFrame','deathVisualUntilAt','eliminationSeq'].forEach(function(k){if(Object.prototype.hasOwnProperty.call(p,k))keep[k]=p[k];});
+            ['id','name','team','remoteId','sessionId','matchKey','rosterVersion','kills','deaths','damageDealt','damageTaken','abilityUses','survivalFrames','killTimes','rapidKillCount','lastKillFrame','placement','tkStats','tkTokens','tkQuiz','lifeSeq','warpSeq','lastInputSeq','lastRemoteAttack','lastRemoteSkill','resolvedAttackSeq','resolvedSkillSeq','firedAttackSeq','firedSkillSeq','_farmDropDeathSeq','deathFrame','deathVisualUntilFrame','deathVisualUntilAt','eliminationSeq','lastDeathCause'].forEach(function(k){if(Object.prototype.hasOwnProperty.call(p,k))keep[k]=p[k];});
             var fresh=new Participant(p.id,p.name,EMOJI_DB[index],new Vec2(p.pos.x,p.pos.y),p.team);
             Object.keys(p).forEach(function(k){delete p[k];});Object.assign(p,fresh,keep);
             p.abilityIndex=index;p.abilityId=EMOJI_DB[index].id;p.rosterVersion=BR_ROSTER_VERSION;p.applyPlayerInput=brApplyPlayerInput;
@@ -10430,6 +10466,79 @@
                 brClamp(received+BRMP.ringClockOffset-actor.authorityHostAt,0,250):brClamp(received-sampled,0,250);
             return (transportAge+Math.max(0,now-received))/(1000/60);
         }
+        function brPresentationFrame(view,now=performance.now()) {
+            let t=BRMP.presentationFrame;
+            if(t&&t.now===now&&t.frame===view.frame)return t;
+            const source=Number(view.frame||0)*(1000/60)+Number(BRMP.netClockOffset||0),paused=brCombatPaused(),base=now+Number(BRMP.presentationLead||0),gap=Number(BRMP.aliveArrivalGap||BRMP.viewGap||150);
+            const actorDelay=Number(BRMP.remoteBuffer??35),straightDelay=brClamp(gap*.12,18,35),curveDelay=brClamp(gap*.24,30,65);
+            t={now,frame:view.frame,source,base:paused?source:base,actor:paused?source:base-actorDelay,straight:paused?source:base-straightDelay,curved:paused?source:base-curveDelay,actorDelay,straightDelay,curveDelay};
+            BRMP.presentationFrame=t;return t;
+        }
+
+        function brFlightEvaluate(track,view,time,now,cfg) {
+            const samples=track.samples||[],last=samples.at(-1),step=1000/60;if(!last)return null;
+            if(track.missingSince!=null&&now-track.missingSince>=Number(track.missingGraceMs??brProjectileGrace(cfg.curved)))return null;
+            if(now-Number(BRMP.lastActorPacketAt??now)>900)return null;
+            if(brCombatPaused())time=last.t;
+            if(time>last.t+Math.max(0,cfg.life)*step)return null;
+            let a=samples[0],b=null;for(const s of samples){if(s.t<=time)a=s;if(s.t>=time){b=s;break;}}
+            let x=a.x,y=a.y;
+            if(b&&b!==a&&b.t>a.t){
+                // Consecutive real vertices include the contact/return vertex itself.
+                if(a.turn===b.turn||b.vertex){const u=brClamp((time-a.t)/(b.t-a.t),0,1);x=a.x+(b.x-a.x)*u;y=a.y+(b.y-a.y)*u;}
+            }else if(!b||time>=last.t){
+                a=last;const age=brClamp(time-last.t,0,Math.min(brFlightHorizon(cfg.curved),cfg.life*step))/step;
+                const speed=Math.hypot(last.vx,last.vy),travel=Math.min(speed*age,cfg.remaining??Infinity),ratio=speed>0?travel/speed:0;
+                x=last.x+last.vx*ratio;y=last.y+last.vy*ratio;
+            }
+            return brVisualClip(a,{x,y},cfg.radius,view,cfg.throughWalls,cfg.throughFarm);
+        }
+
+        function brFlightOffset(track,point,view,now,cfg){
+            if(!point)return null;
+            const decay=Math.exp(-Math.max(0,now-Number(track.offsetAt??now))/70);
+            return !track.offsetX&&!track.offsetY?point:brVisualClip(point,{x:point.x+Number(track.offsetX||0)*decay,y:point.y+Number(track.offsetY||0)*decay},cfg.radius,view,cfg.throughWalls,cfg.throughFarm);
+        }
+
+        function brRemotePoint(p,time,view,now=performance.now()) {
+            const samples=p.samples||[],last=samples.at(-1);if(!last)return null;if(brCombatPaused())time=last.t;
+            let a=samples[0],b=null;for(const point of samples){if(point.t<=time)a=point;if(point.t>=time){b=point;break;}}
+            const ability=EMOJI_DB[Number(p.row?.[2])]||{},rw=p.rw||{},through=!!rw.motion?.airborne||ability.sub==='GHOST_MOVE'||ability.sub==='FLY_DASH'&&Number(p.row?.[26]||0)>0;
+            let x=a.x,y=a.y,mode='interpolate';
+            if(b&&b!==a){const mix=brClamp((time-a.t)/Math.max(1,b.t-a.t),0,1);x=a.x+(b.x-a.x)*mix;y=a.y+(b.y-a.y)*mix;}
+            else if(time>=last.t){
+                const sourceAge=Math.max(0,time-last.t),ticks=brClamp(sourceAge/(1000/60),0,18),motion=rw.motion,capture=rw.capture;
+                mode='extrapolate';
+                if(motion){const age=Math.min(sourceAge/(1000/60),Math.max(0,motion.end-Number(p.rwFrame||0)));
+                    if(motion.airborne&&[motion.fromX,motion.fromY,motion.toX,motion.toY].every(Number.isFinite)){const u=brClamp((Number(p.rwFrame||0)+age-motion.start)/Math.max(1,motion.end-motion.start-1),0,1);x=motion.fromX+(motion.toX-motion.fromX)*u;y=motion.fromY+(motion.toY-motion.fromY)*u;}
+                    else {const d=Math.min(motion.remaining||0,(motion.speed||0)*age);x=last.x+motion.dx*d;y=last.y+motion.dy*d;}mode='motion';
+                }else if(capture){const dx=capture.toX-last.x,dy=capture.toY-last.y,n=Math.hypot(dx,dy),d=Math.min(n,(capture.speed||0)*Math.min(sourceAge/(1000/60),Math.max(0,capture.end-Number(p.rwFrame||0))));x=last.x+dx/Math.max(.001,n)*d;y=last.y+dy/Math.max(.001,n)*d;mode='motion';}
+                else if(Number(p.row?.[26]||0)>0){const n=Math.min(sourceAge/(1000/60),Number(p.row[26]));x=last.x+Number(p.vx||0)*n;y=last.y+Number(p.vy||0)*n;mode='motion';}
+                else {
+                    const gap=brClamp(Number(BRMP.aliveArrivalGap||BRMP.viewGap||150),80,200),arrivalAge=brClamp(Number(p.last??last.t)-last.t,0,250),delay=Math.max(0,now-time);
+                    const start=brClamp(arrivalAge+gap-delay+12,120,240),hard=300,u=brClamp((sourceAge-start)/(hard-start),0,1);
+                    const driveAge=sourceAge<=start?sourceAge:start+(hard-start)*(u-u*u+u*u*u/3);
+                    mode=sourceAge>=hard?'hold':sourceAge>start?'decay':'extrapolate';
+                    const travel=brActorTravel(p,ticks,Number(p.row?.[26]||0)>0?ticks:driveAge/(1000/60));x=last.x+travel.x;y=last.y+travel.y;
+                }
+                a=last;
+            }
+            const clipped=brVisualClip(a,{x,y},Number(p.row?.[15]||0),view,through,false);return {...clipped,mode,through};
+        }
+
+        function brRemoteOffset(p,point,time,view){
+            if(!point)return null;const u=brClamp((time-Number(p.remoteOffsetAt??time))/Number(p.remoteOffsetMs||90),0,1),decay=1-u*u*(3-2*u);
+            return !p.remoteOffsetX&&!p.remoteOffsetY?point:brVisualClip(point,{x:point.x+Number(p.remoteOffsetX||0)*decay,y:point.y+Number(p.remoteOffsetY||0)*decay},Number(p.row?.[15]||0),view,point.through,false);
+        }
+
+        function brRemoteCorrect(p,before,time,view,now,reset=false){
+            const next=brRemotePoint(p,time,view,now);if(!next)return;const dx=before?before.x-next.x:0,dy=before?before.y-next.y:0,error=Math.hypot(dx,dy),r=Number(p.row?.[15]||30),small=Math.min(80,Math.max(32,r*1.5)),limit=Math.min(160,Math.max(80,r*3));
+            const clip=before?brVisualClip(next,before,r,view,next.through,false):next,blocked=before&&Math.hypot(clip.x-before.x,clip.y-before.y)>.1;
+            const smooth=before&&!reset&&!blocked&&error<limit;
+            p.remoteOffsetX=smooth?dx:0;p.remoteOffsetY=smooth?dy:0;p.remoteOffsetMs=error<=small?90:55;p.remoteOffsetAt=time;p.remoteRenderFrame=p.samples.at(-1).t;
+            if(brNetDebug)brNetDebug.presentation('correction',error,{snap:!smooth&&!!before,reason:reset?'transition':blocked?'wall':error>=limit?'divergence':'small'});
+        }
+
         function brReworkClientFrame(actor,now=performance.now()) {
             const state=actor?.rw;if(!state)return Number(BRMP.latestView?.frame||0);
             return Number(actor.rwFrame||0)+brActionSnapshotElapsed(actor,now);
@@ -10492,12 +10601,7 @@
             if(!ignoreFarm)for(const box of BRMP.farmView?.b||[]){if(box[3]<=0)continue;const hit=brCrateSweepTime(box,from,to,radius);if(hit!==null)t=Math.min(t,Math.max(0,hit-.001));}
             return {x:from.x+(to.x-from.x)*t,y:from.y+(to.y-from.y)*t};
         }
-        function brCombatPresentationTime(view,now=performance.now(),curved=false){
-            const offset=Number(BRMP.netClockOffset||0),sample=Number(view.frame||0)*(1000/60)+offset;
-            if(brCombatPaused())return sample;
-            const delay=curved?brClamp(Number(BRMP.viewGap||150)*.24,30,65):brClamp(Number(BRMP.viewGap||150)*.12,18,35);
-            return now+Number(BRMP.presentationLead||0)-delay;
-        }
+        function brCombatPresentationTime(view,now=performance.now(),curved=false){const t=brPresentationFrame(view,now);return curved?t.curved:t.straight;}
         function brFlightHorizon(curved=false) {
             // Measured snapshot interval/jitter, not a longer fixed prediction timeout.
             const gap=Number(BRMP.viewGap||150),samples=BRMP.clockSamples||[],lead=Number(BRMP.presentationLead||0),first=samples[0],last=samples[samples.length-1];
@@ -10512,59 +10616,36 @@
             return curved?memo.curved:memo.straight;
         }
         function brFlightPoint(track,view,time,now,dt,cfg) {
-            const samples=track.samples||[],last=samples.at(-1),step=1000/60;if(!last)return null;
-            track.flightConfig=cfg;track.flightTime=time;
-            if(track.missingSince!=null&&now-track.missingSince>=Number(track.missingGraceMs??brProjectileGrace(cfg.curved)))return null;
-            if(now-Number(BRMP.lastActorPacketAt??now)>900)return null;
-            if(brCombatPaused())time=last.t;
-            if(time>last.t+Math.max(0,cfg.life)*step)return null;
-            let a=samples[0],b=null;for(const s of samples){if(s.t<=time)a=s;if(s.t>=time){b=s;break;}}
-            let x=a.x,y=a.y;
-            if(b&&b!==a&&b.t>a.t){
-                if(a.turn===b.turn||!cfg.curved){const t=brClamp((time-a.t)/(b.t-a.t),0,1);x=a.x+(b.x-a.x)*t;y=a.y+(b.y-a.y)*t;}
-                // Straight reflections record the exact contact as the new turn's first vertex:
-                // approach it continuously. Curved/return boundaries keep their existing path policy.
-            }else if(!b||time>=last.t){
-                a=last;const age=brClamp(time-last.t,0,Math.min(brFlightHorizon(cfg.curved),cfg.life*step))/step;
-                const speed=Math.hypot(last.vx,last.vy),travel=Math.min(speed*age,cfg.remaining??Infinity),ratio=speed>0?travel/speed:0;
-                x=last.x+last.vx*ratio;y=last.y+last.vy*ratio;
-            }
-            const dest=brVisualClip(a,{x,y},cfg.radius,view,cfg.throughWalls,cfg.throughFarm);
-            if(track.handoffPoint){
-                const h=track.handoffPoint;track.handoffPoint=null;
-                const err=Math.hypot(h.x-dest.x,h.y-dest.y);
-                track.offsetX=err<=120?h.x-dest.x:0;track.offsetY=err<=120?h.y-dest.y:0;
-                track.offsetAt=now;
-            }
-            if(!track.offsetX&&!track.offsetY){track.drawAt=now;return dest;}
-            const decay=Math.exp(-Math.max(0,now-Number(track.offsetAt??now))/70);
-            const smooth=brVisualClip(dest,{x:dest.x+Number(track.offsetX||0)*decay,y:dest.y+Number(track.offsetY||0)*decay},cfg.radius,view,cfg.throughWalls,cfg.throughFarm);
-            track.drawAt=now;return smooth;
+            const dest=brFlightEvaluate(track,view,time,now,cfg);if(!dest)return null;
+            if(track.handoffPoint){const h=track.handoffPoint;track.handoffPoint=null;const err=Math.hypot(h.x-dest.x,h.y-dest.y);
+                track.offsetX=err<=120?h.x-dest.x:0;track.offsetY=err<=120?h.y-dest.y:0;track.offsetAt=now;}
+            track.flightConfig=cfg;track.flightTime=time;track.drawAt=now;
+            return brFlightOffset(track,dest,view,now,cfg);
         }
         function brFlightSamples(track,row,frame,offset,path,turn=0) {
-            const samples=track.samples||(track.samples=[]),step=1000/60,last=samples.at(-1),now=performance.now();
-            if(last&&track.flightConfig&&Number.isFinite(track.drawAt)&&frame*step+offset>last.t+.01&&last.turn===turn&&
-                last.vx*row.vx+last.vy*row.vy>Math.hypot(last.vx,last.vy)*Math.hypot(row.vx,row.vy)*.85){
-                const before=brFlightPoint(track,BRMP.latestView||{},Number(track.flightTime||last.t)+Math.max(0,now-track.drawAt),now,0,track.flightConfig);
-                if(before&&!track.handoffPoint)track.handoffPoint=before;
-            }
-            // Paths are short authority samples only for curved/reflected flight. No guessed arcs.
+            const samples=track.samples||(track.samples=[]),step=1000/60,last=samples.at(-1),now=performance.now(),cfg=track.flightConfig;
+            const evalTime=Number(track.flightTime??last?.t??0)+Math.max(0,now-Number(track.drawAt??now));
+            const same=last&&last.turn===turn&&last.vx*row.vx+last.vy*row.vy>Math.hypot(last.vx,last.vy)*Math.hypot(row.vx,row.vy)*.85;
+            const before=track.clockBeforePoint||(last&&cfg&&Number.isFinite(track.drawAt)&&same?brFlightOffset(track,brFlightEvaluate(track,BRMP.latestView||{},evalTime,now,cfg),BRMP.latestView||{},now,cfg):null);track.clockBeforePoint=null;
             if(Array.isArray(path))for(let i=0;i<path.length;i+=4){const f=path[i];if(f>frame)continue;const t=f*step+offset;
-                if(!samples.length||t>samples.at(-1).t+.01)samples.push({t,x:path[i+1],y:path[i+2],vx:row.vx,vy:row.vy,turn:path[i+3]});}
-            const t=frame*step+offset,s={t,x:row.x,y:row.y,vx:row.vx,vy:row.vy,turn};
+                if(!samples.length||t>samples.at(-1).t+.01)samples.push({t,x:path[i+1],y:path[i+2],vx:0,vy:0,turn:path[i+3],vertex:true});}
+            const t=frame*step+offset,s={t,x:row.x,y:row.y,vx:row.vx,vy:row.vy,turn,vertex:!!path?.length};
             if(samples.length&&Math.abs(samples.at(-1).t-t)<.01)samples[samples.length-1]=s;
             else if(!samples.length||t>samples.at(-1).t)samples.push(s);
             while(samples.length>16)samples.shift();
+            // Reconcile only a measured model change, never restart ease on each straight sample.
+            if(before&&cfg&&!track.handoffPoint){const next=brFlightEvaluate(track,BRMP.latestView||{},evalTime,now,{...cfg,life:Math.max(cfg.life,1)}),error=next?Math.hypot(before.x-next.x,before.y-next.y):Infinity;
+                if(error>.75){track.offsetX=error<=120?before.x-next.x:0;track.offsetY=error<=120?before.y-next.y:0;track.offsetAt=now;}}
         }
         function brReceiveProjectileEnds(view,now) {
             const tombs=BRMP.projectileTombstones||(BRMP.projectileTombstones=new Map());
             for(const e of view.shotEnds||[]){
                 if(!Array.isArray(e)||e.length!==9||typeof e[0]!=='string'||![e[1],e[2],e[3],e[6],e[7],e[8]].every(Number.isFinite)||e[1]>view.frame)continue;
-                tombs.set(e[0],now);BRMP.drawProjectiles?.delete(e[0]);
+                if(brNetDebug&&BRMP.drawProjectiles?.has(e[0]))brNetDebug.presentation('counter',1,{name:'native authoritative terminal'});tombs.set(e[0],now);BRMP.drawProjectiles?.delete(e[0]);
                 if(e[4]===String(BRMP.playerId))brTakeLocalShot(e[5],e[6],e[7],e[8],view.matchKey);
             }
             for(const e of view.rw?.entities||[])if(e.kind==='transit'&&e.terminal){
-                tombs.set(e.terminal,now);BRMP.rwDisplayCache?.delete(e.terminal);
+                if(brNetDebug&&BRMP.rwDisplayCache?.has(e.terminal))brNetDebug.presentation('counter',1,{name:'RW terminal: '+String(e.reason||'authority')});tombs.set(e.terminal,now);BRMP.rwDisplayCache?.delete(e.terminal);
                 if(e.owner===String(BRMP.playerId))brTakeLocalShot(e.actionKind,e.actionSeq,e.ordinal,e.life,view.matchKey);
             }
             tombs.forEach((at,id)=>{if(now-at>4000)tombs.delete(id);});
@@ -10572,7 +10653,7 @@
 
         function brTakeLocalShot(kind,seq,ordinal,life,matchKey){
             const list=BRMP.localProjectiles||[],i=list.findIndex(q=>q.kind===kind&&q.seq===seq&&q.ordinal===ordinal&&q.ownerLife===life&&q.matchKey===matchKey);
-            if(i<0)return null;return list.splice(i,1)[0];
+            if(brNetDebug)brNetDebug.presentation('counter',1,{name:i<0?'local match absent (not necessarily failure)':'local handoff matched'});if(i<0)return null;return list.splice(i,1)[0];
         }
         function brReworkDisplayEntities(view,now=performance.now()) {
             const source=view.rw?.entities||[],cache=BRMP.rwDisplayCache||(BRMP.rwDisplayCache=new Map()),step=1000/60;
@@ -10580,7 +10661,7 @@
             const lead=brCombatPaused()?0:Math.min(15,Math.max(0,(now-received)/step));
             const offset=Number.isFinite(BRMP.netClockOffset)?BRMP.netClockOffset:received-Number(view.frame||0)*step;
             const remoteTime=brCombatPresentationTime(view,now);
-            const ownFrame=(brCombatPaused()?Number(view.frame||0):(now+Number(BRMP.presentationLead||0)-offset)/step),remoteFrame=(remoteTime-offset)/step;
+            const ownFrame=(brPresentationFrame(view,now).base-offset)/step,remoteFrame=(remoteTime-offset)/step;
             if(BRMP.rwDisplaySource!==source){
                 BRMP.rwDisplaySource=source;const seen=new Set();
                 for(const e of source){if(BRMP.projectileTombstones?.has(e.id))continue;seen.add(e.id);let item=cache.get(e.id);
@@ -10590,7 +10671,7 @@
                     }else if(item.frame!==view.frame){
                         const old=item.row,turn=old.phase!==e.phase||old.turn!==e.turn||old.dx*e.dx+old.dy*e.dy<.55;
                         item.prev=turn?null:{row:old,frame:item.frame};item.row=e;item.frame=view.frame;
-                        if(turn){item.offsetX=0;item.offsetY=0;item.dx=e.dx;item.dy=e.dy;}
+                        if(turn){item.dx=e.dx;item.dy=e.dy;if(!e.path?.length){item.offsetX=0;item.offsetY=0;}}
                     }
                     item.missingSince=null;item.missingGraceMs=null;Object.assign(item.draw,e);
                     brFlightSamples(item,{x:e.x,y:e.y,vx:e.dx*(e.phase==='dwell'?0:e.speed||0),vy:e.dy*(e.phase==='dwell'?0:e.speed||0)},view.frame,offset,e.path,Number(e.turn||0)+(e.phase==='return'?100:e.phase==='dwell'?50:0));
@@ -10880,7 +10961,7 @@
                 for(const event of gameplayEvents)fxCandidates.push(event);
                 fxCandidates.sort(function(a,b){return a.id-b.id;});
                 var fx=new Array(fxCandidates.length);
-                for(var fi=0;fi<fxCandidates.length;fi++){var e=fxCandidates[fi];fx[fi]=brPackContactFx(e);}
+                for(var fi=0;fi<fxCandidates.length;fi++){var e=fxCandidates[fi];fx[fi]=brPackContactFx(e);if(brCoreFx(e)&&!Array.isArray(fx[fi][13]))fx[fi][13]=Object.assign({},fx[fi][13],{hostFrame:e.frame,matchKey:brRingKey()});}
                 // A bullet born and retired between this viewer's snapshots gets a short true-path trail.
                 // It is NOT resurrected as a moving projectile and cannot cause damage client-side.
                 const prior=BRMP.viewLastSent[id],known=BRMP.viewShotKnown[id];
@@ -10892,14 +10973,15 @@
                         {shape:'transit',points:q.points,width:q.size*.38,kind:q.kind,seq:q.seq,ordinal:q.ordinal,lifeSeq:q.life}]);
                 }
                 const shotEnds=[];
-                for(const q of game.retiredShots)if((!prior||q.frame>prior.frame)&&game.frame-q.frame<=54&&brViewContains(bounds,q.points.at(-2),q.points.at(-1),q.size+40))
+                for(const q of game.retiredShots)if((!prior||q.frame>prior.frame)&&game.frame-q.frame<=54&&(known?.has(q.id)||brViewContains(bounds,q.points.at(-2),q.points.at(-1),q.size+40)))
                     shotEnds.push([q.id,q.frame,q.points.at(-2),q.points.at(-1),q.source,q.kind,q.seq,q.ordinal,q.life]);
                 const shotWire=brPackShots(projectiles);
                 var payload={v:4,rosterVersion:BR_ROSTER_VERSION,at:now,frame:game.frame,worldRadius:game.worldRadius||BR_WORLD_RADIUS,mapRadius:game.mapRadius,mapName:game.mapName,mode:BRMP.roomMeta.mode,clock:Math.round(remaining*10)/10,alive:alive,total:all.length,players:visible.map(r=>brPackPlayer(r,r[0]===all.indexOf(viewer))),projectiles:shotWire.packed,shotStyles:shotWire.table,zones:zones,turrets:turrets,fx:fx};
                 payload.shotEnds=shotEnds;
                 if(window.BR_COMBAT_DEBUG)brCombatTrace('host-view',{frame:game.frame,viewer:id,players:visible.map(r=>[r[0],r[1],r[2]]),shots:projectiles.map(r=>({id:r[6],x:r[0],y:r[1],vx:r[7],vy:r[8],ordinal:r[17],path:r[22]})),ends:shotEnds});
-                payload.rw=brPackReworkWire({v:1,frame:game.frame,states:visible.map(r=>[r[0],rwStates[r[0]]]),entities:window.BRRework.wireEntities(game,viewer,bounds,rwBatch)});
+                const rwViewEntities=window.BRRework.wireEntities(game,viewer,bounds,rwBatch,known);payload.rw=brPackReworkWire({v:1,frame:game.frame,states:visible.map(r=>[r[0],rwStates[r[0]]]),entities:rwViewEntities});
                 payload.sessionId=viewer.sessionId||'';payload.matchKey=brRingKey();
+                if(!viewer.alive&&(viewer.lastDeathCause?.life===Number(viewer.lifeSeq||0)||viewer.lastDeathCause?.life+1===Number(viewer.lifeSeq||0))&&viewer.lastDeathCause.match===payload.matchKey)payload.deathCause=viewer.lastDeathCause;
                 if(game.capture){const rec=BRCapture.record(game.capture,viewer);payload.capture=capturePacket;payload.captureClock=[game.frame,Number(game.capture.hostAt||tickAt),game.capture.active];payload.captureSelf=[rec.points,rec.scoringSeconds,rec.contestedSeconds,rec.pointKills,rec.pointAssists,rec.heal,rec.shield];payload.captureBody=[game.frame,Number(viewer.lifeSeq||0),viewer.pos.x,viewer.pos.y];}else{payload.ringWire=brPackRingWire(ringPacket);payload.selfZoneWire=brPackSelfZone(brRingSelfSnapshot(game,viewer));}
                 if(BRMP.respawnMode) {
                     const board=brTKBuildBoard(false);
@@ -10921,7 +11003,7 @@
                 totalViewBytes+=bytes;if(needsStatic)pendingStatic.push(id);if(boardDelivery)pendingTKBoards.push(boardDelivery);
                 pendingFx.push([id,game.frame]);updates['views/'+id]=text;
                 previousViews.push({id,sent:BRMP.viewLastSent[id],known:BRMP.viewShotKnown[id],alive:!!viewer.alive,bytes});
-                flight.add(id);BRMP.viewLastSent[id]=brStreamSent(viewer,selection[previousViews.length-1],tickAt,game.frame);BRMP.viewShotKnown[id]=new Set(projectiles.map(q=>q[6]));
+                flight.add(id);BRMP.viewLastSent[id]=brStreamSent(viewer,selection[previousViews.length-1],tickAt,game.frame);BRMP.viewShotKnown[id]=new Set([...projectiles.map(q=>q[6]),...rwViewEntities.filter(e=>['projectile','hook','boomerang','bomb','lob'].includes(e.kind)).map(e=>e.id)]);
                 BRMP.streamStats.packets++;BRMP.streamStats.characters+=updates['views/'+id].length;
             }
             viewers=viewers.slice(0,previousViews.length);
@@ -10973,7 +11055,7 @@
                     incoming.boundary=BRCapture.layout(incoming.capture.n).boundary;
                 }else{
                     incoming.zoneState=brUnpackRingWire(incoming.ringWire,incoming.matchKey);incoming.zoneSelf=brUnpackSelfZone(incoming.selfZoneWire);
-                    if(!incoming.zoneState||!brRingValidPacket(incoming.zoneState)||!incoming.zoneSelf||incoming.zoneSelf.frame!==incoming.frame||incoming.zoneSelf.time>incoming.zoneState.time+1e-6)return null;
+                    if(!incoming.zoneState||!brRingValidPacket(incoming.zoneState)||(incoming.zoneState.plan.mode==='team'?'team-elim':incoming.zoneState.plan.mode)!==(BRMP.roomMeta.mode==='team'?'team-elim':BRMP.roomMeta.mode)||!incoming.zoneSelf||incoming.zoneSelf.frame!==incoming.frame||incoming.zoneSelf.time>incoming.zoneState.time+1e-6)return null;
                 }
                 delete incoming.ringWire;delete incoming.selfZoneWire;
                 const rows=incoming.players.map(brUnpackPlayer),shots=brUnpackShots(incoming.projectiles,incoming.shotStyles);
@@ -10997,12 +11079,34 @@
                 incoming.players=incoming.players.map(function(r){var m=roster[r[0]];if(!m||!(Number(m[4])>0&&Number(m[4])<=300)){console.warn('[BODY RADIUS WIRE]',r[0]);return null;}var abilityIndex=brResolveAbilityIndex({abilityId:m[6],abilityIndex:m[2],rosterVersion:incoming.rosterVersion});if(abilityIndex<0)return null;return [m[0],m[1],abilityIndex,r[1],r[2],r[3],r[4],r[5],m[3],r[6],r[7],r[8],r[9],-1,r[10],m[4],m[5],r[11],r[12],r[13],r[14],r[15],r[16],r[17],r[18],r[19],r[20],r[21],r[22],r[23],r[24],r[25],EMOJI_DB[abilityIndex].id];}).filter(Boolean);
             }
             else incoming.players=incoming.players.map(function(r){var index=brResolveAbilityIndex({abilityId:r[32],abilityIndex:r[2],rosterVersion:incoming.rosterVersion});if(index<0)return null;r[2]=index;r[32]=EMOJI_DB[index].id;return r;}).filter(Boolean);
+            if(incoming.deathCause&&!brValidDeathCause(incoming.deathCause,incoming,ownState?.life))delete incoming.deathCause;
             incoming.rosterVersion=BR_ROSTER_VERSION;
             if(brRespawnMode(incoming.mode)&&incoming.tkSelf)brTeamKillReceiveSelf(incoming.tkSelf);
             return incoming;
         }
 
         // 판정은 호스트가 맡고 발사·베기·돌진의 첫 반응은 학생 기기에서 바로 재생한다.
+        function brValidDeathCause(c,view,life){
+            return c&&c.v===1&&c.match===view.matchKey&&c.target===String(BRMP.playerId)&&(c.life===life||c.life+1===life)&&view.players?.some(r=>String(r[0])===String(BRMP.playerId)&&!r[7])&&c.lethal===true&&
+                Number.isSafeInteger(c.id)&&c.id>0&&Number.isInteger(c.frame)&&c.frame>=0&&c.frame<=view.frame&&
+                ['zone','reflection','dot','explosion','beam','hook','projectile','melee','environment','direct','unknown'].includes(c.kind)&&
+                ['damage','shield','ordinal','x','y','dx','dy','impact'].every(k=>Number.isFinite(c[k]))&&c.damage>0&&c.shield>=0&&Math.abs(c.dx)<=1.001&&Math.abs(c.dy)<=1.001&&
+                ['source','ability','skill','cast','shot'].every(k=>typeof c[k]==='string'&&c[k].length<=160);
+        }
+        function brReceiveDeathCause(view,now){
+            const body=BRMP.drawPlayers?.get(String(BRMP.playerId)),el=brEl('br-death-cause');
+            if(body?.row?.[7]){el?.classList.add('br-hidden');return;}
+            const c=view.deathCause;if(!brValidDeathCause(c,view,body?.rw?.life))return;
+            const key=c.match+':'+c.life+':'+c.id;if(BRMP.lastDeathReceipt?.key===key)return;
+            BRMP.lastDeathReceipt={key,cause:c,at:now};
+            const a=EMOJI_DB.find(a=>a.id===c.ability),suffix=({zone:'위험구역 피해로 탈락',dot:'지속 피해로 탈락',reflection:'반사 피해로 탈락',environment:'환경 피해로 탈락',unknown:'탈락 · 원인 정보 없음'})[c.kind];
+            const text=suffix||(a?a.n+'의 '+c.skill+'에 탈락':'탈락 · 원인 정보 없음');brSetText(el,text);el?.classList.remove('br-hidden');
+            if(brNetDebug){brNetDebug.presentation('lethal',1,{kind:c.kind});brNetDebug.confirmedShot(c.shot,c.cast,now,c.frame);}
+            const matched=(view.fx||[]).some(r=>r[1]==='hit'&&String(r[9])===c.target&&r[13]?.hostFrame===c.frame);
+            if(!matched){brSelfDamageCue(c.damage,c.impact,c.kind==='dot',{hitDX:c.dx,hitDY:c.dy},now);
+                // A historic contact mark, never a new damaging or warning geometry.
+                const id='death-contact:'+key;BRMP.drawFx.set(id,{start:now,life:150,row:[id,'hit',c.x,c.y,c.dx,c.dy,32,'#ff7083',c.damage,c.target,'terminal-contact',c.source,c.impact,{shape:'contact',confirmed:true,matchKey:c.match,targetLife:c.life,hostFrame:c.frame,absorbed:c.shield,periodic:c.kind==='dot',feel:'ranged',displayMs:150}]});}
+        }
         function brFxLife(type) {
             return type==='elimination'?750:type==='hit'?720:type==='impact'?360:type==='teleport'?500:type==='explosion'?700:
                 type==='dash'?440:type==='swing'?250:type==='laser'?280:type==='shot'?220:type==='muzzle'?210:320;
@@ -11451,12 +11555,23 @@
             const calibratedClock=Number.isFinite(packetPhysicsAt)&&Number.isFinite(BRMP.ringClockOffset);
             const nextOffset=calibratedClock?packetPhysicsAt-BRMP.ringClockOffset-serverTime:
                 BRMP.netClockOffset+brClamp((Math.min.apply(null,BRMP.clockSamples)-BRMP.netClockOffset)*.12,-16,16);
-            var clockCorrection=nextOffset-BRMP.netClockOffset;BRMP.netClockOffset=nextOffset;
-            if(clockCorrection){for(var actors of [BRMP.drawPlayers,BRMP.drawProjectiles,BRMP.rwDisplayCache||new Map()])actors.forEach(function(p){(p.samples||[]).forEach(function(s){s.t+=clockCorrection;});});}
+            var clockCorrection=nextOffset-BRMP.netClockOffset;
+            const beforeTime=now+Number(BRMP.presentationLead||0)-Number(BRMP.remoteBuffer??35),priorRemote=new Map();
+            BRMP.drawPlayers.forEach((p,id)=>{if(String(id)!==String(BRMP.playerId))priorRemote.set(id,brRemoteOffset(p,brRemotePoint(p,beforeTime,BRMP.latestView||view,now),beforeTime,BRMP.latestView||view));});
+            for(const tracks of [BRMP.drawProjectiles,BRMP.rwDisplayCache])tracks?.forEach(p=>{if(p.flightConfig&&Number.isFinite(p.drawAt)){const at=Number(p.flightTime)+Math.max(0,now-p.drawAt);p.clockBeforePoint=brFlightOffset(p,brFlightEvaluate(p,BRMP.latestView||view,at,now,p.flightConfig),BRMP.latestView||view,now,p.flightConfig);}});
+            BRMP.netClockOffset=nextOffset;BRMP.presentationFrame=null;
+            if(brNetDebug)brNetDebug.presentation('clock',Math.abs(clockCorrection));
+            if(clockCorrection){for(var actors of [BRMP.drawPlayers,BRMP.drawProjectiles,BRMP.rwDisplayCache||new Map()])actors.forEach(function(p){(p.samples||[]).forEach(function(s){s.t+=clockCorrection;});if(Number.isFinite(p.rwAt))p.rwAt+=clockCorrection;if(Number.isFinite(p.remoteRenderFrame))p.remoteRenderFrame+=clockCorrection;});}
             var sampleTime=serverTime+BRMP.netClockOffset;
             if(brNetDebug)brNetDebug.arrival(view,now);
             if(BRMP.lastViewFrame!=null)BRMP.viewGap=Number(BRMP.viewGap||180)*.8+Math.min(500,(view.frame-BRMP.lastViewFrame)*(1000/60))*.2;
-            BRMP.lastViewFrame=view.frame;BRMP.lastActorPacketAt=now;
+            const selfRow=view.players?.find(r=>String(r[0])===String(BRMP.playerId)),streamAlive=!!selfRow?.[7];
+            const arrivalGap=now-Number(BRMP.lastActorPacketAt||now);
+            if(streamAlive&&BRMP.streamWasAlive&&arrivalGap>0&&arrivalGap<=300&&!BRMP.presentationResuming){BRMP.aliveArrivalGap=Number(BRMP.aliveArrivalGap||BRMP.viewGap||150)*.8+arrivalGap*.2;}
+            BRMP.streamWasAlive=streamAlive;BRMP.lastViewFrame=view.frame;BRMP.lastActorPacketAt=now;
+            if(brNetDebug)brNetDebug.presentation('generationGap',Number(BRMP.lastGenerationFrame!=null?(view.frame-BRMP.lastGenerationFrame)*1000/60:0));BRMP.lastGenerationFrame=view.frame;
+            const freshAge=Math.max(0,now-sampleTime);if(BRMP.presentationResuming&&calibratedClock&&freshAge<=300){if(brNetDebug)brNetDebug.presentation('freshResume',now-BRMP.presentationResumeAt);BRMP.presentationResuming=false;}
+            if(calibratedClock&&freshAge<=300)BRMP.lastFreshCombatAt=now;
             // Adaptive actor-only22–45ms buffer. Bounded prediction fills the remainder;
             // self controls and the ring clock keep their existing timeline.
             var deliveryJitter=Math.max.apply(null,BRMP.clockSamples)-Math.min.apply(null,BRMP.clockSamples);
@@ -11564,6 +11679,7 @@
                     if(!r[7]){old.predVx=0;old.predVy=0;}
                 }
                 old.last=now;
+                if(id!==String(BRMP.playerId)){const forced=String(nextRW?.motion?.id||nextRW?.capture?.id||'');const reset=warpChanged||respawned||eliminated||old.remoteForced!==forced;old.remoteForced=forced;brRemoteCorrect(old,priorRemote.get(id),beforeTime,view,now,reset);}
                 BRMP.drawPlayers.set(id,old);seen.add(id);
             });
             // 연막에 숨은 적의 잔상이 오래 남지 않도록 두 번의 전송 주기 안에 제거한다.
@@ -11574,11 +11690,11 @@
                 var id=String(r[6]||('legacy-'+i+'-'+r[3]));if(BRMP.projectileTombstones?.has(id))return;var old=BRMP.drawProjectiles.get(id),pvx=Number(r[7]||0),pvy=Number(r[8]||0);
                 var projectedX=Number(r[0]),projectedY=Number(r[1]);
                 if(!old)old={x:projectedX,y:projectedY,tx:projectedX,ty:projectedY,vx:pvx,vy:pvy,row:r,last:now,samples:[]};
-                old.tx=projectedX;old.ty=projectedY;old.vx=pvx;old.vy=pvy;old.row=r;old.last=now;old.missingSince=null;old.missingGraceMs=null;
+                old.tx=projectedX;old.ty=projectedY;old.vx=pvx;old.vy=pvy;old.row=r;old.last=now;if(old.missingSince!=null&&brNetDebug)brNetDebug.presentation('counter',1,{name:'native grace resumed'});old.missingSince=null;old.missingGraceMs=null;
                 brFlightSamples(old,{x:projectedX,y:projectedY,vx:pvx,vy:pvy},view.frame,BRMP.netClockOffset,r[22],Number(r[20]||0));
                 if(String(r[11])===String(BRMP.playerId)&&r[12]&&Number(r[13])>0) {
                     var local=(BRMP.localProjectiles||[]).find(function(q){return q.matchKey===view.matchKey&&q.ownerLife===Number(r[18]||0)&&q.kind===r[12]&&q.seq===Number(r[13])&&q.ordinal===Number(r[17]||0);});
-                    if(local){old.x=local.x;old.y=local.y;old.localHandoff=true;old.handoffPoint={x:local.x,y:local.y};}
+                    if(brNetDebug)brNetDebug.presentation('counter',1,{name:local?'native handoff matched':'native local match absent'});if(local){old.x=local.x;old.y=local.y;old.localHandoff=true;old.handoffPoint={x:local.x,y:local.y};}
                     BRMP.localProjectiles=(BRMP.localProjectiles||[]).filter(function(q){return q!==local;});
                 }
                 BRMP.drawProjectiles.set(id,old);shotSeen.add(id);
@@ -11598,6 +11714,9 @@
                 var type=String(r[1]||'hit'),life=confirmed?brClamp(Number(geometry.displayMs||(blast?760:430)),geometry.shape==='contact'?100:260,900):Number(geometry.displayMs||brFxLife(type));
                 const own=String(r[11]||'')===String(BRMP.playerId);
                 let start=confirmed?now-Math.min(blast?300:Math.max(0,Math.min(300,life-220)),Math.max(0,Number(view.frame||0)-Number(geometry.hostFrame||view.frame))*1000/60):now;
+                if(!confirmed&&Number.isFinite(geometry.hostFrame)&&!own){const age=Math.max(0,now-(geometry.hostFrame*1000/60+BRMP.netClockOffset));
+                    start=now-Math.min(life-70,age); // only the fading end of a late attack; never restart its warning
+                }
                 if(own&&geometry.seq>0&&geometry.kind){
                     BRMP.drawFx.forEach((fx,key)=>{const m=fx.row[13]||{};
                         if(fx.local&&fx.row[1]===type&&m.kind===geometry.kind&&m.seq===geometry.seq){start=Math.max(fx.start,now-life*.65);BRMP.drawFx.delete(key);}
@@ -11613,6 +11732,7 @@
                 }
                 if(type==='elimination')brRegisterEliminationFeedback(String(r[9]||''),String(r[11]||''));
                 if(type==='hit') {
+                    if(brNetDebug&&String(r[9])===String(BRMP.playerId))brNetDebug.confirmedShot(geometry.projectileId,geometry.castId,now,geometry.hostFrame);
                     var victim=BRMP.drawPlayers?.get(String(r[9]||'')),fallback=victim?.snapshotHit;
                     var duplicate=!!fallback&&now-fallback.at<420&&
                         Math.abs(Number(r[8]||0)-fallback.amount)<=Math.max(1,fallback.amount*.15)&&
@@ -11621,11 +11741,20 @@
                     brRegisterHitFeedback(String(r[9]||''),Number(r[8]||0),Number(r[2]||0),Number(r[3]||0),String(r[11]||''),String(r[10]||''),true,Number(r[12]||0),{...geometry,hitDX:Number(r[4]||0),hitDY:Number(r[5]||0)});
                 }
             });
+            brReceiveDeathCause(view,now);
             BRMP.seenFxIds.forEach(function(t,k){if(now-t>5000)BRMP.seenFxIds.delete(k);});
             BRMP.crateHits?.forEach(function(t,k){if(now-t>500)BRMP.crateHits.delete(k);});
         }
+        function brResetPresentationResume(){
+            const now=performance.now();BRMP.resetControls?.();BRMP.pendingLocalActions={};BRMP.localProjectiles=[];BRMP.localCastFx=null;BRMP.localDash=null;BRMP.localTeleportUntil=0;BRMP.moveHistory=[];
+            if(BRMP.inputState){BRMP.inputState.dx=0;BRMP.inputState.dy=0;BRMP.inputState.attack=null;BRMP.inputState.skill=null;BRMP.inputState.steer=null;}
+            BRMP.drawProjectiles?.clear();BRMP.rwDisplayCache?.clear();BRMP.rwDisplaySource=null;BRMP.drawFx?.clear();
+            BRMP.drawPlayers?.forEach(p=>{p.samples=[];p.remoteOffsetX=p.remoteOffsetY=0;p.remoteRenderAt=null;p.remoteRenderFrame=null;});
+            BRMP.netClockOffset=undefined;BRMP.clockSamples=[];BRMP.presentationFrame=null;BRMP.lastRemoteRenderTime=null;BRMP.presentationLead=0;BRMP.aliveArrivalGap=null;BRMP.streamWasAlive=null;BRMP.presentationResuming=true;BRMP.presentationResumeAt=now;BRMP.lastStudentFrameAt=0;BRMP.streamLagVisible=true;brStreamHud(now);
+        }
         function brStartStudentBattle() {
             const ringBefore=BRMP.pendingRingState||BRMP.ringState,captureBefore=BRMP.pendingCapture||BRMP.captureState;
+            BRMP.presentationFrame=null;BRMP.aliveArrivalGap=null;BRMP.streamWasAlive=null;BRMP.presentationResuming=false;BRMP.lastFreshCombatAt=null;BRMP.lastGenerationFrame=null;BRMP.streamLagVisible=false;BRMP.lastDeathReceipt=null;brEl('br-death-cause')?.classList.add('br-hidden');
             brResetRingClient();if(ringBefore)brReceiveRing(ringBefore);if(captureBefore)brReceiveCapture(captureBefore);
             brEl('br-app').classList.add('br-hidden');
             brEl('br-student-battle').classList.remove('br-hidden');
@@ -12298,38 +12427,13 @@
         function brSampleProjectile(s,view,now,renderTime,dt){
             const r=s.row,own=String(r[11])===String(BRMP.playerId),point=brFlightPoint(s,view,(own?now+Number(BRMP.presentationLead||0):brCombatPresentationTime(view,now,r[15]==='missile'||r[15]==='BOOMERANG')),now,dt,
                 {radius:Number(r[2]),life:Number(r[14]||0),remaining:r[21]??Infinity,curved:r[15]==='missile'||r[15]==='BOOMERANG',throughWalls:!!(r[19]&2),throughFarm:!!(r[19]&1)});
-            s.expired=!point;if(point){s.x=point.x;s.y=point.y;}
+            if(!point&&!s.expired&&brNetDebug)brNetDebug.presentation('counter',1,{name:s.missingSince!=null?'native grace expiry':now-Number(BRMP.lastActorPacketAt||now)>900?'native stale stop':'native life/end'});s.expired=!point;if(point){s.x=point.x;s.y=point.y;}
         }
         function brSampleRemote(p,renderTime,view=BRMP.latestView||{}) {
-            const samples=p.samples||[],last=samples.at(-1);if(!last)return;
-            if(brCombatPaused())renderTime=last.t;
-            let a=samples[0],b=null;for(const point of samples){if(point.t<=renderTime)a=point;if(point.t>=renderTime){b=point;break;}}
-            const ability=EMOJI_DB[Number(p.row?.[2])]||{},throughWalls=!!p.rw?.motion?.airborne||ability.sub==='GHOST_MOVE'||ability.sub==='FLY_DASH'&&Number(p.row?.[26]||0)>0;
-            let x=a.x,y=a.y;
-            if(b&&b!==a){const mix=brClamp((renderTime-a.t)/Math.max(1,b.t-a.t),0,1);x=a.x+(b.x-a.x)*mix;y=a.y+(b.y-a.y)*mix;
-                const clip=brVisualClip(a,{x,y},Number(p.row?.[15]||0),view,throughWalls,false);x=clip.x;y=clip.y;}
-            else if(renderTime>=last.t){
-                const ticks=brClamp((renderTime-last.t)/(1000/60),0,15),rw=p.rw||{},motion=rw.motion,capture=rw.capture;
-                // Explicit authority motion ends/range supersede ordinary velocity. Stun does not freeze forced motion.
-                if(motion){
-                    const age=Math.min(ticks,Math.max(0,motion.end-Number(p.rwFrame||0)));
-                    if(motion.airborne&&[motion.fromX,motion.fromY,motion.toX,motion.toY].every(Number.isFinite)){
-                        const t=brClamp((Number(p.rwFrame||0)+age-motion.start)/Math.max(1,motion.end-motion.start-1),0,1);x=motion.fromX+(motion.toX-motion.fromX)*t;y=motion.fromY+(motion.toY-motion.fromY)*t;
-                    }else{const d=Math.min(motion.remaining||0,(motion.speed||0)*age);x=last.x+motion.dx*d;y=last.y+motion.dy*d;}
-                }else if(capture){const dx=capture.toX-last.x,dy=capture.toY-last.y,n=Math.hypot(dx,dy),d=Math.min(n,(capture.speed||0)*Math.min(ticks,Math.max(0,capture.end-Number(p.rwFrame||0))));x=last.x+dx/Math.max(.001,n)*d;y=last.y+dy/Math.max(.001,n)*d;}
-                else {const age=ticks*(1000/60),driveAge=age<=120?age:120+45*(1-Math.exp(-(age-120)/45));
-                    const travel=brActorTravel(p,ticks,Number(p.row?.[26]||0)>0?ticks:driveAge/(1000/60));x=last.x+travel.x;y=last.y+travel.y;}
-                const clipped=brVisualClip(last,{x,y},Number(p.row?.[15]||0),view,throughWalls,false);x=clipped.x;y=clipped.y;
-            }
-            // Small new-snapshot corrections decay, with no delay added to local inputs.
-            if(p.remoteRenderFrame!==last.t){
-                const elapsed=brClamp((renderTime-Number(p.remoteRenderAt??renderTime))/(1000/60),0,3),dx=Number(p.x)-x+Number(p.remoteVX||0)*elapsed,dy=Number(p.y)-y+Number(p.remoteVY||0)*elapsed;
-                const smooth=Number.isFinite(p.remoteRenderAt)&&!p.rw?.motion&&!p.rw?.capture&&Math.hypot(dx,dy)<80;
-                p.remoteOffsetX=smooth?dx:0;p.remoteOffsetY=smooth?dy:0;p.remoteOffsetAt=renderTime;p.remoteRenderFrame=last.t;
-            }
-            const correction=brClamp((renderTime-Number(p.remoteOffsetAt??renderTime))/100,0,1),decay=1-correction*correction*(3-2*correction);
-            const out=p.remoteOffsetX||p.remoteOffsetY?brVisualClip({x,y},{x:x+Number(p.remoteOffsetX||0)*decay,y:y+Number(p.remoteOffsetY||0)*decay},Number(p.row?.[15]||0),view,throughWalls,false):{x,y};
-            p.x=out.x;p.y=out.y;p.remoteRenderAt=renderTime;p.remoteVX=last.vx;p.remoteVY=last.vy;
+            const now=performance.now(),point=brRemotePoint(p,renderTime,view,now);if(!point)return;
+            const out=brRemoteOffset(p,point,renderTime,view);p.x=out.x;p.y=out.y;
+            if(brNetDebug){brNetDebug.presentation('actor',Math.max(0,renderTime-Number(p.remoteRenderAt??renderTime)),{mode:point.mode});if((p.remoteOffsetX||p.remoteOffsetY)&&renderTime<p.remoteOffsetAt+p.remoteOffsetMs)brNetDebug.presentation('residual',Math.max(0,Number(p.remoteOffsetMs||90)-(renderTime-Number(p.remoteOffsetAt||renderTime))));}
+            p.remoteRenderAt=renderTime;p.remoteRenderFrame=p.samples.at(-1).t;p.remoteVX=p.vx;p.remoteVY=p.vy;
         }
         // Battlefield display objects are projections of BRMP's existing simulation state.
         // Pixi never writes player, projectile, collision, input or network data.
@@ -12407,6 +12511,7 @@
             if(dirty){scene.rwStillSource=source;scene.rwStillZoom=zoom;scene.rwStill.clear();ids.length=still.length;for(let i=0;i<still.length;i++)ids[i]=still[i].id;
                 brPaintReworkEntities(brCombatPainter(scene.rwStill,true),still,frame,zoom);}
             scene.rwWorld.clear();brPaintReworkEntities(brCombatPainter(scene.rwWorld,true),moving,frame,zoom);
+            if(brNetDebug){const now=performance.now(),cam=BRMP.studentCamera||{x:0,y:0},w=scene.width,h=scene.height;brNetDebug.rwScene(now,cam,w,h,zoom);for(const e of moving)if(['projectile','hook','boomerang','bomb'].includes(e.kind)&&Math.abs(e.x-cam.x)<=w/zoom/2+Number(e.radius||10)&&Math.abs(e.y-cam.y)<=h/zoom/2+Number(e.radius||10))brNetDebug.seenShot(e.id,e.castId||'',now);}
         }
         function brPixiStudentFrame(view,draw,self,w,h,cam,zoom,frameNow,dt,shakeX,shakeY) {
             var scene=brPixiBattle;if(!scene)return;
@@ -12507,7 +12612,7 @@
                 }
                 if(emoji){obj.emoji.visible=true;obj.emoji.texture=brPixiTexture(scene,'emoji:'+emoji,brGetEmojiSprite(emoji));obj.emoji.width=rad*2.66;obj.emoji.height=rad*2.66;obj.emoji.rotation=Number.isFinite(rotation)?rotation-obj.root.rotation:0;}else brBulletSprite(scene,obj.emoji,style,color,rad);
             }
-            (BRMP.drawProjectiles||new Map()).forEach(function(s,id){if(!s.expired){var r=s.row;showShot('net:'+id,s.x,s.y,s.vx,s.vy,Number(r[2]||7),r[3]||'',r[4]||'#fff',r[9]||'',1,!!r[12]&&r[12]==='skill',Number(r[16]||0));}});
+            (BRMP.drawProjectiles||new Map()).forEach(function(s,id){if(!s.expired){var r=s.row;showShot('net:'+id,s.x,s.y,s.vx,s.vy,Number(r[2]||7),r[3]||'',r[4]||'#fff',r[9]||'',1,!!r[12]&&r[12]==='skill',Number(r[16]||0));if(brNetDebug&&Math.abs(s.x-cam.x)<=w/zoom/2+Number(r[2])&&Math.abs(s.y-cam.y)<=h/zoom/2+Number(r[2]))brNetDebug.seenShot(id,'',frameNow);}});
             (BRMP.localProjectiles||[]).forEach(function(s){if(frameNow<s.born)return;showShot('local:'+s.ownerLife+':'+s.kind+':'+s.seq+':'+s.ordinal+':'+s.localId,s.x,s.y,s.vx,s.vy,s.size,s.emoji,s.color,s.style,Math.max(0,Math.min(1,s.life/60)),s.kind==='skill');});
             brPixiRecycle(scene,scene.projectiles,seenShots,scene.freeShots);
             scene.fx.clear();BRMP.crateHits?.forEach(function(t,id){
@@ -12600,7 +12705,8 @@
             brUpdateStudentDecoration(frameNow);
             // 다른 플레이어는 짧게 보간하고 스냅샷 사이를 제한적으로 예측한다. 내 캐릭터는 즉시 예측한다.
             BRMP.remoteBuffer+=brClamp(Number(BRMP.remoteBufferTarget||35)-BRMP.remoteBuffer,-dt*.06,dt*.06);
-            var frameUnits=dt/(1000/60),renderTime=Math.max(Number(BRMP.lastRemoteRenderTime||0),frameNow+Number(BRMP.presentationLead||0)-BRMP.remoteBuffer);
+            var frameUnits=dt/(1000/60),renderTime=brPresentationFrame(view,frameNow).actor;
+            if(brNetDebug){brNetDebug.presentation('actorDelay',brPresentationFrame(view,frameNow).actorDelay);if(BRMP.lastRemoteRenderTime!=null&&renderTime<=BRMP.lastRemoteRenderTime)brNetDebug.presentation(renderTime<BRMP.lastRemoteRenderTime?'backward':'frozen',1);}
             BRMP.lastRemoteRenderTime=renderTime;
             draw.forEach(function(p,id){
                 if(String(id)===String(BRMP.playerId)&&BRMP.inputState) {
@@ -12684,7 +12790,7 @@
             var studentDetail=brStudentVisualDetail();
             if(shots)shots.forEach(function(s){
                 var r=s.row;if(s.expired||!onScreen(s.x,s.y,Math.max(100,Number(r[2]||7)*1.33)))return;
-                brDrawProjectileGlyph(cc,s.x,s.y,Number(s.vx||0),Number(s.vy||0),brStudentProjectileVisualSize(Number(r[2]||7)),r[3]||'',r[4]||'#fff',String(r[9]||'standard'),zoom,1,Number(r[16]||0),studentDetail,String(r[12]||'')==='skill');
+                brDrawProjectileGlyph(cc,s.x,s.y,Number(s.vx||0),Number(s.vy||0),brStudentProjectileVisualSize(Number(r[2]||7)),r[3]||'',r[4]||'#fff',String(r[9]||'standard'),zoom,1,Number(r[16]||0),studentDetail,String(r[12]||'')==='skill');if(brNetDebug&&Math.abs(s.x-cam.x)<=w/zoom/2+Number(r[2])&&Math.abs(s.y-cam.y)<=h/zoom/2+Number(r[2]))brNetDebug.seenShot(String(r[6]),'',frameNow);
             });
             brUpdateAndDrawLocalProjectiles(cc,dt,zoom,onScreen,frameNow);
             function drawStudentPlayer(s){
@@ -12958,12 +13064,13 @@
         }
         function brSavePlayPrefs(){try{localStorage.setItem('br_play_prefs_v1',JSON.stringify({muted:!!BRMP.soundMuted,reduceMotion:!!BRMP.reducedMotion,aimHelp:BRMP.aimHelpEnabled!==false}));}catch(_){}brRenderPlayPrefs();}
         function brStreamHud(now){
-            const el=brEl('br-stream-status'),age=BRMP.lastActorPacketAt?now-BRMP.lastActorPacketAt:0;
-            const paused=brCombatPaused();
-            const text=!BRMP.lastActorPacketAt?'전투 정보 받는 중…':!paused&&age>900?'전투 정보 연결 지연 · 위치와 공격 확인 중':'';
+            const el=brEl('br-stream-status'),age=BRMP.lastActorPacketAt?now-BRMP.lastActorPacketAt:0,paused=brCombatPaused();
+            const sourceAge=Number.isFinite(BRMP.ringClockOffset)&&Number.isFinite(BRMP.netClockOffset)&&BRMP.lastViewFrame!=null?Math.max(0,now-(BRMP.lastViewFrame*1000/60+BRMP.netClockOffset)):0;
+            if(!paused&&(age>450||sourceAge>500||BRMP.presentationResuming))BRMP.streamLagVisible=true;
+            if(BRMP.streamLagVisible&&!BRMP.presentationResuming&&age<220&&sourceAge<300&&now-Number(BRMP.lastFreshCombatAt||0)<220){if(BRMP.streamHealthyAt==null)BRMP.streamHealthyAt=now;if(now-BRMP.streamHealthyAt>=250)BRMP.streamLagVisible=false;}else BRMP.streamHealthyAt=null;
+            const text=!BRMP.lastActorPacketAt?'전투 정보 받는 중…':BRMP.presentationResuming?'최신 전투 정보 복구 중…':!paused&&BRMP.streamLagVisible?'연결 지연 · 최신 위치 확인 중':'';
             brSetText(el,text);el.classList.toggle('br-hidden',!text);
         }
-
         function brUpdateStudentHud(r,view,selfObj) {
             brStreamHud(performance.now());
             if(brRespawnMode(view.mode)&&view.tkBoard)brTKRenderLive(view.tkBoard,false);
@@ -13084,7 +13191,7 @@
                     shortestLife:Number(s.completedLives||0)>0?Number(s.shortestLifeFrames||0)/60:0,
                     completedLifeAverage:Number(s.completedLives||0)>0?Number(s.totalLifeFrames||0)/Number(s.completedLives)/60:0,completedLives:Number(s.completedLives||0),
                     abilityIndex:Number(p.abilityIndex||0),abilityId:p.ability.id,abilityName:p.ability.n,abilityEmoji:p.ability.e,tier:p.ability.t,
-                    level:Number(p.run?.level||1),alive:!!p.alive,lastKillFrame:Number(p.lastKillFrame||0)};
+                    lastDeathCause:p.lastDeathCause||null,level:Number(p.run?.level||1),alive:!!p.alive,lastKillFrame:Number(p.lastKillFrame||0)};
             }).sort(function(a,b){return b.kills-a.kills||a.deaths-b.deaths||b.damage-a.damage||brTKStable(a,b);}).map(function(r,i){r.rank=i+1;return r;});
         }
         function brTKBuildBoard(force) {
@@ -13239,7 +13346,7 @@
                 return {rank:i+1,id:p.remoteId||('player-'+p.id),name:p.name,abilityIndex:Number(p.abilityIndex||0),abilityId:p.ability.id,abilityName:p.ability.n,abilityEmoji:p.ability.e,rosterVersion:BR_ROSTER_VERSION,
                     tier:p.ability.t,team:Number(p.team||0),kills:Number(p.kills||0),deaths:Number(p.deaths||0),
                     damage:Math.round(p.damageDealt||0),taken:Math.round(p.damageTaken||0),
-                    level:Number(p.run?.level||1),build:p.run?Object.assign({},p.run.paths):{},
+                    lastDeathCause:p.lastDeathCause||null,level:Number(p.run?.level||1),build:p.run?Object.assign({},p.run.paths):{},
                     survival:Math.round((p.alive?game.frame:Number(p.deathFrame||p.survivalFrames||0))/60),alive:!!p.alive,eliminationSeq:Number(p.eliminationSeq||0)};
             });
             var winningPool=teamWinner?rows.filter(function(r){return r.team===teamWinner;}):rows;
