@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="br-build" content="v30-combat-continuity-ring-2026-10-07">
+    <meta name="br-build" content="v31-stability-survival-augments-2026-10-14">
     <title>클래스 이모지 배틀로얄 · 팀 점령전</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.20.1/dist/pixi.min.js"></script>
@@ -1396,6 +1396,33 @@
 
         // Cover hides occupants, not the observer's entire line of sight. These helpers
         // accept both authoritative objects and the exact static rows sent to students.
+        // v31: bounded, independent placement stream; no combat RNG consumption.
+        function brSurvivalRandom(key){let n=2166136261;for(const c of String(key)){n^=c.charCodeAt(0);n=Math.imul(n,16777619);}return ()=>{n=(Math.imul(n,1664525)+1013904223)>>>0;return n/4294967296;};}
+        let brSurvivalRosterRadius=null;
+        function brSurvivalMaxRadius(){if(brSurvivalRosterRadius==null)brSurvivalRosterRadius=Math.max(...EMOJI_DB.map((a,i)=>new Participant(-1000-i,'',a,new Vec2(0,0)).radius));return brSurvivalRosterRadius;}
+        function brSurvivalGroups(g){const w=g.combatCover||[],out=[];for(let i=0;i+2<w.length;i+=3){const x=(w[i+1].x+w[i+2].x)/2,y=(w[i+1].y+w[i+2].y)/2;out.push({x,y,dx:(x-w[i].x)/128,dy:(y-w[i].y)/128});}return out;}
+        function brSurvivalTerrain(g){
+            const mode=window.BRMP?.roomMeta?.mode||'solo';if(!['solo','team-elim'].includes(mode)||g.survival?.version===31)return;
+            const radius=brSurvivalMaxRadius(),diameter=radius*2,gap=diameter+40,random=brSurvivalRandom(String(window.BRMP?.roomMeta?.seed||'map')+'|survival31|'+g.mapIndex),limit=g.worldRadius;
+            const stats=g.survival={version:31,priorGroups:(g.combatCover?.length||0)/3,requestedGroups:0,addedGroups:0,attempts:0,failedGroups:0,smokeRequested:2,smokeAdded:0,maxRadius:radius,passage:328,depth:254};
+            const make=(cx,cy,a,key)=>[[0,-128,384,28],[-178,0,28,280],[178,0,28,280]].map(([x,y,w,h])=>{const xx=Math.round(cx+x*Math.cos(a)-y*Math.sin(a)),yy=Math.round(cy+x*Math.sin(a)+y*Math.cos(a));return Object.assign(Object.create(Wall.prototype),{x:xx,y:yy,w,h,angle:a,kind:'wall',spinSpeed:0,coverGroup:key,minX:xx-w/2,maxX:xx+w/2,minY:yy-h/2,maxY:yy+h/2});});
+            const clear=walls=>{for(const w of walls){if(g.participants.some(p=>p.id!==999&&combatWallContact(p.pos.x,p.pos.y,p.radius+40,w)))return false;if(Math.hypot(w.x,w.y)+Math.hypot(w.w,w.h)/2>limit-170||Math.hypot(w.x,w.y)<700)return false;const n=Math.ceil(Math.max(w.w,w.h)/36);for(let i=0;i<=n;i++){const x=w.w>w.h?(i/n-.5)*w.w:0,y=w.h>=w.w?(i/n-.5)*w.h:0,p=new Vec2(w.x+x*Math.cos(w.angle)-y*Math.sin(w.angle),w.y+x*Math.sin(w.angle)+y*Math.cos(w.angle));if(g.checkWallCollision(p,gap+Math.min(w.w,w.h)/2)||g.blocksCoverEntry(p,gap))return false;}}for(let i=0;i<walls.length;i+=3){const back=walls[i],cx=(walls[i+1].x+walls[i+2].x)/2,cy=(walls[i+1].y+walls[i+2].y)/2,dx=(cx-back.x)/128,dy=(cy-back.y)/128;for(let d=0;d<=600;d+=40)if(g.checkWallCollision(new Vec2(cx+dx*d,cy+dy*d),radius+20))return false;}return true;};
+            const wanted=Math.min(4,Math.max(3,stats.priorGroups+2)),need=wanted-stats.priorGroups;stats.requestedGroups=need;
+            if(328>=gap&&254>=gap){const symmetric=![0,2].includes(g.mapIndex);for(let added=0;added<need;){const paired=need-added>=2;let found=false;for(let n=0;n<640;n++){stats.attempts++;const angle=random()*Math.PI*2,dist=limit*(n%2?.72:.45)+random()*limit*.08,x=Math.cos(angle)*dist,y=Math.sin(angle)*dist,a=Math.round((angle+Math.PI/2)*1e6)/1e6,pieces=make(x,y,a,'survival31-'+added),all=paired?[...pieces,...make(-x,-y,Math.round((a+Math.PI)*1e6)/1e6,'survival31-'+(added+1))]:pieces;
+                    if(symmetric&&!paired)break;if(!clear(all))continue;g.walls.push(...all);g.combatCover.push(...all);combatWallGridCache.delete(g.walls);added+=paired?2:1;stats.addedGroups=added;found=true;break;}if(!found)break;}}
+            stats.failedGroups=need-stats.addedGroups;const groups=brSurvivalGroups(g),radii=[118,150,182];
+            for(let i=0;i<2;i++){for(let n=0;n<160;n++){const near=groups[(i+Math.floor(n/40))%Math.max(1,groups.length)],a=random()*Math.PI*2,r=radii[Math.floor(random()*3)],d=450+random()*350,p=near?new Vec2(near.x+Math.cos(a)*d,near.y+Math.sin(a)*d):new Vec2(Math.cos(a)*limit*(.4+random()*.4),Math.sin(a)*limit*(.4+random()*.4));if(p.mag()+r>limit-150||p.mag()<600||g.checkWallCollision(p,r*.7)||g.participants.some(q=>q.id!==999&&q.pos.dist(p)<q.radius+r+20)||g.smokes.some(s=>s.pos.dist(p)<s.radius+r+50))continue;g.smokes.push(new SmokeCover(p.x,p.y,r,3100+g.mapIndex*10+i));stats.smokeAdded++;break;}}
+            g.survivalRoutes=groups;g.survivalRandom=brSurvivalRandom(String(window.BRMP?.roomMeta?.seed||'farm')+'|side31|'+g.mapIndex);g.mapRevision='survival31:'+g.mapIndex+':'+g.walls.length+':'+g.smokes.length;
+            combatWallGridCache.delete(g.walls);g._wallCollisionCandidates.length=0;g._wallTraceCandidates.length=0;
+        }
+        function brSurvivalFarmSlot(g){if(!g.survivalRoutes?.length)return false;const n=g.sideFarm||(g.sideFarm={attempts:0,wanted:0,placed:0,fallback:0,index:0});n.attempts++;const selected=(n.index++%4)===3;if(selected)n.wanted++;return selected;}
+        function brSurvivalFarmPoint(g,maxRadius,padding,players){const groups=g.survivalRoutes,random=g.survivalRandom;if(!groups?.length||!random)return null;const body=brSurvivalMaxRadius();for(let n=0;n<64;n++){const q=groups[Math.floor(random()*groups.length)],side=random()<.5?-1:1,lateral=side*(body*2+220+random()*220),along=-120+random()*600,p=new Vec2(q.x-q.dy*lateral+q.dx*along,q.y+q.dx*lateral+q.dy*along);if(p.dist(g.center)>maxRadius-padding||g.checkWallCollision(p,padding+28)||g.blocksCoverEntry(p,padding)||g.smokes.some(s=>s.pos.dist(p)<s.radius*.7+padding)||g.farmBoxes.some(b=>b.pos.dist(p)<padding*2+28)||players.some(a=>a.alive&&a.pos.dist(p)<a.radius+padding+34))continue;return p;}return null;}
+        // Reveal affects environmental smoke only; skill invisibility and viewer bounds stay independent.
+        function brRevealSmoke(p,g,frames,reason){if(!p?.alive||p.id===999||!g)return;const life=Number(p.lifeSeq||0);if(p.smokeRevealLife!==life){p.smokeRevealEnd=0;p.smokeRevealLife=life;}p.smokeRevealEnd=Math.max(Number(p.smokeRevealEnd||0),g.frame+frames);if(reason==='attack'||p.smokeRevealReason!=='attack'||Number(p.smokeAttackEnd||0)<=g.frame)p.smokeRevealReason=reason;if(reason==='attack')p.smokeAttackEnd=g.frame+frames;}
+        function brSmokeRevealed(p,frame){return Number(p.smokeRevealLife??p.lifeSeq??-1)===Number(p.lifeSeq||0)&&Number(p.smokeRevealEnd||0)>frame;}
+        function brSmokeAttack(c,continuing=false){if(!c?.owner?.alive||c.ownerLifeSeq!==Number(c.owner.lifeSeq||0)||c.actionKind==='summon')return;if(c.smokeAttackStarted&&!continuing)return;c.smokeAttackStarted=true;brRevealSmoke(c.owner,c.g,60,'attack');}
+
+        function brStatNumber(n){return String(Math.round((Number(n)+Number.EPSILON)*100)/100);}
         const BR_SMOKE = Object.freeze({reveal:125, skillReveal:170});
         function brSmokeContains(smoke,pos,padding=0) {
             if(!smoke||!pos)return false;
@@ -1405,13 +1432,13 @@
             const r=Math.max(0,radius+padding),dx=px-x,dy=py-y;
             return dx*dx+dy*dy<=r*r;
         }
-        function brSmokeConcealed(smokes,target,viewer) {
+        function brSmokeConcealed(smokes,target,viewer,frame=game?.frame||0) {
             if(!target||!viewer||target===viewer||target.alive===false)return false;
             if(target.team!==0&&target.team===viewer.team)return false;
             const dx=target.pos.x-viewer.pos.x,dy=target.pos.y-viewer.pos.y,d2=dx*dx+dy*dy;
             // Skill invisibility remains independent, including in shared smoke.
             if(target.invisible&&d2>BR_SMOKE.skillReveal**2)return true;
-            if(d2<=BR_SMOKE.reveal**2)return false;
+            if(d2<=BR_SMOKE.reveal**2||brSmokeRevealed(target,frame))return false;
             let targetCovered=false;
             for(const smoke of smokes||[]) {
                 if(!brSmokeContains(smoke,target.pos))continue;
@@ -1603,16 +1630,16 @@
                 g.nextXpCrateFrame=g.frame+XP_INTERVAL;g.xpWave=0;
                 const combatRadius=window.BRMP?.isRespawnMode()?g.mapRadius:g.worldRadius;
                 g.teamCrateQueue=[];g.teamCrateCap=count+3;
-                for(let i=0;i<count;i++)for(let tries=0;tries<140;tries++) {
+                for(let i=0;i<count;i++){const sideWanted=brSurvivalFarmSlot(g),side=sideWanted?brSurvivalFarmPoint(g,combatRadius-140,BOUND,players):null;let used=false;for(let tries=0;tries<140;tries++) {
                     const near=players[i%Math.max(1,players.length)],angle=random()*Math.PI*2;
                     const distance=tries<24&&near?180+random()*220:Math.sqrt(random())*(combatRadius-240);
-                    const pos=g.capture?brCaptureRandomPoint(g,140,random):tries<24&&near?new Vec2(near.pos.x+Math.cos(angle)*distance,near.pos.y+Math.sin(angle)*distance):new Vec2(Math.cos(angle)*distance,Math.sin(angle)*distance);
+                    const pos=tries===0&&side?side:g.capture?brCaptureRandomPoint(g,140,random):tries<24&&near?new Vec2(near.pos.x+Math.cos(angle)*distance,near.pos.y+Math.sin(angle)*distance):new Vec2(Math.cos(angle)*distance,Math.sin(angle)*distance);
                     if((g.capture?!brCaptureFarmClear(g,pos,BOUND):pos.dist(g.center)>combatRadius-140)||(g.checkWallCollision(pos,BOUND+28)||g.blocksCoverEntry?.(pos,BOUND)))continue;
                     if(g.farmBoxes.some(b=>b.pos.dist(pos)<BOUND*2+24)||players.some(p=>p.pos.dist(pos)<p.radius+BOUND+30))continue;
-                    addBox(g,{id:++g.farmSeq,pos,halfSize:HALF,radius:BOUND,hp:UNITS_TO_BREAK,maxHp:UNITS_TO_BREAK,kind:'xp',born:g.frame,lastHits:new Map()});break;
-                }
+                    addBox(g,{id:++g.farmSeq,pos,halfSize:HALF,radius:BOUND,hp:UNITS_TO_BREAK,maxHp:UNITS_TO_BREAK,kind:'xp',born:g.frame,lastHits:new Map()});if(sideWanted){if(pos===side)g.sideFarm.placed++;else g.sideFarm.fallback++;used=true;}break;
+                }if(sideWanted&&!used)g.sideFarm.fallback++;}
             }
-            function dispose(g) {g.farmFlash=new Map();g.teamCrateQueue=[];g.teamCrateCap=0;g.farmBoxes=[];g.xpBundles=[];g.farmGrid=new Map();g._farmSnapshot=null;g.farmRevision=0;g.farmSeq=0;g.farmRandom=null;g.nextHealCrateFrame=0;g.healWave=0;g.xpWaveRandom=null;g.nextXpCrateFrame=0;g.xpWave=0;}
+            function dispose(g) {g.sideFarm=null;g.farmFlash=new Map();g.teamCrateQueue=[];g.teamCrateCap=0;g.farmBoxes=[];g.xpBundles=[];g.farmGrid=new Map();g._farmSnapshot=null;g.farmRevision=0;g.farmSeq=0;g.farmRandom=null;g.nextHealCrateFrame=0;g.healWave=0;g.xpWaveRandom=null;g.nextXpCrateFrame=0;g.xpWave=0;}
             function spawn(g,pos,amount,source) {
                 if(!g.xpBundles)return null;
                 // Normal BR has at most ~57 drops. Repeated respawns also stay bounded:
@@ -1657,16 +1684,16 @@
                 const cap=Math.min(MAX_XP_BOXES,Math.max(12,Math.ceil(alive.length*1.6)));
                 const wanted=Math.min(8,Math.max(2,Math.ceil(alive.length/4)));
                 const existing=g.farmBoxes.filter(b=>b.kind==='xp').length;let created=0;
-                for(let i=0;i<wanted&&existing+created<cap;i++)for(let tries=0;tries<100;tries++) {
+                for(let i=0;i<wanted&&existing+created<cap;i++){const sideWanted=brSurvivalFarmSlot(g),side=sideWanted?brSurvivalFarmPoint(g,safeRadius,BOUND,alive):null;let used=false;for(let tries=0;tries<100;tries++) {
                     const angle=random()*Math.PI*2,minRadius=Math.min(180,safeRadius*.15);
                     const distance=minRadius+Math.sqrt(random())*(safeRadius-minRadius);
-                    const pos=g.capture?brCaptureRandomPoint(g,140,random):new Vec2(g.center.x+Math.cos(angle)*distance,g.center.y+Math.sin(angle)*distance);
+                    const pos=tries===0&&side?side:g.capture?brCaptureRandomPoint(g,140,random):new Vec2(g.center.x+Math.cos(angle)*distance,g.center.y+Math.sin(angle)*distance);
                     if(!brCaptureFarmClear(g,pos,BOUND))continue;
                     if((g.checkWallCollision(pos,BOUND+26)||g.blocksCoverEntry?.(pos,BOUND)))continue;
                     if(g.farmBoxes.some(b=>b.pos.dist(pos)<BOUND*2+28)||alive.some(p=>p.pos.dist(pos)<p.radius+BOUND+34))continue;
                     addBox(g,{id:++g.farmSeq,pos,halfSize:HALF,radius:BOUND,hp:UNITS_TO_BREAK,maxHp:UNITS_TO_BREAK,
-                        kind:'xp',born:g.frame,waveSpawn:true,lastHits:new Map()});created++;break;
-                }
+                        kind:'xp',born:g.frame,waveSpawn:true,lastHits:new Map()});created++;if(sideWanted){if(pos===side)g.sideFarm.placed++;else g.sideFarm.fallback++;used=true;}break;
+                }if(sideWanted&&!used)g.sideFarm.fallback++;}
                 g.xpWave++;if(created)dirty(g);return created;
             }
             function updateXpCrates(g) {
@@ -3690,6 +3717,7 @@
                 const absorbed=window.BRRework?window.BRRework.absorb(this,amt):0;
                 const actualDamage = Math.max(0, Math.min(this.hp, amt-absorbed));
                 this._lastDamageResult.shieldAbsorbed=absorbed;this._lastDamageResult.hpDamage=actualDamage;
+                if(actualDamage+absorbed>0&&attacker&&attacker!==this&&attacker.id!==999&&(!this.team||attacker.team!==this.team))brRevealSmoke(this,game,36,'hit');
                 const counter= !reflected && !damageContext?.periodic && !damageContext?.rw && this.counterFrames>0 && attacker?.alive && attacker!==this && attacker.id!==999
                     ? {attacker,damage:actualDamage*.5*(this.counterCast?.damage||1)} : null;
                 if(actualDamage>0&&this.run)this.run.lastDamageFrame=game?game.frame:this.survivalFrames;
@@ -3980,7 +4008,7 @@
         // END DANGER RING CORE
 
         // CAPTURE v2: staged objectives and scoring only; combat and RNG remain unchanged.
-        const BR_CAPTURE_RULES=Object.freeze({version:3,mapRevision:'capture-landscape-3',seconds:[300,360],defaultSeconds:360,
+        const BR_CAPTURE_RULES=Object.freeze({version:3,mapRevision:'capture-landscape-4',seconds:[300,360],defaultSeconds:360,
             mapScale:.88,openingMask:5,pointMultipliers:Object.freeze([1,1.5,1]),rates:Object.freeze([0,.24,.30,.36]),epsilon:1e-8,pointRadius:250,centerRadius:320,openingSeconds:120,feverSeconds:60,feverMultiplier:2,publishMs:200,staleMs:1800});
         function brModeHpMultiplier(mode){return mode==='team-capture'?.70:mode==='team-respawn'?BR_TEAM_KILL_RULES.hpMultiplier:1;}
         function brRespawnMode(mode){return mode==='team-respawn'||mode==='team-capture';}
@@ -3999,7 +4027,7 @@
                 const walls=(count===3?[[-850,-350,440,44],[850,-350,440,44],[-2700,-700,400,44],[2700,-700,400,44],[-2700,700,400,44],[2700,700,400,44]]:
                     [[-1520,-760,540,44],[1520,760,540,44],[-1520,760,540,44],[1520,-760,540,44],[-620,-1630,480,44],[620,1630,480,44]])
                     .map(([x,y,w,h])=>{x*=scale;y*=scale;return {x,y,w,h,angle:0,kind:'wall',spinSpeed:0,minX:x-w/2,maxX:x+w/2,minY:y-h/2,maxY:y+h/2};});
-                const smokes=[[-2200,-950,185],[2200,950,185],[-2200,950,185],[2200,-950,185]].map(([x,y,r])=>[x*scale,y*scale,r]);
+                const smokes=[[-650,-1080,185],[650,1080,185],[-650,1080,185],[650,-1080,185]];
                 const out={revision:boundary.revision,count,boundary,bases,points,walls,smokes};layouts.set(count,out);return out;
             }
             function inside(p,point){return (p.x-point.x)**2+(p.y-point.y)**2<=point.radius**2+EPS;}
@@ -4223,7 +4251,7 @@
                 this.supplyDropSpawned = false;
                 this.supplyDropSpawnFrame = Math.round(randRange(1050,1750));
 
-                if(brCaptureMode())brCaptureSetupMap(this);else{this.initMap();this.scaleArenaLayout();this.addCombatCover();}this.initParticipants();
+                if(brCaptureMode())brCaptureSetupMap(this);else{this.initMap();this.scaleArenaLayout();this.addCombatCover();}this.initParticipants();brSurvivalTerrain(this);
                 if(window.BRMP?.active&&window.brProgression){
                     this.participants.forEach(p=>window.brProgression.init(p));
                     if(window.brFarm)window.brFarm.init(this);
@@ -4359,7 +4387,7 @@
 
             addCombatCover() {
                 // Final-coordinate, opposed pairs. Does not consume the combat/map RNG.
-                // Open entry width 328, interior depth 254; maximum active body diameter is 213.408.
+                // Existing three-segment groups; v31 validates the current roster clearance separately.
                 const limit=(window.BRMP?.isRespawnMode()?this.worldRadius*BR_TEAM_KILL_RULES.arenaScale:this.worldRadius),margin=112;
                 const make=(cx,cy,turn,group)=>{
                     const angle=Math.round(turn*Math.PI/2*1e6)/1e6,cs=Math.cos(angle),sn=Math.sin(angle),out=[];
@@ -4413,7 +4441,7 @@
                 const walls=this.combatCover||[];
                 for(let i=0;i<walls.length;i+=3){const back=walls[i],x=(walls[i+1].x+walls[i+2].x)/2,y=(walls[i+1].y+walls[i+2].y)/2,dx=(x-back.x)/128,dy=(y-back.y)/128;
                     const px=pos.x-x,py=pos.y-y,along=px*dx+py*dy,side=Math.abs(px*dy-py*dx);
-                    if(along>=-110-padding&&along<=560+padding&&side<=120+padding)return true;
+                    if(along>=-110-padding&&along<=(this.survival?600+brSurvivalMaxRadius():560)+padding&&side<=120+padding)return true;
                 }return false;
             }
 
@@ -5859,7 +5887,7 @@
 
         function loop(now) {
             if(!game) return;
-            const tickNow=Number(now||performance.now());
+            const tickNow=Number(now||performance.now());window.BRMP?.netDiagnostics?.hostFrame(tickNow);
             if(!loopLastTime)loopLastTime=tickNow-FIXED_SIM_MS;
             const elapsed=Math.max(0,Math.min(80,tickNow-loopLastTime));
             loopLastTime=tickNow;loopAccumulator+=elapsed;
@@ -6043,7 +6071,8 @@
             function finishCooldown(c,n){const p=c.owner;p.cooldown=cooldown(c,n);p.skillCooldownMax=p.cooldown;p.maxCooldown=p.cooldown;}
             function cast(p,g,aim,power=1){const id=aid(p),fn=handlers[id];if(!fn)return false;const s=state(p);if(!p.alive||p.stunned>0||s.force)return false;if(s.channel)return steer(p,g,aim,s.channel.ctx.castId);if(s.recast)return recast(p,g,aim,s.recast.ctx.castId,power);if(p.cooldown>0||inputLocks(p,g).skill)return false;p.abilityUses=(p.abilityUses||0)+1;p.spawnProtectionUntilFrame=0;const c=context(p,g,aim,power),def=defs[id],cd=def.skill?.cooldownFrames??def.skill?.cooldown??600;p.lastAimDir=copy(c.aim);p._rwCast=c;s.lastCast=c;fn(c);if(!s.recast)finishCooldown(c,cd);p._runLastSkill=c.run;p._rwCast=null;return true;}
             function end(e,reason='expired'){if(!e||e.dead)return;e.dead=true;e.reason=reason;const c=e.ctx,p=c?.owner,s=p?.rw;if(s){if(s.dash===e){s.dash=null;if(c?.abilityId==='emoji-019')p.vel=v();}if(s.channel===e)s.channel=null;}if(e.kind==='capture'&&e.target?.rw?.force===e)e.target.rw.force=null;if(e.kind==='turret')world(c.g).turretFrame=-1;if(e.onEnd)e.onEnd(c,e,reason);if(c?.g&&(['projectile','hook'].includes(e.kind)||reason==='destroyed'))event(c,e,'end');}
-            function entity(c,kind,opts={},tickFn=null){const rw=world(c.g);if(Number.isFinite(opts.maxPerOwner)){const active=rw.entities.filter(e=>!e.dead&&e.kind===kind&&e.ctx.ownerId===c.ownerId);while(active.length>=opts.maxPerOwner&&active.length)end(active.shift(),'replaced');}const dur=finite(opts.duration,60),e={...opts,ctx:c,kind,id:c.castId+':'+(++rw.seq),pos:copy(opts.pos||c.owner.pos),dir:norm(opts.dir||c.aim),start:frame(c.g),end:frame(c.g)+Math.max(1,Math.round(dur)),duration:Math.max(1,Math.round(dur)),age:0,dead:false,cancelOnStun:opts.cancelOnStun!==false,ownerBound:opts.ownerBound!==false,tick:tickFn};e.origin=copy(e.pos);if(['projectile','lob','bomb'].includes(kind)){e.actionKind=opts.actionKind||c.actionKind;e.actionSeq=c.actionSeq;e.ordinal=c.shotSeq++;e.displayEmoji=e.actionKind==='summon'?'':(opts.displayEmoji??c.displayEmoji);}rw.entities.push(e);if(kind==='turret')rw.turretFrame=-1;return e;}
+            function entity(c,kind,opts={},tickFn=null){const rw=world(c.g);if(Number.isFinite(opts.maxPerOwner)){const active=rw.entities.filter(e=>!e.dead&&e.kind===kind&&e.ctx.ownerId===c.ownerId);while(active.length>=opts.maxPerOwner&&active.length)end(active.shift(),'replaced');}if(['projectile','hook','beam','orbit','dash','leap','bomb','lob','zone','pin-trap','turret'].includes(kind)&&(Number(opts.damage||0)>0||Number(opts.pull||0)>0||kind==='turret')&&opts.actionKind!=='summon'){brSmokeAttack(c);}
+                const dur=finite(opts.duration,60),e={...opts,ctx:c,kind,id:c.castId+':'+(++rw.seq),pos:copy(opts.pos||c.owner.pos),dir:norm(opts.dir||c.aim),start:frame(c.g),end:frame(c.g)+Math.max(1,Math.round(dur)),duration:Math.max(1,Math.round(dur)),age:0,dead:false,cancelOnStun:opts.cancelOnStun!==false,ownerBound:opts.ownerBound!==false,tick:tickFn};e.origin=copy(e.pos);if(['projectile','lob','bomb'].includes(kind)){e.actionKind=opts.actionKind||c.actionKind;e.actionSeq=c.actionSeq;e.ordinal=c.shotSeq++;e.displayEmoji=e.actionKind==='summon'?'':(opts.displayEmoji??c.displayEmoji);}rw.entities.push(e);if(kind==='turret')rw.turretFrame=-1;return e;}
             function event(c,e,kind='start'){
                 // Live geometry and short transit records already carry every attack.
                 // Do not duplicate each volley round as a decorative legacy shot/impact.
@@ -6065,7 +6094,7 @@
             function cooldownRate(p,kind){const own=strongest(p,'basicHaste'),team=strongest(p,'teamBasicHaste'),both=strongest(p,'teamSkillHaste');return kind==='attack'?Math.min(3,own*Math.max(team,both)):Math.min(1.75,both);}
             function moveRate(p){const s=state(p);return strongest(p,'moveHaste')*strongest(p,'slow')*(s.lock?.moveScale??1);}
             function dot(c,p,o){if(!hostile(c,p)||p.isReworkTurret)return null;const s=state(p),key=c.ownerId+':'+c.ownerLifeSeq+':'+(o.kind||'bleed'),now=frame(c.g);s.lastGame=c.g;let d=s.dots.find(x=>x.key===key);if(!d){d={key,kind:o.kind||'bleed',ctx:c,targetLife:life(p),stacks:0,damage:o.damage??4,tickEvery:Math.max(1,o.tickEvery??30),nextTick:now+Math.max(1,o.tickEvery??30)};s.dots.push(d);}d.stacks=Math.min(o.maxStacks??3,d.stacks+1);d.end=now+duration(c,o.duration??180);return d;}
-            function mark(c,p,o={}){if(!hostile(c,p)||p.isReworkTurret)return null;const kind=o.kind||'hunt',key=c.ownerId+':'+c.ownerLifeSeq+':'+kind;for(const q of c.g.participants||[])if(q.rw)q.rw.marks=q.rw.marks.filter(m=>m.key!==key);const m={key,kind,ctx:c,targetLife:life(p),end:frame(c.g)+duration(c,o.duration??240),charges:o.charges??1,bonus:o.bonus??16,lastAttack:null};state(p).marks.push(m);state(p).lastGame=c.g;state(c.owner).markedTarget={p,life:life(p),end:m.end,kind};return m;}
+            function mark(c,p,o={}){if(!hostile(c,p)||p.isReworkTurret)return null;brSmokeAttack(c);const kind=o.kind||'hunt',key=c.ownerId+':'+c.ownerLifeSeq+':'+kind;for(const q of c.g.participants||[])if(q.rw)q.rw.marks=q.rw.marks.filter(m=>m.key!==key);const m={key,kind,ctx:c,targetLife:life(p),end:frame(c.g)+duration(c,o.duration??240),charges:o.charges??1,bonus:o.bonus??16,lastAttack:null};state(p).marks.push(m);state(p).lastGame=c.g;state(c.owner).markedTarget={p,life:life(p),end:m.end,kind};return m;}
             function cleanse(c,p){const s=state(p);p.stunned=0;p.poisonFrames=0;p.poisonOwner=null;p.blindedFrames=0;s.dots=[];s.marks=[];s.buffs=s.buffs.filter(b=>b.kind!=='slow');if(s.force)s.force.cleansed=true;return true;}
             function lock(c,o,frames){const s=state(c.owner);s.lock={...o,ctx:c,end:frame(c.g)+Math.max(1,Math.round(frames)),cancelOnStun:o.cancelOnStun!==false};}
             function impulse(c,p,dir,strength,opts={}){if(!hostile(c,p)||p.isReworkTurret||!strength)return false;const s=state(p);if(s.force&&!s.force.dead)return false;if(s.impulse&&s.impulse.end>frame(c.g)&&Math.hypot(s.impulse.x,s.impulse.y)>.5){if(s.impulse.ctx.castId===c.castId)return false;if(s.impulse.hard)return false;}const d=norm(dir||p.pos.sub(c.owner.pos)),mag=Math.max(0,strength)*(c.run.control??1)*(p.knockbackResist??1);s.impulse={x:d.x*mag,y:d.y*mag,ctx:c,end:frame(c.g)+Math.max(8,Math.min(60,Math.ceil(mag*2))),wallDamage:opts.wallDamage||0,wallDone:false,hard:opts.hardForce===true||(opts.hardForce!==false&&strength>=14)};if(s.impulse.hard)cancelAction(p,c.g,'forced');return true;}
@@ -6086,7 +6115,7 @@
                         matchKey:window.BRMP?.roomCode+'|'+Number(window.BRMP?.roomMeta?.matchRound||0)+'|'+Number(window.BRMP?.roomMeta?.battleStartedAt||0),
                         lifeSeq:c.ownerLifeSeq,hostFrame:frame(c.g),displayMs:type==='explosion'?700:430}});
             }
-            function area(c,pos,radius,damage,opts={}){const r=opts.geometryScaled?radius:sized(c,radius),out=[];for(const p of targets(c,pos,r)){if(dist(pos,p.pos)>r+(p.radius||0)||c.g.checkWallBetween(pos,p.pos))continue;const result=hit(c,p,opts.damageAt?opts.damageAt(p):typeof damage==='function'?damage(p):damage,{...opts,direction:opts.direction||p.pos.sub(pos)});if(result.valid)out.push({target:p,...result});}const farmDamage=typeof damage==='function'?(defs[c.abilityId]?.skill?.damage??20):damage;if(farmDamage>0&&window.brFarm)window.brFarm.area(c.g,c.owner,pos,r,Math.max(.15,farmDamage/60),c.castId+':area:'+frame(c.g));if(!opts.periodic&&opts.visual!==false)confirmedSkillFx(c,pos,'explosion',r,{shape:'circle'},opts.color);return out;}
+            function area(c,pos,radius,damage,opts={}){if(!opts.periodic&&!opts.secondary&&(typeof damage==='function'||damage>0))brSmokeAttack(c);const r=opts.geometryScaled?radius:sized(c,radius),out=[];for(const p of targets(c,pos,r)){if(dist(pos,p.pos)>r+(p.radius||0)||c.g.checkWallBetween(pos,p.pos))continue;const result=hit(c,p,opts.damageAt?opts.damageAt(p):typeof damage==='function'?damage(p):damage,{...opts,direction:opts.direction||p.pos.sub(pos)});if(result.valid)out.push({target:p,...result});}const farmDamage=typeof damage==='function'?(defs[c.abilityId]?.skill?.damage??20):damage;if(farmDamage>0&&window.brFarm)window.brFarm.area(c.g,c.owner,pos,r,Math.max(.15,farmDamage/60),c.castId+':area:'+frame(c.g));if(!opts.periodic&&opts.visual!==false)confirmedSkillFx(c,pos,'explosion',r,{shape:'circle'},opts.color);return out;}
             function confirmedBlast(c,pos,radius,innerRadius,effectId,color){
                 if(!c.g?.emitStudentFx)return;
                 // A confirmed single impact is a retained visual record, not a damaging entity.
@@ -6096,17 +6125,17 @@
                         lifeSeq:c.ownerLifeSeq,hostFrame:frame(c.g),displayMs:760}});
             }
             function sweepTime(from,to,pos,r){return combatSegmentCircleTime(from.x-pos.x,from.y-pos.y,to.x-from.x,to.y-from.y,r);}
-            function front(c,o){const range=ranged(c,o.range??150),width=sized(c,o.width??80),from=copy(o.pos||c.owner.pos),dir=norm(o.dir||c.aim),to=from.add(dir.mult(range)),wall=combatTraceWalls(from,to,width/2,c.g.walls,[]),endAt=wall?.t??1,candidates=[];for(const p of targets(c,from,range+width)){const rel=p.pos.sub(from),along=rel.x*dir.x+rel.y*dir.y,lateral=Math.abs(rel.x*dir.y-rel.y*dir.x);if(along<0||Math.hypot(Math.max(0,along-range*endAt),Math.max(0,lateral-width/2))>p.radius||c.g.checkWallBetween(from,p.pos))continue;candidates.push({p,t:Math.max(0,along-p.radius)});}candidates.sort((a,b)=>a.t-b.t||pid(a.p).localeCompare(pid(b.p)));const out=[];for(const {p} of candidates.slice(0,o.maxTargets??Infinity)){const r=hit(c,p,o.damage??0,{...o,direction:dir});if(r.valid)out.push({target:p,...r});}if((o.damage??0)>0&&window.brFarm)window.brFarm.line(c.g,c.owner,from,from.add(dir.mult(range*endAt)),width/2,Math.max(.15,o.damage/60),c.castId+':front','beam');if((o.damage??0)>0&&!o.periodic&&o.visual!==false){const target=out[0]?.target;confirmedSkillFx(c,from,'swing',range*endAt,{shape:'front-impact',width,part:c.abilityId==='emoji-042'?'hammer':'sweep',targetX:target?.pos.x,targetY:target?.pos.y},o.color);}return out;}
+            function front(c,o){if((o.damage||o.stun||o.knockback)>0)brSmokeAttack(c,true);const range=ranged(c,o.range??150),width=sized(c,o.width??80),from=copy(o.pos||c.owner.pos),dir=norm(o.dir||c.aim),to=from.add(dir.mult(range)),wall=combatTraceWalls(from,to,width/2,c.g.walls,[]),endAt=wall?.t??1,candidates=[];for(const p of targets(c,from,range+width)){const rel=p.pos.sub(from),along=rel.x*dir.x+rel.y*dir.y,lateral=Math.abs(rel.x*dir.y-rel.y*dir.x);if(along<0||Math.hypot(Math.max(0,along-range*endAt),Math.max(0,lateral-width/2))>p.radius||c.g.checkWallBetween(from,p.pos))continue;candidates.push({p,t:Math.max(0,along-p.radius)});}candidates.sort((a,b)=>a.t-b.t||pid(a.p).localeCompare(pid(b.p)));const out=[];for(const {p} of candidates.slice(0,o.maxTargets??Infinity)){const r=hit(c,p,o.damage??0,{...o,direction:dir});if(r.valid)out.push({target:p,...r});}if((o.damage??0)>0&&window.brFarm)window.brFarm.line(c.g,c.owner,from,from.add(dir.mult(range*endAt)),width/2,Math.max(.15,o.damage/60),c.castId+':front','beam');if((o.damage??0)>0&&!o.periodic&&o.visual!==false){const target=out[0]?.target;confirmedSkillFx(c,from,'swing',range*endAt,{shape:'front-impact',width,part:c.abilityId==='emoji-042'?'hammer':'sweep',targetX:target?.pos.x,targetY:target?.pos.y},o.color);}return out;}
             function bounded(g,pos,r=0){if(brArenaRect(g))return brArenaClamp(g,pos,r+4);const center=g.center||v(),edge=Math.max(10,(g.worldRadius||BR_WORLD_RADIUS)-r-4),d=pos.sub(center),n=d.mag();return n>edge?center.add(d.mult(edge/n)):pos;}
             function safe(g,pos,r,owner=null){const m=combatMoveCircle(pos,v(),r,brHostBodyWalls(g),false),base=bounded(g,v(m.x,m.y),r);for(let i=0;i<4;i++){let moved=false;for(const q of nearby(g,base,r+100)){if(q===owner||!q.alive)continue;const d=base.sub(q.pos),len=d.mag(),need=r+q.radius+5;if(len<need){const n=len>.01?d.mult(1/len):v(Math.cos(i*2.3),Math.sin(i*2.3));base.x=q.pos.x+n.x*need;base.y=q.pos.y+n.y*need;moved=true;}}if(!moved)break;const z=combatMoveCircle(base,v(),r,brHostBodyWalls(g),false);base.x=z.x;base.y=z.y;}return bounded(g,base,r);}
             function targetPoint(c,range){return safe(c.g,bounded(c.g,c.owner.pos.add(c.aim.mult(ranged(c,range)*(c.aimRangeFactor??1))),c.owner.radius||0),c.owner.radius||0,c.owner);}
             function safePoint(c,pos,radius=0){return safe(c.g,copy(pos),radius,c.owner);}
             function armWallCrash(c,p,o={}){const q=state(p).impulse;if(q&&q.ctx.castId===c.castId){q.wallDamage=o.damage??0;q.end=Math.max(q.end,frame(c.g)+(o.duration??60));q.wallDone=false;return true;}return false;}
             function applySlow(p,mult,frames,source){if(!source||!p?.alive)return null;const g=source.rw?.lastGame||p.rw?.lastGame||(typeof game!=='undefined'?game:null);if(!g)return null;const c=context(source,g,source.lastAimDir);if(!hostile(c,p))return null;return buff(c,p,'slow',mult,frames);}
-            function teleport(c,pos){const p=c.owner,to=safe(c.g,copy(pos),p.radius,p);confirmedSkillFx(c,p.pos,'teleport',p.radius*1.4,{shape:'blink'},'#a5b4fc');confirmedSkillFx(c,to,'teleport',p.radius*1.4,{shape:'blink'},'#c4b5fd');p.pos.x=to.x;p.pos.y=to.y;p.vel=v();p.warpSeq=(p.warpSeq||0)+1;c.warpSeq=p.warpSeq;world(c.g).spatialDirty=true;c.g.rebuildSpatialGrid?.();return to;}
+            function teleport(c,pos){if(Number(defs[c.abilityId]?.skill?.damage||0)>0)brSmokeAttack(c);const p=c.owner,to=safe(c.g,copy(pos),p.radius,p);confirmedSkillFx(c,p.pos,'teleport',p.radius*1.4,{shape:'blink'},'#a5b4fc');confirmedSkillFx(c,to,'teleport',p.radius*1.4,{shape:'blink'},'#c4b5fd');p.pos.x=to.x;p.pos.y=to.y;p.vel=v();p.warpSeq=(p.warpSeq||0)+1;c.warpSeq=p.warpSeq;world(c.g).spatialDirty=true;c.g.rebuildSpatialGrid?.();return to;}
             function aimTurn(dir,wanted,limit){const a=Math.atan2(dir.y,dir.x),b=Math.atan2(wanted.y,wanted.x),d=Math.atan2(Math.sin(b-a),Math.cos(b-a)),n=a+clamp(d,-limit,limit);return v(Math.cos(n),Math.sin(n));}
             function chooseHoming(c,e){const s=state(c.owner),marked=s.markedTarget;if(marked?.end>frame(c.g)&&marked.life===life(marked.p)&&!e.excludedTargets?.has(pid(marked.p))&&hostile(c,marked.p)&&visible(c,marked.p,e.pos)&&dist(e.pos,marked.p.pos)<e.homingRange){const d=norm(marked.p.pos.sub(e.pos));if(d.x*e.dir.x+d.y*e.dir.y>=e.homingCone)return marked.p;}let best=null,bestD=Infinity;for(const p of enemies(c,e.pos,e.homingRange)){if(e.excludedTargets?.has(pid(p))||!visible(c,p,e.pos))continue;const d=p.pos.sub(e.pos),n=d.mag();if(n<=0||d.x/n*e.dir.x+d.y/n*e.dir.y<e.homingCone)continue;if(n<bestD){bestD=n;best=p;}}return best;}
-            function projectile(c,o){if(o.pos&&o.ownerBound===false)o={...o,actionKind:'summon'};const range=ranged(c,o.range??600)*(o.pos?1:(c.aimRangeFactor??1)),speed=Math.max(.1,o.speed??15),e=entity(c,'projectile',{...o,pos:o.pos||c.owner.pos,dir:o.dir||c.aim,range,radius:sized(c,o.radius??12),speed,damage:o.damage??0,duration:o.duration??Math.ceil(range/speed)*(o.boomerang?4:1)+90,cancelOnStun:false,ownerBound:o.ownerBound!==false},stepProjectile);e.distance=0;e.phase='out';e.hits=new Set();e.excludedTargets=new Set();e.homingRange=ranged(c,o.homingRange??650);e.homingCone=o.homingCone??-.15;e.nextSearch=frame(c.g)+(world(c.g).seq%6);e.bounces=Math.max(0,o.bounces??0);e.bounceCount=0;e.lastBounceFrame=-100;e.wallScratch=[];e.previousPos=copy(e.pos);e._stepTo=copy(e.pos);e._contacts=[];e.owner=c.owner;e.size=e.radius;e._farmHitIds=new Map();e.hitOptions={stun:e.stun??0,stunCap:e.stunCap,knockback:e.knockback??0,slow:e.slow,slowFrames:e.slowFrames,wallDamage:e.wallDamage,onceKnockback:e.onceKnockback,periodic:!!e.periodic,reflected:!!e.reflected,scaled:!!e.scaled,style:e.style||'rw-projectile'};event(c,e);return e;}
+            function projectile(c,o){if(!o.pos&&o.ownerBound!==false&&Number(o.damage||0)>0)brSmokeAttack(c,true);if(o.pos&&o.ownerBound===false)o={...o,actionKind:'summon'};const range=ranged(c,o.range??600)*(o.pos?1:(c.aimRangeFactor??1)),speed=Math.max(.1,o.speed??15),e=entity(c,'projectile',{...o,pos:o.pos||c.owner.pos,dir:o.dir||c.aim,range,radius:sized(c,o.radius??12),speed,damage:o.damage??0,duration:o.duration??Math.ceil(range/speed)*(o.boomerang?4:1)+90,cancelOnStun:false,ownerBound:o.ownerBound!==false},stepProjectile);e.distance=0;e.phase='out';e.hits=new Set();e.excludedTargets=new Set();e.homingRange=ranged(c,o.homingRange??650);e.homingCone=o.homingCone??-.15;e.nextSearch=frame(c.g)+(world(c.g).seq%6);e.bounces=Math.max(0,o.bounces??0);e.bounceCount=0;e.lastBounceFrame=-100;e.wallScratch=[];e.previousPos=copy(e.pos);e._stepTo=copy(e.pos);e._contacts=[];e.owner=c.owner;e.size=e.radius;e._farmHitIds=new Map();e.hitOptions={stun:e.stun??0,stunCap:e.stunCap,knockback:e.knockback??0,slow:e.slow,slowFrames:e.slowFrames,wallDamage:e.wallDamage,onceKnockback:e.onceKnockback,periodic:!!e.periodic,reflected:!!e.reflected,scaled:!!e.scaled,style:e.style||'rw-projectile'};event(c,e);return e;}
             function stepProjectile(c,e){
                 const from=e.previousPos;from.x=e.pos.x;from.y=e.pos.y;
                 if(e.phase==='dwell'){if(e.age>=e.returnAt){e.phase='return';e.hits.clear();e._farmHitIds.clear();}else return;}
@@ -6161,7 +6190,7 @@
                 e.distance+=left;
                 if(e.phase==='out'&&e.distance>=e.range-.01){if(e.boomerang){e.phase=e.dwell>0?'dwell':'return';e.returnAt=e.age+(e.dwell||0);e.hits.clear();e._farmHitIds.clear();}else end(e,'range');}
             }
-            function zone(c,o){const max=o.maxPerOwner??Infinity,kind=o.kind||'zone',active=world(c.g).entities.filter(e=>!e.dead&&e.kind===kind&&e.ctx.ownerId===c.ownerId);while(active.length>=max&&active.length)end(active.shift(),'replaced');const e=entity(c,kind,{...o,pos:o.pos||c.owner.pos,radius:sized(c,o.radius??100),maxRadius:sized(c,o.maxRadius??o.radius??100),pullRadius:sized(c,o.pullRadius??o.radius??100),duration:duration(c,o.duration??180),cancelOnStun:false},stepZone);e.startRadius=e.radius;e.tickEvery=Math.max(1,o.tickEvery??30);e.nextTick=frame(c.g)+e.tickEvery;return e;}
+            function zone(c,o){if(Number(o.damage||0)>0||Number(o.pull||0)>0)brSmokeAttack(c);const max=o.maxPerOwner??Infinity,kind=o.kind||'zone',active=world(c.g).entities.filter(e=>!e.dead&&e.kind===kind&&e.ctx.ownerId===c.ownerId);while(active.length>=max&&active.length)end(active.shift(),'replaced');const e=entity(c,kind,{...o,pos:o.pos||c.owner.pos,radius:sized(c,o.radius??100),maxRadius:sized(c,o.maxRadius??o.radius??100),pullRadius:sized(c,o.pullRadius??o.radius??100),duration:duration(c,o.duration??180),cancelOnStun:false},stepZone);e.startRadius=e.radius;e.tickEvery=Math.max(1,o.tickEvery??30);e.nextTick=frame(c.g)+e.tickEvery;return e;}
             function stepZone(c,e){if(e.followOwner)e.pos=copy(c.owner.pos);if(e.growFrames>0)e.radius=e.startRadius+(e.maxRadius-e.startRadius)*Math.min(1,e.age/e.growFrames);if(e.pull>0){for(const p of enemies(c,e.pos,e.pullRadius)){if(c.g.checkWallBetween(e.pos,p.pos)||state(p).force)continue;const d=e.pos.sub(p.pos),n=d.mag();if(n>e.radius*.2){const pull=d.mult(Math.min(n,e.pull*(c.run.control??1))/Math.max(.01,n));moveExternal(c.g,p,pull,false);}}}if(frame(c.g)>=e.nextTick){e.nextTick+=e.tickEvery;area(c,e.pos,e.radius,e.damage??0,{geometryScaled:true,periodic:true,knockback:0,stun:0,slow:e.slow,slowFrames:e.slowFrames??e.slowDuration??e.tickEvery+10,onHit:e.onHit});}}
             function orbit(c,o){
                 const e=entity(c,'orbit',{...o,pos:c.owner.pos,radius:sized(c,o.radius??150),bladeRadius:sized(c,o.bladeRadius??18),duration:duration(c,o.duration??180),cancelOnStun:true},(ctx,e)=>{
@@ -6197,14 +6226,14 @@
             function onHpDamage(p,attacker,actual,damageContext={}){if(actual<=0||!attacker?.alive||attacker===p||attacker.id===999||damageContext.periodic||damageContext.reflected)return;const s=state(p),now=frame(s.lastGame||damageContext.ctx?.g);for(const b of s.buffs){if(b.end<=now||!['counterImmediate','counterDeferred'].includes(b.kind)||!validContext(b.ctx))continue;const value=actual*(b.extra?.ratio??b.value??.5)*(b.ctx.run.damage??1);if(b.extra?.range&&dist(p.pos,attacker.pos)>b.extra.range)continue;if(b.kind==='counterImmediate'){hit(b.ctx,attacker,value,{scaled:true,reflected:true,knockback:0,stun:0});b.procFrame=now;}else{const key=targetKey(attacker),r=b.records.get(key)||{target:attacker,life:life(attacker),damage:0};r.damage+=value;b.records.set(key,r);b.procFrame=now;}}}
             function afterHit(c,p,result,opts={}){if(result?.hpDamage>0)onHpDamage(p,c.owner,result.hpDamage,{...opts,ctx:c});}
             function tickStatus(g,p){const s=state(p),now=frame(g);s.lastGame=g;s.shields=s.shields.filter(x=>x.end>now&&x.amount>0&&validContext(x.ctx));s.marks=s.marks.filter(x=>x.end>now&&x.charges>0&&x.targetLife===life(p)&&validContext(x.ctx));for(const b of s.buffs.slice()){if(!validContext(b.ctx)){s.buffs.splice(s.buffs.indexOf(b),1);continue;}if(b.kind==='counterDeferred'&&p.stunned>0){s.buffs=s.buffs.filter(x=>x!==b&&!(x.kind==='damageReduction'&&x.ctx.castId===b.ctx.castId));continue;}if(b.kind==='regen'&&now>=b.nextTick&&now<=b.end){b.nextTick+=30;heal(b.ctx,p,b.value);}if(b.end<=now){if(b.kind==='counterDeferred'&&p.alive&&p.stunned<=0)for(const rec of b.records.values())if(rec.target.alive&&life(rec.target)===rec.life)hit(b.ctx,rec.target,rec.damage,{scaled:true,reflected:true,stun:0,knockback:0});s.buffs.splice(s.buffs.indexOf(b),1);continue;}if(b.kind==='ghost'){p.ghostTimer=Math.max(1,b.end-now);p.invisible=true;}}if(!s.buffs.some(b=>b.kind==='ghost')){if(aid(p)==='emoji-008'){p.invisible=false;p.ghostTimer=0;}}for(const d of s.dots.slice()){if(d.end<now||d.targetLife!==life(p)||!validContext(d.ctx)){s.dots.splice(s.dots.indexOf(d),1);continue;}if(now>=d.nextTick){d.nextTick+=d.tickEvery;hit(d.ctx,p,d.damage*d.stacks,{periodic:true,stun:0,knockback:0});}}if(s.lock&&(s.lock.end<=now||!validContext(s.lock.ctx)||p.stunned>0&&s.lock.cancelOnStun))s.lock=null;if(s.recast&&(s.recast.end<=now||p.stunned>0))closeRecast(p,g,p.stunned>0?'stun':'expired');if(p.stunned>0)cancelAction(p,g,'stun');if(s.impulse){const q=s.impulse;if(!validContext(q.ctx)||now>=q.end||Math.hypot(q.x,q.y)<.15)s.impulse=null;else{const moved=moveExternal(g,p,v(q.x,q.y),false);if(moved.hit&&q.wallDamage>0&&!q.wallDone){q.wallDone=true;hit(q.ctx,p,q.wallDamage,{stun:0,knockback:0,secondary:true});}q.x*=.82;q.y*=.82;}}}
-            function tick(g){const rw=world(g),now=frame(g);if(rw.lastFrame===now)return;rw.lastFrame=now;for(const p of g.participants||[]){if(!p.alive)continue;tickStatus(g,p);}const active=rw.entities,len=active.length;for(let i=0;i<len;i++){const e=active[i];if(!e||e.dead)continue;if(!validContext(e.ctx)){end(e,e.ctx.owner.alive?'life':'death');continue;}if(e.cancelOnStun&&e.ctx.owner.stunned>0){end(e,'stun');continue;}e.age=now-e.start;if(now>e.end){end(e,'expired');continue;}e.tick?.(e.ctx,e);if(e.kind==='projectile'&&(e.homing||e.boomerang||e.bounces>0||e.bounceCount))brRecordFlightPath(e,now,e.pos.x,e.pos.y,Number(e.bounceCount||0)+(e.phase==='return'?100:e.phase==='dwell'?50:0));if(!e.dead&&now>=e.end)end(e,'expired');}rw.entities=rw.entities.filter(e=>!e.dead);rw.events=rw.events.filter(e=>e.end>now);if(rw.spatialDirty){rw.spatialDirty=false;g.rebuildSpatialGrid?.();}rw.turretFrame=-1;}
-            function cleanup(p,g,reason='cleanup'){if(!g)return;const rw=world(g),s=p.rw;for(const e of rw.entities){if(e.dead)continue;if(e.ctx.owner===p||e.kind==='capture'&&e.target===p)end(e,reason);else if(e.target===p){if(e.kind==='projectile'){e.excludedTargets=e.excludedTargets||new Set();e.excludedTargets.add(pid(p));}e.target=null;e.targetLife=null;}}rw.events=rw.events.filter(e=>e.owner!==pid(p)||e.kind==='end');if(s){s.shields=[];s.buffs=[];s.dots=[];s.marks=[];s.force=null;s.impulse=null;s.lock=null;s.channel=null;s.dash=null;s.recast=null;s.markedTarget=null;s.lastBasic=null;}for(const q of g.participants||[])if(q.rw){q.rw.shields=q.rw.shields.filter(x=>x.ctx.owner!==p);q.rw.buffs=q.rw.buffs.filter(x=>x.ctx.owner!==p);q.rw.dots=q.rw.dots.filter(x=>x.ctx.owner!==p);q.rw.marks=q.rw.marks.filter(x=>x.ctx.owner!==p);if(q.rw.markedTarget?.p===p)q.rw.markedTarget=null;}rw.entities=rw.entities.filter(e=>!e.dead);rw.turretFrame=-1;p.invisible=false;p.ghostTimer=0;}
+            function tick(g){const rw=world(g),now=frame(g);if(rw.lastFrame===now)return;rw.lastFrame=now;for(const p of g.participants||[]){if(!p.alive)continue;tickStatus(g,p);}const active=rw.entities,len=active.length;for(let i=0;i<len;i++){const e=active[i];if(!e||e.dead)continue;if(!validContext(e.ctx)){end(e,e.ctx.owner.alive?'life':'death');continue;}if(e.cancelOnStun&&e.ctx.owner.stunned>0){end(e,'stun');continue;}e.age=now-e.start;if(now>e.end){end(e,'expired');continue;}if(['beam','orbit','dash','leap'].includes(e.kind)&&Number(e.damage||0)>0)brSmokeAttack(e.ctx,true);e.tick?.(e.ctx,e);if(e.kind==='projectile'&&(e.homing||e.boomerang||e.bounces>0||e.bounceCount))brRecordFlightPath(e,now,e.pos.x,e.pos.y,Number(e.bounceCount||0)+(e.phase==='return'?100:e.phase==='dwell'?50:0));if(!e.dead&&now>=e.end)end(e,'expired');}rw.entities=rw.entities.filter(e=>!e.dead);rw.events=rw.events.filter(e=>e.end>now);if(rw.spatialDirty){rw.spatialDirty=false;g.rebuildSpatialGrid?.();}rw.turretFrame=-1;}
+            function cleanup(p,g,reason='cleanup'){p.smokeRevealEnd=0;p.smokeAttackEnd=0;p.smokeRevealReason='';p.smokeRevealLife=Number(p.lifeSeq||0);if(!g)return;const rw=world(g),s=p.rw;for(const e of rw.entities){if(e.dead)continue;if(e.ctx.owner===p||e.kind==='capture'&&e.target===p)end(e,reason);else if(e.target===p){if(e.kind==='projectile'){e.excludedTargets=e.excludedTargets||new Set();e.excludedTargets.add(pid(p));}e.target=null;e.targetLife=null;}}rw.events=rw.events.filter(e=>e.owner!==pid(p)||e.kind==='end');if(s){s.shields=[];s.buffs=[];s.dots=[];s.marks=[];s.force=null;s.impulse=null;s.lock=null;s.channel=null;s.dash=null;s.recast=null;s.markedTarget=null;s.lastBasic=null;}for(const q of g.participants||[])if(q.rw){q.rw.shields=q.rw.shields.filter(x=>x.ctx.owner!==p);q.rw.buffs=q.rw.buffs.filter(x=>x.ctx.owner!==p);q.rw.dots=q.rw.dots.filter(x=>x.ctx.owner!==p);q.rw.marks=q.rw.marks.filter(x=>x.ctx.owner!==p);if(q.rw.markedTarget?.p===p)q.rw.markedTarget=null;}rw.entities=rw.entities.filter(e=>!e.dead);rw.turretFrame=-1;p.invisible=false;p.ghostTimer=0;}
             function reset(g,reason='match'){if(!g?.rw)return;for(const e of g.rw.entities)end(e,reason);for(const p of g.participants||[])cleanup(p,g,reason);g.rw=null;}
             function basicTurrets(p,g,aim,range,halfAngle,damage,opts={}){const c=opts.ctx||context(p,g,aim,1),out=[];for(const t of turrets(g,p.pos,range+40)){if(!hostile(c,t))continue;const d=t.pos.sub(p.pos),n=d.mag(),dot=n>0?(d.x*c.aim.x+d.y*c.aim.y)/n:1;if(n>range+t.radius||dot<Math.cos(halfAngle??Math.PI/3)||g.checkWallBetween(p.pos,t.pos))continue;const r=hit(c,t,damage,{scaled:opts.scaled!==false});out.push({target:t,...r});}return out;}
             function projectileTurretHit(g,shot,from,to,wall=null,contacts=null){const c={owner:shot.owner},out=contacts||[];for(const t of turrets(g,from,dist(from,to)+(shot.size||0)+40)){if(!hostile(c,t)||shot._rwTurretHits?.has(t.id))continue;const at=sweepTime(from,to,t.pos,(shot.size||0)+t.radius);if(at!=null&&(!wall||at<=wall.t))out.push({turret:t,t:at});}return out;}
             function damageTurret(t,owner,damage,g,token){if(!t||t.dead||t.hp<=0||owner===t.owner||owner.team&&owner.team===t.team)return 0;t.hitTokens=t.hitTokens||new Map();if(token&&t.hitTokens.has(token))return 0;if(token)t.hitTokens.set(token,frame(g));const actual=Math.min(t.hp,Math.max(0,damage));t.hp-=actual;if(t.hp<=0)end(t,'destroyed');return actual;}
             function rateLayers(p,g){const s=state(p),now=frame(g),layers=s.buffs.filter(b=>b.end>now&&['basicHaste','teamBasicHaste','teamSkillHaste'].includes(b.kind)),ends=Array.from(new Set(layers.map(b=>b.end))).sort((a,b)=>a-b),out=[];let at=now;for(const endAt of ends){let own=1,team=1,both=1;for(const b of layers)if(b.end>at){if(b.kind==='basicHaste')own=Math.max(own,b.value);if(b.kind==='teamBasicHaste')team=Math.max(team,b.value);if(b.kind==='teamSkillHaste')both=Math.max(both,b.value);}out.push([endAt,Math.min(3,own*Math.max(team,both)),Math.min(1.75,both)]);at=endAt;}return out;}
-            function wirePlayer(p,g){const s=state(p),now=frame(g),motion=s.dash&&!s.dash.dead?s.dash:null,channel=s.channel&&!s.channel.dead?s.channel:null,recast=s.recast,force=s.force&&!s.force.dead?s.force:null;return {life:life(p),impulseX:s.impulse?.x||0,impulseY:s.impulse?.y||0,impulseEnd:s.impulse?.end||0,stunEnd:now+(p.stunned||0),shield:s.shields.reduce((n,a)=>n+a.amount,0),slow:strongest(p,'slow'),moveRate:moveRate(p),attackRate:cooldownRate(p,'attack'),skillRate:cooldownRate(p,'skill'),locks:inputLocks(p,g),motion:motion?{id:motion.id,kind:motion.kind,start:motion.start,end:motion.end,x:p.pos.x,y:p.pos.y,dx:motion.dir.x,dy:motion.dir.y,speed:motion.speed||0,remaining:Math.max(0,(motion.range||0)-(motion.distance||0)),airborne:motion.kind==='leap',height:motion.height||0,fromX:motion.from?.x??null,fromY:motion.from?.y??null,toX:motion.to?.x??null,toY:motion.to?.y??null}:null,lockEnd:Math.max(now+(p.stunned||0),s.lock?.end||0,s.dash?.end||0,s.channel?.end||0,s.force?.end||0),rateLayers:rateLayers(p,g),channel:channel?{id:channel.ctx.castId,end:channel.end,dx:channel.dir.x,dy:channel.dir.y}:null,recast:recast?{id:recast.ctx.castId,end:recast.end,left:recast.left}:null,capture:force?{id:force.id,end:force.end,x:p.pos.x,y:p.pos.y,toX:force.to.x,toY:force.to.y,speed:force.speed}:null,bleed:s.dots.reduce((n,d)=>n+(d.kind==='bleed'?d.stacks:0),0),mark:s.marks.length,buffs:s.buffs.filter(b=>b.end>now).map(b=>({kind:b.kind,value:b.value,end:b.end,proc:b.procFrame||0}))};}
+            function wirePlayer(p,g){const s=state(p),now=frame(g),motion=s.dash&&!s.dash.dead?s.dash:null,channel=s.channel&&!s.channel.dead?s.channel:null,recast=s.recast,force=s.force&&!s.force.dead?s.force:null;return {smokeRevealEnd:brSmokeRevealed(p,now)?p.smokeRevealEnd:0,smokeRevealReason:brSmokeRevealed(p,now)?(Number(p.smokeAttackEnd||0)>now?1:2):0,life:life(p),impulseX:s.impulse?.x||0,impulseY:s.impulse?.y||0,impulseEnd:s.impulse?.end||0,stunEnd:now+(p.stunned||0),shield:s.shields.reduce((n,a)=>n+a.amount,0),slow:strongest(p,'slow'),moveRate:moveRate(p),attackRate:cooldownRate(p,'attack'),skillRate:cooldownRate(p,'skill'),locks:inputLocks(p,g),motion:motion?{id:motion.id,kind:motion.kind,start:motion.start,end:motion.end,x:p.pos.x,y:p.pos.y,dx:motion.dir.x,dy:motion.dir.y,speed:motion.speed||0,remaining:Math.max(0,(motion.range||0)-(motion.distance||0)),airborne:motion.kind==='leap',height:motion.height||0,fromX:motion.from?.x??null,fromY:motion.from?.y??null,toX:motion.to?.x??null,toY:motion.to?.y??null}:null,lockEnd:Math.max(now+(p.stunned||0),s.lock?.end||0,s.dash?.end||0,s.channel?.end||0,s.force?.end||0),rateLayers:rateLayers(p,g),channel:channel?{id:channel.ctx.castId,end:channel.end,dx:channel.dir.x,dy:channel.dir.y}:null,recast:recast?{id:recast.ctx.castId,end:recast.end,left:recast.left}:null,capture:force?{id:force.id,end:force.end,x:p.pos.x,y:p.pos.y,toX:force.to.x,toY:force.to.y,speed:force.speed}:null,bleed:s.dots.reduce((n,d)=>n+(d.kind==='bleed'?d.stacks:0),0),mark:s.marks.length,buffs:s.buffs.filter(b=>b.end>now).map(b=>({kind:b.kind,value:b.value,end:b.end,proc:b.procFrame||0}))};}
             function entityVisible(g,e,viewer,bounds){if(e.hidden||e.visible===false)return false;if(!viewer||!bounds)return true;const flying=['projectile','hook','boomerang','bomb'].includes(e.kind),reach=flying?Math.min(Math.max(0,e.range==null?Infinity:(e.phase==='return'?Infinity:e.range-(e.distance||0))),(e.speed||0)*brIncomingLeadFrames(bounds)):e.kind==='beam'?(e.length??e.range):e.range||0,end=flying?e.pos.add((e.dir||v(1,0)).mult(reach)):e.to||e.pos.add((e.dir||v(1,0)).mult(reach)),r=e.pullRadius||e.maxRadius||e.radius||e.width||20;const within=typeof brViewSegment==='function'?brViewSegment(bounds,e.pos.x,e.pos.y,end.x,end.y,r):true;if(!within)return false;if(e.kind==='capture'&&e.target&&g.isConcealedFrom?.(e.target,viewer))return false;return true;}
             function prepareEntityWire(g){return {rows:wireEntities(g),sources:new Map(world(g).entities.map(e=>[e.id,e]))};}
             function wireEntities(g,viewer=null,bounds=null,prepared=null,known=null){
@@ -6368,7 +6397,7 @@
     },function(c,s){
         const count=R.count(c,s.count,s.countCap),baseAngle=Math.atan2(c.aim.y,c.aim.x);
         for(let wave=0;wave<s.waves;wave++)R.schedule(c,wave*s.intervalFrames,function(){
-            for(let i=0;i<count;i++){const angle=baseAngle+i*Math.PI*2/count+(wave?Math.PI/count:0);R.projectile(c,{pos:point(c.owner.pos),dir:{x:Math.cos(angle),y:Math.sin(angle)},range:s.range,speed:s.speed,radius:s.width/2,damage:s.damage,pierce:true,knockback:s.knockback,stun:0,shotIndex:wave*count+i,color:'#fde047',emoji:'🌟'});}
+            brSmokeAttack(c,true);for(let i=0;i<count;i++){const angle=baseAngle+i*Math.PI*2/count+(wave?Math.PI/count:0);R.projectile(c,{pos:point(c.owner.pos),dir:{x:Math.cos(angle),y:Math.sin(angle)},range:s.range,speed:s.speed,radius:s.width/2,damage:s.damage,pierce:true,knockback:s.knockback,stun:0,shotIndex:wave*count+i,color:'#fde047',emoji:'🌟'});}
         },{cancelOnStun:true});
     });
 
@@ -6816,7 +6845,7 @@
     };
     R.skillText=function(ability,mods){
         const definition=R.defs[ability.id],s=definition.skill,caps=s.capabilities||s.caps||{};
-        const seconds=frames=>String(Math.round(frames/6)/10)+'초';
+        const seconds=frames=>brStatNumber(frames/60)+'초';
         let text=s.description||s.desc||definition.description||s.label||'고유 스킬';
         const changes=[],cd=finite(s.cooldownFrames??s.cooldown,600)*mod(mods,'skillCooldown');
         if(mod(mods,'skillCooldown')!==1)changes.push('대기 '+seconds(Math.round(cd)));
@@ -6824,9 +6853,9 @@
             const count=Math.min(finite(s.countCap??s.maxCount,99),finite(s.count,1)+Math.min(3,Math.max(0,finite(mods.skillCount))));
             changes.push((s.pulses||s.waves?'파동당 ':'')+'현재 '+count+'발');
         }
-        if(caps.damage&&s.kind!=='counter-immediate'&&(mod(mods,'skillDamage')!==1||mod(mods,'wangguiPower')!==1))changes.push('피해 '+Math.round(mod(mods,'skillDamage')*mod(mods,'wangguiPower')*100)+'%');
-        if(caps.expandable&&mod(mods,'skillSize')!==1)changes.push('크기 '+Math.round(mod(mods,'skillSize')*100)+'%');
-        if((caps.heal||caps.shield)&&mod(mods,'skillRestore')!==1)changes.push('회복·보호 '+Math.round(mod(mods,'skillRestore')*100)+'%');
+        if(caps.damage&&s.kind!=='counter-immediate'&&(mod(mods,'skillDamage')!==1||mod(mods,'wangguiPower')!==1))changes.push('피해 '+brStatNumber(mod(mods,'skillDamage')*mod(mods,'wangguiPower')*100)+'%');
+        if(caps.expandable&&mod(mods,'skillSize')!==1)changes.push('크기 '+brStatNumber(mod(mods,'skillSize')*100)+'%');
+        if((caps.heal||caps.shield)&&mod(mods,'skillRestore')!==1)changes.push('회복·보호 '+brStatNumber(mod(mods,'skillRestore')*100)+'%');
         const stun=finite(s.stunFrames??s.stun);
         if(stun>0&&mod(mods,'skillControl')!==1)changes.push('기절 '+seconds(Math.min(finite(s.stunCap,120),Math.round(stun*mod(mods,'skillControl')))));
         return text+(changes.length?' · 강화 적용: '+changes.join(' · '):'');
@@ -7519,7 +7548,7 @@
             'team-respawn':'팀 킬 대결', 'team-capture':'팀 점령전'
         };
         var BR_TIER_COLOR = {S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'};
-        var BR_ROOM_PROTOCOL=12; // v30 ring rates, presentation receipt and HP semantics: all clients must match.
+        var BR_ROOM_PROTOCOL=13; // v31 augment definitions, smoke reveal and static map semantics; no mixed clients.
         var BR_TIER_CHANCES=Object.freeze([['S',.10],['A',.20],['B',.25],['C',.30],['F',.15]]);
         // 수업용 지정 어휘 54개. 정답과 오답의 품사를 맞춰 의미가 겹치지 않게 구성한다.
         var BR_DEFAULT_QUESTIONS = [
@@ -7603,9 +7632,9 @@
 
         // v25: URL-opt-in, read-only diagnostics. No network calls, combat RNG or simulation writes.
         var brNetDebug=new URLSearchParams(location.search).get('netdebug')==='1'?brCreateNetDebug():null;
-        function brGetNetDebug(){return brNetDebug;}
+        function brGetNetDebug(){return brNetDebug;}BRMP.netDiagnostics=brNetDebug;
         function brCreateNetDebug(){
-            const KEY='dsbr.netdebug.v1.reports',NAMES=['frame','snap','rtt','age','shotMean','shotOldest','write','payloadKB','batch','sendGap','resume','sendAlive','sendDead','sendTransition','snapAlive','snapDead','snapTransition','build','flightAge','catchUpGap','aliveAge','deadAge','aliveShot','deadShot','aliveShotMean','arrivalAlive','arrivalDead','aliveRtt','presClock','presCorrection','presActorDelay','presGenerationGap','freshResume','rwShotAge','rwShotMean','firstDrawToHit','nativeVisible','rwVisible','correctionRemaining','generationAlive','generationDead',...['VIEW','RUN/FARM','RING','CAPTURE','OTHER META','UPGRADE ACK'].map(k=>'lane:'+k)];
+            const KEY='dsbr.netdebug.v1.reports',NAMES=['frame','snap','rtt','age','shotMean','shotOldest','write','payloadKB','batch','sendGap','resume','sendAlive','sendDead','sendTransition','snapAlive','snapDead','snapTransition','build','flightAge','catchUpGap','aliveAge','deadAge','aliveShot','deadShot','aliveShotMean','arrivalAlive','arrivalDead','aliveRtt','presClock','presCorrection','presActorDelay','presGenerationGap','freshResume','rwShotAge','rwShotMean','firstDrawToHit','nativeVisible','rwVisible','correctionRemaining','hostFrameGap','hostLoopDelay','catchRelease','catchEligible','catchDispatch','nativeDrawHit','rwDrawHit','generationAlive','generationDead',...['VIEW','RUN/FARM','RING','CAPTURE','OTHER META','UPGRADE ACK'].map(k=>'lane:'+k)];
             const LIMITS=[1000/30,50,150,200,250,300,500,1000];
             let state=null,panel=null,title=null,body=null,actions=null,cache=null,cacheAt=-Infinity,lastSave=-Infinity,timer=null,collapsed=false,storageError=false;
             // Fixed-size histograms: 1ms bins through 1024, then <=2.5% width. Never per-frame sort.
@@ -7648,13 +7677,18 @@
                 if(kind==='backward'||kind==='frozen'){if(brCombatPaused())d.pausedFrames=Number(d.pausedFrames||0)+1;else d[kind]++;}
                 if(kind==='lethal'){d.lethal++;if(detail.kind==='unknown')d.unknown++;}
             }
-            function seenShot(id,cast,now){const s=active();if(!s||s.role!=='student'||!foreground(s))return;const key=s.key+'|'+id;if(!firstDraws.has(key))firstDraws.set(key,{at:now,cast});
+            function seenShot(id,cast,now){const s=active();if(!s||s.role!=='student'||!foreground(s))return;const key=s.key+'|'+id;if(!firstDraws.has(key))firstDraws.set(key,{at:now,cast,lane:cast?'rw':'native'});
                 for(const [k,v] of firstDraws){if(now-v.at>4000||firstDraws.size>256)firstDraws.delete(k);else break;}}
             function confirmedShot(id,cast,now,frame){const s=active();if(!s||s.role!=='student'||!foreground(s)||!id)return;const key=s.key+'|'+id+'|'+Number(frame??now);if(confirmedDraws.has(key))return;confirmedDraws.set(key,now);for(const [k,t] of confirmedDraws){if(now-t>4000||confirmedDraws.size>256)confirmedDraws.delete(k);else break;}const v=firstDraws.get(s.key+'|'+id);
-                if(v&&(!cast||!v.cast||v.cast===cast)){add(s.metrics.firstDrawToHit,Math.max(0,now-v.at));}else s.delivery.presentation.unmatchedHit++;}
+                if(v&&(!cast||!v.cast||v.cast===cast)){add(s.metrics.firstDrawToHit,Math.max(0,now-v.at));add(s.metrics[v.lane==='rw'?'rwDrawHit':'nativeDrawHit'],Math.max(0,now-v.at));}else {s.delivery.presentation.unmatchedHit++;const d=s.delivery.presentation;d.unmatchedNative=Number(d.unmatchedNative||0)+(!cast?1:0);d.unmatchedRW=Number(d.unmatchedRW||0)+(cast?1:0);}}
             function rwScene(now,cam,w,h,zoom){const s=active();if(!s||!foreground(s)||s.role!=='student'||s.streamAlive!==true||now-Number(s.lastRwAt??-Infinity)<250)return;s.lastRwAt=now;
                 let n=0,sum=0,oldest=0;BRMP.rwDisplayCache?.forEach(q=>{const e=q.row,t=q.samples?.at(-1)?.t;if(!e||!['projectile','hook','boomerang','bomb'].includes(e.kind)||!Number.isFinite(t)||q.expired||Math.abs(q.x-cam.x)>w/zoom/2+Number(e.radius||10)||Math.abs(q.y-cam.y)>h/zoom/2+Number(e.radius||10))return;
                     const age=Math.max(0,now+Number(BRMP.presentationLead||0)-t);n++;sum+=age;oldest=Math.max(oldest,age);});add(s.metrics.rwVisible,n);if(n){add(s.metrics.rwShotAge,oldest);add(s.metrics.rwShotMean,sum/n);}}
+            function hostFrame(now){const s=active();if(!s||s.role!=='host')return;if(!foreground(s)||game?.paused||game?.ringSuspended){s.lastHostFrame=null;return;}if(s.lastHostFrame!=null){const gap=now-s.lastHostFrame;add(s.metrics.hostFrameGap,gap);if(gap>50)hostLong('frame',gap,now);}s.lastHostFrame=now;}
+            function hostLong(kind,ms,now){const s=active();if(!s||s.role!=='host'||!foreground(s)||game?.paused||game?.ringSuspended)return;const d=s.delivery.stability;d.longFrames++;d.longest=Math.max(d.longest,ms);const item={kind,ms,at:now,frame:Number(game?.frame||0),inFlight:Number(BRMP.publishInFlight||0)};if(d.worst.length<12)d.worst.push(item);else{let i=0;for(let j=1;j<12;j++)if(d.worst[j].ms<d.worst[i].ms)i=j;if(ms>d.worst[i].ms)d.worst[i]=item;}}
+            function catchStage(kind,ms){const s=active();if(s?.role==='host')add(s.metrics[kind],Math.max(0,ms));}
+            function catchWait(reason,n=1){const s=active();if(s?.role==='host'){const d=s.delivery.stability.catchWait;d[reason]=(d[reason]||0)+n;}}
+            function resources(){const s=active();if(!s)return;const names=['hostTimer','hostHeartbeat','hostRenderTimer','quizTimer','quizValidationTimer','viewTimer','monitorTimer','summaryTimer','ringTimer','inputTimer'];const timers=names.filter(k=>BRMP[k]!=null).length,refs=['hostRefs','studentRefs','battleRefs','runRefs'].reduce((n,k)=>n+(BRMP[k]?.length||0),0),raf=Number(!!BRMP.renderFrame)+Number(typeof animationId!=='undefined'&&!!animationId),list=s.delivery.stability.resources,last=list.at(-1);if(!last||last.timers!==timers||last.refs!==refs||last.raf!==raf){list.push({frame:Number(game?.frame||0),timers,refs,raf});if(list.length>12)list.shift();}}
             function accepted(view,now){const s=active();if(!s||s.role!=='student')return;s.players=Number(view.total||view.roster?.length||s.players);s.duration=Math.max(s.duration,elapsed(view));
                 const visible=foreground(s);
                 // Capture pre-arrival conditions before ingest resets the authority clock and shot samples.
@@ -7678,7 +7712,7 @@
                 const age=packetAge(now,s.authorityFrame);if(age!=null){add(s.metrics.age,age);if(s.streamAlive!==null)add(s.metrics[s.streamAlive?'aliveAge':'deadAge'],age);s.live.age=age;}
                 const shots=visibleAges(now,cam,w,h,zoom);s.live.shot=shots?.oldest??null;s.live.shotMean=shots?.mean??null;add(s.metrics.nativeVisible,shots?.count||0);
                 if(shots){add(s.metrics.shotMean,shots.mean);add(s.metrics.shotOldest,shots.oldest);if(s.streamAlive!==null)add(s.metrics[s.streamAlive?'aliveShot':'deadShot'],shots.oldest);if(s.streamAlive===true)add(s.metrics.aliveShotMean,shots.mean);}}
-                        function deliveryState(old){const out={occupancyMs:[0,0,0,0,0],stalls:[0,0,0],longestBatch:0,affected500:0,criticalObserved:0,refreshWanted:0,catchUps:0,busyReasons:{},transitions:{},reasons:{},runCalls:0,lanes:{},slowWrites:[]};if(old)Object.assign(out,old);for(const k of ['VIEW','RUN/FARM','RING','CAPTURE','OTHER META','UPGRADE ACK'])if(!out.lanes[k])out.lanes[k]={writes:0,bytes:0,failures:0};out.presentation=out.presentation||{modes:{},snaps:{},backward:0,frozen:0,lethal:0,unknown:0,unmatchedHit:0};return out;}
+                        function deliveryState(old){const out={occupancyMs:[0,0,0,0,0],stalls:[0,0,0],longestBatch:0,affected500:0,criticalObserved:0,refreshWanted:0,catchUps:0,busyReasons:{},transitions:{},reasons:{},runCalls:0,lanes:{},slowWrites:[]};if(old)Object.assign(out,old);for(const k of ['VIEW','RUN/FARM','RING','CAPTURE','OTHER META','UPGRADE ACK'])if(!out.lanes[k])out.lanes[k]={writes:0,bytes:0,failures:0};out.presentation=out.presentation||{modes:{},snaps:{},backward:0,frozen:0,lethal:0,unknown:0,unmatchedHit:0};out.stability=out.stability||{longFrames:0,longest:0,worst:[],catchWait:{},resources:[],loafSupported:typeof PerformanceObserver!=='undefined'&&!!PerformanceObserver.supportedEntryTypes?.includes('long-animation-frame')};return out;}
             function arrival(view,now){const s=active();if(!s||s.role!=='student'||!foreground(s)||s.streamAlive==null||!Number.isFinite(BRMP.netClockOffset))return;const age=Math.max(0,now-(Number(view.frame)*1000/60+BRMP.netClockOffset));add(s.metrics[s.streamAlive?'arrivalAlive':'arrivalDead'],age);if(s.generationAlive===s.streamAlive&&s.generationFrame!=null&&view.frame>s.generationFrame&&!BRMP.presentationResuming)add(s.metrics[s.streamAlive?'generationAlive':'generationDead'],(view.frame-s.generationFrame)*1000/60);s.generationFrame=view.frame;s.generationAlive=s.streamAlive;}
             function occupancy(now,n){const s=active();if(!s||s.role!=='host')return;if(s.occupancyAt!=null)s.delivery.occupancyMs[Math.min(4,Math.max(0,s.occupancyValue||0))]+=Math.max(0,now-s.occupancyAt);s.occupancyAt=now;s.occupancyValue=n;}
             function refreshWanted(){const s=active();if(s?.role==='host')s.delivery.refreshWanted++;}
@@ -7716,7 +7750,7 @@
                     localStorage.setItem(KEY,JSON.stringify([record,...read().filter(x=>!(x.key===state.key&&x.role===state.role))].slice(0,3)));storageError=false;
                 }catch(e){storageError=true;}}
             function fmt(v,d=1){return Number.isFinite(v)?v.toFixed(d):'—';}
-            function report(){const q=summary();if(!q)return '아직 측정된 경기가 없습니다.';const m=q.metrics,lines=['DSbattleroyal '+q.role.toUpperCase()+(q.role==='host'?' STREAM REPORT':' NETWORK REPORT'),'v30 · combat continuity / stall recovery diagnostics · '+new Date().toISOString(),'',`Mode: ${q.mode}`,`Players: ${q.players}`,`Match duration: ${brFormatTime(q.duration)} (${fmt(q.duration)} s)`,`${q.role==='host'?'Observed wall time':'Observed foreground'}: ${fmt(q.observedMs/1000)} s`,`Refresh continuations: ${q.refreshes}`];
+            function report(){const q=summary();if(!q)return '아직 측정된 경기가 없습니다.';const m=q.metrics,lines=['DSbattleroyal '+q.role.toUpperCase()+(q.role==='host'?' STREAM REPORT':' NETWORK REPORT'),'v31 · stability / survival / augment diagnostics · '+new Date().toISOString(),'',`Mode: ${q.mode}`,`Players: ${q.players}`,`Match duration: ${brFormatTime(q.duration)} (${fmt(q.duration)} s)`,`${q.role==='host'?'Observed wall time':'Observed foreground'}: ${fmt(q.observedMs/1000)} s`,`Refresh continuations: ${q.refreshes}`];
                 function block(label,x,thresholds=[]){lines.push('',label,`samples: ${x.samples} | avg: ${fmt(x.avg)} | p50: ${fmt(x.p50)} | p95: ${fmt(x.p95)} | max: ${fmt(x.max)}`);for(const t of thresholds)lines.push(`>${t}ms: ${fmt(x.over.find(a=>a[0]===t)?.[1])}%`);}
                 if(q.role==='student'){lines.push('','RENDER',`FPS avg: ${m.frame.avg?fmt(1000/m.frame.avg):'—'}`,`FPS median: ${m.frame.p50?fmt(1000/m.frame.p50):'—'}`,`FPS 1% low (1000/P99 frame): ${m.frame.p99?fmt(1000/m.frame.p99):'—'}`,`P95 frame: ${fmt(m.frame.p95)} ms`,`Below 30 FPS time: ${fmt(m.frame.time[0][1])}%`,`Below 20 FPS time: ${fmt(m.frame.time[1][1])}%`);
                     block('ALIVE / ACTIVE COMBAT SNAPSHOT (ms)',m.snapAlive,[150,200,300,500]);block('DEAD / QUIZ / SPECTATOR SNAPSHOT (ms)',m.snapDead,[150,200,300,500]);block('ALIVE↔DEAD TRANSITION GAP (ms, excluded from both groups)',m.snapTransition);block('OVERALL SNAPSHOT (ms)',m.snap,[150,200,300,500]);block('INPUT RTT during ALIVE (ms)',m.aliveRtt,[150,250]);block('INPUT RTT (overall, unique acknowledged seq, ms)',m.rtt,[150,250]);block('ALIVE ARRIVAL AUTHORITY AGE (accepted packet, no presentation lead, ms)',m.arrivalAlive);block('DEAD ARRIVAL AUTHORITY AGE (ms)',m.arrivalDead);block('ALIVE PACKET AGE (render sampled, ms)',m.aliveAge);block('DEAD PACKET AGE (render sampled, ms)',m.deadAge);block('PACKET AGE (overall mapped latest authority, ms)',m.age);block('ALIVE SHOT AGE (oldest visible native shot, ms)',m.aliveShot);block('DEAD SHOT AGE (ms)',m.deadShot);block('ALIVE SHOT MEAN (ms)',m.aliveShotMean);block('SHOT AGE (overall oldest visible drawProjectiles sample per observation, ms)',m.shotOldest);block('SHOT MEAN (mean visible drawProjectiles age per observation, ms)',m.shotMean);
@@ -7735,6 +7769,7 @@
 
                 if(q.role==='student'){const p=q.delivery.presentation;block('SOURCE GENERATION GAP (accepted frame delta, ms)',m.presGenerationGap);block('ALIVE SOURCE GENERATION GAP (ms)',m.generationAlive);block('DEAD SOURCE GENERATION GAP (ms)',m.generationDead);block('NATIVE VISIBLE SHOTS (count, no local preview)',m.nativeVisible);block('RW VISIBLE SHOTS (count, alive)',m.rwVisible);block('CORRECTION REMAINING (ms)',m.correctionRemaining);block('CLOCK CORRECTION (absolute mapped source shift, ms)',m.presClock);block('ACTOR DISPLAY BUFFER (configured, not measured total positional delay, ms)',m.presActorDelay);block('REMOTE MODEL CORRECTION (world units)',m.presCorrection);block('ALIVE RW SHOT AGE (oldest visible rework projectile, ms)',m.rwShotAge);block('ALIVE RW SHOT MEAN (ms)',m.rwShotMean);block('MATCHED FIRST DRAW → CONFIRMED HIT (ms; unmatched not inferred)',m.firstDrawToHit);block('RESUME → FIRST FRESH VIEW (mapped age <=300ms, ms)',m.freshResume);
                     lines.push('','PRESENTATION',`Motion sampled actor-ms: ${JSON.stringify(p.modes)}`,`Motion ratio %: ${JSON.stringify(Object.fromEntries(Object.entries(p.modes).map(([k,v])=>[k,Number((100*v/Math.max(1,Object.values(p.modes).reduce((n,t)=>n+t,0))).toFixed(1))])))}`,`Presentation events: ${JSON.stringify(p.events||{})}`,`Viewer regimes actor-ms (initial600ms warm-up separate): ${JSON.stringify(p.regimes||{})}`,`Paused timeline observations (excluded from freeze count): ${p.pausedFrames||0}`,`Authority snaps by reason: ${JSON.stringify(p.snaps)}`,`Backward clock frames: ${p.backward} | unchanged frames: ${p.frozen}`,`Lethal receipts: ${p.lethal} | unknown: ${p.unknown} | hit without matched visible shot: ${p.unmatchedHit}`);}
+                if(q.delivery.stability){const d=q.delivery.stability;lines.push('','v31 STABILITY (local diagnostics; correlations only)');if(q.role==='host'){block('HOST FOREGROUND FRAME GAP (ms)',m.hostFrameGap);block('HOST DIAGNOSTIC TIMER OVERRUN (ms)',m.hostLoopDelay);block('WRITE SETTLEMENT → FLIGHT RELEASE (ms)',m.catchRelease);block('CATCH-UP READY → FIRST ELIGIBLE TICK (ms)',m.catchEligible);block('ELIGIBLE → DISPATCH (ms)',m.catchDispatch);lines.push('Catch-up wait observations: '+JSON.stringify(d.catchWait),'Long frame/LoAF observations (may overlap): '+d.longFrames+'; max '+fmt(d.longest)+'ms; LoAF supported: '+d.loafSupported,'Worst bounded12: '+JSON.stringify(d.worst),'Known timer/ref/rAF observations (not all browser resources): '+JSON.stringify(d.resources));}else{block('NATIVE FIRST DRAW → HIT (ms)',m.nativeDrawHit);block('RW FIRST DRAW → HIT (ms)',m.rwDrawHit);lines.push('Unmatched native/RW: '+Number(q.delivery.presentation.unmatchedNative||0)+' / '+Number(q.delivery.presentation.unmatchedRW||0));}}
                 lines.push('','BACKGROUND',`events: ${q.backgroundEvents} | duration: ${fmt(q.backgroundMs/1000)} s | resumes: ${q.resumeCount}`);block('RESUME RECOVERY (foreground → first accepted view, ms)',m.resume);
                 lines.push('','NOTES','Histograms: exact count/mean/max/threshold ratios; approximate quantiles (<=1 ms bins below 1024, <=2.5% above).','No-shot intervals are not zero samples. Shot scope: visible drawProjectiles only, not rework entities/FX/local predicted shots.','Clock age uses existing mapping; it is an estimate, not independent measured one-way latency. Arrival age excludes presentation lead; render age retains the previous diagnostic definition.','Lane bytes are UTF-8 payload estimates, excluding transport overhead. VIEW uses viewer JSON only; summary is piggybacked, not an extra write.','Flight age is time-sampled every publisher tick; batch duration is measured at real Promise completion. One unresolved write cannot be cancelled; catch-up starts only after its settlement.','Background and first resume gaps excluded from student timing; foreground old-input ACKs excluded.','No names, room numbers or session IDs in this report. No diagnostic Firebase writes.');if(storageError)lines.push('WARNING: localStorage unavailable; memory report only.');return lines.join('\n');}
             async function copy(){const text=report();try{if(!navigator.clipboard)throw Error('clipboard');await navigator.clipboard.writeText(text);brToast('진단 보고서를 복사했습니다.');}catch(e){let box=document.getElementById('br-netdebug-copy');if(!box){box=document.createElement('div');box.id='br-netdebug-copy';box.innerHTML='<label>복사가 차단되었습니다. 아래 내용을 선택해 복사하세요.<textarea readonly aria-label="진단 보고서"></textarea></label><button type="button">닫기</button>';document.body.appendChild(box);box.querySelector('button').onclick=()=>box.remove();}const ta=box.querySelector('textarea');ta.value=text;ta.focus();ta.select();try{if(document.execCommand('copy'))brToast('진단 보고서를 복사했습니다.');}catch(ignore){}}}
@@ -7751,12 +7786,12 @@
                 if(storageError)body.textContent+='\n저장 불가 · 메모리만';}
             function finish(result){const s=ensure();if(!s)return;const now=performance.now();if(!s.ended){if(s.role==='host'||foreground(s))s.observedMs+=Math.max(0,now-s.lastTick);if(s.hiddenAt!=null){s.backgroundMs+=Math.max(0,now-s.hiddenAt);s.hiddenAt=null;}s.lastTick=now;}s.duration=Math.max(s.duration,Number(result?.duration||0));s.players=Array.isArray(result?.players)?result.players.length:s.players;s.ended=true;cache=summary();save();
                 if(!actions){actions=document.createElement('div');actions.id='br-netdebug-actions';const c=document.createElement('button'),d=document.createElement('button');c.className=d.className='br-btn br-btn-ghost';c.textContent='📋 진단 보고서 복사';d.textContent='💾 TXT 저장';c.onclick=copy;d.onclick=download;actions.append(c,d);brEl('br-result-winner').parentElement.appendChild(actions);}if(panel)panel.hidden=true;}
-            function tick(){const s=ensure();if(!s){if(panel)panel.hidden=true;return;}const now=performance.now(),battle=BRMP.roomMeta?.phase==='battle';
+            function tick(){const s=ensure();if(!s){if(panel)panel.hidden=true;return;}const now=performance.now(),battle=BRMP.roomMeta?.phase==='battle';if(s.role==='host'&&foreground(s)&&s.debugTickAt!=null){const late=Math.max(0,now-s.debugTickAt-500);add(s.metrics.hostLoopDelay,late);}s.debugTickAt=now;resources();
                 if(battle&&!s.ended&&(s.role==='host'||foreground(s)))s.observedMs+=Math.max(0,now-s.lastTick);s.lastTick=now;
                 if(now-cacheAt>=1500){cache=summary();cacheAt=now;const dt=now-Number(s.rateAt||now);s.live.viewsPerSec=dt>0?(s.views-Number(s.rateViews||0))*1000/dt:0;s.rateAt=now;s.rateViews=s.views;}
                 paint();if(now-lastSave>=5000){save();lastSave=now;}}
-            function init(){if(timer)return;timer=setInterval(()=>{try{tick();}catch(e){/* Diagnostics must not stop the game. */}},500);document.addEventListener('visibilitychange',visibility);window.addEventListener('pagehide',save);}
-            return {presentation,seenShot,confirmedShot,rwScene,init,accepted,arrival,ack,frame,scene,publish,busy,batch,build,written,visibility,finish,tick,summary,report,save,copy,download,ensure,utf8Length,occupancy,refreshWanted,flightAge,criticalStall,catchUp,batchClosed,busyReason,profileChange,laneStart,laneEnd,runCall,getState:()=>state};
+            function init(){if(timer)return;try{if(typeof PerformanceObserver!=='undefined'&&PerformanceObserver.supportedEntryTypes?.includes('long-animation-frame')){const observer=new PerformanceObserver(list=>{for(const e of list.getEntries()){const s=active();if(s)s.delivery.stability.loafSupported=true;hostLong('loaf',e.duration,e.startTime+e.duration);}});observer.observe({type:'long-animation-frame',buffered:false});}}catch(ignore){}timer=setInterval(()=>{try{tick();}catch(e){/* Diagnostics must not stop the game. */}},500);document.addEventListener('visibilitychange',visibility);window.addEventListener('pagehide',save);}
+            return {hostFrame,hostLong,catchStage,catchWait,resources,presentation,seenShot,confirmedShot,rwScene,init,accepted,arrival,ack,frame,scene,publish,busy,batch,build,written,visibility,finish,tick,summary,report,save,copy,download,ensure,utf8Length,occupancy,refreshWanted,flightAge,criticalStall,catchUp,batchClosed,busyReason,profileChange,laneStart,laneEnd,runCall,getState:()=>state};
         }
 
 
@@ -8011,7 +8046,7 @@
             const sword=a.sub==='SWORD_ORBIT',wind=a.sub==='TORNADO_ORBIT';
             return {radius:radius+(sword?48:wind?44:50)+(sword?28:wind?29:30)*Number(mods.skillSize||1),range:sword?285:wind?330:260};
         }
-        function brEffectiveBasicText(a,mods={}) {return brEffectiveBasicTextBase(a,mods)+(Number(mods.wangguiPower||1)!==1?' · 왕귀 공격력 '+Math.round(Number(mods.wangguiPower)*100)+'%':'');}
+        function brEffectiveBasicText(a,mods={}) {return brEffectiveBasicTextBase(a,mods)+(Number(mods.wangguiPower||1)!==1?' · 왕귀 공격력 '+brStatNumber(Number(mods.wangguiPower)*100)+'%':'');}
         function brEffectiveBasicTextBase(a,mods={}) {
             const rework=brReworkDefinition(a),profile=brRunBasicProfile(a,mods);
             if(rework&&window.BRRework?.basicText)return window.BRRework.basicText(a,mods,profile);
@@ -8020,7 +8055,7 @@
             if(profile.pierce)tags.push('관통');if(profile.bounces)tags.push('벽 반사 '+profile.bounces+'회');if(profile.explode>0)tags.push('폭발');if(profile.status==='poison')tags.push('중독');
             return '일반 투사체 · '+tags.join(' · ');
         }
-        function brEffectiveSkillText(a,mods={}) {const text=brEffectiveSkillTextBase(a,mods);return text+(!brReworkDefinition(a)&&brRunCapabilities(a).skill.damage&&brGetPlayableSkillInfo(a)?.key!=='guard-counter'&&Number(mods.wangguiPower||1)!==1?' · 왕귀 공격력 '+Math.round(Number(mods.wangguiPower)*100)+'%':'');}
+        function brEffectiveSkillText(a,mods={}) {const text=brEffectiveSkillTextBase(a,mods);return text+(!brReworkDefinition(a)&&brRunCapabilities(a).skill.damage&&brGetPlayableSkillInfo(a)?.key!=='guard-counter'&&Number(mods.wangguiPower||1)!==1?' · 왕귀 공격력 '+brStatNumber(Number(mods.wangguiPower)*100)+'%':'');}
         function brEffectiveSkillTextBase(a,mods={}) {
             if(brReworkDefinition(a)&&window.BRRework?.skillText)return window.BRRework.skillText(a,mods);
             const info=brGetPlayableSkillInfo(a),key=info?.key||'native',sub=a.sub,percent=n=>(Math.round(n*10000)/100)+'%',seconds=f=>String(Math.round(f/6)/10)+'초';
@@ -8982,29 +9017,32 @@
         function brCloseEncyclopedia() {var modal=brEl('br-encyclopedia');if(modal)modal.classList.add('br-hidden');}
         // Run progression is match-scoped. Only choices rebuild cached modifiers.
         var BR_RUN_XP=[0,2,3,4,5];
-        const BR_WANGGUI=Object.freeze({A:[[1.15,1.15],[1.30,1.30],[1.45,1.45]],B:[[1.25,1.25],[1.50,1.50],[1.70,1.70]],C:[[1.35,1.40],[1.70,1.80],[2,2.20]],F:[[1.60,1.80],[2.20,2.60],[2.60,3.40]]});
+        const BR_WANGGUI=Object.freeze({"A":[[1.165,1.165],[1.33,1.33],[1.495,1.495]],"B":[[1.275,1.275],[1.55,1.55],[1.77,1.77]],"C":[[1.385,1.44],[1.77,1.88],[2.1,2.32]],"F":[[1.66,1.88],[2.32,2.76],[2.76,3.64]]});
         function brWangguiValues(a,tier){return BR_WANGGUI[a?.t]?.[Number(tier)-1]||[1,1];}
         function brWangguiAllowed(a,paths){return !!BR_WANGGUI[a?.t]&&!['titan','heavy','amplify'].some(id=>Number(paths?.[id])>0);}
         var BR_RUN_PATHS={
             wanggui:{name:'왕귀',icon:'👑',family:'BODY',tiers:[{},{},{}],text:['왕귀 I','왕귀 II','왕귀 III']},
-            rapid:{"name":"RAPID","icon":"⚡","family":"BASIC","tiers":[{"basicSpeed":1.4,"basicDamage":0.9},{"basicSpeed":1.75,"basicDamage":0.95},{"basicSpeed":2.3,"basicDamage":1.05}],"text":["공격속도 140% · 일반 피해 90%","공격속도 175% · 일반 피해 95%","공격속도 230% · 일반 피해 105%"]},
-            heavy:{"name":"HEAVY","icon":"💥","family":"BASIC","tiers":[{"basicDamage":1.4,"basicSpeed":0.9},{"basicDamage":1.75,"basicSpeed":0.95},{"basicDamage":2.2,"basicSpeed":1}],"text":["일반 피해 140% · 공격속도 90%","일반 피해 175% · 공격속도 95%","일반 피해 220% · 공격속도 100%"]},
-            multi:{"name":"MULTI","icon":"🔱","family":"BASIC","tiers":[{"basicCount":1,"basicDamage":0.9},{"basicCount":2,"basicDamage":0.9},{"basicCount":3,"basicDamage":0.9}],"text":["일반 탄환 +1 · 탄당 피해 90%","일반 탄환 +2 · 탄당 피해 90%","일반 탄환 +3 · 탄당 피해 90%"]},
-            giant:{"name":"GIANT","icon":"🔵","family":"BASIC","tiers":[{"basicSize":1.35,"basicVelocity":0.95},{"basicSize":1.65,"basicVelocity":1},{"basicSize":2,"basicVelocity":1.05}],"text":["일반 탄환 크기 135% · 탄속 95%","일반 탄환 크기 165% · 탄속 100%","일반 탄환 크기 200% · 탄속 105%"]},
-            impact:{"name":"IMPACT","icon":"🥊","family":"BASIC","tiers":[{"basicKnockback":1.4,"basicDamage":0.95},{"basicKnockback":1.8,"basicDamage":1},{"basicKnockback":2.3,"basicDamage":1.05}],"text":["일반 넉백 140% · 일반 피해 95%","일반 넉백 180% · 일반 피해 100%","일반 넉백 230% · 일반 피해 105%"]},
-            wide:{"name":"WIDE STRIKE","icon":"⚔️","family":"BASIC","tiers":[{"basicRange":1.2,"basicSpeed":0.95},{"basicRange":1.4,"basicSpeed":1},{"basicRange":1.65,"basicSpeed":1.05}],"text":["근접 범위 120% · 공격속도 95%","근접 범위 140% · 공격속도 100%","근접 범위 165% · 공격속도 105%"]},
-            quick:{"name":"QUICK CAST","icon":"⏱️","family":"SKILL","tiers":[{"skillCooldown":0.75,"skillDamage":0.92},{"skillCooldown":0.62,"skillDamage":0.97},{"skillCooldown":0.48,"skillDamage":1}],"text":["스킬 쿨다운 75% · 스킬 피해 92%","스킬 쿨다운 62% · 스킬 피해 97%","스킬 쿨다운 48% · 스킬 피해 100%"]},
-            amplify:{"name":"AMPLIFY","icon":"🔥","family":"SKILL","tiers":[{"skillDamage":1.4,"skillCooldown":1.1},{"skillDamage":1.75,"skillCooldown":1.05},{"skillDamage":2.2,"skillCooldown":1}],"text":["스킬 피해 140% · 스킬 쿨다운 110%","스킬 피해 175% · 스킬 쿨다운 105%","스킬 피해 220% · 스킬 쿨다운 100%"]},
-            expansion:{"name":"EXPANSION","icon":"🌀","family":"SKILL","tiers":[{"skillSize":1.3,"skillDamage":0.95},{"skillSize":1.6,"skillDamage":1},{"skillSize":1.95,"skillDamage":1.05}],"text":["스킬 범위·크기 130% · 스킬 피해 95%","스킬 범위·크기 160% · 스킬 피해 100%","스킬 범위·크기 195% · 스킬 피해 105%"]},
-            multicast:{"name":"MULTICAST","icon":"☄️","family":"SKILL","tiers":[{"skillCount":1,"skillDamage":0.9},{"skillCount":2,"skillDamage":0.9},{"skillCount":3,"skillDamage":0.9}],"text":["스킬 탄환 +1 · 탄당 피해 90%","스킬 탄환 +2 · 탄당 피해 90%","스킬 탄환 +3 · 탄당 피해 90%"]},
-            control:{"name":"CONTROL","icon":"❄️","family":"SKILL","tiers":[{"skillControl":1.25,"skillDamage":0.95},{"skillControl":1.45,"skillDamage":1},{"skillControl":1.65,"skillDamage":1.05}],"text":["스킬 제어 효과 125% · 스킬 피해 95%","스킬 제어 효과 145% · 스킬 피해 100%","스킬 제어 효과 165% · 스킬 피해 105%"]},
-            restore:{"name":"RESTORE","icon":"💚","family":"SKILL","tiers":[{"skillRestore":1.3,"skillCooldown":1.05},{"skillRestore":1.55,"skillCooldown":1},{"skillRestore":1.85,"skillCooldown":1}],"text":["회복·보호량 130% · 스킬 쿨다운 105%","회복·보호량 155% · 스킬 쿨다운 100%","회복·보호량 185% · 스킬 쿨다운 100%"]},
-            swift:{"name":"SWIFT","icon":"👟","family":"BODY","tiers":[{"moveSpeed":1.15,"maxHp":0.95},{"moveSpeed":1.26,"maxHp":1},{"moveSpeed":1.38,"maxHp":1.05}],"text":["이동속도 115% · 최대 HP 95%","이동속도 126% · 최대 HP 100%","이동속도 138% · 최대 HP 105%"]},
-            titan:{"name":"TITAN","icon":"🛡️","family":"BODY","tiers":[{"maxHp":1.3,"moveSpeed":0.95},{"maxHp":1.5,"moveSpeed":0.98},{"maxHp":1.75,"moveSpeed":1}],"text":["최대 HP 130% · 이동속도 95%","최대 HP 150% · 이동속도 98%","최대 HP 175% · 이동속도 100%"]},
-            regen:{"name":"REGEN","icon":"🌱","family":"BODY","tiers":[{"regenRate":0.018,"regenDelay":270,"maxHp":0.95},{"regenRate":0.026,"regenDelay":210,"maxHp":1},{"regenRate":0.035,"regenDelay":150,"maxHp":1.05}],"text":["4.5초 무피격 후 초당 HP 1.8% · 최대 HP 95%","3.5초 무피격 후 초당 HP 2.6% · 최대 HP 100%","2.5초 무피격 후 초당 HP 3.5% · 최대 HP 105%"]},
-            signature_range:{"name":"LONG STEP","icon":"🪽","family":"SKILL","tiers":[{"signatureRange":1.15,"skillCooldown":1.05},{"signatureRange":1.28,"skillCooldown":1.02},{"signatureRange":1.42,"skillCooldown":1}],"text":["고유 이동 스킬 거리 115% · 스킬 쿨다운 105%","고유 이동 스킬 거리 128% · 스킬 쿨다운 102%","고유 이동 스킬 거리 142% · 스킬 쿨다운 100%"],"signature":true},
-            signature_duration:{"name":"AFTERGLOW","icon":"✨","family":"SKILL","tiers":[{"signatureDuration":1.2,"skillCooldown":1.08},{"signatureDuration":1.35,"skillCooldown":1.04},{"signatureDuration":1.5,"skillCooldown":1}],"text":["고유 지속 스킬 시간 120% · 스킬 쿨다운 108%","고유 지속 스킬 시간 135% · 스킬 쿨다운 104%","고유 지속 스킬 시간 150% · 스킬 쿨다운 100%"],"signature":true}
+            rapid:{"name":"RAPID","icon":"⚡","family":"BASIC","tiers":[{"basicSpeed":1.44,"basicDamage":0.9},{"basicSpeed":1.825,"basicDamage":0.95},{"basicSpeed":2.43,"basicDamage":1.055}]},
+            heavy:{"name":"HEAVY","icon":"💥","family":"BASIC","tiers":[{"basicDamage":1.44,"basicSpeed":0.9},{"basicDamage":1.825,"basicSpeed":0.95},{"basicDamage":2.32,"basicSpeed":1}]},
+            multi:{"name":"MULTI","icon":"🔱","family":"BASIC","tiers":[{"basicCount":1,"basicDamage":0.95},{"basicCount":2,"basicDamage":0.95},{"basicCount":3,"basicDamage":0.95}]},
+            giant:{"name":"GIANT","icon":"🔵","family":"BASIC","tiers":[{"basicSize":1.385,"basicVelocity":0.95},{"basicSize":1.715,"basicVelocity":1},{"basicSize":2.1,"basicVelocity":1.055}]},
+            impact:{"name":"IMPACT","icon":"🥊","family":"BASIC","tiers":[{"basicKnockback":1.44,"basicDamage":0.95},{"basicKnockback":1.88,"basicDamage":1},{"basicKnockback":2.43,"basicDamage":1.055}]},
+            wide:{"name":"WIDE STRIKE","icon":"⚔️","family":"BASIC","tiers":[{"basicRange":1.22,"basicSpeed":0.95},{"basicRange":1.44,"basicSpeed":1},{"basicRange":1.715,"basicSpeed":1.055}]},
+            quick:{"name":"QUICK CAST","icon":"⏱️","family":"SKILL","tiers":[{"skillCooldown":0.725,"skillDamage":0.92},{"skillCooldown":0.582,"skillDamage":0.97},{"skillCooldown":0.428,"skillDamage":1}]},
+            amplify:{"name":"AMPLIFY","icon":"🔥","family":"SKILL","tiers":[{"skillDamage":1.44,"skillCooldown":1.1},{"skillDamage":1.825,"skillCooldown":1.05},{"skillDamage":2.32,"skillCooldown":1}]},
+            expansion:{"name":"EXPANSION","icon":"🌀","family":"SKILL","tiers":[{"skillSize":1.33,"skillDamage":0.95},{"skillSize":1.66,"skillDamage":1},{"skillSize":2.045,"skillDamage":1.055}]},
+            multicast:{"name":"MULTICAST","icon":"☄️","family":"SKILL","tiers":[{"skillCount":1,"skillDamage":0.95},{"skillCount":2,"skillDamage":0.95},{"skillCount":3,"skillDamage":0.95}]},
+            control:{"name":"CONTROL","icon":"❄️","family":"SKILL","tiers":[{"skillControl":1.275,"skillDamage":0.95},{"skillControl":1.495,"skillDamage":1},{"skillControl":1.715,"skillDamage":1.055}]},
+            restore:{"name":"RESTORE","icon":"💚","family":"SKILL","tiers":[{"skillRestore":1.33,"skillCooldown":1.05},{"skillRestore":1.605,"skillCooldown":1},{"skillRestore":1.935,"skillCooldown":1}]},
+            swift:{"name":"SWIFT","icon":"👟","family":"BODY","tiers":[{"moveSpeed":1.165,"maxHp":0.95},{"moveSpeed":1.286,"maxHp":1},{"moveSpeed":1.418,"maxHp":1.055}]},
+            titan:{"name":"TITAN","icon":"🛡️","family":"BODY","tiers":[{"maxHp":1.33,"moveSpeed":0.95},{"maxHp":1.55,"moveSpeed":0.98},{"maxHp":1.825,"moveSpeed":1}]},
+            regen:{"name":"REGEN","icon":"🌱","family":"BODY","tiers":[{"regenRate":0.0198,"regenDelay":270,"maxHp":0.95},{"regenRate":0.0286,"regenDelay":210,"maxHp":1},{"regenRate":0.0385,"regenDelay":150,"maxHp":1.055}]},
+            signature_range:{"name":"LONG STEP","icon":"🪽","family":"SKILL","tiers":[{"signatureRange":1.165,"skillCooldown":1.05},{"signatureRange":1.308,"skillCooldown":1.02},{"signatureRange":1.462,"skillCooldown":1}],"signature":true},
+            signature_duration:{"name":"AFTERGLOW","icon":"✨","family":"SKILL","tiers":[{"signatureDuration":1.22,"skillCooldown":1.08},{"signatureDuration":1.385,"skillCooldown":1.04},{"signatureDuration":1.55,"skillCooldown":1}],"signature":true}
         };
+        function brRunTierText(id,d){const labels={basicSpeed:'공격속도',basicDamage:'일반 피해',basicCount:'일반 탄환',basicSize:'일반 탄환 크기',basicVelocity:'탄속',basicKnockback:'일반 넉백',basicRange:'근접 범위',skillCooldown:'스킬 쿨타임',skillDamage:'스킬 피해',skillSize:'스킬 범위·크기',skillCount:'스킬 탄환',skillControl:'제어 효과',skillRestore:'회복·보호량',moveSpeed:'이동속도',maxHp:'최대 HP',signatureRange:'고유 이동 거리',signatureDuration:'고유 지속 시간'};
+            const out=[];for(const [k,v] of Object.entries(d)){if(k==='regenDelay')continue;if(k==='regenRate'){out.push(brStatNumber(d.regenDelay/60)+'초 무피격 후 초당 HP '+brStatNumber(v*100)+'%');continue;}if(k.endsWith('Count')){out.push(labels[k]+' +'+v);continue;}const pct=(v-1)*100;out.push(labels[k]+' '+(k==='skillCooldown'&&v<1?brStatNumber((1-v)*100)+'% 감소':pct>0?'+'+brStatNumber(pct)+'%':pct<0?brStatNumber(-pct)+'% 감소':'기본 유지')+(v!==1?' (×'+brStatNumber(v)+')':''));}return out.join(' · ');}
+        for(const [id,path] of Object.entries(BR_RUN_PATHS))if(id!=='wanggui')path.text=path.tiers.map(d=>brRunTierText(id,d));
         function brRunDefaultMods(){return {wangguiHp:1,wangguiPower:1,basicSpeed:1,basicDamage:1,basicCount:0,basicSize:1,basicVelocity:1,basicKnockback:1,basicRange:1,skillCooldown:1,skillDamage:1,skillCount:0,skillSize:1,skillControl:1,skillRestore:1,skillDuration:1,moveSpeed:1,maxHp:1,regenRate:0,regenDelay:300,signatureRange:1,signatureDuration:1};}
         function brRunMatchKey(){return String(BRMP.roomCode||'local')+'|'+Number(BRMP.roomMeta&&BRMP.roomMeta.matchRound||0)+'|'+Number(BRMP.roomMeta&&BRMP.roomMeta.battleStartedAt||0);}
         function brInitRun(p){
@@ -9021,7 +9059,7 @@
                 if(id==='quick'&&k==='skillDamage'&&!capabilities.skill?.damage){if(capabilities.skill?.duration)m.skillDuration+=d[k]-1;else if(capabilities.skill?.heal||capabilities.skill?.shield)m.skillRestore+=d[k]-1;return;}
                 m[k]+=d[k]-1;
             });});
-            var caps={basicSpeed:[.5,2.50],basicDamage:[.25,2.75],basicSize:[1,2],basicVelocity:[.75,1.25],basicKnockback:[1,2.30],basicRange:[1,1.65],skillCooldown:[.45,1.6],skillDamage:[.25,2.75],skillSize:[1,1.95],skillControl:[1,1.65],skillRestore:[.75,1.85],skillDuration:[.75,1],moveSpeed:[.75,1.38],maxHp:[.70,1.80],signatureRange:[1,1.42],signatureDuration:[1,1.50]};
+            var caps={"basicSpeed":[0.5,2.5],"basicDamage":[0.25,2.75],"basicSize":[1,2.1],"basicVelocity":[0.75,1.25],"basicKnockback":[1,2.43],"basicRange":[1,1.715],"skillCooldown":[0.428,1.6],"skillDamage":[0.25,2.75],"skillSize":[1,2.045],"skillControl":[1,1.715],"skillRestore":[0.75,1.935],"skillDuration":[0.75,1],"moveSpeed":[0.75,1.418],"maxHp":[0.7,1.825],"signatureRange":[1,1.462],"signatureDuration":[1,1.55]};
             Object.keys(caps).forEach(function(k){m[k]=brClamp(m[k],caps[k][0],caps[k][1]);});m.basicCount=brClamp(m.basicCount,0,3);m.skillCount=brClamp(m.skillCount,0,3);
             if(brWangguiAllowed(ability,paths)){const v=brWangguiValues(ability,paths?.wanggui);m.wangguiHp=v[0];m.wangguiPower=v[1];}
             return m;
@@ -9043,33 +9081,29 @@
             if(id==='signature_duration')return (p.ability.t==='S'||p.ability.t==='A')&&!!(sig.duration||c.signatureDuration);
             return true;
         }
-        function brRunEffectiveNext(p,id){
-            var run=p.run,tier=Number(run.paths[id]||0)+1;
-            if(tier>3||!brRunEligible(p,id))return false;
-            var next=Object.assign({},run.paths,{[id]:tier}),before=brRunModsForPaths(run.paths,run.capabilities,p.ability),after=brRunModsForPaths(next,run.capabilities,p.ability);
-            if(!Object.keys(before).some(function(k){return Math.abs(before[k]-after[k])>1e-7;}))return false;
-            if(id==='multicast'){
-                var skill=brReworkDefinition(p.ability)?.skill;
-                if(skill&&brRunCount(Number(skill.count||1),after.skillCount,Number(skill.countCap??skill.maxCount??24))===
-                    brRunCount(Number(skill.count||1),before.skillCount,Number(skill.countCap??skill.maxCount??24))&&before.skillDamage===after.skillDamage)return false;
-            }
-            return true;
-        }
+        function brRunEffectiveValues(p,mods){const out=brRunMeasured(p,mods),c=p.run.capabilities,s=brReworkDefinition(p.ability)?.skill;delete out.wangguiPower;
+            if(!c.skill.damage)out.skillDamage=0;if(!c.skill.heal&&!c.skill.shield)out.skillRestore=0;if(!c.skill.duration&&!c.signature?.duration)out.skillDuration=0;
+            if(s){const stun=Number(s.stunFrames??s.stun??0),push=Number(s.knockback??s.push??0),pull=Number(s.pull??0);out.skillControl=0;out.stunFrames=stun>0?Math.round(Math.min(Number(s.stunCap??stun*1.35),stun*Number(mods.skillControl||1))):0;out.skillImpulse=push*Number(mods.skillControl||1);out.skillPull=pull*Number(mods.skillControl||1);if(!c.skill.cc){out.stunFrames=out.skillImpulse=out.skillPull=0;}}
+            else if(!c.skill.cc)out.skillControl=0;if(s?.shield>0&&!c.skill.heal)out.skillRestore=Math.min(out.maxHp*.60,s.shield*Number(mods.skillRestore||1));return out;}
+        function brRunEffectiveNext(p,id){const run=p.run,tier=Number(run.paths[id]||0)+1;if(tier>3||!brRunEligible(p,id))return false;const next={...run.paths,[id]:tier},before=brRunEffectiveValues(p,brRunModsForPaths(run.paths,run.capabilities,p.ability)),after=brRunEffectiveValues(p,brRunModsForPaths(next,run.capabilities,p.ability));return Object.keys(before).some(k=>['basicFrames','skillFrames','regenDelay'].includes(k)?after[k]<before[k]-1e-7:after[k]>before[k]+1e-7);}
         function brRunCard(p,id,tier){
-            var d=BR_RUN_PATHS[id],effect=d.text[tier-1];
+            var d=BR_RUN_PATHS[id],effect=d.text[tier-1],capNote='';
+            if(id==='control'||id==='multicast'){const oldMods=brRunModsForPaths(p.run.paths,p.run.capabilities,p.ability),newMods=brRunModsForPaths({...p.run.paths,[id]:tier},p.run.capabilities,p.ability),oldActual=brRunEffectiveValues(p,oldMods),newActual=brRunEffectiveValues(p,newMods);
+            if(id==='control'&&newActual.stunFrames>0&&newActual.stunFrames===oldActual.stunFrames)capNote='기절시간 상한 유지 · ';
+            if(id==='multicast'&&newActual.skillCount===oldActual.skillCount)capNote='탄수 상한 유지 · ';}
             if(id==='wanggui'){
-                const v=brWangguiValues(p.ability,tier),next=brWangguiValues(p.ability,Number(tier)+1),pct=n=>Math.round((n-1)*100);
+                const v=brWangguiValues(p.ability,tier),next=brWangguiValues(p.ability,Number(tier)+1),pct=n=>brStatNumber((n-1)*100);
                 return {id,tier,name:'왕귀',icon:'👑',family:'BODY',effect:p.ability.t+'급 · 최대 HP +'+pct(v[0])+'% · 공격력 +'+pct(v[1])+'%',detail:'평타와 공격 스킬 모두 · '+(tier<3?'다음 단계: HP +'+pct(next[0])+'% · 공격력 +'+pct(next[1])+'%':'최종 단계')};
             }
             if(id==='quick'&&!p.run.capabilities.skill?.damage) {
-                var stats=d.tiers[tier-1],cd=Math.round(stats.skillCooldown*100),penalty=Math.round(stats.skillDamage*100);
+                var stats=d.tiers[tier-1],cd=brStatNumber(stats.skillCooldown*100),penalty=brStatNumber(stats.skillDamage*100);
                 effect='스킬 쿨다운 '+cd+'%';
                 if(p.run.capabilities.skill?.duration)effect+=' · 효과 지속 '+penalty+'%';
                 else if(p.run.capabilities.skill?.heal||p.run.capabilities.skill?.shield)effect+=' · 회복·보호량 '+penalty+'%';
             }
             if(id==='expansion'&&TRAIL_DASH_SUBS.has(p.ability.sub))effect=effect.replace('스킬 범위·크기','남기는 장판 범위');
             if(id==='expansion'&&p.ability.type===ABILITY_TYPES.ORBIT)effect=effect.replace('스킬 범위·크기','회전 무기 크기');
-            return {id:id,tier:tier,name:d.name,icon:d.icon,family:d.family,effect:effect,detail:(d.signature?'고유 스킬 특화 · ':'')+(id==='restore'?'피해 감소 최대 45% · ':'')+'단계 누적값 · 증감 합산·상한 적용'};
+            return {id:id,tier:tier,name:d.name,icon:d.icon,family:d.family,effect:effect,detail:capNote+(d.signature?'고유 스킬 특화 · ':'')+(id==='restore'?'피해 감소 최대 45% · ':'')+'단계 누적값 · 증감 합산·상한 적용'};
         }
         function brRunOffer(p){
             var run=p.run;if(!p.alive||!run||run.offer||run.pending<=0)return;
@@ -9116,6 +9150,8 @@
                 basicKnockback:b.close?brTierValue(a.t,{S:39,A:35,B:30,C:25,F:19})*b.pushScale:b.knockback,
                 skillFrames:Math.round(cd*Number(mods.skillCooldown||1)*(p.cooldownRateMult||1)),
                 wangguiPower:Number(mods.wangguiPower||1),skillDamage:Number(mods.skillDamage||1)*Number(mods.wangguiPower||1),skillControl:Number(mods.skillControl||1),skillRestore:Number(mods.skillRestore||1),
+                skillImpulse:Number(skill?.knockback??skill?.push??0)*Number(mods.skillControl||1),skillPull:Number(skill?.pull||0)*Number(mods.skillControl||1),
+                stunFrames:skill?Math.round(Math.min(Number(skill.stunCap??Number(skill.stunFrames??skill.stun??0)*1.35),Number(skill.stunFrames??skill.stun??0)*Number(mods.skillControl||1))):0,
                 skillDuration:Math.max(.5,Number(mods.signatureDuration||1)+Number(mods.skillDuration||1)-1),
                 skillCount:p.run.capabilities.skill?.multicast?(skill?
                     brRunCount(Number(skill.count||1),mods.skillCount,Number(skill.countCap??skill.maxCount??24)):
@@ -9125,15 +9161,15 @@
                 moveSpeed:brBaseWalkingSpeed(p)*Number(mods.moveSpeed||1),regenRate:Number(mods.regenRate||0),regenDelay:Number(mods.regenDelay||300)};
         }
         function brRunNoticeText(id,tier,before,after){
-            var format=(n,k)=>k==='basicFrames'||k==='skillFrames'?((n/60).toFixed(1)+'초'):
+            var format=(n,k)=>k==='basicFrames'||k==='skillFrames'||k==='stunFrames'?(brStatNumber(n/60)+'초'):
                 k==='basicCount'||k==='skillCount'?String(n)+'발':
-                k==='regenDelay'?((n/60).toFixed(1)+'초'):
-                k==='wangguiPower'||k==='regenRate'||k==='skillDamage'||k==='skillControl'||k==='skillRestore'||k==='skillDuration'?Math.round(n*100)+'%':String(Math.round(n*10)/10);
+                k==='regenDelay'?(brStatNumber(n/60)+'초'):
+                k==='wangguiPower'||k==='regenRate'||k==='skillDamage'||k==='skillControl'||k==='skillRestore'||k==='skillDuration'?brStatNumber(n*100)+'%':brStatNumber(n);
             var fields={wanggui:[['maxHp','최대 HP'],['wangguiPower','공격 배율']],rapid:[['basicFrames','평타 간격'],['basicDamage','기본 위력']],heavy:[['basicDamage','기본 위력'],['basicFrames','평타 간격']],
                 multi:[['basicCount','일반 탄환'],['basicDamage','탄당 기본 위력']],giant:[['basicSize','일반 탄환 크기'],['basicVelocity','탄속']],impact:[['basicKnockback','일반 넉백'],['basicDamage','기본 위력']],
                 wide:[['basicRange','근접 범위'],['basicFrames','평타 간격']],quick:[['skillFrames','기본 스킬 쿨타임'],['skillDamage','스킬 기본 위력'],['skillDuration','효과 지속'],['skillRestore','회복·보호']],
                 amplify:[['skillDamage','스킬 기본 위력'],['skillFrames','기본 스킬 쿨타임']],expansion:[['skillRadius','스킬 반경·폭'],['skillDamage','스킬 기본 위력']],
-                multicast:[['skillCount','스킬 탄환'],['skillDamage','탄당 기본 위력']],control:[['skillControl','제어 계수'],['skillDamage','스킬 기본 위력']],
+                multicast:[['skillCount','스킬 탄환'],['skillDamage','탄당 기본 위력']],control:[['stunFrames','기절 시간'],['skillImpulse','스킬 넉백'],['skillPull','스킬 당김'],['skillDamage','스킬 기본 위력']],
                 restore:[['skillRestore','회복·보호 계수'],['skillFrames','기본 스킬 쿨타임']],swift:[['moveSpeed','기본 이동속도'],['maxHp','최대 HP']],
                 titan:[['maxHp','최대 HP'],['moveSpeed','기본 이동속도']],regen:[['regenRate','초당 재생'],['maxHp','최대 HP'],['regenDelay','무피격 대기']],
                 signature_range:[['skillRange','고유 사거리'],['skillFrames','기본 스킬 쿨타임']],signature_duration:[['skillDuration','고유 지속 계수'],['skillFrames','기본 스킬 쿨타임']]};
@@ -9885,7 +9921,7 @@
         }
         function brCastPlayerSkill(p,g,aim,power) {
             if(window.BRRework?.defs[p.ability.id])return window.BRRework.cast(p,g,aim,power);
-            return brWithRunSkill(p,g,function(){return brCastPlayerSkillBase(p,g,aim,power);});
+            const accepted=brWithRunSkill(p,g,function(){return brCastPlayerSkillBase(p,g,aim,power);});if(accepted!==false&&brRunCapabilities(p.ability).skill.damage)brRevealSmoke(p,g,60,'attack');return accepted;
         }
         function brCastPlayerSkillBase(p,g,aim,power) {
             if(window.BRRework?.defs[p.ability.id])return window.BRRework.cast(p,g,aim,power);
@@ -9997,6 +10033,7 @@
         }
         function brBasicAttack(p,g,aim) {
             if(!p.alive||p.stunned>0||window.BRRework?.inputLocks(p,g)?.attack)return false;
+            brRevealSmoke(p,g,60,'attack');
             var rwBasic=window.BRRework?.basicAttempt(p,g,aim)||null;
             var rwAttackId=(p.remoteId||p.id)+':'+Number(p.lifeSeq||0)+':basic:'+((p.rwBasicSeq=(p.rwBasicSeq||0)+1));
             aim=aim&&aim.mag()>.05?aim.norm():new Vec2(1,0);
@@ -10385,7 +10422,7 @@
         // share life/cast identities. No cross-packet dictionary or delivery ordering needed.
         const BR_RW_ENTITY_KEYS=['id','kind','x','y','dx','dy','length','width','radius','start','end','color','team','owner','life','castId','shape','emoji','speed','pullRadius','maxRadius','collapseRadius','hp','maxHp','phase','count','nextHeavy','shotIndex','height','endX','endY','fx','fy','armAt','actionKind','actionSeq','ordinal','remaining','turn','vx','vy','growth','throughWalls','throughFarm','path','curved','terminal','reason'];
         const BR_RW_MOTION_KEYS=['id','kind','start','end','x','y','dx','dy','speed','remaining','airborne','height','fromX','fromY','toX','toY'];
-        const BR_RW_STATE_KEYS=['life','stunEnd','shield','slow','moveRate','attackRate','skillRate','lockEnd','locks','motion','channel','recast','capture','bleed','mark','buffs','rateLayers','impulseX','impulseY','impulseEnd','driveX','driveY','driveKnown'];
+        const BR_RW_STATE_KEYS=['life','stunEnd','shield','slow','moveRate','attackRate','skillRate','lockEnd','locks','motion','channel','recast','capture','bleed','mark','buffs','rateLayers','impulseX','impulseY','impulseEnd','driveX','driveY','driveKnown','smokeRevealEnd','smokeRevealReason'];
         const BR_RW_STRINGS=new Set(['id','kind','color','owner','castId','shape','emoji','phase','actionKind','terminal','reason']);
         const BR_RW_NULLS=new Set(['shape','emoji','phase','hp','maxHp','shotIndex','endX','endY','fx','fy','fromX','fromY','toX','toY','path']);
         function brPackReworkWire(wire) {
@@ -10406,7 +10443,7 @@
                         if(k==='rateLayers')v=v?.length?v.map(b=>[b[0]-frame,b[1],b[2]]):0;
                     }
                     if(v==null||v===fallback||v===false)continue;
-                    if(BR_RW_STRINGS.has(k))v=str(v);else if(['start','end','stunEnd','lockEnd','armAt','impulseEnd'].includes(k))v=Number(v)-frame;
+                    if(BR_RW_STRINGS.has(k))v=str(v);else if(['start','end','stunEnd','lockEnd','armAt','impulseEnd','smokeRevealEnd'].includes(k))v=Number(v)-frame;
                     else if(typeof v==='number')v=Math.round(v*1000)/1000;
                     if(i<30)lo|=1<<i;else hi|=1<<(i-30);values.push(v);
                 }return [lo,hi,...values];
@@ -10420,7 +10457,7 @@
                 function sparse(row,keys,kind){if(!Array.isArray(row)||row.length<2||!Number.isInteger(row[0])||!Number.isInteger(row[1])||row[0]<0||row[1]<0||row[0]>=2**Math.min(30,keys.length)||row[1]>=2**Math.max(0,keys.length-30))throw Error('rw mask');
                     let at=2;const obj={};for(let i=0;i<keys.length;i++){const k=keys[i],present=i<30?!!(row[0]&(1<<i)):!!(row[1]&(1<<(i-30)));let v=BR_RW_NULLS.has(k)?null:BR_RW_STRINGS.has(k)?'':k==='count'?1:0;
                         if(kind==='state')v=['slow','moveRate','attackRate','skillRate'].includes(k)?1:k==='stunEnd'?frame:0;
-                        if(present){if(at>=row.length)throw Error('rw value');v=row[at++];if(BR_RW_STRINGS.has(k))v=str(v);else if(['start','end','stunEnd','lockEnd','armAt','impulseEnd'].includes(k))v=Number(v)+frame;}
+                        if(present){if(at>=row.length)throw Error('rw value');v=row[at++];if(BR_RW_STRINGS.has(k))v=str(v);else if(['start','end','stunEnd','lockEnd','armAt','impulseEnd','smokeRevealEnd'].includes(k))v=Number(v)+frame;}
                         if(kind==='state'){
                             if(k==='locks')v={move:!!(v&1),attack:!!(v&2),skill:!!(v&4),steerAllowed:!!(v&8)};
                             if(k==='motion')v=v?sparse(v,BR_RW_MOTION_KEYS,'motion'):null;
@@ -10442,6 +10479,7 @@
                 if(!Array.isArray(row)||row.length!==2||!Number.isInteger(row[0])||row[0]<0||!s||!Number.isInteger(s.life)||s.life<0)return false;
                 if(!['stunEnd','shield','slow','moveRate','attackRate','skillRate'].every(k=>Number.isFinite(s[k])&&s[k]>=0))return false;
                 for(const k of ['impulseX','impulseY','impulseEnd','driveX','driveY','driveKnown'])if(s[k]!=null&&!Number.isFinite(s[k]))return false;
+                if(!Number.isInteger(s.smokeRevealEnd)||s.smokeRevealEnd<0||s.smokeRevealEnd>frame+60||![0,1,2].includes(s.smokeRevealReason))return false;
                 for(const k of ['channel','recast'])if(s[k]&&(!Number.isFinite(s[k].end)||typeof s[k].id!=='string'))return false;
             }
             for(const e of wire.entities){if(!brValidFlightPath(e.path))return false;if(!e||typeof e.id!=='string'||typeof e.kind!=='string'||!Number.isFinite(e.x)||!Number.isFinite(e.y)||!Number.isFinite(e.end))return false;
@@ -10833,16 +10871,16 @@
         }
         function brStreamBatchOpen(viewers,previous,at,frame,bytes){
             const batch={id:++BRMP.viewBatchSeq,startedAt:at,frame,viewerCount:viewers.length,aliveViewerCount:viewers.filter(p=>p.alive).length,bytes,severe:false,critical:false};BRMP.viewBatches.set(batch.id,batch);
-            for(const viewer of viewers){const id=viewer.remoteId,intent=BRMP.viewCatchUp.get(id);if(intent){if(brNetDebug)brNetDebug.catchUp(Math.max(0,at-intent.readyAt));BRMP.viewCatchUp.delete(id);}
+            for(const viewer of viewers){const id=viewer.remoteId,intent=BRMP.viewCatchUp.get(id);if(intent){if(brNetDebug){brNetDebug.catchUp(Math.max(0,at-intent.readyAt));brNetDebug.catchStage('catchDispatch',at-Number(intent.eligibleAt??at));}BRMP.viewCatchUp.delete(id);}
                 BRMP.viewFlights.set(id,{batchId:batch.id,startedAt:at,frame,aliveAtDispatch:!!viewer.alive,refreshWanted:false,overdueAt:null,stalledAt:null,viewer});}
             return batch;
         }
         function brStreamBatchClose(batch,viewers,now,failed){
-            BRMP.viewBatches.delete(batch.id);
+            BRMP.viewBatches.delete(batch.id);if(brNetDebug)brNetDebug.catchStage('catchRelease',now-Number(batch.settledAt??now));
             for(const viewer of viewers){const id=viewer.remoteId,m=BRMP.viewFlights.get(id);if(!m||m.batchId!==batch.id)continue;
                 // Completion may occur between 50ms observer ticks; do not miss its catch-up intent.
                 const age=now-m.startedAt,needs=m.refreshWanted||(viewer.alive||m.aliveAtDispatch)&&age>=Math.max(Number(BRMP.streamStats.policy.aliveTarget||120)+80,220);
-                if(needs){if(!m.refreshWanted&&brNetDebug)brNetDebug.refreshWanted();BRMP.viewCatchUp.set(id,{readyAt:now,batchId:batch.id,frame:batch.frame});}
+                if(needs){if(!m.refreshWanted&&brNetDebug)brNetDebug.refreshWanted();BRMP.viewCatchUp.set(id,{readyAt:now,batchId:batch.id,frame:batch.frame,epoch:BRMP.publishEpoch,life:Number(viewer.lifeSeq||0)});}
                 BRMP.viewFlights.delete(id);BRMP.viewFlightIds.delete(id);
             }
             if(!batch.severe&&now-batch.startedAt>=500){const p=BRMP.streamStats.policy;p.stalls.push(now);if(p.stalls.length>16)p.stalls.shift();}
@@ -10853,13 +10891,14 @@
             p.aliveCount=aliveCount;p.deadCount=humans.length-aliveCount;p.aliveTarget=p.profile==='CONGESTED'?base+40:base+(p.profile==='PRESSURED'?20:0);p.deadTarget=BRMP.respawnMode?350:450;
             const normal=Math.max(2,Math.min(BR_STREAM_POLICY.maxBatch,Math.ceil(aliveCount*.5)));
             p.batchLimit=p.profile==='CONGESTED'?Math.max(2,Math.min(10,Math.ceil(aliveCount/3))):Math.max(2,normal-(p.profile==='PRESSURED'?1:0));stats.targetMs=p.aliveTarget;
-            const due=[];let blocked=0;
+            const due=[];let blocked=0;for(const [id,intent] of BRMP.viewCatchUp){if(intent.epoch!=null&&intent.epoch!==BRMP.publishEpoch)BRMP.viewCatchUp.delete(id);}
             for(const viewer of humans){const id=viewer.remoteId;if(BRMP.viewFlightIds.has(id)){blocked++;continue;}
                 const prior=BRMP.viewLastSent[id],target=viewer.alive?p.aliveTarget:p.deadTarget,age=prior?now-prior.at:Infinity;
                 const transition=!!prior&&(prior.alive!==!!viewer.alive||prior.life!==Number(viewer.lifeSeq||0)),catchUp=BRMP.viewCatchUp.has(id);
                 const quizDirty=!viewer.alive&&BRMP.respawnMode&&!!prior&&prior.quizRevision!==Number(viewer.tkQuiz?.revision||0),hard=!!viewer.alive&&age>=BR_STREAM_POLICY.hardOverdue;
                 const deadline=prior?Math.max(prior.at+BR_STREAM_POLICY.minGap,Number(prior.nextAt??prior.at+target)+target-Number(prior.target??target)):now;
                 if(prior&&(age<BR_STREAM_POLICY.minGap||!transition&&!catchUp&&!quizDirty&&!hard&&now+BR_STREAM_POLICY.lookAhead<deadline))continue;
+                if(catchUp&&brNetDebug){const intent=BRMP.viewCatchUp.get(id);if(intent.eligibleAt==null){intent.eligibleAt=now;brNetDebug.catchStage('catchEligible',now-intent.readyAt);}}
                 due.push({p:viewer,target,deadline,age,transition,catchUp,quizDirty,priority:transition?0:catchUp?1:hard?2:quizDirty?3:viewer.alive?4:5,over:(age-target)/target});
             }
             if(brNetDebug&&blocked)brNetDebug.busyReason('viewer already flight',blocked);
@@ -10867,7 +10906,7 @@
             const chosen=due.slice(0,p.batchLimit),dead=due.find(x=>x.priority===5&&x.age>=BR_STREAM_POLICY.deadCeiling);
             // Soft spectator ceiling: at most one ordinary slot; never displace life/catch-up/hard-overdue/quiz.
             if(dead&&!chosen.includes(dead)){const i=chosen.findLastIndex(x=>x.priority>=4);if(i>=0)chosen[i]=dead;}
-            return chosen;
+            if(brNetDebug)for(const item of due)if(item.catchUp&&!chosen.includes(item))brNetDebug.catchWait('batch priority/budget');return chosen;
         }
         function brStreamSent(viewer,entry,now,frame){return {at:now,frame,alive:!!viewer.alive,life:Number(viewer.lifeSeq||0),quizRevision:Number(viewer.tkQuiz?.revision||0),target:entry.target,
             nextAt:entry.transition||entry.catchUp||entry.quizDirty?now+entry.target:Math.max(now+BR_STREAM_POLICY.minGap,Math.min(now+entry.target+BR_STREAM_POLICY.lookAhead,entry.deadline+entry.target))};}
@@ -10888,7 +10927,7 @@
             brStreamObserveFlights(performance.now());
             brStreamPolicyObserve(performance.now(),Number(BRMP.publishInFlight||0)>=brStreamFlightCap());
             if(brNetDebug)brNetDebug.publish();
-            if(Number(BRMP.publishInFlight||0)>=brStreamFlightCap()){if(brNetDebug){brNetDebug.busy();brNetDebug.busyReason('global in-flight cap');}BRMP.streamStats.skippedBusy++;return;}
+            if(Number(BRMP.publishInFlight||0)>=brStreamFlightCap()){if(brNetDebug){brNetDebug.busy();brNetDebug.busyReason('global in-flight cap');if(BRMP.viewCatchUp?.size)brNetDebug.catchWait('global cap',BRMP.viewCatchUp.size);}BRMP.streamStats.skippedBusy++;return;}
             // Stable immutable roster/arena; newest-state batches, no unbounded outbound queue.
             if(!BRMP.wireParticipants) {
                 BRMP.wireParticipants=[];BRMP.wireHumans=[];
@@ -11020,14 +11059,14 @@
             const debugBatch=brNetDebug?brNetDebug.batch(previousViews,updates,tickAt,BRMP.publishInFlight):null,debugWriteStart=brNetDebug?performance.now():0;let debugWriteFailed=false;
             brLaneWrite('VIEW',BRMP.db.ref('rooms/'+BRMP.roomCode),'update',updates).then(function(){
                 if(epoch!==BRMP.publishEpoch)return;
-                const ackAt=performance.now();
+                const ackAt=performance.now();streamBatch.settledAt=ackAt;
                 for(const p of viewers){const id=p.remoteId,m=stats.viewerGaps[id]||(stats.viewerGaps[id]={last:ackAt,n:0,mean:0,m2:0,max:0});
                     if(m.last!==ackAt){const gap=ackAt-m.last,d=gap-m.mean;m.n++;m.mean+=d/m.n;m.m2+=d*(gap-m.mean);m.max=Math.max(m.max,gap);}m.last=ackAt;}
                 pendingStatic.forEach(function(id){BRMP.staticSent[id]={at:now};});
                 if(pendingTKBoards.length){BRMP.tkBoardSent=BRMP.tkBoardSent||{};for(const entry of pendingTKBoards)BRMP.tkBoardSent[entry[0]]={revision:entry[1],at:now};}
                 pendingFx.forEach(function(pair){BRMP.viewFxCursor[pair[0]]=Math.max(Number(BRMP.viewFxCursor[pair[0]]||0),pair[1]);});
             }).catch(function(err){
-                debugWriteFailed=true;
+                debugWriteFailed=true;streamBatch.settledAt=performance.now();
                 if(epoch===BRMP.publishEpoch)for(const v of previousViews){if(v.sent)BRMP.viewLastSent[v.id]=v.sent;else delete BRMP.viewLastSent[v.id];BRMP.viewShotKnown[v.id]=v.known||new Set();}
                 // Retry newest state through the same scheduler; failed write contributes to pressure.
                 console.warn('[BRMP SNAPSHOT]',err);
@@ -12777,7 +12816,7 @@
                 brDrawHazardCircle(cc,r[0],r[1],r[2],r[3],r[4],r[6]||'',zoom,Number(self.row[8])>0&&Number(r[5])===Number(self.row[8]),r[7]);
             });
             (view.turrets||[]).forEach(function(r){if(onScreen(r[0],r[1],50))brDrawTurretGlyph(cc,r[0],r[1],r[2],!!r[3],zoom);});
-            brPaintReworkEntities(brCombatPainter(cc,false),brReworkDisplayEntities(view,frameNow),brReworkClientFrame(self,frameNow),zoom,(...a)=>brReworkCanvasGlyph(cc,...a));
+            const canvasRW=brReworkDisplayEntities(view,frameNow);brPaintReworkEntities(brCombatPainter(cc,false),canvasRW,brReworkClientFrame(self,frameNow),zoom,(...a)=>brReworkCanvasGlyph(cc,...a));if(brNetDebug)for(const e of canvasRW)if(['projectile','hook','boomerang','bomb'].includes(e.kind)&&onScreen(e.x,e.y,Number(e.radius||10)))brNetDebug.seenShot(e.id,e.castId||'',frameNow);
             var selfSpeed=Math.hypot(Number(self.predVx||0),Number(self.predVy||0));
             if(selfSpeed>3.2&&self.row&&self.row[7]) {
                 var sux=self.predVx/selfSpeed,suy=self.predVy/selfSpeed,snx=-suy,sny=sux;
@@ -13078,7 +13117,7 @@
             brSetText(brEl('br-battle-self'),a.e+' '+r[1]+' · '+a.t+'급');
             var playableSkill=brGetPlayableSkillInfo(a);brSetText(brEl('br-skill-label'),playableSkill?playableSkill.label:'스킬');
             var hpWidth=brClamp(hp/max*100,0,100).toFixed(1)+'%',hpBar=brEl('br-battle-hp');if(hpBar.style.width!==hpWidth)hpBar.style.width=hpWidth;
-            var compact=window.innerWidth<=600,cover=String(r[17]||''),coverText=cover==='smoke'?(compact?' · 🌫️ 연막':' · 🌫️ 연막 안 · 바깥 시야 유지'):'';
+            var compact=window.innerWidth<=600,cover=String(r[17]||''),coverText=cover==='smoke'?(Number(selfObj?.rw?.smokeRevealEnd||0)>view.frame?(selfObj.rw.smokeRevealReason===1?' · 🌫️ 공격으로 노출':' · 🌫️ 피격으로 노출'):' · 🌫️ 은폐 중'):'';
             brSetText(brEl('br-battle-status'),'HP '+Math.round(hp)+' / '+Math.round(max)+' · KILL '+Number(r[9]||0)+coverText+(brRespawnMode(view.mode)?' · 🔄 ×'+Number(BRMP.tkSelf?.tokens||0)+(Number(BRMP.tkSelf?.protectionFrames||0)>0?' · 🛡 부활 보호':''):''));
             brSetText(brEl('br-battle-mode'),(Number(r[23]||0)&64?'🔥 FINAL 3 BURNING · ':'')+(BR_MODE_LABELS[view.mode]||'전투')+(!compact&&view.mapName?' · '+view.mapName:''));
             brSetText(brEl('br-battle-time'),brRespawnMode(view.mode)&&view.tkBoard?.suddenDeath?'SUDDEN DEATH':(brRespawnMode(view.mode)?'남은 ':'경과 ')+brFormatTime(Number(view.clock||0)));
@@ -13592,7 +13631,7 @@
                 if(c.host){if(p.hp<=0||!c.boxes.includes(p))return null;x=p.pos.x;y=p.pos.y;r=p.halfSize;box=p;}
                 else {if(p[3]<=0||!c.boxes.includes(p))return null;x=p[1];y=p[2];r=brCrateHalf(p);box=p;}
             }
-            if(!c.host&&brSmokeConcealed(BRMP.latestView?.smokes||[],{pos:{x,y},team:entry.type==='crate'?0:Number(p.row?.[8]??p.team??0),invisible:!!(Number(p.row?.[23])&32)}, {pos:c.origin,team:c.team}))return null;
+            if(!c.host&&brSmokeConcealed(BRMP.latestView?.smokes||[],{pos:{x,y},team:entry.type==='crate'?0:Number(p.row?.[8]??p.team??0),invisible:!!(Number(p.row?.[23])&32),lifeSeq:p.rw?.life||0,smokeRevealLife:p.rw?.life||0,smokeRevealEnd:p.rw?.smokeRevealEnd||0}, {pos:c.origin,team:c.team},BRMP.latestView?.frame||0))return null;
             if(![x,y,r].every(Number.isFinite)||!brViewContains(c.bounds,x,y,0))return null;
             const distance=Math.hypot(x-c.origin.x,y-c.origin.y);if(distance-r>c.profile.range)return null;
             return {...entry,x,y,r,box,vx,vy,distance,angle:Math.atan2(y-c.origin.y,x-c.origin.x)};
