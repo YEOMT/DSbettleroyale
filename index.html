@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="br-build" content="v32-level6-skillfeel-ranged-2026-10-14">
+    <meta name="br-build" content="v32.1-student-smoothness-2026-10-30">
     <title>클래스 이모지 배틀로얄 · 팀 점령전</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.20.1/dist/pixi.min.js"></script>
@@ -7676,7 +7676,7 @@
         var brNetDebug=new URLSearchParams(location.search).get('netdebug')==='1'?brCreateNetDebug():null;
         function brGetNetDebug(){return brNetDebug;}BRMP.netDiagnostics=brNetDebug;
         function brCreateNetDebug(){
-            const KEY='dsbr.netdebug.v1.reports',NAMES=['frame','snap','rtt','age','shotMean','shotOldest','write','payloadKB','batch','sendGap','resume','sendAlive','sendDead','sendTransition','snapAlive','snapDead','snapTransition','build','flightAge','catchUpGap','aliveAge','deadAge','aliveShot','deadShot','aliveShotMean','arrivalAlive','arrivalDead','aliveRtt','presClock','presCorrection','presActorDelay','presGenerationGap','freshResume','rwShotAge','rwShotMean','firstDrawToHit','nativeVisible','rwVisible','correctionRemaining','hostFrameGap','hostLoopDelay','catchRelease','catchEligible','catchDispatch','nativeDrawHit','rwDrawHit','generationAlive','generationDead',...['VIEW','RUN/FARM','RING','CAPTURE','OTHER META','UPGRADE ACK'].map(k=>'lane:'+k)];
+            const KEY='dsbr.netdebug.v1.reports',NAMES=['frame','snap','rtt','age','shotMean','shotOldest','write','payloadKB','batch','sendGap','resume','sendAlive','sendDead','sendTransition','snapAlive','snapDead','snapTransition','build','flightAge','catchUpGap','aliveAge','deadAge','aliveShot','deadShot','aliveShotMean','arrivalAlive','arrivalDead','aliveRtt','presClock','presCorrection','selfContact','selfCorrection','presActorDelay','presGenerationGap','freshResume','rwShotAge','rwShotMean','firstDrawToHit','nativeVisible','rwVisible','correctionRemaining','hostFrameGap','hostLoopDelay','catchRelease','catchEligible','catchDispatch','nativeDrawHit','rwDrawHit','generationAlive','generationDead',...['VIEW','RUN/FARM','RING','CAPTURE','OTHER META','UPGRADE ACK'].map(k=>'lane:'+k)];
             const LIMITS=[1000/30,50,150,200,250,300,500,1000];
             let state=null,panel=null,title=null,body=null,actions=null,cache=null,cacheAt=-Infinity,lastSave=-Infinity,timer=null,collapsed=false,storageError=false;
             // Fixed-size histograms: 1ms bins through 1024, then <=2.5% width. Never per-frame sort.
@@ -7712,7 +7712,7 @@
                 return n?{mean:sum/n,oldest:max,count:n}:null;}
             const firstDraws=new Map(),confirmedDraws=new Map();
             function presentation(kind,value,detail={}){const s=active();if(!s||s.role!=='student'||!foreground(s))return;const d=s.delivery.presentation;
-                const key=({clock:'presClock',correction:'presCorrection',actorDelay:'presActorDelay',generationGap:'presGenerationGap',freshResume:'freshResume'})[kind];if(key)add(s.metrics[key],value);
+                const key=({clock:'presClock',correction:'presCorrection',selfContact:'selfContact',selfCorrection:'selfCorrection',actorDelay:'presActorDelay',generationGap:'presGenerationGap',freshResume:'freshResume'})[kind];if(key)add(s.metrics[key],value);
                 if(kind==='actor'){const ms=Math.max(0,Math.min(100,value));d.modes[detail.mode]=Number(d.modes[detail.mode]||0)+ms;d.regimes=d.regimes||{};const regime=BRMP.presentationResuming?'resume':brCombatPaused()?'paused':performance.now()-s.presentationStart<600?'warmup':s.streamAlive===true?'alive':s.streamAlive===false?'dead':'transition';d.regimes[regime]=Number(d.regimes[regime]||0)+ms;}
                 if(kind==='correction'&&detail.snap)d.snaps[detail.reason]=Number(d.snaps[detail.reason]||0)+1;
                 if(kind==='counter'){d.events=d.events||{};d.events[detail.name]=Number(d.events[detail.name]||0)+value;}if(kind==='residual')add(s.metrics.correctionRemaining,value);
@@ -7792,7 +7792,7 @@
                     localStorage.setItem(KEY,JSON.stringify([record,...read().filter(x=>!(x.key===state.key&&x.role===state.role))].slice(0,3)));storageError=false;
                 }catch(e){storageError=true;}}
             function fmt(v,d=1){return Number.isFinite(v)?v.toFixed(d):'—';}
-            function report(){const q=summary();if(!q)return '아직 측정된 경기가 없습니다.';const m=q.metrics,lines=['DSbattleroyal '+q.role.toUpperCase()+(q.role==='host'?' STREAM REPORT':' NETWORK REPORT'),'v32 · level6 / skill feel / delivery diagnostics · '+new Date().toISOString(),'',`Mode: ${q.mode}`,`Players: ${q.players}`,`Match duration: ${brFormatTime(q.duration)} (${fmt(q.duration)} s)`,`${q.role==='host'?'Observed wall time':'Observed foreground'}: ${fmt(q.observedMs/1000)} s`,`Refresh continuations: ${q.refreshes}`];
+            function report(){const q=summary();if(!q)return '아직 측정된 경기가 없습니다.';const m=q.metrics,lines=['DSbattleroyal '+q.role.toUpperCase()+(q.role==='host'?' STREAM REPORT':' NETWORK REPORT'),'v32.1 · student smoothness / delivery diagnostics · '+new Date().toISOString(),'',`Mode: ${q.mode}`,`Players: ${q.players}`,`Match duration: ${brFormatTime(q.duration)} (${fmt(q.duration)} s)`,`${q.role==='host'?'Observed wall time':'Observed foreground'}: ${fmt(q.observedMs/1000)} s`,`Refresh continuations: ${q.refreshes}`];
                 function block(label,x,thresholds=[]){lines.push('',label,`samples: ${x.samples} | avg: ${fmt(x.avg)} | p50: ${fmt(x.p50)} | p95: ${fmt(x.p95)} | max: ${fmt(x.max)}`);for(const t of thresholds)lines.push(`>${t}ms: ${fmt(x.over.find(a=>a[0]===t)?.[1])}%`);}
                 if(q.role==='student'){lines.push('','RENDER',`FPS avg: ${m.frame.avg?fmt(1000/m.frame.avg):'—'}`,`FPS median: ${m.frame.p50?fmt(1000/m.frame.p50):'—'}`,`FPS 1% low (1000/P99 frame): ${m.frame.p99?fmt(1000/m.frame.p99):'—'}`,`P95 frame: ${fmt(m.frame.p95)} ms`,`Below 30 FPS time: ${fmt(m.frame.time[0][1])}%`,`Below 20 FPS time: ${fmt(m.frame.time[1][1])}%`);
                     block('ALIVE / ACTIVE COMBAT SNAPSHOT (ms)',m.snapAlive,[150,200,300,500]);block('DEAD / QUIZ / SPECTATOR SNAPSHOT (ms)',m.snapDead,[150,200,300,500]);block('ALIVE↔DEAD TRANSITION GAP (ms, excluded from both groups)',m.snapTransition);block('OVERALL SNAPSHOT (ms)',m.snap,[150,200,300,500]);block('INPUT RTT during ALIVE (ms)',m.aliveRtt,[150,250]);block('INPUT RTT (overall, unique acknowledged seq, ms)',m.rtt,[150,250]);block('ALIVE ARRIVAL AUTHORITY AGE (accepted packet, no presentation lead, ms)',m.arrivalAlive);block('DEAD ARRIVAL AUTHORITY AGE (ms)',m.arrivalDead);block('ALIVE PACKET AGE (render sampled, ms)',m.aliveAge);block('DEAD PACKET AGE (render sampled, ms)',m.deadAge);block('PACKET AGE (overall mapped latest authority, ms)',m.age);block('ALIVE SHOT AGE (oldest visible native shot, ms)',m.aliveShot);block('DEAD SHOT AGE (ms)',m.deadShot);block('ALIVE SHOT MEAN (ms)',m.aliveShotMean);block('SHOT AGE (overall oldest visible drawProjectiles sample per observation, ms)',m.shotOldest);block('SHOT MEAN (mean visible drawProjectiles age per observation, ms)',m.shotMean);
@@ -7809,7 +7809,7 @@
                     lines.push('','RECENT SLOW WRITE WINDOWS (bounded last12; correlation, not proof of causation)');for(const e of d.slowWrites)lines.push(`${e.lane} | start match ${fmt(e.matchMs)}ms / frame ${e.frame} | duration ${fmt(e.ms)}ms${e.failed?' | FAILED':''}`);
                 }
 
-                if(q.role==='student'){const p=q.delivery.presentation;block('SOURCE GENERATION GAP (accepted frame delta, ms)',m.presGenerationGap);block('ALIVE SOURCE GENERATION GAP (ms)',m.generationAlive);block('DEAD SOURCE GENERATION GAP (ms)',m.generationDead);block('NATIVE VISIBLE SHOTS (count, no local preview)',m.nativeVisible);block('RW VISIBLE SHOTS (count, alive)',m.rwVisible);block('CORRECTION REMAINING (ms)',m.correctionRemaining);block('CLOCK CORRECTION (absolute mapped source shift, ms)',m.presClock);block('ACTOR DISPLAY BUFFER (configured, not measured total positional delay, ms)',m.presActorDelay);block('REMOTE MODEL CORRECTION (world units)',m.presCorrection);block('ALIVE RW SHOT AGE (oldest visible rework projectile, ms)',m.rwShotAge);block('ALIVE RW SHOT MEAN (ms)',m.rwShotMean);block('MATCHED FIRST DRAW → CONFIRMED HIT (ms; unmatched not inferred)',m.firstDrawToHit);block('RESUME → FIRST FRESH VIEW (mapped age <=300ms, ms)',m.freshResume);
+                if(q.role==='student'){const p=q.delivery.presentation;block('SOURCE GENERATION GAP (accepted frame delta, ms)',m.presGenerationGap);block('ALIVE SOURCE GENERATION GAP (ms)',m.generationAlive);block('DEAD SOURCE GENERATION GAP (ms)',m.generationDead);block('NATIVE VISIBLE SHOTS (count, no local preview)',m.nativeVisible);block('RW VISIBLE SHOTS (count, alive)',m.rwVisible);block('CORRECTION REMAINING (ms)',m.correctionRemaining);block('CLOCK CORRECTION (absolute mapped source shift, ms)',m.presClock);block('ACTOR DISPLAY BUFFER (configured, not measured total positional delay, ms)',m.presActorDelay);block('REMOTE MODEL CORRECTION (world units)',m.presCorrection);block('SELF PREDICTED CONTACT (applied world units)',m.selfContact);block('SELF AUTHORITY CORRECTION (applied world units)',m.selfCorrection);block('ALIVE RW SHOT AGE (oldest visible rework projectile, ms)',m.rwShotAge);block('ALIVE RW SHOT MEAN (ms)',m.rwShotMean);block('MATCHED FIRST DRAW → CONFIRMED HIT (ms; unmatched not inferred)',m.firstDrawToHit);block('RESUME → FIRST FRESH VIEW (mapped age <=300ms, ms)',m.freshResume);
                     lines.push('','PRESENTATION',`Motion sampled actor-ms: ${JSON.stringify(p.modes)}`,`Motion ratio %: ${JSON.stringify(Object.fromEntries(Object.entries(p.modes).map(([k,v])=>[k,Number((100*v/Math.max(1,Object.values(p.modes).reduce((n,t)=>n+t,0))).toFixed(1))])))}`,`Presentation events: ${JSON.stringify(p.events||{})}`,`Viewer regimes actor-ms (initial600ms warm-up separate): ${JSON.stringify(p.regimes||{})}`,`Paused timeline observations (excluded from freeze count): ${p.pausedFrames||0}`,`Authority snaps by reason: ${JSON.stringify(p.snaps)}`,`Backward clock frames: ${p.backward} | unchanged frames: ${p.frozen}`,`Lethal receipts: ${p.lethal} | unknown: ${p.unknown} | hit without matched visible shot: ${p.unmatchedHit}`);}
                 if(q.delivery.stability){const d=q.delivery.stability;lines.push('','v31 STABILITY (local diagnostics; correlations only)');if(q.role==='host'){block('HOST FOREGROUND FRAME GAP (ms)',m.hostFrameGap);block('HOST DIAGNOSTIC TIMER OVERRUN (ms)',m.hostLoopDelay);block('WRITE SETTLEMENT → FLIGHT RELEASE (ms)',m.catchRelease);block('CATCH-UP READY → FIRST ELIGIBLE TICK (ms)',m.catchEligible);block('ELIGIBLE → DISPATCH (ms)',m.catchDispatch);lines.push('Catch-up wait observations: '+JSON.stringify(d.catchWait),'Long frame/LoAF observations (may overlap): '+d.longFrames+'; max '+fmt(d.longest)+'ms; LoAF supported: '+d.loafSupported,'Worst bounded12: '+JSON.stringify(d.worst),'Known timer/ref/rAF observations (not all browser resources): '+JSON.stringify(d.resources));}else{block('NATIVE FIRST DRAW → HIT (ms)',m.nativeDrawHit);block('RW FIRST DRAW → HIT (ms)',m.rwDrawHit);lines.push('Unmatched native/RW: '+Number(q.delivery.presentation.unmatchedNative||0)+' / '+Number(q.delivery.presentation.unmatchedRW||0));}}
                 lines.push('','BACKGROUND',`events: ${q.backgroundEvents} | duration: ${fmt(q.backgroundMs/1000)} s | resumes: ${q.resumeCount}`);block('RESUME RECOVERY (foreground → first accepted view, ms)',m.resume);
@@ -10597,10 +10597,13 @@
                 else if(Number(p.row?.[26]||0)>0){const n=Math.min(sourceAge/(1000/60),Number(p.row[26]));x=last.x+Number(p.vx||0)*n;y=last.y+Number(p.vy||0)*n;mode='motion';}
                 else {
                     const gap=brClamp(Number(BRMP.aliveArrivalGap||BRMP.viewGap||150),80,200),arrivalAge=brClamp(Number(p.last??last.t)-last.t,0,250),delay=Math.max(0,now-time);
-                    const start=brClamp(arrivalAge+gap-delay+12,120,240),hard=300,u=brClamp((sourceAge-start)/(hard-start),0,1);
+                    // Transport age is already spent when this sample arrives. Decay the
+                    // missing-arrival interval, not normal delivery+cadence a second time.
+                    // Only measured transport (<=250ms) is compensated; no extra display delay.
+                    const base=Math.max(0,arrivalAge-delay),start=base+brClamp(gap+12,120,200),hard=base+300,u=brClamp((sourceAge-start)/(hard-start),0,1);
                     const driveAge=sourceAge<=start?sourceAge:start+(hard-start)*(u-u*u+u*u*u/3);
                     mode=sourceAge>=hard?'hold':sourceAge>start?'decay':'extrapolate';
-                    const travel=brActorTravel(p,ticks,Number(p.row?.[26]||0)>0?ticks:driveAge/(1000/60));x=last.x+travel.x;y=last.y+travel.y;
+                    const travel=brActorTravel(p,ticks,driveAge/(1000/60),hard/(1000/60));x=last.x+travel.x;y=last.y+travel.y;
                 }
                 a=last;
             }
@@ -10616,7 +10619,7 @@
             const next=brRemotePoint(p,time,view,now);if(!next)return;const dx=before?before.x-next.x:0,dy=before?before.y-next.y:0,error=Math.hypot(dx,dy),r=Number(p.row?.[15]||30),small=Math.min(80,Math.max(32,r*1.5)),limit=Math.min(160,Math.max(80,r*3));
             const clip=before?brVisualClip(next,before,r,view,next.through,false):next,blocked=before&&Math.hypot(clip.x-before.x,clip.y-before.y)>.1;
             const smooth=before&&!reset&&!blocked&&error<limit;
-            p.remoteOffsetX=smooth?dx:0;p.remoteOffsetY=smooth?dy:0;p.remoteOffsetMs=error<=small?90:55;p.remoteOffsetAt=time;p.remoteRenderFrame=p.samples.at(-1).t;
+            p.remoteOffsetX=smooth?dx:0;p.remoteOffsetY=smooth?dy:0;p.remoteOffsetMs=error<=small?80:55;p.remoteOffsetAt=time;p.remoteRenderFrame=p.samples.at(-1).t;
             if(brNetDebug)brNetDebug.presentation('correction',error,{snap:!smooth&&!!before,reason:reset?'transition':blocked?'wall':error>=limit?'divergence':'small'});
         }
 
@@ -10692,7 +10695,7 @@
             if(!memo||memo.samples!==samples||memo.first!==first||memo.last!==last||memo.count!==samples.length||memo.gap!==gap||memo.lead!==lead||memo.transport!==transport){
                 let min=Infinity,max=-Infinity;for(const t of samples){if(t<min)min=t;if(t>max)max=t;}
                 const value=gap*1.35+Math.min(100,samples.length?max-min:0)+lead+transport;
-                memo=BRMP.flightHorizonMemo={samples,first,last,count:samples.length,gap,lead,transport,straight:brClamp(value,120,450),curved:brClamp(value,90,240)};
+                memo=BRMP.flightHorizonMemo={samples,first,last,count:samples.length,gap,lead,transport,straight:brClamp(value,120,450),curved:transport+brClamp(gap*1.15+Math.min(35,samples.length?max-min:0),90,200)};
             }
             return curved?memo.curved:memo.straight;
         }
@@ -10707,7 +10710,11 @@
             const samples=track.samples||(track.samples=[]),step=1000/60,last=samples.at(-1),now=performance.now(),cfg=track.flightConfig;
             const evalTime=Number(track.flightTime??last?.t??0)+Math.max(0,now-Number(track.drawAt??now));
             const same=last&&last.turn===turn&&last.vx*row.vx+last.vy*row.vy>Math.hypot(last.vx,last.vy)*Math.hypot(row.vx,row.vy)*.85;
-            const before=track.clockBeforePoint||(last&&cfg&&Number.isFinite(track.drawAt)&&same?brFlightOffset(track,brFlightEvaluate(track,BRMP.latestView||{},evalTime,now,cfg),BRMP.latestView||{},now,cfg):null);track.clockBeforePoint=null;
+            // A known bounce/return vertex supersedes the old tangent. Carrying its
+            // correction across a turn draws an off-path shortcut, including RW bodies.
+            const changedTurn=!!last&&last.turn!==turn;
+            const before=!changedTurn&&(track.clockBeforePoint||(last&&cfg&&Number.isFinite(track.drawAt)&&same?brFlightOffset(track,brFlightEvaluate(track,BRMP.latestView||{},evalTime,now,cfg),BRMP.latestView||{},now,cfg):null));track.clockBeforePoint=null;
+            if(changedTurn){track.offsetX=0;track.offsetY=0;track.handoffPoint=null;}
             if(Array.isArray(path))for(let i=0;i<path.length;i+=4){const f=path[i];if(f>frame)continue;const t=f*step+offset;
                 if(!samples.length||t>samples.at(-1).t+.01)samples.push({t,x:path[i+1],y:path[i+2],vx:0,vy:0,turn:path[i+3],vertex:true});}
             const t=frame*step+offset,s={t,x:row.x,y:row.y,vx:row.vx,vy:row.vy,turn,vertex:!!path?.length};
@@ -12328,7 +12335,7 @@
             actor.contactProjectPoint=brVisualClip(from,point,Number(actor.row[15]||0),view,!!forced?.airborne,false);
             return actor.contactProjectPoint;
         }
-        function brPredictPlayerContact(p,view,now){
+        function brPredictPlayerContact(p,view,now,from=null){
             if(!p.row?.[7]||!BRMP.drawPlayers||!view)return {x:p.predX,y:p.predY};
             const radius=Number(p.row[15]);if(!(radius>0))return {x:p.predX,y:p.predY};
             const own=EMOJI_DB[Number(p.row[2])]||{},flags=Number(p.row[23]||0);
@@ -12346,14 +12353,18 @@
                 let dx=x-ox,dy=y-oy,d=Math.hypot(dx,dy),min=radius+r;
                 if(d>=min||d<1e-6&&Number(id)===Number(BRMP.playerId))return;
                 if(d<1e-6){dx=String(id)<String(BRMP.playerId)?1:-1;dy=0;d=1;}
-                const penetration=Math.min(min-d,Math.max(8,radius*.55));
+                // Predict only penetration introduced by our own step. An uncertain
+                // remote tangent may block that step, but cannot push an idle body.
+                // Host contact/impulse positions still reconcile through the usual path.
+                const entered=from?Math.max(0,Math.hypot(from.x-ox,from.y-oy)-d):Infinity;
+                const penetration=Math.min(min-d,entered,Math.max(8,radius*.55));
                 x+=dx/d*penetration;y+=dy/d*penetration;
             });
             return {x,y};
         }
-        function brActorTravel(actor,ticks,driveTicks=ticks) {
+        function brActorTravel(actor,ticks,driveTicks=ticks,driveLimit=18) {
             const rw=actor.rw||{},locked=rw.stunEnd>Number(actor.rwFrame||0)||rw.locks?.move;
-            const n=Math.max(0,Math.min(18,driveTicks)),whole=Math.floor(n),part=n-whole;
+            const n=Math.max(0,Math.min(driveLimit,driveTicks)),whole=Math.floor(n),part=n-whole;
             const dash=Math.max(0,Number(actor.row?.[26]||0));
             if(dash)return {x:Number(actor.vx||0)*Math.min(n,dash),y:Number(actor.vy||0)*Math.min(n,dash)};
             let x=0,y=0;
@@ -12454,8 +12465,9 @@
                 var collision=brResolvePredictedCollision(state,phases?{walls:[],worldRadius:view.worldRadius,_bodyPhasing:true}:view,Number(p.row[15]||38),{x:p.predX,y:p.predY},localDashActive);
                 if(collision&&localDashActive)localDash.remaining=0;
                 p.predX=state.x;p.predY=state.y;
-                var contact=brPredictPlayerContact(p,view,now);
+                var contact=brPredictPlayerContact(p,view,now,{x:p.previousX,y:p.previousY});
                 if(contact.x!==p.predX||contact.y!==p.predY){
+                    if(brNetDebug)brNetDebug.presentation('selfContact',Math.hypot(contact.x-p.predX,contact.y-p.predY));
                     state.x=contact.x;state.y=contact.y;
                     brResolvePredictedCollision(state,view,Number(p.row[15]||38));
                     p.predX=state.x;p.predY=state.y;
@@ -12496,6 +12508,7 @@
                     var fraction=error>Math.max(320,Number(p.row[15]||38)*8)?1:(error-threshold)*fix/error;
                     var fx=ex*fraction,fy=ey*fraction,previousX=Number.isFinite(p.previousX)?p.previousX:p.predX,previousY=Number.isFinite(p.previousY)?p.previousY:p.predY;
                     p.predX+=fx;p.predY+=fy;p.previousX=previousX+fx;p.previousY=previousY+fy;
+                    if(brNetDebug)brNetDebug.presentation('selfCorrection',Math.hypot(fx,fy));
                 }
             }
             state.x=p.predX;state.y=p.predY;state.vx=p.predVx;state.vy=p.predVy;
