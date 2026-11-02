@@ -12,3 +12,9 @@
 - Remaining M1 debt: separate cosmetic RNG consumption without changing original combat sequence; broader full-life and all-build parity. M2–M5 are in progress/unverified.
 
 Production hosting credentials/domain were not provided; production is not deployed. No Firebase operations were performed.
+
+## M2
+
+- Real HTTP/ws room authority, strict protocol schemas, teacher authentication, zero-score draft, quiz scoring/locks, atomic reroll, bounded duplicate ledger, connection epochs and capability resume implemented.
+- Executed five protocol/integration tests over real loopback TCP: all passed. Original engine/rule regression rerun: 90 passed. Initial Windows sandbox TCP attempt returned EACCES; the same suite passed with authorized local network execution.
+- M2 browser UI wiring is pending M3/M4; no connection-only completion claim.
