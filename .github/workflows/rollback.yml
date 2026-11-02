@@ -1,0 +1,18 @@
+name: Paired rollback
+on:
+  workflow_dispatch:
+    inputs:
+      verified_release_sha:
+        description: Previously verified 40-character paired release commit SHA
+        required: true
+        type: string
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  rollback:
+    uses: ./.github/workflows/release.yml
+    with:
+      target_ref: ${{ inputs.verified_release_sha }}
+    secrets: inherit

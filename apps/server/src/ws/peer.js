@@ -13,6 +13,7 @@ export class Peer{
   this.flush();
  }
  trimEvents(now=Date.now()){const p=this.member;if(!p)return;while(p.events.length&&(p.events.length>2048||p.eventBytes>1048576||now-p.events[0].at>10000)){const e=p.events.shift();p.eventBytes-=Buffer.byteLength(e.data);}}
+ snapshot(data){if(this.socket.readyState!==1)return;if(this.pendingSnapshot)this.metrics.replacedSnapshots++;this.pendingSnapshot=data;this.flush();}
  flush(){
   const ws=this.socket;if(ws.readyState!==1)return;const bytes=ws.bufferedAmount;this.metrics.bufferHighWatermark=Math.max(this.metrics.bufferHighWatermark,bytes);
   if(bytes>=this.config.bufferWarn){this.highAt||=Date.now();if(bytes>=this.config.bufferHard&&Date.now()-this.highAt>this.config.bufferTimeoutMs)this.close(4008,'SLOW_RECEIVER_RESYNC');return;}

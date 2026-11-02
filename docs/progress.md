@@ -33,3 +33,11 @@ Production hosting credentials/domain were not provided; production is not deplo
 - Network lab: 26 connections, nine application-level RTT/jitter profiles and three stall durations passed. Raw diagnostics are in artifacts/network-lab.json. This is not OS packet loss or classroom Wi-Fi.
 - Load development exposed a mixed-process benchmark bottleneck and a test-harness rematch race. Both failed reports are retained locally. Dedicated server process load matrix 20/26/30 × 600s is running; results are not yet PASS and will be recorded in the acceptance report.
 - Remaining fidelity limitations (including legacy cosmetic RNG consumption, complete preview handoff and exhaustive all-build/forced-motion parity) remain explicit; no IMPLEMENTATION_COMPLETE claim yet.
+
+## M5
+
+- Added executable verify/boundary/build commands, CI with actual Node/WS/browser/load jobs, pinned Docker/Caddy configurations and guarded paired release/rollback workflows.
+- Authenticated drain/seal and real timeout command passed: protected quiz/draft continue; timeout undrains; closing a room clears tokens/references.
+- Actual local Caddy2.11.7 HTTPS/WSS test passed with a private test CA trusted only by the Node test subprocess; no Windows trust-store installation. Docker, public DNS/SSH/Pages deployment are unverified.
+- Root index.html and remote main1292f875 remain unchanged. Production defaults disabled. Updated dev YAML parser to2.9.1 after audit finding; npm audit now reports0 vulnerabilities.
+- Acceptance ledger lists all70 items individually. Implementation/visual fidelity and load performance gaps remain, so this work is a draft PR and does not claim IMPLEMENTATION_COMPLETE or PRODUCTION_READY.

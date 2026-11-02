@@ -1,4 +1,5 @@
 import {createWorld,stepWorld,getTeacherState,getVisibleState,getStaticState,FIXED_DT_MS} from '../../../../packages/engine/src/index.js';
+import {snapshotEncoder} from '../ws/snapshot.js';
 export function attachSimulation(manager,metrics){
  let stopped=false,timer,last=performance.now();
  manager.startBattle=room=>{
@@ -40,10 +41,11 @@ export function attachSimulation(manager,metrics){
    if(now>=room.nextSnapshot&&room.phase==='BATTLE'){
     do{room.nextSnapshot+=50;}while(room.nextSnapshot<=now);
     metrics.snapshotGap.add(now-room.lastSnapshot);room.lastSnapshot=now;const start=performance.now(),teacher=getTeacherState(room.world);room.snapshotSeq++;
+    const encode=snapshotEncoder(teacher,room.snapshotSeq,now);
     for(const member of room.members.values()){
      if(!member.connected)continue;
      const view=member.role==='host'?teacher:getVisibleState(room.world,member.id,undefined,teacher);
-     member.peer?.send('SNAPSHOT',{...view,snapshotSeq:room.snapshotSeq,serverNow:now},{snapshot:true});
+     if(member.peer)member.peer.snapshot(encode(view,member.peer.scope()));
     }
     metrics.snapshotCpu.add(performance.now()-start);
     if(now-(room.lastBoard||0)>=500){room.lastBoard=now;const board=room.world.session.respawnMode?room.world.brTKBuildBoard(false):{players:teacher.actors.map(a=>({id:a.id,name:a.name,team:a.team,kills:a.kills,deaths:a.deaths,rank:0})),teams:[]};for(const m of room.members.values())m.peer?.send('LEADERBOARD',board);}

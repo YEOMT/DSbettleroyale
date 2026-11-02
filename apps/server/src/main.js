@@ -25,6 +25,11 @@ export async function createGameServer(overrides={}){
    if(!secretMatches(req.headers.authorization?.replace(/^Bearer /,''),config.adminSecret))return json(401,{error:'UNAUTHORIZED'});
    if(url.pathname==='/admin/drain'&&req.method==='POST'){manager.draining=true;return json(200,{draining:true,protectedRooms:manager.protectedRooms()});}
    if(url.pathname==='/admin/undrain'&&req.method==='POST'){manager.draining=false;return json(200,{draining:false});}
+   if(url.pathname==='/admin/seal'&&req.method==='POST'){
+    if(!manager.draining||manager.protectedRooms()!==0)return json(409,{error:'PROTECTED_ROOMS_REMAIN'});
+    for(const p of peers)p.send('MAINTENANCE',{message:'서버 업데이트가 진행됩니다. 대기실은 업데이트 후 새로 만들어 주세요.'});
+    return json(200,{sealed:true,protectedRooms:0});
+   }
    if(url.pathname==='/admin/status')return json(200,{...metrics.report(manager),draining:manager.draining,protectedRooms:manager.protectedRooms(),eventLoopDelayP95Ms:eventLoop.percentile(95)/1e6});
    return json(404,{error:'NOT_FOUND'});
   }

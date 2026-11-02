@@ -7,6 +7,7 @@ export class AppUI{
   this.banner=document.createElement('div');this.banner.className='ws-connection br-hidden';document.body.append(this.banner);this.bind();
   for(const type of ['room_state','full_state','snapshot','private_state','error','status','ended','event','overload','leaderboard'])net.addEventListener(type,e=>this.receive(type,e.detail));
   net.addEventListener('static_state',e=>timeline.setStatic(e.detail));net.addEventListener('reset',()=>{timeline.reset();controls.reset();this.offerId='';});
+  net.addEventListener('maintenance',e=>this.toast(e.detail.message));
   setInterval(()=>this.clock(),100);
  }
  toast(message){text('br-toast',message);$('br-toast').classList.add('show');clearTimeout(this.toastTimer);this.toastTimer=setTimeout(()=>$('br-toast').classList.remove('show'),3500);}
@@ -24,7 +25,7 @@ export class AppUI{
   $('br-start-battle').onclick=()=>this.run(()=>this.net.command('START_BATTLE'));
   $('br-force-end').onclick=()=>this.run(()=>this.net.command('END'));
   $('br-rematch-room').onclick=()=>this.run(()=>this.net.command('REMATCH'));
-  for(const id of ['br-close-room','br-finish-room','br-results-home'])$(id).onclick=()=>{this.net.leave();location.reload();};
+  for(const id of ['br-close-room','br-finish-room','br-results-home'])$(id).onclick=()=>this.run(async()=>{if(this.room?.self.role==='host')await this.net.command('CLOSE_ROOM');this.net.leave();location.reload();});
   $('br-reroll-btn').onclick=()=>this.run(()=>this.net.command('DRAFT_REROLL',{draftRevision:this.room.self.draft.revision}));
   $('br-ready-btn').onclick=()=>this.run(()=>this.net.command('DRAFT_CONFIRM',{draftRevision:this.room.self.draft.revision}));
   $('br-copy-link').onclick=()=>this.run(async()=>{await navigator.clipboard.writeText($('br-join-link').value);this.toast('참가 링크를 복사했습니다.');});

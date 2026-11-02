@@ -19,7 +19,7 @@ const validators={
  PING:p=>num(p.clientTime,0,1e16),CONFIGURE:p=>obj(p),KICK:p=>str(p.playerId,64),
  START_QUIZ:p=>Object.keys(p).length===0,BEGIN_DRAFT:p=>Object.keys(p).length===0,
  START_BATTLE:p=>Object.keys(p).length===0,END:p=>Object.keys(p).length===0,REMATCH:p=>Object.keys(p).length===0,
- CONTINUE:p=>Object.keys(p).length===0,LEAVE:p=>Object.keys(p).length===0,RESYNC:p=>Object.keys(p).length===0,
+ CONTINUE:p=>Object.keys(p).length===0,CLOSE_ROOM:p=>Object.keys(p).length===0,LEAVE:p=>Object.keys(p).length===0,RESYNC:p=>Object.keys(p).length===0,
  QUIZ_ANSWER:p=>str(p.questionId)&&str(p.attemptId)&&str(p.answerId),
  DRAFT_REROLL:p=>int(p.draftRevision),DRAFT_CONFIRM:p=>int(p.draftRevision),
  AUGMENT_CHOOSE:p=>str(p.offerId,256)&&str(p.augmentId,40),

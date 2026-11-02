@@ -1,0 +1,159 @@
+name: Paired release
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      target_ref:
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.identity.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target_ref || github.event.workflow_run.head_sha || github.sha }}
+      - id: identity
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - run: npm run build
+        env:
+          BUILD_ID: ${{ steps.identity.outputs.sha }}
+          PAGES_BUILD: '1'
+          VITE_PUBLIC_WSS_URL: ${{ vars.PUBLIC_WSS_URL }}
+      - name: Paired image, enabled production only
+        if: vars.PRODUCTION_WS_ENABLED == 'true'
+        env:
+          RELEASE_SHA: ${{ steps.identity.outputs.sha }}
+          PUBLIC_WSS_URL: ${{ vars.PUBLIC_WSS_URL }}
+        run: |
+          test -n "$PUBLIC_WSS_URL"
+          docker build -f deploy/Dockerfile --build-arg BUILD_ID="$RELEASE_SHA" --build-arg VITE_PUBLIC_WSS_URL="$PUBLIC_WSS_URL" -t "dsbr:$RELEASE_SHA" .
+          docker save -o server-image.tar "dsbr:$RELEASE_SHA"
+          tar -cf client-assets.tar -C dist/client/assets .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.identity.outputs.sha }}
+          path: |
+            dist/
+            server-image.tar
+            client-assets.tar
+          retention-days: 30
+      - name: Deployment state
+        if: vars.PRODUCTION_WS_ENABLED != 'true'
+        run: echo 'NOT_DEPLOYED — PRODUCTION_WS_ENABLED is false/unset. Existing main/Pages remain unchanged. Build artifact only.' >> "$GITHUB_STEP_SUMMARY"
+  server:
+    needs: build
+    if: vars.PRODUCTION_WS_ENABLED == 'true'
+    environment: production
+    runs-on: ubuntu-latest
+    outputs:
+      previous: ${{ steps.install.outputs.previous }}
+      staged: ${{ steps.install.outputs.staged }}
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      RELEASE_SHA: ${{ needs.build.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc}
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with: {name: 'release-${{ needs.build.outputs.sha }}'}
+      - name: Strict SSH setup
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+        run: |
+          test -n "$DEPLOY_HOST" && test -n "$DEPLOY_USER" && test -n "$SSH_KEY" && test -n "$KNOWN_HOSTS"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      - id: install
+        name: Drain, stage paired server and retain old assets
+        run: |
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p /srv/dsbr/incoming/$RELEASE_SHA"
+          scp server-image.tar client-assets.tar "$DEPLOY_USER@$DEPLOY_HOST:/srv/dsbr/incoming/$RELEASE_SHA/"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "bash /srv/dsbr/install-release.sh $RELEASE_SHA"
+          echo 'staged=true' >> "$GITHUB_OUTPUT"
+          echo "previous=$(ssh "$DEPLOY_USER@$DEPLOY_HOST" 'cat /srv/dsbr/previous-release')" >> "$GITHUB_OUTPUT"
+          scp "$DEPLOY_USER@$DEPLOY_HOST:/srv/dsbr/incoming/$RELEASE_SHA/assets-archive.tar" assets-archive.tar
+          tar -xf assets-archive.tar -C dist/client/assets
+      - name: Public HTTP/version/WSS gate
+        run: node tools/deploy/smoke.mjs
+        env:
+          PUBLIC_HTTP_API_URL: ${{ vars.PUBLIC_HTTP_API_URL }}
+          PUBLIC_WSS_URL: ${{ vars.PUBLIC_WSS_URL }}
+          CLIENT_ORIGIN: https://yeomt.github.io
+      - uses: actions/upload-pages-artifact@v4
+        with: {path: dist/client}
+  pages:
+    needs: [build, server]
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    outputs:
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Verify public Pages build and entry asset
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          EXPECTED_SHA: ${{ needs.build.outputs.sha }}
+        run: |
+          node --input-type=module -e 'const base=process.env.PAGE_URL;const v=await(await fetch(new URL("version.json",base))).json();if(v.buildId!==process.env.EXPECTED_SHA)throw Error("Pages version mismatch");const html=await(await fetch(base)).text();const src=html.match(/<script[^>]+src="([^"]+)"/)?.[1];if(!src||!(await fetch(new URL(src,base))).ok)throw Error("Pages asset missing");console.log("Verified",base,v.buildId)'
+  finalize:
+    needs: [build, server, pages]
+    if: always() && vars.PRODUCTION_WS_ENABLED == 'true' && needs.server.result != 'skipped'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+      PAGES_RESULT: ${{ needs.pages.result }}
+      SERVER_RESULT: ${{ needs.server.result }}
+      STAGED: ${{ needs.server.outputs.staged }}
+    steps:
+      - name: Restore previous server on failure; otherwise release drain
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+          if [[ "$PAGES_RESULT" != success || "$SERVER_RESULT" != success ]]; then
+            if [[ "$STAGED" != true ]]; then
+              echo 'RELEASE_FAILED_BEFORE_STAGING — no additional replacement attempted; inspect the failed guard.' >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+            ssh "$DEPLOY_USER@$DEPLOY_HOST" 'cd /srv/dsbr; previous=$(cat previous-release); if [[ "$previous" =~ ^[0-9a-f]{40}$ ]]; then bash install-release.sh "$previous"; fi'
+            echo 'RELEASE_FAILED — previous server restored when available. Run rollback workflow for the previous paired client; verify both before resuming class.' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" 'cd /srv/dsbr; set -a; source .env; set +a; curl --fail --silent -X POST -H "Authorization: Bearer $ADMIN_SECRET" http://127.0.0.1:8080/admin/undrain'
+          echo 'DEPLOYED_VERIFIED — HTTP/version/WSS and paired Pages asset checks passed; classroom validation remains separate.' >> "$GITHUB_STEP_SUMMARY"

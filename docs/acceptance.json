@@ -1,0 +1,430 @@
+{
+  "counts": {
+    "PASS": 24,
+    "PARTIAL": 38,
+    "PENDING": 6,
+    "NOT_RUN": 2
+  },
+  "items": [
+    {
+      "id": "A01",
+      "requirement": "기준 원본/원격 commit·blob·SHA-256·build 기록.",
+      "status": "PASS",
+      "evidence": "docs/baseline.md; remote main rechecked unchanged; raw Git bytes/SHA recorded."
+    },
+    {
+      "id": "A02",
+      "requirement": "active77종/영구ID/retiredID와 실제 최종 profile 추출.",
+      "status": "PASS",
+      "evidence": "tests/baseline/content.json and manifest: final 77 profiles, permanent and retired IDs."
+    },
+    {
+      "id": "A03",
+      "requirement": "Node에서 DOM/Pixi/Firebase 없이 engine create/step 가능.",
+      "status": "PASS",
+      "evidence": "Node engine create/step tests; tools/check-boundaries.mjs."
+    },
+    {
+      "id": "A04",
+      "requirement": "같은 seed·시간·입력에 원본/추출 engine의 규칙·피해 결과 비교.",
+      "status": "PASS",
+      "evidence": "tests/parity/engine.test.mjs: 77 actual basic+skill, 180 ticks; tolerance 1e-10. Longer/all-build comparisons are separate."
+    },
+    {
+      "id": "A05",
+      "requirement": "전투 RNG와 장식 RNG·방별 RNG 격리.",
+      "status": "PARTIAL",
+      "evidence": "Two-room RNG isolation passed. Original cosmetic RNG draw consumption remains coupled to combat for parity."
+    },
+    {
+      "id": "A06",
+      "requirement": "client/server/content/protocol 간 import 경계 검사.",
+      "status": "PASS",
+      "evidence": "AST import/runtime boundary check executed by verify."
+    },
+    {
+      "id": "A07",
+      "requirement": "깨끗한 clone에서 npm ci/build/dev/verify 성공.",
+      "status": "PENDING",
+      "evidence": "Fresh remote clone npm ci/build/dev/verify scheduled after push."
+    },
+    {
+      "id": "A08",
+      "requirement": "monolithic eval/iframe/headless production engine 없이 실제 책임 분리.",
+      "status": "PASS",
+      "evidence": "26 ordinary production modules / 307 extracted source units; no eval/iframe/browser production engine."
+    },
+    {
+      "id": "B01",
+      "requirement": "교사 생성·QR·6자리 입장·닉네임·학생목록.",
+      "status": "PASS",
+      "evidence": "Three-mode Edge E2E: teacher auth, room number, student names/list and generated QR canvas."
+    },
+    {
+      "id": "B02",
+      "requirement": "퀴즈TXT·내장문제·정오답/잠금/점수/리롤 규칙 유지.",
+      "status": "PARTIAL",
+      "evidence": "Quiz parser/default54/custom bank, correct/wrong locks and scoring tested over WS; browser TXT file-picker path not separately exercised."
+    },
+    {
+      "id": "B03",
+      "requirement": "점수0·탭복귀·통신재연결에도 유효 기본 캐릭터 배정.",
+      "status": "PARTIAL",
+      "evidence": "Zero-score default and session resume tested; 30-second browser background return not exercised."
+    },
+    {
+      "id": "B04",
+      "requirement": "중복/늦은 quiz answer로 점수 중복 증가 없음.",
+      "status": "PASS",
+      "evidence": "session integration rejects stale/duplicate quiz scoring."
+    },
+    {
+      "id": "B05",
+      "requirement": "reroll double tap/응답유실/중복요청의 차감·배정 일관성.",
+      "status": "PASS",
+      "evidence": "same requestId reuses exact draft result and one debit; stale revision rejected."
+    },
+    {
+      "id": "B06",
+      "requirement": "로비/퀴즈/draft의 교사 kick, 학생 운영명령 위조 차단.",
+      "status": "PARTIAL",
+      "evidence": "Host-only command rejection and lobby kick/token revocation tested; every kick phase not independently exercised."
+    },
+    {
+      "id": "B07",
+      "requirement": "동일 이름·다른 세션·다중 탭 접속 경계.",
+      "status": "PASS",
+      "evidence": "Duplicate nickname, token resume and previous-connection supersession tests."
+    },
+    {
+      "id": "B08",
+      "requirement": "같은방 재경기5회, 과거 input/death/offer가 새 경기로 유입되지 않음.",
+      "status": "PARTIAL",
+      "evidence": "Five rematches and unique match IDs/reset world tested; every old death/offer transport permutation not exercised."
+    },
+    {
+      "id": "C01",
+      "requirement": "77종 무증강 평타·스킬 실제 생성/사용/종료 parity.",
+      "status": "PARTIAL",
+      "evidence": "All77 basic/skill fixtures execute for180 ticks; exhaustive terminal lifetime and every later status effect not covered."
+    },
+    {
+      "id": "C02",
+      "requirement": "HP·이속·스킬 지정값·모드배율·평타 보존.",
+      "status": "PASS",
+      "evidence": "All77 HP/radius/speed/basic profiles and mode HP multipliers match extracted baseline."
+    },
+    {
+      "id": "C03",
+      "requirement": "Lv1→Lv6 누적XP20, 다섯선택·III상한·MAX pending.",
+      "status": "PASS",
+      "evidence": "XP20 to level6, five actual offers/choices, tier<=III and MAX/pending tested."
+    },
+    {
+      "id": "C04",
+      "requirement": "왕귀S금지·배타·배율1회·상한·재계산 HP 비율.",
+      "status": "PARTIAL",
+      "evidence": "Wanggui S prohibition/exclusion and repeated HP-ratio recomputation tested; all modifier cap combinations not enumerated."
+    },
+    {
+      "id": "C05",
+      "requirement": "킹모아이·농구왕 환급·좀비 회복·거인12발의 특수검사.",
+      "status": "PARTIAL",
+      "evidence": "Four named actors are in the77 fixture; special refund/healing/12-shot edge-case assertions not complete."
+    },
+    {
+      "id": "C06",
+      "requirement": "포탑3개·벽·유도·반사·왕복·장판·채널링 실제 처리.",
+      "status": "PARTIAL",
+      "evidence": "Original native/RW implementation retained and exercised; turret-three, every reflection/return/channel edge not exhaustively checked."
+    },
+    {
+      "id": "C07",
+      "requirement": "solo/team-elim 자기장 일반/압축/300ms유예/표시 일치.",
+      "status": "PARTIAL",
+      "evidence": "Original ring code retained; ordinary/pressure/compression/300ms display parity not all independently asserted."
+    },
+    {
+      "id": "C08",
+      "requirement": "capture 2/3/4팀·A/C선활성·B1.5·FEVER2·100%/종료시간.",
+      "status": "PARTIAL",
+      "evidence": "2/3/4 teams ×300/360s full fixed-tick timeout and awards; A/C,B1.5,FEVER2 rules tested. Separate100% finish fixture incomplete."
+    },
+    {
+      "id": "C09",
+      "requirement": "부활퀴즈3문제·리롤/keep·life초기화·스폰보호.",
+      "status": "PASS",
+      "evidence": "Actual WS three-answer respawn, keep/reroll, life/run reset and protection tested."
+    },
+    {
+      "id": "C10",
+      "requirement": "경기전체KDA/점령기여/사용이모지/시상·동점처리.",
+      "status": "PARTIAL",
+      "evidence": "Original result/award builders wired; award labels/full capture time tested. Whole-match assist/contribution/tie permutations need broader tests."
+    },
+    {
+      "id": "C11",
+      "requirement": "엄폐 통로·연막 공격/피격 노출·지원/은신 구분.",
+      "status": "PARTIAL",
+      "evidence": "Original concealment/cover mechanics used; dedicated support-versus-hidden visual regression incomplete."
+    },
+    {
+      "id": "C12",
+      "requirement": "상자파괴/픽업/XP보충/사망드롭상한6·일반모드 팀스폰.",
+      "status": "PARTIAL",
+      "evidence": "Original farm/spawn logic retained; separate crate/pickup/drop-cap6 regressions not complete."
+    },
+    {
+      "id": "D01",
+      "requirement": "실WebSocket으로2브라우저 전체경기 완주.",
+      "status": "PASS",
+      "evidence": "Edge: teacher +2 isolated student contexts, all3 public modes, quiz/draft/battle/results/rematch. Teacher ends the short browser battle."
+    },
+    {
+      "id": "D02",
+      "requirement": "서버만 physics 실행, 교사 탭닫힘/숨김이 전투를 정지시키지 않음.",
+      "status": "PASS",
+      "evidence": "Real host socket disconnect leaves server ticks advancing; physics runs only on server."
+    },
+    {
+      "id": "D03",
+      "requirement": "move/aim/button 입력 반응·멀티터치 증강 선택.",
+      "status": "PARTIAL",
+      "evidence": "Keyboard/buttons and normal browser flow tested; real multi-touch augmentation and mobile device response unverified."
+    },
+    {
+      "id": "D04",
+      "requirement": "lastApplied input seq/tick과 client replay의 실제 일치.",
+      "status": "PARTIAL",
+      "evidence": "Applied ACK and ordinary replay kernel checked; jitter/held-input alignment is not exhaustively proven."
+    },
+    {
+      "id": "D05",
+      "requirement": "무입력·무외력 10초 정지와 불확실 상대접촉 흔들림 검사.",
+      "status": "PARTIAL",
+      "evidence": "600 idle ticks show zero drift without external forces; uncertain body-contact scenarios incomplete."
+    },
+    {
+      "id": "D06",
+      "requirement": "급회전·정지·벽·다중 접촉의 보정 오차 비교.",
+      "status": "PARTIAL",
+      "evidence": "840-tick straight/turn/stop/wall parity passed; multi-body/forced-motion correction comparison incomplete."
+    },
+    {
+      "id": "D07",
+      "requirement": "own shot preview→authority handoff, 멀티발ordinal 고유.",
+      "status": "PARTIAL",
+      "evidence": "Action/life/ordinal IDs and cosmetic intent marker exist; complete trajectory preview handoff is not implemented."
+    },
+    {
+      "id": "D08",
+      "requirement": "한snapshot안에 끝난 탄의 spawn/hit/end·즉시사망 원인.",
+      "status": "PARTIAL",
+      "evidence": "Reliable spawn/end and synthetic short-shot timeline terminal test; actual native/RW same-snapshot lethal receipt suite incomplete."
+    },
+    {
+      "id": "D09",
+      "requirement": "native/RW 유도·왕복·반사·직선탄의 연속성·끝점·중복0.",
+      "status": "PARTIAL",
+      "evidence": "Authoritative path/turn samples transmitted; renderer does not fully replay every native/RW curved path and endpoint."
+    },
+    {
+      "id": "D10",
+      "requirement": "hidden actor의 level/name/glow가 남지 않고 위험탄은 필요한 경우 보임.",
+      "status": "PARTIAL",
+      "evidence": "Concealed actors filtered before snapshot and level tracks reset; dedicated hidden-actor browser capture not run."
+    },
+    {
+      "id": "D11",
+      "requirement": "AOI leave와 실제destroy를 구분하고 빠른 재진입 복구.",
+      "status": "PARTIAL",
+      "evidence": "Snapshot absence does not create a terminal; re-entry uses current state. High-speed AOI roundtrip fixture incomplete."
+    },
+    {
+      "id": "D12",
+      "requirement": "clock offset 점프·duplicate/oldframe·pause/resume에서 시간역행/중복피해 없음.",
+      "status": "PARTIAL",
+      "evidence": "Duplicate/old snapshot, life/warp and monotonic timeline tests passed; clock offset jump/pause matrix incomplete."
+    },
+    {
+      "id": "E01",
+      "requirement": "20/26/30학생+teacher 실제WS10분.",
+      "status": "PENDING",
+      "evidence": "20 students+teacher completed600s/7 rounds.26/30 runs in progress; failed overload attempts retained. Performance goals are separate from functional execution."
+    },
+    {
+      "id": "E02",
+      "requirement": "26명 RTT40/100/250ms·지터0/20/60ms.",
+      "status": "PASS",
+      "evidence": "tools/network/run.mjs:26 actual WS clients; all9 RTT40/100/250 × jitter0/20/60 profiles. Application FIFO scheduling, not OS shaping."
+    },
+    {
+      "id": "E03",
+      "requirement": "300/500/1500ms stall 및 연속 회복.",
+      "status": "PASS",
+      "evidence": "Application-message stalls300/500/1500ms recover and continue advancing; raw network trace retained."
+    },
+    {
+      "id": "E04",
+      "requirement": "1명 느린수신·buffer포화가 타학생의 전투를 막지 않음.",
+      "status": "PARTIAL",
+      "evidence": "A paused receiver with synthetic queued payload pressure did not stop another actor tick; full comparative gap/FPS workload not run."
+    },
+    {
+      "id": "E05",
+      "requirement": "26명 동시reconnect, backoff·token·session 검증.",
+      "status": "PARTIAL",
+      "evidence": "26 simultaneous token reconnects/FULL_STATE passed; browser backoff distribution not measured."
+    },
+    {
+      "id": "E06",
+      "requirement": "30초 background 후 현재alive/dead/quiz/match 상태 정확 복원.",
+      "status": "NOT_RUN",
+      "evidence": "30-second real browser background/alive/dead/quiz/match matrix not executed."
+    },
+    {
+      "id": "E07",
+      "requirement": "명령 결과 응답유실 재전송 시 스킬·reroll·증강 중복 적용0.",
+      "status": "PARTIAL",
+      "evidence": "Duplicate reroll/augment request IDs checked; deliberate response loss for every skill/recast not exhaustively tested."
+    },
+    {
+      "id": "E08",
+      "requirement": "이벤트로그 만료 후 FULL_STATE 복구, 옛공격 재생0.",
+      "status": "PASS",
+      "evidence": "Expired event ledger gives FULL_STATE/current cursor, without replaying old attacks."
+    },
+    {
+      "id": "E09",
+      "requirement": "동시방2개 RNG·프레임·학생·메모리 격리.",
+      "status": "PARTIAL",
+      "evidence": "Two-room engine state/RNG/frame isolation passed; concurrent2-room transport/memory soak not run."
+    },
+    {
+      "id": "E10",
+      "requirement": "재경기/방닫기 반복30분에서 메모리·timer·refs 누적 없음.",
+      "status": "NOT_RUN",
+      "evidence": "Continuous30-minute same-process create/rematch/close leak proof not completed; per-load cleanup counters recorded."
+    },
+    {
+      "id": "F01",
+      "requirement": "Pixi/Canvas fallback과low/balanced/high 화면·핵심공격정보 유지.",
+      "status": "PARTIAL",
+      "evidence": "Pixi E2E passed. Canvas path implemented; quality/fallback capture matrix still pending."
+    },
+    {
+      "id": "F02",
+      "requirement": "모바일세로/가로·PC·resize·reducedMotion·6레벨글자.",
+      "status": "PARTIAL",
+      "evidence": "Original six-level texture painter and reduced-motion support wired; real mobile portrait/landscape/resize unverified."
+    },
+    {
+      "id": "F03",
+      "requirement": "BGM전환/반복·음소거·hit/hurt음 중복 없음.",
+      "status": "PARTIAL",
+      "evidence": "Original BGM URLs/phase looping and hit/hurt dedupe wired; actual audio playback/transition listening unverified."
+    },
+    {
+      "id": "F04",
+      "requirement": "교사전체맵·방번호·점령화살표·랭킹·종료조작.",
+      "status": "PARTIAL",
+      "evidence": "Teacher whole-map/room/end verified in browser; focus/leaderboard/arrows wired but not all visual cases asserted."
+    },
+    {
+      "id": "F05",
+      "requirement": "서버tick/build/eventloop/RSS·clientFPS 진단 실제 수집.",
+      "status": "PASS",
+      "evidence": "Server step/snapshot/eventloop/RSS and browser frame-time collections are real bounded measurements."
+    },
+    {
+      "id": "F06",
+      "requirement": "PING RTT·입력ACK·sourceage·positionalerror를 혼동하지 않는 보고서.",
+      "status": "PASS",
+      "evidence": "Reports separate RTT, server apply delay, accepted/arrival gaps, source tick and world-unit corrections; no one-way/input-to-photon claim."
+    },
+    {
+      "id": "F07",
+      "requirement": "권한위조/room탈취/토큰재사용/이전connection 입력 차단.",
+      "status": "PASS",
+      "evidence": "Host-only mutations, room/match/life/connection scope, token revocation and supersession tested."
+    },
+    {
+      "id": "F08",
+      "requirement": "oversize/NaN/Infinity/초과명령/잘못된ID/malformedJSON 처리.",
+      "status": "PARTIAL",
+      "evidence": "Malformed/unknown authority fields, numeric schemas and payload limits implemented/tested; every extreme fuzz/ID/rate permutation not run."
+    },
+    {
+      "id": "F09",
+      "requirement": "학교공유IP26명 정상사용은 허용하고 실제flood는 제한.",
+      "status": "PARTIAL",
+      "evidence": "26 clients from one loopback IP accepted; per-connection token bucket exists. Sustained hostile flood versus healthy traffic not benchmarked."
+    },
+    {
+      "id": "F10",
+      "requirement": "Origin/CORS/TLS·secret/PII/log 노출 검사.",
+      "status": "PARTIAL",
+      "evidence": "Exact Origin/CORS and local trusted Caddy HTTPS/WSS tested; public DNS/TLS and deployment secret configuration absent."
+    },
+    {
+      "id": "G01",
+      "requirement": "단계별commit·remote branch 실제push·PR URL 검증.",
+      "status": "PENDING",
+      "evidence": "M0–M4 commits exist. M5 push and PR URL verification pending."
+    },
+    {
+      "id": "G02",
+      "requirement": "PR CI가 실제tests/build 실행, 미실행PASS 없음.",
+      "status": "PENDING",
+      "evidence": "CI workflow runs actual verify/browser/load/build. Remote run result pending."
+    },
+    {
+      "id": "G03",
+      "requirement": "Pages repo base와assets/QR쿼리·netdebug 링크 검증.",
+      "status": "PENDING",
+      "evidence": "Pages base configured /DSbettleroyale/; built asset/query browser check pending."
+    },
+    {
+      "id": "G04",
+      "requirement": "production 설정없을 때 기존main/Pages 보존.",
+      "status": "PASS",
+      "evidence": "Root index.html unchanged; production defaultfalse; main SHA unchanged; no Firebase writes."
+    },
+    {
+      "id": "G05",
+      "requirement": "Docker nonroot·Caddy WSS 실제 로컬TLS 또는 지정스테이징 검증.",
+      "status": "PARTIAL",
+      "evidence": "Official pinned images; non-root Docker recipe. Actual local Caddy2.11.7 trusted-CA HTTPS/WSS passed; Docker unavailable, container not executed."
+    },
+    {
+      "id": "G06",
+      "requirement": "drain 중 신규라운드차단·기존퀴즈/draft/경기완주·timeout강제종료 없음.",
+      "status": "PASS",
+      "evidence": "Authenticated drain/seal and CLI timeout test: quiz continues to battle/results; timeout undrains without terminating."
+    },
+    {
+      "id": "G07",
+      "requirement": "server/client/content protocol일치와구버전안내.",
+      "status": "PASS",
+      "evidence": "Build/content/protocol exact WSS HELLO checked through local TLS; incompatible handshake rejected."
+    },
+    {
+      "id": "G08",
+      "requirement": "건강검사실패 시release중단·이전image/client짝rollback.",
+      "status": "PARTIAL",
+      "evidence": "Paired guarded release/rollback scripts and runbook supplied; real Docker/SSH/Pages failure rollback not executed."
+    },
+    {
+      "id": "G09",
+      "requirement": "서버재시작장애의명확한방만료·무한reconnect 없음.",
+      "status": "PARTIAL",
+      "evidence": "Unknown/revoked token ends resume; client retry bounded60s. Full process-crash browser exercise not run."
+    },
+    {
+      "id": "G10",
+      "requirement": "실제GitHub반영/공개배포/학교실기기검증 상태를 각각 구분해 최종보고.",
+      "status": "PENDING",
+      "evidence": "Final commit/PR/CI, local/public/classroom states will be recorded after remote verification."
+    }
+  ]
+}

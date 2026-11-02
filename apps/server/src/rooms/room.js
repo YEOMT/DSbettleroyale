@@ -42,7 +42,7 @@ export class Room{
   this.phase='DRAFT';this.revision++;
  }
  command(member,type,p,requestId){
-  const host=['CONFIGURE','KICK','START_QUIZ','BEGIN_DRAFT','START_BATTLE','END','REMATCH','CONTINUE'];
+  const host=['CONFIGURE','KICK','START_QUIZ','BEGIN_DRAFT','START_BATTLE','END','REMATCH','CONTINUE','CLOSE_ROOM'];
   if(host.includes(type)&&member.role!=='host')fail('HOST_REQUIRED');
   switch(type){
    case 'CONFIGURE':this.configure(p);break;
@@ -67,6 +67,7 @@ export class Room{
    case 'START_BATTLE':if(this.phase!=='DRAFT')fail('PHASE_MISMATCH');if(this.manager.activeBattles()>=this.manager.config.maxActiveBattles)fail('BATTLE_CAPACITY');this.manager.startBattle(this);this.phase='BATTLE';this.revision++;break;
    case 'END':if(this.phase!=='BATTLE')fail('PHASE_MISMATCH');this.finish();break;
    case 'CONTINUE':if(this.phase!=='BATTLE'||!this.safePaused||this.lastFault)fail('CANNOT_CONTINUE');this.safePaused=false;this.debt=0;this.overloadSince=0;for(const m of this.members.values())m.peer?.send('OVERLOAD',{paused:false});break;
+   case 'CLOSE_ROOM':if(this.phase==='BATTLE')fail('END_BATTLE_FIRST');queueMicrotask(()=>this.manager.remove(this));break;
    case 'REMATCH':{
     if(this.phase!=='RESULTS')fail('PHASE_MISMATCH');if(this.world)destroyWorld(this.world);this.world=null;this.result=null;this.matchId=randomUUID();this.round++;this.phase='LOBBY';this.revision++;
     for(const m of this.members.values()){m.quiz=null;m.draft=null;m.ledger.clear();m.events=[];m.eventBytes=0;}break;
@@ -84,10 +85,11 @@ export class Room{
   result:this.phase==='RESULTS'?this.result:null};}
 }
 export class RoomManager{
- constructor(config,{now=()=>Date.now()}={}){this.config=config;this.now=now;this.rooms=new Map();this.tokens=new Map();this.draining=false;this.startBattle=()=>fail('ENGINE_NOT_ATTACHED');}
+ constructor(config,{now=()=>Date.now()}={}){this.config=config;this.now=now;this.rooms=new Map();this.tokens=new Map();this.draining=!!config.drainOnStart;this.startBattle=()=>fail('ENGINE_NOT_ATTACHED');}
  create(name){if(this.draining)fail('SERVER_DRAINING');if(this.rooms.size>=this.config.maxRooms)fail('ROOM_CAPACITY');let code;do{code=String(randomInt(100000,1000000));}while(this.rooms.has(code));const room=new Room(this,code,name);this.rooms.set(code,room);return room;}
  activeBattles(){return [...this.rooms.values()].filter(r=>r.phase==='BATTLE').length;}
  protectedRooms(){return [...this.rooms.values()].filter(r=>['QUIZ','DRAFT','BATTLE'].includes(r.phase)).length;}
+ remove(room){if(room.world)destroyWorld(room.world);room.world=null;for(const p of room.members.values()){p.revoked=true;this.tokens.delete(p.token);p.peer?.close(4004,'ROOM_EXPIRED');p.ledger.clear();p.events=[];p.peer=null;}room.members.clear();this.rooms.delete(room.code);}
  sweep(){for(const [code,r]of this.rooms){if([...r.members.values()].some(p=>p.connected))r.lastOccupied=this.now();else if(this.now()-r.lastOccupied>this.config.roomTtlMs){if(r.world)destroyWorld(r.world);for(const p of r.members.values())this.tokens.delete(p.token);r.members.clear();this.rooms.delete(code);continue;}if(r.phase==='QUIZ'&&this.now()>=r.quizEndsAt){r.beginDraft();this.changed?.(r);}}}
  close(){for(const r of this.rooms.values()){for(const p of r.members.values())p.peer?.close(1001,'SERVER_SHUTDOWN');if(r.world)destroyWorld(r.world);}this.rooms.clear();this.tokens.clear();}
 }

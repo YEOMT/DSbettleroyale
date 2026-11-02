@@ -6,9 +6,9 @@ import {connect} from '../../tests/integration/client.mjs';
 import {manifest} from '../../packages/content/src/manifest.js';
 import {Samples} from '../../apps/server/src/diagnostics/metrics.js';
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
-export async function runLoad({players=26,seconds=600,rematchSeconds=90,out=`artifacts/load-${players}-${seconds}.json`}={}){
+export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverOverload=false,out=`artifacts/load-${players}-${seconds}.json`}={}){
  if(!Number.isInteger(players)||players<2||players>30||!Number.isFinite(seconds)||seconds<1)throw Error('INVALID_LOAD_OPTIONS');
- const child=fork(fileURLToPath(new URL('./server.mjs',import.meta.url)),[],{stdio:['ignore','inherit','inherit','ipc'],windowsHide:true});
+ const child=fork(fileURLToPath(new URL('./server.mjs',import.meta.url)),[],{stdio:['ignore','inherit','inherit','ipc'],windowsHide:true,execArgv:[]});
  const port=await new Promise((resolve,reject)=>{child.once('message',m=>resolve(m.port));child.once('error',reject);});let rpcSeq=0;const rpcs=new Map();
  child.on('message',m=>{const p=rpcs.get(m.id);if(p){rpcs.delete(m.id);clearTimeout(p.timer);m.error?p.reject(Error(m.error)):p.resolve(m.value);}});
  const rpc=(type,args={})=>new Promise((resolve,reject)=>{const id=++rpcSeq,timer=setTimeout(()=>{rpcs.delete(id);reject(Error('IPC_TIMEOUT'));},10000);rpcs.set(id,{resolve,reject,timer});child.send({id,type,...args});});
@@ -48,7 +48,7 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,out=`art
     }
     if(tick%60===i%60)c.send('PING',{clientTime:now},false);
    }
-   if(now-lastSample>=5000){lastSample=now;const server=await rpc('status');report.samples.push({elapsedMs:now-started,round:report.rounds,server,pendingCommands:clients.reduce((n,c)=>n+c.waiters.length,0)});if(server.fault||server.paused)throw Error(server.fault||'SERVER_OVERLOAD_PAUSED');}
+   if(now-lastSample>=5000){lastSample=now;const server=await rpc('status');report.samples.push({elapsedMs:now-started,round:report.rounds,server,pendingCommands:clients.reduce((n,c)=>n+c.waiters.length,0)});if(server.fault)throw Error(server.fault);if(server.paused){if(recoverOverload){const result=await host.command('CONTINUE');if(!result.accepted)throw Error('CONTINUE_REJECTED');report.overloadRecoveries=(report.overloadRecoveries||0)+1;}else throw Error('SERVER_OVERLOAD_PAUSED');}}
    await delay(1000/30);
   }
   stopping=true;report.elapsedMs=performance.now()-started;report.server=await rpc('status');report.rtt=report.rtt.report();report.ack=report.ack.report();report.receivedBytes=[host,...clients].reduce((n,c)=>n+(c.receivedBytes||0),0);report.pass=report.errors.length===0&&report.snapshots>players*seconds*10&&report.server.overloads===0;
