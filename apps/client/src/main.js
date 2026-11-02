@@ -11,4 +11,5 @@ const wsUrl=import.meta.env.VITE_PUBLIC_WSS_URL||`${location.protocol==='https:'
 const net=new Connection(wsUrl),timeline=new Timeline(),session={roomMeta:{graphicsPreset:'balanced'},reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches};
 const renderer=new Renderer(document.getElementById('br-student-canvas'),timeline,session),controls=new Controls(net,timeline),audio=new GameAudio();
 const ui=new AppUI(net,timeline,renderer,controls,audio);
+export {net,timeline,renderer,controls,ui};
 if(net.token)net.connect().catch(e=>ui.toast(e.message));

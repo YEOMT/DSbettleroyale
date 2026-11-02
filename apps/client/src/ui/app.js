@@ -1,3 +1,4 @@
+import {AugmentUI} from './augments.js';
 import QRCode from 'qrcode';
 import {skillDescription} from './descriptions.js';
 import {manifest} from '../../../../packages/content/src/manifest.js';
@@ -5,9 +6,9 @@ const $=id=>document.getElementById(id),text=(id,value)=>{const e=$(id);if(e)e.t
 function button(label,handler,cls='br-btn br-btn-primary'){const e=document.createElement('button');e.type='button';e.className=cls;e.textContent=label;e.onclick=handler;return e;}
 export class AppUI{
  constructor(net,timeline,renderer,controls,audio){Object.assign(this,{net,timeline,renderer,controls,audio});this.boundQuiz='';this.offerId='';this.respawnId='';this.room=null;
-  this.banner=document.createElement('div');this.banner.className='ws-connection br-hidden';document.body.append(this.banner);this.bind();
+  this.banner=document.createElement('div');this.banner.className='ws-connection br-hidden';document.body.append(this.banner);this.bind();this.augments=new AugmentUI(net,message=>this.toast(message));
   for(const type of ['room_state','full_state','snapshot','private_state','error','status','ended','event','overload','leaderboard'])net.addEventListener(type,e=>this.receive(type,e.detail));
-  net.addEventListener('static_state',e=>timeline.setStatic(e.detail));net.addEventListener('reset',()=>{timeline.reset();controls.reset();this.offerId='';});
+  net.addEventListener('static_state',e=>timeline.setStatic(e.detail));net.addEventListener('reset',()=>{timeline.reset();controls.reset();this.augments?.reset();this.offerId='';});
   net.addEventListener('maintenance',e=>this.toast(e.detail.message));
   setInterval(()=>this.clock(),100);
  }
@@ -50,7 +51,7 @@ export class AppUI{
   if(type==='room_state')this.renderRoom(p);
   if(type==='leaderboard'){for(const [key,rows]of [['br-tk-team-ranking',p.teams],['br-tk-personal-ranking',p.players]])$(key).replaceChildren(...(rows||[]).map(r=>{const e=document.createElement('div');e.className='ws-teacher-row';e.textContent=r.name?`${r.rank||''} ${r.name} · ${r.kills||0}K / ${r.deaths||0}D / ${r.assists||0}A · ${Number(r.points||0).toFixed(3)}%p`:`팀 ${r.team} · ${Number(r.score||0).toFixed(2)}%`;return e;}));}
   if(type==='full_state'){if(p.static)this.timeline.setStatic(p.static);this.renderRoom(p.room);if(p.self)this.self(p.self);}
-  if(type==='snapshot'){this.timeline.accept(p);if(p.self)this.self(p.self);this.lastView=p;this.battleHud(p);}
+  if(type==='snapshot'){if(!this.timeline.accept(p))return;if(p.self)this.self(p.self);this.lastView=p;this.battleHud(p);}
   if(type==='private_state'&&p)this.self(p);
   if(type==='event'){this.timeline.event(p);this.audio.effect(p,this.net.session?.playerId);}
   if(type==='error')this.toast(p.code);
@@ -83,9 +84,7 @@ export class AppUI{
  }
  self(s){this.selfState=s;this.net.lifeSeq=s.lifeSeq;text('br-battle-self',s.emoji+' '+s.name);text('br-battle-status',`HP ${Math.ceil(s.hp)} / ${Math.round(s.maxHp)}`);$('br-battle-hp').style.width=Math.max(0,s.hp/s.maxHp*100)+'%';
   text('br-attack-cd',s.basicCooldown>0?(s.basicCooldown/60).toFixed(1):'✓');text('br-skill-cd',s.cooldown>0?(s.cooldown/60).toFixed(1):'✓');
-  const run=s.run;if(run){show('br-run-hud');text('br-run-level','LV.'+run.level);text('br-run-xp-text',run.level===6?'MAX':`${run.xp} / ${run.required}`);$('br-run-xp-fill').style.width=run.level===6?'100%':Math.min(100,run.xp/run.required*100)+'%';text('br-run-owned',(run.chips||[]).map(c=>(c.name||c.id)+' '+c.tier).join(' · '));
-   show('br-run-ui',!!run.offer);show('br-run-ready',!!run.offer);if(run.offer?.id!==this.offerId){this.offerId=run.offer?.id||'';show('br-run-panel',!!run.offer);if(run.offer){text('br-run-offer-title',`LV.${run.offer.level} · 강화 선택`);$('br-run-cards').replaceChildren(...run.offer.cards.map(card=>{const b=button((card.icon||'')+' '+(card.name||card.id)+' '+card.tier,()=>this.run(()=>this.net.command('AUGMENT_CHOOSE',{offerId:run.offer.id,augmentId:card.id})));const detail=document.createElement('small');detail.textContent=card.desc||card.text||card.description||'';b.append(detail);return b;}));}}
-  }
+  this.augments.render(s);
   const q=s.respawn;show('br-tk-quiz',!s.alive&&!!q);show('br-respawn',!s.alive&&!q);if(!s.alive&&q){text('br-tk-progress',q.correct+' / 3 CORRECT');text('br-tk-quiz-tokens','🔄 ×'+q.tokens);text('br-tk-word',q.question?.prompt||'부활할 이모지를 선택하세요.');show('br-tk-choice',q.correct>=3);$('br-tk-reroll').disabled=q.tokens<=0;
    if(this.respawnId!==q.question?.id){this.respawnId=q.question?.id;$('br-tk-options').replaceChildren(...(q.question?.answers||[]).map(a=>button(a.text,()=>this.run(async()=>{const r=await this.net.command('RESPAWN',{kind:'answer',questionId:q.question.id,answerId:a.id});text('br-tk-feedback',r.message||'');}))));}}
  }

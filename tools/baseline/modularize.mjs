@@ -48,6 +48,9 @@ function clean(u){
  if(u.name==='BRRework')code=code.replace('rw.entities.push(e);','rw.entities.push(e);room.entitySpawn?.(e);').replace("e.dead=true;e.reason=reason;","e.dead=true;e.reason=reason;room.entityEnd?.(e,reason);");
  return code
  .replace(/this\.cacheCanvas=brActorEmojiCanvas\(ability\.e,brGraphicsProfile\(\)\.source\);/g,'')
+ .replace('return {runLevel:brValidRunLevel(p.run?.level)','return {sourceTick:now,runLevel:brValidRunLevel(p.run?.level)')
+ .replace('stunEnd:now+(p.stunned||0)','stunEnd:p.stunned>0?now+p.stunned:0')
+ .replace('lockEnd:Math.max(now+(p.stunned||0),s.lock?.end||0,s.dash?.end||0,s.channel?.end||0,s.force?.end||0)','lockEnd:Math.max(0,...[p.stunned>0?now+p.stunned:0,s.lock?.end||0,motion?.end||0,channel?.end||0,force?.end||0].filter(end=>end>now))')
  .replace(/document\.hidden/g,'false')
  .replace(/performance\.now\(\)/g,'room.now()')
  .replace(/Date\.now\(\)/g,'room.now()')

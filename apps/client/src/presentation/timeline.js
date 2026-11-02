@@ -26,9 +26,9 @@ export class Timeline{
   this.renderTick=Math.max(this.renderTick,last.state.serverTick+Math.min(150,now-last.at)*.06-4.5);
   let left=this.samples[0],right=last;for(let i=1;i<this.samples.length;i++)if(this.samples[i].state.serverTick>=this.renderTick){left=this.samples[i-1];right=this.samples[i];break;}
   const span=right.state.serverTick-left.state.serverTick,alpha=span?Math.max(0,Math.min(1,(this.renderTick-left.state.serverTick)/span)):1;
-  const actors=right.state.actors.map(a=>{const old=left.state.actors.find(p=>p.id===a.id&&p.lifeSeq===a.lifeSeq&&p.warpSeq===a.warpSeq);if(!old)return a;return {...a,x:old.x+(a.x-old.x)*alpha,y:old.y+(a.y-old.y)*alpha};});
+  const actors=right.state.actors.flatMap(a=>{const old=left.state.actors.find(p=>p.id===a.id&&p.lifeSeq===a.lifeSeq&&p.warpSeq===a.warpSeq),past=this.renderTick<right.state.serverTick,base=past?old:a;if(!base)return [];return [{...base,x:old?old.x+(a.x-old.x)*alpha:a.x,y:old?old.y+(a.y-old.y)*alpha:a.y,statusTick:this.renderTick}];});
   if(now-last.at>150)this.metrics.holds++;else this.metrics.interpolated++;
-  if(this.predicted){const index=actors.findIndex(a=>a.id===this.predicted.id);this.offset.x*=.8;this.offset.y*=.8;const self={...this.predicted,x:this.predicted.x+this.offset.x,y:this.predicted.y+this.offset.y};if(index>=0)actors[index]=self;else actors.push(self);}
+  if(this.predicted){const index=actors.findIndex(a=>a.id===this.predicted.id);this.offset.x*=.8;this.offset.y*=.8;const self={...this.predicted,x:this.predicted.x+this.offset.x,y:this.predicted.y+this.offset.y,statusTick:last.state.serverTick};if(index>=0)actors[index]=self;else actors.push(self);}
   const shots=right.state.shots.filter(s=>!this.terminals.has(s.id)||this.terminals.get(s.id).tick>this.renderTick).map(s=>sampleFlight(s,left.state.shots.find(p=>p.id===s.id),right.state.serverTick,this.renderTick,left.state.serverTick));
   const visibleIds=new Set(shots.map(s=>s.id));
   for(const [id,born]of this.spawns){const end=this.terminals.get(id);if(this.renderTick-born.tick>120||end&&this.renderTick-end.tick>30){this.spawns.delete(id);continue;}

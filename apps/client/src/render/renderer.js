@@ -35,7 +35,7 @@ export class Renderer{
    p.circle(a.x,a.y,a.radius,'#111827',1);this.glyph(a.emoji,a.x,a.y,a.radius,'actor-'+a.id);p.circle(a.x,a.y,a.radius,color,1,(this.teacher?2:3)/zoom);
    const hpw=a.radius*2;p.rect(a.x-a.radius,a.y+a.radius+9/zoom,hpw,5/zoom,'#522637',1);p.rect(a.x-a.radius,a.y+a.radius+9/zoom,hpw*a.hp/a.maxHp,5/zoom,'#4ade80',1);
    this.text(a.name,a.x,a.y-a.radius-14/zoom,(this.teacher?10:13)/zoom,'#fff','name-'+a.id);this.level(a,a.x,a.y-a.radius-32/zoom,zoom,now);
-   this.paint.brPaintReworkStatus(p,a.x,a.y,a.radius,zoom,a.rw,view.renderTick,a.maxHp);
+   this.paint.brPaintReworkStatus(p,a.x,a.y,a.radius,zoom,a.rw,a.statusTick??view.renderTick,a.maxHp);
   }
   for(const fx of view.effects){const age=view.renderTick-fx.tick,alpha=Math.max(0,1-age/Math.max(6,(fx.geometry?.displayMs||400)*.06));const row=['',fx.kind,fx.x,fx.y,fx.dx,fx.dy,fx.size,fx.color,fx.amount,0,fx.style,0,fx.impactLevel,fx.geometry];if(!this.paint.brPaintAttack(p,row,alpha,zoom)&&fx.kind==='impact')p.circle(fx.x,fx.y,Math.max(1,fx.size||30),fx.color||'#fff',alpha*.6,3/zoom);}
   if(!this.teacher&&self&&map.captureMap){for(const z of map.captureMap.points){const dx=(z.x-self.x)*zoom,dy=(z.y-self.y)*zoom;if(Math.abs(dx)<w*.42&&Math.abs(dy)<h*.38)continue;const k=Math.min(w*.42/Math.max(1,Math.abs(dx)),h*.32/Math.max(1,Math.abs(dy))),x=self.x+dx*k/zoom,y=self.y+dy*k/zoom;this.text('➤ '+z.id,x,y,18/zoom,'#fde68a','arrow-'+z.id);}}

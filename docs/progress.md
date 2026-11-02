@@ -53,3 +53,11 @@ Production hosting credentials/domain were not provided; production is not deplo
 - First remote CI run41462100837 passed npm ci,112 tests and build, then failed Playwright dependency installation on Ubuntu26.04. CI/release runner pinned to Ubuntu24.04; no browser test was reported as run in that failed job.
 - Remote CI run41462916244 on source commit165e7b91425236a712fcdf0ab69031851d0dea64 completed SUCCESS: 116 tests, build, Chromium3-mode E2E and26-player20-second WS smoke (0 overloads; step p95 1.687ms; gap p95 53.313ms). This GitHub-runner smoke is not AWS or classroom capacity validation. Deployment shell syntax also passed bash -n.
 - A later docs-only CI run41463518359 exposed an existing random-draft UI error: native characters intentionally have null rework skill records. Added explicit fallback to the original ability skill summary and an all77-description regression. Earlier successful CI remains historical evidence; the corrective commit is checked again by PR CI.
+
+## v33.1 fidelity repair — stage 1
+
+- Baseline main/deployed build: 352afbc4e91427812ad55432981a6ef79f778aa6. Root and legacy HTML remain unchanged.
+- Actual two-browser WebSocket regression reproduced four failures before the fix: three empty effect/detail descriptions and six false stun stars. The same assertions pass after the fix.
+- Restored original augment card hierarchy, exact effect/detail, selected stat-change notice, owned-chip detail and scoped pointer selection. Inactive stun/lock endpoints are zero; historical remote statuses use the historical snapshot and local status uses latest authority.
+- Executed `PLAYWRIGHT_CHANNEL=msedge node tests/fidelity/contracts.mjs`: 63 possible cards (18 paths × I/II/III, Wanggui A/B/C/F) rendered with exact nonempty server text; five/MAX choices; ten real seconds without false self/opponent stun stars; 30/60-tick stun movement/attack blocking and display expiry. 30/60/120 FPS trace replay is simulated timing, not school hardware coverage.
+- Executed `node tools/verify.mjs`: all 117 existing tests and client/server build passed. Broader visual, jitter/lifecycle and touch concurrency checks follow in the separate presentation commit. Existing load/acceptance limitations remain.

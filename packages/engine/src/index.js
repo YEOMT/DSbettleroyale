@@ -63,7 +63,7 @@ export function applyCommand(world,command){
   const list=world.actionPending.get(p.remoteId)||[];if(list.length>=8)return {accepted:false,reason:'ACTION_QUEUE_FULL'};
   list.push(command);world.actionPending.set(p.remoteId,list);return {accepted:true};
  }
- if(command.type==='AUGMENT_CHOOSE')return {accepted:world.brChooseRun(p,command.offerId,command.augmentId)};
+ if(command.type==='AUGMENT_CHOOSE'){const before=world.brRunMeasured(p,p.run.mods),accepted=world.brChooseRun(p,command.offerId,command.augmentId);return {accepted,...(accepted?{notice:world.brRunNoticeText(command.augmentId,p.run.paths[command.augmentId],before,world.brRunMeasured(p,p.run.mods))}:{})};}
  if(command.type==='RESPAWN'){
   world.brTeamKillProcessInput(p,{sessionId:p.sessionId,tkRequest:{...command,matchKey:world.matchId,kind:command.kind,id:command.requestId}});
   return p.tkQuiz?.ack||{accepted:false};
