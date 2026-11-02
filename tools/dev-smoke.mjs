@@ -1,0 +1,3 @@
+import {spawn} from 'node:child_process';
+const child=spawn(process.execPath,['tools/dev.mjs'],{stdio:'ignore',windowsHide:true});
+try{let ready=false;for(let i=0;i<80;i++){try{const r=await fetch('http://127.0.0.1:5173/');if(r.ok&&(await r.text()).includes('br-app')){ready=true;break;}}catch{}await new Promise(r=>setTimeout(r,250));}if(!ready)throw Error('DEV_STARTUP_FAILED');const health=await(await fetch('http://127.0.0.1:5173/healthz')).json();if(!health.ok)throw Error('DEV_PROXY_FAILED');console.log('CLEAN_DEV_START_PASS: Vite client and real server proxy reachable.');}finally{child.kill();}

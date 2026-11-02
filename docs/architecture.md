@@ -1,6 +1,6 @@
 # Architecture
 
-The server owns room phases, identities, quizzes, drafts, combat and results. The production engine is ordinary ES modules under packages/engine/src. It contains the original 77-character code, split into 26 responsibility modules and 301 source units, with a separate binding context for every room. There is no browser, DOM shim, eval, VM or original-HTML loading in production.
+The server owns room phases, identities, quizzes, drafts, combat and results. The production engine is ordinary ES modules under packages/engine/src. It contains the original 77-character code, split into 26 responsibility modules and 307 source units, with a separate binding context for every room. There is no browser, DOM shim, eval, VM or original-HTML loading in production.
 
 The migration tool under tools/baseline is development-only. It preserves original initialization/override order and emits docs/source-map.json. It is not run by the server or client. Browser/Node numeric comparison permits 1e-10 absolute error for JS engine floating-point differences; discrete events, damage decisions, life and entity counts must match.
 

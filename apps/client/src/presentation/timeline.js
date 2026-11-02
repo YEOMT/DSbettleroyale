@@ -1,4 +1,5 @@
 import {createMovementKernel,predictMovement} from '../../../../packages/engine/src/movement/prediction.js';
+import {sampleFlight} from './flight.js';
 export class Timeline{
  constructor(){this.kernel=createMovementKernel();this.reset();this.metrics={accepted:0,discarded:0,corrections:[],arrivalGaps:[],sourceGaps:[],holds:0,interpolated:0};}
  reset(){this.samples=[];this.history=[];this.predicted=null;this.lastSeq=0;this.renderTick=0;this.lifeKey='';this.effects=[];this.terminals=new Map();this.spawns=new Map();this.previews=new Map();this.offset={x:0,y:0};}
@@ -28,7 +29,7 @@ export class Timeline{
   const actors=right.state.actors.map(a=>{const old=left.state.actors.find(p=>p.id===a.id&&p.lifeSeq===a.lifeSeq&&p.warpSeq===a.warpSeq);if(!old)return a;return {...a,x:old.x+(a.x-old.x)*alpha,y:old.y+(a.y-old.y)*alpha};});
   if(now-last.at>150)this.metrics.holds++;else this.metrics.interpolated++;
   if(this.predicted){const index=actors.findIndex(a=>a.id===this.predicted.id);this.offset.x*=.8;this.offset.y*=.8;const self={...this.predicted,x:this.predicted.x+this.offset.x,y:this.predicted.y+this.offset.y};if(index>=0)actors[index]=self;else actors.push(self);}
-  const shots=right.state.shots.filter(s=>!this.terminals.has(s.id)||this.terminals.get(s.id).tick>this.renderTick).map(s=>{const old=left.state.shots.find(p=>p.id===s.id);return old?{...s,x:old.x+(s.x-old.x)*alpha,y:old.y+(s.y-old.y)*alpha}:s;});
+  const shots=right.state.shots.filter(s=>!this.terminals.has(s.id)||this.terminals.get(s.id).tick>this.renderTick).map(s=>sampleFlight(s,left.state.shots.find(p=>p.id===s.id),right.state.serverTick,this.renderTick,left.state.serverTick));
   const visibleIds=new Set(shots.map(s=>s.id));
   for(const [id,born]of this.spawns){const end=this.terminals.get(id);if(this.renderTick-born.tick>120||end&&this.renderTick-end.tick>30){this.spawns.delete(id);continue;}
    if(visibleIds.has(id)||born.tick>this.renderTick)continue;

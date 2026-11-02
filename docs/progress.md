@@ -7,7 +7,7 @@
 - 793 top-level source units inventoried; 77 effective actor profiles, 60 registered reworks, native skill definitions, augments, rules and quiz data extracted after overrides.
 - Real offline Edge harness executed all 77 basic/skill attacks and 180 simulation steps per character, with zero participant runtime faults.
 - Node 24.22.1; npm 11.6.2 bootstrapped locally (not part of the repository). ws 8.22.1 / Vite 7.3.7 security patches pinned; Pixi stays 8.20.1. npm audit: zero known vulnerabilities.
-- M1: 26 responsibility modules / 301 original source units extracted. Node create/step/export/destroy, 77-character attack parity, growth to level 6 with five choices, four mode paths (three public modes plus legacy compatibility), capture phase math, stale-input neutralization and two-room isolation implemented.
+- M1: 26 responsibility modules / 307 original source units extracted. Node create/step/export/destroy, 77-character attack parity, growth to level 6 with five choices, four mode paths (three public modes plus legacy compatibility), capture phase math, stale-input neutralization and two-room isolation implemented.
 - Executed `node --test tests/unit/*.test.mjs tests/parity/*.test.mjs`: 88 passed, 0 failed. Detailed local output: artifacts/m1-tests.txt (not a classroom performance claim).
 - Remaining M1 debt: separate cosmetic RNG consumption without changing original combat sequence; broader full-life and all-build parity. M2–M5 are in progress/unverified.
 
@@ -41,3 +41,13 @@ Production hosting credentials/domain were not provided; production is not deplo
 - Actual local Caddy2.11.7 HTTPS/WSS test passed with a private test CA trusted only by the Node test subprocess; no Windows trust-store installation. Docker, public DNS/SSH/Pages deployment are unverified.
 - Root index.html and remote main1292f875 remain unchanged. Production defaults disabled. Updated dev YAML parser to2.9.1 after audit finding; npm audit now reports0 vulnerabilities.
 - Acceptance ledger lists all70 items individually. Implementation/visual fidelity and load performance gaps remain, so this work is a draft PR and does not claim IMPLEMENTATION_COMPLETE or PRODUCTION_READY.
+
+## Final publication follow-up
+
+- Restored release-to-cast and drag power, original weak aim assistance with server validation, viewport/aspect bounds and native/RW flight path interpolation. Removed unused per-tick projectile serialization and reused prepared public actor state.
+- Executed latest `node tools/verify.mjs`: 116 passed, 0 failed, plus actual client/server build. Latest Edge E2E: 3 modes passed.
+- Independent M5 clone: clean npm ci, verify/build and dev startup passed. Local Pages base/asset/query and Caddy HTTPS/WSS checks passed.
+- Completed 20/26/30-player ten-minute cohorts. 20 functional PASS; 26/30 FAIL with 7/39 overload pauses. Final 26-player 30-second smoke PASS, 0 overloads. Step-p95 target remains unmet; see docs/metrics.
+- GitHub write access restored. M0-M5 published with exact local/remote tree comparisons; Draft PR #1 created. No main push, force push, merge, Pages switch or Firebase write.
+- User reports Lightsail Seoul and Docker/Compose ready. No AWS connection or public deployment performed. Settings and manual staging commands: docs/lightsail-ko.md.
+- First remote CI run41462100837 passed npm ci,112 tests and build, then failed Playwright dependency installation on Ubuntu26.04. CI/release runner pinned to Ubuntu24.04; no browser test was reported as run in that failed job.

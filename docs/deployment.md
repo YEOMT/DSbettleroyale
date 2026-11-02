@@ -1,6 +1,6 @@
 # Deployment state and runbook
 
-**Not deployed.** No server account/domain/SSH credentials were supplied. Production is disabled unless repository variable `PRODUCTION_WS_ENABLED` is exactly `true`. Root main/Pages HTML stays unchanged in this PR. Docker/SSH/Pages release paths are supplied but must be validated on the designated host; they are not recorded as executed deployments.
+**Not deployed by this work.** The user reports that a Seoul Lightsail instance and Docker / Docker Compose are ready. No hostname or SSH connection has been supplied or used. See [the Korean Lightsail staging commands](lightsail-ko.md). Production automation is disabled unless repository variable `PRODUCTION_WS_ENABLED` is exactly `true`. Root main/Pages HTML stays unchanged in this PR. Docker/SSH/Pages release paths are supplied but must be validated on the designated host; they are not recorded as executed deployments.
 
 ## Required settings
 

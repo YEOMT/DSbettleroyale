@@ -15,7 +15,7 @@ export class Renderer{
   const map=this.timeline.static,self=view.actors.find(a=>a.id===view.self?.id),w=innerWidth,h=innerHeight;
   const span=map.boundary?Math.max(map.boundary.maxX-map.boundary.minX,(map.boundary.maxY-map.boundary.minY)*w/h):map.worldRadius*2.15;
   const focused=this.teacher&&this.focus?view.actors.filter(a=>a.alive).sort((a,b)=>b.kills-a.kills)[0]:null;
-  const zoom=this.teacher&&!focused?Math.min(w/span,h/(map.boundary?map.boundary.maxY-map.boundary.minY:map.worldRadius*2.15)):Math.min(w,h)/(focused?2800:1600);
+  const zoom=this.teacher&&!focused?Math.min(w/span,h/(map.boundary?map.boundary.maxY-map.boundary.minY:map.worldRadius*2.15)):focused?Math.min(w,h)/2800:Math.max(w,h)/1800;
   if(focused)this.cam={x:focused.x,y:focused.y};else if(this.teacher)this.cam={x:0,y:0};else if(self)this.cam={x:self.x,y:self.y};
   let p;if(this.pixi){this.g.clear();for(const s of this.sprites.values())s.visible=false;for(const s of this.labels.values())s.visible=false;this.world.position.set(w/2-this.cam.x*zoom,h/2-this.cam.y*zoom);this.world.scale.set(zoom);p=this.paint.brCombatPainter(this.g,true);}
   else{const c=this.ctx;c.setTransform(this.dpr,0,0,this.dpr,0,0);c.fillStyle='#0a1424';c.fillRect(0,0,w,h);c.translate(w/2,h/2);c.scale(zoom,zoom);c.translate(-this.cam.x,-this.cam.y);p=this.paint.brCombatPainter(c,false);}

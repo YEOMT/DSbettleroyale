@@ -37,7 +37,7 @@ export class AppUI{
   $('br-pref-music').onclick=()=>text('br-pref-music',this.audio.toggle()?'음악 켬':'음악 끔');$('br-music-volume').oninput=e=>{this.audio.volume=Number(e.target.value)/100;this.audio.audio.volume=this.audio.volume;};
   $('br-pref-sound').onclick=()=>{this.audio.effects=!this.audio.effects;text('br-pref-sound',this.audio.effects?'효과음 켬':'효과음 끔');};
   $('br-pref-motion').onclick=()=>{this.renderer.session.reducedMotion=!this.renderer.session.reducedMotion;text('br-pref-motion',this.renderer.session.reducedMotion?'흔들림 줄임':'흔들림 기본');};
-  $('br-pref-aim').onclick=()=>this.toast('이동 방향 우선 · 드래그/마우스로 수동 조준');
+  $('br-pref-aim').onclick=()=>{this.controls.assist.enabled=!this.controls.assist.enabled;text('br-pref-aim',this.controls.assist.enabled?'약한 조준 보정 켬':'조준 보정 끔');};
   $('br-focus-toggle').onclick=()=>{this.renderer.focus=!this.renderer.focus;text('br-focus-toggle',this.renderer.focus?'카메라: 전투 집중':'카메라: 전체');};
   for(const id of ['br-tk-host-rank','br-tk-student-rank'])$(id).onclick=()=>show('br-tk-leaderboard');$('br-tk-close-rank').onclick=()=>show('br-tk-leaderboard',false);
   $('br-rank-filters').replaceChildren(...['전체','S','A','B','C','F'].map(rank=>button(rank,()=>{this.rank=rank;this.encyclopedia();},'br-btn br-btn-ghost')));

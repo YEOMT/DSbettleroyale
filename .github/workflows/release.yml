@@ -18,7 +18,7 @@ concurrency:
 jobs:
   build:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       sha: ${{ steps.identity.outputs.sha }}
     steps:
@@ -63,7 +63,7 @@ jobs:
     needs: build
     if: vars.PRODUCTION_WS_ENABLED == 'true'
     environment: production
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       previous: ${{ steps.install.outputs.previous }}
       staged: ${{ steps.install.outputs.staged }}
@@ -108,7 +108,7 @@ jobs:
         with: {path: dist/client}
   pages:
     needs: [build, server]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -129,7 +129,7 @@ jobs:
   finalize:
     needs: [build, server, pages]
     if: always() && vars.PRODUCTION_WS_ENABLED == 'true' && needs.server.result != 'skipped'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     env:
       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}

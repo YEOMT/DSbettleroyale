@@ -64,3 +64,5 @@ npm run dev
 | `deploy`, `.github/workflows` | Docker/Caddy·CI·drain·paired release/rollback |
 
 원본 함수와 새 모듈의 대응은 [source-map.json](docs/source-map.json)에 있습니다. 공개 배포 자격증명이 없으므로 현재 공개 v33 주소는 없습니다. 유료 자원과 운영 Firebase를 생성·변경하지 않았습니다.
+
+Lightsail 서울 서버 테스트 실행: [설정 및 명령어](docs/lightsail-ko.md). 현재 배포 상태와 검증 한계는 [70개 인수 기록](docs/acceptance.md), [실측 부하 결과](docs/metrics/README.md)를 참조하세요.

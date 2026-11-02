@@ -1,8 +1,8 @@
 # 70-item acceptance record
 
-This is an evidence ledger, not a claim that all requirements are complete. **PARTIAL** means some implemented behavior is tested but the full item is not. **NOT_RUN/PENDING** are not passes. The PR remains draft while implementation/fidelity/performance gaps remain. No IMPLEMENTATION_COMPLETE or public-deployment claim.
+This is an evidence ledger, not a claim that all requirements are complete. **PARTIAL** means some implemented behavior is tested but the full item is not. **FAIL** records an executed check that failed. **NOT_RUN/PENDING** are not passes. The PR remains draft while implementation/fidelity/performance gaps remain. No IMPLEMENTATION_COMPLETE or public-deployment claim.
 
-PASS: 24 · PARTIAL: 38 · PENDING: 6 · NOT_RUN: 2
+PASS: 27 · PARTIAL: 39 · FAIL: 1 · NOT_RUN: 2 · PENDING: 1
 
 Commands: `npm run verify`, `npm run test:e2e`, `node tools/network/run.mjs`, `npm run test:load -- --players=26 --seconds=600`, `node tools/deploy/local-tls.mjs`. Raw local logs are in ignored `artifacts/`; shareable sanitized evidence is retained in `docs/metrics/`.
 
@@ -14,7 +14,7 @@ Commands: `npm run verify`, `npm run test:e2e`, `node tools/network/run.mjs`, `n
 | A04 | PASS | 같은 seed·시간·입력에 원본/추출 engine의 규칙·피해 결과 비교. | tests/parity/engine.test.mjs: 77 actual basic+skill, 180 ticks; tolerance 1e-10. Longer/all-build comparisons are separate. |
 | A05 | PARTIAL | 전투 RNG와 장식 RNG·방별 RNG 격리. | Two-room RNG isolation passed. Original cosmetic RNG draw consumption remains coupled to combat for parity. |
 | A06 | PASS | client/server/content/protocol 간 import 경계 검사. | AST import/runtime boundary check executed by verify. |
-| A07 | PENDING | 깨끗한 clone에서 npm ci/build/dev/verify 성공. | Fresh remote clone npm ci/build/dev/verify scheduled after push. |
+| A07 | PASS | 깨끗한 clone에서 npm ci/build/dev/verify 성공. | Independent local Git clone of M5: npm ci, verify (including build), and actual dev client/server proxy startup passed. This was a local clone before GitHub write access was restored; PR CI separately tests remote checkout. |
 | A08 | PASS | monolithic eval/iframe/headless production engine 없이 실제 책임 분리. | 26 ordinary production modules / 307 extracted source units; no eval/iframe/browser production engine. |
 | B01 | PASS | 교사 생성·QR·6자리 입장·닉네임·학생목록. | Three-mode Edge E2E: teacher auth, room number, student names/list and generated QR canvas. |
 | B02 | PARTIAL | 퀴즈TXT·내장문제·정오답/잠금/점수/리롤 규칙 유지. | Quiz parser/default54/custom bank, correct/wrong locks and scoring tested over WS; browser TXT file-picker path not separately exercised. |
@@ -38,18 +38,18 @@ Commands: `npm run verify`, `npm run test:e2e`, `node tools/network/run.mjs`, `n
 | C12 | PARTIAL | 상자파괴/픽업/XP보충/사망드롭상한6·일반모드 팀스폰. | Original farm/spawn logic retained; separate crate/pickup/drop-cap6 regressions not complete. |
 | D01 | PASS | 실WebSocket으로2브라우저 전체경기 완주. | Edge: teacher +2 isolated student contexts, all3 public modes, quiz/draft/battle/results/rematch. Teacher ends the short browser battle. |
 | D02 | PASS | 서버만 physics 실행, 교사 탭닫힘/숨김이 전투를 정지시키지 않음. | Real host socket disconnect leaves server ticks advancing; physics runs only on server. |
-| D03 | PARTIAL | move/aim/button 입력 반응·멀티터치 증강 선택. | Keyboard/buttons and normal browser flow tested; real multi-touch augmentation and mobile device response unverified. |
+| D03 | PARTIAL | move/aim/button 입력 반응·멀티터치 증강 선택. | Restored original release-to-cast, drag power, Q/Space key edges, weak aim toggle and server revalidation. Three browser modes passed; physical multi-touch augmentation remains unverified. |
 | D04 | PARTIAL | lastApplied input seq/tick과 client replay의 실제 일치. | Applied ACK and ordinary replay kernel checked; jitter/held-input alignment is not exhaustively proven. |
 | D05 | PARTIAL | 무입력·무외력 10초 정지와 불확실 상대접촉 흔들림 검사. | 600 idle ticks show zero drift without external forces; uncertain body-contact scenarios incomplete. |
 | D06 | PARTIAL | 급회전·정지·벽·다중 접촉의 보정 오차 비교. | 840-tick straight/turn/stop/wall parity passed; multi-body/forced-motion correction comparison incomplete. |
 | D07 | PARTIAL | own shot preview→authority handoff, 멀티발ordinal 고유. | Action/life/ordinal IDs and cosmetic intent marker exist; complete trajectory preview handoff is not implemented. |
 | D08 | PARTIAL | 한snapshot안에 끝난 탄의 spawn/hit/end·즉시사망 원인. | Reliable spawn/end and synthetic short-shot timeline terminal test; actual native/RW same-snapshot lethal receipt suite incomplete. |
-| D09 | PARTIAL | native/RW 유도·왕복·반사·직선탄의 연속성·끝점·중복0. | Authoritative path/turn samples transmitted; renderer does not fully replay every native/RW curved path and endpoint. |
+| D09 | PARTIAL | native/RW 유도·왕복·반사·직선탄의 연속성·끝점·중복0. | Added authoritative native/RW path interpolation, turn-corner and bounded remaining-range unit tests. All curved weapon/path/endpoint browser cases are not exhaustively tested. |
 | D10 | PARTIAL | hidden actor의 level/name/glow가 남지 않고 위험탄은 필요한 경우 보임. | Concealed actors filtered before snapshot and level tracks reset; dedicated hidden-actor browser capture not run. |
 | D11 | PARTIAL | AOI leave와 실제destroy를 구분하고 빠른 재진입 복구. | Snapshot absence does not create a terminal; re-entry uses current state. High-speed AOI roundtrip fixture incomplete. |
 | D12 | PARTIAL | clock offset 점프·duplicate/oldframe·pause/resume에서 시간역행/중복피해 없음. | Duplicate/old snapshot, life/warp and monotonic timeline tests passed; clock offset jump/pause matrix incomplete. |
-| E01 | PENDING | 20/26/30학생+teacher 실제WS10분. | 20 students+teacher completed600s/7 rounds.26/30 runs in progress; failed overload attempts retained. Performance goals are separate from functional execution. |
-| E02 | PASS | 26명 RTT40/100/250ms·지터0/20/60ms. | tools/network/run.mjs:26 actual WS clients; all9 RTT40/100/250 × jitter0/20/60 profiles. Application FIFO scheduling, not OS shaping. |
+| E01 | FAIL | 20/26/30학생+teacher 실제WS10분. | 20/26/30 students+teacher each completed 600s and seven rounds. 20 passed functionally; 26/30 paused 7/39 times and required CONTINUE, so fail. All cleanup counters zero. Final follow-up 26-player 30s smoke passed; not a replacement for 600s. See docs/metrics. |
+| E02 | PARTIAL | 26명 RTT40/100/250ms·지터0/20/60ms. | 26 actual WS connections completed all nine nominal added RTT40/100/250 x jitter0/20/60 proxy profiles. Measured app RTT includes additional host scheduling and differs from nominal targets; both are recorded. Not an OS-shaped exact-RTT test. |
 | E03 | PASS | 300/500/1500ms stall 및 연속 회복. | Application-message stalls300/500/1500ms recover and continue advancing; raw network trace retained. |
 | E04 | PARTIAL | 1명 느린수신·buffer포화가 타학생의 전투를 막지 않음. | A paused receiver with synthetic queued payload pressure did not stop another actor tick; full comparative gap/FPS workload not run. |
 | E05 | PARTIAL | 26명 동시reconnect, backoff·token·session 검증. | 26 simultaneous token reconnects/FULL_STATE passed; browser backoff distribution not measured. |
@@ -68,13 +68,13 @@ Commands: `npm run verify`, `npm run test:e2e`, `node tools/network/run.mjs`, `n
 | F08 | PARTIAL | oversize/NaN/Infinity/초과명령/잘못된ID/malformedJSON 처리. | Malformed/unknown authority fields, numeric schemas and payload limits implemented/tested; every extreme fuzz/ID/rate permutation not run. |
 | F09 | PARTIAL | 학교공유IP26명 정상사용은 허용하고 실제flood는 제한. | 26 clients from one loopback IP accepted; per-connection token bucket exists. Sustained hostile flood versus healthy traffic not benchmarked. |
 | F10 | PARTIAL | Origin/CORS/TLS·secret/PII/log 노출 검사. | Exact Origin/CORS and local trusted Caddy HTTPS/WSS tested; public DNS/TLS and deployment secret configuration absent. |
-| G01 | PENDING | 단계별commit·remote branch 실제push·PR URL 검증. | M0–M4 commits exist. M5 push and PR URL verification pending. |
-| G02 | PENDING | PR CI가 실제tests/build 실행, 미실행PASS 없음. | CI workflow runs actual verify/browser/load/build. Remote run result pending. |
-| G03 | PENDING | Pages repo base와assets/QR쿼리·netdebug 링크 검증. | Pages base configured /DSbettleroyale/; built asset/query browser check pending. |
+| G01 | PASS | 단계별commit·remote branch 실제push·PR URL 검증. | M0-M5 published to codex/ws-migration-v33 through connected GitHub Git-data API; each remote Git tree equals the corresponding local tree. Draft PR https://github.com/YEOMT/DSbettleroyale/pull/1. Follow-up commits preserve original local history. |
+| G02 | PENDING | PR CI가 실제tests/build 실행, 미실행PASS 없음. | Initial GitHub CI run41462100837: npm ci,112 tests and build passed; browser install failed because ubuntu-latest selected26.04 unsupported by pinned Playwright. Runner pinned to24.04; latest PR check conclusion is reported in final handoff. |
+| G03 | PASS | Pages repo base와assets/QR쿼리·netdebug 링크 검증. | Actual built /DSbettleroyale/ base, entry assets, room query and netdebug browser check passed (artifacts/m5-pages-check.txt). Existing public Pages was not changed. |
 | G04 | PASS | production 설정없을 때 기존main/Pages 보존. | Root index.html unchanged; production defaultfalse; main SHA unchanged; no Firebase writes. |
-| G05 | PARTIAL | Docker nonroot·Caddy WSS 실제 로컬TLS 또는 지정스테이징 검증. | Official pinned images; non-root Docker recipe. Actual local Caddy2.11.7 trusted-CA HTTPS/WSS passed; Docker unavailable, container not executed. |
+| G05 | PARTIAL | Docker nonroot·Caddy WSS 실제 로컬TLS 또는 지정스테이징 검증. | Actual local Caddy trusted HTTPS/WSS passed. User reports Seoul Lightsail and Docker/Compose installed; no SSH or AWS Docker execution was performed by this work. |
 | G06 | PASS | drain 중 신규라운드차단·기존퀴즈/draft/경기완주·timeout강제종료 없음. | Authenticated drain/seal and CLI timeout test: quiz continues to battle/results; timeout undrains without terminating. |
 | G07 | PASS | server/client/content protocol일치와구버전안내. | Build/content/protocol exact WSS HELLO checked through local TLS; incompatible handshake rejected. |
 | G08 | PARTIAL | 건강검사실패 시release중단·이전image/client짝rollback. | Paired guarded release/rollback scripts and runbook supplied; real Docker/SSH/Pages failure rollback not executed. |
 | G09 | PARTIAL | 서버재시작장애의명확한방만료·무한reconnect 없음. | Unknown/revoked token ends resume; client retry bounded60s. Full process-crash browser exercise not run. |
-| G10 | PENDING | 실제GitHub반영/공개배포/학교실기기검증 상태를 각각 구분해 최종보고. | Final commit/PR/CI, local/public/classroom states will be recorded after remote verification. |
+| G10 | PASS | 실제GitHub반영/공개배포/학교실기기검증 상태를 각각 구분해 최종보고. | PR #1 and branch publication recorded separately from executed local tests, unexecuted AWS/public deployment and unverified classroom devices. docs/lightsail-ko.md contains settings and commands; final handoff supplies actual head SHA. |
