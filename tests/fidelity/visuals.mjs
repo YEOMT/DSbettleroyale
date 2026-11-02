@@ -28,8 +28,8 @@ try{
   }
   h.publish();await delay(100);
   const observed=[];
-  for(const page of h.pages){const data=await page.evaluate(()=>({events:fidelity.events,draws:fidelity.draws,feedback:!!(fidelity.app.renderer.session.hitConfirm||fidelity.app.renderer.session.damageFlash)}));
-   const draws=data.draws;assert.ok(draws.every(v=>v.actors.every(a=>Number.isFinite(a.x)&&Number.isFinite(a.y))),name+' finite displayed positions');const shots=draws.flatMap(d=>d.shots),effects=draws.flatMap(d=>d.effects),owners=new Set([...shots.map(q=>q.owner),...effects.map(f=>f.sourceId)]);
+  for(const page of h.pages){const data=await page.evaluate(()=>({events:fidelity.events,draws:fidelity.draws,feedback:!!(fidelity.app.renderer.session.hitConfirm||fidelity.app.renderer.session.damageFlash),foregroundOnTop:!fidelity.app.renderer.pixi||fidelity.app.renderer.world.children.at(-1)===fidelity.app.renderer.fg}));
+   assert.ok(data.foregroundOnTop,'confirmed FX layer stays above emoji sprites');const draws=data.draws;assert.ok(draws.every(v=>v.actors.every(a=>Number.isFinite(a.x)&&Number.isFinite(a.y))),name+' finite displayed positions');const shots=draws.flatMap(d=>d.shots),effects=draws.flatMap(d=>d.effects),owners=new Set([...shots.map(q=>q.owner),...effects.map(f=>f.sourceId)]);
    for(const p of h.players)assert.ok(owners.has(p.remoteId),name+' own/opponent action actually rendered');
    for(const d of draws){const ids=d.shots.filter(q=>['projectile','hook','lob','bomb'].includes(q.kind)).map(q=>[q.owner,q.life,q.actionKind,q.actionSeq,q.ordinal].join(':'));assert.equal(new Set(ids).size,ids.length,name+' no duplicate preview/authority');}
    const fired=data.events.filter(e=>e.type==='SHOT_SPAWN'),unique=new Set(fired.filter(e=>e.data.owner===h.players[0].remoteId&&['projectile','lob'].includes(e.data.kind)).map(e=>e.data.ordinal));
