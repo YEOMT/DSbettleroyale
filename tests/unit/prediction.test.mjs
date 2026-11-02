@@ -16,7 +16,7 @@ test('timeline rejects duplicates, does not smooth across teleport/life, and ret
  const s={snapshotSeq:1,serverTick:3,actors:[self],self,shots:[]};assert.equal(t.accept(s,100),true);assert.equal(t.accept(s,120),false);t.predict({seq:1,clientTick:1,move:{x:1,y:0}});
  t.accept({...s,snapshotSeq:2,serverTick:6,self:{...self,x:1000,warpSeq:1}},150);assert.deepEqual(t.offset,{x:0,y:0});assert.equal(t.history.length,0);assert.equal(t.predicted.x,1000);
  t.event({type:'SHOT_SPAWN',serverTick:6,data:{id:'short',x:20,y:0,native:true}});t.event({type:'SHOT_END',serverTick:7,data:{id:'short',x:40,y:0,reason:'hit'}});
- t.accept({...s,snapshotSeq:3,serverTick:12,self:{...self,x:1000,warpSeq:1}},200);const view=t.frame(200);assert.ok(view.shots.some(s=>s.id==='short'&&s.kind==='transit'));assert.equal(t.terminals.get('short').reason,'hit');
+ t.accept({...s,snapshotSeq:3,serverTick:12,self:{...self,x:1000,warpSeq:1}},200);const view=t.frame(200);assert.ok(view.effects.some(s=>s.terminal==='short'&&s.kind==='transit'));assert.ok(!view.shots.some(s=>s.id==='short'));assert.equal(t.terminals.get('short').reason,'hit');
  const old=t.renderTick;t.frame(199);assert.ok(t.renderTick>=old);
 });
 

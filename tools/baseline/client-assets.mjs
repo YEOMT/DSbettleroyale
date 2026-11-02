@@ -12,8 +12,8 @@ const units=sourceUnits(),byName=new Map();
 for(const u of units){if(u.node.type==='VariableDeclaration')for(const d of u.node.declarations)byName.set(d.id.name,u);else if(u.node.type==='FunctionDeclaration')byName.set(u.name,u);}
 const chosen=new Set();
 function info(code){const ast=parse(code,{ecmaVersion:'latest',ranges:true,sourceType:'module'}),scopes=analyze(ast,{ecmaVersion:2022,sourceType:'module',optimistic:true});return {ast,refs:scopes.scopes.flatMap(s=>s.references).filter(r=>!r.resolved||r.resolved.scope.type==='module')};}
-function add(name){if(['BRMP','game','BRRework'].includes(name))return;const u=byName.get(name);if(!u||chosen.has(u))return;if(u.node.type==='ClassDeclaration')throw Error('Unexpected class '+name);chosen.add(u);for(const r of info(u.code).refs)if(byName.get(r.identifier.name)!==u)add(r.identifier.name);}
-for(const n of ['brCombatPainter','brPaintReworkEntities','brPaintReworkStatus','brPaintAttack','brPaintGround','brPaintSmoke','brPaintCrate','brActorEmojiCanvas','brLevelCanvasDraw','brTeamKillColor'])add(n);
+function add(name){if(['BRMP','game','BRRework','brPlaySfx'].includes(name))return;const u=byName.get(name);if(!u||chosen.has(u))return;if(u.node.type==='ClassDeclaration')throw Error('Unexpected class '+name);chosen.add(u);for(const r of info(u.code).refs)if(byName.get(r.identifier.name)!==u)add(r.identifier.name);}
+for(const n of ['brCombatPainter','brPaintReworkEntities','brPaintReworkStatus','brPaintAttack','brPaintGround','brPaintSmoke','brPaintCrate','brActorEmojiCanvas','brLevelCanvasDraw','brTeamKillColor','brDrawProjectileGlyph','brStudentProjectileVisualSize','brRegisterHitFeedback','brDrawHitConfirm'])add(n);
 function edits(code,list){for(const [a,b,text]of list.sort((a,b)=>b[0]-a[0]))code=code.slice(0,a)+text+code.slice(b);return code;}
 const funcs=[],init=[];
 for(const u of [...chosen].sort((a,b)=>a.script-b.script||a.index-b.index)){
@@ -22,5 +22,5 @@ for(const u of [...chosen].sort((a,b)=>a.script-b.script||a.index-b.index)){
  if(node.type==='VariableDeclaration'){changes.push([0,node.kind.length,'']);for(const d of node.declarations)changes.push([d.id.start,d.id.end,'__visualScope.'+d.id.name]);init.push(edits(u.code,changes));}
  else funcs.push('__visualScope.'+node.id.name+' = '+edits(u.code,changes)+';');
 }
-fs.writeFileSync('apps/client/src/render/original-painters.js',`// Original v32.1 Canvas/Pixi painter implementation; no combat execution.\nexport function createPainters(session){const __visualScope={BRMP:session,game:null};\n${funcs.join('\n\n')}\n${init.join('\n')}\nreturn __visualScope;}\n`.replace(/window\.BRMP/g,'__visualScope.BRMP'));
+fs.writeFileSync('apps/client/src/render/original-painters.js',`// Original v32.1 Canvas/Pixi painter implementation; no combat execution.\nexport function createPainters(session){const __visualScope={BRMP:session,game:null,brPlaySfx:()=>{}};\n${funcs.join('\n\n')}\n${init.join('\n')}\nreturn __visualScope;}\n`.replace(/window\.BRMP/g,'__visualScope.BRMP'));
 console.log('Preserved original HTML/CSS and',chosen.size,'painter units');

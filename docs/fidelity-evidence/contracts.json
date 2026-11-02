@@ -1,0 +1,663 @@
+{
+  "cards": [
+    {
+      "id": "wanggui",
+      "tier": 1,
+      "grade": "A",
+      "abilityId": "emoji-023",
+      "pass": true,
+      "effect": "A급 · 최대 HP +16.5% · 공격력 +16.5%",
+      "detail": "평타와 공격 스킬 모두 · 다음 단계: HP +33% · 공격력 +33%"
+    },
+    {
+      "id": "wanggui",
+      "tier": 1,
+      "grade": "B",
+      "abilityId": "emoji-065",
+      "pass": true,
+      "effect": "B급 · 최대 HP +27.5% · 공격력 +27.5%",
+      "detail": "평타와 공격 스킬 모두 · 다음 단계: HP +55% · 공격력 +55%"
+    },
+    {
+      "id": "wanggui",
+      "tier": 1,
+      "grade": "C",
+      "abilityId": "emoji-073",
+      "pass": true,
+      "effect": "C급 · 최대 HP +38.5% · 공격력 +44%",
+      "detail": "평타와 공격 스킬 모두 · 다음 단계: HP +77% · 공격력 +88%"
+    },
+    {
+      "id": "wanggui",
+      "tier": 1,
+      "grade": "F",
+      "abilityId": "emoji-052",
+      "pass": true,
+      "effect": "F급 · 최대 HP +66% · 공격력 +88%",
+      "detail": "평타와 공격 스킬 모두 · 다음 단계: HP +132% · 공격력 +176%"
+    },
+    {
+      "id": "wanggui",
+      "tier": 2,
+      "grade": "A",
+      "abilityId": "emoji-023",
+      "pass": true,
+      "effect": "A급 · 최대 HP +33% · 공격력 +33%",
+      "detail": "평타와 공격 스킬 모두 · 다음 단계: HP +49.5% · 공격력 +49.5%"
+    },
+    {
+      "id": "wanggui",
+      "tier": 2,
+      "grade": "B",
+      "abilityId": "emoji-065",
+      "pass": true,
+      "effect": "B급 · 최대 HP +55% · 공격력 +55%",
+      "detail": "평타와 공격 스킬 모두 · 다음 단계: HP +77% · 공격력 +77%"
+    },
+    {
+      "id": "wanggui",
+      "tier": 2,
+      "grade": "C",
+      "abilityId": "emoji-073",
+      "pass": true,
+      "effect": "C급 · 최대 HP +77% · 공격력 +88%",
+      "detail": "평타와 공격 스킬 모두 · 다음 단계: HP +110% · 공격력 +132%"
+    },
+    {
+      "id": "wanggui",
+      "tier": 2,
+      "grade": "F",
+      "abilityId": "emoji-052",
+      "pass": true,
+      "effect": "F급 · 최대 HP +132% · 공격력 +176%",
+      "detail": "평타와 공격 스킬 모두 · 다음 단계: HP +176% · 공격력 +264%"
+    },
+    {
+      "id": "wanggui",
+      "tier": 3,
+      "grade": "A",
+      "abilityId": "emoji-023",
+      "pass": true,
+      "effect": "A급 · 최대 HP +49.5% · 공격력 +49.5%",
+      "detail": "평타와 공격 스킬 모두 · 최종 단계"
+    },
+    {
+      "id": "wanggui",
+      "tier": 3,
+      "grade": "B",
+      "abilityId": "emoji-065",
+      "pass": true,
+      "effect": "B급 · 최대 HP +77% · 공격력 +77%",
+      "detail": "평타와 공격 스킬 모두 · 최종 단계"
+    },
+    {
+      "id": "wanggui",
+      "tier": 3,
+      "grade": "C",
+      "abilityId": "emoji-073",
+      "pass": true,
+      "effect": "C급 · 최대 HP +110% · 공격력 +132%",
+      "detail": "평타와 공격 스킬 모두 · 최종 단계"
+    },
+    {
+      "id": "wanggui",
+      "tier": 3,
+      "grade": "F",
+      "abilityId": "emoji-052",
+      "pass": true,
+      "effect": "F급 · 최대 HP +176% · 공격력 +264%",
+      "detail": "평타와 공격 스킬 모두 · 최종 단계"
+    },
+    {
+      "id": "rapid",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "공격속도 +44% (×1.44) · 일반 피해 10% 감소 (×0.9)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "rapid",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "공격속도 +82.5% (×1.83) · 일반 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "rapid",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "공격속도 +143% (×2.43) · 일반 피해 +5.5% (×1.06)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "heavy",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 피해 +44% (×1.44) · 공격속도 10% 감소 (×0.9)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "heavy",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 피해 +82.5% (×1.83) · 공격속도 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "heavy",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 피해 +132% (×2.32) · 공격속도 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "multi",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 탄환 +1 · 일반 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "multi",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 탄환 +2 · 일반 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "multi",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 탄환 +3 · 일반 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "giant",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 탄환 크기 +38.5% (×1.39) · 탄속 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "giant",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 탄환 크기 +71.5% (×1.72) · 탄속 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "giant",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 탄환 크기 +110% (×2.1) · 탄속 +5.5% (×1.06)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "impact",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 넉백 +44% (×1.44) · 일반 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "impact",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 넉백 +88% (×1.88) · 일반 피해 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "impact",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "일반 넉백 +143% (×2.43) · 일반 피해 +5.5% (×1.06)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "wide",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-001",
+      "pass": true,
+      "effect": "근접 범위 +22% (×1.22) · 공격속도 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "wide",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-001",
+      "pass": true,
+      "effect": "근접 범위 +44% (×1.44) · 공격속도 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "wide",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-001",
+      "pass": true,
+      "effect": "근접 범위 +71.5% (×1.72) · 공격속도 +5.5% (×1.06)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "quick",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "스킬 쿨타임 27.5% 감소 (×0.73) · 스킬 피해 8% 감소 (×0.92)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "quick",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "스킬 쿨타임 41.8% 감소 (×0.58) · 스킬 피해 3% 감소 (×0.97)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "quick",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "스킬 쿨타임 57.2% 감소 (×0.43) · 스킬 피해 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "amplify",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "스킬 피해 +44% (×1.44) · 스킬 쿨타임 +10% (×1.1)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "amplify",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "스킬 피해 +82.5% (×1.83) · 스킬 쿨타임 +5% (×1.05)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "amplify",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "스킬 피해 +132% (×2.32) · 스킬 쿨타임 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "expansion",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "스킬 범위·크기 +33% (×1.33) · 스킬 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "expansion",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "스킬 범위·크기 +66% (×1.66) · 스킬 피해 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "expansion",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "스킬 범위·크기 +104.5% (×2.05) · 스킬 피해 +5.5% (×1.06)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "multicast",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-003",
+      "pass": true,
+      "effect": "스킬 탄환 +1 · 스킬 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "multicast",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-003",
+      "pass": true,
+      "effect": "스킬 탄환 +2 · 스킬 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "multicast",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-003",
+      "pass": true,
+      "effect": "스킬 탄환 +3 · 스킬 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "control",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "제어 효과 +27.5% (×1.28) · 스킬 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "control",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "제어 효과 +49.5% (×1.5) · 스킬 피해 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "control",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "제어 효과 +71.5% (×1.72) · 스킬 피해 +5.5% (×1.06)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "restore",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-013",
+      "pass": true,
+      "effect": "회복·보호량 +33% (×1.33) · 스킬 쿨타임 +5% (×1.05)",
+      "detail": "피해 감소 최대 45% · 단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "restore",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-013",
+      "pass": true,
+      "effect": "회복·보호량 +60.5% (×1.61) · 스킬 쿨타임 기본 유지",
+      "detail": "피해 감소 최대 45% · 단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "restore",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-013",
+      "pass": true,
+      "effect": "회복·보호량 +93.5% (×1.94) · 스킬 쿨타임 기본 유지",
+      "detail": "피해 감소 최대 45% · 단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "swift",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "이동속도 +16.5% (×1.17) · 최대 HP 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "swift",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "이동속도 +28.6% (×1.29) · 최대 HP 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "swift",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "이동속도 +41.8% (×1.42) · 최대 HP +5.5% (×1.06)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "titan",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "최대 HP +33% (×1.33) · 이동속도 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "titan",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "최대 HP +55% (×1.55) · 이동속도 2% 감소 (×0.98)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "titan",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "최대 HP +82.5% (×1.83) · 이동속도 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "regen",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "4.5초 무피격 후 초당 HP 1.98% · 최대 HP 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "regen",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "3.5초 무피격 후 초당 HP 2.86% · 최대 HP 기본 유지",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "regen",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-000",
+      "pass": true,
+      "effect": "2.5초 무피격 후 초당 HP 3.85% · 최대 HP +5.5% (×1.06)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "signature_range",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-001",
+      "pass": true,
+      "effect": "고유 이동 거리 +16.5% (×1.17) · 스킬 쿨타임 +5% (×1.05)",
+      "detail": "고유 스킬 특화 · 단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "signature_range",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-001",
+      "pass": true,
+      "effect": "고유 이동 거리 +30.8% (×1.31) · 스킬 쿨타임 +2% (×1.02)",
+      "detail": "고유 스킬 특화 · 단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "signature_range",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-001",
+      "pass": true,
+      "effect": "고유 이동 거리 +46.2% (×1.46) · 스킬 쿨타임 기본 유지",
+      "detail": "고유 스킬 특화 · 단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "signature_duration",
+      "tier": 1,
+      "grade": null,
+      "abilityId": "emoji-006",
+      "pass": true,
+      "effect": "고유 지속 시간 +22% (×1.22) · 스킬 쿨타임 +8% (×1.08)",
+      "detail": "고유 스킬 특화 · 단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "signature_duration",
+      "tier": 2,
+      "grade": null,
+      "abilityId": "emoji-006",
+      "pass": true,
+      "effect": "고유 지속 시간 +38.5% (×1.39) · 스킬 쿨타임 +4% (×1.04)",
+      "detail": "고유 스킬 특화 · 단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "id": "signature_duration",
+      "tier": 3,
+      "grade": null,
+      "abilityId": "emoji-006",
+      "pass": true,
+      "effect": "고유 지속 시간 +55% (×1.55) · 스킬 쿨타임 기본 유지",
+      "detail": "고유 스킬 특화 · 단계 누적값 · 증감 합산·상한 적용"
+    }
+  ],
+  "stuns": [
+    {
+      "frames": 30,
+      "start": 802,
+      "end": 844,
+      "blockedMovement": true,
+      "blockedAttack": true,
+      "clearedDisplay": true
+    },
+    {
+      "frames": 60,
+      "start": 844,
+      "end": 916,
+      "blockedMovement": true,
+      "blockedAttack": true,
+      "clearedDisplay": true
+    }
+  ],
+  "renderRates": [
+    [
+      {
+        "fps": 30,
+        "jitter": false,
+        "activeActorFrames": 45
+      },
+      {
+        "fps": 30,
+        "jitter": true,
+        "activeActorFrames": 46
+      },
+      {
+        "fps": 60,
+        "jitter": false,
+        "activeActorFrames": 92
+      },
+      {
+        "fps": 60,
+        "jitter": true,
+        "activeActorFrames": 92
+      },
+      {
+        "fps": 120,
+        "jitter": false,
+        "activeActorFrames": 184
+      },
+      {
+        "fps": 120,
+        "jitter": true,
+        "activeActorFrames": 184
+      }
+    ],
+    [
+      {
+        "fps": 30,
+        "jitter": false,
+        "activeActorFrames": 45
+      },
+      {
+        "fps": 30,
+        "jitter": true,
+        "activeActorFrames": 45
+      },
+      {
+        "fps": 60,
+        "jitter": false,
+        "activeActorFrames": 90
+      },
+      {
+        "fps": 60,
+        "jitter": true,
+        "activeActorFrames": 90
+      },
+      {
+        "fps": 120,
+        "jitter": false,
+        "activeActorFrames": 180
+      },
+      {
+        "fps": 120,
+        "jitter": true,
+        "activeActorFrames": 180
+      }
+    ]
+  ],
+  "limits": "Two real browser contexts on one PC; FPS variants replay actual WS snapshots, not physical 120Hz devices.",
+  "touchWhileMoving": true,
+  "duplicateAndInvalid": true,
+  "fiveChoices": true,
+  "idleSeconds": 10,
+  "reconnect": true,
+  "respawn": true,
+  "resultsAndRematch": true
+}

@@ -1,0 +1,11 @@
+{
+  "actors": 2,
+  "shots": 0,
+  "frame": 110.46399999856949,
+  "abilities": [
+    "emoji-065",
+    "emoji-043"
+  ],
+  "zoom": 0.7111111111111111,
+  "comparison": "Same actual WS actors, map, growth, quality, camera and tick fed to offline original renderer. Screenshots inspected; full-scene pixel equality is not asserted."
+}
