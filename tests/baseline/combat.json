@@ -1,0 +1,2177 @@
+[
+  {
+    "id": "emoji-000",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 540,
+      "targetHp": 310.2374400000001,
+      "x": 0,
+      "y": 0,
+      "targetX": 266.8958323319296,
+      "targetY": 0,
+      "damage": 139.76256,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-001",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 594.4050000000001,
+      "targetHp": 450,
+      "x": 716,
+      "y": 0,
+      "targetX": 227.80780498488713,
+      "targetY": 0,
+      "damage": 23.8085568,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-002",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "hook"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 600,
+      "targetHp": 398,
+      "x": 0,
+      "y": 0,
+      "targetX": 192.72618240000003,
+      "targetY": 0,
+      "damage": 74.04496,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-003",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 514.2075,
+      "targetHp": 268.36175999999983,
+      "x": 0,
+      "y": 0,
+      "targetX": 264.5734560264331,
+      "targetY": 0,
+      "damage": 181.63824000000002,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-004",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 430.94362500000005,
+      "targetHp": 450,
+      "x": 696,
+      "y": 0,
+      "targetX": 235.85408819894326,
+      "targetY": 0,
+      "damage": 23.8085568,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-006",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "orbit"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 541.3262400000001,
+      "targetHp": 288,
+      "x": 0,
+      "y": 0,
+      "targetX": 229.95178533442044,
+      "targetY": 0,
+      "damage": 201.04496,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-007",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 459,
+      "targetHp": 319.3799999999999,
+      "x": 0,
+      "y": 0,
+      "targetX": 284.7087415085929,
+      "targetY": 0,
+      "damage": 130.61999999999998,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [
+        "radiation"
+      ],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-008",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 416.925,
+      "targetHp": 434.88,
+      "x": 0,
+      "y": 0,
+      "targetX": 221.3023312717928,
+      "targetY": 0,
+      "damage": 15.12,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-010",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "gravity"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 500,
+      "targetHp": 434.88,
+      "x": 0,
+      "y": 0,
+      "targetX": 221.3023312717928,
+      "targetY": 0,
+      "damage": 15.12,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [
+        "gravity"
+      ],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-012",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "turret"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 450,
+      "targetHp": 360.72,
+      "x": 0,
+      "y": 0,
+      "targetX": 198.6140699378382,
+      "targetY": 0,
+      "damage": 89.28,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [
+        "turret"
+      ],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-013",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 465,
+      "targetHp": 366,
+      "x": 12,
+      "y": 0,
+      "targetX": 217.37279149469583,
+      "targetY": 0,
+      "damage": 104.0609136,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-014",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "poison"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 460,
+      "targetHp": 434.88,
+      "x": 0,
+      "y": 0,
+      "targetX": 221.3023312717928,
+      "targetY": 0,
+      "damage": 15.12,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [
+        "poison"
+      ],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-019",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 620,
+      "targetHp": 358,
+      "x": 922.149710915737,
+      "y": 0,
+      "targetX": 1090.8588525739794,
+      "targetY": 0,
+      "damage": 116.24945600000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-020",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile",
+        "projectile",
+        "projectile",
+        "projectile",
+        "projectile",
+        "projectile",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 416.925,
+      "targetHp": 408.168,
+      "x": 0,
+      "y": 0,
+      "targetX": 221.53630319583218,
+      "targetY": 0,
+      "damage": 41.832,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-022",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 366.894,
+      "targetHp": 339.912288,
+      "x": 0,
+      "y": 0,
+      "targetX": 180,
+      "targetY": 0,
+      "damage": 110.08771200000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-037",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 390,
+      "targetHp": 450,
+      "x": 12,
+      "y": 0,
+      "targetX": 222.8613349354374,
+      "targetY": 0,
+      "damage": 22.044960000000003,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-085",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile",
+        "projectile",
+        "projectile",
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 450.279,
+      "targetHp": 320.46479999999997,
+      "x": 0,
+      "y": 0,
+      "targetX": 221.3023312717928,
+      "targetY": 0,
+      "damage": 129.5352,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-098",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 293.25,
+      "targetHp": 434.88,
+      "x": 0,
+      "y": 0,
+      "targetX": 221.3023312717928,
+      "targetY": 0,
+      "damage": 15.12,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-110",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "dash"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 560,
+      "targetHp": 375,
+      "x": 63.39427229589283,
+      "y": 0,
+      "targetX": 239.08353682793143,
+      "targetY": 0,
+      "damage": 97.04496,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-131",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile",
+        "scheduled",
+        "scheduled",
+        "scheduled",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 604.5341255856002,
+      "targetHp": 320,
+      "x": 12,
+      "y": 0,
+      "targetX": 216.07494690116192,
+      "targetY": 0,
+      "damage": 148.5177664,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-132",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "beam"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 422.48400000000004,
+      "targetHp": 211.03680000000026,
+      "x": 0,
+      "y": 0,
+      "targetX": 242.66045246930818,
+      "targetY": 0,
+      "damage": 238.96319999999992,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-023",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 349.2801,
+      "targetHp": 320.9839232,
+      "x": 0,
+      "y": 0,
+      "targetX": 235.78989875807972,
+      "targetY": 0,
+      "damage": 129.0160768,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-024",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 3,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 366.5536875000001,
+      "targetHp": 450,
+      "x": 0,
+      "y": 0,
+      "targetX": 248.7337221919725,
+      "targetY": 0,
+      "damage": 46.2478848,
+      "alive": true,
+      "projectiles": 3,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-025",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 500,
+      "targetHp": 370.83,
+      "x": 12,
+      "y": 0,
+      "targetX": 355.6656512195341,
+      "targetY": 0,
+      "damage": 109.93006752000002,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-026",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 452.76,
+      "targetHp": 413.145,
+      "x": 8,
+      "y": 0,
+      "targetX": 204.63448422504493,
+      "targetY": 0,
+      "damage": 63.602884800000005,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-027",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "dash"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 388.15875000000005,
+      "targetHp": 417.5,
+      "x": 205.81240281910792,
+      "y": 0,
+      "targetX": 344.06102238691676,
+      "targetY": 0,
+      "damage": 59.2478848,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-028",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 367.53506999999996,
+      "targetHp": 450,
+      "x": 8,
+      "y": 0,
+      "targetX": 217.2016512484994,
+      "targetY": 0,
+      "damage": 25.677969408000003,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-029",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "leap"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 500,
+      "targetHp": 387.6,
+      "x": 657.0280635698767,
+      "y": 0,
+      "targetX": 820.7120762012385,
+      "targetY": 0,
+      "damage": 89.14788480000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-030",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "hook",
+        "hook",
+        "hook"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 411.4116562500001,
+      "targetHp": 418.8,
+      "x": 0,
+      "y": 0,
+      "targetX": 143.3912509825154,
+      "targetY": -155.15555088915937,
+      "damage": 57.947884800000004,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-031",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 328.10400000000004,
+      "targetHp": 420,
+      "x": 355.21240938484937,
+      "y": 0,
+      "targetX": 481.37572479121815,
+      "targetY": 0,
+      "damage": 56.7478848,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 2,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-033",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "dash",
+        "plow-pressure"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 366.67028160000007,
+      "targetHp": 418.8,
+      "x": 332.02159839956084,
+      "y": 0,
+      "targetX": 475.892476296205,
+      "targetY": 0,
+      "damage": 56.877969408,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-034",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 2,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 320.173425,
+      "targetHp": 400.3456992,
+      "x": 0,
+      "y": 0,
+      "targetX": 242.0636862553148,
+      "targetY": 0,
+      "damage": 49.6543008,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-035",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 391.42184458608006,
+      "targetHp": 450,
+      "x": 12,
+      "y": 0,
+      "targetX": 196.43764533645006,
+      "targetY": 0,
+      "damage": 25.410490560000003,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-036",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile",
+        "projectile",
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 320.173425,
+      "targetHp": 361.6758326399999,
+      "x": 0,
+      "y": 0,
+      "targetX": 212.7719968630517,
+      "targetY": 0.009133836163290169,
+      "damage": 88.32416736,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-063",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 3,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile",
+        "projectile",
+        "projectile",
+        "projectile",
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 334.7267625,
+      "targetHp": 307.86240960000003,
+      "x": 0,
+      "y": 0,
+      "targetX": 188.38545178440333,
+      "targetY": -1.4394200057716235,
+      "damage": 142.1375904,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-065",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "hook"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 434.0588669427782,
+      "targetHp": 408.2,
+      "x": 12,
+      "y": 0,
+      "targetX": 147.25348799999998,
+      "targetY": 0,
+      "damage": 82.16187232000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-066",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile",
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 320.173425,
+      "targetHp": 289.99771392,
+      "x": 0,
+      "y": 0,
+      "targetX": 154.2727731897178,
+      "targetY": 3.608224830031759e-16,
+      "damage": 160.00228607999998,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-087",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 305.6200875,
+      "targetHp": 382.93971839999995,
+      "x": 0,
+      "y": 0,
+      "targetX": 212.7720268102822,
+      "targetY": 0,
+      "damage": 67.0602816,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-099",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 244.125,
+      "targetHp": 433.152,
+      "x": 0,
+      "y": 0,
+      "targetX": 212.0920268102822,
+      "targetY": 0,
+      "damage": 16.848000000000003,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-101",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 227.85,
+      "targetHp": 433.152,
+      "x": 0,
+      "y": 0,
+      "targetX": 212.0920268102822,
+      "targetY": 0,
+      "damage": 16.848000000000003,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-133",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 472.5,
+      "targetHp": 390.2,
+      "x": 261.85607355261004,
+      "y": 0,
+      "targetX": 404.08479740145475,
+      "targetY": 0,
+      "damage": 86.5478848,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-038",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 302.50920798000004,
+      "targetHp": 450,
+      "x": 536,
+      "y": 0,
+      "targetX": 220.07616831216146,
+      "targetY": 0,
+      "damage": 43.590822105600004,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-039",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "lob"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 333.5,
+      "targetHp": 424.3392,
+      "x": 0,
+      "y": 0,
+      "targetX": 233.5157538035449,
+      "targetY": 0,
+      "damage": 25.660800000000005,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-040",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 423.59031,
+      "targetHp": 428.75,
+      "x": 316.96784939431427,
+      "y": 0,
+      "targetX": 463.4918909574814,
+      "targetY": 0,
+      "damage": 59.59377870400001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-041",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 6,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 287.5,
+      "targetHp": 334.15680000000003,
+      "x": 0,
+      "y": 0,
+      "targetX": 189.9685947358343,
+      "targetY": -1.4095843347849581,
+      "damage": 115.84320000000004,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-042",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 665.6834091600001,
+      "targetHp": 388.554,
+      "x": 8,
+      "y": 0,
+      "targetX": 206.04398742894912,
+      "targetY": 0,
+      "damage": 102.85728100032,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-043",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "dash"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 335.34,
+      "targetHp": 355.4,
+      "x": 97.43097405894618,
+      "y": 0,
+      "targetX": 255.27631368661375,
+      "targetY": 0,
+      "damage": 134.96187232000003,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-044",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "dash",
+        "ice-trail-emitter"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 353.50425,
+      "targetHp": 412.6,
+      "x": 236.10400850608798,
+      "y": 0,
+      "targetX": 371.8931847019293,
+      "targetY": 0,
+      "damage": 77.76187232000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-045",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 333.5,
+      "targetHp": 363.87,
+      "x": 0,
+      "y": 0,
+      "targetX": 202.64074822885595,
+      "targetY": 0,
+      "damage": 86.13000000000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-047",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 333.5,
+      "targetHp": 353.1384,
+      "x": 0,
+      "y": 0,
+      "targetX": 281.2855917167638,
+      "targetY": 0,
+      "damage": 96.86160000000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-048",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 385.641,
+      "targetHp": 424,
+      "x": 344.82902865379134,
+      "y": 0,
+      "targetX": 468.79551098803245,
+      "targetY": 0,
+      "damage": 66.36187232,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-070",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 4,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 245.81249999999997,
+      "targetHp": 356.93999999999994,
+      "x": 0,
+      "y": 0,
+      "targetX": 193.23450249102623,
+      "targetY": -1.6902981360450806,
+      "damage": 93.06,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-072",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 258.75,
+      "targetHp": 380.4492,
+      "x": 0,
+      "y": 0,
+      "targetX": 273.63775035768276,
+      "targetY": 0,
+      "damage": 69.55080000000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-089",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 258.75,
+      "targetHp": 331.068,
+      "x": 0,
+      "y": 0,
+      "targetX": 202.64074822885595,
+      "targetY": 0,
+      "damage": 118.93199999999999,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-102",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 258.75,
+      "targetHp": 426.24,
+      "x": 0,
+      "y": 0,
+      "targetX": 202.64074822885595,
+      "targetY": 0,
+      "damage": 23.759999999999998,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-112",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 665.6834091600001,
+      "targetHp": 433.63812767999997,
+      "x": 8,
+      "y": 0,
+      "targetX": 299.66873854514074,
+      "targetY": 0,
+      "damage": 70.36187232,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-137",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 2,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 243.225,
+      "targetHp": 338.3984,
+      "x": 0,
+      "y": 0,
+      "targetX": 231.670382982733,
+      "targetY": 0,
+      "damage": 111.60160000000002,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-073",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 310.5,
+      "targetHp": 373.275,
+      "x": 0,
+      "y": 0,
+      "targetX": 266.14673032906825,
+      "targetY": 0,
+      "damage": 76.725,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-074",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 2,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 229.42499999999998,
+      "targetHp": 357.024,
+      "x": 0,
+      "y": 0,
+      "targetX": 208.01402266227834,
+      "targetY": -1.5012503296856083,
+      "damage": 92.976,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-075",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 310.5,
+      "targetHp": 373.275,
+      "x": 0,
+      "y": 0,
+      "targetX": 198.00640464039137,
+      "targetY": 0,
+      "damage": 76.725,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-076",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 6,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 241.49999999999997,
+      "targetHp": 379.788,
+      "x": 0,
+      "y": 0,
+      "targetX": 191.92968142661545,
+      "targetY": 0.309097349757546,
+      "damage": 70.212,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-077",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 310.5,
+      "targetHp": 307.913328,
+      "x": 0,
+      "y": 0,
+      "targetX": 171.94389935960862,
+      "targetY": 0,
+      "damage": 142.086672,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-092",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 253.575,
+      "targetHp": 424.944,
+      "x": 0,
+      "y": 0,
+      "targetX": 210.72057267309066,
+      "targetY": 0,
+      "damage": 25.055999999999997,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-094",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 5,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 229.42499999999998,
+      "targetHp": 400.788,
+      "x": 0,
+      "y": 0,
+      "targetX": 191.55529647267917,
+      "targetY": -2.514314879323775,
+      "damage": 49.212,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-105",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 229.42499999999998,
+      "targetHp": 428.4,
+      "x": 0,
+      "y": 0,
+      "targetX": 194.29360464039138,
+      "targetY": 0,
+      "damage": 21.599999999999998,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-113",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 460.23862500000007,
+      "targetHp": 424.576656,
+      "x": 8,
+      "y": 0,
+      "targetX": 202.64074822885595,
+      "targetY": 0,
+      "damage": 79.42334400000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-121",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 448.10506125000006,
+      "targetHp": 413.25,
+      "x": 12,
+      "y": 0,
+      "targetX": 323.8500796132174,
+      "targetY": 0,
+      "damage": 76.79834400000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-122",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 276,
+      "targetHp": 357.89699999999993,
+      "x": 0,
+      "y": 0,
+      "targetX": 218.82819595961308,
+      "targetY": 0,
+      "damage": 92.10300000000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-126",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "pin-trap",
+        "pin-trap",
+        "pin-trap"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 293.25,
+      "targetHp": 392.913,
+      "x": 0,
+      "y": 0,
+      "targetX": 194.29360464039138,
+      "targetY": 0,
+      "damage": 57.087,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [
+        "pin-trap",
+        "pin-trap"
+      ],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-127",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "dash"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 313.467,
+      "targetHp": 407.5,
+      "x": 165.42842658549392,
+      "y": 0,
+      "targetX": 289.13615494736894,
+      "targetY": 0,
+      "damage": 82.54834400000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-128",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 313.467,
+      "targetHp": 428,
+      "x": 276.93697999860825,
+      "y": 0,
+      "targetX": 399.0468097404276,
+      "targetY": 0,
+      "damage": 62.04834400000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 1,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-052",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 400,
+      "targetHp": 442.8,
+      "x": 0,
+      "y": 0,
+      "targetX": 372.3770796057445,
+      "targetY": 0,
+      "damage": 7.199999999999999,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-054",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 180,
+      "targetHp": 450,
+      "x": 134.49122318807235,
+      "y": 0,
+      "targetX": 239.7147678515627,
+      "targetY": 0,
+      "damage": 12.636,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-056",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 1,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "projectile"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 187.5,
+      "targetHp": 429.925,
+      "x": 0,
+      "y": 0,
+      "targetX": 188.16777408022364,
+      "targetY": 0,
+      "damage": 20.075,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-114",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 450,
+      "targetHp": 425.2521152,
+      "x": 8,
+      "y": 0,
+      "targetX": 411.0703981043027,
+      "targetY": 0,
+      "damage": 78.74788480000001,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-139",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": []
+    },
+    "end": {
+      "frame": 180,
+      "hp": 450,
+      "targetHp": 450,
+      "x": 8,
+      "y": 0,
+      "targetX": 225.96904325469913,
+      "targetY": 0,
+      "damage": 41.99999999999999,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  },
+  {
+    "id": "emoji-140",
+    "start": {
+      "basic": true,
+      "skill": true,
+      "projectiles": 0,
+      "zones": 0,
+      "turrets": 0,
+      "reworks": [
+        "warning",
+        "scheduled"
+      ]
+    },
+    "end": {
+      "frame": 180,
+      "hp": 560,
+      "targetHp": 384,
+      "x": 12,
+      "y": 0,
+      "targetX": 235.5071683964654,
+      "targetY": 0,
+      "damage": 91.351704,
+      "alive": true,
+      "projectiles": 0,
+      "zones": 0,
+      "reworks": [],
+      "runtimeFaults": 0
+    }
+  }
+]
