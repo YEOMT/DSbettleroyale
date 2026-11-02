@@ -1,0 +1,1808 @@
+[
+  {
+    "original": "ABILITY_TYPES",
+    "script": 0,
+    "line": 83,
+    "module": "world/rules"
+  },
+  {
+    "original": "TRAIL_DASH_SUBS",
+    "script": 0,
+    "line": 90,
+    "module": "world/rules"
+  },
+  {
+    "original": "IMPACT_CHARGE_SUBS",
+    "script": 0,
+    "line": 92,
+    "module": "world/rules"
+  },
+  {
+    "original": "DIRECT_ASSAULT_DASH_SUBS",
+    "script": 0,
+    "line": 93,
+    "module": "world/rules"
+  },
+  {
+    "original": "ASSASSIN_TELEPORT_SUBS",
+    "script": 0,
+    "line": 97,
+    "module": "world/rules"
+  },
+  {
+    "original": "RANGED_SNIPER_SUBS",
+    "script": 0,
+    "line": 100,
+    "module": "world/rules"
+  },
+  {
+    "original": "RANGED_MACHINE_SUBS",
+    "script": 0,
+    "line": 101,
+    "module": "world/rules"
+  },
+  {
+    "original": "RANGED_BOMBER_SUBS",
+    "script": 0,
+    "line": 102,
+    "module": "world/rules"
+  },
+  {
+    "original": "getRangedWeaponStyle",
+    "script": 0,
+    "line": 103,
+    "module": "world/rules"
+  },
+  {
+    "original": "getRangedCombatProfile",
+    "script": 0,
+    "line": 113,
+    "module": "world/rules"
+  },
+  {
+    "original": "getIdentityProjectileEmoji",
+    "script": 0,
+    "line": 144,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_V32_SKILL_FIELDS",
+    "script": 0,
+    "line": 147,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_V32_NATIVE_SKILLS",
+    "script": 0,
+    "line": 148,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_RUN_MAX_LEVEL,BR_RUN_MAX_CHOICES,BR_RUN_PATH_MAX_TIER,BR_DEATH_XP_CAP",
+    "script": 0,
+    "line": 149,
+    "module": "world/rules"
+  },
+  {
+    "original": "getPlayerSignatureProjectileProfile",
+    "script": 0,
+    "line": 150,
+    "module": "world/rules"
+  },
+  {
+    "original": "getSkillCooldownMultiplier",
+    "script": 0,
+    "line": 181,
+    "module": "world/rules"
+  },
+  {
+    "original": "isTrailDashAbility",
+    "script": 0,
+    "line": 189,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_ROSTER_VERSION",
+    "script": 0,
+    "line": 194,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_TEAM_KILL_RULES",
+    "script": 0,
+    "line": 198,
+    "module": "world/rules"
+  },
+  {
+    "original": "brCanHostileTarget",
+    "script": 0,
+    "line": 206,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_ARENA_SCALE",
+    "script": 0,
+    "line": 212,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_WORLD_RADIUS",
+    "script": 0,
+    "line": 213,
+    "module": "world/rules"
+  },
+  {
+    "original": "EMOJI_DB",
+    "script": 0,
+    "line": 214,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_DISPLAY_NAMES",
+    "script": 0,
+    "line": 294,
+    "module": "world/rules"
+  },
+  {
+    "original": "statement-0-50",
+    "script": 0,
+    "line": 325,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_V28_ROSTER_METADATA",
+    "script": 0,
+    "line": 327,
+    "module": "world/rules"
+  },
+  {
+    "original": "statement-0-52",
+    "script": 0,
+    "line": 329,
+    "module": "world/rules"
+  },
+  {
+    "original": "brV29Edit",
+    "script": 0,
+    "line": 330,
+    "module": "world/rules"
+  },
+  {
+    "original": "statement-0-54",
+    "script": 0,
+    "line": 331,
+    "module": "world/rules"
+  },
+  {
+    "original": "statement-0-55",
+    "script": 0,
+    "line": 332,
+    "module": "world/rules"
+  },
+  {
+    "original": "statement-0-56",
+    "script": 0,
+    "line": 333,
+    "module": "world/rules"
+  },
+  {
+    "original": "statement-0-57",
+    "script": 0,
+    "line": 334,
+    "module": "world/rules"
+  },
+  {
+    "original": "statement-0-58",
+    "script": 0,
+    "line": 335,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_V29_FINAL_HP",
+    "script": 0,
+    "line": 339,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_V29_ZOMBIE_WALK",
+    "script": 0,
+    "line": 340,
+    "module": "world/rules"
+  },
+  {
+    "original": "brReworkDefinition",
+    "script": 0,
+    "line": 344,
+    "module": "world/rules"
+  },
+  {
+    "original": "brCharacterStatType",
+    "script": 0,
+    "line": 345,
+    "module": "world/rules"
+  },
+  {
+    "original": "brAbilityCategory",
+    "script": 0,
+    "line": 346,
+    "module": "world/rules"
+  },
+  {
+    "original": "TEAM_SUPPORT_SUBS",
+    "script": 0,
+    "line": 491,
+    "module": "world/rules"
+  },
+  {
+    "original": "isTeamSupportAbility",
+    "script": 0,
+    "line": 492,
+    "module": "world/rules"
+  },
+  {
+    "original": "isTankAbility",
+    "script": 0,
+    "line": 496,
+    "module": "world/rules"
+  },
+  {
+    "original": "seedState",
+    "script": 0,
+    "line": 499,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "seedRandom",
+    "script": 0,
+    "line": 500,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "rand",
+    "script": 0,
+    "line": 505,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "randRange",
+    "script": 0,
+    "line": 511,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "Vec2",
+    "script": 0,
+    "line": 513,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "brNormalizeAimVector",
+    "script": 0,
+    "line": 527,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatWallShape",
+    "script": 0,
+    "line": 538,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatWallGridCache",
+    "script": 0,
+    "line": 550,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatWallQuerySeq",
+    "script": 0,
+    "line": 551,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatGridKey",
+    "script": 0,
+    "line": 552,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatWallGrid",
+    "script": 0,
+    "line": 553,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatWallCandidates",
+    "script": 0,
+    "line": 574,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatWallContact",
+    "script": 0,
+    "line": 584,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatSegmentCircleTime",
+    "script": 0,
+    "line": 595,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatSegmentBoxTime",
+    "script": 0,
+    "line": 601,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatTraceWalls",
+    "script": 0,
+    "line": 619,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "combatMoveCircle",
+    "script": 0,
+    "line": 638,
+    "module": "movement/geometry"
+  },
+  {
+    "original": "BR_VIEW_SPAN,BR_VIEW_PAD",
+    "script": 0,
+    "line": 667,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brViewerBounds",
+    "script": 0,
+    "line": 673,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brIncomingLeadFrames",
+    "script": 0,
+    "line": 680,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brViewContains",
+    "script": 0,
+    "line": 681,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brViewSegment",
+    "script": 0,
+    "line": 682,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brRecordFlightPath",
+    "script": 0,
+    "line": 691,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brBeginProjectileVisual",
+    "script": 0,
+    "line": 697,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brEndProjectileVisual",
+    "script": 0,
+    "line": 703,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "BR_CONTACT",
+    "script": 0,
+    "line": 718,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brDashWidth",
+    "script": 0,
+    "line": 719,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brLaserProfile",
+    "script": 0,
+    "line": 720,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brTraceBeam",
+    "script": 0,
+    "line": 725,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brBeamTouches",
+    "script": 0,
+    "line": 735,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brFirstBeamHit",
+    "script": 0,
+    "line": 742,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brSectorTouches",
+    "script": 0,
+    "line": 756,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brDashTouchTime",
+    "script": 0,
+    "line": 767,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brZoneGeometry",
+    "script": 0,
+    "line": 776,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "BR_FEEL_MELEE_PUSH_IDS",
+    "script": 0,
+    "line": 787,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brFeelBasicPushScale",
+    "script": 0,
+    "line": 790,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brFeelRepeated",
+    "script": 0,
+    "line": 794,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brFeelImpact",
+    "script": 0,
+    "line": 802,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brFeelSwingMs",
+    "script": 0,
+    "line": 818,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brFxCommand",
+    "script": 0,
+    "line": 825,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brCoreFx",
+    "script": 0,
+    "line": 829,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brTrimCombatFx",
+    "script": 0,
+    "line": 830,
+    "module": "collision/contacts"
+  },
+  {
+    "original": "brValidRunLevel",
+    "script": 0,
+    "line": 888,
+    "module": "world/rules"
+  },
+  {
+    "original": "SwingEffect",
+    "script": 0,
+    "line": 1191,
+    "module": "events/transients"
+  },
+  {
+    "original": "Wall",
+    "script": 0,
+    "line": 1210,
+    "module": "events/transients"
+  },
+  {
+    "original": "SmokeCover",
+    "script": 0,
+    "line": 1243,
+    "module": "events/transients"
+  },
+  {
+    "original": "Particle",
+    "script": 0,
+    "line": 1252,
+    "module": "events/transients"
+  },
+  {
+    "original": "ImpactRing",
+    "script": 0,
+    "line": 1270,
+    "module": "events/transients"
+  },
+  {
+    "original": "SignatureEffect",
+    "script": 0,
+    "line": 1298,
+    "module": "events/transients"
+  },
+  {
+    "original": "brSurvivalRandom",
+    "script": 0,
+    "line": 1342,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brSurvivalRosterRadius",
+    "script": 0,
+    "line": 1343,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brSurvivalMaxRadius",
+    "script": 0,
+    "line": 1344,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brSurvivalGroups",
+    "script": 0,
+    "line": 1345,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brSurvivalTerrain",
+    "script": 0,
+    "line": 1346,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brSurvivalFarmSlot",
+    "script": 0,
+    "line": 1360,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brSurvivalFarmPoint",
+    "script": 0,
+    "line": 1361,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brRevealSmoke",
+    "script": 0,
+    "line": 1363,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brSmokeRevealed",
+    "script": 0,
+    "line": 1364,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brSmokeAttack",
+    "script": 0,
+    "line": 1365,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brStatNumber",
+    "script": 0,
+    "line": 1367,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "BR_SMOKE",
+    "script": 0,
+    "line": 1368,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brSmokeContains",
+    "script": 0,
+    "line": 1369,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "brSmokeConcealed",
+    "script": 0,
+    "line": 1377,
+    "module": "visibility/terrain"
+  },
+  {
+    "original": "BR_CRATE_HALF",
+    "script": 0,
+    "line": 1426,
+    "module": "farm/resources"
+  },
+  {
+    "original": "brCrateHalf",
+    "script": 0,
+    "line": 1427,
+    "module": "farm/resources"
+  },
+  {
+    "original": "brCrateX",
+    "script": 0,
+    "line": 1431,
+    "module": "farm/resources"
+  },
+  {
+    "original": "brCrateY",
+    "script": 0,
+    "line": 1432,
+    "module": "farm/resources"
+  },
+  {
+    "original": "BR_BODY_WALL_CACHE,BR_NO_BODY_WALLS",
+    "script": 0,
+    "line": 1435,
+    "module": "farm/resources"
+  },
+  {
+    "original": "brBodyWalls",
+    "script": 0,
+    "line": 1436,
+    "module": "farm/resources"
+  },
+  {
+    "original": "brHostBodyWalls",
+    "script": 0,
+    "line": 1453,
+    "module": "farm/resources"
+  },
+  {
+    "original": "brCrateCircleTouches",
+    "script": 0,
+    "line": 1461,
+    "module": "farm/resources"
+  },
+  {
+    "original": "brCrateSweepTime",
+    "script": 0,
+    "line": 1466,
+    "module": "farm/resources"
+  },
+  {
+    "original": "brCrateBeamTouches",
+    "script": 0,
+    "line": 1478,
+    "module": "farm/resources"
+  },
+  {
+    "original": "brCrateSectorTouches",
+    "script": 0,
+    "line": 1488,
+    "module": "farm/resources"
+  },
+  {
+    "original": "BR_COLLECTIBLE_RULES",
+    "script": 0,
+    "line": 1536,
+    "module": "farm/resources"
+  },
+  {
+    "original": "brFarm",
+    "script": 0,
+    "line": 1538,
+    "module": "farm/resources"
+  },
+  {
+    "original": "SupplyDrop",
+    "script": 0,
+    "line": 1817,
+    "module": "farm/resources"
+  },
+  {
+    "original": "ConfettiParticle",
+    "script": 0,
+    "line": 1876,
+    "module": "events/transients"
+  },
+  {
+    "original": "brSupportRadius",
+    "script": 0,
+    "line": 1908,
+    "module": "combat/status"
+  },
+  {
+    "original": "brCombatPower",
+    "script": 0,
+    "line": 1909,
+    "module": "combat/status"
+  },
+  {
+    "original": "brEffectCast",
+    "script": 0,
+    "line": 1910,
+    "module": "combat/status"
+  },
+  {
+    "original": "brApplyHealing",
+    "script": 0,
+    "line": 1911,
+    "module": "combat/status"
+  },
+  {
+    "original": "brApplyStun",
+    "script": 0,
+    "line": 1916,
+    "module": "combat/status"
+  },
+  {
+    "original": "brApplyTimedEffect",
+    "script": 0,
+    "line": 1921,
+    "module": "combat/status"
+  },
+  {
+    "original": "brRefreshGuard",
+    "script": 0,
+    "line": 1926,
+    "module": "combat/status"
+  },
+  {
+    "original": "brApplyGuard",
+    "script": 0,
+    "line": 1936,
+    "module": "combat/status"
+  },
+  {
+    "original": "brCooldownRate",
+    "script": 0,
+    "line": 1948,
+    "module": "combat/status"
+  },
+  {
+    "original": "brRunMod",
+    "script": 0,
+    "line": 1989,
+    "module": "combat/status"
+  },
+  {
+    "original": "brWangguiPower",
+    "script": 0,
+    "line": 1990,
+    "module": "combat/status"
+  },
+  {
+    "original": "brRunSkillSnapshot",
+    "script": 0,
+    "line": 1994,
+    "module": "combat/status"
+  },
+  {
+    "original": "brRunCount",
+    "script": 0,
+    "line": 1995,
+    "module": "combat/status"
+  },
+  {
+    "original": "brRunCC",
+    "script": 0,
+    "line": 1996,
+    "module": "combat/status"
+  },
+  {
+    "original": "brWithRunSkill",
+    "script": 0,
+    "line": 1997,
+    "module": "combat/status"
+  },
+  {
+    "original": "Zone",
+    "script": 0,
+    "line": 2009,
+    "module": "combat/zone"
+  },
+  {
+    "original": "Turret",
+    "script": 0,
+    "line": 2252,
+    "module": "combat/turret"
+  },
+  {
+    "original": "Projectile",
+    "script": 0,
+    "line": 2304,
+    "module": "combat/projectile"
+  },
+  {
+    "original": "isEliteRangedAbility",
+    "script": 0,
+    "line": 2608,
+    "module": "world/rules"
+  },
+  {
+    "original": "isSmallRangedEliteAbility",
+    "script": 0,
+    "line": 2617,
+    "module": "world/rules"
+  },
+  {
+    "original": "abilityTimingHash",
+    "script": 0,
+    "line": 2622,
+    "module": "world/rules"
+  },
+  {
+    "original": "getAbilityTiming",
+    "script": 0,
+    "line": 2628,
+    "module": "world/rules"
+  },
+  {
+    "original": "Participant",
+    "script": 0,
+    "line": 2712,
+    "module": "combat/participant"
+  },
+  {
+    "original": "brRecordDeathCause",
+    "script": 0,
+    "line": 3760,
+    "module": "combat/status"
+  },
+  {
+    "original": "game",
+    "script": 0,
+    "line": 3774,
+    "module": "world/rules"
+  },
+  {
+    "original": "teamMode",
+    "script": 0,
+    "line": 3776,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_RING_RULES",
+    "script": 0,
+    "line": 3787,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingContinuousRate",
+    "script": 0,
+    "line": 3789,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingCompressionRate",
+    "script": 0,
+    "line": 3790,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingKey",
+    "script": 0,
+    "line": 3791,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingCopy",
+    "script": 0,
+    "line": 3794,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingAdvance",
+    "script": 0,
+    "line": 3797,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingSample",
+    "script": 0,
+    "line": 3818,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingOutside",
+    "script": 0,
+    "line": 3828,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingDamage",
+    "script": 0,
+    "line": 3833,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingInitWorld",
+    "script": 0,
+    "line": 3837,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingHostTime",
+    "script": 0,
+    "line": 3849,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingPause",
+    "script": 0,
+    "line": 3852,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingScheduleCompression",
+    "script": 0,
+    "line": 3858,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingHostUpdate",
+    "script": 0,
+    "line": 3872,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brRingApplyDamage",
+    "script": 0,
+    "line": 3894,
+    "module": "modes/ring"
+  },
+  {
+    "original": "brCombatTrace",
+    "script": 0,
+    "line": 3944,
+    "module": "modes/ring"
+  },
+  {
+    "original": "BR_CAPTURE_RULES",
+    "script": 0,
+    "line": 3954,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brModeHpMultiplier",
+    "script": 0,
+    "line": 3956,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brCaptureMode",
+    "script": 0,
+    "line": 3958,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brCapturePointMultiplier",
+    "script": 0,
+    "line": 3959,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brCapturePointRate",
+    "script": 0,
+    "line": 3960,
+    "module": "modes/capture"
+  },
+  {
+    "original": "BRCapture",
+    "script": 0,
+    "line": 3961,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brArenaRect",
+    "script": 0,
+    "line": 4054,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brArenaContains",
+    "script": 0,
+    "line": 4055,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brArenaClamp",
+    "script": 0,
+    "line": 4056,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brArenaRay",
+    "script": 0,
+    "line": 4057,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brCaptureFarmClear",
+    "script": 0,
+    "line": 4058,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brCaptureRandomPoint",
+    "script": 0,
+    "line": 4059,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brCaptureSpawn",
+    "script": 0,
+    "line": 4060,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brCaptureSetupMap",
+    "script": 0,
+    "line": 4072,
+    "module": "modes/capture"
+  },
+  {
+    "original": "brCaptureBoundaryHit",
+    "script": 0,
+    "line": 4076,
+    "module": "modes/capture"
+  },
+  {
+    "original": "GameWorld",
+    "script": 0,
+    "line": 4134,
+    "module": "world/world"
+  },
+  {
+    "original": "updateHUD",
+    "script": 0,
+    "line": 5874,
+    "module": "world/rules"
+  },
+  {
+    "original": "compareSurvivalOrder",
+    "script": 0,
+    "line": 5933,
+    "module": "world/rules"
+  },
+  {
+    "original": "brSkillReachFraction",
+    "script": 0,
+    "line": 5950,
+    "module": "world/rules"
+  },
+  {
+    "original": "brSkillUsesAimDistance",
+    "script": 0,
+    "line": 5951,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_CLOSE_BALANCE",
+    "script": 0,
+    "line": 5958,
+    "module": "world/rules"
+  },
+  {
+    "original": "brCloseBalance",
+    "script": 0,
+    "line": 5959,
+    "module": "world/rules"
+  },
+  {
+    "original": "brCloseBaseHp",
+    "script": 0,
+    "line": 5960,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_BASE_HP_OVERRIDES_BY_ID",
+    "script": 0,
+    "line": 5961,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_TRAIN_DISTANCE",
+    "script": 0,
+    "line": 5966,
+    "module": "world/rules"
+  },
+  {
+    "original": "brTrainDistance",
+    "script": 0,
+    "line": 5967,
+    "module": "world/rules"
+  },
+  {
+    "original": "brClipTrainTravel",
+    "script": 0,
+    "line": 5972,
+    "module": "world/rules"
+  },
+  {
+    "original": "BR_MELEE_SKILL_TUNING",
+    "script": 0,
+    "line": 5980,
+    "module": "world/rules"
+  },
+  {
+    "original": "BRRework",
+    "script": 0,
+    "line": 5990,
+    "module": "abilities/rework-core"
+  },
+  {
+    "original": "registerSRework",
+    "script": 0,
+    "line": 6197,
+    "module": "abilities/s-rank"
+  },
+  {
+    "original": "registerOtherReworkedCharacters",
+    "script": 0,
+    "line": 6400,
+    "module": "abilities/other-ranks"
+  },
+  {
+    "original": "registerV29",
+    "script": 0,
+    "line": 6623,
+    "module": "abilities/v29"
+  },
+  {
+    "original": "bridgeNativeCombat",
+    "script": 0,
+    "line": 6674,
+    "module": "abilities/native-bridge"
+  },
+  {
+    "original": "integrateReworkDefinitions",
+    "script": 0,
+    "line": 6748,
+    "module": "abilities/metadata"
+  },
+  {
+    "original": "BR_TIER_COLOR",
+    "script": 1,
+    "line": 26,
+    "module": "world/helpers"
+  },
+  {
+    "original": "BR_TIER_CHANCES",
+    "script": 1,
+    "line": 28,
+    "module": "world/helpers"
+  },
+  {
+    "original": "BR_DEFAULT_QUESTIONS",
+    "script": 1,
+    "line": 30,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brNow",
+    "script": 1,
+    "line": 277,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brClamp",
+    "script": 1,
+    "line": 278,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brShuffle",
+    "script": 1,
+    "line": 284,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brNormalizeQuizText",
+    "script": 1,
+    "line": 289,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brQuizHash",
+    "script": 1,
+    "line": 294,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brPrepareQuizQuestion",
+    "script": 1,
+    "line": 299,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brHashRandom",
+    "script": 1,
+    "line": 321,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brUid",
+    "script": 1,
+    "line": 326,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brValidateQuestionText",
+    "script": 1,
+    "line": 370,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brRollTier",
+    "script": 1,
+    "line": 458,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brTierValue",
+    "script": 1,
+    "line": 468,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brRangedPowerProfile",
+    "script": 1,
+    "line": 469,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brGetPlayableSkillInfo",
+    "script": 1,
+    "line": 478,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brSupportProfile",
+    "script": 1,
+    "line": 518,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brOrbitDisplay",
+    "script": 1,
+    "line": 521,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brBasicCombatProfile",
+    "script": 1,
+    "line": 594,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brRunNeutralMods,brRunCapabilityCache",
+    "script": 1,
+    "line": 631,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brRunClientMods",
+    "script": 1,
+    "line": 632,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brRunBasicCache",
+    "script": 1,
+    "line": 633,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brRunBasicProfile",
+    "script": 1,
+    "line": 634,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brRunCapabilities",
+    "script": 1,
+    "line": 647,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brProgressionCombat",
+    "script": 1,
+    "line": 674,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brBasicAttackFrames",
+    "script": 1,
+    "line": 675,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brBasicShotSize",
+    "script": 1,
+    "line": 683,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brBasicStepDistance",
+    "script": 1,
+    "line": 694,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brMoveBasicStep",
+    "script": 1,
+    "line": 701,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brAimSpec",
+    "script": 1,
+    "line": 708,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brBaseAimSpec",
+    "script": 1,
+    "line": 756,
+    "module": "combat/profiles"
+  },
+  {
+    "original": "brAbilityIndex",
+    "script": 1,
+    "line": 828,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brTKBalancedTeams",
+    "script": 1,
+    "line": 848,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "BR_RUN_XP",
+    "script": 1,
+    "line": 1495,
+    "module": "progression/growth"
+  },
+  {
+    "original": "BR_WANGGUI",
+    "script": 1,
+    "line": 1496,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brWangguiValues",
+    "script": 1,
+    "line": 1497,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brWangguiAllowed",
+    "script": 1,
+    "line": 1498,
+    "module": "progression/growth"
+  },
+  {
+    "original": "BR_RUN_PATHS",
+    "script": 1,
+    "line": 1499,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunTierText",
+    "script": 1,
+    "line": 1519,
+    "module": "progression/growth"
+  },
+  {
+    "original": "statement-1-143",
+    "script": 1,
+    "line": 1521,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunDefaultMods",
+    "script": 1,
+    "line": 1522,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunMatchKey",
+    "script": 1,
+    "line": 1523,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brInitRun",
+    "script": 1,
+    "line": 1524,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunModsForPaths",
+    "script": 1,
+    "line": 1530,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunEligible",
+    "script": 1,
+    "line": 1543,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunEffectiveValues",
+    "script": 1,
+    "line": 1560,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunEffectiveNext",
+    "script": 1,
+    "line": 1564,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunCard",
+    "script": 1,
+    "line": 1565,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunOffer",
+    "script": 1,
+    "line": 1584,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRecomputeRun",
+    "script": 1,
+    "line": 1597,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brChooseRun",
+    "script": 1,
+    "line": 1604,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brAwardRunXP",
+    "script": 1,
+    "line": 1609,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunSnapshot",
+    "script": 1,
+    "line": 1615,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunMeasured",
+    "script": 1,
+    "line": 1620,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brRunNoticeText",
+    "script": 1,
+    "line": 1639,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brUpdateRunWorld",
+    "script": 1,
+    "line": 1660,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brProgression",
+    "script": 1,
+    "line": 1666,
+    "module": "progression/growth"
+  },
+  {
+    "original": "brFindDirectionalTarget",
+    "script": 1,
+    "line": 2191,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brAimEndpoint",
+    "script": 1,
+    "line": 2218,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brMakeAimTarget",
+    "script": 1,
+    "line": 2232,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brPlayableEnemiesInCone",
+    "script": 1,
+    "line": 2243,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brApplyPlayableHit",
+    "script": 1,
+    "line": 2253,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brStartPlayerDash",
+    "script": 1,
+    "line": 2266,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brCastPlayableSkill",
+    "script": 1,
+    "line": 2308,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brCastPlayerSkill",
+    "script": 1,
+    "line": 2398,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brCastPlayerSkillBase",
+    "script": 1,
+    "line": 2402,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brClosePolish",
+    "script": 1,
+    "line": 2438,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brBaseWalkingSpeed",
+    "script": 1,
+    "line": 2439,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brHumanMoveSpeed",
+    "script": 1,
+    "line": 2443,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brApplyPlayerInput",
+    "script": 1,
+    "line": 2446,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brMeleeTargetIntersectsCone",
+    "script": 1,
+    "line": 2507,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brBasicAttack",
+    "script": 1,
+    "line": 2510,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brRespawnPlayer",
+    "script": 1,
+    "line": 2717,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTeamKillRules",
+    "script": 1,
+    "line": 2751,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTeamKillInit",
+    "script": 1,
+    "line": 2752,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTeamKillResetBody",
+    "script": 1,
+    "line": 2758,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTeamKillDeath",
+    "script": 1,
+    "line": 2772,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTeamKillNextQuestion",
+    "script": 1,
+    "line": 2783,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTeamKillSelf",
+    "script": 1,
+    "line": 2795,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTeamKillProcessInput",
+    "script": 1,
+    "line": 2801,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTeamKillSpawnPoint",
+    "script": 1,
+    "line": 2829,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brWirePlayer",
+    "script": 1,
+    "line": 3240,
+    "module": "events/wire"
+  },
+  {
+    "original": "brTKTeamMeta",
+    "script": 1,
+    "line": 5660,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTKId",
+    "script": 1,
+    "line": 5665,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTKStable",
+    "script": 1,
+    "line": 5666,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTKState",
+    "script": 1,
+    "line": 5667,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTKTeams",
+    "script": 1,
+    "line": 5676,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTKAdvanceTime",
+    "script": 1,
+    "line": 5682,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTKRecordKill",
+    "script": 1,
+    "line": 5690,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTKPersonalRows",
+    "script": 1,
+    "line": 5716,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTKBuildBoard",
+    "script": 1,
+    "line": 5730,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "BR_AIM_HELP",
+    "script": 1,
+    "line": 6073,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brAimHelpProfile",
+    "script": 1,
+    "line": 6078,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brAimHelpAngle",
+    "script": 1,
+    "line": 6091,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brAimHelpContext",
+    "script": 1,
+    "line": 6092,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brAimHelpCandidates",
+    "script": 1,
+    "line": 6102,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brAimHelpTarget",
+    "script": 1,
+    "line": 6115,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brAimHelpContact",
+    "script": 1,
+    "line": 6133,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brAimHelpClear",
+    "script": 1,
+    "line": 6142,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brValidateAimHelp",
+    "script": 1,
+    "line": 6172,
+    "module": "combat/player-input"
+  },
+  {
+    "original": "brCapturePacket",
+    "script": 1,
+    "line": 6430,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brCaptureTeams",
+    "script": 1,
+    "line": 6496,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brCaptureRows",
+    "script": 1,
+    "line": 6497,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brCaptureBoard",
+    "script": 1,
+    "line": 6500,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brCaptureRecordKill",
+    "script": 1,
+    "line": 6502,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brCaptureResults",
+    "script": 1,
+    "line": 6527,
+    "module": "modes/respawn"
+  }
+]
