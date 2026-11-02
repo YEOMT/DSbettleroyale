@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import {skillDescription} from './descriptions.js';
 import {manifest} from '../../../../packages/content/src/manifest.js';
 const $=id=>document.getElementById(id),text=(id,value)=>{const e=$(id);if(e)e.textContent=String(value??'');},show=(id,visible=true)=>$(id)?.classList.toggle('br-hidden',!visible);
 function button(label,handler,cls='br-btn br-btn-primary'){const e=document.createElement('button');e.type='button';e.className=cls;e.textContent=label;e.onclick=handler;return e;}
@@ -74,7 +75,7 @@ export class AppUI{
   if(room.phase==='LOBBY')this.screen('br-student-wait');
   if(room.phase==='QUIZ'){this.screen('br-quiz');text('br-quiz-room','ROOM '+room.code);this.quiz(room.self.quiz);}
   if(room.phase==='DRAFT'){this.screen('br-draft');const d=room.self.draft,a=manifest.roster.find(a=>a.id===d?.abilityId);if(!a){this.toast('배정 복구를 기다리는 중입니다.');return;}
-   text('br-draft-room','ROOM '+room.code);text('br-draft-emoji',a.emoji);text('br-draft-tier',a.tier);$('br-draft-tier').className='br-tier br-tier-'+a.tier;text('br-draft-name',a.name);text('br-draft-desc',a.ability.desc);text('br-draft-skill',`${a.ability.basicSummary} · ${a.skill.description||a.skill.desc||a.ability.skillSummary}`);text('br-reroll-count',d.rerolls);text('br-draw-odds','S 10% · A 20% · B 25% · C 30% · F 15%');$('br-reroll-btn').disabled=d.ready||d.rerolls===0;$('br-ready-btn').disabled=d.ready;show('br-draft-wait',d.ready);
+   text('br-draft-room','ROOM '+room.code);text('br-draft-emoji',a.emoji);text('br-draft-tier',a.tier);$('br-draft-tier').className='br-tier br-tier-'+a.tier;text('br-draft-name',a.name);text('br-draft-desc',a.ability.desc);text('br-draft-skill',`${a.ability.basicSummary} · ${skillDescription(a)}`);text('br-reroll-count',d.rerolls);text('br-draw-odds','S 10% · A 20% · B 25% · C 30% · F 15%');$('br-reroll-btn').disabled=d.ready||d.rerolls===0;$('br-ready-btn').disabled=d.ready;show('br-draft-wait',d.ready);
   }
  }
  quiz(q){if(!q?.question)return;this.quizUnlock=performance.now()+q.lockRemainingMs;text('br-quiz-score',q.score);text('br-quiz-rerolls',Math.floor(q.score/this.room.config.rerollEvery));text('br-quiz-progress','문제 '+q.attempt);text('br-quiz-word',q.question.prompt);
