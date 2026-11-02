@@ -4,12 +4,12 @@ export {contentHash};
 export const FIXED_DT_MS=1000/60;
 export const ENGINE_REVISION='v33-authority-1';
 
-export function createRuleContext({mode='solo',teamCount=2,matchSeconds=360,seed='1',matchId='local:1',eventSink=()=>{},quizBank=manifest.questions}={}){
+export function createRuleContext({mode='solo',teamCount=2,matchSeconds=360,mapIndex=-1,seed='1',matchId='local:1',eventSink=()=>{},quizBank=manifest.questions}={}){
  const room={matchId,timeMs:0,idSequence:0,events:[],disposed:false,now(){return this.timeMs;},random:null,
   trace(type,data){eventSink({type:'TRACE',name:type,serverTick:this.game?.frame||0,data});},
   finish(winner,options){this.finished=true;this.finishOptions=options;},
   session:{active:true,role:'host',backend:'authority',inputs:{},players:{},roomCode:matchId,
-   roomMeta:{mode:mode==='team'?'team-elim':mode,teamCount,matchSeconds,seed,matchRound:1,battleStartedAt:0,quizBank},
+   roomMeta:{mode:mode==='team'?'team-elim':mode,teamCount,matchSeconds,mapIndex,seed,matchRound:1,battleStartedAt:0,quizBank},
    isRespawnMode(){return ['team-capture','team-respawn'].includes(this.roomMeta.mode);},
    playerConnected:p=>p?.connected!==false}};
  installRules(room);
@@ -91,7 +91,8 @@ export function stepWorld(world,dt=FIXED_DT_MS){
   if(input){
    Object.assign(prior,{dx:input.move.x,dy:input.move.y,ax:input.aim.x,ay:input.aim.y,ap:input.aimPower??1,seq:input.seq,clientTick:input.clientTick,
     matchKey:world.matchId,life:p.lifeSeq,sessionId:p.sessionId,_receivedAt:world.timeMs});
-   p.lastAppliedSeq=input.seq;p.lastAppliedClientTick=input.clientTick;p.inputAppliedAt=world.game.frame+1;p.heldTicks=0;
+   p.lastAppliedSeq=input.seq;p.lastAppliedClientTick=input.clientTick;p.inputAppliedAt=world.game.frame+1;p.heldTicks=0;world.onInputApplied?.(input);
+   if(input.steer){prior.steerSeq=input.seq;prior.steer={kind:'steer',seq:input.seq,life:p.lifeSeq,castId:input.steer.castId,ax:input.aim.x,ay:input.aim.y};}
    world.inputPending.delete(p.remoteId);
   }else p.heldTicks=(p.heldTicks||0)+1;
   if(world.timeMs-(world.lastInputAt.get(p.remoteId)??-Infinity)>=250){prior.dx=0;prior.dy=0;prior._receivedAt=-Infinity;p.inputNeutral=true;}else p.inputNeutral=false;
@@ -117,7 +118,9 @@ function actor(world,p){return {id:p.remoteId,name:p.name,abilityId:p.ability.id
  x:p.pos.x,y:p.pos.y,vx:p.vel.x,vy:p.vel.y,radius:p.radius,hp:Math.max(0,p.hp),maxHp:p.maxHp,alive:p.alive,level:p.run?.level||1,
  lifeSeq:p.lifeSeq,warpSeq:p.warpSeq||0,kills:p.kills||0,deaths:p.deaths||0,stunned:p.stunned||0,
  cooldown:p.cooldown,basicCooldown:p.basicCooldown||0,skillCooldownMax:p.skillCooldownMax||p.maxCooldown,basicCooldownMax:p.basicCooldownMax,
- moveSpeed:world.brHumanMoveSpeed(p),rw:world.BRRework.wirePlayer(p,world.game),row:world.brWirePlayer(p)};}
+  moveSpeed:world.brHumanMoveSpeed(p),phaseWalls:p.ability.sub==='GHOST_MOVE'||p.ability.sub==='FLY_DASH'&&p.dashFrames>0,
+  dash:p.playerDash?{dx:p.playerDash.dir.x,dy:p.playerDash.dir.y,speed:p.playerDash.speed,remaining:p.playerDash.remaining}:null,
+  rw:world.BRRework.wirePlayer(p,world.game)};}
 export function getPrivateSelfState(world,id){
  const p=world.byId.get(id);if(!p)return null;
  return {...actor(world,p),run:world.brRunSnapshot(p),respawn:world.session.respawnMode?world.brTeamKillSelf(p):null,
@@ -128,16 +131,19 @@ export function getPrivateSelfState(world,id){
 export function getStaticState(world){const g=world.game;return {revision:1,worldRadius:g.worldRadius,mapRadius:g.mapRadius,mapName:g.mapName,
  boundary:g.boundary||null,walls:g.walls.map(w=>({x:w.pos?.x??w.x,y:w.pos?.y??w.y,w:w.w??w.width,h:w.h??w.height,angle:w.angle||0,kind:w.kind||'wall'})),
  smokes:g.smokes.map(s=>({x:s.pos.x,y:s.pos.y,radius:s.radius})),captureMap:g.capture?.map||null};}
-function state(world,players,shots){const g=world.game;return {serverTick:g.frame,simTime:world.timeMs,actors:players.map(p=>actor(world,p)),shots,
+function state(world,players,shots){const g=world.game;return {serverTick:g.frame,simTime:world.timeMs,actors:players.map(p=>actor(world,p)),shots,aliveCount:g.participants.filter(p=>p.alive).length,
+  movingWalls:g.walls.map((w,i)=>w.spinSpeed?[i,w.angle]:null).filter(Boolean),
  ring:g.ringGeometry,capture:g.capture?world.brCapturePacket(g):null,farm:world.brFarm.snapshot(g),
  zones:g.zones.map(z=>({x:z.pos.x,y:z.pos.y,radius:z.radius,type:z.type,color:z.color,duration:z.duration})),finished:!!world.finished};}
 export function getTeacherState(world){return state(world,world.game.participants,projectileStates(world));}
-export function getVisibleState(world,id,interest={width:1280,height:720}){
+export function getVisibleState(world,id,interest={width:1280,height:720},prepared=getTeacherState(world)){
  const p=world.byId.get(id);if(!p)return null;
  const bounds=world.brViewerBounds(p,{vw:interest.width,vh:interest.height});
  const visible=world.game.participants.filter(q=>q===p||(!world.game.isConcealedFrom(q,p)&&world.brViewContains(bounds,q.pos.x,q.pos.y,q.radius)));
- const shots=projectileStates(world).filter(s=>world.brViewContains(bounds,s.x,s.y,Math.max(s.radius||20,s.range||0))||world.brViewSegment(bounds,s.x,s.y,s.x+(s.dx||0)*12,s.y+(s.dy||0)*12,s.radius||20));
- return {...state(world,visible,shots),self:getPrivateSelfState(world,id)};
+ const shots=prepared.shots.filter(s=>world.brViewContains(bounds,s.x,s.y,Math.max(s.radius||20,s.range||s.length||0))||world.brViewSegment(bounds,s.x,s.y,s.x+(s.dx||0)*(s.native?1:s.speed||0)*12,s.y+(s.dy||0)*(s.native?1:s.speed||0)*12,s.radius||20));
+ const ids=new Set(visible.map(p=>p.remoteId)),farm={...prepared.farm};
+ for(const key of ['b','x'])if(Array.isArray(farm[key]))farm[key]=farm[key].filter(row=>world.brViewContains(bounds,row[1],row[2],120));
+ return {...prepared,actors:prepared.actors.filter(p=>ids.has(p.id)),shots,farm,self:getPrivateSelfState(world,id)};
 }
 export function exportResult(world){
  return {...world.brBuildResults(),matchId:world.matchId};

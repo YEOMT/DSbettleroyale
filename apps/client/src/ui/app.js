@@ -5,7 +5,7 @@ function button(label,handler,cls='br-btn br-btn-primary'){const e=document.crea
 export class AppUI{
  constructor(net,timeline,renderer,controls,audio){Object.assign(this,{net,timeline,renderer,controls,audio});this.boundQuiz='';this.offerId='';this.respawnId='';this.room=null;
   this.banner=document.createElement('div');this.banner.className='ws-connection br-hidden';document.body.append(this.banner);this.bind();
-  for(const type of ['room_state','full_state','snapshot','private_state','error','status','ended','event','overload'])net.addEventListener(type,e=>this.receive(type,e.detail));
+  for(const type of ['room_state','full_state','snapshot','private_state','error','status','ended','event','overload','leaderboard'])net.addEventListener(type,e=>this.receive(type,e.detail));
   net.addEventListener('static_state',e=>timeline.setStatic(e.detail));net.addEventListener('reset',()=>{timeline.reset();controls.reset();this.offerId='';});
   setInterval(()=>this.clock(),100);
  }
@@ -37,12 +37,16 @@ export class AppUI{
   $('br-pref-sound').onclick=()=>{this.audio.effects=!this.audio.effects;text('br-pref-sound',this.audio.effects?'효과음 켬':'효과음 끔');};
   $('br-pref-motion').onclick=()=>{this.renderer.session.reducedMotion=!this.renderer.session.reducedMotion;text('br-pref-motion',this.renderer.session.reducedMotion?'흔들림 줄임':'흔들림 기본');};
   $('br-pref-aim').onclick=()=>this.toast('이동 방향 우선 · 드래그/마우스로 수동 조준');
-  $('br-focus-toggle').onclick=()=>this.toast('선생님은 전체맵을 관전합니다.');
+  $('br-focus-toggle').onclick=()=>{this.renderer.focus=!this.renderer.focus;text('br-focus-toggle',this.renderer.focus?'카메라: 전투 집중':'카메라: 전체');};
+  for(const id of ['br-tk-host-rank','br-tk-student-rank'])$(id).onclick=()=>show('br-tk-leaderboard');$('br-tk-close-rank').onclick=()=>show('br-tk-leaderboard',false);
+  $('br-rank-filters').replaceChildren(...['전체','S','A','B','C','F'].map(rank=>button(rank,()=>{this.rank=rank;this.encyclopedia();},'br-btn br-btn-ghost')));
+  $('br-role-filters').replaceChildren(...['전체',...new Set(manifest.roster.map(a=>a.ability.category))].filter(Boolean).map(role=>button(role,()=>{this.roleFilter=role;this.encyclopedia();},'br-btn br-btn-ghost')));
   if(new URLSearchParams(location.search).has('netdebug')){const panel=document.createElement('details');panel.className='ws-debug';const summary=document.createElement('summary');summary.textContent='네트워크 진단';const copy=button('진단 복사',()=>navigator.clipboard.writeText(JSON.stringify(this.diagnostics(),null,2)));this.debug=document.createElement('pre');panel.append(summary,copy,this.debug);document.body.append(panel);}
  }
- config(){return {mode:$('br-mode').value,teamCount:Number($('br-team-count').value),matchSeconds:Number($('br-match-seconds').value),quizSeconds:Number($('br-quiz-seconds').value),graphicsPreset:$('br-graphics-preset').value,quizText:$('br-question-bank').value};}
+ config(){return {mapIndex:$('br-map').value==='random'?-1:Number($('br-map').value),mode:$('br-mode').value,teamCount:Number($('br-team-count').value),matchSeconds:Number($('br-match-seconds').value),quizSeconds:Number($('br-quiz-seconds').value),graphicsPreset:$('br-graphics-preset').value,quizText:$('br-question-bank').value};}
  receive(type,p){
   if(type==='room_state')this.renderRoom(p);
+  if(type==='leaderboard'){for(const [key,rows]of [['br-tk-team-ranking',p.teams],['br-tk-personal-ranking',p.players]])$(key).replaceChildren(...(rows||[]).map(r=>{const e=document.createElement('div');e.className='ws-teacher-row';e.textContent=r.name?`${r.rank||''} ${r.name} · ${r.kills||0}K / ${r.deaths||0}D / ${r.assists||0}A · ${Number(r.points||0).toFixed(3)}%p`:`팀 ${r.team} · ${Number(r.score||0).toFixed(2)}%`;return e;}));}
   if(type==='full_state'){if(p.static)this.timeline.setStatic(p.static);this.renderRoom(p.room);if(p.self)this.self(p.self);}
   if(type==='snapshot'){this.timeline.accept(p);if(p.self)this.self(p.self);this.lastView=p;this.battleHud(p);}
   if(type==='private_state'&&p)this.self(p);
@@ -50,12 +54,13 @@ export class AppUI{
   if(type==='error')this.toast(p.code);
   if(type==='ended'){this.banner.textContent=p||'연결이 종료되었습니다. 다시 참가하세요.';this.banner.classList.remove('br-hidden');this.controls.enabled=false;}
   if(type==='status'){this.banner.textContent=p.connected?'':'연결 복구 중 · 서버에서 경기는 계속됩니다';this.banner.classList.toggle('br-hidden',p.connected);}
-  if(type==='overload'){this.banner.textContent='서버 처리 지연으로 경기가 안전 일시정지되었습니다.';this.banner.classList.remove('br-hidden');}
+  if(type==='overload'){this.banner.replaceChildren();this.banner.classList.toggle('br-hidden',!p.paused);if(p.paused){this.banner.append('서버 처리 지연으로 안전 일시정지되었습니다. ');if(this.room?.self.role==='host')this.banner.append(button('계속',()=>this.run(()=>this.net.command('CONTINUE'))));}}
  }
  screen(id){document.querySelectorAll('.br-screen').forEach(e=>e.classList.add('br-hidden'));show('br-student-battle',id==='br-student-battle');show('br-host-live',id==='br-student-battle'&&this.room?.self.role==='host');show(id);show('br-app',id!=='br-student-battle');}
  renderRoom(room){
   const changed=!this.room||this.room.phase!==room.phase||this.room.matchId!==room.matchId;this.room=room;this.roomAt=performance.now();this.renderer.session.roomMeta=room.config;
   const host=room.self.role==='host';this.renderer.teacher=host;this.renderer.enabled=room.phase==='BATTLE';this.controls.enabled=!host&&room.phase==='BATTLE';show('br-music-controls');
+  show('br-tk-host-bar',host&&room.phase==='BATTLE');show('br-tk-student-bar',!host&&room.phase==='BATTLE'&&room.config.mode==='team-capture');if(room.phase!=='BATTLE')show('br-tk-leaderboard',false);
   if(changed){this.audio.phase(room.phase);if(room.phase!=='BATTLE'){this.timeline.reset();this.controls.reset();}}
   if(room.phase==='RESULTS'){this.screen('br-results');this.results(room.result);return;}
   if(room.phase==='BATTLE'){this.screen('br-student-battle');$('br-live-room').querySelector('[data-room-digits]').textContent=room.code;for(const id of ['br-attack','br-skill','br-joystick'])show(id,!host);return;}
@@ -82,15 +87,18 @@ export class AppUI{
   const q=s.respawn;show('br-tk-quiz',!s.alive&&!!q);show('br-respawn',!s.alive&&!q);if(!s.alive&&q){text('br-tk-progress',q.correct+' / 3 CORRECT');text('br-tk-quiz-tokens','🔄 ×'+q.tokens);text('br-tk-word',q.question?.prompt||'부활할 이모지를 선택하세요.');show('br-tk-choice',q.correct>=3);$('br-tk-reroll').disabled=q.tokens<=0;
    if(this.respawnId!==q.question?.id){this.respawnId=q.question?.id;$('br-tk-options').replaceChildren(...(q.question?.answers||[]).map(a=>button(a.text,()=>this.run(async()=>{const r=await this.net.command('RESPAWN',{kind:'answer',questionId:q.question.id,answerId:a.id});text('br-tk-feedback',r.message||'');}))));}}
  }
- battleHud(v){text('br-battle-time',Math.floor(v.simTime/60000)+':'+String(Math.floor(v.simTime/1000)%60).padStart(2,'0'));text('br-battle-alive',v.actors.filter(p=>p.alive).length+'명');text('br-battle-mode',this.room?.config.mode==='team-capture'?'팀 점령전':this.room?.config.mode==='team-elim'?'팀 생존전':'개인전');text('br-zone-text',v.capture?v.capture.ph==='FEVER'?'FEVER ×2':v.capture.ph==='OPENING'?'A · C 활성':'A · B · C 활성':v.ring?'안전구역 '+Math.round(v.ring.radius):'');
+ battleHud(v){text('br-battle-time',Math.floor(v.simTime/60000)+':'+String(Math.floor(v.simTime/1000)%60).padStart(2,'0'));text('br-battle-alive',v.aliveCount+'명');text('br-battle-mode',this.room?.config.mode==='team-capture'?'팀 점령전':this.room?.config.mode==='team-elim'?'팀 생존전':'개인전');text('br-zone-text',v.capture?v.capture.ph==='FEVER'?'FEVER ×2':v.capture.ph==='OPENING'?'A · C 활성':'A · B · C 활성':v.ring?'안전구역 '+Math.round(v.ring.radius):'');
   if(v.capture){this.captureHud??=Object.assign(document.createElement('div'),{className:'ws-capture'});if(!this.captureHud.isConnected)$('br-student-battle').append(this.captureHud);this.captureHud.replaceChildren(...v.capture.s.map((score,i)=>{const e=document.createElement('span');e.textContent=`${['BLUE','RED','GREEN','YELLOW'][i]} ${score.toFixed(1)}%`;e.style.color=['#60a5fa','#f87171','#4ade80','#facc15'][i];return e;}));}else this.captureHud?.remove();
  }
  results(result){if(!result)return;const rows=result.players||[],winner=rows[0],card=manifest.roster.find(a=>a.id===winner?.abilityId);text('br-result-winner',result.mode==='team-capture'?(result.tiedTeams?.length>1?'공동 1위 · 무승부':'팀 '+result.teamWinner+' 승리'):`🏆 ${card?.emoji||winner?.emoji||''} ${winner?.name||'경기 종료'}`);
   $('br-ranking').replaceChildren(...rows.map((p,i)=>{const row=document.createElement('div');row.className='ws-result-row';for(const value of [p.rank||i+1,p.name,`${p.kills||0} K / ${p.deaths||0} D`,result.mode==='team-capture'?Number(p.points||0).toFixed(3)+'%p':Math.round(p.damage||0)+' DMG']){const e=document.createElement('span');e.textContent=value;row.append(e);}return row;}));
   $('br-awards').replaceChildren(...(result.awards||[]).map(a=>{const e=document.createElement('div');e.className='br-award';e.textContent='🏅 '+a.label+' · '+(a.ids||[a.id]).map(id=>rows.find(p=>p.id===id)?.name||'').join(' · ');return e;}));show('br-host-result-actions',this.room.self.role==='host');
  }
- encyclopedia(){show('br-encyclopedia');text('br-encyclopedia-count','활성 캐릭터 77종');$('br-encyclopedia-grid').className='br-character-grid';$('br-encyclopedia-grid').replaceChildren(...manifest.roster.map(a=>{const e=document.createElement('article');e.className='ws-ency-card';const emoji=document.createElement('div');emoji.className='emoji';emoji.textContent=a.emoji;const title=document.createElement('b');title.textContent=a.tier+' · '+a.name;const info=document.createElement('p');info.textContent=`HP ${Math.round(a.maxHp)} · ${a.basic.close?'근접':'원거리'} · ${a.ability.basicSummary} · ${a.ability.skillSummary}`;e.append(emoji,title,info);return e;}));}
+ encyclopedia(){show('br-encyclopedia');text('br-encyclopedia-count','활성 캐릭터 77종');$('br-encyclopedia-grid').className='br-character-grid';$('br-encyclopedia-grid').replaceChildren(...manifest.roster.filter(a=>(!this.rank||this.rank==='전체'||a.tier===this.rank)&&(!this.roleFilter||this.roleFilter==='전체'||a.ability.category===this.roleFilter)).map(a=>{const e=document.createElement('article');e.className='ws-ency-card';const emoji=document.createElement('div');emoji.className='emoji';emoji.textContent=a.emoji;const title=document.createElement('b');title.textContent=a.tier+' · '+a.name;const info=document.createElement('p');info.textContent=`HP ${Math.round(a.maxHp)} · ${a.basic.close?'근접':'원거리'} · ${a.ability.basicSummary} · ${a.ability.skillSummary}`;e.append(emoji,title,info);return e;}));}
  clock(){if(this.room?.phase==='QUIZ'){const left=Math.max(0,Math.ceil((this.room.quizRemainingMs-(performance.now()-this.roomAt))/1000));text('br-host-clock',left+'초');text('br-quiz-timer',left);for(const b of $('br-quiz-choices').children)b.disabled=performance.now()<this.quizUnlock;}if(this.debug)this.debug.textContent=JSON.stringify(this.diagnostics(),null,2);}
  diagnostics(){const stats=a=>{const n=a.slice().sort((a,b)=>a-b);return {count:n.length,avg:n.reduce((a,b)=>a+b,0)/(n.length||1),p95:n[Math.floor(n.length*.95)]||0,max:n.at(-1)||0};};return {판정:'로컬 계측 · 실제 교실 미검증',renderer:this.renderer.pixi?'Pixi 8.20.1':'Canvas',frameMs:stats(this.renderer.frameTimes),appRttMs:this.net.clock.rtt,clockUncertaintyMs:this.net.clock.uncertainty,acceptedTickGapMs:stats(this.timeline.metrics.sourceGaps),arrivalGapMs:stats(this.timeline.metrics.arrivalGaps),selfCorrectionWorldUnits:stats(this.timeline.metrics.corrections),holdFrames:this.timeline.metrics.holds,viewport:[innerWidth,innerHeight],DPR:devicePixelRatio,quality:this.room?.config.graphicsPreset};}
 }
+
+
+
 

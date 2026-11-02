@@ -6,7 +6,7 @@ const fail=code=>{throw Error(code);};
 export class Room{
  constructor(manager,code,hostName){
   this.manager=manager;this.code=code;this.id=randomUUID();this.round=1;this.matchId=randomUUID();this.phase='LOBBY';this.revision=1;
-  this.config={mode:'solo',teamCount:2,matchSeconds:360,quizSeconds:60,rerollEvery:3,graphicsPreset:'balanced'};
+  this.config={mode:'solo',teamCount:2,matchSeconds:360,quizSeconds:60,rerollEvery:3,mapIndex:-1,graphicsPreset:'balanced'};
   this.rules=createRuleContext({matchId:this.matchId});this.quizBank=manifest.questions;this.members=new Map();this.world=null;this.lastOccupied=manager.now();
   this.host=this.addMember(hostName||'선생님','host');
  }
@@ -24,6 +24,7 @@ export class Room{
   if(p.mode!==undefined){const mode=p.mode==='team'?'team-elim':p.mode;if(!['solo','team-elim','team-capture','team-respawn'].includes(mode))fail('INVALID_MODE');next.mode=mode;}
   for(const [key,min,max]of [['teamCount',2,4],['quizSeconds',10,600],['rerollEvery',1,100]])if(p[key]!==undefined){if(!Number.isInteger(p[key])||p[key]<min||p[key]>max)fail('INVALID_CONFIG');next[key]=p[key];}
   if(p.matchSeconds!==undefined){if(![300,360].includes(p.matchSeconds))fail('INVALID_CONFIG');next.matchSeconds=p.matchSeconds;}
+  if(p.mapIndex!==undefined){if(!Number.isInteger(p.mapIndex)||p.mapIndex< -1||p.mapIndex>4)fail('INVALID_CONFIG');next.mapIndex=p.mapIndex;}
   if(p.graphicsPreset!==undefined){if(!['low','balanced','high'].includes(p.graphicsPreset))fail('INVALID_CONFIG');next.graphicsPreset=p.graphicsPreset;}
   let bank=this.quizBank;
   if(p.quizText!==undefined){if(typeof p.quizText!=='string'||p.quizText.length>200000)fail('QUIZ_TOO_LARGE');const parsed=this.rules.brValidateQuestionText(p.quizText);if(parsed.errors.length||!parsed.questions.length)fail('INVALID_QUIZ:'+JSON.stringify(parsed.errors.slice(0,3)));if(parsed.questions.some(q=>q.some(s=>s.length>1000)))fail('QUIZ_TEXT_TOO_LONG');bank=parsed.questions;}
@@ -41,7 +42,7 @@ export class Room{
   this.phase='DRAFT';this.revision++;
  }
  command(member,type,p,requestId){
-  const host=['CONFIGURE','KICK','START_QUIZ','BEGIN_DRAFT','START_BATTLE','END','REMATCH'];
+  const host=['CONFIGURE','KICK','START_QUIZ','BEGIN_DRAFT','START_BATTLE','END','REMATCH','CONTINUE'];
   if(host.includes(type)&&member.role!=='host')fail('HOST_REQUIRED');
   switch(type){
    case 'CONFIGURE':this.configure(p);break;
@@ -65,6 +66,7 @@ export class Room{
    case 'DRAFT_CONFIRM':if(this.phase!=='DRAFT'||!member.draft||p.draftRevision!==member.draft.revision)fail('DRAFT_REVISION');member.draft.ready=true;member.draft.revision++;break;
    case 'START_BATTLE':if(this.phase!=='DRAFT')fail('PHASE_MISMATCH');if(this.manager.activeBattles()>=this.manager.config.maxActiveBattles)fail('BATTLE_CAPACITY');this.manager.startBattle(this);this.phase='BATTLE';this.revision++;break;
    case 'END':if(this.phase!=='BATTLE')fail('PHASE_MISMATCH');this.finish();break;
+   case 'CONTINUE':if(this.phase!=='BATTLE'||!this.safePaused||this.lastFault)fail('CANNOT_CONTINUE');this.safePaused=false;this.debt=0;this.overloadSince=0;for(const m of this.members.values())m.peer?.send('OVERLOAD',{paused:false});break;
    case 'REMATCH':{
     if(this.phase!=='RESULTS')fail('PHASE_MISMATCH');if(this.world)destroyWorld(this.world);this.world=null;this.result=null;this.matchId=randomUUID();this.round++;this.phase='LOBBY';this.revision++;
     for(const m of this.members.values()){m.quiz=null;m.draft=null;m.ledger.clear();m.events=[];m.eventBytes=0;}break;

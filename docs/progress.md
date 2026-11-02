@@ -25,3 +25,11 @@ Production hosting credentials/domain were not provided; production is not deplo
 - Modular client reuses original markup/CSS, emoji assets and battle painters; bundled Pixi 8.20.1 with Canvas fallback. Lobby, quiz TXT, QR, draft, reroll, growth offers, respawn quiz, three modes, results and rematch are wired.
 - Executed: 90 unit/parity tests, 7 real-WebSocket integration tests and 3 Edge browser flow tests passed. Browser tests use three isolated contexts on one PC, not three devices; results were ended with the authorized teacher button.
 - Inspected student capture screenshot. Remaining visual/continuity work and long load tests belong to M4. Public TLS, real mobile touch and classroom tests remain unverified.
+
+## M4
+
+- Added input replay boundaries, exact ordinary movement/wall prediction, life/warp reset, native/RW reliable terminals and short-shot trails, level texture styling, steering channels and explicit overload continuation.
+- Added original 300/360-second capture timeout tests for 2/3/4 teams, growth/HP ratio/exclusion and awards checks. Unit/parity: 100 passed; real WS integration: 10 passed; Edge three-mode browser regression: 3 passed.
+- Network lab: 26 connections, nine application-level RTT/jitter profiles and three stall durations passed. Raw diagnostics are in artifacts/network-lab.json. This is not OS packet loss or classroom Wi-Fi.
+- Load development exposed a mixed-process benchmark bottleneck and a test-harness rematch race. Both failed reports are retained locally. Dedicated server process load matrix 20/26/30 × 600s is running; results are not yet PASS and will be recorded in the acceptance report.
+- Remaining fidelity limitations (including legacy cosmetic RNG consumption, complete preview handoff and exhaustive all-build/forced-motion parity) remain explicit; no IMPLEMENTATION_COMPLETE claim yet.

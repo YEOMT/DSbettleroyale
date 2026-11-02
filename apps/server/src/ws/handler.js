@@ -20,9 +20,10 @@ export function attachConnection(socket,manager,config,metrics){
   manager.changed(room);
  }
  socket.on('message',(buffer,isBinary)=>{
+  let message;
   try{
    if(isBinary)fail('JSON_REQUIRED');if(!peer.rate()){peer.close(4008,'RATE_LIMIT');return;}
-   const message=decodeClient(buffer.toString('utf8')),p=message.payload;
+   message=decodeClient(buffer.toString('utf8'));const p=message.payload;
    if(message.type==='HELLO'){if(peer.hello)fail('ALREADY_HELLO');if(!matchesFingerprint(p)){peer.send('VERSION_MISMATCH',{expected:fingerprint});peer.close(4002,'VERSION_MISMATCH');return;}peer.hello=true;peer.send('WELCOME',fingerprint);return;}
    if(!peer.hello)fail('HELLO_REQUIRED');
    if(message.type==='PING'){peer.send('PONG',{clientTime:p.clientTime,serverNow:performance.now()});return;}
@@ -37,7 +38,7 @@ export function attachConnection(socket,manager,config,metrics){
     const actor=room.world?.byId.get(member.id);if(room.phase!=='BATTLE'||member.role!=='student'||!actor)fail('BATTLE_REQUIRED');if(message.lifeSeq!==actor.lifeSeq)fail('LIFE_MISMATCH');
    }
    if(message.type==='INPUT_BATCH'){
-    for(const c of p.commands)applyCommand(room.world,{...c,type:'INPUT',playerId:member.id,lifeSeq:message.lifeSeq});return;
+    for(const c of p.commands)applyCommand(room.world,{...c,type:'INPUT',playerId:member.id,lifeSeq:message.lifeSeq,receivedAt:performance.now()});return;
    }
    if(message.type==='RESYNC'){peer.send('FULL_STATE',{room:room.publicState(member),static:room.world?getStaticState(room.world):null,self:room.world?getPrivateSelfState(room.world,member.id):null,cursor:member.cursor,eventGap:true});return;}
    if(message.type==='LEAVE'){member.revoked=true;manager.tokens.delete(member.token);peer.close(1000,'LEFT');return;}
@@ -50,7 +51,7 @@ export function attachConnection(socket,manager,config,metrics){
    result={...result,requestId:message.requestId,command:message.type};member.ledger.set(key,{signature,result});while(member.ledger.size>512)member.ledger.delete(member.ledger.keys().next().value);
    peer.send('COMMAND_RESULT',result,{reliable:true});
    if(!['ACTION','AUGMENT_CHOOSE','RESPAWN'].includes(message.type))manager.changed(room);else peer.send('PRIVATE_STATE',getPrivateSelfState(room.world,member.id));
-  }catch(error){metrics.rejected++;peer.send('ERROR',{code:error.message});if(['ROOM_EXPIRED','SESSION_REVOKED'].includes(error.message))peer.close(4004,error.message);else if(++peer.errors>=8)peer.close(4007,'INVALID_MESSAGES');}
+  }catch(error){metrics.rejected++;if(message?.requestId)peer.send('COMMAND_RESULT',{requestId:message.requestId,accepted:false,reason:error.message});else peer.send('ERROR',{code:error.message});if(['ROOM_EXPIRED','SESSION_REVOKED'].includes(error.message))peer.close(4004,error.message);else if(!['LIFE_MISMATCH','SCOPE_MISMATCH','BATTLE_REQUIRED'].includes(error.message)&&++peer.errors>=8)peer.close(4007,'INVALID_MESSAGES');}
  });
  socket.on('close',()=>{clearTimeout(authTimer);metrics.closed++;const p=peer.member;if(p?.peer===peer){p.connected=false;p.disconnectedAt=Date.now();p.peer=null;if(peer.room.world?.session.players[p.id])peer.room.world.session.players[p.id].connected=false;manager.changed(peer.room);}peer.queue=[];peer.pendingSnapshot=null;});
  return peer;

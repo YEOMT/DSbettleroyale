@@ -3,15 +3,20 @@ export class Connection extends EventTarget{
  constructor(url){super();this.url=url;this.scope={};this.pending=new Map();this.lifeSeq=0;this.cursor=0;this.token=sessionStorage.getItem('dsbr-resume');this.retry=0;this.stopped=false;this.clock={rtt:0,offset:0,uncertainty:0};}
  emit(type,data){this.dispatchEvent(new CustomEvent(type,{detail:data}));}
  async connect(){
+  if(this.connecting)return this.connecting;
   this.stopped=false;this.ws=new WebSocket(this.url);const ws=this.ws;
-  await new Promise((resolve,reject)=>{ws.onopen=()=>{ws.send(JSON.stringify(envelope('HELLO',fingerprint)));resolve();};ws.onerror=()=>reject(Error('서버에 연결할 수 없습니다.'));});
-  ws.onmessage=e=>this.receive(JSON.parse(e.data));
+  let resolveConnect,rejectConnect;this.connecting=new Promise((resolve,reject)=>{resolveConnect=resolve;rejectConnect=reject;});
+  const timeout=setTimeout(()=>{rejectConnect(Error('서버 연결 시간이 초과되었습니다.'));ws.close();},8000);
+  ws.onopen=()=>ws.send(JSON.stringify(envelope('HELLO',fingerprint)));
+  ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='WELCOME'){clearTimeout(timeout);resolveConnect();this.connecting=null;}this.receive(m);};
+  ws.onerror=()=>rejectConnect(Error('서버에 연결할 수 없습니다.'));
   ws.onclose=e=>{clearInterval(this.pingTimer);if(this.ws!==ws)return;this.emit('status',{connected:false,reason:e.reason});
+   clearTimeout(timeout);rejectConnect(Error('연결이 종료되었습니다.'));this.connecting=null;
    if([4002,4003,4004,4009,1000].includes(e.code)||this.stopped){this.stopped=true;if([4003,4004,1000].includes(e.code)){this.token=null;sessionStorage.removeItem('dsbr-resume');}this.emit('ended',e.reason);return;}
    this.retryStart??=performance.now();if(performance.now()-this.retryStart>60000){this.stopped=true;this.emit('ended','재연결 시간이 초과되었습니다. 다시 참가해 주세요.');return;}
-   setTimeout(()=>{if(!this.stopped)this.connect().catch(()=>this.emit('status',{connected:false}));},Math.min(8000,400*2**this.retry++)*(.75+Math.random()*.5));
+   clearTimeout(this.retryTimer);this.retryTimer=setTimeout(()=>{if(!this.stopped)this.connect().catch(()=>this.emit('status',{connected:false}));},Math.min(8000,400*2**this.retry++)*(.75+Math.random()*.5));
   };
-  return new Promise(resolve=>this.addEventListener('welcome',()=>resolve(),{once:true}));
+  return this.connecting;
  }
  receive(m){
   if(m.type==='VERSION_MISMATCH'){this.stopped=true;this.emit('ended','게임 버전이 바뀌었습니다. 새로고침 후 참가하세요.');return;}
@@ -31,8 +36,8 @@ export class Connection extends EventTarget{
  }
  send(type,payload={},scoped=true,requestId){if(this.ws?.readyState!==WebSocket.OPEN)return false;this.ws.send(JSON.stringify(envelope(type,payload,{...(scoped?{...this.scope,lifeSeq:this.lifeSeq}:{}),...(requestId?{requestId}:{})})));return true;}
  command(type,payload={}){
-  const id=crypto.randomUUID();return new Promise((resolve,reject)=>{
-   const p={resolve,reject,retries:0};const attempt=()=>{if(p.retries++>=3){this.pending.delete(id);reject(Error('응답을 확인할 수 없습니다. 연결 복구 후 상태를 확인하세요.'));return;}this.send(type,payload,true,id);p.timer=setTimeout(attempt,1500);};this.pending.set(id,p);attempt();
+  const id=crypto.randomUUID(),scope={...this.scope,lifeSeq:this.lifeSeq};return new Promise((resolve,reject)=>{
+   const p={resolve,reject,retries:0};const attempt=()=>{if(p.retries++>=3||scope.matchId!==this.scope.matchId||scope.lifeSeq!==this.lifeSeq){this.pending.delete(id);reject(Error('응답을 확인할 수 없습니다. 현재 상태를 확인하세요.'));return;}if(this.ws?.readyState===1)this.ws.send(JSON.stringify(envelope(type,payload,{...scope,connectionEpoch:this.scope.connectionEpoch,requestId:id})));p.timer=setTimeout(attempt,1500);};this.pending.set(id,p);attempt();
   });
  }
  async authenticate(secret){this.send('AUTH',{secret},false);await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('교사 인증을 확인해 주세요.')),5000);this.addEventListener('auth',()=>{clearTimeout(timer);resolve();},{once:true});});}

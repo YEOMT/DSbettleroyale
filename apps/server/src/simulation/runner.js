@@ -3,7 +3,8 @@ export function attachSimulation(manager,metrics){
  let stopped=false,timer,last=performance.now();
  manager.startBattle=room=>{
   room.world=createWorld(undefined,{...room.config,matchId:room.matchId,quizBank:room.quizBank},room.matchId,room.students().map(p=>({id:p.id,name:p.name,abilityId:p.draft.abilityId,team:p.team,quizScore:p.quiz?.score||0,rerolls:p.draft.rerolls})),event=>sendEvent(room,event));
-  room.debt=0;room.lastSnapshot=performance.now();room.snapshotSeq=0;room.overloadSince=0;room.static=getStaticState(room.world);
+  room.world.onInputApplied=input=>{if(Number.isFinite(input.receivedAt))metrics.inputApply.add(performance.now()-input.receivedAt);};
+  room.debt=0;room.lastSnapshot=performance.now();room.nextSnapshot=room.lastSnapshot+50;room.snapshotSeq=0;room.overloadSince=0;room.static=getStaticState(room.world);
   for(const m of room.members.values())m.peer?.send('STATIC_STATE',room.static);
  };
  function sendEvent(room,event){
@@ -36,14 +37,16 @@ export function attachSimulation(manager,metrics){
     if(room.world.finished){room.finish();manager.changed(room);break;}
    }
    if(room.debt>=FIXED_DT_MS)more=true;
-   if(now-room.lastSnapshot>=50&&room.phase==='BATTLE'){
+   if(now>=room.nextSnapshot&&room.phase==='BATTLE'){
+    do{room.nextSnapshot+=50;}while(room.nextSnapshot<=now);
     metrics.snapshotGap.add(now-room.lastSnapshot);room.lastSnapshot=now;const start=performance.now(),teacher=getTeacherState(room.world);room.snapshotSeq++;
     for(const member of room.members.values()){
      if(!member.connected)continue;
-     const view=member.role==='host'?teacher:getVisibleState(room.world,member.id);
+     const view=member.role==='host'?teacher:getVisibleState(room.world,member.id,undefined,teacher);
      member.peer?.send('SNAPSHOT',{...view,snapshotSeq:room.snapshotSeq,serverNow:now},{snapshot:true});
     }
     metrics.snapshotCpu.add(performance.now()-start);
+    if(now-(room.lastBoard||0)>=500){room.lastBoard=now;const board=room.world.session.respawnMode?room.world.brTKBuildBoard(false):{players:teacher.actors.map(a=>({id:a.id,name:a.name,team:a.team,kills:a.kills,deaths:a.deaths,rank:0})),teams:[]};for(const m of room.members.values())m.peer?.send('LEADERBOARD',board);}
    }
   }
   timer=more?setImmediate(pump):setTimeout(pump,4);timer.unref();

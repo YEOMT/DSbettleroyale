@@ -18,10 +18,10 @@ export class Controls{
  fire(kind,force=false){
   const self=this.timeline.predicted;if(!this.enabled||!self?.alive||self.rw?.locks?.[kind])return;
   const cooldown=kind==='attack'?self.basicCooldown:self.cooldown,now=performance.now();if(!force&&(cooldown>0||now-(this.lastFire[kind]||0)<100))return;
-  this.lastFire[kind]=now;const seq=++this.actions[kind];this.net.command('ACTION',{kind,seq,aim:this.aim,aimPower:1,castId:kind==='skill'?self.rw?.recast?.id||'':''}).catch(()=>{});
+  this.lastFire[kind]=now;const seq=++this.actions[kind];this.timeline.preview(kind,seq,this.aim);this.net.command('ACTION',{kind,seq,aim:this.aim,aimPower:1,castId:kind==='skill'?self.rw?.recast?.id||'':''}).catch(()=>{});
  }
  neutral(){this.keys.clear();this.move={x:0,y:0};this.held={};this.batch=[];if(this.enabled)this.sendSample({x:0,y:0},true);}
- sendSample(move,flush=false){const c={seq:++this.seq,clientTick:++this.clientTick,move,aim:this.aim,aimPower:1};this.timeline.predict(c);this.batch.push(c);if(flush||this.batch.length>=2){this.net.send('INPUT_BATCH',{commands:this.batch.splice(0,4)});}}
+ sendSample(move,flush=false){const c={seq:++this.seq,clientTick:++this.clientTick,move,aim:this.aim,aimPower:1};const channel=this.timeline.predicted?.rw?.channel;if(channel)c.steer={castId:channel.id};this.timeline.predict(c);this.batch.push(c);if(flush||this.batch.length>=2){this.net.send('INPUT_BATCH',{commands:this.batch.splice(0,4)});}}
  tick(){if(!this.enabled||document.hidden||!this.net.session||this.net.ws?.readyState!==1)return;let x=this.move.x,y=this.move.y;
   if(this.keys.size){x=Number(this.keys.has('d')||this.keys.has('arrowright'))-Number(this.keys.has('a')||this.keys.has('arrowleft'));y=Number(this.keys.has('s')||this.keys.has('arrowdown'))-Number(this.keys.has('w')||this.keys.has('arrowup'));}
   const n=Math.max(1,Math.hypot(x,y));const move={x:x/n,y:y/n};if(!this.mouseAim&&!this.dragAim&&Math.hypot(x,y)>.05)this.aim={...move};this.sendSample(move);

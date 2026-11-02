@@ -3,8 +3,8 @@ import {randomUUID} from 'node:crypto';
 import {fingerprint,envelope} from '../../packages/protocol/src/index.js';
 export class TestClient{
  constructor(url){this.ws=new WebSocket(url,{origin:'http://localhost:5173'});this.messages=[];this.waiters=[];this.scope={};this.lifeSeq=0;
-  this.ws.on('message',raw=>{const m=JSON.parse(raw);if(m.roomInstanceId)this.scope={roomInstanceId:m.roomInstanceId,matchId:m.matchId,connectionEpoch:m.connectionEpoch};if(m.type==='SESSION')this.session=m.payload;if(m.type==='ROOM_STATE'){this.room=m.payload;this.messages=this.messages.filter(old=>old.type!=='ROOM_STATE');}if(m.type==='SNAPSHOT'){this.snapshot=m.payload;this.lifeSeq=m.payload.self?.lifeSeq??this.lifeSeq;}if(m.type==='FULL_STATE')this.room=m.payload.room;
-   const i=this.waiters.findIndex(w=>w.predicate(m));if(i>=0){const w=this.waiters.splice(i,1)[0];clearTimeout(w.timer);w.resolve(m);}else{this.messages.push(m);if(this.messages.length>2000)this.messages.shift();}});
+  this.ws.on('message',raw=>{this.receivedBytes=(this.receivedBytes||0)+raw.length;const m=JSON.parse(raw);if(m.roomInstanceId)this.scope={roomInstanceId:m.roomInstanceId,matchId:m.matchId,connectionEpoch:m.connectionEpoch};if(m.type==='SESSION')this.session=m.payload;if(m.type==='ROOM_STATE'){this.room=m.payload;this.messages=this.messages.filter(old=>old.type!=='ROOM_STATE');}if(m.type==='SNAPSHOT'){this.snapshot=m.payload;this.lifeSeq=m.payload.self?.lifeSeq??this.lifeSeq;}if(m.type==='FULL_STATE')this.room=m.payload.room;
+   const i=this.waiters.findIndex(w=>w.predicate(m));if(i>=0){const w=this.waiters.splice(i,1)[0];clearTimeout(w.timer);w.resolve(m);}else{this.messages.push(m);if(this.messages.length>2000)this.messages.shift();}this.onMessage?.(m);});
  }
  async open(){await new Promise((resolve,reject)=>{this.ws.once('open',resolve);this.ws.once('error',reject);});this.send('HELLO',fingerprint,false);await this.next('WELCOME');return this;}
  send(type,payload={},scoped=true,requestId){this.ws.send(JSON.stringify(envelope(type,payload,{...(scoped?this.scope:{}),...(scoped?{lifeSeq:this.lifeSeq}:{}),...(requestId?{requestId}:{})})));}
@@ -16,3 +16,4 @@ export class TestClient{
  async close(){if(this.ws.readyState>=2)return;await new Promise(resolve=>{this.ws.once('close',resolve);this.ws.close();});}
 }
 export async function connect(app){return new TestClient(`ws://127.0.0.1:${app.address.port}/ws`).open();}
+
