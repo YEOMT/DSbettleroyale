@@ -239,6 +239,40 @@ __brScope.brTKBuildBoard = function brTKBuildBoard(force) {
             return m.board;
         };
 
+__brScope.brTKAwards = function brTKAwards(rows) {
+            const pick=function(pool,compare){return pool.slice().sort(function(a,b){return compare(a,b)||__brScope.brTKStable(a,b);})[0]||null;};
+            const contribute=function(p){return p.kills*100+p.damage*.025-p.deaths*25+p.lateKills*15;};
+            const mvp=pick(rows,function(a,b){return contribute(b)-contribute(a)||b.kills-a.kills||b.damage-a.damage||a.deaths-b.deaths;});
+            const clutch=pick(rows.filter(function(p){return p.kills>0;}),function(a,b){return (b.bestStreak*100+b.lateKills*25+b.kills*5-b.deaths*3)-(a.bestStreak*100+a.lateKills*25+a.kills*5-a.deaths*3)||b.damage-a.damage;});
+            const damage=pick(rows,function(a,b){return b.damage-a.damage||b.kills-a.kills||a.deaths-b.deaths;});
+            const survival=pick(rows,function(a,b){return b.longestLife-a.longestLife||b.lifeAverage-a.lifeAverage||b.kills-a.kills||b.damage-a.damage;});
+            const kills=pick(rows,function(a,b){return b.kills-a.kills||a.deaths-b.deaths||b.damage-a.damage;});
+            const awards=[{icon:'🏆',label:'MVP',id:mvp?.id||'',detail:mvp?mvp.kills+' K · '+mvp.damage+' DMG':'기록 없음'},
+                {icon:'⚡',label:'CLUTCH PLAYER',id:clutch?.id||'',detail:clutch?'최고 '+clutch.bestStreak+' 연속 · 후반 '+clutch.lateKills+' K':'처치 기록 없음'},
+                {icon:'💥',label:'DAMAGE KING',id:damage?.id||'',detail:damage?damage.damage.toLocaleString()+' DMG':'기록 없음'},
+                {icon:'🛡️',label:'SURVIVAL KING',id:survival?.id||'',detail:survival?'최장 Life '+__brScope.brFormatTime(Math.floor(survival.longestLife)):'기록 없음'},
+                {icon:'⚔️',label:'KILL KING',id:kills?.id||'',detail:kills?kills.kills+' KILLS':'기록 없음'}];
+            const speedy=pick(rows.filter(function(p){return p.completedLives>0;}),function(a,b){return a.completedLifeAverage-b.completedLifeAverage||a.shortestLife-b.shortestLife||b.deaths-a.deaths;});
+            const xman=pick(rows.filter(function(p){return p.deaths>0;}),function(a,b){return (a.kills*100+a.damage*.025-a.deaths*65)-(b.kills*100+b.damage*.025-b.deaths*65)||b.deaths-a.deaths||a.damage-b.damage;});
+            const peace=pick(rows,function(a,b){return a.damage-b.damage||a.kills-b.kills||b.lifeTotal-a.lifeTotal;});
+            const fun=[{icon:'⏱️',label:'급사왕',id:speedy?.id||'',detail:speedy?'평균 Life '+__brScope.brFormatTime(Math.floor(speedy.completedLifeAverage))+' · 복귀는 누구보다 빠르게!':'이번 경기는 급사왕 없이!'},
+                {icon:'🕶️',label:'X맨',id:xman?.id||'',detail:xman?'오늘의 작전은 다음 판에 공개!':'이번 경기는 X맨 없이!'},
+                {icon:'☮',label:'평화왕',id:peace?.id||'',detail:'오늘은 전투보다 산책을 선택했습니다.'}];
+            return {major:awards,fun:fun};
+        };
+
+__brScope.brTKBuildResults = function brTKBuildResults() {
+            const m=__brScope.brTKState(__brScope.game),rows=__brScope.brTKPersonalRows(__brScope.game),teams=__brScope.brTKTeams(m);
+            // A forced stop can remain tied. Only an actual unique lead or sudden-death kill wins.
+            const winner=m.winner||((teams.length===1||teams[0]?.score>teams[1]?.score)?Number(teams[0]?.team||0):0);
+            if(winner){teams.sort(function(a,b){return a.team===winner?-1:b.team===winner?1:b.score-a.score||a.team-b.team;});teams.forEach(function(t,i){t.rank=i>1&&t.score===teams[i-1].score?teams[i-1].rank:i+1;});}
+            const awards=__brScope.brTKAwards(rows),champion=rows.find(function(r){return r.team===winner;})||rows[0];
+            return {rosterVersion:__brScope.BR_ROSTER_VERSION,mode:'team-respawn',teamWinner:winner,winnerId:champion?.id||'',players:rows,teams:teams,
+                awards:awards.major,funAwards:awards.fun,suddenDeath:!!m.suddenDeath,winningEvent:m.winningEvent,
+                tiedTeams:winner?[]:teams.filter(function(t){return t.score===teams[0]?.score;}).map(function(t){return t.team;}),
+                duration:Math.round(__brScope.game.frame/60),createdAt:__brScope.brNow()};
+        };
+
 __brScope.brCaptureTeams = function brCaptureTeams(c){const teams=c.s.map((score,i)=>({team:i+1,score})).sort((a,b)=>b.score-a.score||a.team-b.team);teams.forEach((t,i)=>t.rank=i&&Math.abs(t.score-teams[i-1].score)<=1e-8?teams[i-1].rank:i+1);return teams;};
 
 __brScope.brCaptureRows = function brCaptureRows(){const c=__brScope.game.capture,rows=__brScope.brTKPersonalRows(__brScope.game).map(p=>{const body=__brScope.game.participants.find(q=>__brScope.brTKId(q)===p.id),r=__brScope.BRCapture.record(c,body);return {...p,...r,damage:Math.round(r.damageDealt),taken:Math.round(r.damageTaken),usedAbilities:r.usedAbilities.slice()};});

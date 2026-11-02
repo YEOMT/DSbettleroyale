@@ -978,6 +978,12 @@
     "module": "modes/capture"
   },
   {
+    "original": "brRespawnMode",
+    "script": 0,
+    "line": 3957,
+    "module": "modes/capture"
+  },
+  {
     "original": "brCaptureMode",
     "script": 0,
     "line": 3958,
@@ -1170,6 +1176,12 @@
     "module": "abilities/metadata"
   },
   {
+    "original": "BR_TEAM_LABELS",
+    "script": 1,
+    "line": 20,
+    "module": "world/helpers"
+  },
+  {
     "original": "BR_TIER_COLOR",
     "script": 1,
     "line": 26,
@@ -1233,6 +1245,12 @@
     "original": "brUid",
     "script": 1,
     "line": 326,
+    "module": "world/helpers"
+  },
+  {
+    "original": "brFormatTime",
+    "script": 1,
+    "line": 352,
     "module": "world/helpers"
   },
   {
@@ -1714,6 +1732,24 @@
     "script": 1,
     "line": 5730,
     "module": "modes/respawn"
+  },
+  {
+    "original": "brTKAwards",
+    "script": 1,
+    "line": 5807,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brTKBuildResults",
+    "script": 1,
+    "line": 5828,
+    "module": "modes/respawn"
+  },
+  {
+    "original": "brBuildResults",
+    "script": 1,
+    "line": 5855,
+    "module": "world/helpers"
   },
   {
     "original": "BR_AIM_HELP",

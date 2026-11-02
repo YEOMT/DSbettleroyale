@@ -41,6 +41,11 @@ export function createWorld(content=manifest,config={},seed='1',initialPlayers=[
  room.byId=new Map(players.map(p=>[p.remoteId,p]));
  room.inputPending=new Map();room.actionPending=new Map();room.lastInputAt=new Map();room.eventSink=eventSink;
  room.shotIds=new Map();room.eventSequence=0;
+ const beginNative=room.brBeginProjectileVisual,endNative=room.brEndProjectileVisual;
+ room.brBeginProjectileVisual=(g,p)=>{beginNative(g,p);if(!p._brNetId)p._brNetId='q'+(++g.visualShotSeq);if(!p._wsBorn){p._wsBorn=true;emit(room,'SHOT_SPAWN',nativeShot(room,p));}};
+ room.brEndProjectileVisual=(g,p)=>{endNative(g,p);if(p.life<=0&&!p._wsEnded){p._wsEnded=true;emit(room,'SHOT_END',{...nativeShot(room,p),reason:p._endReason||'expired'});}};
+ room.entitySpawn=e=>{if(['projectile','hook','lob','bomb','beam','turret','zone','orbit'].includes(e.kind))emit(room,'SHOT_SPAWN',reworkShot(e));};
+ room.entityEnd=(e,reason)=>emit(room,'SHOT_END',{...reworkShot(e),reason});
  const originalFx=room.game.emitStudentFx.bind(room.game);
  room.game.emitStudentFx=(type,pos,data={})=>{originalFx(type,pos,data);emit(room,'FX',{kind:type,x:pos.x,y:pos.y,...data});};
  return room;
@@ -65,12 +70,16 @@ export function applyCommand(world,command){
  }
  return {accepted:false,reason:'UNKNOWN_COMMAND'};
 }
+function nativeShot(world,p){return {id:world.matchId+':'+p.ownerLife+':'+p.inputKind+':'+p.inputSeq+':'+p.shotOrdinal+':'+p._brNetId,
+ owner:p.owner?.remoteId,life:p.ownerLife,actionKind:p.inputKind,actionSeq:p.inputSeq,ordinal:p.shotOrdinal,
+ kind:'projectile',type:p.type,x:p.pos.x,y:p.pos.y,dx:p.vel?.x||0,dy:p.vel?.y||0,radius:p.size||8,
+ emoji:p.emoji,color:p.color,remaining:p.life,start:p._brBornFrame??world.game.frame,team:p.owner?.team||0,path:p._brPath||[],native:true};}
+function reworkShot(e){return {id:e.id,owner:e.ctx?.ownerId,life:e.ctx?.ownerLifeSeq,actionKind:e.actionKind||e.ctx?.actionKind,actionSeq:e.ctx?.actionSeq,ordinal:e.ordinal??0,
+ kind:e.kind,x:e.pos?.x||0,y:e.pos?.y||0,dx:(e.dir?.x||0)*(e.speed||0),dy:(e.dir?.y||0)*(e.speed||0),radius:e.radius||8,range:e.range||0,
+ start:e.start,end:e.end,team:e.ctx?.owner?.team||0,emoji:e.displayEmoji||e.emoji,color:e.color};}
 function projectileStates(world){
  const g=world.game;
- const native=g.projectiles.filter(p=>p.life>0).map(p=>({id:p.visualShotId||'native:'+p.farmBornFrame+':'+p.owner?.remoteId+':'+p.visualShotOrdinal,
-  owner:p.owner?.remoteId,life:p.owner?.lifeSeq||0,actionSeq:p.actionSeq||p.visualActionSeq||0,ordinal:p.ordinal||p.visualShotOrdinal||0,
-  kind:'projectile',type:p.type,x:p.pos.x,y:p.pos.y,dx:p.vel?.x||0,dy:p.vel?.y||0,radius:p.radius||p.size||8,
-  emoji:p.emoji||p.projEmoji||p.owner?.ability?.e,remaining:p.life,team:p.owner?.team||0,path:p.flightPath||[],native:true}));
+ const native=g.projectiles.filter(p=>p.life>0).map(p=>nativeShot(world,p));
  return native.concat(world.BRRework.wireEntities(g));
 }
 export function stepWorld(world,dt=FIXED_DT_MS){
@@ -97,13 +106,10 @@ export function stepWorld(world,dt=FIXED_DT_MS){
  world.game.update();
  if(world.game.participants.some(p=>p.runtimeFaults))throw Error('COMBAT_RUNTIME_FAULT');
  for(const p of world.game.participants){
-  if(!p.alive&&!p.deathHandled){p.deathHandled=true;emit(world,'DEATH',{playerId:p.remoteId,lifeSeq:p.lifeSeq,cause:p.lastDeathCause});if(world.session.respawnMode)world.brTeamKillDeath(p);}
+  if(!p.alive&&!p.deathHandled){p.deathHandled=true;p.deaths=(p.deaths||0)+1;emit(world,'DEATH',{playerId:p.remoteId,lifeSeq:p.lifeSeq,cause:p.lastDeathCause});if(world.session.respawnMode){world.brTeamKillDeath(p);p.deathHandled=true;world.session.inputs[p.remoteId]={};world.inputPending.delete(p.remoteId);world.actionPending.delete(p.remoteId);}}
   if(p.alive)p.deathHandled=false;
  }
- const shots=projectileStates(world),next=new Map();
- for(const shot of shots){next.set(shot.id,shot);if(!world.shotIds.has(shot.id))emit(world,'SHOT_SPAWN',shot);}
- for(const [id,shot]of world.shotIds)if(!next.has(id))emit(world,'SHOT_END',{...shot,id,reason:'terminal'});
- world.shotIds=next;
+ world.shotIds=new Map(projectileStates(world).map(s=>[s.id,s]));
  if(world.game.capture?.finalized)world.finished=true;
  if(world.game.isGameOver)world.finished=true;
 }
@@ -130,13 +136,10 @@ export function getVisibleState(world,id,interest={width:1280,height:720}){
  const p=world.byId.get(id);if(!p)return null;
  const bounds=world.brViewerBounds(p,{vw:interest.width,vh:interest.height});
  const visible=world.game.participants.filter(q=>q===p||(!world.game.isConcealedFrom(q,p)&&world.brViewContains(bounds,q.pos.x,q.pos.y,q.radius)));
- const shots=projectileStates(world).filter(s=>world.brViewContains(bounds,s.x,s.y,Math.max(s.radius||20,s.range||0))+0||world.brViewSegment(bounds,s.x,s.y,s.x+(s.dx||0)*12,s.y+(s.dy||0)*12,s.radius||20));
+ const shots=projectileStates(world).filter(s=>world.brViewContains(bounds,s.x,s.y,Math.max(s.radius||20,s.range||0))||world.brViewSegment(bounds,s.x,s.y,s.x+(s.dx||0)*12,s.y+(s.dy||0)*12,s.radius||20));
  return {...state(world,visible,shots),self:getPrivateSelfState(world,id)};
 }
 export function exportResult(world){
- if(world.game.capture)return world.brCaptureResults();
- const players=world.game.participants.slice().sort(world.compareSurvivalOrder).map((p,i)=>({...actor(world,p),rank:i+1,damage:Math.round(p.damageDealt),damageTaken:Math.round(p.damageTaken)}));
- return {matchId:world.matchId,mode:world.session.roomMeta.mode,duration:world.game.frame/60,players,winner:players[0]?.id,
-  awards:[{label:'최다 처치',ids:players.filter(p=>p.kills===Math.max(...players.map(p=>p.kills))).map(p=>p.id)}]};
+ return {...world.brBuildResults(),matchId:world.matchId};
 }
 export function destroyWorld(world){if(world.disposed)return;world.BRRework.clearWorld(world.game,'destroy');world.brFarm.dispose(world.game);world.game.participants.length=0;world.byId.clear();world.inputPending.clear();world.actionPending.clear();world.shotIds.clear();world.session.inputs={};world.session.players={};world.disposed=true;}

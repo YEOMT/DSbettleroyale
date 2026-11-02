@@ -2,6 +2,8 @@
 export function install(__brScope){
 __brScope.brModeHpMultiplier = function brModeHpMultiplier(mode){return mode==='team-capture'?.70:mode==='team-respawn'?__brScope.BR_TEAM_KILL_RULES.hpMultiplier:1;};
 
+__brScope.brRespawnMode = function brRespawnMode(mode){return mode==='team-respawn'||mode==='team-capture';};
+
 __brScope.brCaptureMode = function brCaptureMode(){return __brScope.session?.roomMeta?.mode==='team-capture';};
 
 __brScope.brCapturePointMultiplier = function brCapturePointMultiplier(index){return __brScope.BR_CAPTURE_RULES.pointMultipliers[index]||1;};

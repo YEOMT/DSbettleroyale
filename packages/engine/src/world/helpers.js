@@ -53,6 +53,11 @@ __brScope.brHashRandom = function brHashRandom(seedText) {
 
 __brScope.brUid = function brUid(prefix){return prefix+":"+(++__brScope.idSequence);};
 
+__brScope.brFormatTime = function brFormatTime(totalSec) {
+            totalSec=Math.max(0,Math.ceil(totalSec||0));
+            return String(Math.floor(totalSec/60)).padStart(2,'0')+':'+String(totalSec%60).padStart(2,'0');
+        };
+
 __brScope.brValidateQuestionText = function brValidateQuestionText(text) {
             var lines=String(text||'').replace(/^\uFEFF/,'').split(/\r\n|\n|\r/),questions=[],errors=[],nonEmpty=0;
             lines.forEach(function(raw,lineIndex){
@@ -100,9 +105,55 @@ __brScope.brAbilityIndex = function brAbilityIndex(mode, excludeIndex, unusedEmo
             return pool[Math.floor(choice*pool.length)];
         };
 
+__brScope.brBuildResults = function brBuildResults() {
+            if(__brScope.brCaptureMode())return __brScope.brCaptureResults();
+            if(__brScope.session.roomMeta.mode==='team-respawn')return __brScope.brTKBuildResults();
+            var players=__brScope.game.participants.filter(function(p){return p.id!==999;});
+            var mode=__brScope.session.roomMeta.mode, teamWinner=0;
+            if(__brScope.brRespawnMode(mode)) {
+                var scores={};
+                players.forEach(function(p){scores[p.team]=Number(scores[p.team]||0)+Number(p.kills||0);});
+                teamWinner=Number(Object.keys(scores).sort(function(a,b){return scores[b]-scores[a]||Number(a)-Number(b);})[0]||0);
+                players.sort(function(a,b){return (b.kills-a.kills)||(a.deaths-b.deaths)||(b.damageDealt-a.damageDealt);});
+            } else {
+                if(mode==='team-elim') {
+                    var aliveTeams=new Set(players.filter(function(p){return p.alive&&p.team;}).map(function(p){return Number(p.team);}));
+                    var teamLastElimination={};
+                    players.forEach(function(p){
+                        var t=Number(p.team||0);if(!t)return;
+                        teamLastElimination[t]=Math.max(Number(teamLastElimination[t]||0),Number(p.eliminationSeq||0));
+                    });
+                    teamWinner=aliveTeams.size===1?Number(Array.from(aliveTeams)[0]):Number(Object.keys(teamLastElimination).sort(function(a,b){return teamLastElimination[b]-teamLastElimination[a]||Number(a)-Number(b);})[0]||0);
+                }
+                players.sort(__brScope.compareSurvivalOrder);
+            }
+            var rows=players.map(function(p,i){
+                if(!__brScope.brRespawnMode(mode))p.placement=i+1;
+                return {rank:i+1,id:p.remoteId||('player-'+p.id),name:p.name,abilityIndex:Number(p.abilityIndex||0),abilityId:p.ability.id,abilityName:p.ability.n,abilityEmoji:p.ability.e,rosterVersion:__brScope.BR_ROSTER_VERSION,
+                    tier:p.ability.t,team:Number(p.team||0),kills:Number(p.kills||0),deaths:Number(p.deaths||0),
+                    damage:Math.round(p.damageDealt||0),taken:Math.round(p.damageTaken||0),
+                    lastDeathCause:p.lastDeathCause||null,level:Number(p.run?.level||1),build:p.run?Object.assign({},p.run.paths):{},
+                    survival:Math.round((p.alive?__brScope.game.frame:Number(p.deathFrame||p.survivalFrames||0))/60),alive:!!p.alive,eliminationSeq:Number(p.eliminationSeq||0)};
+            });
+            var winningPool=teamWinner?rows.filter(function(r){return r.team===teamWinner;}):rows;
+            var champion=__brScope.brRespawnMode(mode)?(winningPool.slice().sort(function(a,b){return (b.kills-a.kills)||(b.damage-a.damage)||(a.rank-b.rank);})[0]||rows[0]):(winningPool.slice().sort(function(a,b){return a.rank-b.rank;})[0]||rows[0]);
+            var mostKills=rows.slice().sort(function(a,b){return (b.kills-a.kills)||(b.damage-a.damage);})[0];
+            var mostDamage=rows.slice().sort(function(a,b){return (b.damage-a.damage)||(b.kills-a.kills);})[0];
+            var ironWall=rows.slice().sort(function(a,b){return (b.taken-a.taken)||(a.deaths-b.deaths);})[0];
+            var awards=[
+                {icon:'🏆',label:teamWinner?'CHAMPION ACE':'WINNER',id:champion&&champion.id,detail:teamWinner?(__brScope.BR_TEAM_LABELS[teamWinner]||('팀 '+teamWinner)):'최종 1위'},
+                {icon:'⚔️',label:'MOST KILLS',id:mostKills&&mostKills.id,detail:(mostKills?mostKills.kills:0)+' Kills'},
+                {icon:'💥',label:'MOST DAMAGE',id:mostDamage&&mostDamage.id,detail:(mostDamage?mostDamage.damage:0)+' Damage'},
+                {icon:'🛡️',label:'IRON WALL',id:ironWall&&ironWall.id,detail:(ironWall?ironWall.taken:0)+' 막아냄'}
+            ];
+            return {matchKey:__brScope.brRingKey(),rosterVersion:__brScope.BR_ROSTER_VERSION,mode:mode,teamWinner:teamWinner,winnerId:champion&&champion.id,players:rows,awards:awards,
+                duration:Math.round(__brScope.game.frame/60),createdAt:__brScope.brNow()};
+        };
+
 __brScope.brCapturePacket = function brCapturePacket(g){const c=g.capture;return {v:__brScope.BR_CAPTURE_RULES.version,k:c.key,m:c.map.revision,n:c.count,q:(c.wireSeq=Number(c.wireSeq||0)+1),f:g.frame,a:c.active,t:c.seconds,ph:c.phase,am:c.activeMask,fv:c.fever,h:__brScope.now(),p:Number(c.hostAt||__brScope.now()),run:!(g.paused||g.ringSuspended||g.isGameOver),s:c.scores.slice(1),r:c.rates.slice(1),z:c.points.map(z=>[z.state,z.team,z.counts.slice(1),z.rate]),w:c.winners.slice(),end:c.reason};};
 }
 export const initializers=[
+[1005,__brScope=>{ __brScope.BR_TEAM_LABELS = ['개인','BLUE','RED','GREEN','YELLOW'];;}],
 [1007,__brScope=>{ __brScope.BR_TIER_COLOR = {S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'};;}],
 [1009,__brScope=>{ __brScope.BR_TIER_CHANCES=Object.freeze([['S',.10],['A',.20],['B',.25],['C',.30],['F',.15]]);;}],
 [1010,__brScope=>{ __brScope.BR_DEFAULT_QUESTIONS = [

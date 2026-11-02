@@ -45,6 +45,7 @@ function clean(u){
    walk.simple(ast,{FunctionDeclaration(n){if(n.id?.name==='drawStudent')edits.push([n.start,n.end,'']);}});
    code=edit(code,edits).replace(/drawStudent\s*,/g,'').replace(/,\s*drawStudent(?=\s*})/g,'');
  }
+ if(u.name==='BRRework')code=code.replace('rw.entities.push(e);','rw.entities.push(e);room.entitySpawn?.(e);').replace("e.dead=true;e.reason=reason;","e.dead=true;e.reason=reason;room.entityEnd?.(e,reason);");
  return code
  .replace(/this\.cacheCanvas=brActorEmojiCanvas\(ability\.e,brGraphicsProfile\(\)\.source\);/g,'')
  .replace(/document\.hidden/g,'false')
@@ -72,7 +73,7 @@ function select(name){
  for(const r of refs){const name=r.identifier.name;if(byName.get(name)!==u)select(name);}
  for(const [,name]of code.matchAll(/window\.(\w+)/g))if(name!=='BRMP')select(name);
 }
-const roots=['GameWorld','Participant','BRRework','registerSRework','registerOtherReworkedCharacters','registerV29','bridgeNativeCombat','integrateReworkDefinitions','brFarm','brProgression','brProgressionCombat','brApplyPlayerInput','brRespawnPlayer','brTeamKillDeath','brTeamKillProcessInput','brTeamKillSelf','brCaptureResults','brTKPersonalRows','brTKRecordKill','brValidateQuestionText','brPrepareQuizQuestion','brAbilityIndex','BR_TIER_CHANCES','BR_DEFAULT_QUESTIONS','brTKBalancedTeams','brWirePlayer','brRunSnapshot'];
+const roots=['GameWorld','Participant','BRRework','registerSRework','registerOtherReworkedCharacters','registerV29','bridgeNativeCombat','integrateReworkDefinitions','brFarm','brProgression','brProgressionCombat','brApplyPlayerInput','brRespawnPlayer','brTeamKillDeath','brTeamKillProcessInput','brTeamKillSelf','brCaptureResults','brBuildResults','brTKPersonalRows','brTKRecordKill','brValidateQuestionText','brPrepareQuizQuestion','brAbilityIndex','BR_TIER_CHANCES','BR_DEFAULT_QUESTIONS','brTKBalancedTeams','brWirePlayer','brRunSnapshot'];
 // Preserve the precise roster edits and registration ordering, including name restoration.
 for(const u of units.filter(u=>u.script===0&&u.index>=48&&u.index<=60))select(u.name);
 select('statement-1-143');
@@ -139,3 +140,4 @@ for(const [key,g]of groups){
 fs.writeFileSync('packages/engine/src/registry.js',`${imports.join('\n')}\nexport function installRules(room){${installs.join('\n')}\nfor(const [,init] of [${initializers.join(',')}].sort((a,b)=>a[0]-b[0]))init(room);return room;}\n`);
 fs.writeFileSync('docs/source-map.json',JSON.stringify(mapping,null,2)+'\n');
 console.log(JSON.stringify({modules:groups.size,units:selected.size,external:[...missing].sort()},null,2));
+
