@@ -2,7 +2,7 @@
 
 This is an evidence ledger, not a claim that all requirements are complete. **PARTIAL** means some implemented behavior is tested but the full item is not. **FAIL** records an executed check that failed. **NOT_RUN/PENDING** are not passes. The PR remains draft while implementation/fidelity/performance gaps remain. No IMPLEMENTATION_COMPLETE or public-deployment claim.
 
-PASS: 27 · PARTIAL: 39 · FAIL: 1 · NOT_RUN: 2 · PENDING: 1
+PASS: 28 · PARTIAL: 39 · FAIL: 1 · NOT_RUN: 2
 
 Commands: `npm run verify`, `npm run test:e2e`, `node tools/network/run.mjs`, `npm run test:load -- --players=26 --seconds=600`, `node tools/deploy/local-tls.mjs`. Raw local logs are in ignored `artifacts/`; shareable sanitized evidence is retained in `docs/metrics/`.
 
@@ -69,7 +69,7 @@ Commands: `npm run verify`, `npm run test:e2e`, `node tools/network/run.mjs`, `n
 | F09 | PARTIAL | 학교공유IP26명 정상사용은 허용하고 실제flood는 제한. | 26 clients from one loopback IP accepted; per-connection token bucket exists. Sustained hostile flood versus healthy traffic not benchmarked. |
 | F10 | PARTIAL | Origin/CORS/TLS·secret/PII/log 노출 검사. | Exact Origin/CORS and local trusted Caddy HTTPS/WSS tested; public DNS/TLS and deployment secret configuration absent. |
 | G01 | PASS | 단계별commit·remote branch 실제push·PR URL 검증. | M0-M5 published to codex/ws-migration-v33 through connected GitHub Git-data API; each remote Git tree equals the corresponding local tree. Draft PR https://github.com/YEOMT/DSbettleroyale/pull/1. Follow-up commits preserve original local history. |
-| G02 | PENDING | PR CI가 실제tests/build 실행, 미실행PASS 없음. | Initial GitHub CI run41462100837: npm ci,112 tests and build passed; browser install failed because ubuntu-latest selected26.04 unsupported by pinned Playwright. Runner pinned to24.04; latest PR check conclusion is reported in final handoff. |
+| G02 | PASS | PR CI가 실제tests/build 실행, 미실행PASS 없음. | Actual GitHub CI run41462916244 succeeded on source commit165e7b91425236a712fcdf0ab69031851d0dea64: npm ci,116 tests,client/server build,Chromium3-mode E2E,26-player20s WS smoke. https://github.com/YEOMT/DSbettleroyale/actions/runs/41462916244 . Initial Ubuntu26.04 install failure is retained; runner is pinned24.04. |
 | G03 | PASS | Pages repo base와assets/QR쿼리·netdebug 링크 검증. | Actual built /DSbettleroyale/ base, entry assets, room query and netdebug browser check passed (artifacts/m5-pages-check.txt). Existing public Pages was not changed. |
 | G04 | PASS | production 설정없을 때 기존main/Pages 보존. | Root index.html unchanged; production defaultfalse; main SHA unchanged; no Firebase writes. |
 | G05 | PARTIAL | Docker nonroot·Caddy WSS 실제 로컬TLS 또는 지정스테이징 검증. | Actual local Caddy trusted HTTPS/WSS passed. User reports Seoul Lightsail and Docker/Compose installed; no SSH or AWS Docker execution was performed by this work. |

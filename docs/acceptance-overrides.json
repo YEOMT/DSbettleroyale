@@ -24,8 +24,8 @@
     "evidence": "M0-M5 published to codex/ws-migration-v33 through connected GitHub Git-data API; each remote Git tree equals the corresponding local tree. Draft PR https://github.com/YEOMT/DSbettleroyale/pull/1. Follow-up commits preserve original local history."
   },
   "G02": {
-    "status": "PENDING",
-    "evidence": "Initial GitHub CI run41462100837: npm ci,112 tests and build passed; browser install failed because ubuntu-latest selected26.04 unsupported by pinned Playwright. Runner pinned to24.04; latest PR check conclusion is reported in final handoff."
+    "status": "PASS",
+    "evidence": "Actual GitHub CI run41462916244 succeeded on source commit165e7b91425236a712fcdf0ab69031851d0dea64: npm ci,116 tests,client/server build,Chromium3-mode E2E,26-player20s WS smoke. https://github.com/YEOMT/DSbettleroyale/actions/runs/41462916244 . Initial Ubuntu26.04 install failure is retained; runner is pinned24.04."
   },
   "G03": {
     "status": "PASS",

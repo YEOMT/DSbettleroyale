@@ -1,0 +1,27 @@
+{
+  "commit": "165e7b91425236a712fcdf0ab69031851d0dea64",
+  "run": 41462916244,
+  "url": "https://github.com/YEOMT/DSbettleroyale/actions/runs/41462916244",
+  "conclusion": "success",
+  "runner": "ubuntu-24.04",
+  "tests": {
+    "passed": 116,
+    "failed": 0
+  },
+  "browser": {
+    "engine": "Chromium",
+    "modes": 3,
+    "passed": 3
+  },
+  "load": {
+    "players": 26,
+    "teacher": 1,
+    "seconds": 20,
+    "pass": true,
+    "snapshots": 10800,
+    "stepP95Ms": 1.6870359999993525,
+    "stepP99Ms": 2.6123890000000074,
+    "snapshotGapP95Ms": 53.31307799999968
+  },
+  "limitations": "GitHub-hosted synthetic smoke; not physical school devices or Lightsail deployment."
+}
