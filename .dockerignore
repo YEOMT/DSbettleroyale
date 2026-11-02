@@ -1,0 +1,11 @@
+node_modules
+.git
+.local-tools
+artifacts
+test-results
+playwright-report
+.env
+.env.*
+legacy
+index.html
+dist

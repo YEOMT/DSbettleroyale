@@ -1,0 +1,13 @@
+- Source of truth: docs/implementation-spec.md, docs/baseline.md and the final content manifest. Preserve current gameplay numbers.
+- Only the server decides gameplay. Clients send intentions and predict movement/display.
+- Engine/content/protocol must not depend on DOM, Pixi, Firebase or WebSocket.
+- Physics is 60 Hz; snapshots are independently 20 Hz.
+- Check original parity fixtures before changing combat, progression, quiz or mode rules.
+- Test duplicate commands, life/connection epochs, rematch, resume and late packets.
+- Keep room state, queues and event ledgers bounded; clean up all references.
+- Run npm run verify, npm run build and relevant tests; report only executed checks.
+- Never commit student data, authentication tokens, secrets or real classroom logs.
+- Commit/push only a work branch and open a PR. No direct main push, force push or automatic merge.
+- Keep root index.html unchanged during this first migration PR.
+- Production is disabled by default; missing hosting credentials must not prevent local implementation.
+- Keep docs/progress.md current with executed checks and remaining work.

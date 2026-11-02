@@ -1,0 +1,266 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="br-build" content="v33.0.0"><title>이모지 클래스 배틀 · v33</title></head><body>    <div id="br-app">
+        <!-- 시작 화면 -->
+        <section id="br-home" class="br-screen">
+            <div class="br-shell">
+                <div class="br-topline">
+                    <div class="br-brand">
+                        <div class="br-logo">🔥</div>
+                        <div><h1 class="br-title">이모지 클래스 배틀</h1><p class="br-sub">퀴즈를 풀고, 마지막까지 살아남아라!</p></div>
+                    </div>
+                    <span class="br-pill">CLASSROOM EDITION</span>
+                </div>
+                <div class="br-home-layout">
+                    <div class="br-card br-role-card br-student-main">
+                        <div class="br-role-icon">🎮</div>
+                        <h2>학생 바로 참가</h2>
+                        <p class="br-small">방 번호와 이름을 입력하세요.</p>
+                        <div id="br-invite-room" class="br-invite-room">ROOM 000000 · 초대받은 방</div>
+                        <div class="br-field br-room-field"><label class="br-label" for="br-join-code">방 번호</label><input id="br-join-code" class="br-input" inputmode="numeric" maxlength="6" placeholder="예: 482913"></div>
+                        <div class="br-field"><label class="br-label" for="br-player-name">이름</label><input id="br-player-name" class="br-input" maxlength="12" autocomplete="off" placeholder="실명을 입력하세요"></div>
+                        <div class="br-grow"></div>
+                        <button id="br-join-btn" class="br-btn br-btn-primary">방에 참가하기</button>
+                    </div>
+                    <aside class="br-card br-role-card br-host-side">
+                        <div class="br-role-icon">🧑‍🏫</div>
+                        <h2>선생님용</h2>
+                        <p class="br-small">방을 만들고 수업을 시작하세요.</p>
+                        <div class="br-grow"></div>
+                        <button id="br-create-btn" class="br-btn br-btn-fire">방 만들기</button>
+                    </aside>
+                </div>
+                <div class="br-home-flow"><span>① 퀴즈</span><span>② 이모지 선택</span><span>③ 배틀</span></div>
+            </div>
+        </section>
+
+        <!-- 교사용 방 -->
+        <section id="br-host-room" class="br-screen br-hidden">
+            <div class="br-shell">
+                <div class="br-topline">
+                    <div>
+                        <span id="br-online-pill" class="br-pill br-pill-live">● ONLINE</span>
+                        <div id="br-room-code" class="br-room-code">000000</div>
+                        <div class="br-small">학생은 QR 또는 방 번호로 참가합니다.</div>
+                    </div>
+                    <div class="br-actions"><button id="br-copy-link" class="br-btn br-btn-ghost">링크 복사</button><button id="br-close-room" class="br-btn br-btn-danger">방 닫기</button></div>
+                </div>
+                <div class="br-stage" id="br-host-stages">
+                    <span class="br-stage-item active" data-stage="lobby">1 입장</span>
+                    <span class="br-stage-item" data-stage="quiz">2 퀴즈</span>
+                    <span class="br-stage-item" data-stage="draft">3 뽑기</span>
+                    <span class="br-stage-item" data-stage="battle">4 전투</span>
+                    <span class="br-stage-item" data-stage="results">5 결과</span>
+                </div>
+                <div class="br-host-layout">
+                    <div class="br-card">
+                        <div class="br-scoreline"><div><h2 id="br-host-phase-title">학생 입장 대기</h2><p id="br-host-phase-desc" class="br-small">설정을 확인하고 학생들이 모두 들어오면 퀴즈를 시작하세요.</p></div><span id="br-host-clock" class="br-pill br-hidden">60초</span></div>
+                        <div id="br-host-settings">
+                            <div class="br-grid2">
+                                <div class="br-field"><label class="br-label">경기 모드</label><select id="br-mode" class="br-select"><option value="solo">👑 최후의 1인</option><option value="team-elim">🛡️ 팀 생존전</option><option value="team-capture">🚩 팀 점령전</option></select></div>
+                                <div class="br-field"><label class="br-label">팀 수</label><select id="br-team-count" class="br-select"><option value="2">2팀</option><option value="3">3팀</option><option value="4">4팀</option></select></div>
+                                <div class="br-field"><label class="br-label" for="br-map">전장</label><select id="br-map" class="br-select"><option value="random">🎲 무작위</option><option value="0">🌪️ 유동 폐허</option><option value="1">➕ 십자로</option><option value="2">🌫️ 연막 폐허</option><option value="3">🏟️ 네 갈래 광장</option><option value="4">📦 화물 기지</option></select></div>
+                                <div class="br-field"><label class="br-label">퀴즈 시간</label><select id="br-quiz-seconds" class="br-select"><option value="45">45초</option><option value="60" selected>60초</option><option value="90">90초</option></select></div>
+                                <div class="br-field"><label class="br-label" for="br-graphics-preset">그래픽 품질</label><select id="br-graphics-preset" class="br-select"><option value="low">저사양</option><option value="balanced" selected>균형 · 추천</option><option value="high">고품질</option></select><p class="br-small" style="margin:5px 0 0">방 참가자 모두에게 적용됩니다.</p></div>
+                                <div class="br-field"><label class="br-label">점령전 제한시간</label><select id="br-match-seconds" class="br-select"><option value="300">5분</option><option value="360" selected>6분</option></select></div>
+                            </div>
+                            <div id="br-tk-lobby-rules" class="br-notice br-hidden" style="margin-top:12px;line-height:1.8">가로형 전용 맵 · A/B/C 거점<br>거점 안에서 가장 많은 팀이 점수를 얻습니다.<br>여러 거점을 지키면 더 빨리 오릅니다.<br>100% 선취 또는 종료 시 최고 점수 팀 승리 · 최고 동률은 무승부<br>사망 → 퀴즈 정답 3개 → 유지 / 리롤 후 부활<br><span class="br-small">정답 3개마다 리롤권 1개(최대 2개) · 매번 레벨 1에서 시작</span></div>
+                            <div class="br-quiz-upload">
+                                <div class="br-quiz-upload-head">
+                                    <label for="br-quiz-file" class="br-btn br-btn-primary">퀴즈 파일 업로드 (.txt)</label>
+                                    <input id="br-quiz-file" class="br-file-input" type="file" accept=".txt,text/plain">
+                                    <button id="br-quiz-default" class="br-btn br-btn-ghost" type="button">기본 퀴즈 사용</button>
+                                </div>
+                                <p id="br-quiz-file-status" class="br-file-status">TXT를 올리지 않으면 기본 퀴즈 54문제를 사용합니다.</p>
+                                <div id="br-quiz-preview" class="br-quiz-preview" aria-live="polite"></div>
+                                <details style="margin-top:12px"><summary class="br-label" style="cursor:pointer">고급: 문제 직접 편집</summary><textarea id="br-question-bank" class="br-textarea" spellcheck="false" placeholder="영단어 | 정답 | 오답1 | 오답2 | 오답3"></textarea><p class="br-small">한 줄에 한 문제이며 각 줄에는 정확히 5개 항목이 필요합니다. 예: <b>environment | 환경 | 에너지 | 운동 | 경험</b></p></details>
+                            </div>
+                        </div>
+                        <div id="br-host-roster" class="br-list"></div>
+                        <div class="br-actions" style="margin-top:16px">
+                            <span class="br-grow"></span>
+                            <button id="br-start-quiz" class="br-btn br-btn-primary">1분 퀴즈 시작</button>
+                            <button id="br-skip-to-draft" class="br-btn br-btn-primary br-hidden">퀴즈 종료 · 뽑기 시작</button>
+                            <button id="br-start-battle" class="br-btn br-btn-fire br-hidden">전투 시작</button>
+                        </div>
+                    </div>
+                    <aside>
+                        <div class="br-card">
+                            <h3>QR 접속</h3>
+                            <div id="br-qr" class="br-qr"><span style="color:#111">QR 생성 중…</span></div>
+                            <input id="br-join-link" class="br-input" readonly style="font-size:11px;margin-top:10px">
+                        </div>
+                        <div class="br-card" style="margin-top:14px">
+                            <h3>진행 체크</h3>
+                            <div id="br-host-summary" class="br-small" style="line-height:1.8">참가자 0명<br>준비 완료 0명</div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <!-- 학생 대기 -->
+        <section id="br-student-wait" class="br-screen br-hidden">
+            <div class="br-status-center"><div class="br-card br-wait-card">
+                <div id="br-wait-icon" class="br-big-emoji">🙌</div>
+                <span id="br-student-room-pill" class="br-pill">ROOM 000000</span>
+                <h1 id="br-wait-title" style="font-size:32px;margin:18px 0 7px">참가 완료!</h1>
+                <p id="br-wait-desc" class="br-sub">선생님이 퀴즈를 시작할 때까지 기다려 주세요.</p>
+                <div id="br-self-summary" class="br-notice" style="margin-top:20px;text-align:left"></div>
+                <div class="br-actions" style="justify-content:center;margin-top:15px"><button id="br-open-encyclopedia" class="br-btn br-btn-primary" type="button">📖 이모지 도감</button></div>
+            </div></div>
+        </section>
+
+        <div id="br-encyclopedia" class="br-encyclopedia br-hidden" role="dialog" aria-modal="true" aria-labelledby="br-encyclopedia-title">
+            <div class="br-encyclopedia-panel">
+                <div class="br-encyclopedia-head">
+                    <div><h2 id="br-encyclopedia-title">📖 이모지 도감</h2><p class="br-small" style="margin:0">이번 판 캐릭터는 랜덤으로 결정됩니다. 카드는 관람용이며 선택에는 영향을 주지 않습니다.</p></div>
+                    <button id="br-close-encyclopedia" class="br-btn br-btn-ghost" type="button" aria-label="이모지 도감 닫기">닫기</button>
+                </div>
+                <div class="br-encyclopedia-filters">
+                    <div id="br-rank-filters" class="br-filter-row"></div>
+                    <div id="br-role-filters" class="br-filter-row"></div>
+                </div>
+                <div class="br-encyclopedia-body">
+                    <p id="br-encyclopedia-count" class="br-encyclopedia-count"></p>
+                    <div id="br-encyclopedia-grid" class="br-encyclopedia-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 학생 퀴즈 -->
+        <section id="br-quiz" class="br-screen br-hidden">
+            <div class="br-quiz-wrap">
+                <div class="br-scoreline"><span id="br-quiz-room" class="br-pill">ROOM</span><div><b>정답 <span id="br-quiz-score">0</span>개</b> · 리롤권 <b id="br-quiz-rerolls" style="color:var(--br-yellow)">0</b>개</div></div>
+                <div id="br-quiz-timer" class="br-timer-ring"><span>60</span></div>
+                <div class="br-card">
+                    <p class="br-small" style="text-align:center;margin:0">다음 영단어의 뜻을 고르세요.</p>
+                    <div id="br-quiz-word" class="br-quiz-word">ready</div>
+                    <div class="br-quiz-meta"><span id="br-quiz-progress" class="br-pill">문제 1</span></div>
+                    <div id="br-quiz-choices" class="br-choices"></div>
+                    <div id="br-quiz-feedback" class="br-quiz-feedback" role="status" aria-live="polite">정답을 선택하세요</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 학생 뽑기 -->
+        <section id="br-draft" class="br-screen br-hidden">
+            <div class="br-status-center"><div style="width:min(650px,100%)">
+                <div class="br-scoreline"><span id="br-draft-room" class="br-pill">ROOM</span><span class="br-pill">남은 리롤권 <b id="br-reroll-count">0</b></span></div>
+                <div id="br-draft-card" class="br-card br-draft-card">
+                    <div id="br-draft-emoji" class="br-draft-emoji">❔</div>
+                    <div><span id="br-draft-tier" class="br-tier br-tier-F">?</span></div>
+                    <h1 id="br-draft-name" style="font-size:30px;margin:13px 0 4px;position:relative;z-index:1">뽑는 중…</h1>
+                    <p id="br-draft-desc" class="br-small" style="min-height:42px;position:relative;z-index:1"></p>
+                    <p id="br-draft-skill" class="br-notice" style="text-align:left;position:relative;z-index:1"></p>
+                </div>
+                <div id="br-draft-actions" class="br-actions" style="justify-content:center">
+                    <button id="br-reroll-btn" class="br-btn br-btn-primary">🎲 리롤</button>
+                    <button id="br-ready-btn" class="br-btn br-btn-green">이 이모지로 확정</button>
+                </div>
+                <p id="br-draw-odds" class="br-small" style="text-align:center"></p>
+                <div id="br-draft-wait" class="br-notice br-hidden" style="margin-top:14px;text-align:center">✅ 확정 완료! 다른 친구들을 기다리는 중입니다.</div>
+            </div></div>
+        </section>
+
+        <!-- 결과 -->
+        <section id="br-results" class="br-screen br-hidden">
+            <div class="br-shell">
+                <div class="br-topline"><div><span class="br-pill">MATCH COMPLETE</span><h1 class="br-title" style="margin-top:9px">🏆 경기 결과</h1></div><button id="br-results-home" class="br-btn br-btn-ghost">처음 화면</button></div>
+                <div id="br-result-winner" class="br-card" style="text-align:center"></div>
+                <div id="br-tk-result-teams" class="br-tk-team-results br-hidden"></div>
+                <div id="br-awards" class="br-awards"></div>
+                <div id="br-tk-fun-awards" class="br-tk-fun br-hidden"></div>
+                <div class="br-card"><h2 id="br-ranking-title" style="margin-bottom:13px">전체 순위</h2><div id="br-ranking" class="br-ranking"></div></div>
+                <div id="br-host-result-actions" class="br-actions br-hidden" style="justify-content:center;margin-top:15px"><button id="br-rematch-room" class="br-btn br-btn-primary">같은 방에서 다시 하기</button><button id="br-finish-room" class="br-btn br-btn-danger">방 종료</button></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 학생 전투 화면 -->
+    <section id="br-student-battle" class="br-hidden">
+        <canvas id="br-student-canvas"></canvas>
+        <div class="br-play-prefs" aria-label="화면과 소리 설정">
+            <button type="button" id="br-pref-sound" aria-label="효과음 켜기 또는 끄기" aria-pressed="false">효과음 켬</button>
+            <button type="button" id="br-pref-aim" aria-pressed="true">조준 도움 켬</button>
+            <button type="button" id="br-pref-motion" aria-label="화면 흔들림 줄이기" aria-pressed="false">흔들림 기본</button>
+        </div>
+        <div id="br-stream-status" class="br-hidden" role="status" aria-live="polite"></div>
+        <div class="br-battle-hud">
+            <div class="br-hud-box"><b id="br-battle-self">나</b><div class="br-hp"><i id="br-battle-hp"></i></div><span id="br-battle-status">HP 100 / 100</span>
+                <div id="br-run-hud" class="br-run-hud br-hidden">
+                    <div class="br-run-level"><b id="br-run-level">LV.1</b><div id="br-run-xp" class="br-run-xp" role="progressbar" aria-label="다음 레벨까지 경험치" aria-valuemin="0" aria-valuemax="2" aria-valuenow="0"><i id="br-run-xp-fill"></i></div><span id="br-run-xp-text">0 / 2</span></div>
+                    <div id="br-run-owned" class="br-run-owned" aria-label="보유 강화"></div>
+                </div>
+            </div>
+            <div class="br-hud-box" style="text-align:right"><b id="br-battle-mode">생존전</b><br><span id="br-battle-time">00:00</span> · <span id="br-battle-alive">20명</span>
+                <div id="br-zone-status" class="br-zone-status sync" role="status" aria-live="off">
+                    <span id="br-zone-arrow" aria-hidden="true" hidden>↑</span><span id="br-zone-text">위험구역 동기화 중</span>
+                    <div id="br-zone-detail"></div>
+                </div>
+                <div id="br-tk-student-tools" class="br-hidden">
+                    <div id="br-tk-student-scores" class="br-tk-scores"></div>
+                    <button id="br-tk-student-rank" class="br-tk-rank-button" type="button" aria-controls="br-tk-leaderboard" aria-expanded="false">순위</button>
+                </div>
+                <div id="br-gravity-legend" class="br-hidden" style="margin-top:5px;font-size:10px;line-height:1.5" aria-label="블랙홀 범위 안내">
+                    <span style="color:#e879f9">실선: 피해</span> · <span style="color:#c4b5fd">바깥 점선: 흡입</span><br><span style="color:#fbbf24">주황 점선: 마지막 폭발</span>
+                </div>
+            </div>
+        </div>
+        <div id="br-tk-student-feed"></div>
+        <div id="br-run-level-alert" class="br-run-level-alert br-hidden" role="status" aria-live="polite">⬆ LEVEL UP! 강화 1개를 선택하세요</div>
+        <div id="br-run-ui" class="br-run-ui br-hidden">
+            <button id="br-run-ready" type="button" class="br-run-ready br-hidden" aria-controls="br-run-panel" aria-expanded="false">⬆ LEVEL UP · 강화 선택</button>
+            <section id="br-run-panel" class="br-run-panel br-hidden" aria-label="레벨 업 강화 선택">
+                <div class="br-run-heading"><b id="br-run-offer-title">LEVEL UP · 강화 선택</b><button id="br-run-later" type="button" aria-label="강화 선택을 접고 나중에 선택">나중에</button></div>
+                <div id="br-run-cards" class="br-run-cards"></div>
+                <p id="br-run-choice-status" role="status" aria-live="polite"></p>
+            </section>
+        </div>
+        <div id="br-run-applied" class="br-run-applied br-hidden" role="status" aria-live="polite"></div>
+        <button id="br-attack" type="button" class="br-control" aria-label="공격 조준">
+            <span class="br-control-content"><span class="br-attack-symbol" aria-hidden="true"></span><span class="br-action-name">공격</span></span><span id="br-attack-cd" class="br-cd-text ready">✓</span><span class="br-aim-knob"></span>
+        </button>
+        <button id="br-skill" type="button" class="br-control" aria-label="스킬 조준">
+            <span class="br-control-content"><span class="br-skill-symbol" aria-hidden="true">★</span><span id="br-skill-label" class="br-action-name">스킬</span><span id="br-skill-count">∞</span></span><span id="br-skill-cd" class="br-cd-text ready">✓</span><span class="br-aim-knob"></span>
+        </button>
+        <div id="br-joystick" class="br-control"><div id="br-joystick-knob"></div></div>
+        <div id="br-death-cause" class="br-hidden" role="status" aria-live="polite"></div>
+        <div id="br-hurt-edge" aria-hidden="true"><i></i></div>
+        <div id="br-respawn" class="br-respawn br-hidden"><b id="br-respawn-text">탈락 · 관전 중</b></div>
+        <section id="br-tk-quiz" class="br-tk-quiz br-hidden" aria-label="부활 퀴즈">
+            <div class="br-tk-quiz-card">
+                <h2>RESPAWN QUIZ</h2>
+                <div id="br-tk-progress" class="br-tk-progress">0 / 3 CORRECT</div>
+                <div id="br-tk-quiz-tokens" class="br-small">🔄 ×0 · 정답 3개마다 리롤권 +1</div>
+                <div id="br-tk-word" class="br-tk-word">문제를 받는 중…</div>
+                <div id="br-tk-options" class="br-tk-options"></div>
+                <div id="br-tk-choice" class="br-tk-choice br-hidden">
+                    <button id="br-tk-keep" type="button" class="br-btn br-btn-primary">KEEP · 그대로 부활</button>
+                    <button id="br-tk-reroll" type="button" class="br-btn br-btn-ghost">REROLL · 🔄 1</button>
+                </div>
+                <p id="br-tk-feedback" class="br-tk-feedback" role="status" aria-live="polite"></p>
+            </div>
+        </section>
+    </section>
+
+    <div id="br-tk-host-bar" class="br-tk-host-bar br-hidden">
+        <div class="br-tk-head"><div id="br-tk-host-scores" class="br-tk-scores"></div><b id="br-tk-host-clock" class="br-tk-clock">06:00</b><button id="br-tk-host-rank" type="button" class="br-tk-rank-button" aria-controls="br-tk-leaderboard" aria-expanded="false">상세 순위</button></div>
+        <div class="br-tk-host-sub"><span id="br-tk-host-top"></span><span id="br-tk-host-streak"></span></div>
+    </div>
+    <aside id="br-tk-leaderboard" class="br-tk-leaderboard br-hidden" role="region" aria-label="실시간 팀과 개인 순위">
+        <header><div><b>LEADERBOARD</b><small>경기는 계속 진행됩니다</small></div><button id="br-tk-close-rank" type="button" class="br-tk-rank-button" aria-label="순위 닫기">닫기</button></header>
+        <div class="br-tk-board-body"><h3>TEAM RANKING</h3><div id="br-tk-team-ranking"></div><h3 style="margin-top:14px">PERSONAL RANKING</h3><div id="br-tk-personal-ranking"></div></div>
+    </aside>
+    <div id="br-host-live" class="br-host-live br-hidden">
+        <span id="br-live-room" class="br-pill"><small>ROOM</small><b data-room-digits></b></span>
+        <button id="br-focus-toggle" class="br-btn br-btn-ghost">카메라: 전체</button>
+        <button id="br-force-end" class="br-btn br-btn-danger">경기 종료</button>
+    </div>
+    <div id="br-music-controls" class="br-music-controls br-hidden" aria-label="배경음악 설정">
+        <button type="button" id="br-pref-music" aria-pressed="false">음악 끔</button>
+        <input type="range" id="br-music-volume" min="0" max="100" step="1" value="25" aria-label="음악 볼륨">
+        <span id="br-music-status" role="status" aria-live="polite"></span>
+    </div>
+
+    <div id="br-toast" class="br-toast"></div>
+
+<script type="module" src="/src/main.js"></script></body></html>

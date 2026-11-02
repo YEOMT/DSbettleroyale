@@ -1,0 +1,42 @@
+{
+  "A07": {
+    "status": "PASS",
+    "evidence": "Independent local Git clone of M5: npm ci, verify (including build), and actual dev client/server proxy startup passed. This was a local clone before GitHub write access was restored; PR CI separately tests remote checkout."
+  },
+  "D03": {
+    "status": "PARTIAL",
+    "evidence": "Restored original release-to-cast, drag power, Q/Space key edges, weak aim toggle and server revalidation. Three browser modes passed; physical multi-touch augmentation remains unverified."
+  },
+  "D09": {
+    "status": "PARTIAL",
+    "evidence": "Added authoritative native/RW path interpolation, turn-corner and bounded remaining-range unit tests. All curved weapon/path/endpoint browser cases are not exhaustively tested."
+  },
+  "E01": {
+    "status": "FAIL",
+    "evidence": "20/26/30 students+teacher each completed 600s and seven rounds. 20 passed functionally; 26/30 paused 7/39 times and required CONTINUE, so fail. All cleanup counters zero. Final follow-up 26-player 30s smoke passed; not a replacement for 600s. See docs/metrics."
+  },
+  "E02": {
+    "status": "PARTIAL",
+    "evidence": "26 actual WS connections completed all nine nominal added RTT40/100/250 x jitter0/20/60 proxy profiles. Measured app RTT includes additional host scheduling and differs from nominal targets; both are recorded. Not an OS-shaped exact-RTT test."
+  },
+  "G01": {
+    "status": "PASS",
+    "evidence": "M0-M5 published to codex/ws-migration-v33 through connected GitHub Git-data API; each remote Git tree equals the corresponding local tree. Draft PR https://github.com/YEOMT/DSbettleroyale/pull/1. Follow-up commits preserve original local history."
+  },
+  "G02": {
+    "status": "PASS",
+    "evidence": "Actual GitHub CI run41462916244 succeeded on source commit165e7b91425236a712fcdf0ab69031851d0dea64: npm ci,116 tests,client/server build,Chromium3-mode E2E,26-player20s WS smoke. https://github.com/YEOMT/DSbettleroyale/actions/runs/41462916244 . Initial Ubuntu26.04 install failure is retained; runner is pinned24.04."
+  },
+  "G03": {
+    "status": "PASS",
+    "evidence": "Actual built /DSbettleroyale/ base, entry assets, room query and netdebug browser check passed (artifacts/m5-pages-check.txt). Existing public Pages was not changed."
+  },
+  "G05": {
+    "status": "PARTIAL",
+    "evidence": "Actual local Caddy trusted HTTPS/WSS passed. User reports Seoul Lightsail and Docker/Compose installed; no SSH or AWS Docker execution was performed by this work."
+  },
+  "G10": {
+    "status": "PASS",
+    "evidence": "PR #1 and branch publication recorded separately from executed local tests, unexecuted AWS/public deployment and unverified classroom devices. docs/lightsail-ko.md contains settings and commands; final handoff supplies actual head SHA."
+  }
+}

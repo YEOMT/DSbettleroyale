@@ -1,0 +1,11 @@
+import {build as buildClient} from 'vite';
+import {build as bundle} from 'esbuild';
+import fs from 'node:fs';
+import {buildId,sourceHash} from './build-id.mjs';
+import {fingerprint} from '../packages/protocol/src/index.js';
+const id=buildId(),define={__DSBR_BUILD_ID__:JSON.stringify(id)};
+await buildClient({configFile:'apps/client/vite.config.js',define});
+await bundle({entryPoints:['apps/server/src/main.js'],outfile:'dist/server/main.js',bundle:true,platform:'node',target:'node24',format:'esm',packages:'external',sourcemap:true,define});
+fs.writeFileSync('dist/server/package.json',JSON.stringify({type:'module'}));
+const release={...fingerprint,buildId:id,sourceHash:sourceHash()};fs.writeFileSync('dist/release.json',JSON.stringify(release,null,2));fs.writeFileSync('dist/client/version.json',JSON.stringify(release));
+console.log('Client and server built. Root legacy index.html was not changed.');

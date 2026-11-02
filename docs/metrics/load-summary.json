@@ -1,0 +1,269 @@
+{
+  "hardware": {
+    "platform": "win32",
+    "architecture": "x64",
+    "cpu": "13th Gen Intel(R) Core(TM) i5-1340P",
+    "logicalProcessors": 16,
+    "physicalMemoryBytes": 16718413824,
+    "node": "v24.22.1"
+  },
+  "limitations": "One Windows development PC, dedicated server child plus synthetic WS clients. Shared host load was not controlled. Not physical devices, AWS results, or a 30-minute same-process leak proof. Earlier 600-second runs precede final input/serialization follow-up; 30-second run does not replace them.",
+  "loads": [
+    {
+      "source": "load-20-600",
+      "players": 20,
+      "requestedSeconds": 600,
+      "elapsedMs": 600021.4841,
+      "started": "2026-11-02T11:32:43.483Z",
+      "ended": "2026-11-02T11:42:43.610Z",
+      "sourceHash": "not recorded in first harness revision",
+      "pass": true,
+      "rounds": 7,
+      "snapshots": 203889,
+      "overloads": 0,
+      "recoveries": 0,
+      "stepCpu": {
+        "count": 35978,
+        "mean": 3.346600044471702,
+        "p95": 8.366500000003725,
+        "p99": 13.78110000002198,
+        "max": 46.8177999999898
+      },
+      "snapshotCpu": {
+        "count": 9709,
+        "mean": 19.42963758368537,
+        "p95": 30.071800000034273,
+        "p99": 36.89419999998063,
+        "max": 94.76699999999255
+      },
+      "snapshotGap": {
+        "count": 9709,
+        "mean": 61.72145064373263,
+        "p95": 70.8405999999959,
+        "p99": 79.74150000000373,
+        "max": 210.81730000002426
+      },
+      "inputApply": {
+        "count": 0,
+        "mean": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "rtt": {
+        "count": 5135,
+        "mean": 13.016961187926311,
+        "p95": 33.7899000000325,
+        "p99": 48.13769999996293,
+        "max": 126.73359999997774
+      },
+      "ack": {
+        "count": 193862,
+        "mean": 43.77578024419395,
+        "p95": 62.682999999960884,
+        "p99": 70.86599999992177,
+        "max": 168.3796999999904
+      },
+      "receivedBytes": 3116596150,
+      "finalRss": 288112640,
+      "peakSampledRss": 294948864,
+      "cleanup": {
+        "rooms": 0,
+        "tokens": 0,
+        "peers": 0
+      }
+    },
+    {
+      "source": "load-26-600",
+      "players": 26,
+      "requestedSeconds": 600,
+      "elapsedMs": 600003.8388,
+      "started": "2026-11-02T12:47:43.146Z",
+      "ended": "2026-11-02T12:57:43.687Z",
+      "sourceHash": "2f05fe9dbfe59f37b5d0afd0d49ac6a806da2db75bba2c948d558d14f09ece86",
+      "pass": false,
+      "rounds": 7,
+      "snapshots": 298647,
+      "overloads": 7,
+      "recoveries": 7,
+      "stepCpu": {
+        "count": 34501,
+        "mean": 4.658940564041754,
+        "p95": 8.690699999919161,
+        "p99": 12.34050000004936,
+        "max": 194.74149999994552
+      },
+      "snapshotCpu": {
+        "count": 11062,
+        "mean": 16.249092994033763,
+        "p95": 27.03320000000531,
+        "p99": 40.59110000001965,
+        "max": 83.1704000000027
+      },
+      "snapshotGap": {
+        "count": 11062,
+        "mean": 54.16677025854276,
+        "p95": 72.24850000004517,
+        "p99": 119.5171000000555,
+        "max": 4555.586399999971
+      },
+      "inputApply": {
+        "count": 343051,
+        "mean": 7.027299598019086,
+        "p95": 18.53029999998398,
+        "p99": 27.727499999920838,
+        "max": 159.92220000003
+      },
+      "rtt": {
+        "count": 6598,
+        "mean": 19.082067414367984,
+        "p95": 57.82809999998426,
+        "p99": 99.4942999999621,
+        "max": 376.32480000000214
+      },
+      "ack": {
+        "count": 281600,
+        "mean": 47.37755702414738,
+        "p95": 72.40769999998156,
+        "p99": 93.70299999997951,
+        "max": 442.7301999999909
+      },
+      "receivedBytes": 5282370122,
+      "finalRss": 322256896,
+      "peakSampledRss": 323043328,
+      "cleanup": {
+        "rooms": 0,
+        "tokens": 0,
+        "peers": 0
+      }
+    },
+    {
+      "source": "load-30-600",
+      "players": 30,
+      "requestedSeconds": 600,
+      "elapsedMs": 600008.4023000001,
+      "started": "2026-11-02T12:57:44.965Z",
+      "ended": "2026-11-02T13:07:45.842Z",
+      "sourceHash": "2f05fe9dbfe59f37b5d0afd0d49ac6a806da2db75bba2c948d558d14f09ece86",
+      "pass": false,
+      "rounds": 7,
+      "snapshots": 249966,
+      "overloads": 39,
+      "recoveries": 39,
+      "stepCpu": {
+        "count": 26848,
+        "mean": 5.6198209326578485,
+        "p95": 14.411199999973178,
+        "p99": 21.620200000004843,
+        "max": 200.49280000000726
+      },
+      "snapshotCpu": {
+        "count": 8064,
+        "mean": 19.223281622024167,
+        "p95": 38.039199999999255,
+        "p99": 61.57459999999264,
+        "max": 293.04610000003595
+      },
+      "snapshotGap": {
+        "count": 8064,
+        "mean": 73.7222982514881,
+        "p95": 118.12410000001546,
+        "p99": 292.6166000000085,
+        "max": 5050.328299999994
+      },
+      "inputApply": {
+        "count": 279085,
+        "mean": 7.336520393428648,
+        "p95": 14.230400000000373,
+        "p99": 35.661800000001676,
+        "max": 326.460699999996
+      },
+      "rtt": {
+        "count": 7372,
+        "mean": 29.516587601735065,
+        "p95": 105.20039999997243,
+        "p99": 285.9919000000227,
+        "max": 786.8776999999536
+      },
+      "ack": {
+        "count": 238153,
+        "mean": 54.17603652777741,
+        "p95": 83.89099999982864,
+        "p99": 108.60400000005029,
+        "max": 725.1922999999952
+      },
+      "receivedBytes": 4963580998,
+      "finalRss": 323076096,
+      "peakSampledRss": 323375104,
+      "cleanup": {
+        "rooms": 0,
+        "tokens": 0,
+        "peers": 0
+      }
+    },
+    {
+      "source": "load-final-26-30",
+      "players": 26,
+      "requestedSeconds": 30,
+      "elapsedMs": 30001.1767,
+      "started": "2026-11-02T14:27:27.535Z",
+      "ended": "2026-11-02T14:27:57.892Z",
+      "sourceHash": "95de6efe1d677306706ed9f3760c8724677df75dd6e36203920fadbe79f18b17",
+      "pass": true,
+      "rounds": 1,
+      "snapshots": 16200,
+      "overloads": 0,
+      "recoveries": 0,
+      "stepCpu": {
+        "count": 1805,
+        "mean": 3.850805872576147,
+        "p95": 8.80880000000252,
+        "p99": 11.884599999999864,
+        "max": 18.020999999999958
+      },
+      "snapshotCpu": {
+        "count": 601,
+        "mean": 15.995435940099863,
+        "p95": 20.5041999999994,
+        "p99": 22.51369999999997,
+        "max": 37.350799999999936
+      },
+      "snapshotGap": {
+        "count": 601,
+        "mean": 50.01351996672213,
+        "p95": 63.78679999999804,
+        "p99": 70.05060000000049,
+        "max": 82.4357
+      },
+      "inputApply": {
+        "count": 18892,
+        "mean": 5.894940625661668,
+        "p95": 22.357700000000477,
+        "p99": 34.03979999999865,
+        "max": 43.26769999999851
+      },
+      "rtt": {
+        "count": 336,
+        "mean": 15.884050297619085,
+        "p95": 32.09410000000025,
+        "p99": 41.20229999999992,
+        "max": 49.19410000000062
+      },
+      "ack": {
+        "count": 15476,
+        "mean": 48.36262133626255,
+        "p95": 67.48159999999916,
+        "p99": 73.70560000000114,
+        "max": 83.41939999999886
+      },
+      "receivedBytes": 318549890,
+      "finalRss": 208453632,
+      "peakSampledRss": 208453632,
+      "cleanup": {
+        "rooms": 0,
+        "tokens": 0,
+        "peers": 0
+      }
+    }
+  ]
+}
