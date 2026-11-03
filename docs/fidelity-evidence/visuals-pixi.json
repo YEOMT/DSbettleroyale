@@ -1,0 +1,1392 @@
+{
+  "renderer": "pixi",
+  "cases": [
+    {
+      "name": "basic",
+      "ability": "emoji-000",
+      "kind": "attack",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": "out"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 79,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "muzzle",
+            "shot",
+            "explosion",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 99,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "muzzle",
+            "shot",
+            "explosion",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "slash",
+      "ability": "emoji-001",
+      "kind": "attack",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": []
+      },
+      "observed": [
+        {
+          "frames": 69,
+          "renderedKinds": [],
+          "effectKinds": [
+            "swing"
+          ],
+          "ordinals": [],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 0
+        },
+        {
+          "frames": 78,
+          "renderedKinds": [],
+          "effectKinds": [
+            "swing"
+          ],
+          "ordinals": [],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 0
+        }
+      ]
+    },
+    {
+      "name": "sniper",
+      "ability": "emoji-023",
+      "kind": "skill",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 140,
+          "renderedKinds": [
+            "warning",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 164,
+          "renderedKinds": [
+            "warning",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "wizard",
+      "ability": "emoji-003",
+      "kind": "skill",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 199,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 28
+        },
+        {
+          "frames": 254,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 28
+        }
+      ]
+    },
+    {
+      "name": "bubble",
+      "ability": "emoji-056",
+      "kind": "skill",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 224,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 267,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "bats",
+      "ability": "emoji-036",
+      "kind": "skill",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 230,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 6
+        },
+        {
+          "frames": 268,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 6
+        }
+      ]
+    },
+    {
+      "name": "boomerang",
+      "ability": "emoji-066",
+      "kind": "skill",
+      "server": {
+        "turns": [],
+        "returnCount": 2,
+        "ends": [
+          {
+            "reason": "returned",
+            "turn": 0,
+            "phase": "return"
+          },
+          {
+            "reason": "returned",
+            "turn": 0,
+            "phase": "return"
+          },
+          {
+            "reason": "returned",
+            "turn": 0,
+            "phase": "return"
+          },
+          {
+            "reason": "returned",
+            "turn": 0,
+            "phase": "return"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 234,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0,
+            1
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": true,
+          "shotCount": 4
+        },
+        {
+          "frames": 284,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0,
+            1
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": true,
+          "shotCount": 4
+        }
+      ]
+    },
+    {
+      "name": "tennis",
+      "ability": "emoji-045",
+      "kind": "skill",
+      "server": {
+        "turns": [
+          2,
+          1
+        ],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "range",
+            "turn": 1,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 2,
+            "phase": "out"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 234,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 2,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 269,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 1,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "basketball",
+      "ability": "emoji-089",
+      "kind": "skill",
+      "server": {
+        "turns": [],
+        "returnCount": 2,
+        "ends": [
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "returned",
+            "turn": 0,
+            "phase": "return"
+          },
+          {
+            "reason": "returned",
+            "turn": 0,
+            "phase": "return"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 248,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": true,
+          "shotCount": 4
+        },
+        {
+          "frames": 287,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": true,
+          "shotCount": 4
+        }
+      ]
+    },
+    {
+      "name": "genie",
+      "ability": "emoji-012",
+      "kind": "skill",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 353,
+          "renderedKinds": [
+            "turret",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 14
+        },
+        {
+          "frames": 427,
+          "renderedKinds": [
+            "turret",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 14
+        }
+      ]
+    },
+    {
+      "name": "void",
+      "ability": "emoji-132",
+      "kind": "skill",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": null
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 231,
+          "renderedKinds": [
+            "beam"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit"
+          ],
+          "ordinals": [],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 275,
+          "renderedKinds": [
+            "beam"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit"
+          ],
+          "ordinals": [],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "dynamite",
+      "ability": "emoji-039",
+      "kind": "skill",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": null
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 195,
+          "renderedKinds": [
+            "warning",
+            "lob"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "explosion"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 227,
+          "renderedKinds": [
+            "warning",
+            "lob"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "explosion"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "beast12",
+      "ability": "emoji-140",
+      "kind": "skill",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "fired",
+            "turn": 0,
+            "phase": null
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "hit",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "range",
+            "turn": 0,
+            "phase": "out"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 222,
+          "renderedKinds": [
+            "warning",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 24
+        },
+        {
+          "frames": 282,
+          "renderedKinds": [
+            "warning",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 24
+        }
+      ]
+    }
+  ]
+}
