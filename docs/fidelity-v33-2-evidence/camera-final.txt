@@ -1,0 +1,36 @@
+camera canvas 1920 auto PASS
+camera canvas 1920 normal PASS
+camera canvas 1920 broadcast PASS
+camera canvas 1920 focus PASS
+camera canvas 1920 capture PASS
+camera canvas 1366 auto PASS
+camera canvas 1366 normal PASS
+camera canvas 1366 broadcast PASS
+camera canvas 1366 focus PASS
+camera canvas 1366 capture PASS
+camera canvas 1024 auto PASS
+camera canvas 1024 normal PASS
+camera canvas 1024 broadcast PASS
+camera canvas 1024 focus PASS
+camera canvas 1024 capture PASS
+오후 1:26:04 [vite] ws proxy error:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:221:20)
+오후 1:26:04 [vite] ws proxy socket error:
+Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:221:20)
+camera pixi 1920 auto PASS
+camera pixi 1920 normal PASS
+camera pixi 1920 broadcast PASS
+camera pixi 1920 focus PASS
+camera pixi 1920 capture PASS
+camera pixi 1366 auto PASS
+camera pixi 1366 normal PASS
+camera pixi 1366 broadcast PASS
+camera pixi 1366 focus PASS
+camera pixi 1366 capture PASS
+camera pixi 1024 auto PASS
+camera pixi 1024 normal PASS
+camera pixi 1024 broadcast PASS
+camera pixi 1024 focus PASS
+camera pixi 1024 capture PASS

@@ -1,3 +1,4 @@
+import {publicEvidence} from './redact.mjs';
 import assert from 'node:assert/strict';import fs from 'node:fs';import {auditHarness,delay} from './harness.mjs';import {openBaseline} from '../../tools/baseline/browser.mjs';
 fs.mkdirSync('artifacts/fidelity-v33-2',{recursive:true});const h=await auditHarness({audio:true}),report={network:[],stages:[],failures:[],controls:[]};
 const read=()=>h.host.evaluate(async()=>{const {audio}=await import('/src/main.js');return audio.diagnostics();});
@@ -16,4 +17,4 @@ try{
  await h.host.evaluate(()=>{HTMLMediaElement.prototype.play=HTMLMediaElement.prototype._auditPlay;delete HTMLMediaElement.prototype._auditPlay;});await h.host.locator('#br-pref-music').click();await delay(500);
  await h.host.route(/dropbox/,route=>route.fulfill({status:503,contentType:'text/plain',body:'audit simulated failure'}));await h.host.evaluate(async()=>{const {audio}=await import('/src/main.js');audio.controller.stop();audio.controller.urls.ready+='&audit_failure='+Date.now();audio.controller.sync(audio.session.roomMeta,true);});await h.host.waitForFunction(async()=>(await import('/src/main.js')).audio.state.blocked,{},{timeout:10000});const failure=await read();assert.equal(failure.blocked,true);assert.equal(failure.status,'음원 연결을 확인해 주세요');report.injectedNetworkFailure=failure;
  report.playbackPass=report.stages.slice(0,3).every(s=>s.readyState>=2&&!s.paused&&s.currentTime>0)&&report.stages[2].stage==='final';report.status=report.playbackPass?'PASS':'FAIL_EXTERNAL_AUDIO';report.errors=h.errors;assert.deepEqual(h.errors,[]);await h.host.screenshot({path:'artifacts/fidelity-v33-2/audio-failure-status.png'});console.log(JSON.stringify({status:report.status,stages:report.stages.map(s=>({phase:s.phase,stage:s.stage,readyState:s.readyState,error:s.error})),network:report.network.length}));
-}finally{fs.writeFileSync('artifacts/fidelity-v33-2/audio.json',JSON.stringify(report,null,2));await h.close();}
+}finally{fs.writeFileSync('artifacts/fidelity-v33-2/audio.json',JSON.stringify(publicEvidence(report),null,2));await h.close();}

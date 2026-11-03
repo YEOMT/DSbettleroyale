@@ -6,6 +6,8 @@ PASS: 28 · PARTIAL: 39 · FAIL: 1 · NOT_RUN: 2
 
 v33.1 evidence supplement: [Fidelity Repair](fidelity-repair.md). Counts stay unchanged; new actual-browser evidence narrows selected PARTIAL items without proving their entire scope.
 
+v33.2 supplement: [full feature inventory](v33-fidelity-inventory.md), [executed browser/camera/audio/quiz/load evidence](fidelity-v33-2-evidence.md). These add scoped results; the historical 70-item counts and 26/30-player long-load failures are unchanged.
+
 Commands: `npm run verify`, `npm run test:e2e`, `node tools/network/run.mjs`, `npm run test:load -- --players=26 --seconds=600`, `node tools/deploy/local-tls.mjs`. Raw local logs are in ignored `artifacts/`; shareable sanitized evidence is retained in `docs/metrics/`.
 
 | ID | Status | Requirement | Executed evidence / limit |

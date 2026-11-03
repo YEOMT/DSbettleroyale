@@ -1,0 +1,179 @@
+[
+  {
+    "mode": "solo",
+    "resultDOM": "exact same original DOM from actual server result",
+    "viewports": 4,
+    "rematches": [
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      }
+    ],
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "mode": "team-elim",
+    "resultDOM": "exact same original DOM from actual server result",
+    "viewports": 4,
+    "rematches": [
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      }
+    ],
+    "status": "PASS",
+    "errors": []
+  },
+  {
+    "mode": "team-capture",
+    "resultDOM": "exact same original DOM from actual server result",
+    "viewports": 4,
+    "rematches": [
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      },
+      {
+        "phase": "LOBBY",
+        "focus": false,
+        "zoom": 0.5,
+        "shots": 0,
+        "input": 0,
+        "stuns": 0,
+        "music": "ready",
+        "pending": 0
+      }
+    ],
+    "status": "PASS",
+    "errors": []
+  }
+]

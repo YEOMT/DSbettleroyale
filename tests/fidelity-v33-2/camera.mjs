@@ -32,7 +32,7 @@ for(const renderer of ['canvas','pixi']){
      const received=await h.host.evaluate(async()=>{const a=await import('/src/main.js');return {view:a.timeline.samples.at(-1).state,map:a.timeline.static};});
      const current=await h.host.evaluate(async({view,map})=>{const {renderer:r}=await import('/src/main.js');const rows=[];for(let n=0;n<60;n++){r.draw({...view,renderTick:view.serverTick,effects:[]},performance.now());const p=r.cameraPose;rows.push({x:p.x,y:p.y,zoom:p.zoom,screenX:p.screenX,screenY:p.screenY});}return rows;},received);
      const original=await ref.page.evaluate(({view,map,renderer})=>{
-      for(const [i,p]of game.participants.entries()){const a=view.actors[i];p.alive=a.alive;p.pos=new Vec2(a.x,a.y);p.vel=new Vec2(0,0);p.name=a.name;p.ability=EMOJI_DB.find(e=>e.id===a.abilityId);p.radius=a.radius;p.team=a.team;p.hp=a.hp;p.maxHp=a.maxHp;}game.worldRadius=map.worldRadius;game.capture=view.capture?{map:map.captureMap,active:view.capture.a,points:map.captureMap.points.map((p,i)=>({...p,enabled:!!(view.capture.am&(1<<i)),state:view.capture.z[i][0],team:view.capture.z[i][1],counts:[0,...view.capture.z[i][2]]}))}:null;game.boundary=map.boundary;game.refreshAliveCache();const mode=game.capture?'capture':game.getHostBroadcastMode(),out=[];
+      for(const [i,p]of game.participants.entries()){const a=view.actors[i];p.alive=a.alive;p.pos=new Vec2(a.x,a.y);p.vel=new Vec2(0,0);p.name=a.name;p.ability=EMOJI_DB.find(e=>e.id===a.abilityId);p.cacheCanvas=new Participant(p.id,p.name,p.ability,p.pos,p.team).cacheCanvas;p.radius=a.radius;p.team=a.team;p.hp=a.hp;p.maxHp=a.maxHp;}game.worldRadius=map.worldRadius;game.capture=view.capture?{map:map.captureMap,active:view.capture.a,points:map.captureMap.points.map((p,i)=>({...p,enabled:!!(view.capture.am&(1<<i)),state:view.capture.z[i][0],team:view.capture.z[i][1],counts:[0,...view.capture.z[i][2]]}))}:null;game.boundary=map.boundary;game.refreshAliveCache();const mode=game.capture?'capture':game.getHostBroadcastMode(),out=[];
       for(let n=0;n<60;n++){let pose;if(renderer==='pixi'){brPixiHostFrame(game,mode);pose={x:game.lookAt.x,y:game.lookAt.y,zoom:brPixiHost.world.scale.x,screenX:brPixiHost.world.x+game.lookAt.x*game.zoom,screenY:brPixiHost.world.y+game.lookAt.y*game.zoom};}
        else if(mode==='performance'){let first;const arc=ctx.arc;ctx.arc=function(x,y,r,...rest){first??={x,y,r};return arc.call(this,x,y,r,...rest);};try{game.drawHostLite();}finally{ctx.arc=arc;}pose={x:0,y:0,zoom:first.r/game.worldRadius,screenX:first.x,screenY:first.y};}
        else{game.draw();pose={x:game.lookAt.x,y:game.lookAt.y,zoom:game.zoom,screenX:canvas.width/2,screenY:game.capture?Math.min(126,canvas.height*.22)+(canvas.height-Math.min(126,canvas.height*.22)-48)/2:canvas.height/2};}out.push(pose);
@@ -50,7 +50,14 @@ for(const renderer of ['canvas','pixi']){
      if(renderer==='canvas'&&scenario==='auto')hiddenZoomDifference=mode==='performance'?.5-current.at(-1).zoom:hiddenZoomDifference*Math.pow(factor,60);
 
      trace.push({count,first:current[0],last:current.at(-1),originalFirst:original[0],originalLast:original.at(-1),originalCanvasHiddenZoomCorrection:hiddenZoomDifference});
-     if(count===2&&['auto','capture'].includes(scenario)){await h.host.screenshot({path:`artifacts/fidelity-v33-2/camera-${renderer}-${viewport.width}-${scenario}-ws.png`});await ref.page.screenshot({path:`artifacts/fidelity-v33-2/camera-${renderer}-${viewport.width}-${scenario}-original.png`});}
+     if(count===2&&['auto','capture'].includes(scenario)){
+      // Camera trace advances synchronously. Let the real 750ms death paint expire
+      // before paired stills, without advancing the tested camera a 61st frame.
+      await delay(800);await h.host.evaluate(async view=>{const {renderer:r}=await import('/src/main.js'),update=r.camera.update,pose=r.cameraPose;r.camera.update=()=>pose;try{r.draw({...view,renderTick:view.serverTick,effects:[]},performance.now());}finally{r.camera.update=update;}},received.view);
+      // Canvas and Pixi have different canvas elements. Capture the visible render
+      // surface, excluding unrelated HUD placeholders in this camera-only fixture.
+      for(const [page,suffix]of [[h.host,'ws'],[ref.page,'original']]){const style=await page.addStyleTag({content:'body * {visibility:hidden!important} canvas {visibility:visible!important}'});await page.screenshot({path:`artifacts/fidelity-v33-2/camera-${renderer}-${viewport.width}-${scenario}-${suffix}.png`});await style.evaluate(e=>e.remove());}
+     }
     }
     if(scenario==='auto')assert.ok(trace.at(-1).last.zoom>trace[0].last.zoom*2,'late survivors cannot stay fixed at whole-map scale');
     report.push({renderer,viewport,scenario,frames:300,trace,pass:true});console.log('camera',renderer,viewport.width,scenario,'PASS');

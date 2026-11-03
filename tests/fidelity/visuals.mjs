@@ -9,7 +9,9 @@ fs.mkdirSync('artifacts/fidelity',{recursive:true});let comparison;
 try{
  const w=h.room.world;h.room.safePaused=true;w.game.smokes=[];w.game.zones=[];
  let serverEvents=[];const sink=w.eventSink;w.eventSink=e=>{serverEvents.push(structuredClone(e));sink(e);};
- for(const page of h.pages)await page.evaluate(()=>{const r=fidelity.app.renderer,draw=r.draw.bind(r);fidelity.draws=[];fidelity.events=[];fidelity.app.net.addEventListener('event',e=>fidelity.events.push(e.detail));r.draw=(v,n)=>{draw(v,n);fidelity.draws.push(structuredClone({tick:v.renderTick,self:v.self?.id,shots:v.shots,effects:v.effects,actors:v.actors}));if(fidelity.draws.length>500)fidelity.draws.shift();};});
+ // Keep early short-lived shots as well as the latest return/terminal frames.
+ // Software WebGL screenshots on CI can outlast a last-500-only ring buffer.
+ for(const page of h.pages)await page.evaluate(()=>{const r=fidelity.app.renderer,draw=r.draw.bind(r);fidelity.draws=[];fidelity.events=[];fidelity.app.net.addEventListener('event',e=>fidelity.events.push(e.detail));r.draw=(v,n)=>{draw(v,n);fidelity.draws.push(structuredClone({tick:v.renderTick,self:v.self?.id,shots:v.shots,effects:v.effects,actors:v.actors}));if(fidelity.draws.length>500)fidelity.draws.splice(250,1);};});
  for(const [name,ability,kind,ticks]of cases){
   w.BRRework.clearWorld(w.game,'fixture');w.game.projectiles=[];w.game.zones=[];w.game.retiredShots=[];w.actionPending.clear();w.inputPending.clear();w.game.walls=[];
   // Clear the spatial index, cached wire rows and respawn queues as well as visible boxes.
@@ -19,10 +21,10 @@ try{
   for(const [i,p]of h.players.entries()){const id=p.remoteId,life=p.lifeSeq+1,team=p.team,a=w.EMOJI_DB.find(a=>a.id===ability),fresh=new w.Participant(i+1,'Fidelity'+i,a,new w.Vec2(i?300:0,i?(name==='tennis'?200:name==='basketball'?0:70):0),team);Object.assign(p,fresh,{remoteId:id,sessionId:id,lifeSeq:life,team,alive:true,connected:true,spawnProtectionUntilFrame:0,applyPlayerInput:w.brApplyPlayerInput,basicCooldown:0,cooldown:0,lastAimDir:new w.Vec2(1,0),abilityId:a.id,abilityIndex:w.EMOJI_DB.indexOf(a)});w.brInitRun(p);p.aimProfileKey=null;p.rw=null;w.session.inputs[id]={};}
   // Both tennis players have a clear lane to a real wall, away from aim-assist targets.
   if(name==='tennis')w.game.walls=[new w.Wall(-200,0,35,700,0),new w.Wall(500,0,35,700,0)];
-  h.staticState();h.publish();await delay(100);for(const page of h.pages)await page.evaluate(()=>{fidelity.app.controls.enabled=true;document.getElementById('br-toast').classList.remove('show');});
+  h.staticState();h.publish();for(const [i,page]of h.pages.entries())await page.waitForFunction(life=>fidelity.app.net.lifeSeq===life&&fidelity.app.timeline.predicted?.lifeSeq===life,h.players[i].lifeSeq);for(const page of h.pages)await page.evaluate(()=>{fidelity.app.controls.enabled=true;document.getElementById('br-toast').classList.remove('show');});
   for(const page of h.pages)await page.evaluate(()=>{fidelity.draws=[];fidelity.events=[];fidelity.app.timeline.spawns.clear();fidelity.app.timeline.terminals.clear();fidelity.app.timeline.effects=[];});
   for(const [i,page]of h.pages.entries()){await page.evaluate(({kind,i})=>{const c=fidelity.app.controls;c.lastFire={};c.fire(kind,{aim:{x:i?-1:1,y:0}});}, {kind,i});}
-  await delay(40);assert.ok([...w.actionPending.values()].some(q=>q.length),name+' actual WS action queued');
+  for(let n=0;n<100&&h.players.some(p=>!w.actionPending.get(p.remoteId)?.length);n++)await delay(20);for(const p of h.players)assert.ok(w.actionPending.get(p.remoteId)?.length,name+' each player WS action queued');
   let saved=false;const serverTurns=new Map(),serverReturns=new Set();
   for(let tick=0;tick<ticks;tick++){
    // Keep a target alive so the visual lifetime/return can be observed; no damage formula is changed.
@@ -42,7 +44,7 @@ try{
    for(const d of draws){const ids=d.shots.filter(q=>['projectile','hook','lob','bomb'].includes(q.kind)).map(q=>[q.owner,q.life,q.actionKind,q.actionSeq,q.ordinal].join(':'));assert.equal(new Set(ids).size,ids.length,name+' no duplicate preview/authority');}
    const fired=data.events.filter(e=>e.type==='SHOT_SPAWN'),unique=new Set(fired.filter(e=>e.data.owner===h.players[0].remoteId&&['projectile','lob'].includes(e.data.kind)).map(e=>e.data.ordinal));
    if(name==='basketball')assert.ok(shots.some(s=>s.phase==='return'),'harmless basketball return actually rendered');if(name==='tennis')for(const p of h.players)assert.ok(shots.some(s=>s.owner===p.remoteId&&s.turn>0),'own and opponent reflection actually rendered');if(name==='beast12')assert.equal(unique.size,12,'all twelve ordinals arrive');
-   if(name==='basic'){const native=shots.find(s=>s.native&&!s.preview);assert.ok(native.style);assert.equal(native.emoji,null);assert.ok(Math.hypot(native.dx,native.dy)>1);}
+   if(name==='basic'){const native=shots.find(s=>s.native&&!s.preview);assert.ok(native,'authoritative native shot retained among first/last 250 frames; events='+JSON.stringify(fired.map(e=>({owner:e.data.owner,kind:e.data.kind,native:e.data.native}))));assert.ok(native.style);assert.equal(native.emoji,null);assert.ok(Math.hypot(native.dx,native.dy)>1);}
    observed.push({frames:draws.length,renderedKinds:[...new Set(shots.map(s=>s.kind))],effectKinds:[...new Set(effects.map(f=>f.kind))],ordinals:[...unique],ownAndOpponent:true,noDuplicates:true,confirmedFeedback:data.feedback,turns:Math.max(0,...shots.map(s=>s.turn||0)),returnSeen:shots.some(s=>s.phase==='return'),shotCount:fired.length});
   }
   assert.ok(saved,name+' screenshot captured');console.log(report.renderer,name,'PASS');

@@ -1,0 +1,164 @@
+Import/runtime boundary check: 100 modules
+CI/release/rollback YAML parsed with unique keys.
+✔ real WebSocket solo: server battle, host disconnect, results and rematch (364.1043ms)
+✔ real WebSocket team-elim: server battle, host disconnect, results and rematch (239.9606ms)
+✔ real WebSocket team-capture: server battle, host disconnect, results and rematch (233.4955ms)
+✔ same-room five rematches keep identities and clear old combat; drain protects started quiz (59.7291ms)
+✔ authenticated drain timeout does not finish quiz or replace process; seal is atomic (2283.2456ms)
+✔ real respawn quiz three answers, keep/reroll, spawn protection and duplicate augment (200.6216ms)
+✔ 26 simultaneous reconnects restore authoritative state, expired event history is not replayed (221.4451ms)
+✔ bounded slow receiver cannot hold another player tick; safe pause has explicit host continuation (504.9061ms)
+✔ draft recovery refreshes valid assignments and restores the deterministic spent draw without free rerolls (69.397ms)
+✔ real WebSocket lobby → authoritative quiz → valid zero-score draft, idempotent answers/rerolls (20.3589ms)
+✔ resume restores assigned card and supersedes old socket; nickname cannot claim identity (21.2692ms)
+✔ host kick revokes token; malformed and forged authority payloads are rejected (14.1024ms)
+✔ preserved baseline is the exact upstream Git blob (2.9741ms)
+✔ effective manifest and actual reference attacks cover all 77 permanent IDs (10.2019ms)
+✔ all 77 effective actor stats and final basic profiles match the real browser baseline (20.3458ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-000 (29.7929ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-001 (13.4604ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-002 (13.7956ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-003 (20.8808ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-004 (9.857ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-006 (12.1389ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-007 (9.9785ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-008 (10.0539ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-010 (8.86ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-012 (9.6035ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-013 (8.443ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-014 (7.5658ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-019 (10.0869ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-020 (11.0311ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-022 (8.0075ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-037 (14.8624ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-085 (10.616ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-098 (7.5254ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-110 (11.3293ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-131 (7.8689ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-132 (8.129ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-023 (8.7305ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-024 (14.08ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-025 (8.1543ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-026 (6.2959ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-027 (7.4101ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-028 (7.0971ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-029 (7.3461ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-030 (7.3151ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-031 (11.5918ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-033 (9.3053ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-034 (7.745ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-035 (8.6812ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-036 (7.8842ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-063 (8.2252ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-065 (7.6296ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-066 (8.7188ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-087 (7.3171ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-099 (6.1906ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-101 (7.668ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-133 (7.5252ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-038 (5.6562ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-039 (6.5133ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-040 (11.4312ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-041 (9.5746ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-042 (10.8446ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-043 (5.958ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-044 (6.9364ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-045 (6.5104ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-047 (8.5897ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-048 (13.0007ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-070 (7.593ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-072 (6.2518ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-089 (7.7038ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-102 (7.7882ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-112 (5.9906ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-137 (9.751ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-073 (6.0242ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-074 (5.5956ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-075 (6.148ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-076 (7.7359ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-077 (11.0061ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-092 (6.8599ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-094 (7.8786ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-105 (6.4642ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-113 (5.8022ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-121 (7.3189ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-122 (7.9065ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-126 (6.5555ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-127 (6.2403ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-128 (8.1768ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-052 (6.1833ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-054 (6.8813ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-056 (8.8165ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-114 (6.2615ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-139 (5.1673ms)
+✔ actual basic + skill and 180 fixed ticks: emoji-140 (6.8928ms)
+✔ two room simulations have isolated mutable registries, world state and RNG (31.4138ms)
+✔ original weak aim selects visible target and server rejects stale life and excessive turn (34.0075ms)
+✔ student camera interest respects portrait and landscape aspect while self remains present (8.1548ms)
+✔ all77 draft descriptions render, including native characters with null rework skill (0.9024ms)
+✔ host-only particles/text never enter student snapshots; turret interest and precision are preserved (31.8513ms)
+✔ host camera uses authoritative presentation focus/final/end and human focus, capture overrides focus (0.4567ms)
+✔ all77 display descriptions preserve nonempty original skills and numeric cooldown text (0.3014ms)
+✔ original FX lifetimes keep damage and KO visible beyond old 500ms cutoff (0.138ms)
+✔ quiz rerender/reconnect cannot extend the same deadline, new round can reset it (0.2152ms)
+✔ only own pending REMATCH ACK may transition the client to a new match scope (2.0926ms)
+✔ actual farm rows use geometry x/y/w/h and cannot poison predicted coordinates (3.7038ms)
+✔ missing augment effect/detail fails loudly (0.4773ms)
+✔ authority rejecting a melee action cancels its opening cue without a projectile (1.2204ms)
+✔ 12 anticipated rounds have distinct action identity and delayed births (0.6646ms)
+✔ RW direction is multiplied by speed exactly once; native is already velocity (0.2734ms)
+✔ reflected terminal follows its recorded corner and never invents a chord (0.7844ms)
+✔ authoritative corner path is not interpolated through the reflecting wall (0.804ms)
+✔ straight native/RW extrapolation obeys remaining range and bounded horizon (0.163ms)
+✔ capture 2 teams 300s: full fixed-tick timeout and awards (183.1027ms)
+✔ capture 2 teams 360s: full fixed-tick timeout and awards (266.1671ms)
+✔ capture 3 teams 300s: full fixed-tick timeout and awards (314.7884ms)
+✔ capture 3 teams 360s: full fixed-tick timeout and awards (333.1375ms)
+✔ capture 4 teams 300s: full fixed-tick timeout and awards (363.3641ms)
+✔ capture 4 teams 360s: full fixed-tick timeout and awards (406.7319ms)
+✔ wanggui exclusion, S prohibition and idempotent HP ratio recomputation (11.3549ms)
+✔ survival result includes original winner, kills, damage and iron-wall awards (5.0965ms)
+✔ ordinary movement, stop and wall use the original movement kernel, no idle drift over ten seconds (76.1177ms)
+✔ timeline rejects duplicates, does not smooth across teleport/life, and retains short-shot terminals (1.8274ms)
+✔ protocol roundtrip, version/content/engine/build match (1.5238ms)
+✔ unknown commands, HP/position forgery, null/Infinity and excess inputs fail (0.5869ms)
+✔ level 6, XP 20, five actual offers, III cap and mutually exclusive growth (48.3474ms)
+✔ headless mode solo creates and advances (21.0591ms)
+✔ headless mode team-elim creates and advances (15.5926ms)
+✔ headless mode team-capture creates and advances (8.4934ms)
+✔ headless mode team-respawn creates and advances (30.0608ms)
+✔ capture uses population difference, middle multiplier, fever, 120-second activation (2.7004ms)
+✔ stale input becomes neutral and cannot accelerate ticks (6.9881ms)
+✔ prepared snapshot serialization preserves exact JSON values and recipient privacy (1.5193ms)
+ℹ tests 130
+ℹ suites 0
+ℹ pass 130
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9451.4139
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 803 modules transformed.
+rendering chunks...
+computing gzip size...
+../../dist/client/index.html                              23.86 kB │ gzip:   6.30 kB
+../../dist/client/assets/index-D54UYeNm.css               43.27 kB │ gzip:  10.58 kB
+../../dist/client/assets/Filter-aMhFzyi2.js                0.90 kB │ gzip:   0.47 kB
+../../dist/client/assets/BufferResource-BcOj3lOZ.js       11.12 kB │ gzip:   2.85 kB
+../../dist/client/assets/webworkerAll-Dh_6P6fl.js         15.42 kB │ gzip:   4.86 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+../../dist/client/assets/CanvasRenderer-gQclwtHx.js       17.79 kB │ gzip:   5.96 kB
+../../dist/client/assets/browserAll-I5vjdTdO.js           43.09 kB │ gzip:  11.29 kB
+../../dist/client/assets/WebGPURenderer-C5DqxyV4.js       45.99 kB │ gzip:  13.21 kB
+../../dist/client/assets/RenderTargetSystem-CKCSEtch.js   52.14 kB │ gzip:  14.38 kB
+../../dist/client/assets/WebGLRenderer-DJV7esOH.js        72.09 kB │ gzip:  19.63 kB
+../../dist/client/assets/index-BMQsBjOU.js               728.49 kB │ gzip: 211.72 kB
+✓ built in 5.20s
+Client and server built. Root legacy index.html was not changed.
+VERIFY PASSED: boundaries, unit/parity, actual loopback WS integration, client/server build. Browser, load and public deployment are separate checks.

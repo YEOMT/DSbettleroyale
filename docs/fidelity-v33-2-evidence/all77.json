@@ -1,0 +1,9758 @@
+{
+  "scope": "77 characters x 3 qualities x 2 backends. Actual WS actions and renderer frames; accelerated 180 physics ticks per character, not real-time combat or pixel equality of full scenes.",
+  "cases": [
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-000",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "fire"
+      ],
+      "serverEvents": 25,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-001",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport",
+        "explosion"
+      ],
+      "shotKinds": [
+        "fire",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-002",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-003",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 120,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-004",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-006",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "orbit"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-007",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "orbit",
+        "projectile",
+        "warning",
+        "radiation"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-008",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "radiation",
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-010",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "gravity"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-012",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "gravity",
+        "projectile",
+        "turret"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-013",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "turret",
+        "transit",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-014",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "poison"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-019",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "poison",
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-020",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 59,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-022",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-037",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-085",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-098",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-110",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-131",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 40,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-132",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "beam"
+      ],
+      "serverEvents": 34,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-023",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "beam",
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-024",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-025",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-026",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-027",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-028",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-029",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning",
+        "leap"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-030",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-031",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-033",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-034",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-035",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-036",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 26,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-063",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 46,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-065",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-066",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-087",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-099",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-101",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-133",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-038",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-039",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "lob",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-040",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-041",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 44,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-042",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-043",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-044",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash",
+        "ice-trail"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-045",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "ice-trail",
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-047",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-048",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-070",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 24,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-072",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-089",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-102",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-112",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-137",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-073",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-074",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 20,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-075",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-076",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-077",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-092",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-094",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-105",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-113",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-121",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "swing"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-122",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "thorns"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-126",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "pin-trap"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-127",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "pin-trap",
+        "dash"
+      ],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-128",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-052",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "impact"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-054",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-056",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-114",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-139",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "id": "emoji-140",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "warning",
+        "projectile"
+      ],
+      "serverEvents": 66,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-000",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "fire"
+      ],
+      "serverEvents": 25,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-001",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport",
+        "explosion"
+      ],
+      "shotKinds": [
+        "fire",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-002",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-003",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 120,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-004",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-006",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "orbit"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-007",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "orbit",
+        "projectile",
+        "warning",
+        "radiation"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-008",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "radiation",
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-010",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "gravity"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-012",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "gravity",
+        "projectile",
+        "turret"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-013",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "turret",
+        "transit",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-014",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "poison"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-019",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "poison",
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-020",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 59,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-022",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-037",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-085",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-098",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-110",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-131",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 40,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-132",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "beam"
+      ],
+      "serverEvents": 34,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-023",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "beam",
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-024",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-025",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-026",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-027",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-028",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-029",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning",
+        "leap"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-030",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-031",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-033",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-034",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-035",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-036",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 26,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-063",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 46,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-065",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-066",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-087",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-099",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-101",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-133",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-038",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-039",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "lob",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-040",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-041",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 44,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-042",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-043",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-044",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash",
+        "ice-trail"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-045",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "ice-trail",
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-047",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-048",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-070",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 24,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-072",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-089",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-102",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-112",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-137",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-073",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-074",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 20,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-075",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-076",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-077",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-092",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-094",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-105",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-113",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-121",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "swing"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-122",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "thorns"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-126",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "pin-trap"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-127",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "pin-trap",
+        "dash"
+      ],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-128",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-052",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "impact"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-054",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-056",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-114",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-139",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "balanced",
+      "id": "emoji-140",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "warning",
+        "projectile"
+      ],
+      "serverEvents": 66,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-000",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "fire"
+      ],
+      "serverEvents": 25,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-001",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport",
+        "explosion"
+      ],
+      "shotKinds": [
+        "fire",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-002",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-003",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 120,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-004",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-006",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "orbit"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-007",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "orbit",
+        "projectile",
+        "warning",
+        "radiation"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-008",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "radiation",
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-010",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "gravity"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-012",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "gravity",
+        "projectile",
+        "turret"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-013",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "turret",
+        "transit",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-014",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "poison"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-019",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "poison",
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-020",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 59,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-022",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-037",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-085",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-098",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-110",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-131",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 40,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-132",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "beam"
+      ],
+      "serverEvents": 34,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-023",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "beam",
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-024",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-025",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-026",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-027",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-028",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-029",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning",
+        "leap"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-030",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-031",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-033",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-034",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-035",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-036",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 26,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-063",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 46,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-065",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-066",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-087",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-099",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-101",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-133",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-038",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-039",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "lob",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-040",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-041",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 44,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-042",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-043",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-044",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash",
+        "ice-trail"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-045",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "ice-trail",
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-047",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-048",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-070",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 24,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-072",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-089",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-102",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-112",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-137",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-073",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-074",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 20,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-075",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-076",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 31,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-077",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-092",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-094",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-105",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-113",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-121",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "swing"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-122",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "thorns"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-126",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "pin-trap"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-127",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "pin-trap",
+        "dash"
+      ],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-128",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-052",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "impact"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-054",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-056",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-114",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-139",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "canvas",
+      "quality": "high",
+      "id": "emoji-140",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "warning",
+        "projectile"
+      ],
+      "serverEvents": 66,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-000",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "fire"
+      ],
+      "serverEvents": 25,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-001",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport",
+        "explosion"
+      ],
+      "shotKinds": [
+        "fire",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-002",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-003",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 120,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-004",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-006",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "orbit"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-007",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "orbit",
+        "projectile",
+        "warning",
+        "radiation"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-008",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "radiation",
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-010",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "gravity"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-012",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "gravity",
+        "projectile",
+        "turret"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-013",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "turret",
+        "transit",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-014",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "poison"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-019",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "poison",
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-020",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 59,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-022",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-037",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-085",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-098",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-110",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-131",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 40,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-132",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "beam"
+      ],
+      "serverEvents": 34,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-023",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "beam",
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-024",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-025",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-026",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-027",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-028",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-029",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning",
+        "leap"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-030",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-031",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-033",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-034",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-035",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-036",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 26,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-063",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 46,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-065",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-066",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-087",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-099",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-101",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-133",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-038",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-039",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "lob",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-040",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-041",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 44,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-042",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-043",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-044",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash",
+        "ice-trail"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-045",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "ice-trail",
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-047",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-048",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-070",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 24,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-072",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-089",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-102",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-112",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-137",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-073",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-074",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 20,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-075",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-076",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-077",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-092",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-094",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-105",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-113",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-121",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "swing"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-122",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "thorns"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-126",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "pin-trap"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-127",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "pin-trap",
+        "dash"
+      ],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-128",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-052",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "impact"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-054",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-056",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-114",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-139",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "low",
+      "id": "emoji-140",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "warning",
+        "projectile"
+      ],
+      "serverEvents": 66,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-000",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "fire"
+      ],
+      "serverEvents": 25,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-001",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport",
+        "explosion"
+      ],
+      "shotKinds": [
+        "fire",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-002",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-003",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 120,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-004",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-006",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "orbit"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-007",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "orbit",
+        "projectile",
+        "warning",
+        "radiation"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-008",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "radiation",
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-010",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "gravity"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-012",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "gravity",
+        "projectile",
+        "turret"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-013",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "turret",
+        "transit",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-014",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "poison"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-019",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "poison",
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-020",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 59,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-022",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-037",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-085",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-098",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-110",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-131",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 40,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-132",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "beam"
+      ],
+      "serverEvents": 34,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-023",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "beam",
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-024",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-025",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-026",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-027",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-028",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-029",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning",
+        "leap"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-030",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-031",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-033",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-034",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-035",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-036",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 26,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-063",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 46,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-065",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-066",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-087",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-099",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-101",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-133",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-038",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-039",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "lob",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-040",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-041",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 44,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-042",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-043",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-044",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash",
+        "ice-trail"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-045",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "ice-trail",
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-047",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-048",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-070",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 24,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-072",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-089",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-102",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-112",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-137",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-073",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-074",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 20,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-075",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-076",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-077",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-092",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-094",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-105",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-113",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-121",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "swing"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-122",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "thorns"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-126",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "pin-trap"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-127",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "pin-trap",
+        "dash"
+      ],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-128",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-052",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "impact"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-054",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-056",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-114",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-139",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "balanced",
+      "id": "emoji-140",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "warning",
+        "projectile"
+      ],
+      "serverEvents": 66,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-000",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "fire"
+      ],
+      "serverEvents": 25,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-001",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport",
+        "explosion"
+      ],
+      "shotKinds": [
+        "fire",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-002",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-003",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 120,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-004",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-006",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "orbit"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-007",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "orbit",
+        "projectile",
+        "warning",
+        "radiation"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-008",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "radiation",
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-010",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "gravity"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-012",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "gravity",
+        "projectile",
+        "turret"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-013",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "turret",
+        "transit",
+        "warning"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-014",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "poison"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-019",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "poison",
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-020",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 59,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-022",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-037",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-085",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-098",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-110",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-131",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 40,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-132",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "beam"
+      ],
+      "serverEvents": 34,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-023",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "beam",
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-024",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 5,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-025",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-026",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-027",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-028",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-029",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [
+        "warning",
+        "leap"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-030",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-031",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "hit"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-033",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-034",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-035",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-036",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 26,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-063",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 46,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-065",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "hook"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-066",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-087",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-099",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-101",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-133",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "warning",
+        "dash"
+      ],
+      "serverEvents": 9,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-038",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "teleport"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-039",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "lob",
+        "warning"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-040",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-041",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 44,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-042",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [
+        "warning"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-043",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-044",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "dash",
+        "ice-trail"
+      ],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-045",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "ice-trail",
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-047",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-048",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash",
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-070",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 24,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-072",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-089",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-102",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-112",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-137",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 16,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-073",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-074",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 20,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-075",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-076",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit",
+        "hit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 32,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-077",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 18,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-092",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-094",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-105",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "warning"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-113",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "explosion"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-121",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "swing"
+      ],
+      "shotKinds": [],
+      "serverEvents": 8,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-122",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "explosion",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "thorns"
+      ],
+      "serverEvents": 28,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-126",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile",
+        "pin-trap"
+      ],
+      "serverEvents": 12,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-127",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit"
+      ],
+      "shotKinds": [
+        "pin-trap",
+        "dash"
+      ],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-128",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 6,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-052",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit",
+        "impact"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-054",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "dash"
+      ],
+      "shotKinds": [],
+      "serverEvents": 10,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-056",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "shot",
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "projectile"
+      ],
+      "serverEvents": 14,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-114",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "swing"
+      ],
+      "shotKinds": [],
+      "serverEvents": 4,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-139",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [],
+      "shotKinds": [],
+      "serverEvents": 2,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "id": "emoji-140",
+      "frames": 14,
+      "actions": [
+        "attack",
+        "skill"
+      ],
+      "effectKinds": [
+        "hit",
+        "transit"
+      ],
+      "shotKinds": [
+        "warning",
+        "projectile"
+      ],
+      "serverEvents": 66,
+      "rwStatusRaster": "PASS",
+      "finitePositions": true,
+      "status": "PASS"
+    }
+  ]
+}

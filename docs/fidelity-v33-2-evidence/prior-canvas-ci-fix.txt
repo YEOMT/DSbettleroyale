@@ -1,0 +1,13 @@
+canvas basic PASS
+canvas slash PASS
+canvas sniper PASS
+canvas wizard PASS
+canvas bubble PASS
+canvas bats PASS
+canvas boomerang PASS
+canvas tennis PASS
+canvas basketball PASS
+canvas genie PASS
+canvas void PASS
+canvas dynamite PASS
+canvas beast12 PASS

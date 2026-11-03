@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "nativeHostStyles": 7,
+  "scope": "actual WS host records, original Particle/ImpactRing/SignatureEffect raster equality; private host data absent from student; full scene not pixel-equal claim",
+  "counts": {
+    "particles": 1,
+    "rings": 1,
+    "signatures": 1,
+    "texts": 1
+  }
+}
