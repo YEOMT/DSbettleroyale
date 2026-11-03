@@ -7,9 +7,9 @@ import {snapshotEncoder} from '../../apps/server/src/ws/snapshot.js';
 export const delay=ms=>new Promise(r=>setTimeout(r,ms));
 export async function openFidelity({renderer='canvas',touch=false}={}){
  const app=await createGameServer({port:0,hostSecret:'test-host'}),target='http://127.0.0.1:'+app.address.port;
- const vite=await createServer({configFile:'apps/client/vite.config.js',server:{port:0,strictPort:false,proxy:{'/ws':{target:target.replace('http:','ws:'),ws:true},'/version':target,'/healthz':target}}});await vite.listen();
+ const vite=await createServer({configFile:'apps/client/vite.config.js',server:{watch:null,hmr:false,port:0,strictPort:false,proxy:{'/ws':{target:target.replace('http:','ws:'),ws:true},'/version':target,'/healthz':target}}});await vite.listen();
  const url='http://127.0.0.1:'+vite.httpServer.address().port;app.config.origins.push(url);
- const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{})}),host=await(await connect(app)).host(),pages=[],contexts=[],errors=[];
+ const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{}),...(process.env.FIDELITY_SOFTWARE_GL?{args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']}:{})}),host=await(await connect(app)).host(),pages=[],contexts=[],errors=[];
  const room=app.manager.rooms.get(host.room.code);
  for(let i=0;i<2;i++){const context=await browser.newContext({viewport:{width:1280,height:720},deviceScaleFactor:1,hasTouch:touch}),page=await context.newPage();contexts.push(context);pages.push(page);page.on('pageerror',e=>errors.push(e.message));await page.goto(url+'/?room='+room.code+'&renderer='+renderer);await page.locator('#br-player-name').fill('Fidelity'+i);await page.locator('#br-join-btn').click();await page.locator('#br-student-wait').waitFor();}
  await host.command('CONFIGURE',{mode:'team-capture',teamCount:2,quizText:'Fixture | Correct | Wrong1 | Wrong2 | Wrong3'});await host.command('START_QUIZ');await host.command('BEGIN_DRAFT');await host.command('START_BATTLE');

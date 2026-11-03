@@ -1,0 +1,55 @@
+
+> dsbettleroyale@33.0.0 test:fidelity
+> node tests/fidelity/regression.mjs && node tests/fidelity/contracts.mjs && node tests/fidelity/visuals.mjs && node tests/fidelity/reference.mjs
+
+Port 5173 is in use, trying another one...
+[
+  {
+    "name": "server card quick effect/detail reaches real UI",
+    "pass": true,
+    "expected": {
+      "effect": "스킬 쿨다운 72.5%",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    "actual": "고유 스킬⏱️ QUICK CAST I스킬 쿨다운 72.5%단계 누적값 · 증감 합산·상한 적용"
+  },
+  {
+    "name": "server card control effect/detail reaches real UI",
+    "pass": true,
+    "expected": {
+      "effect": "제어 효과 +27.5% (×1.28) · 스킬 피해 5% 감소 (×0.95)",
+      "detail": "단계 누적값 · 증감 합산·상한 적용"
+    },
+    "actual": "고유 스킬❄️ CONTROL I제어 효과 +27.5% (×1.28)스킬 피해 5% 감소 (×0.95)단계 누적값 · 증감 합산·상한 적용"
+  },
+  {
+    "name": "server card wanggui effect/detail reaches real UI",
+    "pass": true,
+    "expected": {
+      "effect": "F급 · 최대 HP +66% · 공격력 +88%",
+      "detail": "평타와 공격 스킬 모두 · 다음 단계: HP +132% · 공격력 +176%"
+    },
+    "actual": "기동 · 체력👑 왕귀 IF급최대 HP +66%공격력 +88%평타와 공격 스킬 모두 · 다음 단계: HP +132% · 공격력 +176%"
+  },
+  {
+    "name": "inactive stun emits no stars in actual student renderer",
+    "pass": true,
+    "actualStars": 0
+  }
+]
+{"cards":63,"displayed":63,"idleSeconds":10,"stuns":[{"frames":30,"start":812,"end":854,"blockedMovement":true,"blockedAttack":true,"clearedDisplay":true},{"frames":60,"start":854,"end":926,"blockedMovement":true,"blockedAttack":true,"clearedDisplay":true}],"rates":[[{"fps":30,"jitter":false,"activeActorFrames":47},{"fps":30,"jitter":true,"activeActorFrames":46},{"fps":60,"jitter":false,"activeActorFrames":92},{"fps":60,"jitter":true,"activeActorFrames":92},{"fps":120,"jitter":false,"activeActorFrames":184},{"fps":120,"jitter":true,"activeActorFrames":184}],[{"fps":30,"jitter":false,"activeActorFrames":45},{"fps":30,"jitter":true,"activeActorFrames":45},{"fps":60,"jitter":false,"activeActorFrames":90},{"fps":60,"jitter":true,"activeActorFrames":90},{"fps":120,"jitter":false,"activeActorFrames":179},{"fps":120,"jitter":true,"activeActorFrames":180}]]}
+canvas basic PASS
+canvas slash PASS
+canvas sniper PASS
+canvas wizard PASS
+canvas bubble PASS
+canvas bats PASS
+canvas boomerang PASS
+canvas tennis PASS
+canvas basketball PASS
+canvas genie PASS
+canvas void PASS
+canvas dynamite PASS
+canvas beast12 PASS
+Port 5173 is in use, trying another one...
+{"actors":2,"shots":0,"frame":190.12199999928475,"abilities":["emoji-054","emoji-033"],"zoom":0.7111111111111111,"matchedHud":{"text":["🧼 Fidelity0 · F급","HP 126 / 126 · KILL 0 · 🔄 ×0","팀 점령전 · 가로형 점령 아레나","2 / 2명","비눗길"],"capture":["05:57","A · C 활성 · 중앙 B 01:57 후 개방"],"arrows":[{"label":"A","transform":"translate(38px, 360px) translate(-50%, -50%)","rotation":"rotate(3.14159rad)"},{"label":"C","transform":"translate(1242px, 360px) translate(-50%, -50%)","rotation":"rotate(0rad)"}],"growth":true,"music":false}}

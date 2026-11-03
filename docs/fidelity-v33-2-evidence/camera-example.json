@@ -1,0 +1,174 @@
+[
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "auto",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.38869565217391305
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.13492574370709381,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 0.7720682775508255,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.5119605263157895,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 0.8345731306400819,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.0625048530892563
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 0.7891827754447074,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.3452269642459742,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 0.850312521766,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.3616799615297848,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.016452997283810628
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.3547919710325629,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6655557733073902,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.3708830023761296,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6698866549308469,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.004330881623456045
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6680735462946277,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.749875130364158,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6723091485223682,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.7510151375806453,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.0011400072164872517
+      }
+    ],
+    "pass": true
+  }
+]

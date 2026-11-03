@@ -23,7 +23,11 @@ export class Connection extends EventTarget{
   if(m.type==='WELCOME'){this.emit('welcome',m.payload);this.retry=0;this.retryStart=null;this.emit('status',{connected:true});if(this.token)this.send('RESUME',{token:this.token,cursor:this.cursor},false);this.pingTimer=setInterval(()=>this.send('PING',{clientTime:performance.now()},false),2000);return;}
   if(m.roomInstanceId){if(this.scope.roomInstanceId&&m.roomInstanceId!==this.scope.roomInstanceId&&m.type!=='SESSION')return;
    if(this.scope.connectionEpoch&&m.connectionEpoch<this.scope.connectionEpoch)return;
-   if(this.scope.matchId&&this.scope.matchId!==m.matchId&&!['ROOM_STATE','SESSION','FULL_STATE'].includes(m.type))return;
+   // REMATCH's successful reply carries the new match scope. Accept only the
+   // reply to our own outstanding transition; unrelated late replies stay rejected.
+   const pendingTransition=m.type==='COMMAND_RESULT'&&m.payload?.accepted&&m.payload.command==='REMATCH'&&this.pending.get(m.payload.requestId);
+   const rematchAck=pendingTransition&&pendingTransition.type==='REMATCH'&&pendingTransition.matchId===this.scope.matchId;
+   if(this.scope.matchId&&this.scope.matchId!==m.matchId&&!['ROOM_STATE','SESSION','FULL_STATE'].includes(m.type)&&!rematchAck)return;
    if(this.scope.matchId!==m.matchId)this.emit('reset',{});this.scope={roomInstanceId:m.roomInstanceId,matchId:m.matchId,connectionEpoch:m.connectionEpoch};}
   if(m.eventSeq){if(m.eventSeq<=this.cursor)return;this.cursor=m.eventSeq;}
   if(m.type==='SESSION'){this.token=m.payload.token;this.session=m.payload;sessionStorage.setItem('dsbr-resume',this.token);}
@@ -37,7 +41,7 @@ export class Connection extends EventTarget{
  send(type,payload={},scoped=true,requestId){if(this.ws?.readyState!==WebSocket.OPEN)return false;this.ws.send(JSON.stringify(envelope(type,payload,{...(scoped?{...this.scope,lifeSeq:this.lifeSeq}:{}),...(requestId?{requestId}:{})})));return true;}
  command(type,payload={}){
   const id=crypto.randomUUID(),scope={...this.scope,lifeSeq:this.lifeSeq};return new Promise((resolve,reject)=>{
-   const p={resolve,reject,retries:0};const attempt=()=>{if(p.retries++>=3||scope.matchId!==this.scope.matchId||scope.lifeSeq!==this.lifeSeq){this.pending.delete(id);reject(Error('응답을 확인할 수 없습니다. 현재 상태를 확인하세요.'));return;}if(this.ws?.readyState===1)this.ws.send(JSON.stringify(envelope(type,payload,{...scope,connectionEpoch:this.scope.connectionEpoch,requestId:id})));p.timer=setTimeout(attempt,1500);};this.pending.set(id,p);attempt();
+   const p={resolve,reject,retries:0,type,matchId:scope.matchId};const attempt=()=>{if(p.retries++>=3||scope.matchId!==this.scope.matchId||scope.lifeSeq!==this.lifeSeq){this.pending.delete(id);reject(Error('응답을 확인할 수 없습니다. 현재 상태를 확인하세요.'));return;}if(this.ws?.readyState===1)this.ws.send(JSON.stringify(envelope(type,payload,{...scope,connectionEpoch:this.scope.connectionEpoch,requestId:id})));p.timer=setTimeout(attempt,1500);};this.pending.set(id,p);attempt();
   });
  }
  async authenticate(secret){this.send('AUTH',{secret},false);await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('교사 인증을 확인해 주세요.')),5000);this.addEventListener('auth',()=>{clearTimeout(timer);resolve();},{once:true});});}

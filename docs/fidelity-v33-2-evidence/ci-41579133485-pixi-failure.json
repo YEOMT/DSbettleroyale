@@ -1,0 +1,50 @@
+{
+  "renderer": "pixi",
+  "cases": [
+    {
+      "name": "basic",
+      "ability": "emoji-000",
+      "kind": "attack",
+      "server": {
+        "turns": [],
+        "returnCount": 0,
+        "ends": [
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": "out"
+          },
+          {
+            "reason": "expired",
+            "turn": 0,
+            "phase": "out"
+          }
+        ]
+      },
+      "observed": [
+        {
+          "frames": 18,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "muzzle",
+            "shot",
+            "explosion",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    }
+  ]
+}

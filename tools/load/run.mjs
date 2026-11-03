@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {loadBrowser} from './browser.mjs';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {fork} from 'node:child_process';
@@ -6,7 +7,7 @@ import {connect} from '../../tests/integration/client.mjs';
 import {manifest} from '../../packages/content/src/manifest.js';
 import {Samples} from '../../apps/server/src/diagnostics/metrics.js';
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
-export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverOverload=false,out=`artifacts/load-${players}-${seconds}.json`}={}){
+export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverOverload=false,browser=false,out=`artifacts/load-${players}-${seconds}.json`}={}){
  if(!Number.isInteger(players)||players<2||players>30||!Number.isFinite(seconds)||seconds<1)throw Error('INVALID_LOAD_OPTIONS');
  const child=fork(fileURLToPath(new URL('./server.mjs',import.meta.url)),[],{stdio:['ignore','inherit','inherit','ipc'],windowsHide:true,execArgv:[]});
  const port=await new Promise((resolve,reject)=>{child.once('message',m=>resolve(m.port));child.once('error',reject);});let rpcSeq=0;const rpcs=new Map();
@@ -15,11 +16,12 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverO
  const app={address:{port}},host=await(await connect(app)).host(),clients=[];
  const report={scenario:'real loopback WebSocket; teacher + synthetic clients; not physical devices',players,seconds,started:new Date().toISOString(),fingerprint:host.session,fixture:'All roster characters rotate by round. Server fixture grants XP20; clients choose real offers. Respawn answers use fixture oracle. No invulnerability.',samples:[],rtt:new Samples(),ack:new Samples(),snapshots:0,receivedBytes:0,errors:[],expectedStale:0,rounds:0};
  delete report.fingerprint.token;delete report.fingerprint.playerId;
- let stopping=false,tick=0,roundStarted=performance.now(),roundBusy=false;
+ let observer;let stopping=false,tick=0,roundStarted=performance.now(),roundBusy=false;
  const track=c=>{c.messages=[];c.onMessage=m=>{if(stopping)return;if(m.type==='SNAPSHOT'){report.snapshots++;const sent=c.sentInputs?.get(m.payload.self?.lastAppliedSeq);if(sent){report.ack.add(performance.now()-sent);c.sentInputs.delete(m.payload.self.lastAppliedSeq);}}if(m.type==='PONG')report.rtt.add(performance.now()-m.payload.clientTime);if(m.type==='ERROR'&&['LIFE_MISMATCH','SCOPE_MISMATCH','BATTLE_REQUIRED'].includes(m.payload.code)){report.expectedStale++;return;}if(m.type==='ERROR'||m.type==='OVERLOAD'){if(report.errors.length<100)report.errors.push(m.payload);}c.messages=c.messages.filter(x=>['SESSION','ROOM_STATE','COMMAND_RESULT'].includes(x.type));};};
  track(host);
  try{
-  for(let i=0;i<players;i++){const c=await(await connect(app)).join(host.room.code,'Bot'+String(i+1).padStart(2,'0'));c.seq=0;c.action=0;c.sentInputs=new Map();track(c);clients.push(c);}
+  if(browser){observer=await loadBrowser(app,host.room.code,rpc);report.scenario='teacher + 19 synthetic students + one real browser student over loopback WS; not physical devices';}
+  for(let i=0;i<players-(browser?1:0);i++){const c=await(await connect(app)).join(host.room.code,'Bot'+String(i+1).padStart(2,'0'));c.seq=0;c.action=0;c.sentInputs=new Map();track(c);clients.push(c);}
   async function begin(){
    if(host.room.phase==='RESULTS'){await host.command('REMATCH');await host.phase('LOBBY');}
    await host.command('CONFIGURE',{mode:'team-capture',teamCount:4,matchSeconds:300,quizText:'Load question | Correct | Wrong one | Wrong two | Wrong three'});
@@ -48,11 +50,11 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverO
     }
     if(tick%60===i%60)c.send('PING',{clientTime:now},false);
    }
-   if(now-lastSample>=5000){lastSample=now;const server=await rpc('status');report.samples.push({elapsedMs:now-started,round:report.rounds,server,pendingCommands:clients.reduce((n,c)=>n+c.waiters.length,0)});if(server.fault)throw Error(server.fault);if(server.paused){if(recoverOverload){const result=await host.command('CONTINUE');if(!result.accepted)throw Error('CONTINUE_REJECTED');report.overloadRecoveries=(report.overloadRecoveries||0)+1;}else throw Error('SERVER_OVERLOAD_PAUSED');}}
+   if(now-lastSample>=5000){lastSample=now;const server=await rpc('status');report.samples.push({elapsedMs:now-started,round:report.rounds,server,browser:observer?await observer.sample():undefined,pendingCommands:clients.reduce((n,c)=>n+c.waiters.length,0)});if(server.fault)throw Error(server.fault);if(server.paused){if(recoverOverload){const result=await host.command('CONTINUE');if(!result.accepted)throw Error('CONTINUE_REJECTED');report.overloadRecoveries=(report.overloadRecoveries||0)+1;}else throw Error('SERVER_OVERLOAD_PAUSED');}}
    await delay(1000/30);
   }
-  stopping=true;report.elapsedMs=performance.now()-started;report.server=await rpc('status');report.rtt=report.rtt.report();report.ack=report.ack.report();report.receivedBytes=[host,...clients].reduce((n,c)=>n+(c.receivedBytes||0),0);report.pass=report.errors.length===0&&report.snapshots>players*seconds*10&&report.server.overloads===0;
- }catch(error){report.pass=false;report.failure=error.stack;report.server=await rpc('status');report.hostPhase=host.room?.phase;report.clientPhases=clients.map(c=>({phase:c.room?.phase,open:c.ws.readyState}));}finally{stopping=true;report.cleanup=await rpc('close');report.ended=new Date().toISOString();fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');}
+  stopping=true;report.elapsedMs=performance.now()-started;report.server=await rpc('status');report.rtt=report.rtt.report();report.ack=report.ack.report();report.receivedBytes=[host,...clients].reduce((n,c)=>n+(c.receivedBytes||0),0);report.browser=observer?await observer.sample():undefined;report.pass=(!observer||!report.browser.errors.length)&&report.errors.length===0&&report.snapshots>players*seconds*10&&report.server.overloads===0;
+ }catch(error){report.pass=false;report.failure=error.stack;report.server=await rpc('status');report.hostPhase=host.room?.phase;report.clientPhases=clients.map(c=>({phase:c.room?.phase,open:c.ws.readyState}));}finally{stopping=true;await observer?.close();await host.close();for(const c of clients)await c.close();report.cleanup=await rpc('close');report.ended=new Date().toISOString();fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');}
  console.log(JSON.stringify({file:out,players,seconds,pass:report.pass,rounds:report.rounds,snapshots:report.snapshots,failure:report.failure,errors:report.errors.slice(0,3),step:report.server?.stepCpu,gap:report.server?.snapshotGap}));return report;
 }
 if(path.resolve(process.argv[1]||'')===fileURLToPath(import.meta.url)){

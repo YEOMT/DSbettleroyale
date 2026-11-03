@@ -1,0 +1,1052 @@
+[
+  {
+    "renderer": "canvas",
+    "mode": "solo",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 1013.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1633.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1900,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "solo",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1079.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1346,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "solo",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 737.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1004,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "solo",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 777.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 103.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 370,
+        "height": 74,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "solo",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 323.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 557.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 824,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "team-elim",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 1013.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1633.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1900,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "team-elim",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1079.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1346,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "team-elim",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 737.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1004,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "team-elim",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 777.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 103.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 370,
+        "height": 74,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "team-elim",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 323.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 557.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 824,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "team-capture",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 1013.3125,
+        "width": 248.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1631.125,
+        "y": 1018,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "br-capture-scoreboard",
+        "x": 410,
+        "y": 8,
+        "width": 1100,
+        "height": 117,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "team-capture",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 248.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1077.125,
+        "y": 706,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "br-capture-scoreboard",
+        "x": 133,
+        "y": 8,
+        "width": 1100,
+        "height": 117,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "team-capture",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 248.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 735.125,
+        "y": 706,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "br-capture-scoreboard",
+        "x": 120,
+        "y": 8,
+        "width": 784,
+        "height": 117,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "team-capture",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 777.3125,
+        "width": 248.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 101.125,
+        "y": 782,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "br-capture-scoreboard",
+        "x": 10,
+        "y": 8,
+        "width": 370,
+        "height": 150,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "canvas",
+    "mode": "team-capture",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 323.3125,
+        "width": 248.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 555.125,
+        "y": 328,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "br-capture-scoreboard",
+        "x": 120,
+        "y": 4,
+        "width": 604,
+        "height": 100,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "solo",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 1013.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1633.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1900,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "solo",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1079.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1346,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "solo",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 737.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1004,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "solo",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 777.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 103.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 370,
+        "height": 74,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "solo",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 323.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 557.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 824,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "team-elim",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 1013.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1633.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1900,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "team-elim",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1079.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1346,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "team-elim",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 737.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 1004,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "team-elim",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 777.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 103.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 370,
+        "height": 74,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "team-elim",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 323.3125,
+        "width": 345.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 557.125,
+        "y": 8,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "hud-overlay",
+        "x": 10,
+        "y": 10,
+        "width": 824,
+        "height": 45,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "team-capture",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 1013.3125,
+        "width": 248.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1631.125,
+        "y": 1018,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "br-capture-scoreboard",
+        "x": 410,
+        "y": 8,
+        "width": 1100,
+        "height": 117,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "team-capture",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 248.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 1077.125,
+        "y": 706,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "br-capture-scoreboard",
+        "x": 133,
+        "y": 8,
+        "width": 1100,
+        "height": 117,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "team-capture",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 701.3125,
+        "width": 248.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 735.125,
+        "y": 706,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "br-capture-scoreboard",
+        "x": 120,
+        "y": 8,
+        "width": 784,
+        "height": 117,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "team-capture",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 777.3125,
+        "width": 248.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 101.125,
+        "y": 782,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "br-capture-scoreboard",
+        "x": 10,
+        "y": 8,
+        "width": 370,
+        "height": 150,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  },
+  {
+    "renderer": "pixi",
+    "mode": "team-capture",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "boxes": [
+      {
+        "id": "br-host-live",
+        "x": 12,
+        "y": 323.3125,
+        "width": 248.765625,
+        "height": 54.6875,
+        "visible": true
+      },
+      {
+        "id": "br-music-controls",
+        "x": 555.125,
+        "y": 328,
+        "width": 276.875,
+        "height": 50,
+        "visible": true
+      },
+      {
+        "id": "br-capture-scoreboard",
+        "x": 120,
+        "y": 4,
+        "width": 604,
+        "height": 100,
+        "visible": true
+      }
+    ],
+    "status": "PASS"
+  }
+]

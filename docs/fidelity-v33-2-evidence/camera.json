@@ -1,0 +1,5168 @@
+[
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "scenario": "auto",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.1565217391304348,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.1565217391304348,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.1565217391304348,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.1565217391304348,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0.34347826086956523
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.189720823798627,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 1.0852034207349328,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.5228947368421053,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 1.1404370157466912,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0.05523359501175892
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 1.0954289454787642,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.427652750495192,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 1.149447401400264,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.4421917525692522,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0.014539002074060845
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.4354043899842976,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6872525083647112,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.4496235340127288,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.691079573781411,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0.0038270654167005314
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6892929531806875,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.7555863080619256,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.69303582315822,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.7565936969892473,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0.0010073889273209493
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "scenario": "normal",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.5026086956521739,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.5729733331285586,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.5026086956521739,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.5729733331285586,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.5936788699768071,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 1.1521716143744962,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.5936788699768071,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 1.1521716143744962,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 1.1626064659432613,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.4440668759164106,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 1.1626064659432613,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.4440668759164106,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.4457448696389184,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4910055806281475,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.4457448696389184,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4910055806281475,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4912754132093031,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4985536373810293,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4912754132093031,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4985536373810293,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "scenario": "broadcast",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.5027341040462427,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.5915642103057315,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.5027341040462427,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.5915642103057315,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.608507244487516,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 1.1589806358693577,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.608507244487516,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 1.1589806358693577,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 1.1675830618802319,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.4470729436517207,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 1.1675830618802319,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.4470729436517207,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.454397338891383,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6923644375904172,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.454397338891383,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6923644375904172,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.694292419963428,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.756931908499471,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.694292419963428,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.756931908499471,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "scenario": "focus",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "scenario": "capture",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "auto",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.38869565217391305
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.13492574370709381,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 0.7720682775508255,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.5119605263157895,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 0.8345731306400819,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.0625048530892563
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 0.7891827754447074,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.3452269642459742,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 0.850312521766,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.3616799615297848,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.016452997283810628
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.3547919710325629,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6655557733073902,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.3708830023761296,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6698866549308469,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.004330881623456045
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6680735462946277,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.749875130364158,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6723091485223682,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.7510151375806453,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.0011400072164872517
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "normal",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.4975217391304348,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.43067533352786935,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.4975217391304348,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.43067533352786935,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.4447155998378227,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 0.8234252619436669,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.4447155998378227,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 0.8234252619436669,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 0.843722504085357,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.3912022700290148,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 0.843722504085357,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.3912022700290148,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.3944662019281444,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4825045994462562,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.3944662019281444,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4825045994462562,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4830294614628685,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4971866229137538,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4830294614628685,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4971866229137538,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "broadcast",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.4987664739884393,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.4586896353504373,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.4987664739884393,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.4586896353504373,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.4699119385500326,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 0.8345207350097635,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.4699119385500326,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 0.8345207350097635,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 0.8502612788395487,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.3616661695581105,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 0.8502612788395487,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.3616661695581105,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.370869513827832,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6698830245043872,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.370869513827832,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6698830245043872,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.6723055979652908,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.7510141819525027,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.6723055979652908,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.7510141819525027,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "focus",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "capture",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scenario": "auto",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.38869565217391305
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.12817574370709384,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 0.5832497780806802,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.5052105263157894,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 0.6457546311699367,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.0625048530892563
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 0.6045182829629052,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.2955247394526568,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 0.6656480292841981,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.3119777367364673,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.016452997283810628
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.3061831951846983,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6524727800819516,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.322274226528265,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6568036617054072,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.004330881623456045
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6552783789201486,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.7464313265415188,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6595139811478883,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.747571333758006,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0.0011400072164872517
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scenario": "normal",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.49663636363636365,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.4059086265266617,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.49663636363636365,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.4059086265266617,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.4139418940466513,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 0.6306241108180242,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.4139418940466513,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 0.6306241108180242,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 0.6534445179282661,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.2689818927222771,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 0.6534445179282661,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.2689818927222771,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.2759124359406089,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4628507476850001,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.2759124359406089,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4628507476850001,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4639652252544502,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4940261524785825,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4639652252544502,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4940261524785825,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scenario": "broadcast",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.49790434782608695,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.4298173247490234,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.49790434782608695,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.4298173247490234,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.4363386485690839,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 0.6482142312428946,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.4363386485690839,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 0.6482142312428946,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 0.6680535181555509,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.3126251711566692,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 0.6680535181555509,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.3126251711566692,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.3229074173912225,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6569740842603062,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.3229074173912225,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6569740842603062,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.6596806544065794,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.7476161936639856,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.6596806544065794,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.7476161936639856,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scenario": "focus",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "canvas",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scenario": "capture",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "legacyPixiMissingGlobalBindings": [
+      "brEmojiSourceSize"
+    ],
+    "note": "Reference has these unresolved IIFE helpers; exposed solely to exercise the original Pixi camera. Production original falls back to Canvas."
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "scenario": "auto",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.1565217391304348,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.1565217391304348,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.1565217391304348,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.1565217391304348,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.189720823798627,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 1.0852034207349328,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.189720823798627,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 1.0852034207349328,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 1.0954289454787642,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.427652750495192,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 1.0954289454787642,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.427652750495192,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.4354043899842976,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6872525083647112,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.4354043899842976,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6872525083647112,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6892929531806875,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.7555863080619256,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6892929531806875,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.7555863080619256,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "scenario": "normal",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.5026086956521739,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.5729733331285586,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.5026086956521739,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.5729733331285586,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.5936788699768071,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 1.1521716143744962,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.5936788699768071,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 1.1521716143744962,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 1.1626064659432613,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.4440668759164106,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 1.1626064659432613,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.4440668759164106,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.4457448696389184,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4910055806281475,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.4457448696389184,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4910055806281475,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4912754132093031,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4985536373810293,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4912754132093031,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4985536373810293,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "scenario": "broadcast",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.5027341040462427,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.5915642103057315,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.5027341040462427,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.5915642103057315,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.608507244487516,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 1.1589806358693577,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.608507244487516,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 1.1589806358693577,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 1.1675830618802319,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.4470729436517207,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 1.1675830618802319,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.4470729436517207,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.454397338891383,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6923644375904172,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.454397338891383,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6923644375904172,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.694292419963428,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.756931908499471,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.694292419963428,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.756931908499471,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "scenario": "focus",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 959.9999999999999,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 960,
+          "screenY": 540.0000000000001
+        },
+        "originalLast": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "last": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalFirst": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalLast": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 960,
+          "screenY": 540
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "scenario": "capture",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.2542087542087542,
+          "screenX": 960,
+          "screenY": 579
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "auto",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.13492574370709381,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 0.7720682775508255,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.13492574370709381,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 0.7720682775508255,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 0.7891827754447074,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.3452269642459742,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 0.7891827754447074,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.3452269642459742,
+          "screenX": 683,
+          "screenY": 383.99999999999994
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.3547919710325629,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6655557733073902,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.3547919710325629,
+          "screenX": 683,
+          "screenY": 384.00000000000006
+        },
+        "originalLast": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6655557733073902,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6680735462946277,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.749875130364158,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6680735462946277,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.749875130364158,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "normal",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.4975217391304348,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.43067533352786935,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.4975217391304348,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.43067533352786935,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.4447155998378227,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 0.8234252619436669,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.4447155998378227,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 0.8234252619436669,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 0.843722504085357,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.3912022700290148,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 0.843722504085357,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.3912022700290148,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.3944662019281444,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4825045994462562,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.3944662019281444,
+          "screenX": 683,
+          "screenY": 384.00000000000006
+        },
+        "originalLast": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4825045994462562,
+          "screenX": 683,
+          "screenY": 384.00000000000006
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4830294614628685,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4971866229137538,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4830294614628685,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4971866229137538,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "broadcast",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.4987664739884393,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.4586896353504373,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.4987664739884393,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.4586896353504373,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.4699119385500326,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 0.8345207350097635,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.4699119385500326,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 0.8345207350097635,
+          "screenX": 683,
+          "screenY": 384.00000000000006
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 0.8502612788395487,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.3616661695581105,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 0.8502612788395487,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.3616661695581105,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.370869513827832,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6698830245043872,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.370869513827832,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6698830245043872,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.6723055979652908,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.7510141819525027,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.6723055979652908,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.7510141819525027,
+          "screenX": 683,
+          "screenY": 383.99999999999994
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "focus",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 682.9999999999999,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 683,
+          "screenY": 384.0000000000001
+        },
+        "originalLast": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 683,
+          "screenY": 383.99999999999994
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 683,
+          "screenY": 383.99999999999994
+        },
+        "originalLast": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 683,
+          "screenY": 384.00000000000006
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "last": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 683,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "scenario": "capture",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.16666666666666666,
+          "screenX": 683,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scenario": "auto",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.11130434782608696,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.12817574370709384,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 0.5832497780806802,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -15.75,
+          "zoom": 0.12817574370709384,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -300.4880133191101,
+          "zoom": 0.5832497780806802,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 0.6045182829629052,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.2955247394526568,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 122.41057649548195,
+          "y": -297.8803968928986,
+          "zoom": 0.6045182829629052,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 81.10536407170741,
+          "y": -230.57751009424834,
+          "zoom": 1.2955247394526568,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.3061831951846983,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6524727800819516,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 79.98199242141277,
+          "y": -227.90302977123238,
+          "zoom": 1.3061831951846983,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 50.98763794020658,
+          "y": -158.87437792818758,
+          "zoom": 1.6524727800819516,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6552783789201486,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.7464313265415188,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 51.724033526119975,
+          "y": -157.34239783448558,
+          "zoom": 1.6552783789201486,
+          "screenX": 512,
+          "screenY": 384.00000000000006
+        },
+        "originalLast": {
+          "x": 70.73049025018659,
+          "y": -117.80181134799449,
+          "zoom": 1.7464313265415188,
+          "screenX": 512,
+          "screenY": 384.00000000000006
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scenario": "normal",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.49663636363636365,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.4059086265266617,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 6.5,
+          "y": -3.75,
+          "zoom": 0.49663636363636365,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 124.01092613169622,
+          "y": -71.54476507597859,
+          "zoom": 0.4059086265266617,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.4139418940466513,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 0.6306241108180242,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 124.31037982511141,
+          "y": -83.71752682217966,
+          "zoom": 0.4139418940466513,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 129.7240845707692,
+          "y": -303.7840662647292,
+          "zoom": 0.6306241108180242,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 0.6534445179282661,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.2689818927222771,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 126.93788034223074,
+          "y": -299.54486295149275,
+          "zoom": 0.6534445179282661,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 76.56719737490725,
+          "y": -222.90598489011253,
+          "zoom": 1.2689818927222771,
+          "screenX": 512,
+          "screenY": 384.00000000000006
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.2759124359406089,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4628507476850001,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 75.03883750616188,
+          "y": -219.1106856456069,
+          "zoom": 1.2759124359406089,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 47.40822463865646,
+          "y": -150.4969734657941,
+          "zoom": 1.4628507476850001,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4639652252544502,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4940261524785825,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 48.73781340672364,
+          "y": -148.5221247925044,
+          "zoom": 1.4639652252544502,
+          "screenX": 512,
+          "screenY": 384.00000000000006
+        },
+        "originalLast": {
+          "x": 72.77492225439673,
+          "y": -112.81961762816209,
+          "zoom": 1.4940261524785825,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scenario": "broadcast",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.49790434782608695,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.4298173247490234,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 4.16,
+          "y": -2.4,
+          "zoom": 0.49790434782608695,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 111.53008950705008,
+          "y": -64.3442824079135,
+          "zoom": 0.4298173247490234,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.4363386485690839,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 0.6482142312428946,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 112.12112664282448,
+          "y": -72.36526537086027,
+          "zoom": 0.4363386485690839,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 127.37586466448013,
+          "y": -279.3877794732925,
+          "zoom": 0.6482142312428946,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 0.6680535181555509,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.3126251711566692,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 125.66783699521677,
+          "y": -277.45537053014715,
+          "zoom": 0.6680535181555509,
+          "screenX": 512,
+          "screenY": 384.00000000000006
+        },
+        "originalLast": {
+          "x": 81.58344186797508,
+          "y": -227.57966832107473,
+          "zoom": 1.3126251711566692,
+          "screenX": 512,
+          "screenY": 384.00000000000006
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.3229074173912225,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6569740842603062,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 80.44477172819988,
+          "y": -225.00111893480033,
+          "zoom": 1.3229074173912225,
+          "screenX": 512,
+          "screenY": 384.00000000000006
+        },
+        "originalLast": {
+          "x": 51.05556143332758,
+          "y": -158.4484558572449,
+          "zoom": 1.6569740842603062,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.6596806544065794,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.7476161936639856,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 51.7897834674611,
+          "y": -156.93010526981308,
+          "zoom": 1.6596806544065794,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 70.74014056432748,
+          "y": -117.74129794393846,
+          "zoom": 1.7476161936639856,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scenario": "focus",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -49.5,
+          "y": -39.75,
+          "zoom": 0.5186,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": -944.3908990029175,
+          "y": -758.3745098053731,
+          "zoom": 1.0202998652066224,
+          "screenX": 511.9999999999999,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -918.6713540527717,
+          "y": -742.2057843151044,
+          "zoom": 1.0232908692504237,
+          "screenX": 512,
+          "screenY": 384.0000000000001
+        },
+        "originalLast": {
+          "x": -453.697885317782,
+          "y": -449.8977986642377,
+          "zoom": 1.1039675534228748,
+          "screenX": 511.99999999999994,
+          "screenY": 383.99999999999994
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -435.71299105189286,
+          "y": -438.3529087310258,
+          "zoom": 1.1044485268201885,
+          "screenX": 512,
+          "screenY": 383.99999999999994
+        },
+        "originalLast": {
+          "x": -110.57120927262196,
+          "y": -229.63741517099118,
+          "zoom": 1.1174218756696659,
+          "screenX": 511.99999999999994,
+          "screenY": 384.00000000000006
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": -104.14264880899086,
+          "y": -225.50554441244162,
+          "zoom": 1.1174992193995759,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 12.07675023330096,
+          "y": -150.80708910572886,
+          "zoom": 1.1195854204141158,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "last": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalFirst": {
+          "x": 15.172912721635912,
+          "y": -148.8167346504424,
+          "zoom": 1.1195978578016923,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalLast": {
+          "x": 71.14720833062935,
+          "y": -112.83390459335662,
+          "zoom": 1.1199333328377497,
+          "screenX": 512,
+          "screenY": 384
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  },
+  {
+    "renderer": "pixi",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scenario": "capture",
+    "frames": 300,
+    "trace": [
+      {
+        "count": 20,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 10,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 4,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 2,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      },
+      {
+        "count": 1,
+        "first": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "last": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalFirst": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalLast": {
+          "x": 0,
+          "y": 0,
+          "zoom": 0.15404040404040403,
+          "screenX": 512,
+          "screenY": 423
+        },
+        "originalCanvasHiddenZoomCorrection": 0
+      }
+    ],
+    "pass": true
+  }
+]

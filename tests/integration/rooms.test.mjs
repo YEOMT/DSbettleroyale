@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 import {createGameServer} from '../../apps/server/src/main.js';
 import {connect} from './client.mjs';
 async function setup(t){const app=await createGameServer({port:0,hostSecret:'test-host',adminSecret:'test-admin'});t.after(()=>app.close());const host=await(await connect(app)).host(),a=await(await connect(app)).join(host.room.code,'A'),b=await(await connect(app)).join(host.room.code,'B');return {app,host,a,b};}
+test('draft recovery refreshes valid assignments and restores the deterministic spent draw without free rerolls',async t=>{
+ const {app,host,a,b}=await setup(t);await host.command('START_QUIZ');await host.command('BEGIN_DRAFT');await a.phase('DRAFT');await b.phase('DRAFT');const room=app.manager.rooms.get(host.room.code),member=room.members.get(a.session.playerId),original=structuredClone(member.draft);
+ assert.equal((await b.command('DRAFT_RECOVER',{playerId:member.id})).reason,'HOST_REQUIRED');assert.equal((await host.command('DRAFT_RECOVER',{playerId:member.id})).accepted,true);assert.deepEqual(member.draft,original);
+ member.quiz.score=6;member.draft.rerolls=2;await a.command('DRAFT_REROLL',{draftRevision:member.draft.revision});const drawn=structuredClone(member.draft);member.draft.abilityId='corrupt';assert.equal((await a.command('DRAFT_RECOVER',{})).accepted,true);assert.equal(member.draft.abilityId,drawn.abilityId);assert.equal(member.draft.rerolls,1);assert.equal(member.draft.spent,1);assert.equal(member.draft.revision,drawn.revision+1);
+});
 test('real WebSocket lobby → authoritative quiz → valid zero-score draft, idempotent answers/rerolls',async t=>{
  const {app,host,a,b}=await setup(t);
  assert.equal((await a.command('START_QUIZ')).reason,'HOST_REQUIRED');

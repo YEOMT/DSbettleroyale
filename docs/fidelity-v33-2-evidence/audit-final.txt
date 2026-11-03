@@ -1,0 +1,63 @@
+AUDIT camera
+camera canvas 1920 auto PASS
+camera canvas 1920 normal PASS
+camera canvas 1920 broadcast PASS
+camera canvas 1920 focus PASS
+camera canvas 1920 capture PASS
+camera canvas 1366 auto PASS
+camera canvas 1366 normal PASS
+camera canvas 1366 broadcast PASS
+camera canvas 1366 focus PASS
+camera canvas 1366 capture PASS
+camera canvas 1024 auto PASS
+camera canvas 1024 normal PASS
+camera canvas 1024 broadcast PASS
+camera canvas 1024 focus PASS
+camera canvas 1024 capture PASS
+camera pixi 1920 auto PASS
+camera pixi 1920 normal PASS
+camera pixi 1920 broadcast PASS
+camera pixi 1920 focus PASS
+camera pixi 1920 capture PASS
+camera pixi 1366 auto PASS
+camera pixi 1366 normal PASS
+camera pixi 1366 broadcast PASS
+camera pixi 1366 focus PASS
+camera pixi 1366 capture PASS
+camera pixi 1024 auto PASS
+camera pixi 1024 normal PASS
+camera pixi 1024 broadcast PASS
+camera pixi 1024 focus PASS
+camera pixi 1024 capture PASS
+AUDIT layout
+Port 5173 is in use, trying another one...
+layout canvas solo PASS
+Port 5173 is in use, trying another one...
+layout canvas team-elim PASS
+Port 5173 is in use, trying another one...
+layout canvas team-capture PASS
+Port 5173 is in use, trying another one...
+layout pixi solo PASS
+Port 5173 is in use, trying another one...
+layout pixi team-elim PASS
+Port 5173 is in use, trying another one...
+layout pixi team-capture PASS
+AUDIT surface
+Port 5173 is in use, trying another one...
+surface 77 catalog + 77 draft PASS
+AUDIT screens
+Port 5173 is in use, trying another one...
+screens/results solo PASS
+screens/results team-elim PASS
+screens/results team-capture PASS
+AUDIT quiz
+QUIZ 45 PASS 45503
+QUIZ 60 PASS 60641
+QUIZ 90 PASS 90943
+AUDIT all77
+all77 canvas low PASS
+all77 canvas balanced PASS
+all77 canvas high PASS
+all77 pixi low PASS
+all77 pixi balanced PASS
+all77 pixi high PASS

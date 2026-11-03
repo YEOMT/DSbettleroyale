@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-03",
+  "platform": "win32",
+  "node": "v24.22.1",
+  "playwright": "1.56.1",
+  "browser": "installed Microsoft Edge headless",
+  "deviceScaleFactor": 1,
+  "release": {
+    "protocolVersion": 33,
+    "contentHash": "e4c309f890acca0a97e5ad2b33008fa4ef7fe4fed6a5f4c93b47569c37952ba4",
+    "engineRevision": "v33-authority-1",
+    "buildId": "v33-2e934e06ac966649",
+    "sourceHash": "2e934e06ac96664964d38148039d1af0408f7c01052f416613cbae0e389531b8"
+  },
+  "baselineSha256": "a006aa596c5640ffe127774f271fce7afce81a4769525979fa453f9107ac5d36"
+}

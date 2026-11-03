@@ -74,7 +74,7 @@ export function applyCommand(world,command){
 function nativeShot(world,p){return {id:world.matchId+':'+p.ownerLife+':'+p.inputKind+':'+p.inputSeq+':'+p.shotOrdinal+':'+p._brNetId,
  owner:p.owner?.remoteId,life:p.ownerLife,actionKind:p.inputKind,actionSeq:p.inputSeq,ordinal:p.shotOrdinal,
  kind:'projectile',type:p.type,x:p.pos.x,y:p.pos.y,dx:p.vel?.x||0,dy:p.vel?.y||0,radius:p.size||8,
- emoji:p.emoji,color:p.color,style:p.weaponStyle,trailColor:p.trailColor,rotation:p.spinRate?p.spinAngle:p.faceDir?Math.atan2(p.vel.y,p.vel.x):0,spin:p.spinRate,phase:p.returning?'return':'out',trace:p._brTrace||[],remaining:p.life,rangeRemaining:p.rangeRemaining,turn:p._brTurn||0,curved:['BOOMERANG','ORBIT','missile'].includes(p.type)||!!p.wobble,start:p._brBornFrame??world.game.frame,team:p.owner?.team||0,path:p._brPath||[],native:true};}
+ vfx:p.vfx,orbitAngle:p.orbitAngle,faceDir:!!p.faceDir,emoji:p.emoji,color:p.color,style:p.weaponStyle,trailColor:p.trailColor,rotation:p.spinRate?p.spinAngle:p.faceDir?Math.atan2(p.vel.y,p.vel.x):0,spin:p.spinRate,phase:p.returning?'return':'out',trace:p._brTrace||[],remaining:p.life,rangeRemaining:p.rangeRemaining,turn:p._brTurn||0,curved:['BOOMERANG','ORBIT','missile'].includes(p.type)||!!p.wobble,start:p._brBornFrame??world.game.frame,team:p.owner?.team||0,path:p._brPath||[],native:true};}
 function reworkShot(e){return {id:e.id,owner:e.ctx?.ownerId,life:e.ctx?.ownerLifeSeq,actionKind:e.actionKind||e.ctx?.actionKind,actionSeq:e.ctx?.actionSeq,ordinal:e.ordinal??0,
  kind:e.kind,x:e.pos?.x||0,y:e.pos?.y||0,dx:e.dir?.x||0,dy:e.dir?.y||0,speed:e.speed||0,radius:e.radius||8,range:e.range||0,
  path:e._brPath||[],curved:!!(e.homing||e.boomerang),turn:e.bounceCount||0,phase:e.phase||null,width:e.width||0,length:e.length??e.range??0,remaining:e.range!=null?Math.max(0,e.range-(e.distance||0)):0,style:'skill',start:e.start,end:e.end,team:e.ctx?.owner?.team||0,emoji:e.displayEmoji||e.emoji,color:e.color};}
@@ -114,7 +114,8 @@ export function stepWorld(world,dt=FIXED_DT_MS){
  if(world.game.capture?.finalized)world.finished=true;
  if(world.game.isGameOver)world.finished=true;
 }
-function actor(world,p){return {id:p.remoteId,name:p.name,abilityId:p.ability.id,emoji:p.ability.e,tier:p.ability.t,team:p.team,
+function actor(world,p){return {id:p.remoteId,name:p.name,abilityId:p.ability.id,emoji:p.ability.e,tier:p.ability.t,team:p.team,humanControlled:!!p.humanControlled,clone:!!p.isClone,
+ visual:{id:p.id,flashUntilFrame:p.flashUntilFrame||0,supportPulseFrames:p.supportPulseFrames||0,supportPulseKind:p.supportPulseKind||'',teamGuardFrames:p.teamGuardFrames||0,frenzyFrames:p.frenzyFrames||0},
  x:p.pos.x,y:p.pos.y,vx:p.vel.x,vy:p.vel.y,radius:p.radius,hp:Math.max(0,p.hp),maxHp:p.maxHp,alive:p.alive,level:p.run?.level||1,
  cover:world.game.getCoverTypeAt?.(p.pos)||'',flags:(p.playerMoveBoostFrames>0?8:0)|(p.playerAttackHasteFrames>0?16:0)|(p.invisible?32:0)|(p.finalPhaseBoosted?64:0),skillUsesLeft:p.skillUsesLeft??-1,lifeSeq:p.lifeSeq,warpSeq:p.warpSeq||0,kills:p.kills||0,deaths:p.deaths||0,stunned:p.stunned||0,
  cooldown:p.cooldown,basicCooldown:p.basicCooldown||0,skillCooldownMax:p.skillCooldownMax||p.maxCooldown,basicCooldownMax:p.basicCooldownMax,
@@ -125,7 +126,7 @@ export function getPrivateSelfState(world,id,preparedActor){
  const p=world.byId.get(id);if(!p)return null;
  const aimKey=p.ability.id+':'+p.radius+':'+p.run?.revision;
  if(p.aimProfileKey!==aimKey){p.aimProfileKey=aimKey;p.visualProfiles=visualProfiles(world,p);p.aimProfiles={};for(const kind of ['attack','skill']){const full=world.brAimHelpProfile(p.ability,kind,p.radius,1,p.run?.mods||{}),short=world.brAimHelpProfile(p.ability,kind,p.radius,.18,p.run?.mods||{});p.aimProfiles[kind]={...full,rangeMin:short.range};}}
- return {...(preparedActor||actor(world,p)),run:world.brRunSnapshot(p),respawn:world.session.respawnMode?world.brTeamKillSelf(p):null,
+ return {...(preparedActor||actor(world,p)),capturePoints:world.game.capture?.records.get(String(p.remoteId||p.id))?.points??0,run:world.brRunSnapshot(p),respawn:world.session.respawnMode?world.brTeamKillSelf(p):null,
   aimProfiles:p.aimProfiles,visualProfiles:p.visualProfiles,
   lastAppliedSeq:p.lastAppliedSeq||0,lastAppliedClientTick:p.lastAppliedClientTick||0,inputAppliedAt:p.inputAppliedAt||0,
   heldTicks:p.heldTicks||0,replacedInputSeq:p.replacedInputSeq||0,inputNeutral:!!p.inputNeutral,
@@ -135,10 +136,17 @@ export function getStaticState(world){const g=world.game;return {revision:1,worl
  boundary:g.boundary||null,walls:g.walls.map(w=>({x:w.pos?.x??w.x,y:w.pos?.y??w.y,w:w.w??w.width,h:w.h??w.height,angle:w.angle||0,kind:w.kind||'wall'})),
  smokes:g.smokes.map(s=>({x:s.pos.x,y:s.pos.y,radius:s.radius})),captureMap:g.capture?.map||null};}
 function state(world,players,shots){const g=world.game;return {serverTick:g.frame,simTime:world.timeMs,actors:players.map(p=>actor(world,p)),shots,aliveCount:g.participants.filter(p=>p.alive).length,
+  presentation:{finalPhase:!!g.finalPhase,gameOver:!!g.isGameOver,eventFocusFrames:g.eventFocusFrames||0,eventFocusPos:g.eventFocusPos?{x:g.eventFocusPos.x,y:g.eventFocusPos.y}:null,announcement:g.announcement||'',announcementLife:g.announcementLife||0,feed:(g.eventFeed||[]).slice(0,3).map(e=>({text:e.text,color:e.color,life:e.life}))},
   movingWalls:g.walls.map((w,i)=>w.spinSpeed?[i,w.angle]:null).filter(Boolean),
  ring:g.ringGeometry,capture:g.capture?world.brCapturePacket(g):null,farm:world.brFarm.snapshot(g),
- zones:g.zones.map(z=>({x:z.pos.x,y:z.pos.y,radius:z.radius,type:z.type,color:z.color,duration:z.duration})),finished:!!world.finished};}
-export function getTeacherState(world){return state(world,world.game.participants,projectileStates(world));}
+ zones:g.zones.map(z=>({x:z.pos.x,y:z.pos.y,radius:z.radius,type:z.type,color:z.color,duration:z.duration,meta:{endFrame:g.frame+Math.max(0,z.duration),span:Math.max(1,z.maxDuration||z.duration),ownerId:z.owner?.remoteId||'',...(z.type==='pull'?{...world.brZoneGeometry(z.radius,z.type,z.owner?.ability?.sub),soon:z.duration<=36}:{})}})),finished:!!world.finished};}
+export function getTeacherState(world){const g=world.game,pos=p=>({x:p.x,y:p.y});return {...state(world,g.participants,projectileStates(world)),turrets:g.turrets.filter(t=>t.life>0).map(t=>({x:t.pos.x,y:t.pos.y,golden:!!t.isGolden,emoji:t.owner?.ability?.e||''})),hostEffects:{
+ particles:g.particles.map(q=>({pos:pos(q.pos),size:q.size,color:q.color,life:q.life,maxLife:q.maxLife})),
+ rings:g.rings.map(q=>({pos:pos(q.pos),radius:q.radius,color:q.color,lineWidth:q.lineWidth,life:q.life,maxLife:q.maxLife})),
+ signatures:g.signatureEffects.map(q=>({owner:{pos:pos(q.owner.pos),radius:q.owner.radius,alive:q.owner.alive},type:q.type,angle:q.angle,color:q.color,life:q.life,maxLife:q.maxLife})),
+ texts:g.texts.map(q=>({pos:pos(q.pos),text:q.text,size:q.size,color:q.color,life:q.life,maxLife:q.maxLife})),
+ screenFlashAlpha:g.screenFlashAlpha,screenFlashColor:g.screenFlashColor,vignettePulse:g.vignettePulse,shakeAmount:g.shakeAmount,cameraKick:pos(g.cameraKick)
+ }};}
 export function getVisibleState(world,id,interest,prepared=getTeacherState(world)){
  const p=world.byId.get(id);if(!p)return null;
  const bounds=world.brViewerBounds(p,interest?{aspect:interest.width/interest.height}:world.session.inputs[id]);
@@ -146,7 +154,8 @@ export function getVisibleState(world,id,interest,prepared=getTeacherState(world
  const shots=prepared.shots.filter(s=>world.brViewContains(bounds,s.x,s.y,Math.max(s.radius||20,s.range||s.length||0))||world.brViewSegment(bounds,s.x,s.y,s.x+(s.dx||0)*(s.native?1:s.speed||0)*12,s.y+(s.dy||0)*(s.native?1:s.speed||0)*12,s.radius||20));
  const ids=new Set(visible.map(p=>p.remoteId)),farm={...prepared.farm};
  for(const key of ['b','x'])if(Array.isArray(farm[key]))farm[key]=farm[key].filter(row=>world.brViewContains(bounds,row[1],row[2],120));
- return {...prepared,actors:prepared.actors.filter(p=>ids.has(p.id)),shots,farm,self:getPrivateSelfState(world,id,prepared.actors.find(a=>a.id===id))};
+ const {hostEffects,...publicState}=prepared;
+ return {...publicState,turrets:(prepared.turrets||[]).filter(t=>world.brViewContains(bounds,t.x,t.y,32)),actors:prepared.actors.filter(p=>ids.has(p.id)),shots,farm,self:getPrivateSelfState(world,id,prepared.actors.find(a=>a.id===id))};
 }
 export function exportResult(world){
  return {...world.brBuildResults(),matchId:world.matchId};
