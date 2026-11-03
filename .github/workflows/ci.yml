@@ -22,20 +22,79 @@ jobs:
       - run: npm run verify
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
-      - run: npm run test:fidelity
-      - run: node tests/fidelity/visuals.mjs
-        env:
-          FIDELITY_RENDERER: pixi
-      - run: npm run test:fidelity-audit
       - run: npm run test:load -- --players=26 --seconds=20
       - name: Retain executed results and matching builds
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ci-${{ github.sha }}
+          name: ci-${{ github.sha }}-verify
           path: |
             dist/
             artifacts/
             playwright-report/
             test-results/
+          retention-days: 30
+
+  fidelity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:fidelity
+      - run: node tests/fidelity/visuals.mjs
+        env:
+          FIDELITY_RENDERER: pixi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-${{ github.sha }}-fidelity
+          path: artifacts/
+          retention-days: 30
+
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/fidelity-v33-2/run.mjs lobby host-effects camera layout surface screens quiz
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-${{ github.sha }}-audit
+          path: artifacts/
+          retention-days: 30
+
+  roster:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [canvas, pixi]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/fidelity-v33-2/all77.mjs ${{ matrix.renderer }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-${{ github.sha }}-roster-${{ matrix.renderer }}
+          path: artifacts/
           retention-days: 30
