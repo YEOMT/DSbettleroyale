@@ -1,11 +1,38 @@
 {
   "actors": 2,
-  "shots": 0,
-  "frame": 110.46399999856949,
+  "shots": 1,
+  "frame": 139.24800000071525,
   "abilities": [
-    "emoji-065",
-    "emoji-043"
+    "emoji-072",
+    "emoji-112"
   ],
   "zoom": 0.7111111111111111,
+  "matchedHud": {
+    "text": [
+      "🥤 Fidelity0 · B급",
+      "HP 181 / 181 · KILL 0 · 🔄 ×0",
+      "팀 점령전 · 가로형 점령 아레나",
+      "2 / 2명",
+      "탄산 폭탄"
+    ],
+    "capture": [
+      "05:58",
+      "A · C 활성 · 중앙 B 01:58 후 개방"
+    ],
+    "arrows": [
+      {
+        "label": "A",
+        "transform": "translate(38px, 360px) translate(-50%, -50%)",
+        "rotation": "rotate(3.14159rad)"
+      },
+      {
+        "label": "C",
+        "transform": "translate(1242px, 360px) translate(-50%, -50%)",
+        "rotation": "rotate(0rad)"
+      }
+    ],
+    "growth": true,
+    "music": false
+  },
   "comparison": "Same actual WS actors, map, growth, quality, camera and tick fed to offline original renderer. Screenshots inspected; full-scene pixel equality is not asserted."
 }
