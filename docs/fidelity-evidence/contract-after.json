@@ -1,0 +1,37 @@
+{
+  "checks": [
+    {
+      "name": "server card quick effect/detail reaches real UI",
+      "pass": true,
+      "expected": {
+        "effect": "스킬 쿨타임 27.5% 감소 (×0.73) · 스킬 피해 8% 감소 (×0.92)",
+        "detail": "단계 누적값 · 증감 합산·상한 적용"
+      },
+      "actual": "고유 스킬⏱️ QUICK CAST I스킬 쿨타임 27.5% 감소 (×0.73)스킬 피해 8% 감소 (×0.92)단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "name": "server card control effect/detail reaches real UI",
+      "pass": true,
+      "expected": {
+        "effect": "제어 효과 +27.5% (×1.28) · 스킬 피해 5% 감소 (×0.95)",
+        "detail": "단계 누적값 · 증감 합산·상한 적용"
+      },
+      "actual": "고유 스킬❄️ CONTROL I제어 효과 +27.5% (×1.28)스킬 피해 5% 감소 (×0.95)단계 누적값 · 증감 합산·상한 적용"
+    },
+    {
+      "name": "server card wanggui effect/detail reaches real UI",
+      "pass": true,
+      "expected": {
+        "effect": "C급 · 최대 HP +38.5% · 공격력 +44%",
+        "detail": "평타와 공격 스킬 모두 · 다음 단계: HP +77% · 공격력 +88%"
+      },
+      "actual": "기동 · 체력👑 왕귀 IC급최대 HP +38.5%공격력 +44%평타와 공격 스킬 모두 · 다음 단계: HP +77% · 공격력 +88%"
+    },
+    {
+      "name": "inactive stun emits no stars in actual student renderer",
+      "pass": true,
+      "actualStars": 0
+    }
+  ],
+  "browserErrors": []
+}

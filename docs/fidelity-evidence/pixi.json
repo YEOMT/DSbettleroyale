@@ -1,0 +1,672 @@
+{
+  "renderer": "pixi",
+  "cases": [
+    {
+      "name": "basic",
+      "ability": "emoji-000",
+      "kind": "attack",
+      "observed": [
+        {
+          "frames": 40,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "muzzle",
+            "shot",
+            "explosion",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 59,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "muzzle",
+            "shot",
+            "explosion",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "slash",
+      "ability": "emoji-001",
+      "kind": "attack",
+      "observed": [
+        {
+          "frames": 36,
+          "renderedKinds": [],
+          "effectKinds": [
+            "swing"
+          ],
+          "ordinals": [],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 0
+        },
+        {
+          "frames": 43,
+          "renderedKinds": [],
+          "effectKinds": [
+            "swing"
+          ],
+          "ordinals": [],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 0
+        }
+      ]
+    },
+    {
+      "name": "sniper",
+      "ability": "emoji-023",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 52,
+          "renderedKinds": [
+            "warning",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 64,
+          "renderedKinds": [
+            "warning",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "wizard",
+      "ability": "emoji-003",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 75,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 28
+        },
+        {
+          "frames": 102,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 28
+        }
+      ]
+    },
+    {
+      "name": "bubble",
+      "ability": "emoji-056",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 77,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 94,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "bats",
+      "ability": "emoji-036",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 76,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 6
+        },
+        {
+          "frames": 92,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 6
+        }
+      ]
+    },
+    {
+      "name": "boomerang",
+      "ability": "emoji-066",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 75,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0,
+            1
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": true,
+          "shotCount": 4
+        },
+        {
+          "frames": 91,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit",
+            "transit"
+          ],
+          "ordinals": [
+            0,
+            1
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": true,
+          "shotCount": 4
+        }
+      ]
+    },
+    {
+      "name": "tennis",
+      "ability": "emoji-045",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 77,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 1,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 92,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 1,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "basketball",
+      "ability": "emoji-089",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 84,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": true,
+          "shotCount": 4
+        },
+        {
+          "frames": 104,
+          "renderedKinds": [
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": true,
+          "shotCount": 4
+        }
+      ]
+    },
+    {
+      "name": "genie",
+      "ability": "emoji-012",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 110,
+          "renderedKinds": [
+            "turret",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 14
+        },
+        {
+          "frames": 139,
+          "renderedKinds": [
+            "turret",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 14
+        }
+      ]
+    },
+    {
+      "name": "void",
+      "ability": "emoji-132",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 77,
+          "renderedKinds": [
+            "beam"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit"
+          ],
+          "ordinals": [],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 99,
+          "renderedKinds": [
+            "beam"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "hit"
+          ],
+          "ordinals": [],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "dynamite",
+      "ability": "emoji-039",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 70,
+          "renderedKinds": [
+            "warning",
+            "lob"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "explosion"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        },
+        {
+          "frames": 88,
+          "renderedKinds": [
+            "warning",
+            "lob"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "explosion"
+          ],
+          "ordinals": [
+            0
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 2
+        }
+      ]
+    },
+    {
+      "name": "beast12",
+      "ability": "emoji-140",
+      "kind": "skill",
+      "observed": [
+        {
+          "frames": 75,
+          "renderedKinds": [
+            "warning",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 24
+        },
+        {
+          "frames": 102,
+          "renderedKinds": [
+            "warning",
+            "projectile"
+          ],
+          "effectKinds": [
+            "cast-start",
+            "transit",
+            "hit"
+          ],
+          "ordinals": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "ownAndOpponent": true,
+          "noDuplicates": true,
+          "confirmedFeedback": true,
+          "turns": 0,
+          "returnSeen": false,
+          "shotCount": 24
+        }
+      ]
+    }
+  ]
+}

@@ -22,6 +22,10 @@ jobs:
       - run: npm run verify
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - run: npm run test:fidelity
+      - run: node tests/fidelity/visuals.mjs
+        env:
+          FIDELITY_RENDERER: pixi
       - run: npm run test:load -- --players=26 --seconds=20
       - name: Retain executed results and matching builds
         if: always()

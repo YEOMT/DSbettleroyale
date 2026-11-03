@@ -21,7 +21,7 @@ export class Controls{
  fire(kind,{aim=this.aim,power=1,tap=false}={}){
   const self=this.timeline.predicted;if(!this.enabled||!self?.alive||self.rw?.locks?.[kind])return;
   const cooldown=kind==='attack'?self.basicCooldown:self.cooldown,now=performance.now();if((cooldown>0&&!self.rw?.recast)||now-(this.lastFire[kind]??-Infinity)<100)return;
-  const helped=this.assist.resolve(kind,aim,power,tap);this.lastFire[kind]=now;const seq=++this.actions[kind];this.timeline.preview(kind,seq,helped.aim);this.net.command('ACTION',{kind,seq,...helped,aimPower:power,castId:kind==='skill'?self.rw?.recast?.id||'':''}).catch(()=>{});
+  const helped=this.assist.resolve(kind,aim,power,tap);this.lastFire[kind]=now;const seq=++this.actions[kind];this.timeline.preview(kind,seq,helped.aim,power);this.net.command('ACTION',{kind,seq,...helped,aimPower:power,castId:kind==='skill'?self.rw?.recast?.id||'':''}).catch(()=>this.timeline.cancelPreview(kind,seq));
  }
  neutral(){this.keys.clear();this.move={x:0,y:0};this.gestures.clear();document.querySelectorAll('.aiming').forEach(e=>e.classList.remove('aiming'));document.querySelectorAll('.br-aim-knob').forEach(e=>e.style.transform='');this.batch=[];if(this.enabled)this.sendSample({x:0,y:0},true);}
  sendSample(move,flush=false){const c={seq:++this.seq,clientTick:++this.clientTick,move,aim:this.aim,aimPower:1,aspect:clamp(innerWidth/innerHeight,.2,5)};const channel=this.timeline.predicted?.rw?.channel;if(channel)c.steer={castId:channel.id};this.timeline.predict(c);this.batch.push(c);if(flush||this.batch.length>=2)this.net.send('INPUT_BATCH',{commands:this.batch.splice(0,4)});}

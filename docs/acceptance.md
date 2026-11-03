@@ -4,6 +4,8 @@ This is an evidence ledger, not a claim that all requirements are complete. **PA
 
 PASS: 28 · PARTIAL: 39 · FAIL: 1 · NOT_RUN: 2
 
+v33.1 evidence supplement: [Fidelity Repair](fidelity-repair.md). Counts stay unchanged; new actual-browser evidence narrows selected PARTIAL items without proving their entire scope.
+
 Commands: `npm run verify`, `npm run test:e2e`, `node tools/network/run.mjs`, `npm run test:load -- --players=26 --seconds=600`, `node tools/deploy/local-tls.mjs`. Raw local logs are in ignored `artifacts/`; shareable sanitized evidence is retained in `docs/metrics/`.
 
 | ID | Status | Requirement | Executed evidence / limit |
@@ -38,11 +40,11 @@ Commands: `npm run verify`, `npm run test:e2e`, `node tools/network/run.mjs`, `n
 | C12 | PARTIAL | 상자파괴/픽업/XP보충/사망드롭상한6·일반모드 팀스폰. | Original farm/spawn logic retained; separate crate/pickup/drop-cap6 regressions not complete. |
 | D01 | PASS | 실WebSocket으로2브라우저 전체경기 완주. | Edge: teacher +2 isolated student contexts, all3 public modes, quiz/draft/battle/results/rematch. Teacher ends the short browser battle. |
 | D02 | PASS | 서버만 physics 실행, 교사 탭닫힘/숨김이 전투를 정지시키지 않음. | Real host socket disconnect leaves server ticks advancing; physics runs only on server. |
-| D03 | PARTIAL | move/aim/button 입력 반응·멀티터치 증강 선택. | Restored original release-to-cast, drag power, Q/Space key edges, weak aim toggle and server revalidation. Three browser modes passed; physical multi-touch augmentation remains unverified. |
+| D03 | PARTIAL | move/aim/button 입력 반응·멀티터치 증강 선택. | Restored original release-to-cast, drag power, Q/Space key edges, weak aim toggle and server revalidation. Three browser modes passed; Chromium two-contact movement+augment touch passes in v33.1; physical school-device touch remains unverified. |
 | D04 | PARTIAL | lastApplied input seq/tick과 client replay의 실제 일치. | Applied ACK and ordinary replay kernel checked; jitter/held-input alignment is not exhaustively proven. |
 | D05 | PARTIAL | 무입력·무외력 10초 정지와 불확실 상대접촉 흔들림 검사. | 600 idle ticks show zero drift without external forces; uncertain body-contact scenarios incomplete. |
 | D06 | PARTIAL | 급회전·정지·벽·다중 접촉의 보정 오차 비교. | 840-tick straight/turn/stop/wall parity passed; multi-body/forced-motion correction comparison incomplete. |
-| D07 | PARTIAL | own shot preview→authority handoff, 멀티발ordinal 고유. | Action/life/ordinal IDs and cosmetic intent marker exist; complete trajectory preview handoff is not implemented. |
+| D07 | PARTIAL | own shot preview→authority handoff, 멀티발ordinal 고유. | v33.1 replaces the marker with original-derived volley previews, windup/interval, per-ordinal authority handoff and rejection cancellation. Canvas/Pixi representative suite asserts no duplicated flying bodies. Physical latency and every skill combination remain unverified. |
 | D08 | PARTIAL | 한snapshot안에 끝난 탄의 spawn/hit/end·즉시사망 원인. | Reliable spawn/end and synthetic short-shot timeline terminal test; actual native/RW same-snapshot lethal receipt suite incomplete. |
 | D09 | PARTIAL | native/RW 유도·왕복·반사·직선탄의 연속성·끝점·중복0. | Added authoritative native/RW path interpolation, turn-corner and bounded remaining-range unit tests. All curved weapon/path/endpoint browser cases are not exhaustively tested. |
 | D10 | PARTIAL | hidden actor의 level/name/glow가 남지 않고 위험탄은 필요한 경우 보임. | Concealed actors filtered before snapshot and level tracks reset; dedicated hidden-actor browser capture not run. |

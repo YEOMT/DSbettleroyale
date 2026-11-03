@@ -20,7 +20,8 @@
     "verify": "node tools/verify.mjs",
     "build": "node tools/build.mjs",
     "dev": "node tools/dev.mjs",
-    "start:server": "node dist/server/main.js"
+    "start:server": "node dist/server/main.js",
+    "test:fidelity": "node tests/fidelity/regression.mjs && node tests/fidelity/contracts.mjs && node tests/fidelity/visuals.mjs && node tests/fidelity/reference.mjs"
   },
   "dependencies": {
     "pixi.js": "8.20.1",

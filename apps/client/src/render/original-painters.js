@@ -1,5 +1,5 @@
 // Original v32.1 Canvas/Pixi painter implementation; no combat execution.
-export function createPainters(session){const __visualScope={BRMP:session,game:null};
+export function createPainters(session){const __visualScope={BRMP:session,game:null,brPlaySfx:()=>{}};
 __visualScope.brTeamKillColor = function brTeamKillColor(team){return __visualScope.BR_TEAM_KILL_COLORS[Number(team)]||__visualScope.BR_TEAM_KILL_COLORS[0];};
 
 __visualScope.brCombatPainter = function brCombatPainter(target,pixi) {
@@ -100,6 +100,18 @@ __visualScope.brPaintReworkStatus = function brPaintReworkStatus(p,x,y,r,zoom,st
             if(has('basicHaste')||has('teamBasicHaste')||has('teamSkillHaste'))p.arc(x,y,r*.90,-Math.PI*.8,-Math.PI*.2,'#fde68a',.78,1.6/zoom);
             if(has('counterImmediate')||has('counterDeferred'))p.arc(x,y,r*1.05,-Math.PI*.45,Math.PI*.45,'#cbd5e1',.85,2/zoom);
             if(has('regen')){p.line(x-r*.35,y-r*.15,x+r*.35,y-r*.15,'#86efac',.85,3/zoom);p.line(x,y-r*.5,x,y+r*.2,'#86efac',.85,3/zoom);}
+        };
+
+__visualScope.brBulletForm = function brBulletForm(style){return /homing/.test(style)?'diamond':/boomerang/.test(style)?'disc':/sniper|pierce|heavy/.test(style)?'capsule':'circle';};
+
+__visualScope.brBulletCanvas = function brBulletCanvas(style,color='#ffffff'){
+            const form=__visualScope.brBulletForm(style),key=form+'|'+color;let image=__visualScope.brBulletSources.get(key);if(image)return image;
+            image=document.createElement('canvas');image.width=image.height=64;const c=image.getContext('2d');c.translate(32,32);c.fillStyle=color;c.strokeStyle='#f8fafc';c.lineWidth=2;
+            c.beginPath();if(form==='diamond'){c.moveTo(30,0);c.lineTo(0,30);c.lineTo(-30,0);c.lineTo(0,-30);c.closePath();}
+            else if(form==='capsule'){c.moveTo(-18,-12);c.lineTo(18,-12);c.arc(18,0,12,-Math.PI/2,Math.PI/2);c.lineTo(-18,12);c.arc(-18,0,12,Math.PI/2,Math.PI*1.5);}
+            else c.arc(0,0,30,0,Math.PI*2);
+            c.fill();c.stroke();if(form==='disc'){c.beginPath();c.arc(0,0,17,0,Math.PI*1.55);c.strokeStyle='#0f172a';c.lineWidth=5;c.stroke();}
+            __visualScope.brBulletSources.set(key,image);return image;
         };
 
 __visualScope.brPaintReworkEntities = function brPaintReworkEntities(p,entities,frame,zoom=1,glyph=null) {
@@ -384,9 +396,111 @@ __visualScope.brPaintCrate = function brPaintCrate(p,b,flash=0) {
         };
 
 __visualScope.brCaptureMode = function brCaptureMode(){return __visualScope.BRMP?.roomMeta?.mode==='team-capture';};
+
+__visualScope.brEl = function brEl(id) {const old=__visualScope.brElementCache.get(id);if(old&&old.isConnected)return old;const el=document.getElementById(id);if(el)__visualScope.brElementCache.set(id,el);return el;};
+
+__visualScope.brClamp = function brClamp(v,a,b) { return Math.max(a,Math.min(b,v)); };
+
+__visualScope.brEmojiSourceSize = function brEmojiSourceSize(preset){return __visualScope.BR_GRAPHICS_PROFILES[__visualScope.brGraphicsPreset(preset)].source;};
+
+__visualScope.brGetEmojiSprite = function brGetEmojiSprite(text) {
+            return __visualScope.brActorEmojiCanvas(text,__visualScope.brEmojiSourceSize(__visualScope.BRMP?.roomMeta?.graphicsPreset));
+        };
+
+__visualScope.brGetNameSprite = function brGetNameSprite(text,color,bold) {
+            var key=String(text)+'|'+String(color)+'|'+(bold?'1':'0');__visualScope.BRMP.nameSpriteCache=__visualScope.BRMP.nameSpriteCache||new Map();
+            if(__visualScope.BRMP.nameSpriteCache.has(key))return __visualScope.BRMP.nameSpriteCache.get(key);
+            var sprite=document.createElement('canvas'),sc=sprite.getContext('2d'),font=(bold?'900 ':'700 ')+'18px sans-serif';
+            sc.font=font;
+            // Tight bounds prevent short Korean names from being squeezed out of a fixed 220px bitmap.
+            var labelWidth=Math.min(260,Math.max(26,Math.ceil(sc.measureText(String(text)).width)+14));
+            sprite.width=labelWidth*2;sprite.height=64;sprite._labelW=labelWidth;sprite._labelH=32;
+            sc=sprite.getContext('2d');sc.scale(2,2);sc.font=font;sc.textAlign='center';sc.textBaseline='middle';
+            sc.lineWidth=3;sc.strokeStyle='rgba(2,6,15,.92)';sc.strokeText(String(text),labelWidth/2,16);sc.fillStyle=color;sc.fillText(String(text),labelWidth/2,16);
+            __visualScope.BRMP.nameSpriteCache.set(key,sprite);return sprite;
+        };
+
+__visualScope.brSelfDamageCue = function brSelfDamageCue(damage,level,periodic,geometry,now=performance.now()) {
+            const fatal=__visualScope.BRMP.drawPlayers?.get(String(__visualScope.BRMP.playerId))?.row?.[7]===0&&!(__visualScope.BRMP.damageFlash&&now<__visualScope.BRMP.damageFlash.until);
+            if(!(damage>0)||!fatal&&now-Number(__visualScope.BRMP.lastHurtPulseAt??-1000)<(periodic?200:120))return false;
+            __visualScope.BRMP.lastHurtPulseAt=now;const duration=[0,90,100,115,125][level],alpha=[0,.20,.25,.30,.36][level];
+            __visualScope.BRMP.damageFlash={until:now+duration,duration,alpha,level};
+            const el=__visualScope.brEl('br-hurt-edge');if(!el)return true;
+            const animation=(__visualScope.BRMP.hurtPulseSeq=(__visualScope.BRMP.hurtPulseSeq||0)+1)%2?'br-hurt-a':'br-hurt-b';
+            el.style.setProperty('--hurt-anim',animation);el.style.setProperty('--hurt-ms',duration+'ms');el.style.setProperty('--hurt-alpha',String(alpha));
+            const dx=-Number(geometry.hitDX||0),dy=-Number(geometry.hitDY||0),mag=Math.hypot(dx,dy);
+            if(mag>.001){el.style.setProperty('--hurt-x',(dx/mag*76).toFixed(1)+'px');el.style.setProperty('--hurt-y',(dy/mag*76).toFixed(1)+'px');el.style.setProperty('--hurt-angle',(Math.atan2(dy,dx)+Math.PI/4)+'rad');el.style.setProperty('--hurt-dir-anim',animation);}
+            else el.style.setProperty('--hurt-dir-anim','none');
+            return true;
+        };
+
+__visualScope.brRegisterHitFeedback = function brRegisterHitFeedback(targetId,amount,x,y,sourceId,style,confirmed,impactLevel,geometry={}) {
+            if(!confirmed)return;
+            const now=performance.now(),damage=Math.max(0,Number(amount||0)),key=String(targetId||''),periodic=!!geometry.periodic;
+            let level=Number(impactLevel)>0?__visualScope.brClamp(Math.round(impactLevel),1,4):(window.BRCombatFeel?.impact(damage,Number(geometry.absorbed||0),null,geometry,style)||1);
+            if(periodic)level=1;
+            const clocks=__visualScope.BRMP.sustainFeedbackAt||(__visualScope.BRMP.sustainFeedbackAt=new Map());
+            const last=Number(clocks.get(key)??-10000),gap=periodic?140:level===1?85:0;
+            if(gap&&now-last<gap)return;clocks.set(key,now);
+            const profile=periodic?{duration:70,squash:.025,flash:.20}:__visualScope.BR_HIT_PROFILES[level],map=__visualScope.BRMP.hitStates||(__visualScope.BRMP.hitStates=new Map());let hit=map.get(key);
+            // A tiny rapid hit must not erase a heavy impact that is still returning to neutral.
+            if(!hit||hit.until<=now||hit.level<=level){if(!hit){hit={};map.set(key,hit);}Object.assign(hit,{until:now+profile.duration,duration:profile.duration,level,squash:profile.squash,flash:profile.flash,dx:0,dy:0});}
+            const victim=key===String(__visualScope.BRMP.playerId),owner=String(sourceId)===String(__visualScope.BRMP.playerId);
+            if(victim){__visualScope.brSelfDamageCue(damage,level,periodic,geometry,now);if(now-Number(__visualScope.BRMP.lastHurtSfxAt??-1000)>(level===1?110:70)){__visualScope.BRMP.lastHurtSfxAt=now;__visualScope.brPlaySfx(damage<=0&&Number(geometry.absorbed)>0?'shield':'hurt',level);}}
+            if(owner){__visualScope.BRMP.hitConfirm={until:now+(periodic?90:100+level*15),duration:periodic?90:100+level*15,amount:damage,heavy:level>=3,level,confirmed:true};if(now-Number(__visualScope.BRMP.lastHitSfxAt??-1000)>(level===1?110:70)){__visualScope.BRMP.lastHitSfxAt=now;__visualScope.brPlaySfx(damage<=0&&Number(geometry.absorbed)>0?'shield':'hit',level);}}
+            if((victim||owner)&&level===4&&!periodic&&!__visualScope.BRMP.reducedMotion&&now-Number(__visualScope.BRMP.lastMajorImpulseAt??-1000)>180){
+                __visualScope.BRMP.lastMajorImpulseAt=now;__visualScope.BRMP.studentShake={until:now+85,duration:85,strength:victim?1.5:1.0,seed:now%997};
+                if(navigator.vibrate)try{navigator.vibrate(victim?12:8);}catch(_){}
+            }
+        };
+
+__visualScope.brDrawProjectileGlyph = function brDrawProjectileGlyph(cc,x,y,vx,vy,size,emoji,color,style,zoom,alpha,rotation,detail=false,emphasis=false) {
+            zoom=Math.max(.18,Number(zoom||1));
+            var speed=Math.hypot(vx,vy)||1,ux=vx/speed,uy=vy/speed,r=Math.max(3/zoom,Number(size||7)),opacity=alpha==null?1:alpha;
+            var fastFloor=speed>=14?18/zoom:0,tail=Math.min(style==='sniper'||style==='skill-sniper'?100:62,Math.max(speed*3.2,fastFloor))*(detail?1:.6);
+            cc.save();cc.lineCap='round';cc.globalAlpha=opacity*.52;cc.strokeStyle=color;cc.lineWidth=Math.max(1.2/zoom,r*.50);
+            cc.beginPath();cc.moveTo(x-ux*tail,y-uy*tail);cc.lineTo(x,y);cc.stroke();cc.globalAlpha=opacity;
+            if(detail&&(style==='sniper'||style==='heavy')) {
+                // One thin core makes deliberate, heavy shots distinct without particles.
+                cc.globalAlpha=opacity*(style==='sniper'?.78:.52);cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(.7/zoom,r*.14);
+                cc.beginPath();cc.moveTo(x-ux*tail,y-uy*tail);cc.lineTo(x,y);cc.stroke();cc.globalAlpha=opacity;
+            }
+            if(emphasis) {
+                // Skill projectiles keep one stable ring even when optional detail is reduced.
+                cc.globalAlpha=opacity*.72;cc.strokeStyle='#ffffff';cc.lineWidth=Math.max(.8/zoom,r*.13);
+                cc.beginPath();cc.arc(x,y,r*1.42,0,Math.PI*2);cc.stroke();cc.globalAlpha=opacity;
+            } else if(detail&&(style==='bomber'||style==='heavy')) {
+                cc.globalAlpha=opacity*.56;cc.strokeStyle=style==='bomber'?'#fde68a':'#ffffff';cc.lineWidth=Math.max(.7/zoom,r*.12);
+                cc.beginPath();cc.arc(x,y,r*1.30,0,Math.PI*2);cc.stroke();cc.globalAlpha=opacity;
+            }
+            if(emoji) {
+                // Rasterize once, then draw the emoji itself at the hitbox diameter (sprite has transparent padding).
+                var glyphRadius=Math.max(r,3.5/zoom)*1.33;cc.translate(x,y);if(rotation)cc.rotate(rotation);
+                cc.drawImage(__visualScope.brGetEmojiSprite(emoji),-glyphRadius,-glyphRadius,glyphRadius*2,glyphRadius*2);
+            } else {
+                cc.save();cc.translate(x,y);cc.rotate(Math.atan2(vy,vx));const source=__visualScope.brBulletCanvas(style,color),extent=r*32/30;cc.drawImage(source,-extent,-extent,extent*2,extent*2);cc.restore();
+            }
+            cc.restore();
+        };
+
+__visualScope.brStudentProjectileVisualSize = function brStudentProjectileVisualSize(size) {
+            var radius=Math.max(1,Number(size||7));
+            return radius<10?radius*1.22:radius<16?radius*1.14:radius*1.08;
+        };
+
+__visualScope.brDrawHitConfirm = function brDrawHitConfirm(cc,w,h,now) {
+            var kill=__visualScope.BRMP.killConfirm;if(kill&&now>=kill.until){__visualScope.BRMP.killConfirm=null;kill=null;}
+            var hit=kill||__visualScope.BRMP.hitConfirm;if(!hit||now>=hit.until){__visualScope.BRMP.hitConfirm=null;return;}
+            var remain=__visualScope.brClamp((hit.until-now)/Math.max(1,Number(hit.duration||105)),0,1),size=(hit.heavy?19:14)*(1+(1-remain)*.35);
+            cc.save();cc.translate(w/2,h/2);cc.globalAlpha=Math.min(1,remain*1.7);cc.strokeStyle=hit.elimination?'#fb7185':hit.confirmed?(hit.heavy?'#fde047':'#ffffff'):'rgba(255,255,255,.72)';cc.lineWidth=hit.heavy?4:3;cc.lineCap='round';
+            for(var i=0;i<4;i++){var a=Math.PI/4+i*Math.PI/2,inner=size*.42,outer=size;cc.beginPath();cc.moveTo(Math.cos(a)*inner,Math.sin(a)*inner);cc.lineTo(Math.cos(a)*outer,Math.sin(a)*outer);cc.stroke();}
+            if(hit.elimination){cc.drawImage(__visualScope.brGetNameSprite('K.O.','#ffe4e6',true),-24,22,48,20);}
+            cc.restore();
+        };
  __visualScope.BR_RUN_MAX_LEVEL=6, __visualScope.BR_RUN_MAX_CHOICES=__visualScope.BR_RUN_MAX_LEVEL-1, __visualScope.BR_RUN_PATH_MAX_TIER=3, __visualScope.BR_DEATH_XP_CAP=6;
  __visualScope.BR_TEAM_KILL_COLORS = Object.freeze(['#9ca3af','#3b82f6','#ef4444','#22c55e','#eab308']);
  __visualScope.BR_LEVEL_TEXTURES=new Map();
+ __visualScope.brBulletSources=new Map();
  __visualScope.BR_GRAPHICS_PROFILES=Object.freeze({
             low:Object.freeze({label:'저사양',dpr:1,source:128,glow:0,antialias:false,finalFps:20}),
             balanced:Object.freeze({label:'균형',dpr:1.5,source:256,glow:.42,antialias:true,finalFps:30}),
@@ -394,4 +508,12 @@ __visualScope.brCaptureMode = function brCaptureMode(){return __visualScope.BRMP
         });
  __visualScope.BR_ACTOR_EMOJI_STYLE=1,__visualScope.BR_ACTOR_EMOJI_CACHE=new Map();
  __visualScope.BR_CRATE_HALF = 48;
+ __visualScope.brElementCache=new Map();
+ __visualScope.BR_HIT_PROFILES=Object.freeze([
+            null,
+            Object.freeze({duration:75,squash:.028,flash:.22,span:10,soundMs:48,volume:.045,frequency:640,endFrequency:270}),
+            Object.freeze({duration:95,squash:.058,flash:.34,span:18,soundMs:75,volume:.070,frequency:185,endFrequency:75}),
+            Object.freeze({duration:120,squash:.090,flash:.46,span:28,soundMs:110,volume:.105,frequency:95,endFrequency:40}),
+            Object.freeze({duration:135,squash:.120,flash:.52,span:38,soundMs:145,volume:.125,frequency:70,endFrequency:28})
+        ]);
 return __visualScope;}
