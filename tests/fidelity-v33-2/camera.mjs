@@ -2,8 +2,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {auditHarness,delay} from './harness.mjs';
 import {openBaseline} from '../../tools/baseline/browser.mjs';
+import {selectCases} from './selection.mjs';
+const renderers=selectCases(['canvas','pixi'],process.argv[2],'RENDERER'),widths=selectCases(['1920','1366','1024'],process.argv[3],'VIEWPORT');
+if(process.argv.length>4)throw Error('UNEXPECTED_ARGUMENT');
+const viewports=widths.map(width=>({width:Number(width),height:width==='1920'?1080:768}));
 fs.mkdirSync('artifacts/fidelity-v33-2',{recursive:true});const report=[];
-for(const renderer of ['canvas','pixi']){
+for(const renderer of renderers){
  const h=await auditHarness({renderer}),ref=await openBaseline();
  try{
   await h.battle();const w=h.room.world;w.game.projectiles=[];w.BRRework.clearWorld(w.game);w.brFarm.dispose(w.game);w.game.smokes=[];w.game.walls=[];
@@ -19,7 +23,7 @@ for(const renderer of ['canvas','pixi']){
    if(renderer==='pixi')brPixiHostStart();
   },renderer);
   if(renderer==='pixi'){await ref.page.waitForFunction(()=>!!brPixiHost);const missing=await ref.page.evaluate(()=>{const missing=[];for(let i=0;i<20;i++){try{brPixiHostFrame(game,'normal');return missing;}catch(e){const name=/^(\w+) is not defined$/.exec(e.message)?.[1];if(!name||!__baseline[name])throw e;missing.push(name);globalThis[name]=__baseline[name];}}throw Error('Too many missing legacy bindings');});report.push({legacyPixiMissingGlobalBindings:missing,note:'Reference has these unresolved IIFE helpers; exposed solely to exercise the original Pixi camera. Production original falls back to Canvas.'});}
-  for(const viewport of [{width:1920,height:1080},{width:1366,height:768},{width:1024,height:768}]){
+  for(const viewport of viewports){
    await h.host.setViewportSize(viewport);await ref.page.setViewportSize(viewport);
    for(const scenario of ['auto','normal','broadcast','focus','capture']){
     const capture=scenario==='capture';if(capture){const sample=(await import('../../packages/engine/src/index.js')).createWorld(undefined,{mode:'team-capture',teamCount:2},'camera-map',w.game.participants.map(p=>({id:p.remoteId,name:p.name,abilityId:p.ability.id,team:1})));w.game.capture=sample.game.capture;w.game.boundary=sample.game.boundary;}else{w.game.capture=null;w.game.boundary=null;}
@@ -66,3 +70,4 @@ for(const renderer of ['canvas','pixi']){
   assert.deepEqual(h.errors,[]);assert.deepEqual(ref.errors,[]);
  }finally{fs.writeFileSync('artifacts/fidelity-v33-2/camera.json',JSON.stringify(report,null,2));await h.close();await ref.browser.close();}
 }
+assert.equal(report.filter(r=>r.pass).length,renderers.length*viewports.length*5,'all selected camera policies completed');

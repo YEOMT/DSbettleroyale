@@ -2,11 +2,11 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, 'codex/**']
+    branches: [main]
 permissions:
   contents: read
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
   verify:
@@ -60,6 +60,10 @@ jobs:
   audit:
     runs-on: ubuntu-24.04
     timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [lobby, host-effects, surface, screens, quiz]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -68,11 +72,61 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: node tests/fidelity-v33-2/run.mjs lobby host-effects camera layout surface screens quiz
+      - run: node tests/fidelity-v33-2/run.mjs ${{ matrix.suite }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ci-${{ github.sha }}-audit
+          name: ci-${{ github.sha }}-audit-${{ matrix.suite }}
+          path: artifacts/
+          retention-days: 30
+
+  audit-camera:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        renderer: [canvas, pixi]
+        viewport: [1920, 1366, 1024]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/fidelity-v33-2/camera.mjs ${{ matrix.renderer }} ${{ matrix.viewport }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-${{ github.sha }}-camera-${{ matrix.renderer }}-${{ matrix.viewport }}
+          path: artifacts/
+          retention-days: 30
+
+  audit-layout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        renderer: [canvas, pixi]
+        mode: [solo, team-elim, team-capture]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/fidelity-v33-2/layout.mjs ${{ matrix.renderer }} ${{ matrix.mode }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-${{ github.sha }}-layout-${{ matrix.renderer }}-${{ matrix.mode }}
           path: artifacts/
           retention-days: 30
 
@@ -82,7 +136,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        renderer: [canvas, pixi]
+        include:
+          - {renderer: canvas, quality: all}
+          - {renderer: pixi, quality: low}
+          - {renderer: pixi, quality: balanced}
+          - {renderer: pixi, quality: high}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -91,10 +149,22 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: node tests/fidelity-v33-2/all77.mjs ${{ matrix.renderer }}
+      - run: node tests/fidelity-v33-2/all77.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ci-${{ github.sha }}-roster-${{ matrix.renderer }}
+          name: ci-${{ github.sha }}-roster-${{ matrix.renderer }}-${{ matrix.quality }}
           path: artifacts/
           retention-days: 30
+
+  required-checks:
+    if: always()
+    needs: [verify, fidelity, audit, audit-camera, audit-layout, roster]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every suite and partition to finish successfully
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          node -e 'const jobs=JSON.parse(process.env.NEEDS_JSON); const failed=Object.entries(jobs).filter(([,job])=>job.result!=="success"); if(failed.length){console.error(failed);process.exit(1);} console.log("All required suites and partitions passed.");'

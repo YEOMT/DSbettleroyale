@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';import fs from 'node:fs';import {openFidelity,delay} from '../fidelity/harness.mjs';import {stepWorld} from '../../packages/engine/src/index.js';import {manifest} from '../../packages/content/src/manifest.js';import {openBaseline} from '../../tools/baseline/browser.mjs';
-const renderers=process.argv[2]?[process.argv[2]]:['canvas','pixi'];if(renderers.some(r=>!['canvas','pixi'].includes(r)))throw Error('INVALID_RENDERER');
+import {selectCases} from './selection.mjs';
+const renderers=selectCases(['canvas','pixi'],process.argv[2],'RENDERER'),qualities=selectCases(['low','balanced','high'],process.argv[3],'QUALITY');
+if(process.argv.length>4)throw Error('UNEXPECTED_ARGUMENT');
 fs.mkdirSync('artifacts/fidelity-v33-2',{recursive:true});const report=[];
-for(const renderer of renderers)for(const quality of ['low','balanced','high']){
+for(const renderer of renderers)for(const quality of qualities){
  const h=await openFidelity({renderer}),ref=await openBaseline();try{const w=h.room.world;h.room.safePaused=true;h.room.config.graphicsPreset=quality;h.app.manager.changed(h.room);w.game.smokes=[];w.game.walls=[];w.game.zones=[];w.brFarm.dispose(w.game);
  for(const page of h.pages)await page.evaluate(async()=>{const a=fidelity.app;a.controls.enabled=false;a.renderer.enabled=false;fidelity.matrix=[];fidelity.castEvents=[];a.net.addEventListener('event',e=>fidelity.castEvents.push(e.detail));});
  for(const ability of manifest.roster){
@@ -23,4 +25,5 @@ for(const renderer of renderers)for(const quality of ['low','balanced','high']){
   report.push({renderer,quality,id:ability.id,frames:data.frames.length,actions:['attack','skill'],effectKinds:[...new Set(data.frames.flatMap(f=>f.view.effects.map(e=>e.kind)))],shotKinds:[...new Set(data.frames.flatMap(f=>f.view.shots.map(e=>e.kind)))],serverEvents:data.events.length,rwStatusRaster:'PASS',finitePositions:true,status:'PASS'});
  }
  assert.deepEqual(h.errors,[]);console.log('all77',renderer,quality,'PASS');
- }finally{fs.writeFileSync('artifacts/fidelity-v33-2/all77.json',JSON.stringify({scope:'77 characters x 3 qualities x '+renderers.length+' backend(s). Actual WS actions and renderer frames; accelerated 180 physics ticks per character, not real-time combat or pixel equality of full scenes.',renderers,cases:report},null,2));await h.close();await ref.browser.close();}}
+ }finally{fs.writeFileSync('artifacts/fidelity-v33-2/all77.json',JSON.stringify({scope:'77 characters x '+qualities.length+' qualities x '+renderers.length+' backend(s). Actual WS actions and renderer frames; accelerated 180 physics ticks per character, not real-time combat or pixel equality of full scenes.',renderers,qualities,expectedCases:manifest.roster.length*renderers.length*qualities.length,cases:report},null,2));await h.close();await ref.browser.close();}}
+assert.equal(report.length,manifest.roster.length*renderers.length*qualities.length,'all selected roster cases completed');
