@@ -11,4 +11,7 @@ artifacts/
 *.log
 *.pem
 *.key
+.releaseops/
+__pycache__/
+*.pyc
 

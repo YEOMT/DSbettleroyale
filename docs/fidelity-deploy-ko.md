@@ -1,5 +1,7 @@
 # v33.1 승인 후 AWS 갱신 절차
 
+현재 v33.2 이후 자동 배포·복구는 [ReleaseOps 안내](releaseops-ko.md)를 따른다. 아래는 이전 수동 배포 기록이며 새 workflow를 대신하지 않는다.
+
 이 작업에서는 실행하지 않았다. 현재 AWS의 경로·Compose 프로젝트 이름·도메인은 확인하지 않았다. **기존 `.env`, 비밀값, Caddy 인증서/볼륨을 그대로 사용**한다. `.env.example`을 덮어쓰거나 키를 재생성하지 않는다. 승인된 PR의 정확한 40자리 SHA와 통과한 CI를 먼저 확인한다.
 
 아래는 기존 Compose의 `game` 이미지가 client/server를 함께 제공하는 구성이다. GitHub Pages 등 별도 클라이언트 호스팅을 사용한다면 [paired release 절차](deployment.md)에 따라 동일 SHA 클라이언트까지 교체한 후에만 입장을 재개한다.

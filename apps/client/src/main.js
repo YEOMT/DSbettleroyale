@@ -1,3 +1,4 @@
+import {releaseInfo} from './release-info.js';
 import './ui/overrides.css';
 import {Connection} from './net/connection.js';
 import {Timeline} from './presentation/timeline.js';
@@ -14,3 +15,5 @@ renderer.controls=controls;controls.audio=audio;renderer.paint.brPlaySfx=(...arg
 const ui=new AppUI(net,timeline,renderer,controls,audio);
 export {net,timeline,renderer,controls,ui,audio};
 if(net.token)net.connect().catch(e=>ui.toast(e.message));
+
+releaseInfo(net);

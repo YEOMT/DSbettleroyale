@@ -12,7 +12,7 @@ try{
  // Keep early short-lived shots as well as the latest return/terminal frames.
  // Software WebGL screenshots on CI can outlast a last-500-only ring buffer.
  for(const page of h.pages)await page.evaluate(()=>{const r=fidelity.app.renderer,draw=r.draw.bind(r);fidelity.draws=[];fidelity.events=[];fidelity.app.net.addEventListener('event',e=>fidelity.events.push(e.detail));r.draw=(v,n)=>{draw(v,n);fidelity.draws.push(structuredClone({snapshotSeq:fidelity.app.timeline.lastSeq,tick:v.renderTick,self:v.self?.id,shots:v.shots,effects:v.effects,actors:v.actors}));if(fidelity.draws.length>500)fidelity.draws.splice(250,1);};});
- for(const [name,ability,kind,ticks]of cases){
+ for(const [name,ability,kind,ticks]of (process.env.FIDELITY_QUICK?cases.filter(c=>['basic','slash','wizard'].includes(c[0])):cases)){
   w.BRRework.clearWorld(w.game,'fixture');w.game.projectiles=[];w.game.zones=[];w.game.retiredShots=[];w.actionPending.clear();w.inputPending.clear();w.game.walls=[];
   // Clear the spatial index, cached wire rows and respawn queues as well as visible boxes.
   // These are empty combat fixtures; real crate collision is covered separately.

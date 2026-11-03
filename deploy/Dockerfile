@@ -1,13 +1,19 @@
 FROM node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
+COPY apps/client/package.json ./apps/client/package.json
+COPY apps/server/package.json ./apps/server/package.json
+COPY packages/content/package.json ./packages/content/package.json
+COPY packages/engine/package.json ./packages/engine/package.json
+COPY packages/protocol/package.json ./packages/protocol/package.json
+RUN npm ci
 COPY apps/ ./apps/
 COPY packages/ ./packages/
 COPY tools/ ./tools/
 ARG BUILD_ID
 ARG VITE_PUBLIC_WSS_URL
 ENV BUILD_ID=$BUILD_ID VITE_PUBLIC_WSS_URL=$VITE_PUBLIC_WSS_URL
-RUN npm ci && npm run build
+RUN npm run build
 
 FROM node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c
 WORKDIR /app

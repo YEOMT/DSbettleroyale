@@ -1,0 +1,180 @@
+name: Deep Audit
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Explicit deep suite
+        required: true
+        type: choice
+        options: [all, verify, fidelity, audit, camera, layout, roster]
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    if: inputs.suite == 'all' || inputs.suite == 'verify'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: npm run test:load -- --players=26 --seconds=20
+      - name: Retain executed results and matching builds
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-${{ github.sha }}-verify
+          path: |
+            dist/
+            artifacts/
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+  fidelity:
+    if: inputs.suite == 'all' || inputs.suite == 'fidelity'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:fidelity
+      - run: node tests/fidelity/visuals.mjs
+        env:
+          FIDELITY_RENDERER: pixi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-${{ github.sha }}-fidelity
+          path: artifacts/
+          retention-days: 30
+
+  audit:
+    if: inputs.suite == 'all' || inputs.suite == 'audit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [lobby, host-effects, surface, screens, quiz]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/fidelity-v33-2/run.mjs ${{ matrix.suite }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-${{ github.sha }}-audit-${{ matrix.suite }}
+          path: artifacts/
+          retention-days: 30
+
+  audit-camera:
+    if: inputs.suite == 'all' || inputs.suite == 'camera'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        renderer: [canvas, pixi]
+        viewport: [1920, 1366, 1024]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/fidelity-v33-2/camera.mjs ${{ matrix.renderer }} ${{ matrix.viewport }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-${{ github.sha }}-camera-${{ matrix.renderer }}-${{ matrix.viewport }}
+          path: artifacts/
+          retention-days: 30
+
+  audit-layout:
+    if: inputs.suite == 'all' || inputs.suite == 'layout'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        renderer: [canvas, pixi]
+        mode: [solo, team-elim, team-capture]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/fidelity-v33-2/layout.mjs ${{ matrix.renderer }} ${{ matrix.mode }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-${{ github.sha }}-layout-${{ matrix.renderer }}-${{ matrix.mode }}
+          path: artifacts/
+          retention-days: 30
+
+  roster:
+    if: inputs.suite == 'all' || inputs.suite == 'roster'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {renderer: canvas, quality: all}
+          - {renderer: pixi, quality: low}
+          - {renderer: pixi, quality: balanced}
+          - {renderer: pixi, quality: high}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/fidelity-v33-2/all77.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-${{ github.sha }}-roster-${{ matrix.renderer }}-${{ matrix.quality }}
+          path: artifacts/
+          retention-days: 30
+
+  required-checks:
+    if: always()
+    needs: [verify, fidelity, audit, audit-camera, audit-layout, roster]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every suite and partition to finish successfully
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          node -e 'const jobs=JSON.parse(process.env.NEEDS_JSON); const failed=Object.entries(jobs).filter(([,job])=>!["success","skipped"].includes(job.result)); if(failed.length){console.error(failed);process.exit(1);} console.log("All required suites and partitions passed.");'

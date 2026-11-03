@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';import fs from 'node:fs';import {openFidelity,delay} from '../fidelity/harness.mjs';import {stepWorld} from '../../packages/engine/src/index.js';import {manifest} from '../../packages/content/src/manifest.js';import {openBaseline} from '../../tools/baseline/browser.mjs';
 import {selectCases} from './selection.mjs';
+import {selectCharacters} from '../../tools/ci/characters.mjs';
+const roster=selectCharacters(manifest.roster,process.env.FIDELITY_CHARACTERS);
 const renderers=selectCases(['canvas','pixi'],process.argv[2],'RENDERER'),qualities=selectCases(['low','balanced','high'],process.argv[3],'QUALITY');
 if(process.argv.length>4)throw Error('UNEXPECTED_ARGUMENT');
 fs.mkdirSync('artifacts/fidelity-v33-2',{recursive:true});const report=[];
 for(const renderer of renderers)for(const quality of qualities){
  const h=await openFidelity({renderer}),ref=await openBaseline();try{const w=h.room.world;h.room.safePaused=true;h.room.config.graphicsPreset=quality;h.app.manager.changed(h.room);w.game.smokes=[];w.game.walls=[];w.game.zones=[];w.brFarm.dispose(w.game);
  for(const page of h.pages)await page.evaluate(async()=>{const a=fidelity.app;a.controls.enabled=false;a.renderer.enabled=false;fidelity.matrix=[];fidelity.castEvents=[];a.net.addEventListener('event',e=>fidelity.castEvents.push(e.detail));});
- for(const ability of manifest.roster){
+ for(const ability of roster){
   w.BRRework.clearWorld(w.game,'matrix');w.game.projectiles=[];w.game.retiredShots=[];w.game.zones=[];w.actionPending.clear();w.inputPending.clear();w.brFarm.dispose(w.game);
   for(const [i,p]of h.players.entries()){const id=p.remoteId,life=p.lifeSeq+1,team=p.team,a=w.EMOJI_DB.find(a=>a.id===ability.id),fresh=new w.Participant(i+1,'Matrix'+i,a,new w.Vec2(i?260:0,0),team);Object.assign(p,fresh,{remoteId:id,sessionId:id,lifeSeq:life,team,alive:true,connected:true,humanControlled:true,spawnProtectionUntilFrame:0,applyPlayerInput:w.brApplyPlayerInput,basicCooldown:0,cooldown:0,lastAimDir:new w.Vec2(1,0),abilityId:a.id,abilityIndex:w.EMOJI_DB.indexOf(a)});w.brInitRun(p);p.aimProfileKey=null;p.rw=null;w.session.inputs[id]={};}
   h.staticState();h.publish();for(const [i,page]of h.pages.entries())await page.waitForFunction(life=>fidelity.app.net.lifeSeq===life&&fidelity.app.timeline.predicted?.lifeSeq===life,h.players[i].lifeSeq);for(const page of h.pages)await page.evaluate(()=>{const a=fidelity.app;a.timeline.effects=[];a.timeline.spawns.clear();a.timeline.terminals.clear();a.renderer.reset();fidelity.matrix=[];fidelity.castEvents=[];});
@@ -25,5 +27,5 @@ for(const renderer of renderers)for(const quality of qualities){
   report.push({renderer,quality,id:ability.id,frames:data.frames.length,actions:['attack','skill'],effectKinds:[...new Set(data.frames.flatMap(f=>f.view.effects.map(e=>e.kind)))],shotKinds:[...new Set(data.frames.flatMap(f=>f.view.shots.map(e=>e.kind)))],serverEvents:data.events.length,rwStatusRaster:'PASS',finitePositions:true,status:'PASS'});
  }
  assert.deepEqual(h.errors,[]);console.log('all77',renderer,quality,'PASS');
- }finally{fs.writeFileSync('artifacts/fidelity-v33-2/all77.json',JSON.stringify({scope:'77 characters x '+qualities.length+' qualities x '+renderers.length+' backend(s). Actual WS actions and renderer frames; accelerated 180 physics ticks per character, not real-time combat or pixel equality of full scenes.',renderers,qualities,expectedCases:manifest.roster.length*renderers.length*qualities.length,cases:report},null,2));await h.close();await ref.browser.close();}}
-assert.equal(report.length,manifest.roster.length*renderers.length*qualities.length,'all selected roster cases completed');
+ }finally{fs.writeFileSync('artifacts/fidelity-v33-2/all77.json',JSON.stringify({scope:roster.length+' characters x '+qualities.length+' qualities x '+renderers.length+' backend(s). Actual WS actions and renderer frames; accelerated 180 physics ticks per character, not real-time combat or pixel equality of full scenes.',renderers,qualities,characters:roster.map(a=>a.id),expectedCases:roster.length*renderers.length*qualities.length,cases:report},null,2));await h.close();await ref.browser.close();}}
+assert.equal(report.length,roster.length*renderers.length*qualities.length,'all selected roster cases completed');

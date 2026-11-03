@@ -1,0 +1,62 @@
+name: 중단된 배포 복구
+on:
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: Exact 40-character candidate SHA (never latest)
+        required: true
+        type: string
+      target:
+        type: choice
+        options:
+          - staging
+          - production
+        required: true
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: releaseops-host
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: github.ref == 'refs/heads/main'
+    environment: ${{ inputs.target }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+      DEPLOY_STATE_DIR: ${{ vars.DEPLOY_STATE_DIR }}
+      TARGET: ${{ inputs.target }}
+      RELEASE_SHA: ${{ inputs.release_id }}
+    steps:
+      - name: Validate trusted main ancestry before checkout or npm
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE: ${{ inputs.release_id }}
+        run: node --input-type=module -e 'const sha=process.env.CANDIDATE;if(!/^[a-f0-9]{40}$/.test(sha))throw Error("INVALID_SHA");const r=await fetch("https://api.github.com/repos/"+process.env.GITHUB_REPOSITORY+"/compare/main..."+sha,{headers:{Authorization:"Bearer "+process.env.GH_TOKEN},signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error("UNTRUSTED_SOURCE");const c=await r.json();if(!["behind","identical"].includes(c.status))throw Error("NOT_TRUSTED_MAIN_ANCESTOR");'
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.release_id }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: node tools/deploy/remote.mjs download
+      - id: restore
+        run: node artifacts/candidate/ops/tools/deploy/remote.mjs restore
+      - if: steps.restore.outputs.pages == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/previous-pages
+          name: restore-pages
+      - if: steps.restore.outputs.pages == 'true'
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: restore-pages
+      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs finish-rollback
