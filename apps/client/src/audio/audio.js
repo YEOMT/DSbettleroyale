@@ -1,10 +1,31 @@
-const links={ready:'https://www.dropbox.com/scl/fi/uh3w61oauudkb79kogl44/BR-Ready.mp3?rlkey=mii9oxram8d7oda6k0g9j5x36&raw=1',start:'https://www.dropbox.com/scl/fi/acuk8jzd3cyz8j3qdpin4/BR-Start.mp3?rlkey=nkms6a7rvpm45sxuzsasf6tj6&raw=1',final:'https://www.dropbox.com/scl/fi/945izg1kyv4cmu07x6w6d/BR-Final.mp3?rlkey=wyx84e89smyfbxipmvqicg4uu&raw=1'};
+import {createOriginalAudio} from './original-audio.js';
 export class GameAudio{
- constructor(){this.enabled=false;this.effects=true;this.volume=.25;this.audio=new Audio();this.audio.preload='none';this.audio.addEventListener('ended',()=>{if(this.stage==='start')this.play('final');});this.seen=new Set();}
- play(stage){if(stage===this.stage&&this.audio.src)return;this.stage=stage;this.audio.pause();this.audio.src=links[stage]||'';this.audio.loop=stage==='ready'||stage==='final';this.audio.volume=this.volume;if(this.enabled&&links[stage])this.audio.play().catch(()=>{});}
- phase(phase){if(['LOBBY','QUIZ','DRAFT'].includes(phase))this.play('ready');else if(phase==='BATTLE')this.play('start');else{this.audio.pause();this.stage='';}}
- toggle(){this.enabled=!this.enabled;if(this.enabled)this.audio.play().catch(()=>{});else this.audio.pause();return this.enabled;}
- effect(event,selfId){if(!this.effects||this.seen.has(event.eventId)||event.type!=='FX'||event.data.kind!=='hit')return;this.seen.add(event.eventId);if(this.seen.size>500)this.seen.delete(this.seen.values().next().value);if(event.data.sourceId!==selfId&&event.data.targetId!==selfId)return;
-  try{this.ctx??=new AudioContext();const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.connect(g);g.connect(this.ctx.destination);o.frequency.value=event.data.targetId===selfId?130:420;g.gain.setValueAtTime(.04,this.ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,this.ctx.currentTime+.07);o.start();o.stop(this.ctx.currentTime+.08);}catch{}
+ constructor(session={}){
+  this.session=session;this.epochOffset=0;this.controller=createOriginalAudio(session,()=>Date.now()+this.epochOffset);this.seen=new Set();this.history=[];this.watched=new WeakSet();this.effects=true;
+  const gesture=()=>this.controller.ensure();addEventListener('pointerdown',gesture,{passive:true});addEventListener('keydown',gesture);
+  // v32.1 retries blocked BGM through its explicit music button, not focus/pointerdown.
+  document.addEventListener('visibilitychange',()=>{if(this.session.roomMeta?.phase!=='battle')return;this.controller.pause(document.hidden||!!this.gamePaused);if(!document.hidden)this.controller.sync(this.session.roomMeta);});
+  addEventListener('focus',()=>{if(!document.hidden&&this.session.roomMeta?.phase==='battle'&&!this.state.blocked)this.controller.catchUp();});
+  this.monitor=setInterval(()=>this.observe(),100);
  }
+ get state(){return this.controller.state;}
+ get audio(){return this.state.audio;}
+ get enabled(){return !!this.state.pref?.enabled;}
+ get volume(){return (this.state.pref?.volume??25)/100;}
+ set volume(value){if(this.state.pref){this.state.pref.volume=Math.max(0,Math.min(100,value*100));if(this.audio)this.audio.volume=this.volume;this.controller.save();}}
+ prime(){this.controller.prime();this.observe();}
+ sync(room){this.session.role=room.self.role;this.session.roomCode=room.code;this.session.roomMeta={...room.config,phase:room.phase.toLowerCase(),matchRound:room.round,battleStartedAt:room.battleStartedAt||0};if(Number.isFinite(room.serverTime))this.epochOffset=room.serverTime-Date.now();this.controller.sync(this.session.roomMeta);this.observe();}
+ pause(paused){this.gamePaused=!!paused;this.controller.pause(paused||document.hidden);}
+ toggle(){this.controller.toggle();this.observe();return this.enabled;}
+ stop(){this.controller.stop();this.seen.clear();}
+ record(type,detail={}){this.history.push({at:performance.now(),type,stage:this.state.stage,...detail});if(this.history.length>160)this.history.shift();}
+ observe(){const a=this.audio;if(!a)return;if(!this.watched.has(a)){this.watched.add(a);for(const type of ['loadstart','loadedmetadata','canplay','playing','pause','ended','error','stalled'])a.addEventListener(type,()=>this.record(type,{readyState:a.readyState,networkState:a.networkState,time:a.currentTime,error:a.error?{code:a.error.code,message:a.error.message}:null}));this.record('source',{url:a.currentSrc||a.src});}const signature=this.state.stage+'|'+this.state.blocked+'|'+this.state.status;if(signature!==this.lastStatus){this.lastStatus=signature;this.record('state',{blocked:this.state.blocked,status:this.state.status});}}
+ diagnostics(){const a=this.audio;return {role:this.state.role,enabled:this.enabled,volume:this.volume,stage:this.state.stage,blocked:this.state.blocked,status:this.state.status,lastPlayError:this.state.lastPlayError||null,paused:a?.paused,currentTime:a?.currentTime,duration:a&&Number.isFinite(a.duration)?a.duration:null,readyState:a?.readyState,networkState:a?.networkState,error:a?.error?{code:a.error.code,message:a.error.message}:null,history:this.history};}
+ effect(event,selfId){if(!this.effects||this.seen.has(event.eventId)||event.type!=='FX')return;this.seen.add(event.eventId);while(this.seen.size>500)this.seen.delete(this.seen.values().next().value);const d=event.data,own=d.sourceId===selfId,hurt=d.targetId===selfId;if(!own&&!hurt)return;
+  this.session.soundMuted=!this.effects;
+  // Hit/shield audio is emitted by the original brRegisterHitFeedback throttles.
+  if(d.kind==='elimination'&&own)this.controller.sfx('elimination',true);
+
+ }
+ action(kind){if(!this.effects)return;this.controller.ensure();this.controller.sfx(kind,false);}
 }

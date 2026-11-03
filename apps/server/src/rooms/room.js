@@ -16,9 +16,10 @@ export class Room{
   name=String(name).normalize('NFC').trim();if(!name||name.length>24||/[\u0000-\u001f]/.test(name))fail('INVALID_NAME');
   if([...this.members.values()].some(p=>!p.revoked&&p.name===name))fail('NAME_IN_USE');
   const p={id:randomUUID(),token:randomBytes(32).toString('base64url'),name,role,epoch:0,connected:false,revoked:false,team:0,joinedAt:this.manager.now(),ledger:new Map(),events:[],eventBytes:0,cursor:0};
-  this.members.set(p.id,p);this.manager.tokens.set(p.token,{room:this,member:p});this.revision++;return p;
+  this.members.set(p.id,p);this.manager.tokens.set(p.token,{room:this,member:p});this.balanceLobbyTeams();this.revision++;return p;
  }
  students(){return [...this.members.values()].filter(p=>p.role==='student'&&!p.revoked);}
+ balanceLobbyTeams(){if(this.phase!=='LOBBY'||this.config.mode!=='team-capture')return;const teams=this.rules.brTKBalancedTeams(this.students().map(p=>({...p,_id:p.id})),this.config.teamCount);for(const p of this.students())p.team=teams[p.id];}
  configure(p){
   if(this.phase!=='LOBBY')fail('PHASE_MISMATCH');const next={...this.config};
   if(p.mode!==undefined){const mode=p.mode==='team'?'team-elim':p.mode;if(!['solo','team-elim','team-capture','team-respawn'].includes(mode))fail('INVALID_MODE');next.mode=mode;}
@@ -30,7 +31,7 @@ export class Room{
   if(p.quizText!==undefined){if(typeof p.quizText!=='string'||p.quizText.length>200000)fail('QUIZ_TOO_LARGE');const parsed=this.rules.brValidateQuestionText(p.quizText);if(parsed.errors.length||!parsed.questions.length)fail('INVALID_QUIZ:'+JSON.stringify(parsed.errors.slice(0,3)));if(parsed.questions.some(q=>q.some(s=>s.length>1000)))fail('QUIZ_TEXT_TOO_LONG');bank=parsed.questions;}
   if(p.teams!==undefined){if(!p.teams||typeof p.teams!=='object'||Array.isArray(p.teams))fail('INVALID_TEAMS');for(const [id,team]of Object.entries(p.teams))if(!this.members.has(id)||!Number.isInteger(team)||team<1||team>next.teamCount)fail('INVALID_TEAMS');}
   this.config=next;this.quizBank=bank;if(p.teams)for(const [id,team]of Object.entries(p.teams))this.members.get(id).team=team;
-  this.revision++;
+  this.balanceLobbyTeams();this.revision++;
  }
  beginDraft(){
   if(this.phase!=='QUIZ')fail('PHASE_MISMATCH');
@@ -58,13 +59,23 @@ export class Room{
    }
    case 'BEGIN_DRAFT':this.beginDraft();break;
    case 'QUIZ_ANSWER':if(this.phase!=='QUIZ'||member.role!=='student')fail('PHASE_MISMATCH');return answer(this,member,p,this.manager.now());
+   case 'DRAFT_RECOVER':{
+    if(this.phase!=='DRAFT')fail('PHASE_MISMATCH');const target=this.members.get(p.playerId||member.id);if(!target||target.role!=='student'||target.revoked)fail('INVALID_PLAYER');if(target!==member&&member.role!=='host')fail('HOST_REQUIRED');
+    // A refresh never rerolls a valid assignment. Rebuild only corrupted/missing data
+    // from the same deterministic original draw stream, retaining spent credits.
+    if(!this.rules.EMOJI_DB.some(a=>a.id===target.draft?.abilityId)){const spent=target.draft?.spent||0;let index=this.rules.brAbilityIndex(this.config.mode,-1,null,this.rules.brHashRandom(this.matchId+'|'+target.id+'|initial'));
+     for(let i=1;i<=spent;i++)index=this.rules.brAbilityIndex(this.config.mode,index,null,this.rules.brHashRandom(this.matchId+'|'+target.id+'|reroll|'+i));
+     const credits=Math.min(['team-capture','team-respawn'].includes(this.config.mode)?2:1000,Math.floor((target.quiz?.score||0)/this.config.rerollEvery));
+     target.draft={abilityId:this.rules.EMOJI_DB[index].id,spent,rerolls:Math.max(0,credits-spent),revision:(target.draft?.revision||0)+1,ready:!!target.draft?.ready};}
+    target.peer?.send('ROOM_STATE',this.publicState(target));break;
+   }
    case 'DRAFT_REROLL':{
     const d=member.draft;if(this.phase!=='DRAFT'||!d||d.ready)fail('PHASE_MISMATCH');if(p.draftRevision!==d.revision)fail('DRAFT_REVISION');if(d.rerolls<=0)fail('NO_REROLLS');
     const old=this.rules.EMOJI_DB.findIndex(a=>a.id===d.abilityId),index=this.rules.brAbilityIndex(this.config.mode,old,null,this.rules.brHashRandom(this.matchId+'|'+member.id+'|reroll|'+(d.spent+1)));
     const id=this.rules.EMOJI_DB[index]?.id;if(!id)fail('DRAFT_ASSIGNMENT_FAILED');member.draft={...d,abilityId:id,rerolls:d.rerolls-1,spent:d.spent+1,revision:d.revision+1};break;
    }
    case 'DRAFT_CONFIRM':if(this.phase!=='DRAFT'||!member.draft||p.draftRevision!==member.draft.revision)fail('DRAFT_REVISION');member.draft.ready=true;member.draft.revision++;break;
-   case 'START_BATTLE':if(this.phase!=='DRAFT')fail('PHASE_MISMATCH');if(this.manager.activeBattles()>=this.manager.config.maxActiveBattles)fail('BATTLE_CAPACITY');this.manager.startBattle(this);this.phase='BATTLE';this.revision++;break;
+   case 'START_BATTLE':if(this.phase!=='DRAFT')fail('PHASE_MISMATCH');if(this.manager.activeBattles()>=this.manager.config.maxActiveBattles)fail('BATTLE_CAPACITY');this.manager.startBattle(this);this.battleStartedAt=this.manager.now();this.phase='BATTLE';this.revision++;break;
    case 'END':if(this.phase!=='BATTLE')fail('PHASE_MISMATCH');this.finish();break;
    case 'CONTINUE':if(this.phase!=='BATTLE'||!this.safePaused||this.lastFault)fail('CANNOT_CONTINUE');this.safePaused=false;this.debt=0;this.overloadSince=0;for(const m of this.members.values())m.peer?.send('OVERLOAD',{paused:false});break;
    case 'CLOSE_ROOM':if(this.phase==='BATTLE')fail('END_BATTLE_FIRST');queueMicrotask(()=>this.manager.remove(this));break;
@@ -79,8 +90,9 @@ export class Room{
  }
  finish(){if(this.phase!=='BATTLE')return;this.result=exportResult(this.world);this.world.finished=true;this.phase='RESULTS';this.revision++;this.manager.onResult?.(this.matchId,this.result);}
  publicState(member){return {id:this.id,code:this.code,matchId:this.matchId,round:this.round,phase:this.phase,revision:this.revision,config:this.config,
+  serverTime:this.manager.now(),quizEndsAt:this.quizEndsAt||0,battleStartedAt:this.battleStartedAt||0,
   quizRemainingMs:Math.max(0,(this.quizEndsAt||0)-this.manager.now()),
-  players:this.students().map(p=>({id:p.id,name:p.name,team:p.team,connected:p.connected,ready:!!p.draft?.ready,score:p.quiz?.score||0})),
+  players:this.students().map(p=>({id:p.id,name:p.name,team:p.team,connected:p.connected,ready:!!p.draft?.ready,score:p.quiz?.score||0,...(member.role==='host'?{draft:p.draft||null}:{})})),
   self:{id:member.id,name:member.name,role:member.role,team:member.team,draft:member.draft||null,quiz:member.role==='student'&&this.phase==='QUIZ'?publicQuiz(member,this.manager.now()):null},
   result:this.phase==='RESULTS'?this.result:null};}
 }

@@ -11,7 +11,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,6 +26,7 @@ jobs:
       - run: node tests/fidelity/visuals.mjs
         env:
           FIDELITY_RENDERER: pixi
+      - run: npm run test:fidelity-audit
       - run: npm run test:load -- --players=26 --seconds=20
       - name: Retain executed results and matching builds
         if: always()

@@ -1,3 +1,4 @@
+import {effectLife} from './effect-life.js';
 import {shotKey,previewShots,previewCue,terminalPoints} from './previews.js';
 import {createMovementKernel,predictMovement} from '../../../../packages/engine/src/movement/prediction.js';
 import {sampleFlight} from './flight.js';
@@ -44,6 +45,6 @@ export class Timeline{
   }
   const handed=new Set(shots.filter(q=>['projectile','hook','lob','bomb'].includes(q.kind)).map(shotKey));
   for(const [id,q]of this.previews){const ended=[...this.terminals.values()].some(e=>shotKey(e)===id);if(handed.has(id)||ended||now>q.expires){this.previews.delete(id);continue;}if(now<q.bornAt)continue;const ticks=Math.min((now-q.bornAt)*.06,q.rangeRemaining/Math.max(1,Math.hypot(q.dx,q.dy)));shots.push({...q,x:q.x+q.dx*ticks,y:q.y+q.dy*ticks});}
-  this.effects=this.effects.filter(e=>this.renderTick-e.tick<30&&actors.every(a=>(a.id!==e.targetId||e.geometry?.targetLife==null||a.lifeSeq===e.geometry.targetLife)&&(a.id!==e.sourceId||e.geometry?.lifeSeq==null||a.lifeSeq===e.geometry.lifeSeq)));return {...right.state,actors,shots,renderTick:this.renderTick,effects:this.effects.filter(e=>e.tick<=this.renderTick).concat(residuals)};
+  this.effects=this.effects.filter(e=>this.renderTick-e.tick<effectLife(e)*.06&&actors.every(a=>(a.id!==e.targetId||e.geometry?.targetLife==null||a.lifeSeq===e.geometry.targetLife)&&(a.id!==e.sourceId||e.geometry?.lifeSeq==null||a.lifeSeq===e.geometry.lifeSeq)));return {...right.state,actors,shots,renderTick:this.renderTick,effects:this.effects.filter(e=>e.tick<=this.renderTick).concat(residuals)};
  }
 }

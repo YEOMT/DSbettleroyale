@@ -1,6 +1,8 @@
+import {hostProjectile} from './host-projectile.js';
 // v32.1 brDrawProjectileGlyph geometry with the same cached sources for Pixi.
 export function drawProjectile(renderer,p,q,zoom){
- const paint=renderer.paint,size=paint.brStudentProjectileVisualSize(q.radius),detail=renderer.session.roomMeta.graphicsPreset!=='low',alpha=q.preview?.85:1,style=q.style||'skill',color=q.trailColor||q.color||'#fff',emphasis=q.actionKind==='skill';
+ if(renderer.teacher&&renderer.cameraPose.mode!=='performance'){hostProjectile(renderer,p,q,zoom);return;}
+ const paint=renderer.paint,size=renderer.teacher?Math.max(3,q.radius):paint.brStudentProjectileVisualSize(q.radius),detail=renderer.session.roomMeta.graphicsPreset!=='low',alpha=q.preview?.85:1,style=q.style||'skill',color=q.trailColor||q.color||'#fff',emphasis=q.actionKind==='skill';
  if(!renderer.pixi){paint.brDrawProjectileGlyph(renderer.ctx,q.x,q.y,q.dx,q.dy,size,q.emoji,color,style,zoom,alpha,q.rotation||0,detail,emphasis);return;}
  const z=Math.max(.18,zoom),speed=Math.hypot(q.dx,q.dy)||1,ux=q.dx/speed,uy=q.dy/speed,r=Math.max(3/z,size),tail=Math.min(['sniper','skill-sniper'].includes(style)?100:62,Math.max(speed*3.2,speed>=14?18/z:0))*(detail?1:.6);
  p.line(q.x-ux*tail,q.y-uy*tail,q.x,q.y,color,alpha*.52,Math.max(1.2/z,r*.50),'round');
