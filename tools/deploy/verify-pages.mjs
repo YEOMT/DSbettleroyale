@@ -9,6 +9,9 @@ export async function verifyPages(url,dir){
  }
  for(const match of expected.toString().matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)){
   const asset=match[1],base=new URL(url).pathname,p=asset.startsWith(base)?asset.slice(base.length):asset.replace(/^\.\//,'');
+  // The initial legacy/Firebase page can reference pinned CDN scripts. Its exact
+  // archived HTML and CDN availability are verified; do not invent local copies.
+  if(/^https?:/.test(asset)&&new URL(asset).origin!==new URL(url).origin){await get(asset);continue;}
   const hash=b=>createHash('sha256').update(b).digest('hex');if(hash(await get(asset))!==hash(fs.readFileSync(dir+'/'+p)))throw Error('PAGES_ASSET_MISMATCH');
  }
  console.log('PAGES_PAIR_VERIFIED');

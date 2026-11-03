@@ -47,10 +47,9 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
       - run: node tools/deploy/remote.mjs download
       - id: restore
-        run: node tools/deploy/remote.mjs restore
+        run: node artifacts/candidate/ops/tools/deploy/remote.mjs restore
       - if: steps.restore.outputs.pages == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
@@ -60,4 +59,4 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           artifact_name: restore-pages
-      - run: node tools/deploy/remote.mjs finish-rollback
+      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs finish-rollback

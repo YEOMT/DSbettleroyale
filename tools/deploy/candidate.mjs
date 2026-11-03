@@ -16,5 +16,7 @@ for(const [name,c]of Object.entries(targets)){
  if(name!=='pages'){fs.cpSync('dist/server',root+'/'+name+'/server',{recursive:true});fs.cpSync('node_modules/ws',root+'/'+name+'/ws',{recursive:true});fs.copyFileSync('dist/release.json',root+'/'+name+'/release.json');}
 }
 fs.cpSync('deploy',root+'/ops/deploy',{recursive:true,filter:p=>!p.endsWith('.env')});fs.cpSync('tools/deploy',root+'/ops/tools/deploy',{recursive:true});
+// Deployment/rollback needs no historical npm install: retain the exact small tool runtime.
+for(const pkg of ['ws','playwright','playwright-core'])fs.cpSync('node_modules/'+pkg,root+'/ops/node_modules/'+pkg,{recursive:true});
 fs.writeFileSync(root+'/manifest.json',JSON.stringify({schema:1,releaseId:sha,sourceSha:sha,sourceDirty,sourceTree:execFileSync('git',['rev-parse','HEAD^{tree}'],{encoding:'utf8'}).trim(),fingerprint:release,targets,images:{},checks:{status:'PENDING',quick:JSON.parse(fs.readFileSync('artifacts/quick-results.json')),targeted:JSON.parse(fs.readFileSync('artifacts/targeted-results.json'))},status:sourceDirty?'LOCAL_FIXTURE_NOT_DEPLOYABLE':'ARTIFACT_READY',previousGoodRelease:null,checksums:{}},null,2));
 console.log('Candidate variants built once; server reused from exact main quick artifact.');

@@ -7,7 +7,7 @@
 1. 패치 PR → `CI / quick`, 선택된 `targeted`, `required-checks` 확인 → 사용자가 Merge.
 2. 정확한 main 병합본 CI가 성공하면 `Paired candidate`가 해당 SHA의 산출물을 만들고, 설정된 경우 staging만 갱신한다. Merge는 운영 교체를 실행하지 않는다.
 3. staging 플레이 후 Actions **정식 반영**에서 `release_id`(40자리 SHA), `candidate_run_id`(성공한 후보 실행 번호)를 입력해 실행한다. 이것이 명시적 승인이다. production environment의 reviewer를 설정했다면 그 승인도 필요하다. 계정에 reviewer 기능이 없다면 권한 있는 사용자의 dispatch가 승인 경계다.
-4. **이전 정식 버전으로 복구**에서 이전 정상 SHA와 후보 run ID를 입력한다. 기존 이미지/Pages artifact를 쓰며 과거 소스를 다시 빌드하지 않는다. 보존 artifact가 만료되면 실패로 차단한다. 자동으로 latest나 재빌드로 대체하지 않는다.
+4. **이전 정식 버전으로 복구**에서 이전 정상 SHA를 입력한다. 서버에 보존한 이미지/Pages/배포 도구를 내려받아 사용하며 과거 npm 설치·빌드를 하지 않는다. 보존 artifact가 삭제/손상됐으면 실패로 차단한다. 자동으로 latest나 재빌드로 대체하지 않는다.
 5. SSH/runner 종료로 작업이 중단됐으면 **중단된 배포 복구**에서 그 작업의 SHA와 환경을 지정한다. 서버에 남은 transaction과 이전 Pages를 이용해 복구한다. 잠금이 남아 있으면 새 릴리스를 억지로 적용하지 않는다.
 
 승인 중 staging이 더 새 후보로 바뀌면 이전 후보 승격은 `SUPERSEDED_OR_UNVERIFIED_STAGING`으로 차단한다. 다시 선택한 후보를 확인한다. 일반 롤백은 이 검사 대신 `production-verified.json` 기록을 요구한다.

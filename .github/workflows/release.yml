@@ -115,19 +115,18 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
       - uses: actions/download-artifact@v4
         with:
           name: release-${{ env.RELEASE_SHA }}
           path: artifacts/candidate
-      - run: npx playwright install --with-deps chromium
       - run: node tools/deploy/remote.mjs upload
-      - run: node tools/deploy/remote.mjs stage
-      - run: node tools/deploy/remote.mjs commit
+      - run: node artifacts/candidate/ops/node_modules/playwright/cli.js install --with-deps chromium
+      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs stage
+      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs commit
       - if: failure()
         run: |-
-          node tools/deploy/remote.mjs restore
-          node tools/deploy/remote.mjs finish-rollback
+          node artifacts/candidate/ops/tools/deploy/remote.mjs restore
+          node artifacts/candidate/ops/tools/deploy/remote.mjs finish-rollback
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -6,10 +6,6 @@ on:
         description: Exact 40-character candidate SHA (never latest)
         required: true
         type: string
-      candidate_run_id:
-        description: Successful Paired candidate run ID retaining this artifact
-        required: true
-        type: string
 permissions:
   contents: read
   actions: read
@@ -49,23 +45,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
-      - name: Validate immutable candidate provenance
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          RUN_ID: ${{ inputs.candidate_run_id }}
-        run: node --input-type=module -e 'import {trustedRun,github} from "./tools/deploy/trust.mjs";if(!/^\d+$/.test(process.env.RUN_ID))throw Error("INVALID_RUN");const r=await github("/repos/"+process.env.GITHUB_REPOSITORY+"/actions/runs/"+process.env.RUN_ID);trustedRun(r,process.env.GITHUB_REPOSITORY,process.env.RELEASE_SHA,".github/workflows/release.yml");'
-      - uses: actions/download-artifact@v4
-        with:
-          name: release-${{ inputs.release_id }}
-          run-id: ${{ inputs.candidate_run_id }}
-          github-token: ${{ github.token }}
-          path: artifacts/candidate
-      - run: npx playwright install --with-deps chromium
-      - run: node tools/deploy/remote.mjs upload
+      - run: node tools/deploy/remote.mjs download
+      - run: node artifacts/candidate/ops/node_modules/playwright/cli.js install --with-deps chromium
       - id: stage
-        run: node tools/deploy/remote.mjs stage
-      - run: node tools/deploy/remote.mjs publishing
+        run: node artifacts/candidate/ops/tools/deploy/remote.mjs stage
+      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs publishing
       - uses: actions/upload-pages-artifact@v3
         with:
           path: artifacts/publish-pages
@@ -73,10 +57,10 @@ jobs:
       - uses: actions/deploy-pages@v4
         with:
           artifact_name: candidate-pages
-      - run: node tools/deploy/remote.mjs commit
+      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs commit
       - id: restore
         if: failure()
-        run: node tools/deploy/remote.mjs restore
+        run: node artifacts/candidate/ops/tools/deploy/remote.mjs restore
       - if: failure() && steps.restore.outputs.pages == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
@@ -87,7 +71,7 @@ jobs:
         with:
           artifact_name: restore-pages
       - if: failure()
-        run: node tools/deploy/remote.mjs finish-rollback
+        run: node artifacts/candidate/ops/tools/deploy/remote.mjs finish-rollback
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -49,7 +49,6 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
       - name: Validate immutable candidate provenance
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -61,11 +60,11 @@ jobs:
           run-id: ${{ inputs.candidate_run_id }}
           github-token: ${{ github.token }}
           path: artifacts/candidate
-      - run: npx playwright install --with-deps chromium
       - run: node tools/deploy/remote.mjs upload
+      - run: node artifacts/candidate/ops/node_modules/playwright/cli.js install --with-deps chromium
       - id: stage
-        run: node tools/deploy/remote.mjs stage
-      - run: node tools/deploy/remote.mjs publishing
+        run: node artifacts/candidate/ops/tools/deploy/remote.mjs stage
+      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs publishing
       - uses: actions/upload-pages-artifact@v3
         with:
           path: artifacts/publish-pages
@@ -73,10 +72,10 @@ jobs:
       - uses: actions/deploy-pages@v4
         with:
           artifact_name: candidate-pages
-      - run: node tools/deploy/remote.mjs commit
+      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs commit
       - id: restore
         if: failure()
-        run: node tools/deploy/remote.mjs restore
+        run: node artifacts/candidate/ops/tools/deploy/remote.mjs restore
       - if: failure() && steps.restore.outputs.pages == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
@@ -87,7 +86,7 @@ jobs:
         with:
           artifact_name: restore-pages
       - if: failure()
-        run: node tools/deploy/remote.mjs finish-rollback
+        run: node artifacts/candidate/ops/tools/deploy/remote.mjs finish-rollback
       - uses: actions/upload-artifact@v4
         if: always()
         with:

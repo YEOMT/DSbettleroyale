@@ -2,6 +2,11 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 import {classify} from '../../tools/ci/plan.mjs';import {trustedRun} from '../../tools/deploy/trust.mjs';import {readConfig} from '../../apps/server/src/config.js';
 import {parse} from 'acorn';
 import {selectCharacters} from '../../tools/ci/characters.mjs';
+import {verifyPages} from '../../tools/deploy/verify-pages.mjs';
+test('initial legacy restore verifies archived HTML/CDN and blocks a wrong published page',async()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dsbr-pages-')),html='<script src="https://cdn.example/pinned.js"></script>',prior=globalThis.fetch;
+ try{fs.writeFileSync(dir+'/index.html',html);globalThis.fetch=async url=>new Response(String(url).startsWith('https://cdn.example')?'external library':html);await verifyPages('https://pages.example/repo/',dir);globalThis.fetch=async()=>new Response('wrong release');await assert.rejects(verifyPages('https://pages.example/repo/',dir),/PAGES_INDEX_MISMATCH/);}finally{globalThis.fetch=prior;fs.rmSync(dir,{recursive:true});}
+});
 test('character selection preserves full default and selects exact changed IDs without weaker assertions',()=>{
  const roster=[{id:'emoji-001'},{id:'emoji-003'}];assert.equal(selectCharacters(roster),roster);assert.deepEqual(selectCharacters(roster,'emoji-003'),[roster[1]]);assert.throws(()=>selectCharacters(roster,'emoji-999'));
  assert.deepEqual(classify(['apps/client/src/render/rework.js'],'+ emoji-003').characters,['emoji-003']);
@@ -32,4 +37,6 @@ test('workflow gates and bounded selection are explicit; privileged operations n
  for(const name of ['release','promote','rollback','recover']){const w=load(name);assert.equal(w.concurrency['cancel-in-progress'],false);assert.equal(w.on.pull_request,undefined);for(const j of Object.values(w.jobs))for(const s of j.steps||[])assert.notEqual(s['continue-on-error'],true);}
  for(const name of ['promote','rollback']){const w=load(name);assert.ok(w.on.workflow_dispatch);assert.match(w.jobs.deploy.if,/PRODUCTION_WS_ENABLED/);assert.ok(w.jobs.deploy.steps.some(s=>s.uses==='actions/deploy-pages@v4'&&s.with.artifact_name==='restore-pages'));assert.match(w.jobs.deploy.steps.find(s=>s.uses==='actions/checkout@v4').with.ref,/inputs.release_id/);assert.match(w.jobs.deploy.steps[0].run,/NOT_TRUSTED_MAIN_ANCESTOR/);}
  assert.ok(Object.hasOwn(load('deep').on,'workflow_dispatch'));
+ for(const name of ['promote','rollback','recover'])assert.ok(Object.values(load(name).jobs).every(j=>(j.steps||[]).every(s=>!s.run?.includes('npm ci')&&!s.run?.includes('npm run build'))));
+ assert.ok(load('rollback').jobs.deploy.steps.some(s=>s.run==='node tools/deploy/remote.mjs download'));
 });

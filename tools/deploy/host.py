@@ -8,7 +8,11 @@ def atomic(path,data):
 def read(path):return json.loads(pathlib.Path(path).read_text())
 def fingerprint(actual,expected):
     if any(actual.get(k)!=expected.get(k) for k in KEYS):raise RuntimeError('VERSION_MISMATCH')
-def sha(path):return hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+def sha(path):
+    digest=hashlib.sha256()
+    with open(path,'rb') as stream:
+        for chunk in iter(lambda:stream.read(1024*1024),b''):digest.update(chunk)
+    return digest.hexdigest()
 def env_values(path):
     values={}
     for line in pathlib.Path(path).read_text().splitlines():

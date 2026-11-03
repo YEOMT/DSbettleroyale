@@ -1,4 +1,5 @@
 import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {verifyPages} from './verify-pages.mjs';
 const action=process.argv[2],target=process.env.TARGET,sha=process.env.RELEASE_SHA,root=process.env.DEPLOY_STATE_DIR,host=process.env.DEPLOY_HOST,user=process.env.DEPLOY_USER;
 if(!['staging','production'].includes(target)||!/^[/a-zA-Z0-9_.-]+$/.test(root||'')||!root.startsWith('/')||!/^[-a-zA-Z0-9.]+$/.test(host||'')||!/^[-a-zA-Z0-9_]+$/.test(user||'')||!sha?.match(/^[a-f0-9]{40}$/)||!process.env.SSH_KEY||!process.env.KNOWN_HOSTS)throw Error('BLOCKED_CONFIGURATION');
@@ -12,7 +13,7 @@ const command=verb=>ssh(`DEPLOY_STATE_DIR=${q(root)} bash ${q(folder+'/ops/deplo
 const status=()=>JSON.parse(command('status'));
 async function smoke(version,config){
  fs.writeFileSync('artifacts/expected-release.json',JSON.stringify(version));
- execFileSync(process.execPath,['tools/deploy/smoke.mjs'],{stdio:'inherit',timeout:45000,env:{...process.env,RELEASE_FILE:'artifacts/expected-release.json',PUBLIC_HTTP_API_URL:config.http,PUBLIC_WSS_URL:config.ws,CLIENT_ORIGIN:target==='production'?'https://yeomt.github.io':config.http}});
+ execFileSync(process.execPath,[fileURLToPath(new URL('./smoke.mjs',import.meta.url))],{stdio:'inherit',timeout:45000,env:{...process.env,RELEASE_FILE:'artifacts/expected-release.json',PUBLIC_HTTP_API_URL:config.http,PUBLIC_WSS_URL:config.ws,CLIENT_ORIGIN:target==='production'?'https://yeomt.github.io':config.http}});
 }
 if(action==='upload'){
  ssh(`test -f ${q(root+'/config.json')} && mkdir -p ${q(root+'/incoming/'+sha)}`);
@@ -34,7 +35,7 @@ if(action==='upload'){
  await smoke(m.fingerprint,m.targets[target]);
  // Read existing secret over authenticated SSH into child memory only, never outputs/artifacts.
  const secret=ssh('python3 -c '+q(`import sys,json;sys.path.insert(0,${JSON.stringify(folder+'/ops/tools/deploy')});from host import env_values;c=json.load(open(${JSON.stringify(root+'/config.json')}));print(env_values(c[${JSON.stringify(target)}]['env'])['HOST_AUTH_SECRET'])`)).trim();
- execFileSync(process.execPath,['tools/deploy/browser-smoke.mjs'],{stdio:'inherit',timeout:120000,env:{...process.env,SMOKE_URL:target==='production'?m.targets.pages.http:m.targets.staging.http,SMOKE_HOST_SECRET:secret}});
+ execFileSync(process.execPath,[fileURLToPath(new URL('./browser-smoke.mjs',import.meta.url))],{stdio:'inherit',timeout:120000,env:{...process.env,SMOKE_URL:target==='production'?m.targets.pages.http:m.targets.staging.http,SMOKE_HOST_SECRET:secret}});
  console.log(command('verified'));
  if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,`DEPLOYED_VERIFIED: ${target} ${sha}\n\n${m.targets[target].http}\nPrevious: ${status().previous?.releaseId||'none (first staging)'}\n`);
 }else if(action==='restore'){
