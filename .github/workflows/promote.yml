@@ -1,0 +1,101 @@
+name: 정식 반영
+on:
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: Exact 40-character candidate SHA (never latest)
+        required: true
+        type: string
+      candidate_run_id:
+        description: Successful Paired candidate run ID retaining this artifact
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: releaseops-host
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main' && vars.PRODUCTION_WS_ENABLED == 'true'
+    environment:
+      name: production
+      url: https://yeomt.github.io/DSbettleroyale/
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+      DEPLOY_STATE_DIR: ${{ vars.DEPLOY_STATE_DIR }}
+      TARGET: production
+      RELEASE_MODE: promote
+      RELEASE_SHA: ${{ inputs.release_id }}
+    steps:
+      - name: Validate trusted main ancestry before checkout or npm
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE: ${{ inputs.release_id }}
+        run: node --input-type=module -e 'const sha=process.env.CANDIDATE;if(!/^[a-f0-9]{40}$/.test(sha))throw Error("INVALID_SHA");const r=await fetch("https://api.github.com/repos/"+process.env.GITHUB_REPOSITORY+"/compare/main..."+sha,{headers:{Authorization:"Bearer "+process.env.GH_TOKEN},signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error("UNTRUSTED_SOURCE");const c=await r.json();if(!["behind","identical"].includes(c.status))throw Error("NOT_TRUSTED_MAIN_ANCESTOR");'
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.release_id }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Validate immutable candidate provenance
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.candidate_run_id }}
+        run: node --input-type=module -e 'import {trustedRun,github} from "./tools/deploy/trust.mjs";if(!/^\d+$/.test(process.env.RUN_ID))throw Error("INVALID_RUN");const r=await github("/repos/"+process.env.GITHUB_REPOSITORY+"/actions/runs/"+process.env.RUN_ID);trustedRun(r,process.env.GITHUB_REPOSITORY,process.env.RELEASE_SHA,".github/workflows/release.yml");'
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ inputs.release_id }}
+          run-id: ${{ inputs.candidate_run_id }}
+          github-token: ${{ github.token }}
+          path: artifacts/candidate
+      - run: npx playwright install --with-deps chromium
+      - run: node tools/deploy/remote.mjs upload
+      - id: stage
+        run: node tools/deploy/remote.mjs stage
+      - run: node tools/deploy/remote.mjs publishing
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/publish-pages
+          name: candidate-pages
+      - uses: actions/deploy-pages@v4
+        with:
+          artifact_name: candidate-pages
+      - run: node tools/deploy/remote.mjs commit
+      - id: restore
+        if: failure()
+        run: node tools/deploy/remote.mjs restore
+      - if: failure() && steps.restore.outputs.pages == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: artifacts/previous-pages
+          name: restore-pages
+      - if: failure() && steps.restore.outputs.pages == 'true'
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: restore-pages
+      - if: failure()
+        run: node tools/deploy/remote.mjs finish-rollback
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: production-state-${{ inputs.release_id }}
+          path: artifacts/transaction.json
+          retention-days: 30
+  blocked:
+    if: vars.PRODUCTION_WS_ENABLED != 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - run: 'echo "BLOCKED_CONFIGURATION: first Pages transition requires explicit setup/approval; no production change." >> "$GITHUB_STEP_SUMMARY"'

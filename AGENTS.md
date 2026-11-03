@@ -5,7 +5,8 @@
 - Check original parity fixtures before changing combat, progression, quiz or mode rules.
 - Test duplicate commands, life/connection epochs, rematch, resume and late packets.
 - Keep room state, queues and event ledgers bounded; clean up all references.
-- Run npm run verify, npm run build and relevant tests; report only executed checks.
+- Use tools/ci/plan.mjs to record the changed scope, then quick common checks, one required build and selected targeted checks. Keep all assertions. Deep Audit (all77, full visual matrices, long load) is manual or evidence-driven; do not repeat passed suites for unrelated edits. Report PASS/FAIL/TIMEOUT/INFRA_FAILURE/NOT_RUN separately.
+- ReleaseOps: preserve exact client/server buildId pairing. PRs have no deploy secrets. Main creates a candidate/staging only; production and rollback require explicit workflow_dispatch approval. Never substitute latest for a selected releaseId. Keep admission closed until the restored pair is verified. Follow docs/releaseops-ko.md; do not assume /srv/dsbr or provision paid resources.
 - Never commit student data, authentication tokens, secrets or real classroom logs.
 - Commit/push only a work branch and open a PR. No direct main push, force push or automatic merge.
 - Keep root index.html unchanged during this first migration PR.

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import YAML from 'yaml';
 import {selectCases} from '../fidelity-v33-2/selection.mjs';
 
-const workflow=YAML.parse(fs.readFileSync(new URL('../../.github/workflows/ci.yml',import.meta.url),'utf8'));
+const workflow=YAML.parse(fs.readFileSync(new URL('../../.github/workflows/deep.yml',import.meta.url),'utf8'));
 const renderers=['canvas','pixi'],qualities=['low','balanced','high'];
 const commands=job=>job.steps.flatMap(step=>step.run?[step.run]:[]).join('\n');
 
@@ -48,8 +48,8 @@ test('partition selectors preserve full local defaults and reject invalid partit
 });
 
 test('feature branch commits use PR CI only and the gate requires every suite',()=>{
- assert.ok(Object.hasOwn(workflow.on,'pull_request'));
- assert.deepEqual(workflow.on.push.branches,['main']);
+ assert.ok(Object.hasOwn(workflow.on,'workflow_dispatch'));
+ assert.equal(workflow.on.push,undefined);
  assert.equal(workflow.jobs['required-checks'].if,'always()');
  assert.deepEqual(workflow.jobs['required-checks'].needs.slice().sort(),Object.keys(workflow.jobs).filter(k=>k!=='required-checks').sort());
  for(const job of Object.values(workflow.jobs).filter(j=>j.strategy))assert.equal(job.strategy['fail-fast'],false);

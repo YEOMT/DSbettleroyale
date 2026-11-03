@@ -1,5 +1,7 @@
 # Deployment state and runbook
 
+Current ReleaseOps entry point: [releaseops-ko.md](releaseops-ko.md). The `/srv/dsbr` commands below are historical migration notes, not the current Lightsail layout or release workflow. Use the parameterized `install-release.sh` and one-time bootstrap; production now requires explicit promotion, and rollback restores both retained artifacts without rebuilding.
+
 **Not deployed by this work.** The user reports that a Seoul Lightsail instance and Docker / Docker Compose are ready. No hostname or SSH connection has been supplied or used. See [the Korean Lightsail staging commands](lightsail-ko.md). Production automation is disabled unless repository variable `PRODUCTION_WS_ENABLED` is exactly `true`. Root main/Pages HTML stays unchanged in this PR. Docker/SSH/Pages release paths are supplied but must be validated on the designated host; they are not recorded as executed deployments.
 
 ## Required settings

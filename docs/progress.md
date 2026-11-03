@@ -94,3 +94,10 @@ Production hosting credentials/domain were not provided; production is not deplo
 - No game/runtime/content/deployment files changed. Pixi roster now has independent low/balanced/high jobs (77 each); Canvas keeps all231 cases. Camera is partitioned by renderer and viewport (6 jobs,9000 total trace frames), layout by renderer and mode (6 jobs,30 total viewport cases), and lobby/host-effects/surface/screens/quiz each have their own job. Every original assertion and local unfiltered default remains. Added partition completion counts and four CI coverage/selector/trigger tests.
 - Feature branches now run CI only on pull_request; push is restricted to main. This removes duplicate work-branch push/PR runs. A final required-checks job rejects any failed/cancelled/skipped prerequisite. Artifact names include each partition; the audit runner creates its output directory for independent execution.
 - Targeted local CI tests (4/4), script syntax and diff checks passed. The full mandatory jobs are executed on PR #3; their final links/results are recorded in the PR description. No new gameplay audit, feature work, main merge or AWS deployment.
+# ReleaseOps / Fast CI follow-up
+
+- Latest main confirmed: `206aaee4bca23d639769134bc86773fb3214ec1e`; existing v33.2 gameplay/content/protocol/legacy/root HTML preserved.
+- Quick/targeted CI and manual Deep Audit separated; exact SHA artifact provenance, variant builds, staging isolation, approval-only paired promotion, retained-artifact rollback and interrupted-transaction recovery implemented in existing release paths.
+- Actual local timings, infrastructure failures and targeted reruns: [releaseops-validation.md](releaseops-validation.md). One-time configuration and daily workflow: [releaseops-ko.md](releaseops-ko.md).
+- AWS version read only: existing server reports `206aaee4...`. No AWS/Pages/Firebase mutation. New deployment path remains BLOCKED_CONFIGURATION until bootstrap, environment secrets and first-transition approval are supplied.
+

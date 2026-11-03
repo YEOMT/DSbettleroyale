@@ -22,7 +22,9 @@
     "dev": "node tools/dev.mjs",
     "start:server": "node dist/server/main.js",
     "test:fidelity": "node tests/fidelity/regression.mjs && node tests/fidelity/contracts.mjs && node tests/fidelity/visuals.mjs && node tests/fidelity/reference.mjs",
-    "test:fidelity-audit": "node tests/fidelity-v33-2/run.mjs"
+    "test:fidelity-audit": "node tests/fidelity-v33-2/run.mjs",
+    "quick": "node tools/ci/quick.mjs",
+    "test:targeted": "node tools/ci/targeted.mjs"
   },
   "dependencies": {
     "pixi.js": "8.20.1",
