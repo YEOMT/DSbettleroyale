@@ -1,0 +1,13 @@
+pixi basic PASS
+pixi slash PASS
+pixi sniper PASS
+pixi wizard PASS
+pixi bubble PASS
+pixi bats PASS
+pixi boomerang PASS
+pixi tennis PASS
+pixi basketball PASS
+pixi genie PASS
+pixi void PASS
+pixi dynamite PASS
+pixi beast12 PASS

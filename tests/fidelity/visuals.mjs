@@ -11,7 +11,7 @@ try{
  let serverEvents=[];const sink=w.eventSink;w.eventSink=e=>{serverEvents.push(structuredClone(e));sink(e);};
  // Keep early short-lived shots as well as the latest return/terminal frames.
  // Software WebGL screenshots on CI can outlast a last-500-only ring buffer.
- for(const page of h.pages)await page.evaluate(()=>{const r=fidelity.app.renderer,draw=r.draw.bind(r);fidelity.draws=[];fidelity.events=[];fidelity.app.net.addEventListener('event',e=>fidelity.events.push(e.detail));r.draw=(v,n)=>{draw(v,n);fidelity.draws.push(structuredClone({tick:v.renderTick,self:v.self?.id,shots:v.shots,effects:v.effects,actors:v.actors}));if(fidelity.draws.length>500)fidelity.draws.splice(250,1);};});
+ for(const page of h.pages)await page.evaluate(()=>{const r=fidelity.app.renderer,draw=r.draw.bind(r);fidelity.draws=[];fidelity.events=[];fidelity.app.net.addEventListener('event',e=>fidelity.events.push(e.detail));r.draw=(v,n)=>{draw(v,n);fidelity.draws.push(structuredClone({snapshotSeq:fidelity.app.timeline.lastSeq,tick:v.renderTick,self:v.self?.id,shots:v.shots,effects:v.effects,actors:v.actors}));if(fidelity.draws.length>500)fidelity.draws.splice(250,1);};});
  for(const [name,ability,kind,ticks]of cases){
   w.BRRework.clearWorld(w.game,'fixture');w.game.projectiles=[];w.game.zones=[];w.game.retiredShots=[];w.actionPending.clear();w.inputPending.clear();w.game.walls=[];
   // Clear the spatial index, cached wire rows and respawn queues as well as visible boxes.
@@ -30,8 +30,11 @@ try{
    // Keep a target alive so the visual lifetime/return can be observed; no damage formula is changed.
    for(const p of h.players){p.hp=p.maxHp;p.stunned=0;}
    stepWorld(w);for(const e of w.BRRework.world(w.game).entities){if(e.bounceCount)serverTurns.set(e.ctx.ownerId,Math.max(serverTurns.get(e.ctx.ownerId)||0,e.bounceCount));if(e.phase==='return')serverReturns.add(e.ctx.ownerId);}
-   // Three 60 Hz physics ticks per 20 Hz snapshot. Let real browser animation frames run.
-   if(tick%3===0){h.publish();await delay(50);}
+   // Three physics ticks per snapshot. On software WebGL CI, 50ms alone can
+   // advance the entire projectile lifetime before one page paints. Wait for
+   // BOTH real render loops to consume the publication before manual stepping.
+   // This is a visual fixture, not a wall-clock throughput measurement.
+   if(tick%3===0){h.publish();const seq=h.room.snapshotSeq;await delay(50);await Promise.all(h.pages.map(page=>page.waitForFunction(seq=>fidelity.draws.some(d=>d.snapshotSeq>=seq),seq)));}
    if(!saved&&tick>14){const v=await h.pages[0].evaluate(()=>fidelity.draws.findLast(v=>v.shots.some(q=>!q.preview)||v.effects.some(f=>f.kind==='swing')));if(v){for(const [i,page]of h.pages.entries())await page.screenshot({path:`artifacts/fidelity/${report.renderer}-${name}-student${i}.png`});saved=true;if(!comparison&&v.shots.some(q=>q.native&&!q.preview))comparison=v;}}
   }
   h.publish();await delay(100);
