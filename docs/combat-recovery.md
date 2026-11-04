@@ -38,11 +38,15 @@
 | snapshot 수신 p95 ms | 74.0 | 68.4 |
 | 그라디언트 생성 / 주 canvas 텍스트 호출 | 1400 / 6650 | 350 / 5600 |
 
+별도 실시간 6→1 실험에서는 같은 seed와 입력 주기로 학생·호스트를 WebSocket에 연결했다. 양쪽 모두 생존 1명에서 결과로 전환했다. 서버 step p95는 기존 11.81ms, 패치 12.89ms였고 snapshot 간격 p95는 65.31ms와 68.59ms였다. 서버 overload는 양쪽 모두 0회였다. 이 실험에서 서버 처리 시간 개선은 관측되지 않았다.
+
 ![호스트 프레임 시간](evidence/combat/host-time.svg)
 
 [전체 계측 요약](evidence/combat/host-summary.json) · [공격자](evidence/combat/pixi-attacker.png) · [상대](evidence/combat/pixi-opponent.png) · [호스트](evidence/combat/pixi-host.png) · [조준](evidence/combat/aim-pixi.png)
 
 **검사 시간과 제한.** 개발 중 로컬 combat 묶음은 Canvas 45.45초, Pixi 42.36초였고, 5개 연결·계약 검사는 약 0.4초였다. 실제 최종 SHA의 CI 시간과 판정은 PR에 별도 기록한다. 초기 시험의 쿨타임 대기 한 번은 제한 시간 안에 끝나지 않았다. 재실행에서 통과했지만 그 첫 대기의 원인은 확정하지 않았다. 연속 증강 제안과 기관차 선딜 marker를 잘못 읽었던 fixture는 서버 제안 ID 교체와 실제 돌진 종료 위치를 확인하도록 수정했다.
+
+첫 GitHub Pixi 세션은 짧은 평타의 세 화면 관측 대기에서 시간 초과했다. 두 번째 키 입력과 9개 렌더 샘플 뒤에 평타를 확인하던 시험을 바꿨다. 각 입력을 실제 WebSocket으로 큐에 넣은 뒤 권위 엔진의 6틱을 진행해 세 화면의 draw를 확인하고 그다음 공격을 입력한다. 동일 평타·스킬 번호, 픽셀, 쿨타임 검사를 유지했다. 수정된 로컬 Pixi 세션 31.52초 PASS.
 
 명시적 탈퇴·강퇴·만료·버전 오류·다른 탭의 세션 인계는 복귀와 구분한다. 토큰은 sessionStorage에만 보관하며 탭 종료/브라우저 재실행 후 복귀는 보장하지 않는다. 경기 수치·쿨타임·잠금·서버 권위·buildId 매칭·60/20Hz를 유지한다.
 

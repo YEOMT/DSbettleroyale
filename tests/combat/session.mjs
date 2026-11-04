@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
+import {stepWorld} from '../../packages/engine/src/index.js';
 import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';
 const renderer=process.argv[2]||'canvas',dir='artifacts/combat',started=Date.now(),report={renderer,checks:[]};
 fs.mkdirSync(dir,{recursive:true});
@@ -66,9 +67,18 @@ try{
  await wait('legitimate cooldown',()=>p.cooldown<=0&&p.basicCooldown<=0,20000);
  // Place participants in a clear lane; the casts below must come from student UI.
  p.pos=new w.Vec2(960,340);other.pos=new w.Vec2(1070,340);h.publish();
- const previousBasic=p.firedAttackSeq;await attacker.keyboard.press('Space');await wait('new basic fired',()=>p.firedAttackSeq>previousBasic);
- await attacker.keyboard.press('q');await wait('new skill fired',()=>p.firedSkillSeq>1001);
- h.room.safePaused=true;h.publish();
+ // Sample each short-lived cast on its own authoritative ticks. Otherwise three
+ // software-rendered browser windows can miss the swing between two key presses.
+ h.room.safePaused=true;
+ const captureCast=async(key,kind,field)=>{
+  const previous=p[field];await attacker.keyboard.press(key);
+  await wait(kind+' queued',()=>w.actionPending.get(id)?.some(c=>c.kind===kind));
+  for(let tick=0;tick<6;tick++)stepWorld(w);
+  assert.ok(p[field]>previous,kind+' must actually fire');h.publish();
+ };
+ await captureCast('Space','attack','firedAttackSeq');
+ for(const page of pages)await page.waitForFunction(({id,seq})=>seenActions.some(a=>a.owner===id&&a.seq===seq&&a.kind==='attack'),{id,seq:p.firedAttackSeq});
+ await captureCast('q','skill','firedSkillSeq');
  for(const page of pages)await page.waitForFunction(({id,seq})=>seenActions.some(a=>a.owner===id&&a.seq===seq&&a.type==='ORBIT'),{id,seq:p.firedSkillSeq});
  for(const quality of ['low','balanced','high']){
  h.room.config.graphicsPreset=quality;h.app.manager.changed(h.room);
@@ -87,7 +97,6 @@ try{
   },{id,seq:p.firedSkillSeq});assert.ok(result.changed>20,JSON.stringify(result));assert.equal(result.pixi,renderer==='pixi');screens.push({quality,...result});
   if(quality==='low')await page.screenshot({path:dir+'/'+renderer+'-'+['attacker','opponent','host'][i]+'.png'});
  }}
- for(const page of pages)await page.waitForFunction(({id,seq})=>seenActions.some(a=>a.owner===id&&a.seq===seq&&a.kind==='attack'),{id,seq:p.firedAttackSeq});
  h.room.safePaused=false;
  report.checks.push({id:'T06',fired:{attack:p.firedAttackSeq,skill:p.firedSkillSeq},screens});
  await wait('orbits expire',()=>!w.game.projectiles.some(q=>q.type==='ORBIT'),6500);
