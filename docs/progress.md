@@ -105,3 +105,7 @@ Production hosting credentials/domain were not provided; production is not deplo
 ## Integrated combat recovery (2026-11-04)
 
 Base 4a9ee7574a82af9f18f62de4e50a36de2d5142ae. B01–B10 causes, T01–T11 coverage, times, screenshots and before/after host trace: [combat-recovery.md](combat-recovery.md). ReleaseOps pairing retained. Public AWS only queried; no deployment. Physical-device late-game hitch remains unverified. See PR for exact-head CI results.
+
+## Camera, attack feedback and smooth controls (2026-11-05)
+
+PR #5 is present in base ef84ca5. Real mouse and release-direction failures reproduced; 30/60/120Hz correction, teacher framing, bounded confirmed sprite feedback, actual WS controls and renderer recovery exercised. Local Quick 10.86s, then 6 focused regressions for the CI movement edge fix, paired build 4.41s and healthy local version match. The focused team-elim E2E passed in 8.4s after preserving all three sessions with a smaller rival viewport. Each of the three renderers retained zero pose/sprite/texture entries after receiving the new lobby. Before/after replay and continuous-play measurements, failures and unverified devices are in [camera-feel-smooth-control.md](camera-feel-smooth-control.md). Final GitHub job timings are recorded on the work-branch PR. No public rollout.

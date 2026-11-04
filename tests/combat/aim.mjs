@@ -49,6 +49,44 @@ try{
   await page.waitForFunction(()=>gameTest.renderer.ctx&&!gameTest.renderer.pixi&&gameTest.renderer.canvas.isConnected);
   report.push({contextLoss:'Canvas restored on same connected session'});
  }
+ // Exercise the actual replacement canvas on the Pixi path and the original
+ // one on Canvas. Deliberately CSS-scale and offset it independently of its backing store.
+ {
+  const ability=w.EMOJI_DB.find(a=>a.id==='emoji-001'),id=p.remoteId,life=p.lifeSeq+1,team=p.team;
+  w.BRRework.clearWorld(w.game,'cursor');w.game.walls=[];w.game.projectiles=[];w.session.inputs[id]={};w.actionPending.clear();
+  Object.assign(p,new w.Participant(1,'Cursor',ability,new w.Vec2(0,0),team),{remoteId:id,sessionId:id,lifeSeq:life,abilityId:ability.id,team,humanControlled:true,connected:true,applyPlayerInput:w.brApplyPlayerInput,aimProfileKey:null,rw:null,basicCooldown:0,cooldown:0});
+  w.brInitRun(p);h.staticState();h.publish();await page.waitForFunction(l=>gameTest.timeline.predicted?.lifeSeq===l,life);
+  const pointer=await page.evaluate(()=>{
+   const r=gameTest.renderer;r.canvas.style.cssText+=';position:absolute!important;left:11px!important;top:8px!important;width:92vw!important;height:90vh!important';
+   const b=r.canvas.getBoundingClientRect();for(const fx of [.63,.61,.56])for(const fy of [.46,.54]){
+    const x=Math.floor(b.left+fx*b.width),y=Math.floor(b.top+fy*b.height);if(document.elementFromPoint(x,y)===r.canvas)return {x,y};
+   }throw Error('Cursor target covered');
+  });
+  await page.mouse.move(pointer.x,pointer.y);await page.waitForFunction(()=>!!gameTest.renderer.aimGuide);
+  const guide=await page.evaluate(({x,y})=>{
+   const r=gameTest.renderer,t=gameTest.timeline.predicted,pose=r.cameraPose,b=r.canvas.getBoundingClientRect();
+   const world={x:pose.x+((x-b.left)*innerWidth/b.width-pose.screenX)/pose.zoom,y:pose.y+((y-b.top)*innerHeight/b.height-pose.screenY)/pose.zoom};
+   r.session.studentShake={until:performance.now()+500,duration:500,strength:6,seed:1};
+   return {g:r.aimGuide,world,origin:{x:t.x,y:t.y}};
+  },pointer);
+  await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
+  assert.ok(await page.evaluate(()=>gameTest.renderer.cam.x===gameTest.renderer.cameraPose.x));
+  await page.waitForFunction(()=>{const c=gameTest.controls,s=gameTest.timeline.predicted;return c.enabled&&s.alive&&!s.stunned&&!s.rw?.locks?.skill&&s.cooldown<=0&&performance.now()-(c.lastFire.skill??-Infinity)>=100;});
+  const oldSeq=await page.evaluate(()=>gameTest.controls.actions.skill);await page.keyboard.press('q');
+  await page.waitForFunction(seq=>gameTest.controls.lastAction?.seq>seq&&gameTest.controls.lastAction.state==='queued',oldSeq,{timeout:5000});
+  for(let n=0;n<100&&!w.actionPending.get(id)?.length;n++)await delay(10);
+  const queued=w.actionPending.get(id)?.[0];assert.ok(queued);const dx=guide.world.x-guide.origin.x,dy=guide.world.y-guide.origin.y;
+  assert.ok(Math.abs(queued.rawAim.x-dx/Math.hypot(dx,dy))<.002);
+  stepWorld(w);const entity=w.BRRework.world(w.game).entities.find(e=>e.kind==='warning');
+  assert.ok(entity,'thunder landing warning');const dest=entity.to||entity.pos,error=Math.hypot(dest.x-guide.g.x,dest.y-guide.g.y);assert.ok(error<2,'cursor endpoint '+error);
+  const touch=await page.context().newCDPSession(page);await touch.send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:2});
+  const stick=await page.locator('#br-joystick').boundingBox(),point={id:1,x:stick.x+stick.width*.8,y:stick.y+stick.height*.5};
+  await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[point]});
+  await page.waitForFunction(()=>gameTest.controls.pointer!==null&&gameTest.controls.lastMove.x>.2);
+  await touch.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});
+  await page.waitForFunction(()=>gameTest.controls.pointer===null&&gameTest.controls.lastMove.x===0);
+  report.push({mouseAfterFallback:renderer==='pixi',cursorEndpointError:error,touchCancelled:true});h.publish();
+ }
  await page.evaluate(()=>{const r=gameTest.renderer,draw=r.draw;r.draw=function(...args){this.draw=draw;throw Error('FIXTURE_CANVAS_DRAW');};});
  await page.getByRole('button',{name:'경기 화면 복원'}).click();
  await page.waitForFunction(()=>gameTest.renderer.enabled&&!gameTest.renderer.renderBlocked&&gameTest.timeline.samples.length>0);

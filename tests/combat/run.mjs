@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import {spawnSync} from 'node:child_process';
-const renderer=process.argv[2];
+const renderer=process.argv[2],suite=process.argv[3]||'recovery';
+if(!['recovery','continuous'].includes(suite))throw Error('INVALID_SUITE');
 if(!['canvas','pixi'].includes(renderer))throw Error('INVALID_RENDERER');
 const started=Date.now(),steps=[];
 fs.mkdirSync('artifacts/combat',{recursive:true});
@@ -11,8 +12,14 @@ function run(args,env={}){
  if(status!=='PASS')throw Error(status+' '+args.join(' '));
 }
 try{
- run(['tests/combat/session.mjs',renderer]);
- run(['tests/combat/aim.mjs',renderer]);
- if(renderer==='canvas'){run(['tests/combat/origin-contract.mjs']);run(['tests/combat/motion.mjs']);run(['tests/releaseops/audio.mjs']);}
- run(['tests/fidelity-v33-2/all77.mjs',renderer,'balanced'],{FIDELITY_CHARACTERS:'emoji-006,emoji-012,emoji-066,emoji-085,emoji-132'});
-}finally{fs.writeFileSync('artifacts/combat/jobs-'+renderer+'.json',JSON.stringify({ms:Date.now()-started,steps},null,2));}
+ if(suite==='continuous'){
+  run(['tests/combat/live-control.mjs',renderer]);
+  run(['tests/combat/live-feel.mjs',renderer]);
+  if(renderer==='canvas')run(['tests/combat/live-late.mjs','candidate']);
+ }else{
+  run(['tests/combat/session.mjs',renderer]);
+  run(['tests/combat/aim.mjs',renderer]);
+  if(renderer==='canvas'){run(['tests/combat/origin-contract.mjs']);run(['tests/combat/motion.mjs']);run(['tests/releaseops/audio.mjs']);}
+  run(['tests/fidelity-v33-2/all77.mjs',renderer,'balanced'],{FIDELITY_CHARACTERS:'emoji-006,emoji-012,emoji-066,emoji-085,emoji-132'});
+ }
+}finally{fs.writeFileSync('artifacts/combat/jobs-'+suite+'-'+renderer+'.json',JSON.stringify({ms:Date.now()-started,steps},null,2));}

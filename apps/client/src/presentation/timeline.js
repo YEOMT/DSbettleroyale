@@ -4,7 +4,8 @@ import {createMovementKernel,predictMovement} from '../../../../packages/engine/
 import {sampleFlight} from './flight.js';
 export class Timeline{
  constructor(){this.kernel=createMovementKernel();this.reset();this.metrics={accepted:0,discarded:0,corrections:[],arrivalGaps:[],sourceGaps:[],holds:0,interpolated:0};}
- reset(){this.static=null;this.walls=[];this.samples=[];this.history=[];this.predicted=null;this.lastSeq=0;this.renderTick=0;this.lifeKey='';this.effects=[];this.terminals=new Map();this.spawns=new Map();this.previews=new Map();this.pendingInputs=new Map();this.offset={x:0,y:0};}
+ reset(){this.static=null;this.walls=[];this.samples=[];this.history=[];this.predicted=null;this.lastSeq=0;this.renderTick=0;this.lifeKey='';this.effects=[];this.terminals=new Map();this.spawns=new Map();this.previews=new Map();this.pendingInputs=new Map();this.offset={x:0,y:0};this.correctedAt=0;}
+ displayOffset(now){const k=.8**(Math.max(0,now-this.correctedAt)*.06);return {x:this.offset.x*k,y:this.offset.y*k};}
  setStatic(data){this.static=data;this.walls=(data.walls||[]).map(w=>({...w,pos:{x:w.x,y:w.y},width:w.w,height:w.h}));}
  accept(s,now=performance.now()){
   if(s.snapshotSeq<=this.lastSeq){this.metrics.discarded++;return false;}this.lastSeq=s.snapshotSeq;this.metrics.accepted++;
@@ -13,10 +14,15 @@ export class Timeline{
   this.samples.push({at:now,state:s});if(this.samples.length>40)this.samples.shift();
   for(const key of ['arrivalGaps','sourceGaps','corrections'])if(this.metrics[key].length>1200)this.metrics[key].splice(0,this.metrics[key].length-1200);
   for(const [index,angle]of s.movingWalls||[]){if(this.static?.walls[index])this.static.walls[index].angle=angle;if(this.walls?.[index])this.walls[index].angle=angle;}
-  if(s.self){const key=s.self.lifeSeq+':'+s.self.warpSeq,changed=key!==this.lifeKey;if(changed){this.history=[];this.offset={x:0,y:0};this.lifeKey=key;this.previews.clear();this.pendingInputs.clear();this.effects=this.effects.filter(f=>!f.preview);}
+  if(s.self){const key=s.self.lifeSeq+':'+s.self.warpSeq,changed=key!==this.lifeKey||s.self.alive!==this.predicted?.alive;if(changed){this.history=[];this.offset={x:0,y:0};this.lifeKey=key;this.previews.clear();this.pendingInputs.clear();this.effects=this.effects.filter(f=>!f.preview);}
    const before=this.predicted;this.history=this.history.filter(i=>i.seq>s.self.lastAppliedSeq&&i.clientTick>s.self.lastAppliedClientTick+(s.self.heldTicks||0));
    let corrected={...s.self};for(const input of this.history.slice(-12))corrected=predictMovement(this.kernel,corrected,input,this.collisionWalls(s),this.static);
-   if(before&&!changed){const distance=Math.hypot(before.x-corrected.x,before.y-corrected.y);this.metrics.corrections.push(distance);this.offset=distance<50?{x:before.x-corrected.x,y:before.y-corrected.y}:{x:0,y:0};}
+   if(before&&!changed){const distance=Math.hypot(before.x-corrected.x,before.y-corrected.y);this.metrics.corrections.push(distance);
+    const previous=this.displayOffset(now),x=previous.x+before.x-corrected.x,y=previous.y+before.y-corrected.y;
+    // The server already moved the attacker. Show its melee step on this ACK.
+    const step=s.self.visualProfiles?.attack?.step>0&&s.self.actions?.firedAttack>before.actions?.firedAttack;
+    this.offset=!step&&distance<50&&Math.hypot(x,y)<50?{x,y}:{x:0,y:0};
+    this.correctedAt=now;}
    for(const [key,q]of this.pendingInputs){const resolved=s.self.actions?.[q.kind]||0,fired=s.self.actions?.[q.kind==='attack'?'firedAttack':'firedSkill']||0;if(!s.self.alive||s.self.stunned>0||resolved>=q.seq&&fired!==q.seq)this.cancelPreview(q.kind,q.seq);else if(resolved>=q.seq||now>q.until)this.pendingInputs.delete(key);}
    this.predicted=corrected;
    for(const [id,q]of this.previews){const resolved=s.self.actions?.[q.actionKind]||0,fired=s.self.actions?.[q.actionKind==='attack'?'firedAttack':'firedSkill']||0;if(!s.self.alive||s.self.stunned>0||resolved>=q.actionSeq&&fired!==q.actionSeq)this.cancelPreview(q.actionKind,q.actionSeq);}
@@ -35,7 +41,7 @@ export class Timeline{
   const priorActors=new Map(left.state.actors.map(a=>[a.id,a])),priorShots=new Map(left.state.shots.map(q=>[q.id,q]));
   const actors=right.state.actors.flatMap(a=>{const row=priorActors.get(a.id),old=row?.lifeSeq===a.lifeSeq&&row?.warpSeq===a.warpSeq?row:null,past=this.renderTick<right.state.serverTick,base=past?old:a;if(!base)return [];return [{...base,x:old?old.x+(a.x-old.x)*alpha:a.x,y:old?old.y+(a.y-old.y)*alpha:a.y,statusTick:this.renderTick}];});
   if(now-last.at>150)this.metrics.holds++;else this.metrics.interpolated++;
-  if(this.predicted){const index=actors.findIndex(a=>a.id===this.predicted.id);this.offset.x*=.8;this.offset.y*=.8;const self={...this.predicted,x:this.predicted.x+this.offset.x,y:this.predicted.y+this.offset.y,statusTick:last.state.serverTick};if(index>=0)actors[index]=self;else actors.push(self);}
+  if(this.predicted){const index=actors.findIndex(a=>a.id===this.predicted.id);const offset=this.displayOffset(now);const self={...this.predicted,x:this.predicted.x+offset.x,y:this.predicted.y+offset.y,statusTick:last.state.serverTick};if(index>=0)actors[index]=self;else actors.push(self);}
   const selfId=this.predicted?.id,shots=[],residuals=[];
   for(const row of right.state.shots){const target=row.owner===selfId?last.state.serverTick:this.renderTick,end=this.terminals.get(row.id);if(end&&end.tick<=target)continue;if(row.kind==='transit'&&this.terminals.has(row.terminal)&&this.spawns.has(row.terminal))continue;if(row.start>target)continue;shots.push(sampleFlight(row,priorShots.get(row.id),right.state.serverTick,target,left.state.serverTick));}
   const visibleIds=new Set(shots.map(s=>s.id));

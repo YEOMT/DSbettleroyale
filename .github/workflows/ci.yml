@@ -84,17 +84,18 @@ jobs:
       fail-fast: false
       matrix:
         renderer: [canvas, pixi]
+        suite: [recovery, continuous]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version-file: .nvmrc, cache: npm}
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: node tests/combat/run.mjs ${{ matrix.renderer }}
+      - run: node tests/combat/run.mjs ${{ matrix.renderer }} ${{ matrix.suite }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: combat-${{ matrix.renderer }}-${{ github.sha }}
+          name: combat-${{ matrix.renderer }}-${{ matrix.suite }}-${{ github.sha }}
           path: artifacts/
           retention-days: 30
   required-checks:
