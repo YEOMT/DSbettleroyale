@@ -28,13 +28,15 @@ for(const renderer of renderers){
    for(const scenario of ['auto','normal','broadcast','focus','capture']){
     const capture=scenario==='capture';if(capture){const sample=(await import('../../packages/engine/src/index.js')).createWorld(undefined,{mode:'team-capture',teamCount:2},'camera-map',w.game.participants.map(p=>({id:p.remoteId,name:p.name,abilityId:p.ability.id,team:1})));w.game.capture=sample.game.capture;w.game.boundary=sample.game.boundary;}else{w.game.capture=null;w.game.boundary=null;}
     h.staticState();
-    await h.host.evaluate(async scenario=>{const {renderer:r}=await import('/src/main.js');r.enabled=false;r.camera.reset();r.focus=scenario==='focus';const update=Object.getPrototypeOf(r.camera).update.bind(r.camera);r.camera.update=(v,m,w,h,focus)=>update(v,m,w,h,focus,['normal','broadcast'].includes(scenario)?scenario:scenario==='focus'?'normal':undefined);},scenario);
+    await h.host.evaluate(async scenario=>{const {renderer:r}=await import('/src/main.js');r.enabled=false;r.camera.reset();r.focus=scenario==='focus'||scenario==='broadcast';},scenario);
     await ref.page.evaluate(({scenario,viewport})=>{game.lookAt=new Vec2(0,0);game.zoom=.5;canvas.width=viewport.width;canvas.height=viewport.height;game.capture=null;game.boundary=null;__baseline.BRMP.focusPlayer=scenario==='focus';game.getHostBroadcastMode=()=>scenario==='focus'?'normal':['normal','broadcast'].includes(scenario)?scenario:game.aliveRealPlayers.length<=5?'broadcast':game.aliveRealPlayers.length<=12?'normal':'performance';}, {scenario,viewport});
-    const trace=[];let hiddenZoomDifference=0;
+    const trace=[];
     for(const count of [20,10,4,2,1]){
      for(const [i,p]of w.game.participants.entries()){p.alive=i<count;p.pos.x=(i%5-2)*count*28+130;p.pos.y=(Math.floor(i/5)-1.5)*count*24-75;p.vel.x=p.vel.y=0;}w.game.frame+=3;h.publish();await delay(85);
      const received=await h.host.evaluate(async()=>{const a=await import('/src/main.js');return {view:a.timeline.samples.at(-1).state,map:a.timeline.static};});
-     const current=await h.host.evaluate(async({view,map})=>{const {renderer:r}=await import('/src/main.js');const rows=[];for(let n=0;n<60;n++){r.draw({...view,renderTick:view.serverTick,effects:[]},performance.now());const p=r.cameraPose;rows.push({x:p.x,y:p.y,zoom:p.zoom,screenX:p.screenX,screenY:p.screenY});}return rows;},received);
+     const current=await h.host.evaluate(async({view,map})=>{const {renderer:r}=await import('/src/main.js');const rows=[],start=r.drawAt??performance.now(),live=view.actors.filter(a=>a.alive);
+      if(r.focus&&live.length>=2)r.camera.observe({type:'FX',serverTick:view.serverTick,data:{kind:'hit',sourceId:live[0].id,targetId:live[1].id}});
+      for(let n=0;n<60;n++){r.draw({...view,renderTick:view.serverTick+n,effects:[]},start+(n+1)*1000/60);const p=r.cameraPose;rows.push({...p,pair:r.camera.pair?[r.camera.pair.first,r.camera.pair.second]:null});}return rows;},received);
      const original=await ref.page.evaluate(({view,map,renderer})=>{
       for(const [i,p]of game.participants.entries()){const a=view.actors[i];p.alive=a.alive;p.pos=new Vec2(a.x,a.y);p.vel=new Vec2(0,0);p.name=a.name;p.ability=EMOJI_DB.find(e=>e.id===a.abilityId);p.cacheCanvas=new Participant(p.id,p.name,p.ability,p.pos,p.team).cacheCanvas;p.radius=a.radius;p.team=a.team;p.hp=a.hp;p.maxHp=a.maxHp;}game.worldRadius=map.worldRadius;game.capture=view.capture?{map:map.captureMap,active:view.capture.a,points:map.captureMap.points.map((p,i)=>({...p,enabled:!!(view.capture.am&(1<<i)),state:view.capture.z[i][0],team:view.capture.z[i][1],counts:[0,...view.capture.z[i][2]]}))}:null;game.boundary=map.boundary;game.refreshAliveCache();const mode=game.capture?'capture':game.getHostBroadcastMode(),out=[];
       for(let n=0;n<60;n++){let pose;if(renderer==='pixi'){brPixiHostFrame(game,mode);pose={x:game.lookAt.x,y:game.lookAt.y,zoom:brPixiHost.world.scale.x,screenX:brPixiHost.world.x+game.lookAt.x*game.zoom,screenY:brPixiHost.world.y+game.lookAt.y*game.zoom};}
@@ -42,18 +44,16 @@ for(const renderer of renderers){
        else{game.draw();pose={x:game.lookAt.x,y:game.lookAt.y,zoom:game.zoom,screenX:canvas.width/2,screenY:game.capture?Math.min(126,canvas.height*.22)+(canvas.height-Math.min(126,canvas.height*.22)-48)/2:canvas.height/2};}out.push(pose);
       }return out;
      },{...received,renderer});
-     // Original Canvas drawHostLite paints a fit but leaves its hidden g.zoom at .5.
-     // v33.2 follows the original Pixi policy for BOTH backends, eliminating that
-     // Canvas jump on 20→10. Retain and quantify the raw original discrepancy.
-     const mode=scenario==='auto'?(count>12?'performance':count>5?'normal':'broadcast'):scenario;
-     const factor=mode==='broadcast'?.978:.97;
-     for(let n=0;n<60;n++)for(const key of ['x','y','zoom','screenX','screenY']){
-      const expected=original[n][key]-(key==='zoom'&&renderer==='canvas'&&mode!=='performance'?hiddenZoomDifference*Math.pow(factor,n+1):0);
-      assert.ok(Math.abs(current[n][key]-expected)<1e-8,renderer+'/'+scenario+'/'+count+'/'+n+'/'+key+': '+current[n][key]+' != '+expected);
+     // Capture keeps the legacy fixed viewport. The requested non-capture camera
+     // intentionally changes the framing; test its actual visible subjects on every frame.
+     for(const [n,p] of current.entries()){
+      assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.zoom>0&&Number.isFinite(p.zoom));
+      if(capture){for(const key of ['x','y','zoom','screenX','screenY'])assert.ok(Math.abs(p[key]-original[n][key])<1e-8);continue;}
+      const subjects=received.view.actors.filter(a=>a.alive&&!a.clone&&(!p.pair||p.pair.includes(a.id)));
+      for(const a of subjects){const x=p.screenX+(a.x-p.x)*p.zoom,y=p.screenY+(a.y-p.y)*p.zoom;
+       assert.ok(x>=24&&x<=viewport.width-24&&y>=30&&y<=viewport.height-24,'subject outside safe frame');}
      }
-     if(renderer==='canvas'&&scenario==='auto')hiddenZoomDifference=mode==='performance'?.5-current.at(-1).zoom:hiddenZoomDifference*Math.pow(factor,60);
-
-     trace.push({count,first:current[0],last:current.at(-1),originalFirst:original[0],originalLast:original.at(-1),originalCanvasHiddenZoomCorrection:hiddenZoomDifference});
+     trace.push({count,first:current[0],last:current.at(-1),originalFirst:original[0],originalLast:original.at(-1)});
      if(count===2&&['auto','capture'].includes(scenario)){
       // Camera trace advances synchronously. Let the real 750ms death paint expire
       // before paired stills, without advancing the tested camera a 61st frame.

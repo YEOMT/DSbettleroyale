@@ -55,6 +55,13 @@ try{
  await attacker.keyboard.down('Space');await attacker.waitForFunction(()=>gameTest.controls.lastMove.x>.2);await attacker.keyboard.up('Space');
  const seqBeforeCancel=await attacker.evaluate(()=>gameTest.controls.actions.attack);await event('touchCancel',[]);
  assert.equal(await attacker.evaluate(()=>gameTest.controls.actions.attack),seqBeforeCancel);
+ // Release only the action capture while the joystick pointer remains down.
+ await event('touchStart',[move]);await event('touchStart',[move,{id:2,...act}]);
+ await event('touchMove',[move,{id:2,x:act.x-35,y:act.y}]);
+ await attacker.waitForFunction(()=>gameTest.controls.gestures.get('attack')?.aim.x<-.9&&gameTest.controls.lastMove.x>.2);
+ await attacker.evaluate(()=>{const g=gameTest.controls.gestures.get('attack');document.getElementById('br-attack').releasePointerCapture(g.id);});
+ await event('touchMove',[move,{id:2,x:act.x-40,y:act.y}]);await attacker.waitForFunction(()=>!gameTest.controls.gestures.size&&gameTest.controls.pointer!==null&&gameTest.controls.lastMove.x>.2);
+ await event('touchEnd',[]);assert.equal(await attacker.evaluate(()=>gameTest.controls.actions.attack),seqBeforeCancel);
  for(let i=0;i<3;i++){await event('touchStart',[move]);await attacker.evaluate(()=>window.dispatchEvent(new Event('blur')));await event('touchEnd',[]);}
  await event('touchStart',[move]);await attacker.waitForFunction(()=>gameTest.controls.pointer!==null&&gameTest.controls.lastMove.x>.2);await event('touchEnd',[]);
  w.brProgression.awardXP(p,20,0);h.publish();await attacker.locator('#br-run-panel').waitFor();

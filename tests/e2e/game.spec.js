@@ -10,6 +10,9 @@ for(const mode of ['solo','team-elim','team-capture'])test(`${mode}: original sc
  await expect(a.locator('#br-quiz')).toBeVisible();await a.getByRole('button',{name:'정답',exact:true}).click();await expect(a.locator('#br-quiz-score')).toHaveText('1');
  await host.locator('#br-skip-to-draft').click();await expect(a.locator('#br-draft')).toBeVisible();await expect(a.locator('#br-draft-name')).not.toHaveText('뽑는 중…');await a.locator('#br-ready-btn').click();await b.locator('#br-ready-btn').click();await host.locator('#br-start-battle').click();
  await expect(a.locator('#br-student-battle')).toBeVisible();await expect(a.locator('#br-battle-status')).toContainText('HP');await a.keyboard.down('d');await a.waitForTimeout(400);await a.keyboard.up('d');await a.locator('#br-attack').click();await a.waitForTimeout(300);
+ const camera=host.locator('#br-focus-toggle');await expect(camera).toBeVisible();
+ if(mode==='team-capture'){await expect(camera).toBeDisabled();await expect(camera).toHaveText(/점령전 고정/);}
+ else{await camera.click();await expect(camera).toHaveText(/전투 집중/);await camera.click();await expect(camera).toHaveText(/전체 관전/);}
  await a.screenshot({path:testInfo.outputPath(mode+'-student.png')});await host.screenshot({path:testInfo.outputPath(mode+'-teacher.png')});
  await host.locator('#br-force-end').click();await expect(a.locator('#br-results')).toBeVisible();await expect(a.locator(mode==='team-capture'?'#br-ranking tbody tr':'#br-ranking .br-rank')).toHaveCount(2);await host.locator('#br-rematch-room').click();await expect(a.locator('#br-student-wait')).toBeVisible();
  expect(errors).toEqual([]);await hc.close();await ac.close();await bc.close();

@@ -6,3 +6,4 @@
 
 /* Reserve the original 126px capture viewport; keep music clear of team scores. */
 .br-capture-host #hud-overlay{display:none}.br-capture-host #br-music-controls{top:auto;bottom:calc(12px + env(safe-area-inset-bottom));right:12px}
+body.br-capture-host #br-focus-toggle:disabled{display:inline-block;cursor:default}

@@ -12,6 +12,7 @@ export function aimGuide(actor,kind,gesture,map,kernel,walls,visible=[]){
  const fraction=Math.max(0,Math.min(1,(gesture.power-.18)/.82));
  const range=profile.rangeMin+(profile.range-profile.rangeMin)*fraction;
  const {x:dx,y:dy}=gesture.aim;
+ if(spec.shape==='circle')return {...spec,range,x:actor.x,y:actor.y,dx,dy};
  let x=actor.x+dx*range,y=actor.y+dy*range;
  const pad=actor.radius+4;
  if(spec.train&&map){
@@ -64,6 +65,7 @@ export function paintGuide(p,a,g,z){
  }else if(g.width&&['rect','line'].includes(g.shape)){
   for(const side of [-1,1]){const x=-side*g.dy*g.width/2,y=side*g.dx*g.width/2;p.line(a.x+x,a.y+y,g.x+x,g.y+y,col,.45,stroke);}
  }
+ if(g.shape==='circle')return; // A self-centred skill has no remote landing point.
  p.line(a.x,a.y,g.x,g.y,col,.62,stroke);
  for(const side of [-1,1])p.line(g.x,g.y,g.x-(g.dx*11-side*g.dy*6)/z,g.y-(g.dy*11+side*g.dx*6)/z,col,.8,stroke);
 }
