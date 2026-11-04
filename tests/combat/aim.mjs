@@ -71,7 +71,9 @@ try{
   },pointer);
   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
   assert.ok(await page.evaluate(()=>gameTest.renderer.cam.x===gameTest.renderer.cameraPose.x));
-  await page.keyboard.press('q');
+  await page.waitForFunction(()=>{const c=gameTest.controls,s=gameTest.timeline.predicted;return c.enabled&&s.alive&&!s.stunned&&!s.rw?.locks?.skill&&s.cooldown<=0&&performance.now()-(c.lastFire.skill??-Infinity)>=100;});
+  const oldSeq=await page.evaluate(()=>gameTest.controls.actions.skill);await page.keyboard.press('q');
+  await page.waitForFunction(seq=>gameTest.controls.lastAction?.seq>seq&&gameTest.controls.lastAction.state==='queued',oldSeq,{timeout:5000});
   for(let n=0;n<100&&!w.actionPending.get(id)?.length;n++)await delay(10);
   const queued=w.actionPending.get(id)?.[0];assert.ok(queued);const dx=guide.world.x-guide.origin.x,dy=guide.world.y-guide.origin.y;
   assert.ok(Math.abs(queued.rawAim.x-dx/Math.hypot(dx,dy))<.002);

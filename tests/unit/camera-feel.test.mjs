@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {HostCamera} from '../../apps/client/src/render/camera.js';
 import {StudentCamera,screenToWorld} from '../../apps/client/src/render/viewport.js';
+import {Controls} from '../../apps/client/src/input/controls.js';
 import {Timeline} from '../../apps/client/src/presentation/timeline.js';
 import {AttackPoses,poseFamily} from '../../apps/client/src/render/attack-pose.js';
 import {manifest} from '../../packages/content/src/manifest.js';
@@ -75,4 +76,17 @@ test('display gates one sequence across ordinals, preserves authoritative origin
  poses.accept(event,[a],100);const entry=poses.active.get('a');assert.equal(entry.family,'recoil');poses.accept({...event,serverTick:6,data:{...event.data,id:'two',ordinal:1}},[a],130);assert.equal(poses.active.get('a'),entry);
  const pose=poses.sample(a,1,5,116,false,false);assert.ok(pose.x<0&&pose.x>=-4);assert.equal(a.x,40);assert.equal(poses.sample(a,1,5,116,true,false),null);assert.equal(poses.sample({...a,lifeSeq:3},1,5,116,false,false),null);
  poses.accept({...event,type:'COMMAND_RESULT'},[a],116);assert.equal(poses.active.size,0);
+});
+
+test('a delayed movement edge borrows one normal sample; pointer bursts cannot step again before the interval',t=>{
+ let now=1000;t.mock.method(performance,'now',()=>now);
+ const previous=globalThis.document;globalThis.document={hidden:false};
+ try{
+  const c=Object.assign(Object.create(Controls.prototype),{enabled:true,net:{session:{},ws:{readyState:1}},timeline:{predicted:{}},move:{x:0,y:0},keys:new Set(['d']),gestures:new Map(),lastMove:{x:0,y:0}});
+  const samples=[];c.sendSample=(move,flush)=>{samples.push({move,flush});c.sampleAt=performance.now();c.lastMove=move;};
+  c.tick(true);assert.equal(samples.length,1);assert.equal(samples[0].flush,true);
+  c.keys=new Set(['a']);for(let n=0;n<50;n++)c.tick(true);c.tick();
+  assert.equal(samples.length,1);now+=17;c.tick(true);
+  assert.deepEqual(samples[1],{move:{x:-1,y:0},flush:true});
+ }finally{if(previous===undefined)delete globalThis.document;else globalThis.document=previous;}
 });

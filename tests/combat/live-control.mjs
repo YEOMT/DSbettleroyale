@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';
 const baseline=process.argv.includes('--baseline'),renderer=process.argv[2]||'canvas';
-const h=await auditHarness({players:2,mode:'team-elim',quality:'balanced',renderer});
+const h=await auditHarness({players:2,mode:'team-elim',quality:'balanced',renderer,viewport:renderer==='pixi'?{width:800,height:520}:{width:1366,height:768}});
 const report={renderer,baseline},time=performance.now();
 const percentile=(rows,p)=>rows.slice().sort((a,b)=>a-b)[Math.ceil(p*rows.length)-1]??0;
 try{
@@ -38,10 +38,11 @@ try{
   const x=b.left+fx*b.width,y=b.top+fy*b.height;if(document.elementFromPoint(x,y)===c)return {x,y};
  }throw Error('No visible aiming surface');});await page.mouse.move(hit.x,hit.y);
  const button=await page.locator('#br-attack').boundingBox();
- await page.keyboard.down('d');await delay(300);
+ const edgeShown=()=>page.waitForFunction(()=>Number.isFinite(measure.edges.at(-1)?.displayMs),null,{timeout:8000});
+ await page.keyboard.down('d');await edgeShown();await delay(300);
  await page.mouse.move(button.x+button.width/2,button.y+button.height/2);await page.mouse.down();
- await page.keyboard.up('d');await delay(45);await page.keyboard.down('a');await page.mouse.up();
- await delay(450);await page.keyboard.up('a');
+ await page.keyboard.up('d');await edgeShown();await delay(45);await page.keyboard.down('a');await page.mouse.up();await edgeShown();
+ await delay(450);await page.keyboard.up('a');await edgeShown();
  // Delay the student's actual outbound snapshots in order. All commands still reach
  // the unpaused server over its normal connection, with no prediction shortcuts.
  const peer=first.peer,snapshot=peer.snapshot.bind(peer),delays=[15,40,5,35],timers=new Set();let idx=0,due=0;
