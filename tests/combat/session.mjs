@@ -73,11 +73,18 @@ try{
  const captureCast=async(key,kind,field)=>{
   const previous=p[field];await attacker.keyboard.press(key);
   await wait(kind+' queued',()=>w.actionPending.get(id)?.some(c=>c.kind===kind));
-  for(let tick=0;tick<6;tick++)stepWorld(w);
+  for(let tick=0;tick<6&&p[field]===previous;tick++)stepWorld(w);
   assert.ok(p[field]>previous,kind+' must actually fire');h.publish();
  };
  await captureCast('Space','attack','firedAttackSeq');
- for(const page of pages)await page.waitForFunction(({id,seq})=>seenActions.some(a=>a.owner===id&&a.seq===seq&&a.kind==='attack'),{id,seq:p.firedAttackSeq});
+ for(const [role,page] of pages.entries()){
+  try {
+   await page.waitForFunction(({id,seq})=>seenActions.some(a=>a.owner===id&&a.seq===seq&&a.kind==='attack'),{id,seq:p.firedAttackSeq});
+  } catch(error) {
+   const state=await page.evaluate(()=>({tick:gameTest.timeline.renderTick,renderBlocked:gameTest.renderer.renderBlocked,hidden:document.hidden,seen:seenActions.slice(-8)}));
+   throw Error('Missing basic draw '+JSON.stringify({role,frame:w.game.frame,seq:p.firedAttackSeq,state}),{cause:error});
+  }
+ }
  await captureCast('q','skill','firedSkillSeq');
  for(const page of pages)await page.waitForFunction(({id,seq})=>seenActions.some(a=>a.owner===id&&a.seq===seq&&a.type==='ORBIT'),{id,seq:p.firedSkillSeq});
  for(const quality of ['low','balanced','high']){
