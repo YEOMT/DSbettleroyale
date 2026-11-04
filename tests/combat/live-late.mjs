@@ -10,7 +10,10 @@ for(const focus of [false,true]){
   await h.command('START_QUIZ');await h.command('BEGIN_DRAFT');const ids=['emoji-024','emoji-003','emoji-023','emoji-029','emoji-013','emoji-025'];
   h.room.students().forEach((m,i)=>m.draft.abilityId=ids[i]);await h.command('START_BATTLE');
   await h.host.waitForFunction(async()=>!!(await import('/src/main.js')).renderer.cameraPose);
-  if(focus)await h.host.locator('#br-focus-toggle').click();
+  const toggle=h.host.locator('#br-focus-toggle');
+  if(label!=='base'){assert.ok(await toggle.isVisible());assert.match(await toggle.textContent(),/전체 관전/);}
+  if(focus)await toggle.click();
+  if(label!=='base'&&focus)assert.match(await toggle.textContent(),/전투 집중/);
   const w=h.room.world,actors=w.game.participants;w.brFarm.dispose(w.game);w.game.walls=[];w.game.smokes=[];w.game.zones=[];h.staticState();
   for(const [i,p] of actors.entries())p.pos=new w.Vec2((i-2)*270,(i%2)*85);
   await h.host.evaluate(async()=>{

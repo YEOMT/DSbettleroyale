@@ -33,6 +33,7 @@ try{
    };
   });
  }
+ const toggle=h.host.locator('#br-focus-toggle');await toggle.click();assert.match(await toggle.textContent(),/전투 집중/);await toggle.click();assert.match(await toggle.textContent(),/전체 관전/);
  h.room.safePaused=false;await delay(500);
  for(const [abilityId,kind,family] of [['emoji-013','attack','slash'],['emoji-025','attack','heavy'],['emoji-023','skill','recoil'],['emoji-003','skill','burst'],['emoji-024','skill','orbit'],['emoji-010','skill','field']]){
   w.BRRework.clearWorld(w.game,'next-case');w.game.projectiles.length=0;w.game.zones.length=0;
@@ -62,8 +63,11 @@ try{
  await h.command('END');await h.command('REMATCH');await h.student.locator('#br-student-wait').waitFor();
  await h.command('START_QUIZ');await h.command('BEGIN_DRAFT');await h.command('START_BATTLE');await h.student.waitForFunction(()=>m.timeline.samples.at(-1)?.state.serverTick>3);
  await h.command('END');await h.command('REMATCH');await h.student.locator('#br-student-wait').waitFor();
+ // Each socket independently receives the rematch. The first student's lobby
+ // cannot establish that the rival and teacher have left the old battle yet.
+ await Promise.all(pages.map(page=>page.waitForFunction(matchId=>m.ui.room?.matchId===matchId&&m.ui.room.phase==='LOBBY'&&!m.renderer.enabled,h.room.matchId)));
  const resources=await Promise.all(pages.map(page=>page.evaluate(()=>({...objectCounts,retained:m.renderer.sprites.size+m.renderer.textures.size,poses:m.renderer.poses.active.size}))));
- for(const row of resources){assert.equal(row.retained,0);assert.equal(row.poses,0);}
+ for(const row of resources){assert.equal(row.retained,0,JSON.stringify(resources));assert.equal(row.poses,0);}
  checks.push({afterTwoRematches:resources});
  assert.deepEqual(h.errors,[]);console.log(checks);
 }finally{fs.mkdirSync('artifacts/combat',{recursive:true});fs.writeFileSync('artifacts/combat/feel-'+renderer+'.json',JSON.stringify({ms:Date.now()-started,checks},null,2));await h.close();}
