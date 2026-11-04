@@ -5,11 +5,11 @@ import {connect} from '../integration/client.mjs';
 import {getTeacherState,getVisibleState,getStaticState} from '../../packages/engine/src/index.js';
 import {snapshotEncoder} from '../../apps/server/src/ws/snapshot.js';
 export const delay=ms=>new Promise(r=>setTimeout(r,ms));
-export async function auditHarness({players=20,mode='solo',renderer='canvas',quality='balanced',viewport={width:1366,height:768},audio=false}={}){
+export async function auditHarness({players=20,mode='solo',renderer='canvas',quality='balanced',viewport={width:1366,height:768},audio=false,browserArgs=[]}={}){
  const app=await createGameServer({port:0,hostSecret:'test-host'}),target='http://127.0.0.1:'+app.address.port;
  const vite=await createServer({configFile:'apps/client/vite.config.js',server:{watch:null,hmr:false,port:0,strictPort:false,proxy:{'/ws':{target:target.replace('http:','ws:'),ws:true},'/version':target,'/healthz':target}}});await vite.listen();
  const url='http://127.0.0.1:'+vite.httpServer.address().port;app.config.origins.push(url);
- const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{})}),contexts=[],errors=[],clients=[];
+ const browser=await chromium.launch({headless:true,args:browserArgs,...(process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{})}),contexts=[],errors=[],clients=[];
  async function page(){const context=await browser.newContext({viewport,deviceScaleFactor:1});if(!audio)await context.route(/dropbox/,r=>r.abort());contexts.push(context);const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(url+'/?renderer='+renderer);return p;}
  const host=await page();await host.locator('#ws-host-secret').fill('test-host');await host.locator('#br-create-btn').click();await host.locator('#br-host-room').waitFor();const code=(await host.locator('#br-room-code').textContent()).trim(),room=app.manager.rooms.get(code);
  const student=await page();await student.locator('#br-join-code').fill(code);await student.locator('#br-player-name').fill('Audit Student');await student.locator('#br-join-btn').click();await student.locator('#br-student-wait').waitFor();

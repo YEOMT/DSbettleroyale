@@ -1,6 +1,6 @@
 import {createHash,timingSafeEqual} from 'node:crypto';
 import {decodeClient,fingerprint,matchesFingerprint} from '../../../../packages/protocol/src/index.js';
-import {applyCommand,getStaticState,getPrivateSelfState} from '../../../../packages/engine/src/index.js';
+import {applyCommand,getStaticState,getPrivateSelfState,getTeacherState,getVisibleState} from '../../../../packages/engine/src/index.js';
 import {Peer} from './peer.js';
 const digest=s=>createHash('sha256').update(s).digest();
 export const secretMatches=(a,b)=>typeof a==='string'&&timingSafeEqual(digest(a),digest(b));
@@ -10,13 +10,24 @@ export function attachConnection(socket,manager,config,metrics){
  const authTimer=setTimeout(()=>{if(!peer.member)peer.close(4001,'AUTH_TIMEOUT');},config.authTimeoutMs);authTimer.unref();
  socket.on('pong',()=>peer.alive=true);
  socket.on('error',()=>{});
+ function restore(room,member,eventGap){
+  const world=room.world,self=world?getPrivateSelfState(world,member.id,undefined,true):null;
+  let snapshot=null;
+  if(world&&room.phase==='BATTLE'){
+   const teacher=getTeacherState(world);
+   const view=member.role==='host'?teacher:getVisibleState(world,member.id,undefined,teacher);
+   const {self:privateRow,...publicView}=view;
+   snapshot={...publicView,snapshotSeq:++room.snapshotSeq,serverNow:performance.now()};
+  }
+  peer.send('FULL_STATE',{room:room.publicState(member),static:world?getStaticState(world):null,self,snapshot,cursor:member.cursor,eventGap});
+ }
  function bind(room,member,resume=false,cursor=0){
   if(member.revoked)fail('SESSION_REVOKED');if(peer.member)fail('ALREADY_BOUND');
   if(member.peer&&member.peer!==peer)member.peer.close(4009,'SUPERSEDED');
   member.epoch++;member.connected=true;member.peer=peer;peer.room=room;peer.member=member;peer.epoch=member.epoch;clearTimeout(authTimer);
-  if(room.world){const p=room.world.byId.get(member.id);if(p){p.connected=true;room.world.session.players[member.id].connected=true;room.world.session.inputs[member.id]={};room.world.inputPending.delete(member.id);room.world.actionPending.delete(member.id);}}
+  if(room.world){const p=room.world.byId.get(member.id);if(p){p.connected=true;room.world.session.players[member.id].connected=true;room.world.session.inputs[member.id]={};room.world.inputPending.delete(member.id);room.world.actionPending.delete(member.id);p.pendingAttack=null;p.pendingSkill=null;}}
   peer.send('SESSION',{token:member.token,playerId:member.id,role:member.role,...fingerprint});
-  if(resume){metrics.reconnects++;peer.trimEvents();peer.send('FULL_STATE',{room:room.publicState(member),static:room.world?getStaticState(room.world):null,self:room.world?getPrivateSelfState(room.world,member.id):null,cursor:member.cursor,eventGap:!member.events.length||cursor<member.events[0].seq-1});}
+  if(resume){metrics.reconnects++;peer.trimEvents();restore(room,member,!member.events.length||cursor<member.events[0].seq-1);}
   manager.changed(room);
  }
  socket.on('message',(buffer,isBinary)=>{
@@ -40,7 +51,7 @@ export function attachConnection(socket,manager,config,metrics){
    if(message.type==='INPUT_BATCH'){
     for(const c of p.commands)applyCommand(room.world,{...c,type:'INPUT',playerId:member.id,lifeSeq:message.lifeSeq,receivedAt:performance.now()});return;
    }
-   if(message.type==='RESYNC'){peer.send('FULL_STATE',{room:room.publicState(member),static:room.world?getStaticState(room.world):null,self:room.world?getPrivateSelfState(room.world,member.id):null,cursor:member.cursor,eventGap:true});return;}
+   if(message.type==='RESYNC'){restore(room,member,true);return;}
    if(message.type==='LEAVE'){member.revoked=true;manager.tokens.delete(member.token);peer.close(1000,'LEFT');return;}
    if(!message.requestId)fail('REQUEST_ID_REQUIRED');
    const key=room.matchId+'|'+message.requestId,signature=JSON.stringify({type:message.type,life:message.lifeSeq,payload:p}),old=member.ledger.get(key);

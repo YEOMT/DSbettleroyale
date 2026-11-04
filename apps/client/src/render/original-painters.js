@@ -206,7 +206,7 @@ __visualScope.brPaintAttack = function brPaintAttack(p,r,alpha,zoom=1) {
             }
             if(type==='transit'){
                 const points=geo.points||[];
-                for(let i=2;i<points.length;i+=2)p.line(points[i-2],points[i-1],points[i],points[i+1],color,alpha*.64,Math.max(1.4/z,Math.min(5/z,Number(geo.width||2))));
+                for(let i=2;i+1<points.length;i+=2)if([points[i-2],points[i-1],points[i],points[i+1]].every(Number.isFinite))p.line(points[i-2],points[i-1],points[i],points[i+1],color,alpha*.64,Math.max(1.4/z,Math.min(5/z,Number(geo.width||2))));
                 return true;
             }
             if(type==='shot'){
@@ -267,7 +267,7 @@ __visualScope.brPaintAttack = function brPaintAttack(p,r,alpha,zoom=1) {
             if(type==='swing') {
                 if(geo.shape==='target-strike') {
                     // A lock-on follow-up hits one target; do not depict it as a large AoE cone.
-                    const tx=Number(geo.targetX),ty=Number(geo.targetY),a=Math.max(12,Math.min(32,Number(geo.targetRadius)||22));
+                    const valid=Number.isFinite(geo.targetX)&&Number.isFinite(geo.targetY),tx=valid?geo.targetX:ex,ty=valid?geo.targetY:ey,a=Math.max(12,Math.min(32,Number(geo.targetRadius)||22));
                     p.line(x,y,tx,ty,color,alpha*.45,line);
                     p.line(tx-dy*a-dx*a*.3,ty+dx*a-dy*a*.3,tx+dy*a+dx*a*.3,ty-dx*a+dy*a*.3,'#ffffff',alpha,4/z);
                     p.line(tx-dy*a*.7+dx*a*.25,ty+dx*a*.7+dy*a*.25,tx+dy*a*.7-dx*a*.25,ty-dx*a*.7-dy*a*.25,color,alpha*.9,3/z);

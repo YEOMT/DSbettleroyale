@@ -15,6 +15,7 @@ jobs:
     timeout-minutes: 10
     outputs:
       docs: ${{ steps.plan.outputs.docs }}
+      combat: ${{ steps.plan.outputs.combat }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -74,16 +75,41 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 30
+  combat:
+    needs: quick
+    if: needs.quick.outputs.combat == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [canvas, pixi]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/combat/run.mjs ${{ matrix.renderer }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: combat-${{ matrix.renderer }}-${{ github.sha }}
+          path: artifacts/
+          retention-days: 30
   required-checks:
     if: always()
     needs:
       - quick
       - targeted
+      - combat
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
       - env:
+          COMBAT: ${{ needs.combat.result }}
+          SELECTED: ${{ needs.quick.outputs.combat }}
           QUICK: ${{ needs.quick.result }}
           TARGET: ${{ needs.targeted.result }}
           DOCS: ${{ needs.quick.outputs.docs }}
-        run: node -e 'if(process.env.QUICK!=="success"||(process.env.DOCS==="true"?process.env.TARGET!=="skipped":process.env.TARGET!=="success"))process.exit(1)'
+        run: node -e 'if(process.env.COMBAT!==(process.env.SELECTED==="true"?"success":"skipped")||process.env.QUICK!=="success"||(process.env.DOCS==="true"?process.env.TARGET!=="skipped":process.env.TARGET!=="success"))process.exit(1)'

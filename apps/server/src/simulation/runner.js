@@ -33,7 +33,7 @@ export function attachSimulation(manager,metrics){
    if(room.debt>250){room.overloadSince||=now;if(now-room.overloadSince>1000){room.safePaused=true;metrics.overloads++;for(const m of room.members.values())m.peer?.send('OVERLOAD',{paused:true,debtMs:room.debt});continue;}}else room.overloadSince=0;
    let count=0;
    while(room.debt+1e-8>=FIXED_DT_MS&&count<5){
-    const start=performance.now();try{stepWorld(room.world);}catch(error){room.safePaused=true;room.lastFault=error.message;for(const m of room.members.values())m.peer?.send('ERROR',{code:'SIMULATION_PAUSED'});break;}
+    const start=performance.now();try{stepWorld(room.world);}catch(error){room.safePaused=true;room.lastFault=error.message;for(const m of room.members.values())m.peer?.send('ERROR',{code:'SIMULATION_PAUSED'});manager.changed(room);break;}
     metrics.stepCpu.add(performance.now()-start);room.debt-=FIXED_DT_MS;count++;
     if(room.world.finished){room.finish();manager.changed(room);break;}
    }

@@ -1,0 +1,82 @@
+{
+  "reference": {
+    "frames": 350,
+    "raf": {
+      "p50": 16.7,
+      "p95": 16.9,
+      "p99": 17
+    },
+    "draw": {
+      "p50": 1,
+      "p95": 1.7,
+      "p99": 2
+    },
+    "timeline": {
+      "p50": 0.1,
+      "p95": 0.2,
+      "p99": 0.3
+    },
+    "receive": {
+      "p50": 0.1,
+      "p95": 0.3,
+      "p99": 0.4
+    },
+    "snapshot": {
+      "p50": 63.5,
+      "p95": 74,
+      "p99": 84.5
+    },
+    "over33": 0,
+    "over50": 0,
+    "gradients": 1400,
+    "textDraws": 6650,
+    "objects": {
+      "actors": 6,
+      "shots": 36,
+      "particles": 160,
+      "texts": 16,
+      "sprites": 0,
+      "textures": 0
+    }
+  },
+  "candidate": {
+    "frames": 350,
+    "raf": {
+      "p50": 16.7,
+      "p95": 17,
+      "p99": 17
+    },
+    "draw": {
+      "p50": 0.7,
+      "p95": 1.4,
+      "p99": 1.9
+    },
+    "timeline": {
+      "p50": 0.1,
+      "p95": 0.2,
+      "p99": 0.2
+    },
+    "receive": {
+      "p50": 0.1,
+      "p95": 0.2,
+      "p99": 0.8
+    },
+    "snapshot": {
+      "p50": 65.1,
+      "p95": 68.4,
+      "p99": 74.7
+    },
+    "over33": 0,
+    "over50": 0,
+    "gradients": 350,
+    "textDraws": 5600,
+    "objects": {
+      "actors": 6,
+      "shots": 36,
+      "particles": 160,
+      "texts": 16,
+      "sprites": 0,
+      "textures": 0
+    }
+  }
+}

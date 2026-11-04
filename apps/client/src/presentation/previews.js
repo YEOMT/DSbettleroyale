@@ -1,7 +1,7 @@
 export const shotKey=s=>[s.owner,s.life,s.actionKind,s.actionSeq,s.ordinal??0].join(':');
 export function previewShots(self,kind,seq,aim,now,power=1){
  const v=self.visualProfiles?.[kind];if(!v)return [];
- const count=v.close?0:v.count||0,range=kind==='skill'&&self.aimProfiles?.skill?.distance?v.range*power:v.range;
+ const count=v.close?0:v.count||0,range=kind==='skill'&&self.aimProfiles?.skill?self.aimProfiles.skill.rangeMin+(self.aimProfiles.skill.range-self.aimProfiles.skill.rangeMin)*Math.max(0,Math.min(1,(power-.18)/.82)):v.range;
  return Array.from({length:count},(_,ordinal)=>{const angle=Math.atan2(aim.y,aim.x)+(v.radial?ordinal:ordinal-(count-1)/2)*(v.spread||0),dx=Math.cos(angle),dy=Math.sin(angle),delay=(v.windup||0)+(v.interval||0)*ordinal;
  const q={owner:self.id,life:self.lifeSeq,actionKind:kind,actionSeq:seq,ordinal,kind:'projectile',native:true,preview:true,x:self.x+dx*self.radius*(v.offset||0),y:self.y+dy*self.radius*(v.offset||0),dx:dx*v.speed,dy:dy*v.speed,radius:ordinal===count-1&&v.finalRadius||v.radius,color:v.color,emoji:kind==='attack'?null:v.emoji,style:v.style,rotation:0,rangeRemaining:range,at:now,bornAt:now+delay*1000/60,expires:now+delay*1000/60+500};q.id='preview:'+shotKey(q);return q;});
 }

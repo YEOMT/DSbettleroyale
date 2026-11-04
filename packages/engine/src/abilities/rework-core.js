@@ -40,7 +40,7 @@ export const initializers=[
                 // Do not duplicate each volley round as a decorative legacy shot/impact.
                 if(kind!=='end')return;
                 if(e.kind==='projectile'||e.kind==='hook'){
-                    const rw=world(c.g);rw.events.push({id:e.id+':'+kind,entity:e.id,kind,type:e.kind,x:e.pos.x,y:e.pos.y,fromX:e.previousPos?.x??e.origin?.x??e.pos.x,fromY:e.previousPos?.y??e.origin?.y??e.pos.y,dx:e.dir?.x||0,dy:e.dir?.y||0,radius:e.radius||0,color:e.color||'#fff',team:c.owner.team,owner:c.ownerId,life:c.ownerLifeSeq,actionKind:e.actionKind||c.actionKind,actionSeq:c.actionSeq,ordinal:e.ordinal??0,reason:e.reason||'expired',start:frame(c.g),end:frame(c.g)+24});
+                    const rw=world(c.g);rw.events.push({id:e.id+':'+kind,entity:e.id,kind,type:e.kind,x:e.pos.x,y:e.pos.y,fromX:e.previousPos?.x??e.pos.x,fromY:e.previousPos?.y??e.pos.y,dx:e.dir?.x||0,dy:e.dir?.y||0,radius:e.radius||0,color:e.color||'#fff',team:c.owner.team,owner:c.ownerId,life:c.ownerLifeSeq,actionKind:e.actionKind||c.actionKind,actionSeq:c.actionSeq,ordinal:e.ordinal??0,reason:e.reason||'expired',start:frame(c.g),end:frame(c.g)+24});
                     if(rw.events.length>160)rw.events.splice(0,rw.events.length-160);
                 }else if(e.kind==='turret'&&c.g.emitStudentFx)c.g.emitStudentFx('impact',e.pos,{size:Math.max(18,(e.radius||30)*2),color:e.color||'#a5b4fc',sourceId:c.ownerId,style:'rw:turret-destroyed'});
             }

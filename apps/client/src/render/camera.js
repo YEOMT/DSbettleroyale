@@ -3,7 +3,7 @@
 export class HostCamera{
  constructor(){this.reset();}
  reset(){this.x=0;this.y=0;this.zoom=.5;this.mode='performance';this.target=null;}
- update(view,map,w,h,focusPlayer=false,override){
+ update(view,map,w,h,focusPlayer=false,override,dt=1000/60){
   const alive=view.actors.filter(p=>p.alive&&!p.clone),state=view.presentation||{};
   this.mode=view.capture?'capture':override||(alive.length<=5?'broadcast':alive.length<=12?'normal':'performance');
   let screenX=w/2,screenY=h/2;
@@ -23,8 +23,8 @@ export class HostCamera{
    if(focusPlayer&&alive.length){const p=alive.find(p=>p.humanControlled)||alive[0];x=p.x;y=p.y;target=1.12;}
    if(state.eventFocusFrames>0&&state.eventFocusPos&&!state.gameOver&&!auto){x=x*.72+state.eventFocusPos.x*.28;y=y*.72+state.eventFocusPos.y*.28;target=Math.min(1.58,target*1.08);}
    if(state.finalPhase&&!state.gameOver)target=Math.min(1.6,target*1.06);
-   const ease=auto?.032:.05;this.x+=(x-this.x)*ease;this.y+=(y-this.y)*ease;
-   if(state.gameOver)target=Math.min(1.5,target*1.5);this.zoom+=(target-this.zoom)*(auto?.022:.03);this.target={x,y,zoom:target};
+   const frames=Math.max(0,Math.min(80,dt))*60/1000,ease=1-(1-(auto?.032:.05))**frames;this.x+=(x-this.x)*ease;this.y+=(y-this.y)*ease;
+   if(state.gameOver)target=Math.min(1.5,target*1.5);this.zoom+=(target-this.zoom)*(1-(1-(auto?.022:.03))**frames);this.target={x,y,zoom:target};
   }
   return {x:this.x,y:this.y,zoom:this.zoom,screenX,screenY,mode:this.mode,target:this.target};
  }
