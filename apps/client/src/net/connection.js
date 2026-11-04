@@ -2,17 +2,18 @@ import {fingerprint,envelope} from '../../../../packages/protocol/src/index.js';
 export class Connection extends EventTarget{
  constructor(url){super();this.url=url;this.scope={};this.pending=new Map();this.lifeSeq=0;this.cursor=0;this.token=sessionStorage.getItem('dsbr-resume');this.retry=0;this.stopped=false;this.clock={rtt:0,offset:0,uncertainty:0};}
  emit(type,data){this.dispatchEvent(new CustomEvent(type,{detail:data}));}
+ reconnect(){this.retryStart=null;this.retry=0;return this.connect();}
  async connect(){
-  if(this.connecting)return this.connecting;
+  if(this.connecting)return this.connecting;if(this.ws?.readyState===WebSocket.OPEN)return;clearTimeout(this.retryTimer);
   this.stopped=false;this.ws=new WebSocket(this.url);const ws=this.ws;
   let resolveConnect,rejectConnect;this.connecting=new Promise((resolve,reject)=>{resolveConnect=resolve;rejectConnect=reject;});
   const timeout=setTimeout(()=>{rejectConnect(Error('서버 연결 시간이 초과되었습니다.'));ws.close();},8000);
   ws.onopen=()=>ws.send(JSON.stringify(envelope('HELLO',fingerprint)));
-  ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='WELCOME'){clearTimeout(timeout);resolveConnect();this.connecting=null;}this.receive(m);};
+  ws.onmessage=e=>{if(this.ws!==ws)return;const m=JSON.parse(e.data);this.receive(m);if((m.type==='FULL_STATE'||m.type==='WELCOME')&&!this.restoring){clearTimeout(timeout);resolveConnect();this.connecting=null;}};
   ws.onerror=()=>rejectConnect(Error('서버에 연결할 수 없습니다.'));
-  ws.onclose=e=>{clearInterval(this.pingTimer);if(this.ws!==ws)return;this.emit('status',{connected:false,reason:e.reason});
+  ws.onclose=e=>{if(this.ws!==ws)return;clearInterval(this.pingTimer);this.restoring=!!this.token;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(Error('연결이 끊겼습니다.'));}this.pending.clear();this.emit('status',{connected:false,reason:e.reason});
    clearTimeout(timeout);rejectConnect(Error('연결이 종료되었습니다.'));this.connecting=null;
-   if([4002,4003,4004,4009,1000].includes(e.code)||this.stopped){this.stopped=true;if([4003,4004,1000].includes(e.code)){this.token=null;sessionStorage.removeItem('dsbr-resume');}this.emit('ended',e.reason);return;}
+   if([4002,4003,4004,4009].includes(e.code)||this.stopped){this.stopped=true;if([4002,4003,4004,4009].includes(e.code)||e.reason==='LEFT'){this.token=null;sessionStorage.removeItem('dsbr-resume');}this.emit('ended',e.reason);return;}
    this.retryStart??=performance.now();if(performance.now()-this.retryStart>60000){this.stopped=true;this.emit('ended','재연결 시간이 초과되었습니다. 다시 참가해 주세요.');return;}
    clearTimeout(this.retryTimer);this.retryTimer=setTimeout(()=>{if(!this.stopped)this.connect().catch(()=>this.emit('status',{connected:false}));},Math.min(8000,400*2**this.retry++)*(.75+Math.random()*.5));
   };
@@ -20,7 +21,7 @@ export class Connection extends EventTarget{
  }
  receive(m){
   if(m.type==='VERSION_MISMATCH'){this.stopped=true;this.emit('ended','게임 버전이 바뀌었습니다. 새로고침 후 참가하세요.');return;}
-  if(m.type==='WELCOME'){this.emit('welcome',m.payload);this.retry=0;this.retryStart=null;this.emit('status',{connected:true});if(this.token)this.send('RESUME',{token:this.token,cursor:this.cursor},false);this.pingTimer=setInterval(()=>this.send('PING',{clientTime:performance.now()},false),2000);return;}
+  if(m.type==='WELCOME'){this.emit('welcome',m.payload);this.restoring=!!this.token;if(!this.restoring){this.retry=0;this.retryStart=null;this.emit('status',{connected:true});}if(this.token)this.send('RESUME',{token:this.token,cursor:this.cursor},false);this.pingTimer=setInterval(()=>this.send('PING',{clientTime:performance.now()},false),2000);return;}
   if(m.roomInstanceId){if(this.scope.roomInstanceId&&m.roomInstanceId!==this.scope.roomInstanceId&&m.type!=='SESSION')return;
    if(this.scope.connectionEpoch&&m.connectionEpoch<this.scope.connectionEpoch)return;
    // REMATCH's successful reply carries the new match scope. Accept only the
@@ -32,16 +33,21 @@ export class Connection extends EventTarget{
   if(m.eventSeq){if(m.eventSeq<=this.cursor)return;this.cursor=m.eventSeq;}
   if(m.type==='SESSION'){this.token=m.payload.token;this.session=m.payload;sessionStorage.setItem('dsbr-resume',this.token);}
   if(m.type==='SNAPSHOT'||m.type==='PRIVATE_STATE')this.lifeSeq=(m.payload.self||m.payload)?.lifeSeq??this.lifeSeq;
-  if(m.type==='FULL_STATE'){this.cursor=m.payload.cursor;this.lifeSeq=m.payload.self?.lifeSeq||0;this.emit('reset',{});}
+  if(m.type==='FULL_STATE'){const full=m.payload;
+   if(!full.room?.self||full.room.self.id!==this.session?.playerId||full.room.phase==='BATTLE'&&(!full.static||!full.snapshot||full.room.self.role==='student'&&(!full.self?.inputFloor||full.self.id!==this.session.playerId))){
+    this.restoring=true;this.ws?.close(4007,'INCOMPLETE_RECOVERY_STATE');return;
+   }
+   this.cursor=m.payload.cursor;this.lifeSeq=m.payload.self?.lifeSeq||0;this.emit('reset',{});}
   if(m.type==='PONG'){const now=performance.now(),rtt=now-m.payload.clientTime,offset=m.payload.serverNow-(now-rtt/2);this.clock={rtt,offset:this.clock.rtt?this.clock.offset*.85+offset*.15:offset,uncertainty:rtt/2};}
   if(m.type==='COMMAND_RESULT'){const pending=this.pending.get(m.payload.requestId);if(pending){clearTimeout(pending.timer);this.pending.delete(m.payload.requestId);m.payload.accepted?pending.resolve(m.payload):pending.reject(Error(m.payload.reason||'요청을 처리하지 못했습니다.'));}}
   if(m.type==='AUTH_OK'){this.emit('auth',{});return;}
-  this.emit(m.type.toLowerCase(),m.payload);
+  this.emit(m.type.toLowerCase(),m.payload);if(m.type==='FULL_STATE'){this.restoring=false;this.retry=0;this.retryStart=null;this.emit('status',{connected:true});}
  }
  send(type,payload={},scoped=true,requestId){if(this.ws?.readyState!==WebSocket.OPEN)return false;this.ws.send(JSON.stringify(envelope(type,payload,{...(scoped?{...this.scope,lifeSeq:this.lifeSeq}:{}),...(requestId?{requestId}:{})})));return true;}
  command(type,payload={}){
+  if(this.restoring)return Promise.reject(Error('경기 상태를 복원하는 중입니다.'));
   const id=crypto.randomUUID(),scope={...this.scope,lifeSeq:this.lifeSeq};return new Promise((resolve,reject)=>{
-   const p={resolve,reject,retries:0,type,matchId:scope.matchId};const attempt=()=>{if(p.retries++>=3||scope.matchId!==this.scope.matchId||scope.lifeSeq!==this.lifeSeq){this.pending.delete(id);reject(Error('응답을 확인할 수 없습니다. 현재 상태를 확인하세요.'));return;}if(this.ws?.readyState===1)this.ws.send(JSON.stringify(envelope(type,payload,{...scope,connectionEpoch:this.scope.connectionEpoch,requestId:id})));p.timer=setTimeout(attempt,1500);};this.pending.set(id,p);attempt();
+   const p={resolve,reject,retries:0,type,matchId:scope.matchId};const attempt=()=>{if(p.retries++>=3||scope.connectionEpoch!==this.scope.connectionEpoch||scope.matchId!==this.scope.matchId||scope.lifeSeq!==this.lifeSeq){this.pending.delete(id);reject(Error('응답을 확인할 수 없습니다. 현재 상태를 확인하세요.'));return;}if(this.ws?.readyState===1)this.ws.send(JSON.stringify(envelope(type,payload,{...scope,connectionEpoch:this.scope.connectionEpoch,requestId:id})));p.timer=setTimeout(attempt,1500);};this.pending.set(id,p);attempt();
   });
  }
  async authenticate(secret){this.send('AUTH',{secret},false);await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('교사 인증을 확인해 주세요.')),5000);this.addEventListener('auth',()=>{clearTimeout(timer);resolve();},{once:true});});}

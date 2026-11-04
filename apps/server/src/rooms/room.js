@@ -80,7 +80,7 @@ export class Room{
    case 'CONTINUE':if(this.phase!=='BATTLE'||!this.safePaused||this.lastFault)fail('CANNOT_CONTINUE');this.safePaused=false;this.debt=0;this.overloadSince=0;for(const m of this.members.values())m.peer?.send('OVERLOAD',{paused:false});break;
    case 'CLOSE_ROOM':if(this.phase==='BATTLE')fail('END_BATTLE_FIRST');queueMicrotask(()=>this.manager.remove(this));break;
    case 'REMATCH':{
-    if(this.phase!=='RESULTS')fail('PHASE_MISMATCH');if(this.world)destroyWorld(this.world);this.world=null;this.result=null;this.matchId=randomUUID();this.round++;this.phase='LOBBY';this.revision++;
+    if(this.phase!=='RESULTS')fail('PHASE_MISMATCH');if(this.world)destroyWorld(this.world);this.world=null;this.result=null;this.static=null;this.safePaused=false;this.lastFault=null;this.debt=0;this.overloadSince=0;this.lastBoard=0;this.battleStartedAt=0;this.matchId=randomUUID();this.round++;this.phase='LOBBY';this.revision++;
     for(const m of this.members.values()){m.quiz=null;m.draft=null;m.ledger.clear();m.events=[];m.eventBytes=0;}break;
    }
    case 'AUGMENT_CHOOSE':case 'RESPAWN':if(this.phase!=='BATTLE')fail('PHASE_MISMATCH');return applyCommand(this.world,{...p,type,playerId:member.id,lifeSeq:this.world.byId.get(member.id)?.lifeSeq,requestId});
@@ -89,7 +89,7 @@ export class Room{
   return {accepted:true};
  }
  finish(){if(this.phase!=='BATTLE')return;this.result=exportResult(this.world);this.world.finished=true;this.phase='RESULTS';this.revision++;this.manager.onResult?.(this.matchId,this.result);}
- publicState(member){return {id:this.id,code:this.code,matchId:this.matchId,round:this.round,phase:this.phase,revision:this.revision,config:this.config,
+ publicState(member){return {simulationFault:this.phase==='BATTLE'&&!!this.lastFault,id:this.id,code:this.code,matchId:this.matchId,round:this.round,phase:this.phase,revision:this.revision,config:this.config,
   serverTime:this.manager.now(),quizEndsAt:this.quizEndsAt||0,battleStartedAt:this.battleStartedAt||0,
   quizRemainingMs:Math.max(0,(this.quizEndsAt||0)-this.manager.now()),
   players:this.students().map(p=>({id:p.id,name:p.name,team:p.team,connected:p.connected,ready:!!p.draft?.ready,score:p.quiz?.score||0,...(member.role==='host'?{draft:p.draft||null}:{})})),

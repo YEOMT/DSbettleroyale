@@ -101,3 +101,7 @@ Production hosting credentials/domain were not provided; production is not deplo
 - Actual local timings, infrastructure failures and targeted reruns: [releaseops-validation.md](releaseops-validation.md). One-time configuration and daily workflow: [releaseops-ko.md](releaseops-ko.md).
 - AWS version read only: existing server reports `206aaee4...`. No AWS/Pages/Firebase mutation. New deployment path remains BLOCKED_CONFIGURATION until bootstrap, environment secrets and first-transition approval are supplied.
 
+
+## Integrated combat recovery (2026-11-04)
+
+Base 4a9ee7574a82af9f18f62de4e50a36de2d5142ae. B01–B10 causes, T01–T11 coverage, times, screenshots and before/after host trace: [combat-recovery.md](combat-recovery.md). ReleaseOps pairing retained. Public AWS only queried; no deployment. Physical-device late-game hitch remains unverified. See PR for exact-head CI results.

@@ -20,6 +20,32 @@ function brActorEmojiCanvas(glyph,size=128){
             ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(glyph||'•'),size*.5,size*.53);
             BR_ACTOR_EMOJI_CACHE.set(key,canvas);return canvas;
         }
+// Finite tier palettes. Pulse, fragment positions and rotation still advance every frame.
+const glowCache=new Map(),abilities=new Map(manifest.roster.map(row=>[row.id,row.ability]));
+function glowLayers(color){
+ if(glowCache.has(color))return glowCache.get(color);
+ function layer(paint){const c=document.createElement('canvas');c.width=c.height=192;const ctx=c.getContext('2d');ctx.translate(96,96);paint(ctx);return c;}
+ const ring=(radius,width,alpha)=>layer(ctx=>{ctx.strokeStyle=color;ctx.shadowColor=color;ctx.shadowBlur=28;ctx.lineWidth=width;ctx.globalAlpha=alpha;ctx.beginPath();ctx.arc(0,0,radius,0,2*Math.PI);ctx.stroke();});
+ const layers={
+  aura:layer(ctx=>{const g=ctx.createRadialGradient(0,0,8,0,0,96);g.addColorStop(0,'rgba(255,255,255,.18)');g.addColorStop(.35,color+'42');g.addColorStop(1,color+'00');ctx.fillStyle=g;ctx.fillRect(-96,-96,192,192);}),
+  outer:ring(69,9,.30),inner:ring(58,4,.72),
+  dot:layer(ctx=>{ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=48;ctx.beginPath();ctx.arc(0,0,24,0,2*Math.PI);ctx.fill();}),
+  arcs:layer(ctx=>{ctx.strokeStyle='#fff';ctx.globalAlpha=.4;ctx.shadowColor='#fff';ctx.shadowBlur=12;ctx.lineWidth=2;for(const start of [0,Math.PI]){ctx.beginPath();ctx.arc(0,0,82,start,start+1.25);ctx.stroke();}})
+ };glowCache.set(color,layers);return layers;
+}
+const nameLabels=r.hostNameLabels=new Map();
+function drawName(ctx,label,x,y,broadcast){
+ const size=broadcast?34:30,key=size+'|'+label;let source=nameLabels.get(key);
+ if(!source){
+  source=document.createElement('canvas');const c=source.getContext('2d'),font='900 '+size+'px sans-serif';c.font=font;
+  const width=Math.ceil(c.measureText(label).width)+32,height=size*2+32;
+  source.width=width*2;source.height=height*2;c.scale(2,2);c.font=font;c.fillStyle='#fff';c.textAlign='center';
+  if(broadcast){c.shadowColor='rgba(0,0,0,.95)';c.shadowBlur=16;}
+  c.fillText(label,width/2,height/2);nameLabels.set(key,source);
+  if(nameLabels.size>128)nameLabels.delete(nameLabels.keys().next().value);
+ }
+ ctx.drawImage(source,x-source.width/4,y-source.height/4,source.width/2,source.height/2);
+}
 function normal(ctx,autoBroadcast,teamMode){this.participants.forEach(p => {
                     if(!p.alive) {
                         const remaining=Number(p.deathVisualUntilAt||0)-performance.now();
@@ -39,26 +65,14 @@ function normal(ctx,autoBroadcast,teamMode){this.participants.forEach(p => {
                         const pulse=1+Math.sin(this.frame*0.16+p.id)*0.07;
                         ctx.save();
                         // 바닥에서 퍼지는 부드러운 광원
-                        const aura=ctx.createRadialGradient(p.pos.x,p.pos.y,tr*0.20,p.pos.x,p.pos.y,tr*2.25);
-                        aura.addColorStop(0,'rgba(255,255,255,0.18)');
-                        aura.addColorStop(0.35,glowCol+'42');
-                        aura.addColorStop(1,glowCol+'00');
-                        ctx.globalAlpha=0.95; ctx.fillStyle=aura; ctx.beginPath(); ctx.arc(p.pos.x,p.pos.y,tr*2.25,0,Math.PI*2); ctx.fill();
-                        // 이중 광원 링
-                        ctx.globalAlpha=0.72; ctx.strokeStyle=glowCol; ctx.lineWidth=5; ctx.shadowColor=glowCol; ctx.shadowBlur=32;
-                        ctx.beginPath(); ctx.arc(p.pos.x,p.pos.y,tr*1.34*pulse,0,Math.PI*2); ctx.stroke();
-                        ctx.globalAlpha=0.30; ctx.lineWidth=10; ctx.beginPath(); ctx.arc(p.pos.x,p.pos.y,tr*1.58/pulse,0,Math.PI*2); ctx.stroke();
-                        // 회전하는 영역 파편/빛점
-                        ctx.globalAlpha=0.90; ctx.fillStyle=glowCol; ctx.shadowBlur=20;
-                        for(let gi=0;gi<5;gi++) {
-                            const ga=this.frame*0.035*(gi%2?1:-1)+gi*Math.PI*2/5+p.id;
-                            const gr=tr*(1.72+(gi%2)*0.18);
-                            ctx.beginPath(); ctx.arc(p.pos.x+Math.cos(ga)*gr,p.pos.y+Math.sin(ga)*gr,3.5+(gi%2)*1.5,0,Math.PI*2); ctx.fill();
-                        }
-                        ctx.globalAlpha=0.40; ctx.strokeStyle='#ffffff'; ctx.lineWidth=2; ctx.shadowBlur=12;
-                        const arcA=this.frame*0.025+p.id;
-                        ctx.beginPath(); ctx.arc(p.pos.x,p.pos.y,tr*1.88,arcA,arcA+1.25); ctx.stroke();
-                        ctx.beginPath(); ctx.arc(p.pos.x,p.pos.y,tr*1.88,arcA+Math.PI,arcA+Math.PI+1.25); ctx.stroke();
+                        const layers=glowLayers(glowCol),stamp=(image,x,y,scale)=>ctx.drawImage(image,x-scale,y-scale,scale*2,scale*2);
+                        stamp(layers.aura,p.pos.x,p.pos.y,tr*2.25);
+                        stamp(layers.outer,p.pos.x,p.pos.y,tr*2.2/pulse);
+                        stamp(layers.inner,p.pos.x,p.pos.y,tr*2.2*pulse);
+                        for(let gi=0;gi<5;gi++){const ga=this.frame*.035*(gi%2?1:-1)+gi*Math.PI*2/5+p.id,gr=tr*(1.72+(gi%2)*.18);
+                          stamp(layers.dot,p.pos.x+Math.cos(ga)*gr,p.pos.y+Math.sin(ga)*gr,(gi%2?5:3.5)*4);}
+                        ctx.translate(p.pos.x,p.pos.y);ctx.rotate(this.frame*.025+p.id);
+                        stamp(layers.arcs,0,0,tr*2.2);
                         ctx.restore();
                     }
 
@@ -161,10 +175,8 @@ function normal(ctx,autoBroadcast,teamMode){this.participants.forEach(p => {
                     ctx.fillStyle=hpPct>.35?'#4ade80':'#fb4b63'; ctx.fillRect(p.pos.x-barW/2,barY,barW*hpPct,barH);
                     if(autoBroadcast){ctx.strokeStyle='rgba(255,255,255,.82)';ctx.lineWidth=2;ctx.strokeRect(p.pos.x-barW/2,barY,barW,barH);}
                     
-                    ctx.fillStyle='#fff'; ctx.font=`900 ${autoBroadcast?34:30}px sans-serif`; ctx.textAlign = 'center';
-                    if(autoBroadcast){ctx.shadowColor='rgba(0,0,0,.95)';ctx.shadowBlur=8;}
-                    let label = p.name; if(p.kills > 0) label += ` [⚔️${p.kills}]`;
-                    ctx.fillText(label,p.pos.x,p.pos.y-p.radius-(autoBroadcast?35:25));ctx.shadowBlur=0;
+                    const label=p.name+(p.kills>0?' [⚔️'+p.kills+']':'');
+                    ctx.shadowBlur=0;drawName(ctx,label,p.pos.x,p.pos.y-p.radius-(autoBroadcast?35:25),autoBroadcast);
                 });}
 function lite(ctx,scale,cx,cy){const tierColor={S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'};for(const p of this.participants) {
                     if(p.id===999)continue;
@@ -190,5 +202,5 @@ function lite(ctx,scale,cx,cy){const tierColor={S:'#ff3859',A:'#facc15',B:'#60a5
                     brPaintReworkStatus(brCombatPainter(ctx,false),x,y,r,1,window.BRRework?.wirePlayer(p,this),this.frame,p.maxHp);
                 }}
 function capture(ctx,g){const painter=brCombatPainter(ctx,false);for(const p of g.participants){if(p.id===999||!p.alive)continue;const r=p.radius;painter.circle(p.pos.x,p.pos.y,r,'#101623',1);ctx.drawImage(brActorEmojiCanvas(p.ability.e),p.pos.x-r,p.pos.y-r,r*2,r*2);painter.circle(p.pos.x,p.pos.y,r,brTeamKillColor(p.team),1,brTeamBorderWidth(g.zoom,true));painter.rect(p.pos.x-r,p.pos.y+r+12,r*2,8,'#57202d',1);painter.rect(p.pos.x-r,p.pos.y+r+12,r*2*p.hp/p.maxHp,8,'#4ade80',1);ctx.fillStyle='#f8fafc';ctx.font='bold 30px sans-serif';ctx.textAlign='center';ctx.fillText(p.name,p.pos.x,p.pos.y-r-20);brLevelCanvasDraw(ctx,p,p.run?.level,p.lifeSeq,p.pos.x,p.pos.y-r-55/g.zoom,g.zoom,true);brPaintReworkStatus(painter,p.pos.x,p.pos.y,r,g.zoom,window.BRRework.wirePlayer(p,g),g.frame,p.maxHp);}}
-return (view,pose,now)=>{const participants=view.actors.map(a=>{let p=r.hostTracks.get(a.id);if(!p){p={};r.hostTracks.set(a.id,p);}Object.assign(p,a,a.visual,{id:a.visual?.id||0,pos:{x:a.x,y:a.y},ability:manifest.roster.find(q=>q.id===a.abilityId).ability,run:{level:a.level},invisible:!!(a.flags&32),finalPhaseBoosted:!!(a.flags&64)});p.cacheCanvas=brActorEmojiCanvas(a.emoji,r.paint.brGraphicsProfile().source);if(a.alive)p.deathVisualUntilAt=0;else if(!p.deathVisualUntilAt)p.deathVisualUntilAt=now+750;return p;});const g={participants,frame:view.renderTick,zoom:pose.zoom,finalPhase:view.presentation?.finalPhase,isVisualPerformanceMode:()=>pose.mode==='performance'},ctx=r.ctx;ctx.save();if(view.capture)capture(ctx,g);else if(pose.mode==='performance')(ctx.scale(1/pose.zoom,1/pose.zoom),lite.call(g,ctx,pose.zoom,0,0));else normal.call(g,ctx,pose.mode==='broadcast',r.session.roomMeta?.mode==='solo'?0:1);ctx.restore();};
+return (view,pose,now)=>{const participants=view.actors.map(a=>{let p=r.hostTracks.get(a.id);if(!p){p={};r.hostTracks.set(a.id,p);}Object.assign(p,a,a.visual,{id:a.visual?.id||0,pos:{x:a.x,y:a.y},ability:abilities.get(a.abilityId)||{e:a.emoji,t:a.tier},run:{level:a.level},invisible:!!(a.flags&32),finalPhaseBoosted:!!(a.flags&64)});p.cacheCanvas=brActorEmojiCanvas(a.emoji,r.paint.brGraphicsProfile().source);if(a.alive)p.deathVisualUntilAt=0;else if(!p.deathVisualUntilAt)p.deathVisualUntilAt=now+750;return p;});const g={participants,frame:view.renderTick,zoom:pose.zoom,finalPhase:view.presentation?.finalPhase,isVisualPerformanceMode:()=>pose.mode==='performance'},ctx=r.ctx;ctx.save();if(view.capture)capture(ctx,g);else if(pose.mode==='performance')(ctx.scale(1/pose.zoom,1/pose.zoom),lite.call(g,ctx,pose.zoom,0,0));else normal.call(g,ctx,pose.mode==='broadcast',r.session.roomMeta?.mode==='solo'?0:1);ctx.restore();};
 }
