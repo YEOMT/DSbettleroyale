@@ -85,7 +85,11 @@ export class AttackPoses{
   if(s.family==='hit'){const level=Math.max(1,Math.min(4,s.level));ms=[0,75,95,125,150][level];px=[0,1.5,2.5,4,5][level];squash=[0,.05,.09,.14,.18][level];}
   const age=(tick-s.tick)*1000/60;
   if(age<0)return null; // The interpolated row can still belong to the previous life.
-  if(!actor.alive||actor.lifeSeq!==s.life||now-s.born>ms+240){this.active.delete(actor.id);this.contacts.delete(actor.id);return null;}
+  // The first eligible paint has one bounded wait budget, independent of the
+  // pose's length. A short orbit/hit must not expire sooner than a heavy swing
+  // while both wait for the same busy renderer. Never revive old server events.
+  const pending=s.shownAt==null;
+  if(!actor.alive||actor.lifeSeq!==s.life||(pending?(now-s.born>500||age>750):now-s.shownAt>=ms)){this.active.delete(actor.id);this.contacts.delete(actor.id);return null;}
   if(reduced)return null;
   // The render clock chooses the first eligible frame. A busy first paint can
   // consume the whole short pose before that frame; bound its visible recovery

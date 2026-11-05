@@ -25,7 +25,7 @@ engine/content/protocol/server, root index.html 및 legacy 파일은 변경하�
 | WebKit 모바일 크기 | PASS(제한 명시) | 8.35s, 위 5크기 native tap, scoped gesture 취소, 결과·재경기·도감 스크롤. WebKit 자동화 API는 native 두 손가락 pinch를 제공하지 않아 해당 부분 NOT_RUN |
 | 연속 3화면, Canvas 전/후 | PASS | 9.01s / 8.73s. 실제 touch tap, 서버 60/20Hz 계속 진행. 근접2/저격/연발/회오리/장판6종, 실제 painter contact/피격, 두 번 재경기 |
 | 연속 3화면, Pixi | PASS | 11.26s, 같은6종·확정명중·실제 bodies·재경기 정리 |
-| 최종 쌍 빌드 | PASS | 약8.3s(산출물 확인 포함), `v33-7b5891afbff26d41` |
+| 최종 쌍 빌드 | PASS | 약8.3s(산출물 확인 포함), `v33-1de9a94ae00af46d` |
 | 기존 recovery/조준/카메라/최후반 | CI | 기존 assertion을 유지하고 기존4개 combat job에서 실행. 최종 결과는 PR에 기재 |
 
 Chromium의 전투 중 pinch/빠른 탭/이동+공격+스킬/취소·재획득 후 viewport scale=1, scroll/offset=0. 전투 종료·재경기 후 도감 scrollTop=150, 실제 손가락 확대 scale=5를 확인했다. 같은 브라우저에서 확대가 작동하는 양성 대조까지 확인한 결과다. 물리 기기 인증을 대체하지 않는다.
@@ -58,6 +58,8 @@ WebAudio 실제 oscillator 초기 주파수(빠른/보통/강한 근접/강한 �
 Canvas recovery는 WebKit의 Ubuntu Azure apt 미러 다운로드가 약40KB/s 수준으로 진행돼10분 job 제한에 TIMEOUT됐고 검사는 시작하지 못했다. 해당 job만 lockfile의 Playwright1.56.1과 같은 공식 `mcr.microsoft.com/playwright:v1.56.1-noble` 사전 설치 이미지로 실행한다. 검사를 생략하거나 timeout 기준을 늘리지 않는다. 최종 정확한 커밋의 전체 결과는 PR에 기록한다.
 
 두 번째 CI의 Pixi 연속 검사는 세 화면 동시 녹화 중 호스트 프레임 간격이 약384ms로 늘어나 피격 몸체의 제한된 유효 시간을 넘겨 FAIL이었다. 짧은 연출을 오래 재생하거나 assertion을 완화하지 않고, CI 녹화는 공격자 한 화면으로 제한했다. 상대·호스트의 실제 body/contact painter·재경기 assertion과 viewport는 모두 유지했다.
+
+세 번째 CI에서는 첫 표시가350ms 지연됐을 때 짧은 회오리 몸체(100ms)가 기존 `duration+240ms` 한도를10ms 넘겨 표시되지 않았다. 첫 표시 대기 한도를 종류와 무관하게500ms로 통일하고 서버 사건이750ms보다 오래됐으면 표시하지 않는다. 실제 애니메이션은 원래80~190ms 길이 그대로이고, 한 번 그린 뒤 wall time으로 끝난다. 지연된 첫 eligible tick/old event/life를 재현한 회귀 포함17개0.23s PASS. 이는 입력 지연·추가 관성·공격 수치 변경이 아니다. 최종 쌍 빌드는 위 새 buildId를 사용한다.
 
 ## 실기기와 한계
 

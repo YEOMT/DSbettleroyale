@@ -35,6 +35,17 @@ test('heavy stroke has thrust, compression and return; quick attacks keep a shor
  assert.ok(poseEnvelope('heavy',.72).shift<0);assert.ok(poseEnvelope('heavy',.43).squash>.99);
  assert.ok(poseEnvelope('quick',.8).shift<.1);assert.deepEqual(poseEnvelope('heavy',1),{shift:0,squash:0});
 });
+test('short orbit and hit wait for one busy eligible paint, then expire by wall time; old events never revive',()=>{
+ const a=actor('a','emoji-024'),b=actor('b','emoji-001');
+ const shot={type:'SHOT_SPAWN',serverTick:10,data:{owner:'a',life:2,actionKind:'skill',actionSeq:1,dx:1,dy:0}};
+ const hit={type:'FX',serverTick:10,data:{kind:'hit',targetId:'b',impactLevel:2,geometry:{confirmed:true,targetLife:2}}};
+ for(const [event,target] of [[shot,a],[hit,b]]){
+  const p=new AttackPoses();p.accept(event,[a,b],1000);assert.equal(p.sample(target,1,9,1000,false,true),null);
+  assert.ok(p.sample(target,1,34,1350,false,true));assert.equal(p.sample(target,1,40,1500,false,true),null);
+  const old=new AttackPoses();old.accept(event,[a,b],1000);assert.equal(old.sample(target,1,50,1600,false,true),null);
+  const stale=new AttackPoses();stale.accept(event,[a,b],1000);assert.equal(stale.sample(target,1,70,1000,false,true),null);
+ }
+});
 test('low quality retains bounded recoil, ordinals cannot stack it, and actor coordinates remain exact',()=>{
  const a=actor('a','emoji-023'),b=actor('b','emoji-001'),before=structuredClone([a,b]);
  for(const low of [true,false]){
