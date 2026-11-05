@@ -4,7 +4,10 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';
 const renderer=process.argv[2]||'canvas',browserEngine=process.argv[3]||'chromium',start=Date.now();
-const checks=[],h=await auditHarness({players:2,renderer,quality:'low',mode:'team-elim',browserEngine,
+// The full resize/cooldown sequence can outlast the shrinking solo/team arena
+// on software GPUs. Use the existing fixed capture arena, with real clocks and
+// cooldowns, so a normal ring elimination cannot masquerade as an input fault.
+const checks=[],h=await auditHarness({players:2,renderer,quality:'low',mode:'team-capture',browserEngine,
  viewport:{width:800,height:520},studentContext:{viewport:{width:390,height:844},hasTouch:true,isMobile:true,deviceScaleFactor:2}});
 const page=h.student;
 const metric=()=>page.evaluate(()=>({scale:visualViewport.scale,x:scrollX,y:scrollY,vx:visualViewport.offsetLeft,vy:visualViewport.offsetTop}));
@@ -85,4 +88,4 @@ try{
  if(native){await touch('touchStart',[{id:1,x:360,y:400},{id:2,x:400,y:400}]);for(let n=1;n<=6;n++){await touch('touchMove',[{id:1,x:360-n*22,y:400},{id:2,x:400+n*22,y:400}]);await delay(50);}await touch('touchEnd',[]);await page.waitForFunction(()=>visualViewport.scale>1.1);scrolling.zoom=(await metric()).scale;}
  checks.push({rematch:restored,encyclopedia:scrolling});assert.deepEqual(h.errors,[]);
  console.log(JSON.stringify({browserEngine,renderer,status:'PASS',ms:Date.now()-start}));
-}catch(error){console.error(error.message,await page.evaluate(()=>({actions:m.timeline.predicted?.actions,request:m.controls.lastAction,gestures:m.controls.gestures.size,pointer:m.controls.pointer,sent:sentActions})).catch(()=>null));throw error;}finally{fs.mkdirSync('artifacts/combat',{recursive:true});fs.writeFileSync(`artifacts/combat/touch-${browserEngine}-${renderer}.json`,JSON.stringify({ms:Date.now()-start,checks,physicalDevices:'NOT_RUN',webkitNativePinch:browserEngine==='webkit'?'NOT_RUN':'N/A'},null,2));await h.close();}
+}catch(error){console.error(error.message,await page.evaluate(()=>({phase:m.ui.room?.phase,alive:m.timeline.predicted?.alive,renderError:m.renderer.lastRenderError,actions:m.timeline.predicted?.actions,request:m.controls.lastAction,gestures:m.controls.gestures.size,pointer:m.controls.pointer,sent:sentActions})).catch(()=>null));throw error;}finally{fs.mkdirSync('artifacts/combat',{recursive:true});fs.writeFileSync(`artifacts/combat/touch-${browserEngine}-${renderer}.json`,JSON.stringify({ms:Date.now()-start,checks,physicalDevices:'NOT_RUN',webkitNativePinch:browserEngine==='webkit'?'NOT_RUN':'N/A'},null,2));await h.close();}

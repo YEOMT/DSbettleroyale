@@ -25,7 +25,7 @@ engine/content/protocol/server, root index.html 및 legacy 파일은 변경하�
 | WebKit 모바일 크기 | PASS(제한 명시) | 8.35s, 위 5크기 native tap, scoped gesture 취소, 결과·재경기·도감 스크롤. WebKit 자동화 API는 native 두 손가락 pinch를 제공하지 않아 해당 부분 NOT_RUN |
 | 연속 3화면, Canvas 전/후 | PASS | 9.01s / 8.73s. 실제 touch tap, 서버 60/20Hz 계속 진행. 근접2/저격/연발/회오리/장판6종, 실제 painter contact/피격, 두 번 재경기 |
 | 연속 3화면, Pixi | PASS | 11.26s, 같은6종·확정명중·실제 bodies·재경기 정리 |
-| 최종 쌍 빌드 | PASS | 약8.3s(산출물 확인 포함), `v33-8626560ce361f105` |
+| 최종 쌍 빌드 | PASS | 약8.3s(산출물 확인 포함), `v33-7b5891afbff26d41` |
 | 기존 recovery/조준/카메라/최후반 | CI | 기존 assertion을 유지하고 기존4개 combat job에서 실행. 최종 결과는 PR에 기재 |
 
 Chromium의 전투 중 pinch/빠른 탭/이동+공격+스킬/취소·재획득 후 viewport scale=1, scroll/offset=0. 전투 종료·재경기 후 도감 scrollTop=150, 실제 손가락 확대 scale=5를 확인했다. 같은 브라우저에서 확대가 작동하는 양성 대조까지 확인한 결과다. 물리 기기 인증을 대체하지 않는다.
@@ -48,6 +48,14 @@ WebAudio 실제 oscillator 초기 주파수(빠른/보통/강한 근접/강한 �
 | 서버 근접 전진(두 사례 각각) | 12 | 12 |
 
 한 짧은 표본으로 모든 모바일 기기의 FPS 개선을 주장하지 않는다. 같은 CPU의 다른 로컬 검사/임시 방이 일부 시간에 존재했다. 변경 후 실제 연속 플레이, 제한된 프레임 비용, 표시 크기 차이를 확인한 결과다. 공격 수치 비교와 정지 화면만으로 조작감 보존을 판단하지 않았다.
+
+## 최종 CI에서 발견한 추가 경로
+
+첫 CI42035136743에서 Pixi 연속 명중 표시가 FAIL이었다. 이벤트 tick323이 도착했을 때 첫 표시 tick358이 되어 170ms contact가 그려지기 전에 만료됐다. `Timeline`은 최근240ms 내 도착/최대45tick 지연의 확정 비주기 hit에 한해서 표시 시계를 한 번만 보정한다. 원래 사건 tick·좌표, windup/위험 신호/공격 판정은 바꾸지 않는다. 중복 표시 시계 재설정·life 변경·오래된 이벤트 재생·정지 중 영구 잔상을 막는 회귀를 포함한16개 검사0.26s와 실제 Pixi3화면 재검사가 PASS다. 영상/원래 전후 표는 이 작은 추가 수정 전 계측이며, 마지막 CI 영상에는 추가 수정도 포함한다.
+
+같은 실행의 Pixi 모바일 검사는 긴 소프트웨어 GPU 시나리오에서 입력 대기가 끝나지 않아 TIMEOUT이었다. 정상 경기 종료와 입력 대기가 충돌할 수 있는 축소 경기장 대신 기존 점령전의 고정 경기장을 사용하고, 실패 로그에 phase/alive/renderError를 추가했다. 쿨타임·서버 시계·기존 assertion을 그대로 유지한 로컬 Pixi 다중 터치 재검사는79.90s PASS였다.
+
+Canvas recovery는 WebKit의 Ubuntu Azure apt 미러 다운로드가 약40KB/s 수준으로 진행돼10분 job 제한에 TIMEOUT됐고 검사는 시작하지 못했다. 해당 job만 lockfile의 Playwright1.56.1과 같은 공식 `mcr.microsoft.com/playwright:v1.56.1-noble` 사전 설치 이미지로 실행한다. 검사를 생략하거나 timeout 기준을 늘리지 않는다. 최종 정확한 커밋의 전체 결과는 PR에 기록한다.
 
 ## 실기기와 한계
 

@@ -3,7 +3,19 @@ import assert from 'node:assert/strict';
 import {AttackPoses,poseEnvelope} from '../../apps/client/src/render/attack-pose.js';
 import {bindBattleTouch} from '../../apps/client/src/input/battle-touch.js';
 import {requestId} from '../../apps/client/src/net/request-id.js';
+import {Timeline} from '../../apps/client/src/presentation/timeline.js';
 const actor=(id,abilityId)=>({id,abilityId,alive:true,lifeSeq:2,radius:32,x:10,y:20});
+test('a recent confirmed contact survives one busy first paint, never stale replay, changed life or an endless hold',()=>{
+ const fresh=()=>{const t=new Timeline();t.accept({serverTick:359,snapshotSeq:1,actors:[actor('a','emoji-025'),actor('b','emoji-001')],shots:[]},1000);return t;};
+ const hit={eventId:'hit',type:'FX',serverTick:323,data:{kind:'hit',sourceId:'a',targetId:'b',x:44,y:50,geometry:{confirmed:true,shape:'contact',lifeSeq:2,targetLife:2,displayMs:170}}};
+ const t=fresh();t.event(hit,1000);const shown=t.frame(1000).effects[0];assert.ok(shown);assert.equal(shown.tick,323);assert.equal(shown.x,44);assert.ok(shown.displayTick>323);
+ assert.equal(t.frame(1000).effects[0].displayTick,shown.displayTick);assert.equal(t.frame(1171).effects.length,0);
+ for(const [tick,received,life,periodic] of [[270,1000,2,false],[323,700,2,false],[323,1000,3,false],[323,1000,2,true]]){
+  const q=fresh();q.event({...hit,serverTick:tick,data:{...hit.data,geometry:{...hit.data.geometry,targetLife:life,periodic}}},received);assert.equal(q.frame(1000).effects.length,0);
+ }
+ const q=fresh();q.event({...hit,data:{...hit.data,kind:'cast-start'}},1000);assert.equal(q.frame(1000).effects.length,0,'windup/danger timing is never shifted');
+ t.reset();assert.equal(t.effects.length,0);
+});
 test('HTTP LAN requests keep cryptographic UUIDv4 identities without changing secure-context IDs',()=>{
  assert.equal(requestId({randomUUID:()=> 'native-id'}),'native-id');
  const source={getRandomValues:a=>crypto.getRandomValues(a)},ids=new Set();
