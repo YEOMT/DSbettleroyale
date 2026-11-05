@@ -26,7 +26,7 @@ engine/content/protocol/server, root index.html 및 legacy 파일은 변경하�
 | 연속 3화면, Canvas 전/후 | PASS | 9.01s / 8.73s. 실제 touch tap, 서버 60/20Hz 계속 진행. 근접2/저격/연발/회오리/장판6종, 실제 painter contact/피격, 두 번 재경기 |
 | 연속 3화면, Pixi | PASS | 11.26s, 같은6종·확정명중·실제 bodies·재경기 정리 |
 | 최종 쌍 빌드 | PASS | 약8.3s(산출물 확인 포함), `v33-1de9a94ae00af46d` |
-| 기존 recovery/조준/카메라/최후반/터치 | CI | 기존 assertion을 유지하고 renderer×recovery/continuous/touch의6개 combat job에서 실행. 최종 결과는 PR에 기재 |
+| 기존 recovery/조준/카메라/최후반/터치 | CI | renderer×recovery/continuous/touch에 Pixi continuous 역할3분할을 적용한8개 combat job. 기존 assertion과 전체 필수 gate 유지. 최종 결과는 PR에 기재 |
 
 Chromium 네이티브 터치 자동화에서 전투 중 pinch/빠른 탭/이동+공격+스킬/취소·재획득 후 viewport scale=1, scroll/offset=0. 전투 종료·재경기 후 도감 scrollTop=150, 확대 scale=5를 확인했다. 같은 브라우저에서 확대가 작동하는 양성 대조까지 확인한 결과다. 물리 기기 인증을 대체하지 않는다.
 
@@ -66,6 +66,8 @@ CI42039701647은 Quick162개/Python11개, Targeted, Canvas recovery, Canvas/Pixi
 추가 CI42042188021은 Pixi recovery도 PASS였지만 Pixi continuous의 저격 반동 첫 표시가 FAIL이었다. RAF p95 약383ms, 이벤트 tick2036→첫 eligible tick2100으로 서버 사건이750ms보다 오래되어 의도한 stale 제한에 걸렸다. 연출/사건 유효 시간을 더 늘리지 않았다. 로컬에 SwiftShader를 강제하고 같은800×520/low/3화면/공격자 녹화를 실행하자 접촉 표시 누락을 재현했다(FAIL). 독립 브라우저3개는 첫 동작의 서버 tick이 진행하지 않아 FAIL로 처리하고 변경을 채택하지 않았다. 같은3화면에서 녹화만 제외한 소프트웨어 GPU 검사13.28s는6종·확정 contact/피격·서버 전진12·두 번 재경기 모두 PASS였다. 따라서 `tests/combat/run.mjs`의 Pixi CI 영상 인코딩만 제외한다. 화면/서버 진행/판정/timeout/assertion은 그대로이며, Canvas CI 영상과 로컬 Pixi 영상은 유지한다. 최종 정확한 커밋 상태는 PR을 따른다.
 
 CI42044235776 attempt1은 Quick/Targeted/Canvas PASS, Pixi2개 TIMEOUT이었다. continuous는 apt15.8MB 다운로드9분24초(27.9kB/s) 후 job10분 제한에 걸렸다. 같은 커밋의 실패 job만 재실행한 attempt2에서 continuous는98s PASS였지만 recovery는 터치5크기198.30s PASS 후 마지막 대표5종 balanced 검사가 다시 합산540초 제한에 걸렸다. 기능 assertion 실패가 아닌 반복된 합산 시간 제한이므로, 터치를 독립 job으로 옮겨 renderer×3suite=6개로 나눴다. recovery의 세션/조준/대표5종, continuous의 연속 플레이, touch의5크기/Canvas WebKit을 모두 유지하며 필수 gate는6개 전체를 요구한다. combat jobs는 기존 검증된 동일 Playwright1.56.1 공식 이미지로 통일해 apt 지연을 제거했다. 게임 코드/timeout/판정 변경 없음. 분할·gate·lockfile 이미지 버전 관련11개 검사0.36s PASS. 전체77종 Deep Audit를 새로 실행한 것이 아니다.
+
+CI42048409760에서 두 recovery/touch, Canvas continuous, Quick, Targeted는 PASS였으나 Pixi continuous의 호스트 첫 contact가364ms 뒤에 와서 FAIL이었다. 단일 소프트웨어 GPU에3개 WebGL 표면을 동시에 올리는 경합은 영상 제외만으로 항상 해소되지 않았다. CI Pixi continuous를 공격자/상대/호스트3개 job으로 분리했다. 각 job은 지정 역할1개를 실제 Pixi, 나머지2개를 Canvas로 렌더하며 세 클라이언트의 네트워크·body/contact/hit·두 번 재경기 assertion을 모두 실행한다. 모든 역할의 Pixi 실행을 필수 matrix/gate가 요구하고 실제 renderer도 assertion으로 확인한다. 기본 로컬 실행은 종전대로3개 모두 Pixi이며, 이 경로의 현 게임 코드 소프트웨어 GPU13.28s PASS도 위에 보존했다. 역할 분할은 같은 강제 SwiftShader 조건에서 공격자12.42s/상대13.54s/호스트13.15s PASS. 관련 정책11개0.36s PASS. 게임 코드나 표시 기한은 바꾸지 않았다. 최종 combat8개 및 전체11개 job 결과는 PR에 기록한다.
 
 ## 실기기와 한계
 

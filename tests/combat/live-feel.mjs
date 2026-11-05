@@ -3,13 +3,19 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';
 const renderer=process.argv[2]||'canvas',viewport={width:800,height:520},started=Date.now();
-const h=await auditHarness({renderer,quality:'low',players:1,mode:'team-elim',viewport,studentContext:{hasTouch:true,isMobile:true}});
+const pixiRole=process.env.COMBAT_PIXI_ROLE||'',roles=['attacker','opponent','host'];
+if(pixiRole&&(renderer!=='pixi'||!roles.includes(pixiRole)))throw Error('INVALID_PIXI_ROLE');
+// Default/local execution still renders all three roles with the same engine.
+// CI partitions Pixi roles to avoid three software WebGL surfaces contending
+// for one GPU process. Every run retains all three real clients/assertions.
+const modeFor=role=>pixiRole&&pixiRole!==role?'canvas':renderer;
+const h=await auditHarness({renderer,hostRenderer:modeFor('host'),studentRenderer:modeFor('attacker'),quality:'low',players:1,mode:'team-elim',viewport,studentContext:{hasTouch:true,isMobile:true}});
 const checks=[],metrics=[],videoPages=[];
 const label=process.env.COMBAT_LABEL||'candidate';
 try{
  const ctx=await h.browser.newContext({viewport,hasTouch:true,isMobile:true});h.contexts.push(ctx);await ctx.route(/dropbox/,r=>r.abort());
  const rival=await ctx.newPage();rival.on('pageerror',e=>h.errors.push(e.message));
- await rival.goto(h.url+'/?renderer='+renderer+'&room='+h.room.code);await rival.locator('#br-player-name').fill('Target');await rival.locator('#br-join-btn').click();await rival.locator('#br-student-wait').waitFor();
+ await rival.goto(h.url+'/?renderer='+modeFor('opponent')+'&room='+h.room.code);await rival.locator('#br-player-name').fill('Target');await rival.locator('#br-join-btn').click();await rival.locator('#br-student-wait').waitFor();
  videoPages.push(['attacker',h.student],['opponent',rival],['host',h.host]);
  await h.battle();const pages=[h.student,rival,h.host],w=h.room.world,[a,b]=h.room.students().map(m=>w.byId.get(m.id));
  const steps=[],step=w.brMoveBasicStep;w.brMoveBasicStep=(pos,aim,distance,...rest)=>{
@@ -37,6 +43,7 @@ try{
    };
   });
  }
+ for(const [i,page] of pages.entries())assert.equal(await page.evaluate(()=>!!m.renderer.pixi),modeFor(roles[i])==='pixi','actual renderer for '+roles[i]);
  const toggle=h.host.locator('#br-focus-toggle');await toggle.click();assert.match(await toggle.textContent(),/전투 집중/);await toggle.click();assert.match(await toggle.textContent(),/전체 관전/);
  h.room.safePaused=false;await delay(500);
  for(const [abilityId,kind,family] of [['emoji-013','attack','slash'],['emoji-025','attack','heavy'],['emoji-023','skill','recoil'],['emoji-003','skill','burst'],['emoji-024','skill','orbit'],['emoji-010','skill','field']]){
@@ -76,4 +83,4 @@ try{
  for(const row of resources){assert.equal(row.retained,0,JSON.stringify(resources));assert.equal(row.poses,0);assert.equal(row.contacts,0);}
  checks.push({afterTwoRematches:resources});
  assert.deepEqual(h.errors,[]);console.log(checks);
-}finally{fs.mkdirSync('artifacts/combat',{recursive:true});fs.writeFileSync('artifacts/combat/feel-'+renderer+'-'+label+'.json',JSON.stringify({ms:Date.now()-started,checks,metrics},null,2));if(process.env.COMBAT_VIDEO_DIR){const saves=videoPages.filter(([,page])=>page.video()).map(([role,page])=>page.video().saveAs(process.env.COMBAT_VIDEO_DIR+'/'+role+'.webm'));await Promise.all(h.contexts.map(c=>c.close()));await Promise.all(saves);}await h.close();}
+}finally{fs.mkdirSync('artifacts/combat',{recursive:true});fs.writeFileSync('artifacts/combat/feel-'+renderer+'-'+label+(pixiRole?'-'+pixiRole:'')+'.json',JSON.stringify({ms:Date.now()-started,pixiRole:pixiRole||'all',renderers:roles.map(modeFor),checks,metrics},null,2));if(process.env.COMBAT_VIDEO_DIR){const saves=videoPages.filter(([,page])=>page.video()).map(([role,page])=>page.video().saveAs(process.env.COMBAT_VIDEO_DIR+'/'+role+'.webm'));await Promise.all(h.contexts.map(c=>c.close()));await Promise.all(saves);}await h.close();}

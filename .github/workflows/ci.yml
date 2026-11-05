@@ -85,6 +85,12 @@ jobs:
       matrix:
         renderer: [canvas, pixi]
         suite: [recovery, continuous, touch]
+        exclude:
+          - {renderer: pixi, suite: continuous}
+        include:
+          - {renderer: pixi, suite: continuous, role: attacker}
+          - {renderer: pixi, suite: continuous, role: opponent}
+          - {renderer: pixi, suite: continuous, role: host}
     container: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
@@ -92,10 +98,12 @@ jobs:
         with: {node-version-file: .nvmrc, cache: npm}
       - run: npm ci
       - run: node tests/combat/run.mjs ${{ matrix.renderer }} ${{ matrix.suite }}
+        env:
+          COMBAT_PIXI_ROLE: ${{ matrix.role || '' }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: combat-${{ matrix.renderer }}-${{ matrix.suite }}-${{ github.sha }}
+          name: combat-${{ matrix.renderer }}-${{ matrix.suite }}-${{ matrix.role || 'all' }}-${{ github.sha }}
           path: artifacts/
           retention-days: 30
   required-checks:
