@@ -34,7 +34,7 @@ WebAudio 실제 oscillator 초기 주파수(빠른/보통/강한 근접/강한 �
 
 ## 전후 계측과 영상
 
-동일800×520, low, Edge Canvas, 독립 공격자·상대·호스트의 실제 연속 서버 전투다. 같은 6종·동작·근접 거리로 촬영했다. 계측 및 영상은 `artifacts/combat/feel-canvas-{before,after}.json`, `artifacts/mobile-impact/{before,after}/{attacker,opponent,host}.webm`에 있다. CI는 세 화면을 모두 검증하고, 변경 후 Canvas/Pixi 공격자 영상만 artifact로 보존한다. 세 영상의 동시 GPU readback/인코딩이 검사 자체를 방해하지 않게 한다. 녹화는 무음이다.
+동일800×520, low, Edge Canvas, 독립 공격자·상대·호스트의 실제 연속 서버 전투다. 같은 6종·동작·근접 거리로 촬영했다. 계측 및 영상은 `artifacts/combat/feel-canvas-{before,after}.json`, `artifacts/mobile-impact/{before,after}/{attacker,opponent,host}.webm`에 있다. CI는 세 화면을 모두 검증하고, 변경 후 Canvas 공격자 영상과 두 renderer의3화면 raw metrics를 artifact로 보존한다. Pixi 영상은 하드웨어 가속 로컬 실행의 `artifacts/mobile-impact/pixi-single-video/attacker.webm`에 있다. 소프트웨어 GPU의 readback/인코딩이 검사 자체를 방해하지 않게 CI Pixi에서는 녹화하지 않는다. 녹화는 무음이다.
 
 | 항목 | 전 | 후 |
 |---|---:|---:|
@@ -64,6 +64,8 @@ Canvas recovery는 WebKit의 Ubuntu Azure apt 미러 다운로드가 약40KB/s �
 CI42039701647은 Quick162개/Python11개, Targeted, Canvas recovery, Canvas/Pixi continuous가 PASS였지만 Pixi recovery의 다섯 번째 viewport 이동 확인은 FAIL이었다. 경기장 경계에서 같은 실패 조건을 로컬 재현했다: 시작/종료 x=3122.2, 이동 입력 x=.765, 서버 입력50개 적용, 살아 있는 상태에서 바깥 방향으로 더 이동할 수 없었다. 당시 CI 로그에는 좌표가 없어 그 실행의 경계 도달 여부를 직접 확정하지는 않는다. 터치 fixture만 중앙 방향으로 이동하게 바꾸고, 두 손가락을 모두 누른 동안 서버 이동을 확인한 뒤 공격을 놓는다. 기존의 공격 후 검사에서는 정상 근접 전진이 이동 반대 방향으로 발생할 수도 있었다. 입력·쿨타임·물리·timeout·확대/조준/취소·재경기 assertion은 유지하며, 각 viewport의 시작/종료 좌표·방향·서버 적용 순번을 artifact에 추가했다. 게임 코드는 변경하지 않았다. 해당 Pixi5크기 재검사79.43s PASS; 각 동시 조작 중 실제 이동24.15~33.50, 양방향 입력/공격/스킬/취소/배율/결과·재경기 확인.
 
 ## 실기기와 한계
+
+추가 CI42042188021은 Pixi recovery도 PASS였지만 Pixi continuous의 저격 반동 첫 표시가 FAIL이었다. RAF p95 약383ms, 이벤트 tick2036→첫 eligible tick2100으로 서버 사건이750ms보다 오래되어 의도한 stale 제한에 걸렸다. 연출/사건 유효 시간을 더 늘리지 않았다. 로컬에 SwiftShader를 강제하고 같은800×520/low/3화면/공격자 녹화를 실행하자 접촉 표시 누락을 재현했다(FAIL). 독립 브라우저3개는 첫 동작의 서버 tick이 진행하지 않아 FAIL로 처리하고 변경을 채택하지 않았다. 같은3화면에서 녹화만 제외한 소프트웨어 GPU 검사13.28s는6종·확정 contact/피격·서버 전진12·두 번 재경기 모두 PASS였다. 따라서 `tests/combat/run.mjs`의 Pixi CI 영상 인코딩만 제외한다. 화면/서버 진행/판정/timeout/assertion은 그대로이며, Canvas CI 영상과 로컬 Pixi 영상은 유지한다. 최종 정확한 커밋 상태는 PR을 따른다.
 
 동일 Wi-Fi의 임시 PC 서버/독립 방을 제공했고, 사용자가 **iPhone Chrome**으로 입장해 **“많이 개선됨”**이라고 회신했다. 이는 사용자 보고에 의한 체감 개선이다. 정확한 모델/OS, 확대·멀티터치·회전·새로고침 항목별 결과는 제공되지 않았으므로 개별 실기기 PASS로 표시하지 않는다. iPhone Safari, iPad Safari, Android Chrome 실물 검사는 **NOT_RUN**. 운영체제의 가장자리·홈·접근성 시스템 제스처 전체 차단을 보장하지 않는다.
 
