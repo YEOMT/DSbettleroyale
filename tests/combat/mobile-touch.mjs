@@ -29,7 +29,7 @@ try{
  for(const viewport of [{width:390,height:844},{width:844,height:390},{width:1024,height:768},{width:768,height:1024},{width:768,height:930}]){
   await page.setViewportSize(viewport);await page.waitForFunction(({width,height})=>innerWidth===width&&innerHeight===height,viewport);
   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
-  const before=await metric();
+  const before=await metric();let motion=null;
   const policy=await page.evaluate(()=>{
    const root=document.querySelector('#br-student-battle'),bad=[root,...root.querySelectorAll('*')].filter(e=>getComputedStyle(e).touchAction!=='none').map(e=>e.id||e.tagName);
    const canceled={};for(const name of ['gesturestart','gesturechange','gestureend','touchmove']){const e=new Event(name,{bubbles:true,cancelable:true});root.dispatchEvent(e);canceled[name]=e.defaultPrevented;}
@@ -47,15 +47,22 @@ try{
     for(let n=0;n<4;n++)await page.touchscreen.tap(cx,cy);
    }
    await ready('attack');await ready('skill');const stick=await center('#br-joystick'),attack=await center('#br-attack'),x=p.pos.x;
-   const moving={id:1,x:stick.x+28,y:stick.y},aim={id:2,...attack};
-   await touch('touchStart',[moving]);await page.waitForFunction(()=>m.controls.lastMove?.x>.3);
+   // Repeated rightward holds can reach the fixed arena boundary on slow GPUs.
+   // Move toward the centre; keep native input, actual physics and cooldowns.
+   const direction=x>0?-1:1,moving={id:1,x:stick.x+28*direction,y:stick.y},aim={id:2,...attack};
+   await touch('touchStart',[moving]);await page.waitForFunction(sign=>m.controls.lastMove?.x*sign>.3,direction);
    await touch('touchStart',[moving,aim]);await touch('touchMove',[moving,{...aim,x:aim.x-36}]);
    await page.waitForFunction(()=>m.controls.gestures.get('attack')?.aim.x<-.9&&m.renderer.aimGuide?.dx<-.9);
    const guide=await page.evaluate(()=>({dx:m.renderer.aimGuide.dx,dy:m.renderer.aimGuide.dy}));
+   // Check displacement while both fingers are still held, before the attack's
+   // legitimate melee step can move the actor in the opposite direction.
+   for(let n=0;n<100&&(p.pos.x-x)*direction<=0;n++)await delay(20);
+   motion={from:x,to:p.pos.x,direction,applied:p.lastAppliedSeq};
+   assert.ok((motion.to-motion.from)*direction>0,'authority moved while action pointer held: '+JSON.stringify(motion));
+   assert.ok(await page.evaluate(()=>m.controls.pointer!==null&&m.controls.gestures.has('attack')));
    const fired=p.firedAttackSeq||0;await touch('touchEnd',[{...aim,x:aim.x-36}]);
    await page.waitForFunction(()=>m.controls.pointer!==null&&!m.controls.gestures.has('attack'),null,{timeout:2000});
    await page.waitForFunction(seq=>m.timeline.predicted?.actions.firedAttack>seq,fired);
-   assert.ok(p.pos.x>x,'authority moved while action pointer held');
    assert.ok((await page.evaluate(()=>sentActions.at(-1).rawAim.x))<-.9);
    assert.ok(guide.dx<-.9&&Math.abs(guide.dy)<.01);assert.ok(await page.evaluate(()=>m.controls.pointer!==null));
    // The second pointer can aim a skill while the joystick remains captured.
@@ -69,7 +76,7 @@ try{
    const actions=await page.evaluate(()=>m.controls.actions.attack);
    await touch('touchStart',[moving]);await touch('touchStart',[moving,aim]);await touch('touchCancel',[]);
    assert.equal(await page.evaluate(()=>m.controls.actions.attack),actions);
-   await touch('touchStart',[moving]);await page.waitForFunction(()=>m.controls.lastMove?.x>.3);await touch('touchEnd',[]);
+   await touch('touchStart',[moving]);await page.waitForFunction(sign=>m.controls.lastMove?.x*sign>.3,direction);await touch('touchEnd',[]);
    await ready('attack');await page.locator('#br-attack').tap();await page.waitForFunction(seq=>m.timeline.predicted?.actions.firedAttack>seq,actions);
   }else{
    // WebKit's public Playwright touch API supports native taps, not two fingers.
@@ -77,7 +84,7 @@ try{
    await ready('attack');const seq=p.firedAttackSeq||0;await page.locator('#br-attack').tap();await page.waitForFunction(seq=>m.timeline.predicted?.actions.firedAttack>seq,seq);
   }
   await delay(150);const after=await metric();assert.deepEqual(after,before);
-  checks.push({viewport,policy,scale:after,nativeMultiTouch:!!native});console.log('viewport PASS',viewport);
+  checks.push({viewport,policy,scale:after,nativeMultiTouch:!!native,motion});console.log('viewport PASS',viewport,motion);
  }
  await h.command('END');await page.locator('#br-results').waitFor();await h.command('REMATCH');await page.locator('#br-student-wait').waitFor();
  const restored=await page.evaluate(()=>{const root=document.getElementById('br-student-battle'),e=new Event('gesturestart',{bubbles:true,cancelable:true});root.dispatchEvent(e);return {blocked:e.defaultPrevented,body:getComputedStyle(document.body).overflow,touch:getComputedStyle(document.getElementById('br-student-wait')).touchAction};});

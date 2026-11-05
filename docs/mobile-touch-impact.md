@@ -21,14 +21,14 @@ engine/content/protocol/server, root index.html 및 legacy 파일은 변경하�
 | Quick | PASS | 10.95s, JS 159개 및 경계 검사. 이후 LAN 수정은 관련 8개 0.37s; 최종 커밋 전체 Quick는 CI에서 확인 |
 | CI 분할 정책 | PASS | 4개, 0.28s |
 | Targeted | PASS | 141.20s, 3모드 E2E 29.80s / Canvas 대표 26.36s / Pixi 대표 32.64s / 배치 9.85s / 음향 9.97s / 26명30초 부하 32.58s |
-| Chromium Canvas 다중 터치 | PASS | 77.66s, 실제 CDP 손가락 입력과 서버 동작 확인. 390×844, 844×390, 1024×768, 768×1024, 768×930 |
+| Chromium Canvas 다중 터치 | PASS | 77.66s, CDP 네이티브 터치 자동화와 서버 동작 확인. 390×844, 844×390, 1024×768, 768×1024, 768×930 |
 | WebKit 모바일 크기 | PASS(제한 명시) | 8.35s, 위 5크기 native tap, scoped gesture 취소, 결과·재경기·도감 스크롤. WebKit 자동화 API는 native 두 손가락 pinch를 제공하지 않아 해당 부분 NOT_RUN |
 | 연속 3화면, Canvas 전/후 | PASS | 9.01s / 8.73s. 실제 touch tap, 서버 60/20Hz 계속 진행. 근접2/저격/연발/회오리/장판6종, 실제 painter contact/피격, 두 번 재경기 |
 | 연속 3화면, Pixi | PASS | 11.26s, 같은6종·확정명중·실제 bodies·재경기 정리 |
 | 최종 쌍 빌드 | PASS | 약8.3s(산출물 확인 포함), `v33-1de9a94ae00af46d` |
 | 기존 recovery/조준/카메라/최후반 | CI | 기존 assertion을 유지하고 기존4개 combat job에서 실행. 최종 결과는 PR에 기재 |
 
-Chromium의 전투 중 pinch/빠른 탭/이동+공격+스킬/취소·재획득 후 viewport scale=1, scroll/offset=0. 전투 종료·재경기 후 도감 scrollTop=150, 실제 손가락 확대 scale=5를 확인했다. 같은 브라우저에서 확대가 작동하는 양성 대조까지 확인한 결과다. 물리 기기 인증을 대체하지 않는다.
+Chromium 네이티브 터치 자동화에서 전투 중 pinch/빠른 탭/이동+공격+스킬/취소·재획득 후 viewport scale=1, scroll/offset=0. 전투 종료·재경기 후 도감 scrollTop=150, 확대 scale=5를 확인했다. 같은 브라우저에서 확대가 작동하는 양성 대조까지 확인한 결과다. 물리 기기 인증을 대체하지 않는다.
 
 WebAudio 실제 oscillator 초기 주파수(빠른/보통/강한 근접/강한 기술) 270/190/130/155Hz 및 4개 voice 종료를 확인했다. 실전 화면에서도 근접2/3, 저격3, 보통 기술2 등 발사 가중치와 확정 hit1~4 호출을 기록했다. 물리 스피커에서의 음질·음량 평가는 별도다.
 
@@ -60,6 +60,8 @@ Canvas recovery는 WebKit의 Ubuntu Azure apt 미러 다운로드가 약40KB/s �
 두 번째 CI의 Pixi 연속 검사는 세 화면 동시 녹화 중 호스트 프레임 간격이 약384ms로 늘어나 피격 몸체의 제한된 유효 시간을 넘겨 FAIL이었다. 짧은 연출을 오래 재생하거나 assertion을 완화하지 않고, CI 녹화는 공격자 한 화면으로 제한했다. 상대·호스트의 실제 body/contact painter·재경기 assertion과 viewport는 모두 유지했다.
 
 세 번째 CI에서는 첫 표시가350ms 지연됐을 때 짧은 회오리 몸체(100ms)가 기존 `duration+240ms` 한도를10ms 넘겨 표시되지 않았다. 첫 표시 대기 한도를 종류와 무관하게500ms로 통일하고 서버 사건이750ms보다 오래됐으면 표시하지 않는다. 실제 애니메이션은 원래80~190ms 길이 그대로이고, 한 번 그린 뒤 wall time으로 끝난다. 지연된 첫 eligible tick/old event/life를 재현한 회귀 포함17개0.23s PASS. 이는 입력 지연·추가 관성·공격 수치 변경이 아니다. 최종 쌍 빌드는 위 새 buildId를 사용한다.
+
+CI42039701647은 Quick162개/Python11개, Targeted, Canvas recovery, Canvas/Pixi continuous가 PASS였지만 Pixi recovery의 다섯 번째 viewport 이동 확인은 FAIL이었다. 경기장 경계에서 같은 실패 조건을 로컬 재현했다: 시작/종료 x=3122.2, 이동 입력 x=.765, 서버 입력50개 적용, 살아 있는 상태에서 바깥 방향으로 더 이동할 수 없었다. 당시 CI 로그에는 좌표가 없어 그 실행의 경계 도달 여부를 직접 확정하지는 않는다. 터치 fixture만 중앙 방향으로 이동하게 바꾸고, 두 손가락을 모두 누른 동안 서버 이동을 확인한 뒤 공격을 놓는다. 기존의 공격 후 검사에서는 정상 근접 전진이 이동 반대 방향으로 발생할 수도 있었다. 입력·쿨타임·물리·timeout·확대/조준/취소·재경기 assertion은 유지하며, 각 viewport의 시작/종료 좌표·방향·서버 적용 순번을 artifact에 추가했다. 게임 코드는 변경하지 않았다. 해당 Pixi5크기 재검사79.43s PASS; 각 동시 조작 중 실제 이동24.15~33.50, 양방향 입력/공격/스킬/취소/배율/결과·재경기 확인.
 
 ## 실기기와 한계
 
