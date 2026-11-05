@@ -14,11 +14,13 @@ function run(args,env={}){
 try{
  if(suite==='continuous'){
   run(['tests/combat/live-control.mjs',renderer]);
-  run(['tests/combat/live-feel.mjs',renderer]);
+  run(['tests/combat/live-feel.mjs',renderer],{COMBAT_VIDEO_DIR:`artifacts/mobile-impact/${renderer}`,COMBAT_LABEL:'candidate'});
   if(renderer==='canvas')run(['tests/combat/live-late.mjs','candidate']);
  }else{
   run(['tests/combat/session.mjs',renderer]);
   run(['tests/combat/aim.mjs',renderer]);
+  run(['tests/combat/mobile-touch.mjs',renderer]);
+  if(renderer==='canvas')run(['tests/combat/mobile-touch.mjs','canvas','webkit']);
   if(renderer==='canvas'){run(['tests/combat/origin-contract.mjs']);run(['tests/combat/motion.mjs']);run(['tests/releaseops/audio.mjs']);}
   run(['tests/fidelity-v33-2/all77.mjs',renderer,'balanced'],{FIDELITY_CHARACTERS:'emoji-006,emoji-012,emoji-066,emoji-085,emoji-132'});
  }

@@ -3,12 +3,14 @@ import {createOriginalUI} from './original-ui.js';
 import {QuizClock} from './quiz-clock.js';
 import {actionHud,captureHud} from './battle.js';
 import {AugmentUI} from './augments.js';
+import {bindBattleTouch} from '../input/battle-touch.js';
 import QRCode from 'qrcode';
 import {manifest} from '../../../../packages/content/src/manifest.js';
 const $=id=>document.getElementById(id),text=(id,value)=>{const e=$(id);const next=String(value??'');if(e&&e.textContent!==next)e.textContent=next;},show=(id,visible=true)=>$(id)?.classList.toggle('br-hidden',!visible);
 function button(label,handler,cls='br-btn br-btn-primary'){const e=document.createElement('button');e.type='button';e.className=cls;e.textContent=label;e.onclick=handler;return e;}
 export class AppUI{
  constructor(net,timeline,renderer,controls,audio){Object.assign(this,{net,timeline,renderer,controls,audio});this.quizClock=new QuizClock();this.boundQuiz='';this.offerId='';this.respawnId='';this.room=null;
+  bindBattleTouch($('br-student-battle'));
   this.original=createOriginalUI(renderer.session,id=>this.screen(id));this.original.loadPrefs();try{renderer.focus=localStorage.getItem('dsbr-host-camera')==='combat';}catch{/* Use overview when preferences are unavailable. */}audio.effects=!renderer.session.soundMuted;controls.assist.enabled=renderer.session.aimHelpEnabled;
   this.banner=document.createElement('div');this.banner.className='ws-connection br-hidden';document.body.append(this.banner);this.bind();this.augments=new AugmentUI(net,message=>this.toast(message));
   for(const type of ['room_state','full_state','snapshot','private_state','error','status','ended','event','overload','leaderboard'])net.addEventListener(type,e=>this.receive(type,e.detail));
@@ -78,7 +80,7 @@ export class AppUI{
   if(type==='status'){if(!p.connected){this.renderer.poses.clear();this.controls.neutral(false);this.timeline.history=[];this.timeline.pendingInputs.clear();this.timeline.previews.clear();this.timeline.effects=this.timeline.effects.filter(e=>!e.preview);}this.banner.textContent=p.connected?'':'연결 복구 중 · 서버에서 경기는 계속됩니다';this.banner.classList.toggle('br-hidden',p.connected);if(p.connected&&this.room?.simulationFault)this.receive('error',{code:'SIMULATION_PAUSED'});}
   if(type==='overload'){this.timeline.paused=p.paused;this.audio.pause(p.paused);this.banner.replaceChildren();this.banner.classList.toggle('br-hidden',!p.paused);if(p.paused){this.banner.append('서버 처리 지연으로 안전 일시정지되었습니다. ');if(this.room?.self.role==='host')this.banner.append(button('계속',()=>this.run(()=>this.net.command('CONTINUE'))));}}
  }
- screen(id){const battle=id==='br-student-battle',host=battle&&this.room?.self.role==='host';document.querySelectorAll('.br-screen').forEach(e=>e.classList.add('br-hidden'));show('br-student-battle',battle&&!host);show('game-screen',host);show('br-host-live',host);show(id,!host);show('br-app',!battle);if(battle){const parent=host?$('canvas-wrapper'):$('br-student-battle');if(this.renderer.canvas.parentElement!==parent)parent.prepend(this.renderer.canvas);}}
+ screen(id){const battle=id==='br-student-battle',host=battle&&this.room?.self.role==='host';const bannerParent=battle&&!host?$('br-student-battle'):document.body;if(this.banner.parentElement!==bannerParent)bannerParent.append(this.banner);document.querySelectorAll('.br-screen').forEach(e=>e.classList.add('br-hidden'));show('br-student-battle',battle&&!host);show('game-screen',host);show('br-host-live',host);show(id,!host);show('br-app',!battle);if(battle){const parent=host?$('canvas-wrapper'):$('br-student-battle');if(this.renderer.canvas.parentElement!==parent)parent.prepend(this.renderer.canvas);}}
 
  renderRoom(room){
   const changed=!this.room||this.room.phase!==room.phase||this.room.matchId!==room.matchId;const oldQuality=this.room?.config.graphicsPreset;this.room=room;this.roomAt=performance.now();this.quizClock.accept(room);this.audio.sync(room);if(oldQuality!==room.config.graphicsPreset)this.renderer.resize();

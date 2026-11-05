@@ -23,7 +23,7 @@ export class Renderer{
   await hostAssetsReady;
   if(new URLSearchParams(location.search).get('renderer')!=='canvas')try{this.app=new Application();await this.app.init({canvas:this.canvas,width:innerWidth,height:innerHeight,background:'#07101d',antialias:this.paint.brGraphicsProfile().antialias,resolution:this.scene.resolution(innerWidth,innerHeight,this.paint.brGraphicsProfile().dpr),autoDensity:true,autoStart:false});this.world=new Container();this.g=new Graphics();this.world.addChild(this.g);this.fg=new Graphics();this.world.addChild(this.fg);this.app.stage.addChild(this.world);this.screen=new Graphics();this.app.stage.addChild(this.screen);this.pixi=true;}catch(error){console.warn('Canvas fallback:',error.message);this.useCanvas(error);}
   if(this.pixi)this.canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();this.useCanvas(new Error('WEBGL_CONTEXT_LOST'));this.resize();},{once:true});
-  if(!this.pixi)this.ctx=this.canvas.getContext('2d');this.resize();addEventListener('resize',()=>this.resize());requestAnimationFrame(t=>this.frame(t));
+  if(!this.pixi)this.ctx=this.canvas.getContext('2d');this.resize();addEventListener('resize',()=>this.resize());visualViewport?.addEventListener('resize',()=>this.resize());requestAnimationFrame(t=>this.frame(t));
  }
  useCanvas(error){
   const old=this.canvas,fresh=old.cloneNode(false);old.replaceWith(fresh);this.canvas=fresh;this.pixi=false;
@@ -36,7 +36,7 @@ export class Renderer{
  glyph(emoji,x,y,r,key,squash=0,alpha=1){this.image(this.paint.brGetEmojiSprite(emoji),x,y,r,key,0,alpha,squash);}
  actorBody(source,a,x,y,rad,key,zoom,now,alpha=1,hit=0){
   const pose=this.poses.sample(a,zoom,this.poseTick,now,this.session.reducedMotion,this.session.roomMeta?.graphicsPreset==='low');
-  const squash=this.session.reducedMotion?0:Math.max(hit,pose?.squash||0);
+  const squash=this.session.reducedMotion?0:hit>0?Math.max(hit,pose?.squash||0):pose?.squash||0;
   if(!this.pixi&&!pose&&!squash&&alpha===1){this.ctx.drawImage(source,x-rad,y-rad,2*rad,2*rad);return;}
   this.image(source,x+(pose?.x||0),y+(pose?.y||0),rad,key,pose?.rotation||0,alpha,squash);
  }

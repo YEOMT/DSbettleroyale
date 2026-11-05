@@ -59,7 +59,7 @@ export class Controls{
   aim??=gesture?this.gestureAim(kind,gesture):mouse?.direction||(kind==='attack'?this.rememberMove():this.aim);
   const profile=self.aimProfiles?.[kind];power??=gesture?.power??this.cursorPower(profile,mouse);
   const cooldown=kind==='attack'?self.basicCooldown:self.cooldown,now=performance.now();if((cooldown>0&&!(kind==='skill'&&self.rw?.recast))||now-(this.lastFire[kind]??-Infinity)<100)return;
-  this.aim=aim;const helped=this.assist.resolve(kind,aim,power,tap);this.lastFire[kind]=now;const seq=++this.actions[kind];this.timeline.preview(kind,seq,helped.aim,power);this.sounds.set(kind,{life:self.lifeSeq,seq,expires:now+2200,onShot:kind==='skill'&&poseFamily(self.abilityId,kind)==='recoil',sound:kind==='skill'?'skill':self.visualProfiles?.attack?.close?'melee':'shoot'});const sent=this.lastAction={kind,seq,life:self.lifeSeq,epoch:this.net.scope.connectionEpoch,state:'sent'};
+  this.aim=aim;const helped=this.assist.resolve(kind,aim,power,tap);this.lastFire[kind]=now;const seq=++this.actions[kind];this.timeline.preview(kind,seq,helped.aim,power);this.sounds.set(kind,{life:self.lifeSeq,seq,expires:now+2200,onShot:kind==='skill'&&poseFamily(self.abilityId,kind)==='recoil',sound:kind==='skill'?'skill':self.visualProfiles?.attack?.close?'melee':'shoot',weight:['heavy','recoil'].includes(poseFamily(self.abilityId,kind))?3:poseFamily(self.abilityId,kind)==='quick'?1:2});const sent=this.lastAction={kind,seq,life:self.lifeSeq,epoch:this.net.scope.connectionEpoch,state:'sent'};
   this.net.command('ACTION',{kind,seq,...helped,aimPower:power,castId:kind==='skill'?self.rw?.recast?.id||'':''}).then(()=>{sent.state='queued';}).catch(error=>{
    sent.state='rejected';sent.reason=error.message;if(this.sounds.get(kind)?.seq===seq)this.sounds.delete(kind);
    if(sent.life===this.net.lifeSeq&&sent.epoch===this.net.scope.connectionEpoch)this.timeline.cancelPreview(kind,seq);
@@ -70,7 +70,7 @@ export class Controls{
   const d=e.data,p=this.sounds.get(d.actionKind);
   if(!p?.onShot||d.owner!==this.timeline.predicted?.id||p.seq!==d.actionSeq||p.life!==d.life)return;
   this.sounds.delete(d.actionKind);
-  if(!document.hidden&&performance.now()<p.expires)this.audio?.action(p.sound);
+  if(!document.hidden&&performance.now()<p.expires)this.audio?.action(p.sound,p.weight);
  }
  confirmSounds(self){
   for(const [kind,pending] of this.sounds){
@@ -78,7 +78,7 @@ export class Controls{
    if(self.alive&&self.lifeSeq===pending.life&&performance.now()<pending.expires&&
     ((self.actions?.[kind]||0)<pending.seq||pending.onShot&&fired===pending.seq))continue;
    this.sounds.delete(kind);
-   if(!pending.onShot&&self.alive&&self.lifeSeq===pending.life&&!document.hidden&&fired===pending.seq)this.audio?.action(pending.sound);
+   if(!pending.onShot&&self.alive&&self.lifeSeq===pending.life&&!document.hidden&&fired===pending.seq)this.audio?.action(pending.sound,pending.weight);
   }
  }
  clearBlockedGestures(self){

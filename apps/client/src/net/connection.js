@@ -1,4 +1,5 @@
 import {fingerprint,envelope} from '../../../../packages/protocol/src/index.js';
+import {requestId} from './request-id.js';
 export class Connection extends EventTarget{
  constructor(url){super();this.url=url;this.scope={};this.pending=new Map();this.lifeSeq=0;this.cursor=0;this.token=sessionStorage.getItem('dsbr-resume');this.retry=0;this.stopped=false;this.clock={rtt:0,offset:0,uncertainty:0};}
  emit(type,data){this.dispatchEvent(new CustomEvent(type,{detail:data}));}
@@ -46,7 +47,7 @@ export class Connection extends EventTarget{
  send(type,payload={},scoped=true,requestId){if(this.ws?.readyState!==WebSocket.OPEN)return false;this.ws.send(JSON.stringify(envelope(type,payload,{...(scoped?{...this.scope,lifeSeq:this.lifeSeq}:{}),...(requestId?{requestId}:{})})));return true;}
  command(type,payload={}){
   if(this.restoring)return Promise.reject(Error('경기 상태를 복원하는 중입니다.'));
-  const id=crypto.randomUUID(),scope={...this.scope,lifeSeq:this.lifeSeq};return new Promise((resolve,reject)=>{
+  const id=requestId(),scope={...this.scope,lifeSeq:this.lifeSeq};return new Promise((resolve,reject)=>{
    const p={resolve,reject,retries:0,type,matchId:scope.matchId};const attempt=()=>{if(p.retries++>=3||scope.connectionEpoch!==this.scope.connectionEpoch||scope.matchId!==this.scope.matchId||scope.lifeSeq!==this.lifeSeq){this.pending.delete(id);reject(Error('응답을 확인할 수 없습니다. 현재 상태를 확인하세요.'));return;}if(this.ws?.readyState===1)this.ws.send(JSON.stringify(envelope(type,payload,{...scope,connectionEpoch:this.scope.connectionEpoch,requestId:id})));p.timer=setTimeout(attempt,1500);};this.pending.set(id,p);attempt();
   });
  }

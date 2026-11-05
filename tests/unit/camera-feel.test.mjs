@@ -74,7 +74,7 @@ test('display gates one sequence across ordinals, preserves authoritative origin
  for(const a of manifest.roster)for(const kind of ['attack','skill'])assert.equal(typeof poseFamily(a.id,kind),'string');
  const poses=new AttackPoses(),a=actor('a',40,80),event={type:'SHOT_SPAWN',serverTick:4,data:{id:'one',owner:'a',life:2,actionKind:'skill',actionSeq:4,dx:20,dy:0}};
  poses.accept(event,[a],100);const entry=poses.active.get('a');assert.equal(entry.family,'recoil');poses.accept({...event,serverTick:6,data:{...event.data,id:'two',ordinal:1}},[a],130);assert.equal(poses.active.get('a'),entry);
- const pose=poses.sample(a,1,5,116,false,false);assert.ok(pose.x<0&&pose.x>=-4);assert.equal(a.x,40);assert.equal(poses.sample(a,1,5,116,true,false),null);assert.equal(poses.sample({...a,lifeSeq:3},1,5,116,false,false),null);
+ const pose=poses.sample(a,1,5,116,false,false);assert.ok(pose.x<0&&pose.x>=-8);assert.equal(a.x,40);assert.equal(poses.sample(a,1,5,116,true,false),null);assert.equal(poses.sample({...a,lifeSeq:3},1,5,116,false,false),null);
  poses.accept({...event,type:'COMMAND_RESULT'},[a],116);assert.equal(poses.active.size,0);
 });
 

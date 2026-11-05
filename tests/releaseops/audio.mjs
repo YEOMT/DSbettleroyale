@@ -19,5 +19,13 @@ try{
   }finally{c?.stop();window.Audio=OriginalAudio;if(stored===null)localStorage.removeItem('br_bgm_host_v1');else localStorage.setItem('br_bgm_host_v1',stored);}
  });
  assert.equal(result.volume,37);for(const key of ['muted','enabled','blocked','retryKeptEnabled','recovered'])assert.equal(result[key],true,key);assert.equal(result.error,'NotAllowedError');assert.deepEqual(result.stages,['ready','start','final','results','ready']);
+ const synth=await h.student.evaluate(async()=>{
+  const m=await import('/src/main.js');m.audio.controller.ensure();const s=m.renderer.session,ac=s.audioCtx;await ac.resume();
+  const create=ac.createOscillator.bind(ac),muted=s.soundMuted,tones=[];let ended=0;s.soundMuted=false;
+  ac.createOscillator=()=>{const o=create(),set=o.frequency.setValueAtTime.bind(o.frequency);o.frequency.setValueAtTime=(v,t)=>{tones.push(v);return set(v,t);};o.addEventListener('ended',()=>ended++);return o;};
+  try{for(const level of [1,2,3])m.audio.controller.sfx('melee',level);m.audio.controller.sfx('skill',3);await new Promise(r=>setTimeout(r,240));return {tones,ended};}
+  finally{ac.createOscillator=create;s.soundMuted=muted;}
+ });
+ assert.deepEqual(synth.tones,[270,190,130,155]);assert.equal(synth.ended,4,'short action voices must end');
  await h.command('END');await h.command('REMATCH');assert.deepEqual(h.errors,[]);
 }finally{await h.close();}
