@@ -11,9 +11,9 @@ export async function auditHarness({players=20,mode='solo',renderer='canvas',qua
  const url='http://127.0.0.1:'+vite.httpServer.address().port;app.config.origins.push(url);
  const browser=await (browserEngine==='webkit'?webkit:chromium).launch({headless:true,args:browserArgs,...(browserEngine==='chromium'&&process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{})}),contexts=[],errors=[],clients=[];
  const video=process.env.COMBAT_VIDEO_DIR?{recordVideo:{dir:process.env.COMBAT_VIDEO_DIR,size:viewport}}:{};
- async function page(options={}){const context=await browser.newContext({viewport,deviceScaleFactor:1,...video,...options});if(!audio)await context.route(/dropbox/,r=>r.abort());contexts.push(context);const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(url+'/?renderer='+renderer);return p;}
+ async function page(options={},record=false){const context=await browser.newContext({viewport,deviceScaleFactor:1,...(record?video:{}),...options});if(!audio)await context.route(/dropbox/,r=>r.abort());contexts.push(context);const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(url+'/?renderer='+renderer);return p;}
  const host=await page();await host.locator('#ws-host-secret').fill('test-host');await host.locator('#br-create-btn').click();await host.locator('#br-host-room').waitFor();const code=(await host.locator('#br-room-code').textContent()).trim(),room=app.manager.rooms.get(code);
- const student=await page(studentContext);await student.locator('#br-join-code').fill(code);await student.locator('#br-player-name').fill('Audit Student');await student.locator('#br-join-btn').click();await student.locator('#br-student-wait').waitFor();
+ const student=await page(studentContext,true);await student.locator('#br-join-code').fill(code);await student.locator('#br-player-name').fill('Audit Student');await student.locator('#br-join-btn').click();await student.locator('#br-student-wait').waitFor();
  for(let i=1;i<players;i++)clients.push(await(await connect(app)).join(code,'Audit '+i));
  const command=(type,payload={})=>host.evaluate(async({type,payload})=>(await import('/src/main.js')).net.command(type,payload),{type,payload});
  await command('CONFIGURE',{mode,teamCount:2,graphicsPreset:quality,quizText:'Audit | Correct | Wrong 1 | Wrong 2 | Wrong 3'});

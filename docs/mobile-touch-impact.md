@@ -34,7 +34,7 @@ WebAudio 실제 oscillator 초기 주파수(빠른/보통/강한 근접/강한 �
 
 ## 전후 계측과 영상
 
-동일800×520, low, Edge Canvas, 독립 공격자·상대·호스트의 실제 연속 서버 전투다. 같은 6종·동작·근접 거리로 촬영했다. 계측 및 영상은 `artifacts/combat/feel-canvas-{before,after}.json`, `artifacts/mobile-impact/{before,after}/{attacker,opponent,host}.webm`에 있다. CI는 변경 후 Canvas/Pixi 세 화면 영상을 artifact로 보존한다. 녹화는 무음이다.
+동일800×520, low, Edge Canvas, 독립 공격자·상대·호스트의 실제 연속 서버 전투다. 같은 6종·동작·근접 거리로 촬영했다. 계측 및 영상은 `artifacts/combat/feel-canvas-{before,after}.json`, `artifacts/mobile-impact/{before,after}/{attacker,opponent,host}.webm`에 있다. CI는 세 화면을 모두 검증하고, 변경 후 Canvas/Pixi 공격자 영상만 artifact로 보존한다. 세 영상의 동시 GPU readback/인코딩이 검사 자체를 방해하지 않게 한다. 녹화는 무음이다.
 
 | 항목 | 전 | 후 |
 |---|---:|---:|
@@ -56,6 +56,8 @@ WebAudio 실제 oscillator 초기 주파수(빠른/보통/강한 근접/강한 �
 같은 실행의 Pixi 모바일 검사는 긴 소프트웨어 GPU 시나리오에서 입력 대기가 끝나지 않아 TIMEOUT이었다. 정상 경기 종료와 입력 대기가 충돌할 수 있는 축소 경기장 대신 기존 점령전의 고정 경기장을 사용하고, 실패 로그에 phase/alive/renderError를 추가했다. 쿨타임·서버 시계·기존 assertion을 그대로 유지한 로컬 Pixi 다중 터치 재검사는79.90s PASS였다.
 
 Canvas recovery는 WebKit의 Ubuntu Azure apt 미러 다운로드가 약40KB/s 수준으로 진행돼10분 job 제한에 TIMEOUT됐고 검사는 시작하지 못했다. 해당 job만 lockfile의 Playwright1.56.1과 같은 공식 `mcr.microsoft.com/playwright:v1.56.1-noble` 사전 설치 이미지로 실행한다. 검사를 생략하거나 timeout 기준을 늘리지 않는다. 최종 정확한 커밋의 전체 결과는 PR에 기록한다.
+
+두 번째 CI의 Pixi 연속 검사는 세 화면 동시 녹화 중 호스트 프레임 간격이 약384ms로 늘어나 피격 몸체의 제한된 유효 시간을 넘겨 FAIL이었다. 짧은 연출을 오래 재생하거나 assertion을 완화하지 않고, CI 녹화는 공격자 한 화면으로 제한했다. 상대·호스트의 실제 body/contact painter·재경기 assertion과 viewport는 모두 유지했다.
 
 ## 실기기와 한계
 

@@ -7,7 +7,7 @@ const h=await auditHarness({renderer,quality:'low',players:1,mode:'team-elim',vi
 const checks=[],metrics=[],videoPages=[];
 const label=process.env.COMBAT_LABEL||'candidate';
 try{
- const ctx=await h.browser.newContext({viewport,hasTouch:true,isMobile:true,...(process.env.COMBAT_VIDEO_DIR?{recordVideo:{dir:process.env.COMBAT_VIDEO_DIR,size:viewport}}:{})});h.contexts.push(ctx);await ctx.route(/dropbox/,r=>r.abort());
+ const ctx=await h.browser.newContext({viewport,hasTouch:true,isMobile:true});h.contexts.push(ctx);await ctx.route(/dropbox/,r=>r.abort());
  const rival=await ctx.newPage();rival.on('pageerror',e=>h.errors.push(e.message));
  await rival.goto(h.url+'/?renderer='+renderer+'&room='+h.room.code);await rival.locator('#br-player-name').fill('Target');await rival.locator('#br-join-btn').click();await rival.locator('#br-student-wait').waitFor();
  videoPages.push(['attacker',h.student],['opponent',rival],['host',h.host]);
@@ -76,4 +76,4 @@ try{
  for(const row of resources){assert.equal(row.retained,0,JSON.stringify(resources));assert.equal(row.poses,0);assert.equal(row.contacts,0);}
  checks.push({afterTwoRematches:resources});
  assert.deepEqual(h.errors,[]);console.log(checks);
-}finally{fs.mkdirSync('artifacts/combat',{recursive:true});fs.writeFileSync('artifacts/combat/feel-'+renderer+'-'+label+'.json',JSON.stringify({ms:Date.now()-started,checks,metrics},null,2));if(process.env.COMBAT_VIDEO_DIR){const saves=videoPages.map(([role,page])=>page.video().saveAs(process.env.COMBAT_VIDEO_DIR+'/'+role+'.webm'));await Promise.all(h.contexts.map(c=>c.close()));await Promise.all(saves);}await h.close();}
+}finally{fs.mkdirSync('artifacts/combat',{recursive:true});fs.writeFileSync('artifacts/combat/feel-'+renderer+'-'+label+'.json',JSON.stringify({ms:Date.now()-started,checks,metrics},null,2));if(process.env.COMBAT_VIDEO_DIR){const saves=videoPages.filter(([,page])=>page.video()).map(([role,page])=>page.video().saveAs(process.env.COMBAT_VIDEO_DIR+'/'+role+'.webm'));await Promise.all(h.contexts.map(c=>c.close()));await Promise.all(saves);}await h.close();}
