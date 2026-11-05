@@ -26,7 +26,7 @@ engine/content/protocol/server, root index.html 및 legacy 파일은 변경하�
 | 연속 3화면, Canvas 전/후 | PASS | 9.01s / 8.73s. 실제 touch tap, 서버 60/20Hz 계속 진행. 근접2/저격/연발/회오리/장판6종, 실제 painter contact/피격, 두 번 재경기 |
 | 연속 3화면, Pixi | PASS | 11.26s, 같은6종·확정명중·실제 bodies·재경기 정리 |
 | 최종 쌍 빌드 | PASS | 약8.3s(산출물 확인 포함), `v33-1de9a94ae00af46d` |
-| 기존 recovery/조준/카메라/최후반 | CI | 기존 assertion을 유지하고 기존4개 combat job에서 실행. 최종 결과는 PR에 기재 |
+| 기존 recovery/조준/카메라/최후반/터치 | CI | 기존 assertion을 유지하고 renderer×recovery/continuous/touch의6개 combat job에서 실행. 최종 결과는 PR에 기재 |
 
 Chromium 네이티브 터치 자동화에서 전투 중 pinch/빠른 탭/이동+공격+스킬/취소·재획득 후 viewport scale=1, scroll/offset=0. 전투 종료·재경기 후 도감 scrollTop=150, 확대 scale=5를 확인했다. 같은 브라우저에서 확대가 작동하는 양성 대조까지 확인한 결과다. 물리 기기 인증을 대체하지 않는다.
 
@@ -63,9 +63,11 @@ Canvas recovery는 WebKit의 Ubuntu Azure apt 미러 다운로드가 약40KB/s �
 
 CI42039701647은 Quick162개/Python11개, Targeted, Canvas recovery, Canvas/Pixi continuous가 PASS였지만 Pixi recovery의 다섯 번째 viewport 이동 확인은 FAIL이었다. 경기장 경계에서 같은 실패 조건을 로컬 재현했다: 시작/종료 x=3122.2, 이동 입력 x=.765, 서버 입력50개 적용, 살아 있는 상태에서 바깥 방향으로 더 이동할 수 없었다. 당시 CI 로그에는 좌표가 없어 그 실행의 경계 도달 여부를 직접 확정하지는 않는다. 터치 fixture만 중앙 방향으로 이동하게 바꾸고, 두 손가락을 모두 누른 동안 서버 이동을 확인한 뒤 공격을 놓는다. 기존의 공격 후 검사에서는 정상 근접 전진이 이동 반대 방향으로 발생할 수도 있었다. 입력·쿨타임·물리·timeout·확대/조준/취소·재경기 assertion은 유지하며, 각 viewport의 시작/종료 좌표·방향·서버 적용 순번을 artifact에 추가했다. 게임 코드는 변경하지 않았다. 해당 Pixi5크기 재검사79.43s PASS; 각 동시 조작 중 실제 이동24.15~33.50, 양방향 입력/공격/스킬/취소/배율/결과·재경기 확인.
 
-## 실기기와 한계
-
 추가 CI42042188021은 Pixi recovery도 PASS였지만 Pixi continuous의 저격 반동 첫 표시가 FAIL이었다. RAF p95 약383ms, 이벤트 tick2036→첫 eligible tick2100으로 서버 사건이750ms보다 오래되어 의도한 stale 제한에 걸렸다. 연출/사건 유효 시간을 더 늘리지 않았다. 로컬에 SwiftShader를 강제하고 같은800×520/low/3화면/공격자 녹화를 실행하자 접촉 표시 누락을 재현했다(FAIL). 독립 브라우저3개는 첫 동작의 서버 tick이 진행하지 않아 FAIL로 처리하고 변경을 채택하지 않았다. 같은3화면에서 녹화만 제외한 소프트웨어 GPU 검사13.28s는6종·확정 contact/피격·서버 전진12·두 번 재경기 모두 PASS였다. 따라서 `tests/combat/run.mjs`의 Pixi CI 영상 인코딩만 제외한다. 화면/서버 진행/판정/timeout/assertion은 그대로이며, Canvas CI 영상과 로컬 Pixi 영상은 유지한다. 최종 정확한 커밋 상태는 PR을 따른다.
+
+CI42044235776 attempt1은 Quick/Targeted/Canvas PASS, Pixi2개 TIMEOUT이었다. continuous는 apt15.8MB 다운로드9분24초(27.9kB/s) 후 job10분 제한에 걸렸다. 같은 커밋의 실패 job만 재실행한 attempt2에서 continuous는98s PASS였지만 recovery는 터치5크기198.30s PASS 후 마지막 대표5종 balanced 검사가 다시 합산540초 제한에 걸렸다. 기능 assertion 실패가 아닌 반복된 합산 시간 제한이므로, 터치를 독립 job으로 옮겨 renderer×3suite=6개로 나눴다. recovery의 세션/조준/대표5종, continuous의 연속 플레이, touch의5크기/Canvas WebKit을 모두 유지하며 필수 gate는6개 전체를 요구한다. combat jobs는 기존 검증된 동일 Playwright1.56.1 공식 이미지로 통일해 apt 지연을 제거했다. 게임 코드/timeout/판정 변경 없음. 분할·gate·lockfile 이미지 버전 관련11개 검사0.36s PASS. 전체77종 Deep Audit를 새로 실행한 것이 아니다.
+
+## 실기기와 한계
 
 동일 Wi-Fi의 임시 PC 서버/독립 방을 제공했고, 사용자가 **iPhone Chrome**으로 입장해 **“많이 개선됨”**이라고 회신했다. 이는 사용자 보고에 의한 체감 개선이다. 정확한 모델/OS, 확대·멀티터치·회전·새로고침 항목별 결과는 제공되지 않았으므로 개별 실기기 PASS로 표시하지 않는다. iPhone Safari, iPad Safari, Android Chrome 실물 검사는 **NOT_RUN**. 운영체제의 가장자리·홈·접근성 시스템 제스처 전체 차단을 보장하지 않는다.
 
@@ -83,6 +85,8 @@ npm run build
 npm run test:targeted
 node tests/combat/run.mjs canvas recovery
 node tests/combat/run.mjs pixi recovery
+node tests/combat/run.mjs canvas touch
+node tests/combat/run.mjs pixi touch
 node tests/combat/run.mjs canvas continuous
 node tests/combat/run.mjs pixi continuous
 npm run dev

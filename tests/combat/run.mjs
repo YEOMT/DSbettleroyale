@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import {spawnSync} from 'node:child_process';
 const renderer=process.argv[2],suite=process.argv[3]||'recovery';
-if(!['recovery','continuous'].includes(suite))throw Error('INVALID_SUITE');
+if(!['recovery','continuous','touch'].includes(suite))throw Error('INVALID_SUITE');
 if(!['canvas','pixi'].includes(renderer))throw Error('INVALID_RENDERER');
 const started=Date.now(),steps=[];
 fs.mkdirSync('artifacts/combat',{recursive:true});
@@ -19,11 +19,12 @@ try{
   // Pixi video remains available by running live-feel with COMBAT_VIDEO_DIR.
   run(['tests/combat/live-feel.mjs',renderer],{COMBAT_VIDEO_DIR:renderer==='canvas'?'artifacts/mobile-impact/canvas':'',COMBAT_LABEL:'candidate'});
   if(renderer==='canvas')run(['tests/combat/live-late.mjs','candidate']);
+ }else if(suite==='touch'){
+  run(['tests/combat/mobile-touch.mjs',renderer]);
+  if(renderer==='canvas')run(['tests/combat/mobile-touch.mjs','canvas','webkit']);
  }else{
   run(['tests/combat/session.mjs',renderer]);
   run(['tests/combat/aim.mjs',renderer]);
-  run(['tests/combat/mobile-touch.mjs',renderer]);
-  if(renderer==='canvas')run(['tests/combat/mobile-touch.mjs','canvas','webkit']);
   if(renderer==='canvas'){run(['tests/combat/origin-contract.mjs']);run(['tests/combat/motion.mjs']);run(['tests/releaseops/audio.mjs']);}
   run(['tests/fidelity-v33-2/all77.mjs',renderer,'balanced'],{FIDELITY_CHARACTERS:'emoji-006,emoji-012,emoji-066,emoji-085,emoji-132'});
  }
