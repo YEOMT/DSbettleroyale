@@ -27,5 +27,5 @@ export class GameAudio{
   if(d.kind==='elimination'&&own)this.controller.sfx('elimination',true);
 
  }
- action(kind){if(!this.effects)return;this.controller.ensure();this.controller.sfx(kind,false);}
+ action(kind,weight=2){if(!this.effects)return;this.controller.ensure();this.controller.sfx(kind,weight);}
 }

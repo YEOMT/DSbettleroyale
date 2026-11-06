@@ -186,9 +186,19 @@ __visualScope.brPaintAttack = function brPaintAttack(p,r,alpha,zoom=1) {
             const z=Math.max(.18,zoom),line=2/z,angle=Math.atan2(dy,dx),ex=x+dx*length,ey=y+dy*length;
             if(type==='hit'&&geo.shape==='contact'){
                 const level=geo.periodic?1:Math.max(1,Math.min(4,Math.round(Number(r[12])||1))),shield=Number(geo.absorbed||0)>0,col=shield?'#67e8f9':color;
-                const span=[0,10,18,28,38][level],a=alpha*alpha,px=-dy,py=dx;
+                const span=[0,10,18,28,38][level],a=alpha*alpha,px=-dy,py=dx,style=String(r[10]||'');
                 // Impact primitives show contact only; these rings never represent damage range.
                 if(level===1){p.circle(x,y,2.5/z,'#ffffff',a*.85);p.line(x-dx*span/z,y-dy*span/z,x,y,col,a*.8,1.8/z);if(shield)p.circle(x,y,6/z,col,a*.7,1/z);return true;}
+                // One silhouette per confirmed contact, shared by low/Canvas/Pixi.
+                // Slash/claw leaves a sharp cut; heavy melee compresses a crescent;
+                // deliberate ranged hits retain the narrow incoming direction.
+                if(/slash|scissor|claw|soul/.test(style)){
+                    p.line(x-dx*span*.4/z-px*span*.65/z,y-dy*span*.4/z-py*span*.65/z,x+dx*span*.4/z+px*span*.65/z,y+dy*span*.4/z+py*span*.65/z,'#ffffff',a,3/z);
+                }else if(/hammer|punch|smash|heavy/.test(style)||geo.feel==='melee'){
+                    p.arc(x-dx*span*.2/z,y-dy*span*.2/z,span*(.4+.2*(1-alpha))/z,angle-.95,angle+.95,col,a*.9,3/z);
+                }else if(level>=3){
+                    p.line(x-dx*span*1.15/z,y-dy*span*1.15/z,x,y,'#ffffff',a*.85,2/z);
+                }
                 p.line(x-dx*span/z,y-dy*span/z,x+dx*span*.35/z,y+dy*span*.35/z,col,a,Math.max(2,level+1)/z,'round');
                 p.line(x-px*span*.48/z,y-py*span*.48/z,x+px*span*.48/z,y+py*span*.48/z,'#ffffff',a,Math.max(1.5,level*.75)/z);
                 p.circle(x,y,(span*.35+span*.65*(1-alpha))/z,col,a*.72,(level>=3?2.5:1.5)/z);

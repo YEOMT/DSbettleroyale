@@ -23,7 +23,7 @@ export class Renderer{
   await hostAssetsReady;
   if(new URLSearchParams(location.search).get('renderer')!=='canvas')try{this.app=new Application();await this.app.init({canvas:this.canvas,width:innerWidth,height:innerHeight,background:'#07101d',antialias:this.paint.brGraphicsProfile().antialias,resolution:this.scene.resolution(innerWidth,innerHeight,this.paint.brGraphicsProfile().dpr),autoDensity:true,autoStart:false});this.world=new Container();this.g=new Graphics();this.world.addChild(this.g);this.fg=new Graphics();this.world.addChild(this.fg);this.app.stage.addChild(this.world);this.screen=new Graphics();this.app.stage.addChild(this.screen);this.pixi=true;}catch(error){console.warn('Canvas fallback:',error.message);this.useCanvas(error);}
   if(this.pixi)this.canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();this.useCanvas(new Error('WEBGL_CONTEXT_LOST'));this.resize();},{once:true});
-  if(!this.pixi)this.ctx=this.canvas.getContext('2d');this.resize();addEventListener('resize',()=>this.resize());requestAnimationFrame(t=>this.frame(t));
+  if(!this.pixi)this.ctx=this.canvas.getContext('2d');this.resize();addEventListener('resize',()=>this.resize());visualViewport?.addEventListener('resize',()=>this.resize());requestAnimationFrame(t=>this.frame(t));
  }
  useCanvas(error){
   const old=this.canvas,fresh=old.cloneNode(false);old.replaceWith(fresh);this.canvas=fresh;this.pixi=false;
@@ -36,7 +36,7 @@ export class Renderer{
  glyph(emoji,x,y,r,key,squash=0,alpha=1){this.image(this.paint.brGetEmojiSprite(emoji),x,y,r,key,0,alpha,squash);}
  actorBody(source,a,x,y,rad,key,zoom,now,alpha=1,hit=0){
   const pose=this.poses.sample(a,zoom,this.poseTick,now,this.session.reducedMotion,this.session.roomMeta?.graphicsPreset==='low');
-  const squash=this.session.reducedMotion?0:Math.max(hit,pose?.squash||0);
+  const squash=this.session.reducedMotion?0:hit>0?Math.max(hit,pose?.squash||0):pose?.squash||0;
   if(!this.pixi&&!pose&&!squash&&alpha===1){this.ctx.drawImage(source,x-rad,y-rad,2*rad,2*rad);return;}
   this.image(source,x+(pose?.x||0),y+(pose?.y||0),rad,key,pose?.rotation||0,alpha,squash);
  }
@@ -135,7 +135,7 @@ export class Renderer{
    this.name(a,a.x,a.y-a.radius-26/zoom,zoom,a.id===self?.id);this.level(a,a.x,a.y-a.radius-(a.stunned||a.rw?.capture?70:52)/zoom,zoom,now);
    this.paint.brPaintReworkStatus(p,a.x,a.y,a.radius,zoom,a.rw,a.statusTick??view.renderTick,a.maxHp);
   }
-  for(const fx of view.effects){const age=view.renderTick-fx.tick,alpha=Math.max(0,1-age/Math.max(6,effectLife(fx)*.06));const row=['',fx.kind,fx.x,fx.y,fx.dx,fx.dy,fx.size,fx.color,fx.amount,0,fx.style,0,fx.impactLevel,fx.geometry];if(!this.paint.brPaintAttack(foreground,row,alpha,zoom)){if(this.pixi)drawFallback(this,foreground,fx,alpha,zoom);else this.canvasFx(this.ctx,row,age/0.06,effectLife(fx),zoom);}}
+  for(const fx of view.effects){const age=view.renderTick-(fx.displayTick??fx.tick),alpha=Math.max(0,1-age/Math.max(6,effectLife(fx)*.06));const row=['',fx.kind,fx.x,fx.y,fx.dx,fx.dy,fx.size,fx.color,fx.amount,0,fx.style,0,fx.impactLevel,fx.geometry];if(!this.paint.brPaintAttack(foreground,row,alpha,zoom)){if(this.pixi)drawFallback(this,foreground,fx,alpha,zoom);else this.canvasFx(this.ctx,row,age/0.06,effectLife(fx),zoom);}}
   if(this.teacher&&!this.pixi&&pose.lod!=='performance'&&!view.capture)hostEffects(this.ctx,view.hostEffects,'over');
   if(!view.capture&&view.ring){const ring={...view.ring,calibrated:true,running:!this.timeline.paused,stale:now-(this.timeline.samples.at(-1)?.at||now)>750};this.scene.boundary(foreground,ring,zoom);this.scene.preview(foreground,ring,zoom);if(self&&!this.teacher){const displaySelf={...self,row:{7:self.alive}};this.scene.self(foreground,displaySelf,ring,zoom);this.scene.ringHud(displaySelf,{_ring:ring},now);}}
   if(!this.teacher&&self?.alive)this.objectives.draw(map.captureMap,view.capture,this.cam,w,h,zoom,this.paint.brTeamKillColor);else this.objectives.hide();

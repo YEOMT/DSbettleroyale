@@ -32,7 +32,7 @@ export class Timeline{
  predict(input){if(!this.predicted)return;this.history.push(input);if(this.history.length>120)this.history.shift();this.predicted=predictMovement(this.kernel,this.predicted,input,this.collisionWalls(),this.static);}
  preview(kind,seq,aim,power=1){const self=this.predicted;if(!self)return;const now=performance.now();this.pendingInputs.set(kind+':'+seq,{kind,seq,until:now+3000});for(const q of previewShots(self,kind,seq,aim,now,power))this.previews.set(shotKey(q),q);const cue=previewCue(self,kind,seq,aim,this.renderTick);if(cue)this.effects.push(cue);}
  cancelPreview(kind,seq){this.pendingInputs.delete(kind+':'+seq);for(const [id,q]of this.previews)if(q.actionKind===kind&&q.actionSeq===seq)this.previews.delete(id);this.effects=this.effects.filter(f=>!f.preview||f.actionKind!==kind||f.actionSeq!==seq);}
- event(e){const d=e.data;if(e.type==='SHOT_SPAWN'){this.spawns.set(d.id,{...d,tick:e.serverTick,seenInSnapshot:false});}else if(e.type==='SHOT_END')this.terminals.set(d.id,{...d,tick:e.serverTick});else if(e.type==='FX'){if(d.sourceId===this.predicted?.id&&d.geometry?.seq)this.effects=this.effects.filter(f=>!f.preview||f.actionKind!==d.geometry.kind||f.actionSeq!==d.geometry.seq);this.effects.push({...d,id:e.eventId,tick:e.serverTick});}if(this.effects.length>300)this.effects.splice(0,this.effects.length-300);for(const map of [this.terminals,this.spawns])while(map.size>2048)map.delete(map.keys().next().value);}
+ event(e,now=performance.now()){const d=e.data;if(e.type==='SHOT_SPAWN'){this.spawns.set(d.id,{...d,tick:e.serverTick,seenInSnapshot:false});}else if(e.type==='SHOT_END')this.terminals.set(d.id,{...d,tick:e.serverTick});else if(e.type==='FX'){if(d.sourceId===this.predicted?.id&&d.geometry?.seq)this.effects=this.effects.filter(f=>!f.preview||f.actionKind!==d.geometry.kind||f.actionSeq!==d.geometry.seq);this.effects.push({...d,id:e.eventId,tick:e.serverTick,receivedAt:now});}if(this.effects.length>300)this.effects.splice(0,this.effects.length-300);for(const map of [this.terminals,this.spawns])while(map.size>2048)map.delete(map.keys().next().value);}
  frame(now=performance.now()){
   const last=this.samples.at(-1);if(!last)return null;
   this.renderTick=Math.max(this.renderTick,last.state.serverTick+Math.min(150,now-last.at)*.06-4.5);
@@ -58,6 +58,15 @@ export class Timeline{
   for(const [id,end] of this.terminals)if(this.renderTick-end.tick>30)this.terminals.delete(id);
   const handed=new Set(shots.filter(q=>['projectile','hook','lob','bomb'].includes(q.kind)).map(shotKey));
   for(const [id,q]of this.previews){const ended=[...this.terminals.values()].some(e=>shotKey(e)===id);if(handed.has(id)||ended||now>q.expires){this.previews.delete(id);continue;}if(now<q.bornAt)continue;const ticks=Math.min((now-q.bornAt)*.06,q.rangeRemaining/Math.max(1,Math.hypot(q.dx,q.dy)));shots.push({...q,x:q.x+q.dx*ticks,y:q.y+q.dy*ticks});}
-  this.effects=this.effects.filter(e=>this.renderTick-e.tick<effectLife(e)*.06&&actors.every(a=>(a.id!==e.targetId||e.geometry?.targetLife==null||a.lifeSeq===e.geometry.targetLife)&&(a.id!==e.sourceId||e.geometry?.lifeSeq==null||a.lifeSeq===e.geometry.lifeSeq)));return {...right.state,actors,shots,renderTick:this.renderTick,effects:this.effects.filter(e=>e.tick<=this.renderTick).concat(residuals)};
+  this.effects=this.effects.filter(e=>{
+   if(!actors.every(a=>(a.id!==e.targetId||e.geometry?.targetLife==null||a.lifeSeq===e.geometry.targetLife)&&(a.id!==e.sourceId||e.geometry?.lifeSeq==null||a.lifeSeq===e.geometry.lifeSeq)))return false;
+   // A busy first paint must not discard a newly received confirmed contact.
+   // Only its display clock is adjusted, once; server tick/position and all
+   // attack/warning timings remain authoritative. Old/replayed FX never renew.
+   if(e.kind==='hit'&&e.geometry?.confirmed&&!e.geometry.periodic&&e.firstVisibleAt==null&&e.tick<=this.renderTick&&this.renderTick-e.tick<=45&&now-e.receivedAt<=240){
+    e.firstVisibleAt=now;e.displayTick=Math.max(e.tick,this.renderTick-2);
+   }
+   return this.renderTick-(e.displayTick??e.tick)<effectLife(e)*.06&&(e.firstVisibleAt==null||now-e.firstVisibleAt<effectLife(e));
+  });return {...right.state,actors,shots,renderTick:this.renderTick,effects:this.effects.filter(e=>e.tick<=this.renderTick).concat(residuals)};
  }
 }

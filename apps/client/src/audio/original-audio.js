@@ -176,12 +176,12 @@ function brPlaySfx(kind,weight) {
             // Bound synth voices before allocating any AudioNodes. BGM uses separate media elements.
             if(impact&&now-Number(BRMP.lastImpactAudioTime??-10)<(level===1?.095:.045))return;
             if(impact)BRMP.lastImpactAudioTime=now;
-            const span=impact?profile.soundMs/1000:heavy?.16:.10,master=ac.createGain();master.gain.setValueAtTime(.0001,now);
-            master.gain.exponentialRampToValueAtTime(impact?profile.volume:heavy?.12:.08,now+.004);master.gain.exponentialRampToValueAtTime(.0001,now+span);master.connect(ac.destination);
+            const span=impact?profile.soundMs/1000:heavy?.145:level===1?.065:.10,master=ac.createGain();master.gain.setValueAtTime(.0001,now);
+            master.gain.exponentialRampToValueAtTime(impact?profile.volume:heavy?.12:level===1?.055:.08,now+.004);master.gain.exponentialRampToValueAtTime(.0001,now+span);master.connect(ac.destination);
             const osc=ac.createOscillator(),gain=ac.createGain();osc.connect(gain);gain.connect(master);
             const tone=kind==='hit'?1.12:kind==='hurt'?.85:1;
-            const start=kind==='shield'?980:impact?profile.frequency*tone:kind==='elimination'?420:kind==='skill'?310:kind==='melee'?190:390;
-            const end=kind==='shield'?580:impact?profile.endFrequency*tone:kind==='elimination'?680:kind==='skill'?105:kind==='melee'?78:175;
+            const start=kind==='shield'?980:impact?profile.frequency*tone:kind==='elimination'?420:kind==='skill'?(heavy?155:310):kind==='melee'?(heavy?130:level===1?270:190):390;
+            const end=kind==='shield'?580:impact?profile.endFrequency*tone:kind==='elimination'?680:kind==='skill'?(heavy?60:105):kind==='melee'?(heavy?55:level===1?110:78):175;
             osc.type=kind==='shield'?'sine':impact?(level===1?'sine':'triangle'):kind==='shoot'?'square':kind==='skill'?'sawtooth':'triangle';
             osc.frequency.setValueAtTime(start,now);osc.frequency.exponentialRampToValueAtTime(end,now+span*.8);
             gain.gain.setValueAtTime(.8,now);gain.gain.exponentialRampToValueAtTime(.001,now+span*.9);

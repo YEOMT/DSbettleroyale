@@ -7,3 +7,8 @@
 /* Reserve the original 126px capture viewport; keep music clear of team scores. */
 .br-capture-host #hud-overlay{display:none}.br-capture-host #br-music-controls{top:auto;bottom:calc(12px + env(safe-area-inset-bottom));right:12px}
 body.br-capture-host #br-focus-toggle:disabled{display:inline-block;cursor:default}
+
+/* Only the student battlefield owns gestures. Lobby/settings/encyclopedia
+   retain native scroll and pinch zoom; the viewport meta stays unrestricted. */
+#br-student-battle,#br-student-battle *{touch-action:none;overscroll-behavior:none}
+#br-student-battle{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
