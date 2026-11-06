@@ -27,7 +27,11 @@ export async function tabletLoad({players=30,seconds=605,mode='solo',label='befo
  const command=(type,payload={})=>host.evaluate(async({type,payload})=>(await import('/src/main.js')).net.command(type,payload),{type,payload});
  async function begin(){
   await command('CONFIGURE',{mode,teamCount:4,matchSeconds:360,graphicsPreset:quality,quizText:'Synthetic | Correct | Wrong one | Wrong two | Wrong three'});
-  await rpc('fixture-seed',{round:++round});await command('START_QUIZ');await command('BEGIN_DRAFT');await rpc('fixture-stability-draft');await command('START_BATTLE');
+  await rpc('fixture-seed',{round:++round});
+  // The private seed change sends ROOM_STATE asynchronously. Wait for each
+  // browser to accept its new scope before issuing the next normal command.
+  for(const p of pages)await p.page.waitForFunction(async match=>(await import('/src/main.js')).net.scope.matchId===match,'stability-fixture-'+round);
+  await command('START_QUIZ');await command('BEGIN_DRAFT');await rpc('fixture-stability-draft');await command('START_BATTLE');
   await rpc('fixture-stability',{alive:startAlive,place:true,dense});for(const c of clients){c.seq=0;c.action=0;}
   for(const p of pages)await p.page.evaluate(dense=>{tabletProbe.dense=dense;},dense);
   for(const p of pages)await p.page.waitForFunction(async()=>{const a=await import('/src/main.js');return a.timeline.samples.length&&a.renderer.enabled;});
