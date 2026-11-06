@@ -9,7 +9,8 @@ import {Samples} from '../../apps/server/src/diagnostics/metrics.js';
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverOverload=false,browser=false,out=`artifacts/load-${players}-${seconds}.json`}={}){
  if(!Number.isInteger(players)||players<2||players>30||!Number.isFinite(seconds)||seconds<1)throw Error('INVALID_LOAD_OPTIONS');
- const child=fork(fileURLToPath(new URL('./server.mjs',import.meta.url)),[],{stdio:['ignore','inherit','inherit','ipc'],windowsHide:true,execArgv:[]});
+ const profileDir=process.env.LOAD_CPU_PROFILE;if(profileDir)fs.mkdirSync(profileDir,{recursive:true});
+ const child=fork(fileURLToPath(new URL('./server.mjs',import.meta.url)),[],{stdio:['ignore','inherit','inherit','ipc'],windowsHide:true,execArgv:profileDir?['--cpu-prof','--cpu-prof-interval=10000','--cpu-prof-dir='+path.resolve(profileDir)]:[]});
  const port=await new Promise((resolve,reject)=>{child.once('message',m=>resolve(m.port));child.once('error',reject);});let rpcSeq=0;const rpcs=new Map();
  child.on('message',m=>{const p=rpcs.get(m.id);if(p){rpcs.delete(m.id);clearTimeout(p.timer);m.error?p.reject(Error(m.error)):p.resolve(m.value);}});
  const rpc=(type,args={})=>new Promise((resolve,reject)=>{const id=++rpcSeq,timer=setTimeout(()=>{rpcs.delete(id);reject(Error('IPC_TIMEOUT'));},10000);rpcs.set(id,{resolve,reject,timer});child.send({id,type,...args});});
@@ -31,7 +32,7 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverO
    await rpc('fixture-growth');
    report.rounds++;roundStarted=performance.now();
   }
-  await begin();const started=performance.now(),deadline=started+seconds*1000;let lastSample=started;
+  await begin();const started=performance.now(),deadline=started+seconds*1000;let lastSample=started,lastProgress=started;
   while(performance.now()<deadline){
    const now=performance.now();tick++;
    if(host.room.phase==='RESULTS'){await begin();}
@@ -51,6 +52,7 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverO
     if(tick%60===i%60)c.send('PING',{clientTime:now},false);
    }
    if(now-lastSample>=5000){lastSample=now;const server=await rpc('status');report.samples.push({elapsedMs:now-started,round:report.rounds,server,browser:observer?await observer.sample():undefined,pendingCommands:clients.reduce((n,c)=>n+c.waiters.length,0)});if(server.fault)throw Error(server.fault);if(server.paused){if(recoverOverload){const result=await host.command('CONTINUE');if(!result.accepted)throw Error('CONTINUE_REJECTED');report.overloadRecoveries=(report.overloadRecoveries||0)+1;}else throw Error('SERVER_OVERLOAD_PAUSED');}}
+   if(now-lastProgress>=60000){lastProgress=now;const s=report.samples.at(-1)?.server;console.log(JSON.stringify({elapsedSeconds:Math.round((now-started)/1000),players,rounds:report.rounds,overloads:s?.overloads,stepP95:s?.window?.step.p95,snapshotP95:s?.window?.snapshot.p95,eventLoopMax:s?.window?.eventLoop.max}));}
    await delay(1000/30);
   }
   stopping=true;report.elapsedMs=performance.now()-started;report.server=await rpc('status');report.rtt=report.rtt.report();report.ack=report.ack.report();report.receivedBytes=[host,...clients].reduce((n,c)=>n+(c.receivedBytes||0),0);report.browser=observer?await observer.sample():undefined;report.pass=(!observer||!report.browser.errors.length)&&report.errors.length===0&&report.snapshots>players*seconds*10&&report.server.overloads===0;

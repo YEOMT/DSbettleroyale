@@ -1,5 +1,9 @@
 # Progress
 
+## Student tablet / late-game stability (2026-11-06, in progress)
+
+Started from latest main `0816f1c`, preserving merged PR #7. Added private, bounded load instrumentation and three-surface browser measurements. Candidate 30-connected / 6→5→3-alive combat ran 605s and rematched: PASS, 622.45s total, overload0, browser errors0, cleanup0/0/0. Identical main baseline and remaining natural capture cases are being measured. Extended-health full-30 stress still fails; physical Samsung Android is unavailable. Exact executed checks, rejected experiments and limitations are maintained in [tablet-stability.md](tablet-stability.md). Quick/Targeted/paired build and PR remain pending; no deployment occurred.
+
 ## M0
 
 - Latest main inspected: 1292f87528436e7182dcf066c6b9576d71c1cbed. No later user changes or local edits existed.

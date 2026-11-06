@@ -1,5 +1,6 @@
 import {createWorld,stepWorld,getTeacherState,getVisibleState,getStaticState,FIXED_DT_MS} from '../../../../packages/engine/src/index.js';
 import {snapshotEncoder} from '../ws/snapshot.js';
+import {presentationState} from '../ws/presentation-state.js';
 export function attachSimulation(manager,metrics){
  let stopped=false,timer,last=performance.now();
  manager.startBattle=room=>{
@@ -11,6 +12,7 @@ export function attachSimulation(manager,metrics){
  function sendEvent(room,event){
   if(event.type==='TRACE')return;
   const world=room.world;if(!world)return;
+  const payloadJson=JSON.stringify(event);
   for(const m of room.members.values()){
    if(!m.peer)continue;
    if(m.role!=='host'){
@@ -21,7 +23,7 @@ export function attachSimulation(manager,metrics){
      if(d.owner!==m.id&&d.sourceId!==m.id&&!world.brViewContains(b,d.x,d.y,Math.max(100,d.radius||d.size||0)))continue;
     }
    }
-   m.peer.send('EVENT',event,{reliable:true});
+   m.peer.send('EVENT',event,{reliable:true,payloadJson});
   }
  }
  function pump(){
@@ -31,6 +33,8 @@ export function attachSimulation(manager,metrics){
    if(room.safePaused)continue;
    room.debt+=elapsed;
    if(room.debt>250){room.overloadSince||=now;if(now-room.overloadSince>1000){room.safePaused=true;metrics.overloads++;for(const m of room.members.values())m.peer?.send('OVERLOAD',{paused:true,debtMs:room.debt});continue;}}else room.overloadSince=0;
+   const pumpStart=performance.now(),peers=[];for(const m of room.members.values())if(m.connected&&m.peer){peers.push(m.peer);m.peer.beginBatch();}
+   try{
    let count=0;
    while(room.debt+1e-8>=FIXED_DT_MS&&count<5){
     const start=performance.now();try{stepWorld(room.world);}catch(error){room.safePaused=true;room.lastFault=error.message;for(const m of room.members.values())m.peer?.send('ERROR',{code:'SIMULATION_PAUSED'});manager.changed(room);break;}
@@ -41,15 +45,16 @@ export function attachSimulation(manager,metrics){
    if(now>=room.nextSnapshot&&room.phase==='BATTLE'){
     do{room.nextSnapshot+=50;}while(room.nextSnapshot<=now);
     metrics.snapshotGap.add(now-room.lastSnapshot);room.lastSnapshot=now;const start=performance.now(),teacher=getTeacherState(room.world);room.snapshotSeq++;
-    const encode=snapshotEncoder(teacher,room.snapshotSeq,now);
+    const publicTeacher=presentationState(room.world,teacher),encode=snapshotEncoder(publicTeacher,room.snapshotSeq,now);
     for(const member of room.members.values()){
      if(!member.connected)continue;
-     const view=member.role==='host'?teacher:getVisibleState(room.world,member.id,undefined,teacher);
+     const view=member.role==='host'?publicTeacher:getVisibleState(room.world,member.id,undefined,publicTeacher);
      if(member.peer)member.peer.snapshot(encode(view,member.peer.scope()));
     }
     metrics.snapshotCpu.add(performance.now()-start);
     if(now-(room.lastBoard||0)>=500){room.lastBoard=now;const board=room.world.session.respawnMode?room.world.brTKBuildBoard(false):{players:teacher.actors.map(a=>({id:a.id,name:a.name,team:a.team,kills:a.kills,deaths:a.deaths,rank:0})),teams:[]};for(const m of room.members.values())m.peer?.send('LEADERBOARD',board);}
    }
+   }finally{const sendStart=performance.now();for(const peer of peers)peer.endBatch();metrics.sendCpu.add(performance.now()-sendStart);metrics.pumpCpu.add(performance.now()-pumpStart);metrics.debtMs.add(room.debt);}
   }
   timer=more?setImmediate(pump):setTimeout(pump,4);timer.unref();
  }
