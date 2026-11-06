@@ -1,5 +1,5 @@
 // Display-only functions from the final v32.1 renderer.
-export function createScene(session){const BRMP=session,brEl=id=>document.getElementById(id),brSetText=(e,t)=>{if(e)e.textContent=t;},brCaptureMode=()=>BRMP.roomMeta?.mode==='team-capture';
+export function createScene(session){const BRMP=session,brEl=id=>document.getElementById(id),brSetText=(e,t)=>{if(e&&e.textContent!==t)e.textContent=t;},brCaptureMode=()=>BRMP.roomMeta?.mode==='team-capture';
 function brDrawStudentWall(cc,r) {
             var kind=r[5]||'wall';cc.save();cc.translate(r[0],r[1]);cc.rotate(r[4]||0);cc.lineWidth=3;
             if(kind==='crate') {
@@ -33,7 +33,7 @@ function brRingOutside(x,y,r) {
             return r.radius<=0||Math.hypot(x-r.cx,y-r.cy)>r.radius+1e-7;
         }
 function brUpdateRingHud(self,view,now=performance.now()) {
-            if(brCaptureMode()){brEl('br-zone-status').style.display='none';return;}brEl('br-zone-status').style.display='';
+            const status=brEl('br-zone-status'),display=brCaptureMode()?'none':'';if(status.style.display!==display)status.style.display=display;if(brCaptureMode())return;
             const r=view._ring;if(!r)return;
             const el=brEl('br-zone-status'),arrow=brEl('br-zone-arrow'),alive=!!self?.row?.[7];
             const outside=alive&&brRingOutside(self.x,self.y,r),near=alive&&Math.abs(Math.hypot(self.x-r.cx,self.y-r.cy)-r.radius)<160;
@@ -48,8 +48,8 @@ function brUpdateRingHud(self,view,now=performance.now()) {
             else if(r.startInMs>0){text='위험구역 수축까지 '+Math.ceil(r.startInMs/1000)+'초';}
             else if(r.radius<=r.minRadius+.01){text=r.radius<=0?'안전구역 소멸':'위험구역 경계 고정';}
             else {text='위험구역 수축 중';if(near){kind='warn';detail='경계 주의 · 캐릭터 중심 기준';}}
-            el.className='br-zone-status '+kind;brSetText(brEl('br-zone-text'),text);brSetText(brEl('br-zone-detail'),detail);
-            arrow.hidden=!outside||r.radius<=0;
+            const className='br-zone-status '+kind;if(el.className!==className)el.className=className;brSetText(brEl('br-zone-text'),text);brSetText(brEl('br-zone-detail'),detail);
+            const hidden=!outside||r.radius<=0;if(arrow.hidden!==hidden)arrow.hidden=hidden;
             if(!arrow.hidden)arrow.style.transform='rotate('+(Math.atan2(r.cy-self.y,r.cx-self.x)*180/Math.PI+90)+'deg)';
         }
 function brDrawDangerFill(cc,x,y,radius,worldRadius) {

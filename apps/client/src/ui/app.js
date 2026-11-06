@@ -2,6 +2,7 @@ import {display} from '../../../../packages/content/src/display.js';
 import {createOriginalUI} from './original-ui.js';
 import {QuizClock} from './quiz-clock.js';
 import {actionHud,captureHud} from './battle.js';
+import {writeStyle} from './dom-write.js';
 import {AugmentUI} from './augments.js';
 import {bindBattleTouch} from '../input/battle-touch.js';
 import QRCode from 'qrcode';
@@ -114,8 +115,7 @@ export class AppUI{
  }
  quizFeedback(value,state=''){text('br-quiz-feedback',value);$('br-quiz-feedback').className='br-quiz-feedback'+(state?' '+state:'');}
 
- self(s){if(this.selfState&&this.selfState.lifeSeq!==s.lifeSeq){this.controls.neutral(false);this.controls.lastDirection=this.controls.aim={x:1,y:0};}this.controls.confirmSounds(s);this.controls.clearBlockedGestures(s);this.controls.syncFloor(s.inputFloor);if(s.alive)show('br-death-cause',false);this.selfState=s;this.net.lifeSeq=s.lifeSeq;text('br-battle-self',s.emoji+' '+s.name+' · '+s.tier+'급');text('br-battle-status',`HP ${Math.ceil(s.hp)} / ${Math.round(s.maxHp)}`);$('br-battle-hp').style.width=Math.max(0,s.hp/s.maxHp*100)+'%';
-  text('br-attack-cd',s.basicCooldown>0?(s.basicCooldown/60).toFixed(1):'✓');text('br-skill-cd',s.cooldown>0?(s.cooldown/60).toFixed(1):'✓');
+ self(s){if(this.selfState&&this.selfState.lifeSeq!==s.lifeSeq){this.controls.neutral(false);this.controls.lastDirection=this.controls.aim={x:1,y:0};}this.controls.confirmSounds(s);this.controls.clearBlockedGestures(s);this.controls.syncFloor(s.inputFloor);if(s.alive)show('br-death-cause',false);this.selfState=s;this.net.lifeSeq=s.lifeSeq;text('br-battle-self',s.emoji+' '+s.name+' · '+s.tier+'급');writeStyle($('br-battle-hp'),'width',Math.max(0,s.hp/s.maxHp*100)+'%');
   actionHud(s);this.augments.render(s);
   const q=s.respawn;show('br-tk-quiz',!s.alive&&!!q);show('br-respawn',!s.alive&&!q);if(!s.alive&&q){this.respawnUnlock=performance.now()+Math.max(0,(q.lockUntil||0)-(q.hostAt||0));text('br-tk-progress',q.correct+' / '+q.needed+' CORRECT');text('br-tk-quiz-tokens','🔄 ×'+q.tokens+' · 정답 3개마다 리롤권 +1 (최대 '+manifest.respawn.tokenCap+'개)');text('br-tk-word',q.correct>=q.needed?'다시 전장으로!':q.question?.prompt||'문제를 받는 중…');show('br-tk-choice',q.correct>=3);$('br-tk-reroll').disabled=q.tokens<=0;
    if(this.respawnId!==q.question?.id){this.respawnId=q.question?.id;$('br-tk-options').replaceChildren(...(q.question?.answers||[]).map(a=>button(a.text,()=>this.run(async()=>{this.respawnPending=true;try{await this.net.command('RESPAWN',{kind:'answer',questionId:q.question.id,answerId:a.id});}finally{this.respawnPending=false;}}))));}}

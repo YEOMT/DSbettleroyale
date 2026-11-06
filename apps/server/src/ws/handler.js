@@ -2,11 +2,12 @@ import {createHash,timingSafeEqual} from 'node:crypto';
 import {decodeClient,fingerprint,matchesFingerprint} from '../../../../packages/protocol/src/index.js';
 import {applyCommand,getStaticState,getPrivateSelfState,getTeacherState,getVisibleState} from '../../../../packages/engine/src/index.js';
 import {Peer} from './peer.js';
+import {presentationState} from './presentation-state.js';
 const digest=s=>createHash('sha256').update(s).digest();
 export const secretMatches=(a,b)=>typeof a==='string'&&timingSafeEqual(digest(a),digest(b));
 const fail=code=>{throw Error(code);};
-export function attachConnection(socket,manager,config,metrics){
- const peer=new Peer(socket,config,metrics);
+export function attachConnection(socket,manager,config,metrics,transport){
+ const peer=new Peer(socket,config,metrics,transport);
  const authTimer=setTimeout(()=>{if(!peer.member)peer.close(4001,'AUTH_TIMEOUT');},config.authTimeoutMs);authTimer.unref();
  socket.on('pong',()=>peer.alive=true);
  socket.on('error',()=>{});
@@ -14,7 +15,7 @@ export function attachConnection(socket,manager,config,metrics){
   const world=room.world,self=world?getPrivateSelfState(world,member.id,undefined,true):null;
   let snapshot=null;
   if(world&&room.phase==='BATTLE'){
-   const teacher=getTeacherState(world);
+   const teacher=presentationState(world,getTeacherState(world));
    const view=member.role==='host'?teacher:getVisibleState(world,member.id,undefined,teacher);
    const {self:privateRow,...publicView}=view;
    snapshot={...publicView,snapshotSeq:++room.snapshotSeq,serverNow:performance.now()};

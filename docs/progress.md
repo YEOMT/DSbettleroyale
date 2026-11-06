@@ -1,5 +1,9 @@
 # Progress
 
+## Student tablet / late-game stability (2026-11-06, review candidate)
+
+Started from latest main `0816f1c`, preserving merged PR #7. Cached static rendering, stopped repeated text/HUD writes, cleaned renderer resources and reduced server serialization/socket fan-out while preserving gameplay and exact build pairing. Candidate 30-connected / 6→5→3-alive combat: PASS, 622.45s total,606.40s actual simulation, overload0; identical main: FAIL, four overloads,519.72s simulation. Natural20/26/30 capture each605s and three rounds: PASS, errors0/overload0/cleanup0. Quick169 tests (12.56s), paired build (8.25s), Targeted (126.86s), jitter, actual blocked TCP/resume and live Pixi input/effects/touch regressions passed. Extended-health full-30 stress remains FAIL (one overload); Windows WebKit cadence is poor on both revisions, and physical Samsung Android is unavailable. No all-field-symptoms-resolved or production-ready claim. [tablet-stability.md](tablet-stability.md) and its aggregate evidence distinguish PASS/FAIL/NOT_RUN and exact times; GitHub CI is reported separately by PR checks. No deployment occurred.
+
 ## M0
 
 - Latest main inspected: 1292f87528436e7182dcf066c6b9576d71c1cbed. No later user changes or local edits existed.

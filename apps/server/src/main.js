@@ -47,7 +47,7 @@ export async function createGameServer(overrides={}){
   if(req.url!=='/ws'||!config.origins.includes(req.headers.origin)||peers.size>=512){socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');socket.destroy();return;}
   wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws,req));
  });
- wss.on('connection',socket=>{const peer=attachConnection(socket,manager,config,metrics);peers.add(peer);socket.on('close',()=>peers.delete(peer));});
+ wss.on('connection',(socket,request)=>{const peer=attachConnection(socket,manager,config,metrics,request.socket);peers.add(peer);socket.on('close',()=>peers.delete(peer));});
  const maintenance=setInterval(()=>{manager.sweep();for(const peer of peers)peer.flush();},100);maintenance.unref();
  const heartbeat=setInterval(()=>{for(const peer of peers){if(!peer.alive){peer.socket.terminate();continue;}peer.alive=false;peer.socket.ping();peer.trimEvents();}},15000);heartbeat.unref();
  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(config.port,config.host,resolve);});

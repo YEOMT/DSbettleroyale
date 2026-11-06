@@ -1,5 +1,6 @@
 import {fingerprint,envelope} from '../../../../packages/protocol/src/index.js';
 import {requestId} from './request-id.js';
+import {eventBatchMessages} from '../../../../packages/protocol/src/server-events.js';
 export class Connection extends EventTarget{
  constructor(url){super();this.url=url;this.scope={};this.pending=new Map();this.lifeSeq=0;this.cursor=0;this.token=sessionStorage.getItem('dsbr-resume');this.retry=0;this.stopped=false;this.clock={rtt:0,offset:0,uncertainty:0};}
  emit(type,data){this.dispatchEvent(new CustomEvent(type,{detail:data}));}
@@ -21,6 +22,7 @@ export class Connection extends EventTarget{
   return this.connecting;
  }
  receive(m){
+  const batch=eventBatchMessages(m);if(batch){for(const event of batch)this.receive(event);return;}
   if(m.type==='VERSION_MISMATCH'){this.stopped=true;this.emit('ended','게임 버전이 바뀌었습니다. 새로고침 후 참가하세요.');return;}
   if(m.type==='WELCOME'){this.emit('welcome',m.payload);this.restoring=!!this.token;if(!this.restoring){this.retry=0;this.retryStart=null;this.emit('status',{connected:true});}if(this.token)this.send('RESUME',{token:this.token,cursor:this.cursor},false);this.pingTimer=setInterval(()=>this.send('PING',{clientTime:performance.now()},false),2000);return;}
   if(m.roomInstanceId){if(this.scope.roomInstanceId&&m.roomInstanceId!==this.scope.roomInstanceId&&m.type!=='SESSION')return;
