@@ -45,7 +45,7 @@ export function createWorld(content=manifest,config={},seed='1',initialPlayers=[
  const beginNative=room.brBeginProjectileVisual,endNative=room.brEndProjectileVisual;
  room.brBeginProjectileVisual=(g,p)=>{beginNative(g,p);if(!p._brNetId)p._brNetId='q'+(++g.visualShotSeq);if(!p._wsBorn){p._brBornFrame??=g.frame;p._wsBorn=true;emit(room,'SHOT_SPAWN',nativeShot(room,p));}};
  room.brEndProjectileVisual=(g,p)=>{endNative(g,p);if(p.life<=0&&!p._wsEnded){p._wsEnded=true;emit(room,'SHOT_END',{...nativeShot(room,p),reason:p._endReason||'expired'});}};
- room.entitySpawn=e=>{if(['projectile','hook','lob','bomb','beam','turret','zone','orbit'].includes(e.kind))emit(room,'SHOT_SPAWN',reworkShot(e));};
+ room.entitySpawn=e=>{if(['projectile','hook','lob','bomb','beam','turret','zone','orbit','decoy','grapple','mushroom','poison','ring-wall'].includes(e.kind))emit(room,'SHOT_SPAWN',reworkShot(e));};
  room.entityEnd=(e,reason)=>emit(room,'SHOT_END',{...reworkShot(e),reason});
  const originalFx=room.game.emitStudentFx.bind(room.game);
  room.game.emitStudentFx=(type,pos,data={})=>{originalFx(type,pos,data);emit(room,'FX',{kind:type,x:pos.x,y:pos.y,...data});};
@@ -78,7 +78,7 @@ function nativeShot(world,p){p._brNetId??="q"+(++world.game.visualShotSeq);p._br
  kind:'projectile',type:p.type,x:p.pos.x,y:p.pos.y,dx:p.vel?.x||0,dy:p.vel?.y||0,radius:p.size||8,
  vfx:p.vfx,ownerWarp:p.owner?.warpSeq||0,orbitAngle:p.orbitAngle,faceDir:!!p.faceDir,emoji:p.emoji,color:p.color,style:p.weaponStyle,trailColor:p.trailColor,rotation:p.spinRate?p.spinAngle:p.faceDir?Math.atan2(p.vel.y,p.vel.x):0,spin:p.spinRate,phase:p.returning?'return':'out',trace:p._brTrace||[],remaining:p.life,rangeRemaining:p.rangeRemaining,turn:p._brTurn||0,curved:['BOOMERANG','ORBIT','missile'].includes(p.type)||!!p.wobble,start:p._brBornFrame??world.game.frame,team:p.owner?.team||0,path:p._brPath||[],native:true};}
 function reworkShot(e){return {id:e.id,owner:e.ctx?.ownerId,life:e.ctx?.ownerLifeSeq,actionKind:e.actionKind||e.ctx?.actionKind,actionSeq:e.ctx?.actionSeq,ordinal:e.ordinal??0,
- kind:e.kind,x:e.pos?.x||0,y:e.pos?.y||0,dx:e.dir?.x||0,dy:e.dir?.y||0,speed:e.speed||0,radius:e.radius||8,range:e.range||0,
+ kind:e.kind,...(['decoy','grapple','mushroom','poison','ring-wall'].includes(e.kind)?{hp:e.hp??null,maxHp:e.maxHp??null,name:e.name||'',armAt:e.armFrames!=null?e.start+e.armFrames:null,fx:e.from?.x??null,fy:e.from?.y??null,tx:e.to?.x??null,ty:e.to?.y??null}:{}),x:e.pos?.x||0,y:e.pos?.y||0,dx:e.dir?.x||0,dy:e.dir?.y||0,speed:e.speed||0,radius:e.radius||8,range:e.range||0,
  path:e._brPath||[],curved:!!(e.homing||e.boomerang),turn:e.bounceCount||0,phase:e.phase||null,width:e.width||0,length:e.length??e.range??0,remaining:e.range!=null?Math.max(0,e.range-(e.distance||0)):0,style:'skill',start:e.start,end:e.end,team:e.ctx?.owner?.team||0,emoji:e.displayEmoji||e.emoji,color:e.color};}
 function projectileStates(world){
  const g=world.game;
@@ -136,11 +136,11 @@ export function getPrivateSelfState(world,id,preparedActor,restore=false){
   actions:{attack:p.resolvedAttackSeq||0,skill:p.resolvedSkillSeq||0,firedAttack:p.firedAttackSeq||0,firedSkill:p.firedSkillSeq||0}};
 }
 export function getStaticState(world){const g=world.game;return {revision:1,worldRadius:g.worldRadius,mapRadius:g.mapRadius,mapName:g.mapName,
- boundary:g.boundary||null,walls:g.walls.map(w=>({x:w.pos?.x??w.x,y:w.pos?.y??w.y,w:w.w??w.width,h:w.h??w.height,angle:w.angle||0,kind:w.kind||'wall'})),
+ boundary:g.boundary||null,walls:g.walls.filter(w=>!w.dynamic).map(w=>({x:w.pos?.x??w.x,y:w.pos?.y??w.y,w:w.w??w.width,h:w.h??w.height,angle:w.angle||0,kind:w.kind||'wall'})),
  smokes:g.smokes.map(s=>({x:s.pos.x,y:s.pos.y,radius:s.radius})),captureMap:g.capture?.map||null};}
 function state(world,players,shots){const g=world.game;return {serverTick:g.frame,simTime:world.timeMs,actors:players.map(p=>actor(world,p)),shots,aliveCount:g.participants.filter(p=>p.alive).length,
   presentation:{finalPhase:!!g.finalPhase,gameOver:!!g.isGameOver,eventFocusFrames:g.eventFocusFrames||0,eventFocusPos:g.eventFocusPos?{x:g.eventFocusPos.x,y:g.eventFocusPos.y}:null,announcement:g.announcement||'',announcementLife:g.announcementLife||0,feed:(g.eventFeed||[]).slice(0,3).map(e=>({text:e.text,color:e.color,life:e.life}))},
-  movingWalls:g.walls.map((w,i)=>w.spinSpeed?[i,w.angle]:null).filter(Boolean),
+  movingWalls:g.walls.map((w,i)=>w.spinSpeed?[i,w.angle]:null).filter(Boolean),...(g.dynamicObstacles?{dynamicWalls:world.BRRework.dynamicWalls(g)}:{}),
  ring:g.ringGeometry,capture:g.capture?world.brCapturePacket(g):null,farm:world.brFarm.snapshot(g),
  zones:g.zones.map(z=>({x:z.pos.x,y:z.pos.y,radius:z.radius,type:z.type,color:z.color,duration:z.duration,meta:{endFrame:g.frame+Math.max(0,z.duration),span:Math.max(1,z.maxDuration||z.duration),ownerId:z.owner?.remoteId||'',...(z.type==='pull'?{...world.brZoneGeometry(z.radius,z.type,z.owner?.ability?.sub),soon:z.duration<=36}:{})}})),finished:!!world.finished};}
 export function getTeacherState(world){const g=world.game,pos=p=>({x:p.x,y:p.y});return {...state(world,g.participants,projectileStates(world)),turrets:g.turrets.filter(t=>t.life>0).map(t=>({x:t.pos.x,y:t.pos.y,golden:!!t.isGolden,emoji:t.owner?.ability?.e||''})),hostEffects:{
@@ -154,7 +154,10 @@ export function getVisibleState(world,id,interest,prepared=getTeacherState(world
  const p=world.byId.get(id);if(!p)return null;
  const bounds=world.brViewerBounds(p,interest?{aspect:interest.width/interest.height}:world.session.inputs[id]);
  const visible=world.game.participants.filter(q=>q===p||(!world.game.isConcealedFrom(q,p)&&world.brViewContains(bounds,q.pos.x,q.pos.y,q.radius)));
- const shots=prepared.shots.filter(s=>world.brViewContains(bounds,s.x,s.y,Math.max(s.radius||20,s.range||s.length||0))||world.brViewSegment(bounds,s.x,s.y,s.x+(s.dx||0)*(s.native?1:s.speed||0)*12,s.y+(s.dy||0)*(s.native?1:s.speed||0)*12,s.radius||20));
+ const shots=prepared.shots.filter(s=>{
+  if(s.kind==='decoy'&&s.owner!==id&&world.game.isConcealedFrom({id:s.id,pos:{x:s.x,y:s.y},team:s.team||0,alive:true,lifeSeq:s.life},p))return false;
+  return world.brViewContains(bounds,s.x,s.y,Math.max(s.radius||20,s.range||s.length||0))||world.brViewSegment(bounds,s.x,s.y,s.x+(s.dx||0)*(s.native?1:s.speed||0)*12,s.y+(s.dy||0)*(s.native?1:s.speed||0)*12,s.radius||20);
+ });
  const ids=new Set(visible.map(p=>p.remoteId)),farm={...prepared.farm};
  for(const key of ['b','x'])if(Array.isArray(farm[key]))farm[key]=farm[key].filter(row=>world.brViewContains(bounds,row[1],row[2],120));
  const {hostEffects,...publicState}=prepared;

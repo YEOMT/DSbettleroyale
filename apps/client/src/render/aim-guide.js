@@ -6,7 +6,7 @@ function clampPoint(point,map,pad){
  const length=Math.hypot(point.x,point.y),limit=map?.worldRadius-pad;
  return length>limit?{x:point.x*limit/length,y:point.y*limit/length}:point;
 }
-export function aimGuide(actor,kind,gesture,map,kernel,walls,visible=[]){
+export function aimGuide(actor,kind,gesture,map,kernel,walls,visible=[],objects=[]){
  const profile=actor.aimProfiles?.[kind],spec=profile?.spec;
  if(!spec)return null;
  const fraction=Math.max(0,Math.min(1,(gesture.power-.18)/.82));
@@ -14,6 +14,12 @@ export function aimGuide(actor,kind,gesture,map,kernel,walls,visible=[]){
  const {x:dx,y:dy}=gesture.aim;
  if(spec.shape==='circle')return {...spec,range,x:actor.x,y:actor.y,dx,dy};
  let x=actor.x+dx*range,y=actor.y+dy*range;
+ if(spec.clipRope&&kernel){
+  kernel.boundary=map?.boundary;const wall=kernel.combatTraceWalls(actor,{x,y},5,walls||[],[]);let t=wall?.t??1;
+  for(const other of visible){if(!other.alive||other.id===actor.id)continue;const at=kernel.combatSegmentCircleTime(actor.x-other.x,actor.y-other.y,x-actor.x,y-actor.y,other.radius+6);if(at!==null)t=Math.min(t,at);}
+  for(const other of objects){if(!['turret','mushroom'].includes(other.kind)||other.hp<=0)continue;const at=kernel.combatSegmentCircleTime(actor.x-other.x,actor.y-other.y,x-actor.x,y-actor.y,other.radius+5);if(at!==null)t=Math.min(t,at);}
+  return {...spec,range:range*t,x:actor.x+(x-actor.x)*t,y:actor.y+(y-actor.y)*t,dx,dy};
+ }
  const pad=actor.radius+4;
  if(spec.train&&map){
   let edge=range;
@@ -23,6 +29,12 @@ export function aimGuide(actor,kind,gesture,map,kernel,walls,visible=[]){
   x=actor.x+dx*Math.max(0,edge);y=actor.y+dy*Math.max(0,edge);
  }
  if(spec.teleport||spec.dash||spec.shape==='target'){
+  if(spec.clipPath&&kernel){
+   const radius=spec.collisionRadius??actor.radius,from={x:actor.x,y:actor.y};({x,y}=clampPoint({x,y},map,radius+4));kernel.boundary=map?.boundary;
+   const wall=kernel.combatTraceWalls(from,{x,y},radius,walls||[],[]);let t=wall?Math.max(0,wall.t-.0001):1;
+   if(spec.clipBodies)for(const other of visible){if(!other.alive||other.id===actor.id)continue;const at=kernel.combatSegmentCircleTime(actor.x-other.x,actor.y-other.y,x-actor.x,y-actor.y,radius+other.radius+(spec.bodyPadding??1));if(at!==null)t=Math.min(t,Math.max(0,at-.0001));}
+   return {...spec,range,x:actor.x+(x-actor.x)*t,y:actor.y+(y-actor.y)*t,dx,dy};
+  }
   ({x,y}=clampPoint({x,y},map,pad));
   if(kernel&&(spec.teleport||spec.dash||spec.rework&&spec.shape==='target')&&!spec.phases){
    const from=spec.teleport||spec.shape==='target'?{x,y}:actor;

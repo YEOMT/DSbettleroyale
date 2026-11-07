@@ -9,9 +9,9 @@ const telemetry=loadTelemetry(app);
 process.send({ready:true,port:app.address.port});
 process.on('message',async m=>{try{let value;const room=[...app.manager.rooms.values()][0];
  if(m.type==='fixture-origin'){app.config.origins.push(m.origin);value=true;}
- if(m.type==='fixture-draft'){room.students().forEach((p,i)=>p.draft.abilityId=manifest.roster[(i+m.round*m.players)%77].id);value=true;}
+ if(m.type==='fixture-draft'){const ids=m.roster==='new'?[...manifest.roster.filter(a=>Number(a.id.slice(6))>=141),...manifest.roster.filter(a=>Number(a.id.slice(6))<141).slice(0,10)]:manifest.roster;room.students().forEach((p,i)=>p.draft.abilityId=ids[(i+(m.roster==='new'?0:m.round*m.players))%ids.length].id);value=true;}
  if(m.type==='fixture-stability-draft'){
-  const ids=['emoji-024','emoji-003','emoji-023','emoji-029','emoji-013','emoji-025'];
+  const ids=m.roster==='new'?['emoji-141','emoji-143','emoji-144','emoji-142','emoji-024','emoji-003']:['emoji-024','emoji-003','emoji-023','emoji-029','emoji-013','emoji-025'];
   room.students().forEach((p,i)=>p.draft.abilityId=ids[i%ids.length]);value=true;
  }
  if(m.type==='fixture-seed'){room.matchId='stability-fixture-'+m.round;app.manager.changed(room);value=true;}

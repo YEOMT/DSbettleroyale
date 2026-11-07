@@ -1,0 +1,14 @@
+// Compact public evidence: synthetic performance counters, never session tokens.
+import fs from 'node:fs';
+const cases=[['main-late45','before-late.json'],['candidate-late45','after-late.json'],['mixed20-initial','capture20.json'],['mixed20-profile30','capture20-profile.json'],['mixed20-605','capture20-long.json'],['new-late30-605','late30-new.json']];
+const q=(values,p)=>{const a=values.filter(Number.isFinite).sort((a,b)=>a-b);return a[Math.floor((a.length-1)*p)]??null;};
+const reports=cases.map(([scenario,file])=>{
+ const path='artifacts/roster10/'+file;if(!fs.existsSync(path))return {scenario,status:'NOT_RUN'};
+ const a=JSON.parse(fs.readFileSync(path)),samples=a.samples||[],server=a.server||samples.at(-1)?.server||{},keys=['retained','active','decoy','grapple','mushroom','poison','ring-wall','wallSegments'];
+ return {scenario,status:a.status||(a.pass?'PASS':'FAIL'),requestedSeconds:a.seconds,elapsedMs:a.elapsedMs??a.totalMs??Date.parse(a.ended)-Date.parse(a.started),sourceHash:server.sourceHash,fixtureHash:a.fixtureHash||null,overloads:server.overloads,rounds:a.rounds,step:server.stepCpu,snapshot:server.snapshotCpu,gap:server.snapshotGap,inputApply:server.inputApply,pump:server.pumpCpu,send:server.sendCpu,debt:server.debtMs,
+  objectPeaks:Object.fromEntries(keys.map(key=>[key,Math.max(0,...samples.map(s=>s.server?.window?.roster10?.[key]||0))])),serverRssPeak:Math.max(0,...samples.map(s=>s.server?.memory?.rss||0)),gcMax:Math.max(0,...samples.map(s=>s.server?.window?.gc?.max||0)),eventLoopMax:Math.max(0,...samples.map(s=>s.server?.window?.eventLoop?.max||0)),cleanup:a.cleanup,rematchCleanup:a.rematchCleanup?.map(w=>({phase:w.phase,objects:w.objects,roster10:w.roster10})),failure:a.failure?.split('\n')[0]||null,
+  windows:samples.map(s=>({seconds:s.elapsedSeconds??s.elapsedMs/1000,stage:s.stage,round:s.round,alive:s.server?.window?.alive,objects:s.server?.window?.roster10,stepP95:s.server?.window?.step?.p95,snapshotP95:s.server?.window?.snapshot?.p95,eventLoopMax:s.server?.window?.eventLoop?.max,rss:s.server?.memory?.rss,
+   surfaces:s.surfaces?Object.fromEntries(Object.entries(s.surfaces).map(([role,v])=>[role,{drawnFrameGap:v.stats.frameGapMs,draw:v.stats.drawMs,rafGapP95:q(v.rafGapMs||[],.95),caches:v.caches,roster10:v.roster10,heap:v.heap,simTime:v.simTime,blocked:v.blocked,error:v.error}])):s.browser?{studentPixi:{diagnostics:s.browser.diagnostics,caches:s.browser.caches,heap:s.browser.heap}}:undefined}))};
+});
+fs.mkdirSync('docs/evidence/roster10',{recursive:true});fs.writeFileSync('docs/evidence/roster10/performance.json',JSON.stringify({environment:'Windows loopback; no Docker quota; not physical classroom or AWS',awsUserReported:{vCPU:2,ramGiB:1,ssdGiB:40,dockerLimits:'UNKNOWN'},physicalMobile:'NOT_RUN',priorExtreme30:'FAIL retained from PR8',reports},null,2)+'\n');
+console.log(reports.map(({scenario,status,overloads,elapsedMs})=>({scenario,status,overloads,elapsedMs})));

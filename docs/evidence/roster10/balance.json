@@ -1,0 +1,894 @@
+{
+  "baseline": "tests/baseline/content.json (immutable v32.1 effective content)",
+  "hp": [
+    {
+      "id": "emoji-000",
+      "name": "용의 분노",
+      "tier": "S",
+      "before": 540,
+      "after": 540,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-001",
+      "name": "천둥군주",
+      "tier": "S",
+      "before": 594.4050000000001,
+      "after": 594.4050000000001,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-002",
+      "name": "우주 납치범",
+      "tier": "S",
+      "before": 600,
+      "after": 600,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-003",
+      "name": "대마법사",
+      "tier": "S",
+      "before": 514.2075,
+      "after": 514.2075,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-004",
+      "name": "공허 암살자",
+      "tier": "S",
+      "before": 430.94362500000005,
+      "after": 430.94362500000005,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-006",
+      "name": "검성",
+      "tier": "S",
+      "before": 541.3262400000001,
+      "after": 541.3262400000001,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-007",
+      "name": "폴아웃",
+      "tier": "S",
+      "before": 459,
+      "after": 459,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-008",
+      "name": "폴터가이스트",
+      "tier": "S",
+      "before": 416.925,
+      "after": 416.925,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-010",
+      "name": "블랙홀",
+      "tier": "S",
+      "before": 500,
+      "after": 500,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-012",
+      "name": "지니",
+      "tier": "S",
+      "before": 450,
+      "after": 450,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-013",
+      "name": "블러드로드",
+      "tier": "S",
+      "before": 465,
+      "after": 465,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-014",
+      "name": "역병군주",
+      "tier": "S",
+      "before": 460,
+      "after": 460,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-019",
+      "name": "폭주기관차",
+      "tier": "S",
+      "before": 620,
+      "after": 620,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-020",
+      "name": "초신성",
+      "tier": "S",
+      "before": 416.925,
+      "after": 416.925,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-022",
+      "name": "요요 마스터",
+      "tier": "S",
+      "before": 366.894,
+      "after": 366.894,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-037",
+      "name": "구급차",
+      "tier": "S",
+      "before": 390,
+      "after": 390,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-085",
+      "name": "심연의 눈",
+      "tier": "S",
+      "before": 450.279,
+      "after": 450.279,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-098",
+      "name": "성역술사",
+      "tier": "S",
+      "before": 293.25,
+      "after": 293.25,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-110",
+      "name": "철갑 코뿔소",
+      "tier": "S",
+      "before": 560,
+      "after": 560,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-131",
+      "name": "가위 수호자",
+      "tier": "S",
+      "before": 604.5341255856002,
+      "after": 604.5341255856002,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-132",
+      "name": "공허 파괴자",
+      "tier": "S",
+      "before": 422.48400000000004,
+      "after": 422.48400000000004,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-023",
+      "name": "헤드슈터",
+      "tier": "A",
+      "before": 349.2801,
+      "after": 349.2801,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-024",
+      "name": "윈드워커",
+      "tier": "A",
+      "before": 366.5536875000001,
+      "after": 366.5536875000001,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-025",
+      "name": "핵주먹",
+      "tier": "A",
+      "before": 500,
+      "after": 500,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-026",
+      "name": "아이스킹",
+      "tier": "A",
+      "before": 452.76,
+      "after": 452.76,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-027",
+      "name": "로드킬",
+      "tier": "A",
+      "before": 388.15875000000005,
+      "after": 388.15875000000005,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-028",
+      "name": "아이언월",
+      "tier": "A",
+      "before": 367.53506999999996,
+      "after": 367.53506999999996,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-029",
+      "name": "스카이 하이",
+      "tier": "A",
+      "before": 500,
+      "after": 500,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-030",
+      "name": "크라켄",
+      "tier": "A",
+      "before": 411.4116562500001,
+      "after": 411.4116562500001,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-031",
+      "name": "스컹크 대쉬",
+      "tier": "A",
+      "before": 328.10400000000004,
+      "after": 328.10400000000004,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-033",
+      "name": "불도저",
+      "tier": "A",
+      "before": 366.67028160000007,
+      "after": 366.67028160000007,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-034",
+      "name": "볼링 챔피언",
+      "tier": "A",
+      "before": 320.173425,
+      "after": 320.173425,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-035",
+      "name": "체인소맨",
+      "tier": "A",
+      "before": 391.42184458608006,
+      "after": 391.42184458608006,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-036",
+      "name": "뱀파이어 떼",
+      "tier": "A",
+      "before": 320.173425,
+      "after": 320.173425,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-063",
+      "name": "버거 캐논",
+      "tier": "A",
+      "before": 334.7267625,
+      "after": 334.7267625,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-065",
+      "name": "자석포",
+      "tier": "B",
+      "before": 434.0588669427782,
+      "after": 460.1023989593449,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-066",
+      "name": "프로 부메랑",
+      "tier": "A",
+      "before": 320.173425,
+      "after": 320.173425,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-087",
+      "name": "사냥꾼",
+      "tier": "A",
+      "before": 305.6200875,
+      "after": 305.6200875,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-099",
+      "name": "전투 의무병",
+      "tier": "A",
+      "before": 244.125,
+      "after": 244.125,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-101",
+      "name": "가속마도사",
+      "tier": "A",
+      "before": 227.85,
+      "after": 227.85,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-133",
+      "name": "영혼 검사",
+      "tier": "A",
+      "before": 472.5,
+      "after": 472.5,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-038",
+      "name": "암살자",
+      "tier": "B",
+      "before": 302.50920798000004,
+      "after": 320.65976045880006,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-039",
+      "name": "다이너마이트",
+      "tier": "B",
+      "before": 333.5,
+      "after": 353.51,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-040",
+      "name": "멧라이더",
+      "tier": "B",
+      "before": 423.59031,
+      "after": 449.0057286,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-041",
+      "name": "킬러비",
+      "tier": "B",
+      "before": 287.5,
+      "after": 304.75,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-042",
+      "name": "뿅망치",
+      "tier": "B",
+      "before": 665.6834091600001,
+      "after": 705.6244137096002,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-043",
+      "name": "로켓 점프",
+      "tier": "B",
+      "before": 335.34,
+      "after": 355.4604,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-044",
+      "name": "스노우보더",
+      "tier": "B",
+      "before": 353.50425,
+      "after": 374.71450500000003,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-045",
+      "name": "테니스 챔피언",
+      "tier": "B",
+      "before": 333.5,
+      "after": 353.51,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-047",
+      "name": "파워 슛",
+      "tier": "B",
+      "before": 333.5,
+      "after": 353.51,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-048",
+      "name": "카트 질주",
+      "tier": "B",
+      "before": 385.641,
+      "after": 408.77946000000003,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-070",
+      "name": "다트 챔피언",
+      "tier": "B",
+      "before": 245.81249999999997,
+      "after": 260.56125,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-072",
+      "name": "탄산 폭탄",
+      "tier": "B",
+      "before": 258.75,
+      "after": 274.27500000000003,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-089",
+      "name": "농구왕",
+      "tier": "B",
+      "before": 258.75,
+      "after": 274.27500000000003,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-102",
+      "name": "보호술사",
+      "tier": "B",
+      "before": 258.75,
+      "after": 274.27500000000003,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-112",
+      "name": "람북스",
+      "tier": "B",
+      "before": 665.6834091600001,
+      "after": 705.6244137096002,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-137",
+      "name": "BB 스나이퍼",
+      "tier": "B",
+      "before": 243.225,
+      "after": 257.81850000000003,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-073",
+      "name": "교과서 투척",
+      "tier": "C",
+      "before": 310.5,
+      "after": 329.13,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-074",
+      "name": "슬리퍼 스나이퍼",
+      "tier": "C",
+      "before": 229.42499999999998,
+      "after": 243.1905,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-075",
+      "name": "사과 투척",
+      "tier": "C",
+      "before": 310.5,
+      "after": 329.13,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-076",
+      "name": "휴지 대포",
+      "tier": "C",
+      "before": 241.49999999999997,
+      "after": 255.98999999999998,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-077",
+      "name": "크루아상 부메랑",
+      "tier": "C",
+      "before": 310.5,
+      "after": 329.13,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-092",
+      "name": "팬테옹",
+      "tier": "C",
+      "before": 253.575,
+      "after": 268.7895,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-094",
+      "name": "크레파스 난사",
+      "tier": "C",
+      "before": 229.42499999999998,
+      "after": 243.1905,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-105",
+      "name": "응원단장",
+      "tier": "C",
+      "before": 229.42499999999998,
+      "after": 243.1905,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-113",
+      "name": "게렌",
+      "tier": "C",
+      "before": 460.23862500000007,
+      "after": 487.8529425000001,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-121",
+      "name": "청소반장",
+      "tier": "C",
+      "before": 448.10506125000006,
+      "after": 474.9913649250001,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-122",
+      "name": "통조림 투척",
+      "tier": "C",
+      "before": 276,
+      "after": 292.56,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-126",
+      "name": "압정 난사",
+      "tier": "C",
+      "before": 293.25,
+      "after": 310.845,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-127",
+      "name": "롤러스케이트",
+      "tier": "C",
+      "before": 313.467,
+      "after": 332.27502,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-128",
+      "name": "먹물 대쉬",
+      "tier": "C",
+      "before": 313.467,
+      "after": 332.27502,
+      "factor": 1.06,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-052",
+      "name": "벽돌",
+      "tier": "F",
+      "before": 400,
+      "after": 400,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-054",
+      "name": "비누",
+      "tier": "F",
+      "before": 180,
+      "after": 180,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-056",
+      "name": "비눗방울 놀이",
+      "tier": "F",
+      "before": 187.5,
+      "after": 187.5,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-114",
+      "name": "킹 모아이",
+      "tier": "A",
+      "before": 450,
+      "after": 450,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-139",
+      "name": "좀비",
+      "tier": "A",
+      "before": 450,
+      "after": 450,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-140",
+      "name": "짐승형 거인",
+      "tier": "S",
+      "before": 560,
+      "after": 560,
+      "factor": 1,
+      "source": "immutable legacy"
+    },
+    {
+      "id": "emoji-141",
+      "name": "조커",
+      "tier": "S",
+      "before": 550.66312,
+      "after": 550.66312,
+      "factor": 1,
+      "source": "frozen new-roster role median"
+    },
+    {
+      "id": "emoji-142",
+      "name": "마운틴 팀",
+      "tier": "S",
+      "before": 436.242,
+      "after": 436.242,
+      "factor": 1,
+      "source": "frozen new-roster role median"
+    },
+    {
+      "id": "emoji-143",
+      "name": "킹 오브 데마시아",
+      "tier": "S",
+      "before": 550.66312,
+      "after": 550.66312,
+      "factor": 1,
+      "source": "frozen new-roster role median"
+    },
+    {
+      "id": "emoji-144",
+      "name": "버섯돌보미",
+      "tier": "A",
+      "before": 320.173425,
+      "after": 320.173425,
+      "factor": 1,
+      "source": "frozen new-roster role median"
+    },
+    {
+      "id": "emoji-145",
+      "name": "부캉이",
+      "tier": "A",
+      "before": 401.41675041804007,
+      "after": 401.41675041804007,
+      "factor": 1,
+      "source": "frozen new-roster role median"
+    },
+    {
+      "id": "emoji-146",
+      "name": "푸바오",
+      "tier": "A",
+      "before": 401.41675041804007,
+      "after": 401.41675041804007,
+      "factor": 1,
+      "source": "frozen new-roster role median"
+    },
+    {
+      "id": "emoji-147",
+      "name": "외계인",
+      "tier": "B",
+      "before": 258.75,
+      "after": 274.27500000000003,
+      "factor": 1.06,
+      "source": "frozen new-roster role median"
+    },
+    {
+      "id": "emoji-148",
+      "name": "도깨비",
+      "tier": "C",
+      "before": 313.467,
+      "after": 332.27502,
+      "factor": 1.06,
+      "source": "frozen new-roster role median"
+    },
+    {
+      "id": "emoji-149",
+      "name": "꿀꿀이",
+      "tier": "F",
+      "before": 180,
+      "after": 180,
+      "factor": 1,
+      "source": "frozen new-roster role median"
+    },
+    {
+      "id": "emoji-150",
+      "name": "찍찍이",
+      "tier": "F",
+      "before": 293.75,
+      "after": 293.75,
+      "factor": 1,
+      "source": "frozen new-roster role median"
+    }
+  ],
+  "initialCrates": [
+    {
+      "players": 5,
+      "before": 8,
+      "after": 9,
+      "totalRespawnCap": 13
+    },
+    {
+      "players": 8,
+      "before": 10,
+      "after": 11,
+      "totalRespawnCap": 15
+    },
+    {
+      "players": 20,
+      "before": 26,
+      "after": 29,
+      "totalRespawnCap": 33
+    },
+    {
+      "players": 30,
+      "before": 38,
+      "after": 42,
+      "totalRespawnCap": 46
+    },
+    {
+      "players": 40,
+      "before": 42,
+      "after": 46,
+      "totalRespawnCap": 50
+    }
+  ],
+  "waves": {
+    "players": 8,
+    "waves": 10,
+    "intervalTicks": 1200,
+    "xp": {
+      "before": 20,
+      "after": 22,
+      "carry": 1.7763568394002505e-15
+    },
+    "heal": {
+      "before": 20,
+      "after": 23,
+      "carry": 0
+    },
+    "xpWaveCap": 9,
+    "xpCap": 53,
+    "healCap": 7,
+    "adaptiveXpCap": "min(53,max(12,ceil(alive*1.6*1.10)))"
+  },
+  "displacement": [
+    {
+      "path": "native projectile",
+      "before": {
+        "displacement": 14,
+        "damage": 1,
+        "stunned": 24,
+        "hard": true
+      },
+      "after": {
+        "displacement": 12.319999999999993,
+        "damage": 1,
+        "stunned": 24,
+        "hard": true
+      },
+      "factor": 0.8799999999999996
+    },
+    {
+      "path": "rework traveling projectile",
+      "before": {
+        "displacement": 14,
+        "damage": 1,
+        "stunned": 24,
+        "hard": true
+      },
+      "after": {
+        "displacement": 12.319999999999993,
+        "damage": 1,
+        "stunned": 24,
+        "hard": true
+      },
+      "factor": 0.8799999999999996
+    }
+  ],
+  "genie": {
+    "before": {
+      "hp": 70,
+      "lifeTicks": 1800
+    },
+    "after": {
+      "hp": 56,
+      "lifeTicks": 1440
+    },
+    "preserved": {
+      "cooldownTicks": 420,
+      "installRange": 250,
+      "attackRange": 780,
+      "damage": 15.45,
+      "heavyDamage": 27.81,
+      "shotIntervalTicks": 42,
+      "maxOwned": 3
+    }
+  },
+  "tests": {},
+  "elapsedMs": 255.2855
+}

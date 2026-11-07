@@ -20,6 +20,7 @@ export function attachSimulation(manager,metrics){
     if(event.type==='DEATH'&&event.data.playerId!==m.id)continue;
     if(event.type!=='DEATH'){
      const d=event.data,b=world.brViewerBounds(self,{});
+     if(d.kind==='decoy'&&d.owner!==m.id&&world.game.isConcealedFrom({id:d.id,pos:{x:d.x,y:d.y},team:d.team||0,alive:true,lifeSeq:d.life},self))continue;
      if(d.owner!==m.id&&d.sourceId!==m.id&&!world.brViewContains(b,d.x,d.y,Math.max(100,d.radius||d.size||0)))continue;
     }
    }

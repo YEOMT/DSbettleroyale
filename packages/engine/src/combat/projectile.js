@@ -32,7 +32,11 @@ __brScope.Projectile = class Projectile {
                 this.wobble = opts.wobble || false;
                 this.spinRate = opts.spinRate || 0;
                 this.faceDir = opts.faceDir || false;
-                this.knockback = (opts.knockback ?? 3)*(this.runSkill?.control??1);
+                // Orbit blades are melee; explicit pull forces retain their separate
+                // control path. Store the pre-delta force for descendant blast floors.
+                this.rangedPushFactor=type==='ORBIT'||opts.status==='pull'?1:__brScope.ROSTER10_BALANCE.rangedPush;
+                this.baseKnockback=(opts.knockback??3)*(this.runSkill?.control??1);
+                this.knockback=this.baseKnockback*this.rangedPushFactor;
                 this.vfx = opts.vfx || null;
                 // ✨ v13: 투사체별 잔상/충돌색/상태효과
                 this.trailColor = opts.trailColor || null;
@@ -195,9 +199,10 @@ __brScope.Projectile = class Projectile {
                         victim.takeDamage(this.damage*falloff,this.owner,false,victim.pos.sub(this.pos),{scaled:true,wangguiPower:this.wangguiPower,style:this.impactStyle||'ranged-power',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:radius,projectileId:this._brNetId||'',ordinal:this.shotOrdinal||0,actionKind:this.inputKind,contact:{x:victim.pos.x,y:victim.pos.y}});
                         const outward=victim.pos.sub(this.pos),dir=outward.mag()>.01?outward.norm():this.vel.norm();
                         const push=this.knockback*falloff;
-                        __brScope.BRRework.nativeImpulse(victim,this.owner,dir,push,game,this.runSkill);
+                        __brScope.BRRework.nativeImpulse(victim,this.owner,dir,push,game,this.runSkill,{hardForce:this.baseKnockback*falloff>=14});
                         // Explosion recoil is physical displacement, never implicit stun.
-                        if(push>=24)game.markLaunched(victim,this.owner,Math.min(35,Math.round(12+push*.35)),{wangguiPower:this.wangguiPower});
+                        const launchForce=this.baseKnockback*falloff;
+                        if(launchForce>=24)game.markLaunched(victim,this.owner,Math.min(35,Math.round(12+launchForce*.35)),{wangguiPower:this.wangguiPower});
                     }
                 } finally {if(this.owner)this.owner.currentImpactStyle=previousStyle||'';}
             }
@@ -225,7 +230,7 @@ __brScope.Projectile = class Projectile {
                         if(this.owner.team!==0 && p.team===this.owner.team) continue;
                         if(p===target||p.pos.dist(this.pos) < this.explodeRadius) {
                             const dealt=dealDamage(p);if(!p.alive||!p._lastDamageResult?.valid)continue;
-                            __brScope.BRRework.nativeImpulse(p,this.owner,p.pos.sub(this.pos).norm(),this.knockback,game,this.runSkill);
+                            __brScope.BRRework.nativeImpulse(p,this.owner,p.pos.sub(this.pos).norm(),this.knockback,game,this.runSkill,{hardForce:this.baseKnockback>=14});
                             // No automatic stun on explosions.
                         }
                     }
@@ -245,7 +250,7 @@ __brScope.Projectile = class Projectile {
                     let impactDir = this.vel.mag() > 0 ? this.vel.norm() : null;
                     if(this.type === 'ORBIT' && this.owner) impactDir = target.pos.sub(this.owner.pos).norm();
                     if(!impactDir || impactDir.mag() === 0) impactDir = new __brScope.Vec2(1,0);
-                    __brScope.BRRework.nativeImpulse(target,this.owner,impactDir,this.knockback,game,null);
+                    __brScope.BRRework.nativeImpulse(target,this.owner,impactDir,this.knockback,game,null,{hardForce:this.baseKnockback>=14});
                     if(this.type === 'ORBIT' && this.owner?.ability?.sub === 'SWORD_ORBIT') {
                         // Orbit hit feedback does not interrupt controls.
                         this.owner.vel = this.owner.vel.add(target.pos.sub(this.owner.pos).norm().mult(1.2));
