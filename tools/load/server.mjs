@@ -1,5 +1,6 @@
 // Test harness only. Fixture controls use private IPC, never a production HTTP/WS route.
-import {createGameServer} from '../../apps/server/src/main.js';
+// Optional exact deploy bundle; fixtures/telemetry remain private IPC wrappers.
+const {createGameServer}=await import(process.env.LOAD_BUILT==='1'?'../../dist/server/main.js':'../../apps/server/src/main.js');
 import {manifest} from '../../packages/content/src/manifest.js';
 import {sourceHash} from '../build-id.mjs';
 import {loadTelemetry} from './telemetry.mjs';
