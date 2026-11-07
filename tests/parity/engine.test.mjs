@@ -16,8 +16,12 @@ test('all 77 effective actor stats and final basic profiles match the real brows
   parity(JSON.parse(JSON.stringify(r.brProgressionCombat.basicProfile(ability))),a.basic,a.id);
  }
 });
-for(const expected of fixtures)test(`actual basic + skill and 180 fixed ticks: ${expected.id}`,()=>{
+for(const expected of fixtures)test(`legacy parity with only approved balance deltas normalized: ${expected.id}`,()=>{
  const r=createRuleContext({seed:'fixture',matchId:'fixture|1|1'});
+ // Preserve every original combat fixture/assertion. The live defaults are
+ // separately checked by roster10 balance tests, never by rewriting goldens.
+ Object.assign(r.ROSTER10_BALANCE,{bcHp:1,rangedPush:1,farmInitial:1,farmXpWave:1,farmHealWave:1,initialCap:42,xpWaveCap:8,xpCap:48,healCap:6,respawnExtra:3,genieHp:70,genieTicks:1800});
+ Object.assign(r.BRRework.defs['emoji-012'].skill,{turretHp:70,durationFrames:1800});
  r.seedRandom('parity|'+expected.id);r.teamMode=0;
  const a=r.EMOJI_DB.find(a=>a.id===expected.id),target=r.EMOJI_DB.find(a=>a.id==='emoji-114');
  const p=new r.Participant(1,'actor',a,new r.Vec2(0,0)),q=new r.Participant(2,'target',target,new r.Vec2(180,0));

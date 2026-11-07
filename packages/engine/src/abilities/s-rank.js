@@ -108,8 +108,8 @@ export const initializers=[
         onEnd:function(ctx,e,reason){if(reason==='expired')R.area(ctx,e.pos,s.collapseRadius,s.collapseDamage,{stun:0,knockback:4,color:'#c4b5fd',style:'gravity-collapse'});}});});
 
     register('emoji-012','지니','설치형',{}, {
-        kind:'turret',shape:'target',cooldownFrames:420,range:250,radius:31,damage:15,heavyDamage:27,turretRange:780,turretCooldownFrames:42,turretHp:70,durationFrames:1800,maxPerOwner:3,count:3,countCap:3,
-        description:'HP 70 포탑 설치(보통 B/C 평타 약 3회) · 동시 3개 / 각 30초 · 4번째는 가장 오래된 포탑 교체 · 4회마다 강화탄',
+        kind:'turret',shape:'target',cooldownFrames:420,range:250,radius:31,damage:15,heavyDamage:27,turretRange:780,turretCooldownFrames:42,turretHp:__brScope.ROSTER10_BALANCE.genieHp,durationFrames:__brScope.ROSTER10_BALANCE.genieTicks,maxPerOwner:3,count:3,countCap:3,
+        description:'HP 56 포탑 설치 · 동시 3개 / 각 24초 · 4번째는 가장 오래된 포탑 교체 · 4회마다 강화탄',
         capabilities:caps({expandable:false,summon:true,duration:true,signatureRange:true,signatureDuration:true})
     },function(c,s){R.turret(c,{pos:R.targetPoint(c,s.range),radius:s.radius,hp:s.turretHp,duration:s.durationFrames,maxPerOwner:3,range:s.turretRange,damage:s.damage,heavyDamage:s.heavyDamage,cooldown:s.turretCooldownFrames,color:'#fbbf24'});});
 

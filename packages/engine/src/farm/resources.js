@@ -127,11 +127,20 @@ export const initializers=[
 [177,__brScope=>{ __brScope.BR_COLLECTIBLE_RULES=Object.freeze({xpRadius:20,deathRadius:26,healRadius:28,pickupExtra:42});;}],
 [179,__brScope=>{__brScope.brFarm = (() => {
             const HALF=__brScope.BR_CRATE_HALF, BOUND=HALF*Math.SQRT2, CELL=320, UNITS_TO_BREAK=1;
-            const HEAL_FRACTION=.20,HEAL_INTERVAL=1200,HEAL_LIFETIME=2400,MAX_HEAL_BOXES=6;
-            const XP_INTERVAL=1200,XP_WAVE_LIFETIME=2700,MAX_XP_BOXES=48;
+            const HEAL_FRACTION=.20,HEAL_INTERVAL=1200,HEAL_LIFETIME=2400;
+            const XP_INTERVAL=1200,XP_WAVE_LIFETIME=2700,P=__brScope.ROSTER10_BALANCE;
             const key=(x,y)=>x+','+y;
             const real=p=>p&&p.id!==999&&!p.isClone&&!p.cloneOwner;
             const dirty=g=>{g.farmRevision=(g.farmRevision||0)+1;g._farmSnapshot=null;};
+            // Count reservations as well as live crates: expiry and destruction
+            // move the same slot into the queue, they do not release it twice.
+            const reserved=(g,kind)=>(g.teamCrateQueue||[]).filter(q=>q.kind===kind).length;
+            const occupied=(g,kind)=>g.farmBoxes.filter(b=>b.kind===kind).length+reserved(g,kind);
+            function waveTarget(g,key,base,factor,cap=Infinity){
+                const exact=base*factor+(g[key]||0),whole=Math.floor(exact+1e-9);
+                g[key]=Math.max(0,Math.min(1-Number.EPSILON,exact-whole));
+                return Math.min(cap,whole);
+            }
             function addBox(g,box) {
                 g.farmBoxes.push(box);
                 const cell=key(Math.floor(box.pos.x/CELL),Math.floor(box.pos.y/CELL));
@@ -149,19 +158,20 @@ export const initializers=[
             function init(g) {
                 dispose(g);g.farmRevision=1;g.farmSeq=0;g.farmGrid=new Map();
                 const players=g.participants.filter(real),density=[1.28,1.32,1.36,1.28,1.34][g.mapIndex]||1.30;
-                const count=Math.min(42,Math.max(8,Math.round(players.length*density)));
+                const oldCount=Math.min(42,Math.max(8,Math.round(players.length*density)));
+                const count=Math.min(P.initialCap,Math.round(oldCount*P.farmInitial));
                 g.farmPickupSearchRadius=Math.max(100,...players.map(p=>p.radius+__brScope.BR_COLLECTIBLE_RULES.pickupExtra));
                 // Separate random stream leaves map, character and combat RNG untouched.
                 let seed=2166136261;
                 const text=String(__brScope.session?.roomMeta?.seed||'farm')+'|'+String(__brScope.session?.roomMeta?.matchRound||0)+'|'+g.mapIndex;
                 for(let i=0;i<text.length;i++){seed^=text.charCodeAt(i);seed=Math.imul(seed,16777619);}
                 const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-                g.farmRandom=random;g.nextHealCrateFrame=HEAL_INTERVAL;g.healWave=0;
+                g.farmRandom=random;g.nextHealCrateFrame=HEAL_INTERVAL;g.healWave=0;g.healWaveCarry=0;
                 let xpSeed=(seed^0x9e3779b9)>>>0;
                 g.xpWaveRandom=()=>{xpSeed=(Math.imul(xpSeed,1664525)+1013904223)>>>0;return xpSeed/4294967296;};
-                g.nextXpCrateFrame=g.frame+XP_INTERVAL;g.xpWave=0;
+                g.nextXpCrateFrame=g.frame+XP_INTERVAL;g.xpWave=0;g.xpWaveCarry=0;
                 const combatRadius=__brScope.session?.isRespawnMode()?g.mapRadius:g.worldRadius;
-                g.teamCrateQueue=[];g.teamCrateCap=count+3;
+                g.teamCrateQueue=[];g.teamCrateCap=count+P.respawnExtra;g.teamXpCrateCap=count;
                 for(let i=0;i<count;i++){const sideWanted=__brScope.brSurvivalFarmSlot(g),side=sideWanted?__brScope.brSurvivalFarmPoint(g,combatRadius-140,BOUND,players):null;let used=false;for(let tries=0;tries<140;tries++) {
                     const near=players[i%Math.max(1,players.length)],angle=random()*Math.PI*2;
                     const distance=tries<24&&near?180+random()*220:Math.sqrt(random())*(combatRadius-240);
@@ -171,7 +181,7 @@ export const initializers=[
                     addBox(g,{id:++g.farmSeq,pos,halfSize:HALF,radius:BOUND,hp:UNITS_TO_BREAK,maxHp:UNITS_TO_BREAK,kind:'xp',born:g.frame,lastHits:new Map()});if(sideWanted){if(pos===side)g.sideFarm.placed++;else g.sideFarm.fallback++;used=true;}break;
                 }if(sideWanted&&!used)g.sideFarm.fallback++;}
             }
-            function dispose(g) {g.sideFarm=null;g.farmFlash=new Map();g.teamCrateQueue=[];g.teamCrateCap=0;g.farmBoxes=[];g.xpBundles=[];g.farmGrid=new Map();g._farmSnapshot=null;g.farmRevision=0;g.farmSeq=0;g.farmRandom=null;g.nextHealCrateFrame=0;g.healWave=0;g.xpWaveRandom=null;g.nextXpCrateFrame=0;g.xpWave=0;}
+            function dispose(g) {g.sideFarm=null;g.farmFlash=new Map();g.teamCrateQueue=[];g.teamCrateCap=0;g.teamXpCrateCap=0;g.farmBoxes=[];g.xpBundles=[];g.farmGrid=new Map();g._farmSnapshot=null;g.farmRevision=0;g.farmSeq=0;g.farmRandom=null;g.nextHealCrateFrame=0;g.healWave=0;g.healWaveCarry=0;g.xpWaveRandom=null;g.nextXpCrateFrame=0;g.xpWave=0;g.xpWaveCarry=0;}
             function spawn(g,pos,amount,source) {
                 if(!g.xpBundles)return null;
                 // Normal BR has at most ~57 drops. Repeated respawns also stay bounded:
@@ -194,9 +204,9 @@ export const initializers=[
                 const safeRadius=Math.min(g.worldRadius-190,g.mapRadius-170);
                 if(alive.length<2||safeRadius<260)return 0;
                 const random=g.farmRandom||__brScope.random,largeClass=alive.length>=24;
-                const wanted=largeClass&&g.healWave%2===0?3:2;g.healWave++;
-                let existing=g.farmBoxes.filter(b=>b.kind==='heal').length,created=0;
-                for(let i=0;i<wanted&&existing+created<MAX_HEAL_BOXES&&(!__brScope.session?.isRespawnMode()||g.farmBoxes.length+(g.teamCrateQueue?.length||0)<g.teamCrateCap);i++)for(let tries=0;tries<100;tries++) {
+                const wanted=waveTarget(g,'healWaveCarry',largeClass&&g.healWave%2===0?3:2,P.farmHealWave);g.healWave++;
+                let existing=occupied(g,'heal'),created=0;
+                for(let i=0;i<wanted&&existing+created<P.healCap&&(!__brScope.session?.isRespawnMode()||g.farmBoxes.length+(g.teamCrateQueue?.length||0)<g.teamCrateCap);i++)for(let tries=0;tries<100;tries++) {
                     const angle=random()*Math.PI*2,minRadius=Math.min(220,safeRadius*.18);
                     const distance=minRadius+Math.sqrt(random())*Math.max(0,safeRadius-minRadius);
                     const pos=g.capture?__brScope.brCaptureRandomPoint(g,140,random):new __brScope.Vec2(Math.cos(angle)*distance,Math.sin(angle)*distance);
@@ -213,8 +223,8 @@ export const initializers=[
                 const safeRadius=Math.min(g.worldRadius-190,g.mapRadius-170);
                 if(alive.length<2||safeRadius<260||!alive.some(p=>p.run&&p.run.level<__brScope.BR_RUN_MAX_LEVEL))return 0;
                 const random=g.xpWaveRandom;if(!random)return 0;
-                const cap=Math.min(MAX_XP_BOXES,Math.max(12,Math.ceil(alive.length*1.6)));
-                const wanted=Math.min(8,Math.max(2,Math.ceil(alive.length/4)));
+                const cap=Math.min(P.xpCap,Math.max(12,Math.ceil(alive.length*1.6*P.farmXpWave)));
+                const wanted=waveTarget(g,'xpWaveCarry',Math.min(8,Math.max(2,Math.ceil(alive.length/4))),P.farmXpWave,P.xpWaveCap);
                 const existing=g.farmBoxes.filter(b=>b.kind==='xp').length;let created=0;
                 for(let i=0;i<wanted&&existing+created<cap;i++){const sideWanted=__brScope.brSurvivalFarmSlot(g),side=sideWanted?__brScope.brSurvivalFarmPoint(g,safeRadius,BOUND,alive):null;let used=false;for(let tries=0;tries<100;tries++) {
                     const angle=random()*Math.PI*2,minRadius=Math.min(180,safeRadius*.15);
@@ -317,7 +327,7 @@ export const initializers=[
                 if(shot.explodeRadius>0) {
                     area(g,shot.owner,shot.pos,shot.explodeRadius,shot.farmDamage||.65,token);
                     g.spawnExplosion(shot.pos,shot.explodeRadius,shot.impactColor||shot.color);
-                    g.applyAoE(shot.pos,shot.explodeRadius,shot.damage,shot.owner,Math.max(12,shot.knockback),{scaled:true,wangguiPower:shot.wangguiPower,style:'projectile-blast'});
+                    g.applyAoE(shot.pos,shot.explodeRadius,shot.damage,shot.owner,Math.max(12,shot.baseKnockback??shot.knockback)*(shot.rangedPushFactor??1),{scaled:true,wangguiPower:shot.wangguiPower,style:'projectile-blast'});
                 }
                 if(shot.type!=='ORBIT'&&shot.type!=='BOOMERANG'&&!shot.pierce){shot.life=0;return true;}
                 return false;
@@ -325,11 +335,17 @@ export const initializers=[
             function updateTeamCrates(g) {
                 if(g.frame%30!==0)return;
                 const queue=g.teamCrateQueue||(g.teamCrateQueue=[]),random=g.farmRandom||__brScope.random;
+                // Expired heal crates retain their reservation while respawning.
+                // This uses the existing 30-tick queue cadence, not a new timer.
+                let expired=false;
+                for(const box of g.farmBoxes.slice())if(box.kind==='heal'&&g.frame-box.born>=HEAL_LIFETIME){removeBox(g,box);expired=true;}
+                if(expired)dirty(g);
                 if(g.frame>=g.nextHealCrateFrame){g.nextHealCrateFrame=g.frame+__brScope.BR_TEAM_KILL_RULES.boxRespawnFrames;
                     if(g.farmBoxes.length+queue.length<g.teamCrateCap)spawnHealthWave(g);}
                 const radius=Math.max(150,g.mapRadius-170),alive=(g.activeParticipants||g.participants).filter(p=>p.alive&&real(p));
                 for(let i=queue.length-1;i>=0;i--){const pending=queue[i];if(pending.at>g.frame)continue;
-                    if(g.farmBoxes.length>=g.teamCrateCap){queue.splice(i,1);continue;}
+                    const kindCap=pending.kind==='heal'?P.healCap:g.teamXpCrateCap;
+                    if(g.farmBoxes.length>=g.teamCrateCap||occupied(g,pending.kind)>kindCap){queue.splice(i,1);continue;}
                     let placed=false;
                     for(let tries=0;tries<80;tries++){
                         const angle=random()*Math.PI*2,distance=Math.sqrt(random())*radius,pos=g.capture?__brScope.brCaptureRandomPoint(g,140,random):new __brScope.Vec2(g.center.x+Math.cos(angle)*distance,g.center.y+Math.sin(angle)*distance);

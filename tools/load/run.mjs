@@ -3,11 +3,12 @@ import {loadBrowser} from './browser.mjs';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {fork} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {connect} from '../../tests/integration/client.mjs';
 import {manifest} from '../../packages/content/src/manifest.js';
 import {Samples} from '../../apps/server/src/diagnostics/metrics.js';
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
-export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverOverload=false,browser=false,out=`artifacts/load-${players}-${seconds}.json`}={}){
+export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverOverload=false,browser=false,roster="original",out=`artifacts/load-${players}-${seconds}.json`}={}){
  if(!Number.isInteger(players)||players<2||players>30||!Number.isFinite(seconds)||seconds<1)throw Error('INVALID_LOAD_OPTIONS');
  const profileDir=process.env.LOAD_CPU_PROFILE;if(profileDir)fs.mkdirSync(profileDir,{recursive:true});
  const child=fork(fileURLToPath(new URL('./server.mjs',import.meta.url)),[],{stdio:['ignore','inherit','inherit','ipc'],windowsHide:true,execArgv:profileDir?['--cpu-prof','--cpu-prof-interval=10000','--cpu-prof-dir='+path.resolve(profileDir)]:[]});
@@ -15,8 +16,9 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverO
  child.on('message',m=>{const p=rpcs.get(m.id);if(p){rpcs.delete(m.id);clearTimeout(p.timer);m.error?p.reject(Error(m.error)):p.resolve(m.value);}});
  const rpc=(type,args={})=>new Promise((resolve,reject)=>{const id=++rpcSeq,timer=setTimeout(()=>{rpcs.delete(id);reject(Error('IPC_TIMEOUT'));},10000);rpcs.set(id,{resolve,reject,timer});child.send({id,type,...args});});
  const app={address:{port}},host=await(await connect(app)).host(),clients=[];
- const report={scenario:'real loopback WebSocket; teacher + synthetic clients; not physical devices',players,seconds,started:new Date().toISOString(),fingerprint:host.session,fixture:'All roster characters rotate by round. Server fixture grants XP20; clients choose real offers. Respawn answers use fixture oracle. No invulnerability.',samples:[],rtt:new Samples(),ack:new Samples(),snapshots:0,receivedBytes:0,errors:[],expectedStale:0,rounds:0};
+ const report={scenario:'real loopback WebSocket; teacher + synthetic clients; not physical devices',players,seconds,roster,started:new Date().toISOString(),fingerprint:host.session,fixture:'All roster characters rotate by round. Server fixture grants XP20; clients choose real offers. Respawn answers use fixture oracle. No invulnerability.',samples:[],rtt:new Samples(),ack:new Samples(),snapshots:0,receivedBytes:0,errors:[],expectedStale:0,rounds:0};
  delete report.fingerprint.token;delete report.fingerprint.playerId;
+ report.fixtureHash=createHash('sha256').update(['run.mjs','server.mjs','telemetry.mjs','browser.mjs'].map(f=>fs.readFileSync(new URL(f,import.meta.url),'utf8').replaceAll('\r\n','\n')).join('\n')).digest('hex');
  let observer;let stopping=false,tick=0,roundStarted=performance.now(),roundBusy=false;
  const track=c=>{c.messages=[];c.onMessage=m=>{if(stopping)return;if(m.type==='SNAPSHOT'){report.snapshots++;const sent=c.sentInputs?.get(m.payload.self?.lastAppliedSeq);if(sent){report.ack.add(performance.now()-sent);c.sentInputs.delete(m.payload.self.lastAppliedSeq);}}if(m.type==='PONG')report.rtt.add(performance.now()-m.payload.clientTime);if(m.type==='ERROR'&&['LIFE_MISMATCH','SCOPE_MISMATCH','BATTLE_REQUIRED'].includes(m.payload.code)){report.expectedStale++;return;}if(m.type==='ERROR'||m.type==='OVERLOAD'){if(report.errors.length<100)report.errors.push(m.payload);}c.messages=c.messages.filter(x=>['SESSION','ROOM_STATE','COMMAND_RESULT'].includes(x.type));};};
  track(host);
@@ -24,10 +26,10 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverO
   if(browser){observer=await loadBrowser(app,host.room.code,rpc);report.scenario='teacher + 19 synthetic students + one real browser student over loopback WS; not physical devices';}
   for(let i=0;i<players-(browser?1:0);i++){const c=await(await connect(app)).join(host.room.code,'Bot'+String(i+1).padStart(2,'0'));c.seq=0;c.action=0;c.sentInputs=new Map();track(c);clients.push(c);}
   async function begin(){
-   if(host.room.phase==='RESULTS'){await host.command('REMATCH');await host.phase('LOBBY');}
+   if(host.room.phase==='RESULTS'){await host.command('REMATCH');await host.phase('LOBBY');const clean=await rpc('status');(report.rematchCleanup??=[]).push(clean.window);if(Object.values(clean.window.objects).some(n=>n!==0)||clean.window.roster10.retained!==0)throw Error('REMATCH_OBJECT_LEAK');}
    await host.command('CONFIGURE',{mode:'team-capture',teamCount:4,matchSeconds:300,quizText:'Load question | Correct | Wrong one | Wrong two | Wrong three'});
    await host.command('START_QUIZ');await host.command('BEGIN_DRAFT');
-   await rpc('fixture-draft',{round:report.rounds,players});for(const c of clients){c.seq=0;c.action=0;c.snapshot=null;c.lifeSeq=0;}
+   await rpc('fixture-draft',{round:report.rounds,players,roster});for(const c of clients){c.seq=0;c.action=0;c.snapshot=null;c.lifeSeq=0;}
    const result=await host.command('START_BATTLE');if(!result.accepted)throw Error('START_BATTLE '+result.reason);await clients[0].phase('BATTLE');
    await rpc('fixture-growth');
    report.rounds++;roundStarted=performance.now();
@@ -56,7 +58,7 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverO
    await delay(1000/30);
   }
   stopping=true;report.elapsedMs=performance.now()-started;report.server=await rpc('status');report.rtt=report.rtt.report();report.ack=report.ack.report();report.receivedBytes=[host,...clients].reduce((n,c)=>n+(c.receivedBytes||0),0);report.browser=observer?await observer.sample():undefined;report.pass=(!observer||!report.browser.errors.length)&&report.errors.length===0&&report.snapshots>players*seconds*10&&report.server.overloads===0;
- }catch(error){report.pass=false;report.failure=error.stack;report.server=await rpc('status');report.hostPhase=host.room?.phase;report.clientPhases=clients.map(c=>({phase:c.room?.phase,open:c.ws.readyState}));}finally{stopping=true;await observer?.close();await host.close();for(const c of clients)await c.close();report.cleanup=await rpc('close');report.ended=new Date().toISOString();fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');}
+ }catch(error){report.pass=false;report.failure=error.stack;report.server=await rpc('status');report.hostPhase=host.room?.phase;report.clientPhases=clients.map(c=>({phase:c.room?.phase,open:c.ws.readyState}));}finally{stopping=true;await observer?.close();await host.close();for(const c of clients)await c.close();report.cleanup=await rpc('close');if(Object.values(report.cleanup).some(n=>n!==0)){report.pass=false;report.failure??='SERVER_REFERENCE_LEAK';}report.ended=new Date().toISOString();report.totalMs=Date.parse(report.ended)-Date.parse(report.started);fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');}
  console.log(JSON.stringify({file:out,players,seconds,pass:report.pass,rounds:report.rounds,snapshots:report.snapshots,failure:report.failure,errors:report.errors.slice(0,3),step:report.server?.stepCpu,gap:report.server?.snapshotGap}));return report;
 }
 if(path.resolve(process.argv[1]||'')===fileURLToPath(import.meta.url)){

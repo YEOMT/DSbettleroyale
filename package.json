@@ -24,7 +24,9 @@
     "test:fidelity": "node tests/fidelity/regression.mjs && node tests/fidelity/contracts.mjs && node tests/fidelity/visuals.mjs && node tests/fidelity/reference.mjs",
     "test:fidelity-audit": "node tests/fidelity-v33-2/run.mjs",
     "quick": "node tools/ci/quick.mjs",
-    "test:targeted": "node tools/ci/targeted.mjs"
+    "test:targeted": "node tools/ci/targeted.mjs",
+    "content:generate": "node tools/content/generate.mjs",
+    "content:check": "node tools/content/generate.mjs --check"
   },
   "dependencies": {
     "pixi.js": "8.20.1",

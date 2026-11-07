@@ -1,3 +1,4 @@
+import {manifest} from '../../packages/content/src/manifest.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -16,7 +17,7 @@ test('CI roster partitions cover all six renderer/quality pairs exactly once',()
  assert.equal(new Set(pairs).size,6);
  assert.deepEqual(pairs.slice().sort(),renderers.flatMap(r=>qualities.map(q=>r+'/'+q)).sort());
  assert.match(commands(workflow.jobs.roster),/all77\.mjs \$\{\{ matrix\.renderer \}\} \$\{\{ matrix\.quality \}\}/);
- assert.equal(pairs.length*77,462);
+ assert.equal(pairs.length*manifest.roster.length,6*manifest.roster.length);
 });
 
 test('CI camera, layout and remaining audits retain the full original case inventory',()=>{

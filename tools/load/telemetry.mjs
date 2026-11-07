@@ -14,6 +14,7 @@ export function loadTelemetry(app){
   phase:room?.phase,alive:g?.participants.filter(p=>p.alive).length||0,participants:g?.participants.length||0,
   policy:g?.getHostBroadcastMode(),particleBudget:g?.getParticleBudget(),
   objects:Object.fromEntries(['projectiles','particles','zones','turrets','texts','swings','walls','smokes','signatures','rings'].map(k=>[k,g?.[k]?.length||0])),
+  roster10:{retained:g?.rw?.entities.length||0,active:g?.rw?.entities.filter(e=>!e.dead).length||0,...Object.fromEntries(['decoy','grapple','mushroom','poison','ring-wall'].map(k=>[k,g?.rw?.entities.filter(e=>!e.dead&&e.kind===k).length||0])),wallSegments:g?.walls.filter(w=>w.dynamic).length||0,wallRevision:g?.dynamicObstacles?.revision||0},
   peers:peers.length,wireBytesWritten:peers.reduce((n,p)=>n+(p.socket._socket?.bytesWritten||0),0),bufferBytes:peers.reduce((n,p)=>n+p.socket.bufferedAmount,0),queueBytes:peers.reduce((n,p)=>n+p.queueBytes,0),
   pendingSnapshots:peers.filter(p=>p.pendingSnapshot).length,replacedSnapshots:app.metrics.replacedSnapshots,memory:process.memoryUsage()};}
  for(const [key,get] of [['stepCpu',()=>step],['snapshotCpu',()=>snapshot],['snapshotGap',()=>gap]]){

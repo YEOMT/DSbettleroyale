@@ -1,0 +1,29 @@
+name: Roster10 focused long load
+on:
+  workflow_dispatch: null
+permissions:
+  contents: read
+jobs:
+  load:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [capture20, late30]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - if: matrix.scenario == 'capture20'
+        run: node tools/load/run.mjs --players=20 --seconds=605 --rematchSeconds=360 --roster=new --browser=true --out=artifacts/roster10/capture20.json
+      - if: matrix.scenario == 'late30'
+        run: node tools/load/tablet.mjs --players=30 --seconds=605 --roster=new --label=roster10-long --out=artifacts/roster10/late30.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roster10-load-${{ matrix.scenario }}-${{ github.sha }}
+          path: artifacts/roster10/
+          retention-days: 30

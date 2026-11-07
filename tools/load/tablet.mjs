@@ -3,13 +3,15 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {fork} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {createServer} from 'vite';
 import {chromium,webkit} from 'playwright';
 import {connect} from '../../tests/integration/client.mjs';
 import {installBrowserTelemetry} from './browser-telemetry.mjs';
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
-export async function tabletLoad({players=30,seconds=605,mode='solo',label='before',engine='chromium',quality='balanced',matrix=false,dense=false,out=`artifacts/tablet-stability/${label}-${mode}-${players}.json`}={}){
- const started=performance.now(),report={label,players,seconds,mode,engine,quality,started:new Date().toISOString(),fixture:'Private IPC: six representative characters, extended health/refill to sustain combat; real movement, attacks, cooldowns, damage, 60Hz physics and 20Hz WS. 30 connected participants enter the late-game fixture with 6 alive, then 5 and 3. Capture keeps all participants alive as a separate extreme stress case, not natural deaths/respawns. No production test routes. Three simultaneous browser surfaces on one PC; not three physical devices.',samples:[],errors:[]};
+export async function tabletLoad({players=30,seconds=605,mode='solo',label='before',engine='chromium',quality='balanced',matrix=false,dense=false,roster="original",transitionSeconds=null,out=`artifacts/tablet-stability/${label}-${mode}-${players}.json`}={}){
+ const started=performance.now(),report={label,players,seconds,mode,engine,quality,roster,started:new Date().toISOString(),fixture:'Private IPC: six representative characters, extended health/refill to sustain combat; real movement, attacks, cooldowns, damage, 60Hz physics and 20Hz WS. 30 connected participants enter the late-game fixture with 6 alive, then 5 and 3. Capture keeps all participants alive as a separate extreme stress case, not natural deaths/respawns. No production test routes. Three simultaneous browser surfaces on one PC; not three physical devices.',samples:[],errors:[]};
+ report.fixtureHash=createHash('sha256').update(['tablet.mjs','server.mjs','telemetry.mjs','browser-telemetry.mjs'].map(f=>fs.readFileSync(new URL(f,import.meta.url),'utf8').replaceAll('\r\n','\n')).join('\n')).digest('hex');
  const profileDir=process.env.LOAD_CPU_PROFILE;if(profileDir)fs.mkdirSync(profileDir,{recursive:true});
  const child=fork(fileURLToPath(new URL('./server.mjs',import.meta.url)),[],{stdio:['ignore','inherit','inherit','ipc'],windowsHide:true,execArgv:profileDir?['--cpu-prof','--cpu-prof-interval=1000','--cpu-prof-dir='+path.resolve(profileDir)]:[]});
  const port=await new Promise((resolve,reject)=>{child.once('message',m=>resolve(m.port));child.once('error',reject);});let id=0;const pending=new Map();
@@ -31,7 +33,7 @@ export async function tabletLoad({players=30,seconds=605,mode='solo',label='befo
   // The private seed change sends ROOM_STATE asynchronously. Wait for each
   // browser to accept its new scope before issuing the next normal command.
   for(const p of pages)await p.page.waitForFunction(async match=>(await import('/src/main.js')).net.scope.matchId===match,'stability-fixture-'+round);
-  await command('START_QUIZ');await command('BEGIN_DRAFT');await rpc('fixture-stability-draft');await command('START_BATTLE');
+  await command('START_QUIZ');await command('BEGIN_DRAFT');await rpc('fixture-stability-draft',{roster});await command('START_BATTLE');
   await rpc('fixture-stability',{alive:startAlive,place:true,dense});for(const c of clients){c.seq=0;c.action=0;}
   for(const p of pages)await p.page.evaluate(dense=>{tabletProbe.dense=dense;},dense);
   for(const p of pages)await p.page.waitForFunction(async()=>{const a=await import('/src/main.js');return a.timeline.samples.length&&a.renderer.enabled;});
@@ -58,7 +60,7 @@ export async function tabletLoad({players=30,seconds=605,mode='solo',label='befo
   }else{
    let alive=startAlive,nextSample=5;
    while(performance.now()-phaseStart<seconds*1000){const elapsed=(performance.now()-phaseStart)/1000;
-    if(mode==='solo'&&players>6){const next=elapsed>=360?3:elapsed>=60?5:6;if(next!==alive){alive=next;await rpc('fixture-stability',{alive});}}
+    if(mode==='solo'&&players>6){const transitions=transitionSeconds?String(transitionSeconds).split(',').map(Number):[60,360];const next=elapsed>=transitions[1]?3:elapsed>=transitions[0]?5:6;if(next!==alive){alive=next;await rpc('fixture-stability',{alive});}}
     if(elapsed>=nextSample){await sample('continuous-'+alive);nextSample+=elapsed<20?5:30;}
     await delay(200);
    }

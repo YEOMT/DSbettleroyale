@@ -1,4 +1,5 @@
 // Display-only actor loops from final v32.1 GameWorld.draw/drawHostLite/brCaptureCanvasFrame.
+import {hostDisplayRadius,hostInk,drawHostInfo} from './host-layout.js';
 import {manifest} from '../../../../packages/content/src/manifest.js';
 export function createHostCanvas(renderer){
 const r=renderer,BR_ACTOR_EMOJI_CACHE=r.paint.BR_ACTOR_EMOJI_CACHE,TEAM_NEUTRAL_FILL='#111827',brTeamKillColor=r.paint.brTeamKillColor,brCombatPainter=r.paint.brCombatPainter,brPaintReworkStatus=r.paint.brPaintReworkStatus,brLevelCanvasDraw=r.paint.brLevelCanvasDraw;
@@ -76,7 +77,7 @@ function normal(ctx,autoBroadcast,teamMode){this.participants.forEach(p => {
                         ctx.restore();
                     }
 
-                    // Circular body fill shares the collision radius.
+                    // Circular body fill shares the host display radius.
                     // 다른 이펙트의 원형 path가 팀 테두리를 덮어쓰던 버그를 차단한다.
                     drawTeamShapePath(ctx,p.team,p.pos.x,p.pos.y,tr);
                     ctx.fillStyle = p.team>0 ? TEAM_NEUTRAL_FILL : '#111';
@@ -104,7 +105,7 @@ function normal(ctx,autoBroadcast,teamMode){this.participants.forEach(p => {
                         ctx.textAlign='center'; ctx.textBaseline='middle';
                         ctx.fillStyle=guardSubs.has(p.ability.sub)?'#bfdbfe':hasteSubs.has(p.ability.sub)?'#fde68a':'#bbf7d0';
                         ctx.shadowColor=ctx.fillStyle; ctx.shadowBlur=6;
-                        ctx.fillText(roleMark,p.pos.x,p.pos.y-tr*1.48);
+                        ctx.fillText(roleMark,p.pos.x-tr-10/this.zoom,p.pos.y-tr*.35);
                         ctx.restore();
                     }
 
@@ -114,7 +115,7 @@ function normal(ctx,autoBroadcast,teamMode){this.participants.forEach(p => {
                         ctx.font=`bold ${Math.max(12,tr*0.32)}px sans-serif`;
                         ctx.textAlign='center'; ctx.textBaseline='middle';
                         ctx.fillStyle='#dbeafe'; ctx.shadowColor='#60a5fa'; ctx.shadowBlur=6;
-                        ctx.fillText('🛡',p.pos.x,p.pos.y-tr*1.48);
+                        ctx.fillText('🛡',p.pos.x-tr-10/this.zoom,p.pos.y-tr*.35);
                         ctx.restore();
                     }
 
@@ -167,41 +168,14 @@ function normal(ctx,autoBroadcast,teamMode){this.participants.forEach(p => {
                     if(p.team>0){drawTeamShapePath(ctx,p.team,p.pos.x,p.pos.y,tr);ctx.strokeStyle=brTeamKillColor(p.team);ctx.lineWidth=brTeamBorderWidth(this.zoom);ctx.stroke();}
                     ctx.globalAlpha = 1.0; 
 
-                    brLevelCanvasDraw(ctx,p,p.run?.level,p.lifeSeq,p.pos.x,p.pos.y-tr-Math.max(58/this.zoom,autoBroadcast?64:52),this.zoom);
-                    brPaintReworkStatus(brCombatPainter(ctx,false),p.pos.x,p.pos.y,tr,this.zoom,window.BRRework?.wirePlayer(p,this),this.frame,p.maxHp);
-                    let hpPct = Math.max(0, p.hp/p.maxHp);
-                    let barW = p.radius * (autoBroadcast?2.35:2),barH=autoBroadcast?11:8,barY=p.pos.y-p.radius-(autoBroadcast?16:12);
-                    ctx.fillStyle='#4b1620'; ctx.fillRect(p.pos.x-barW/2,barY,barW,barH);
-                    ctx.fillStyle=hpPct>.35?'#4ade80':'#fb4b63'; ctx.fillRect(p.pos.x-barW/2,barY,barW*hpPct,barH);
-                    if(autoBroadcast){ctx.strokeStyle='rgba(255,255,255,.82)';ctx.lineWidth=2;ctx.strokeRect(p.pos.x-barW/2,barY,barW,barH);}
-                    
-                    const label=p.name+(p.kills>0?' [⚔️'+p.kills+']':'');
-                    ctx.shadowBlur=0;drawName(ctx,label,p.pos.x,p.pos.y-p.radius-(autoBroadcast?35:25),autoBroadcast);
+                    drawHostInfo(r,brCombatPainter(ctx,false),p.actor,p.radius,this.zoom,this.now,this.frame,this.names,false);
                 });}
-function lite(ctx,scale,cx,cy){const tierColor={S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'};for(const p of this.participants) {
-                    if(p.id===999)continue;
-                    const x=cx+(p.pos.x||0)*scale,y=cy+(p.pos.y||0)*scale,r=p.humanControlled?7:5;
-                    if(!p.alive) {
-                        const fade=Math.max(0,Math.min(1,(Number(p.deathVisualUntilAt||0)-performance.now())/750));
-                        if(fade>0){ctx.globalAlpha=fade;ctx.strokeStyle='#fb4b63';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,3+8*(1-fade),0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
-                        continue;
-                    }
-                    ctx.fillStyle=window.BRMP?.isRespawnMode()?'#111827':tierColor[p.ability?.t]||'#fff';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
-                    ctx.strokeStyle='rgba(5,12,24,.9)';ctx.lineWidth=2;if(!window.BRMP?.isRespawnMode())ctx.stroke();
-                    const body=renderer.poses.sample(p.actor,scale,renderer.poseTick,this.now,renderer.session.reducedMotion,true);
-                    ctx.save();ctx.translate(x+(body?.x||0)*scale,y+(body?.y||0)*scale);ctx.rotate(body?.rotation||0);ctx.scale(1+(body?.squash||0)*.55,1-(body?.squash||0));ctx.drawImage(p.cacheCanvas,-r*1.4,-r*1.4,r*2.8,r*2.8);ctx.restore();
-                    if(p.team>0){ctx.strokeStyle=brTeamKillColor(p.team);ctx.lineWidth=3.25;ctx.beginPath();ctx.arc(x,y,r*1.5,0,Math.PI*2);ctx.stroke();}
-                    if(p.humanControlled){
-                        const label=Array.from(String(p.name||'')).slice(0,7).join('');
-                        ctx.font='800 10px sans-serif';ctx.textAlign='center';ctx.lineJoin='round';ctx.lineWidth=3;
-                        const labelY=y-r-(p.stunned>0?16:5);ctx.strokeStyle='rgba(3,8,18,.96)';ctx.strokeText(label,x,labelY);ctx.fillStyle='#f8fafc';ctx.fillText(label,x,labelY);
-                    }
-                    const hp=Math.max(0,p.hp/Math.max(1,p.maxHp)),barW=p.humanControlled?19:15,barY=y+r+3;
-                    ctx.fillStyle='rgba(8,17,32,.96)';ctx.fillRect(x-barW/2-1,barY-1,barW+2,5);
-                    ctx.fillStyle=hp>.35?'#4ade80':'#fb4b63';ctx.fillRect(x-barW/2,barY,barW*hp,3);
-                    brLevelCanvasDraw(ctx,p,p.run?.level,p.lifeSeq,x,y-r-34,1,true);
-                    brPaintReworkStatus(brCombatPainter(ctx,false),x,y,r,1,window.BRRework?.wirePlayer(p,this),this.frame,p.maxHp);
-                }}
-function capture(ctx,g){const painter=brCombatPainter(ctx,false);for(const p of g.participants){if(p.id===999||!p.alive)continue;const r=p.radius;painter.circle(p.pos.x,p.pos.y,r,'#101623',1);renderer.actorBody(p.cacheCanvas,p.actor,p.pos.x,p.pos.y,r,'actor-'+p.actor.id,g.zoom,g.now);painter.circle(p.pos.x,p.pos.y,r,brTeamKillColor(p.team),1,brTeamBorderWidth(g.zoom,true));painter.rect(p.pos.x-r,p.pos.y+r+12,r*2,8,'#57202d',1);painter.rect(p.pos.x-r,p.pos.y+r+12,r*2*p.hp/p.maxHp,8,'#4ade80',1);ctx.fillStyle='#f8fafc';ctx.font='bold 30px sans-serif';ctx.textAlign='center';ctx.fillText(p.name,p.pos.x,p.pos.y-r-20);brLevelCanvasDraw(ctx,p,p.run?.level,p.lifeSeq,p.pos.x,p.pos.y-r-55/g.zoom,g.zoom,true);brPaintReworkStatus(painter,p.pos.x,p.pos.y,r,g.zoom,window.BRRework.wirePlayer(p,g),g.frame,p.maxHp);}}
-return (view,pose,now)=>{const participants=view.actors.map(a=>{let p=r.hostTracks.get(a.id);if(!p){p={};r.hostTracks.set(a.id,p);}Object.assign(p,a,a.visual,{actor:a,id:a.visual?.id||0,pos:{x:a.x,y:a.y},ability:abilities.get(a.abilityId)||{e:a.emoji,t:a.tier},run:{level:a.level},invisible:!!(a.flags&32),finalPhaseBoosted:!!(a.flags&64)});p.cacheCanvas=brActorEmojiCanvas(a.emoji,r.paint.brGraphicsProfile().source);if(a.alive)p.deathVisualUntilAt=0;else if(!p.deathVisualUntilAt)p.deathVisualUntilAt=now+750;return p;});const g={participants,now,frame:view.renderTick,zoom:pose.zoom,finalPhase:view.presentation?.finalPhase,isVisualPerformanceMode:()=>pose.lod==='performance'},ctx=r.ctx;ctx.save();if(view.capture)capture(ctx,g);else if(pose.lod==='performance')(ctx.scale(1/pose.zoom,1/pose.zoom),lite.call(g,ctx,pose.zoom,0,0));else normal.call(g,ctx,pose.lod==='broadcast',r.session.roomMeta?.mode==='solo'?0:1);ctx.restore();};
+function lite(ctx){const painter=brCombatPainter(ctx,false);for(const p of this.participants){
+ const a=p.actor,rad=p.radius,col=p.team?brTeamKillColor(p.team):({S:'#ff3859',A:'#facc15',B:'#60a5fa',C:'#34d399',F:'#cbd5e1'}[a.tier]||'#fff');
+ if(!p.alive){const fade=Math.max(0,(p.deathVisualUntilAt-this.now)/750);if(fade){ctx.save();ctx.globalAlpha=fade;renderer.actorBody(p.cacheCanvas,a,a.x,a.y,rad*(.45+.55*fade),'actor-'+a.id,this.zoom,this.now,fade);ctx.restore();}continue;}
+ painter.circle(a.x,a.y,rad,'#111827',1);renderer.actorBody(p.cacheCanvas,a,a.x,a.y,rad,'actor-'+a.id,this.zoom,this.now,a.flags&32?.3:1);painter.circle(a.x,a.y,rad,col,1,2/this.zoom);
+ drawHostInfo(renderer,painter,a,rad,this.zoom,this.now,this.frame,this.names,true);
+}}
+function capture(ctx,g){const painter=brCombatPainter(ctx,false);for(const p of g.participants){if(!p.alive)continue;const rad=p.radius;painter.circle(p.pos.x,p.pos.y,rad,'#101623',1);renderer.actorBody(p.cacheCanvas,p.actor,p.pos.x,p.pos.y,rad,'actor-'+p.actor.id,g.zoom,g.now);painter.circle(p.pos.x,p.pos.y,rad,brTeamKillColor(p.team),1,brTeamBorderWidth(g.zoom,true));drawHostInfo(renderer,painter,p.actor,rad,g.zoom,g.now,g.frame,g.names,false);}}
+return (view,pose,now)=>{const participants=view.actors.map(a=>{let p=r.hostTracks.get(a.id);if(!p){p={};r.hostTracks.set(a.id,p);}Object.assign(p,a,a.visual,{actor:a,id:a.visual?.id||0,pos:{x:a.x,y:a.y},ability:abilities.get(a.abilityId)||{e:a.emoji,t:a.tier},run:{level:a.level},invisible:!!(a.flags&32),finalPhaseBoosted:!!(a.flags&64)});p.radius=hostDisplayRadius(a.radius,pose.zoom,innerWidth,innerHeight);p.cacheCanvas=hostInk(r.paint.brGetEmojiSprite(a.emoji),true);if(a.alive)p.deathVisualUntilAt=0;else if(!p.deathVisualUntilAt)p.deathVisualUntilAt=now+750;return p;});const g={participants,names:[],now,frame:view.renderTick,zoom:pose.zoom,finalPhase:view.presentation?.finalPhase,isVisualPerformanceMode:()=>pose.lod==='performance'},ctx=r.ctx;ctx.save();if(view.capture)capture(ctx,g);else if(pose.lod==='performance')lite.call(g,ctx);else normal.call(g,ctx,pose.lod==='broadcast',r.session.roomMeta?.mode==='solo'?0:1);ctx.restore();};
 }

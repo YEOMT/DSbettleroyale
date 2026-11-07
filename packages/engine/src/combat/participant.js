@@ -1,5 +1,8 @@
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
 export function install(__brScope){
+// Explicit room-scoped deltas let frozen parity fixtures neutralize only the
+// approved balance changes without replacing their original combat assertions.
+__brScope.ROSTER10_BALANCE={bcHp:1.06,rangedPush:.88,farmInitial:1.10,farmXpWave:1.10,farmHealWave:1.15,initialCap:46,xpWaveCap:9,xpCap:53,healCap:7,respawnExtra:4,genieHp:56,genieTicks:1440};
 __brScope.Participant = class Participant {
             constructor(id, name, ability, pos, team=0) {
                 const rwDef=__brScope.BR_REWORK_DEFS?.[ability.id],statType=rwDef?.statType||ability.type;
@@ -140,12 +143,15 @@ __brScope.Participant = class Participant {
                     this.hp=this.maxHp;
                 }
                 
-                if(rwDef?.stats){const st=rwDef.stats;if(Number.isFinite(st.maxHp))this.maxHp=st.maxHp;if(Number.isFinite(st.speed))this.speed=st.speed;this.maxHp*=Number(st.hpMultiplier??1);this.speed*=Number(st.speedMultiplier??1);this.damageMult*=Number(st.damageMultiplier??1);if(st.knockbackResist!=null)this.knockbackResist=st.knockbackResist;}
+                if(rwDef?.stats){const st=rwDef.stats;if(Number.isFinite(st.maxHp))this.maxHp=st.maxHp;if(Number.isFinite(st.speed))this.speed=st.speed;if(Number.isFinite(st.radius))this.radius=st.radius;this.maxHp*=Number(st.hpMultiplier??1);this.speed*=Number(st.speedMultiplier??1);this.damageMult*=Number(st.damageMultiplier??1);if(st.knockbackResist!=null)this.knockbackResist=st.knockbackResist;}
                 // Run HP augments multiply this already adjusted base exactly once.
                 if(Object.prototype.hasOwnProperty.call(__brScope.BR_BASE_HP_OVERRIDES_BY_ID,ability.id))this.maxHp=__brScope.BR_BASE_HP_OVERRIDES_BY_ID[ability.id];
                 this.maxHp=__brScope.brCloseBaseHp(ability,this.maxHp);
                 if(__brScope.BR_V29_FINAL_HP[ability.id]!=null)this.maxHp=__brScope.BR_V29_FINAL_HP[ability.id];
                 if(ability.t==='B'||ability.t==='C')this.maxHp*=1.15; // v30: final base HP, once before mode/run multipliers
+                // New entries freeze the final pre-mode median after old role modifiers.
+                if(Number.isFinite(rwDef?.stats?.finalBaseHp))this.maxHp=rwDef.stats.finalBaseHp;
+                if(ability.t==='B'||ability.t==='C')this.maxHp*=__brScope.ROSTER10_BALANCE.bcHp;
                 if(ability.id==='emoji-114')this.speed=1.5827; // median existing A tank walk; native tank-punch retained
                 this.modeHpMultiplier=__brScope.brModeHpMultiplier(__brScope.session?.roomMeta?.mode);
                 this.maxHp*=this.modeHpMultiplier;this.hp=this.maxHp;

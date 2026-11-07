@@ -1,6 +1,6 @@
-// Generated from offline final v32.1 browser. Display text only; no client combat.
+// Generated from current authority runtime. Display text only; no client combat.
 export const display={
-  "rosterVersion": "emoji77-v29-wanggui",
+  "rosterVersion": "emoji87-roster10-v33",
   "odds": "S 10% · A 20% · B 25% · C 30% · F 15%",
   "cards": {
     "emoji-000": {
@@ -86,7 +86,7 @@ export const display={
     },
     "emoji-012": {
       "basic": "지니 사격 · 1발",
-      "skill": "HP 70 포탑 설치(보통 B/C 평타 약 3회) · 동시 3개 / 각 30초 · 4번째는 가장 오래된 포탑 교체 · 4회마다 강화탄",
+      "skill": "HP 56 포탑 설치 · 동시 3개 / 각 24초 · 4번째는 가장 오래된 포탑 교체 · 4회마다 강화탄",
       "passive": "",
       "cooldown": "7초",
       "label": "지니",
@@ -695,6 +695,96 @@ export const display={
       "label": "돌 무더기 투척",
       "category": "근접형",
       "concept": "큰 몸집의 근접 전사 · 준비 후 작은 돌 12발 투척"
+    },
+    "emoji-141": {
+      "basic": "짧은 카드 베기",
+      "skill": "최대 240 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
+      "passive": "",
+      "cooldown": "12초",
+      "label": "조커",
+      "category": "근접형",
+      "concept": "최대 240 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개"
+    },
+    "emoji-142": {
+      "basic": "단발 탄",
+      "skill": "밧줄 800 · 첫 플레이어/벽/상자/포탑 표면까지 자신만 이동 · 피해·기절·넉백 없음",
+      "passive": "",
+      "cooldown": "10초",
+      "label": "마운틴 팀",
+      "category": "원거리형",
+      "concept": "밧줄 800 · 첫 플레이어/벽/상자/포탑 표면까지 자신만 이동 · 피해·기절·넉백 없음"
+    },
+    "emoji-143": {
+      "basic": "검격",
+      "skill": "최대 420 돌진 · 첫 적 피해 60 · 자신도 막히는 반경 260~360의 실제 5초 원형 벽",
+      "passive": "",
+      "cooldown": "16초",
+      "label": "킹 오브 데마시아",
+      "category": "근접형",
+      "concept": "최대 420 돌진 · 첫 적 피해 60 · 자신도 막히는 반경 260~360의 실제 5초 원형 벽"
+    },
+    "emoji-144": {
+      "basic": "포자 단발",
+      "skill": "최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
+      "passive": "",
+      "cooldown": "9초",
+      "label": "버섯돌보미",
+      "category": "원거리형",
+      "concept": "최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)"
+    },
+    "emoji-145": {
+      "basic": "짧은 깨물기",
+      "skill": "정확히 5초 이동속도 ×1.20 · 평타 공격빈도 ×1.25(같은 효과 비누적)",
+      "passive": "",
+      "cooldown": "12초",
+      "label": "부캉이",
+      "category": "근접형",
+      "concept": "정확히 5초 이동속도 ×1.20 · 평타 공격빈도 ×1.25(같은 효과 비누적)"
+    },
+    "emoji-146": {
+      "basic": "대나무 타격",
+      "skill": "최대 HP 10% 즉시 회복 · 6초 안의 다음 실제 평타 행동 1회 피해 ×1.50(헛쳐도 소비)",
+      "passive": "",
+      "cooldown": "10초",
+      "label": "푸바오",
+      "category": "근접형",
+      "concept": "최대 HP 10% 즉시 회복 · 6초 안의 다음 실제 평타 행동 1회 피해 ×1.50(헛쳐도 소비)"
+    },
+    "emoji-147": {
+      "basic": "작은 에너지탄",
+      "skill": "최대 260 / 속도 26의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음",
+      "passive": "",
+      "cooldown": "7초",
+      "label": "외계인",
+      "category": "원거리형",
+      "concept": "최대 260 / 속도 26의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음"
+    },
+    "emoji-148": {
+      "basic": "방망이 타격",
+      "skill": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신)",
+      "passive": "",
+      "cooldown": "10초",
+      "label": "도깨비",
+      "category": "근접형",
+      "concept": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신)"
+    },
+    "emoji-149": {
+      "basic": "짧은 들이밀기",
+      "skill": "정확히 3초 이동속도 ×1.20 · 별도 접촉 피해 없음",
+      "passive": "",
+      "cooldown": "8초",
+      "label": "꿀꿀이",
+      "category": "근접형",
+      "concept": "정확히 3초 이동속도 ×1.20 · 별도 접촉 피해 없음"
+    },
+    "emoji-150": {
+      "basic": "작은 단발 탄",
+      "skill": "최대 180 / 속도 22의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음",
+      "passive": "",
+      "cooldown": "9초",
+      "label": "찍찍이",
+      "category": "원거리형",
+      "concept": "최대 180 / 속도 22의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음"
     }
   }
 };
