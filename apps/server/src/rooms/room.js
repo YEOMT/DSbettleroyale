@@ -2,10 +2,11 @@ import {randomUUID,randomBytes,randomInt} from 'node:crypto';
 import {createRuleContext,exportResult,destroyWorld,applyCommand} from '../../../../packages/engine/src/index.js';
 import {manifest} from '../../../../packages/content/src/manifest.js';
 import {initializeQuiz,publicQuiz,answer} from './quiz.js';
+import {cancelCombatInputs} from './pause.js';
 const fail=code=>{throw Error(code);};
 export class Room{
  constructor(manager,code,hostName){
-  this.manager=manager;this.code=code;this.id=randomUUID();this.round=1;this.matchId=randomUUID();this.phase='LOBBY';this.revision=1;
+  this.manager=manager;this.code=code;this.id=randomUUID();this.round=1;this.matchId=randomUUID();this.phase='LOBBY';this.revision=1;this.safePaused=false;this.lastFault=null;
   this.config={mode:'solo',teamCount:2,matchSeconds:360,quizSeconds:60,rerollEvery:3,mapIndex:-1,graphicsPreset:'balanced'};
   this.rules=createRuleContext({matchId:this.matchId});this.quizBank=manifest.questions;this.members=new Map();this.world=null;this.lastOccupied=manager.now();
   this.host=this.addMember(hostName||'선생님','host');
@@ -77,7 +78,11 @@ export class Room{
    case 'DRAFT_CONFIRM':if(this.phase!=='DRAFT'||!member.draft||p.draftRevision!==member.draft.revision)fail('DRAFT_REVISION');member.draft.ready=true;member.draft.revision++;break;
    case 'START_BATTLE':if(this.phase!=='DRAFT')fail('PHASE_MISMATCH');if(this.manager.activeBattles()>=this.manager.config.maxActiveBattles)fail('BATTLE_CAPACITY');this.manager.startBattle(this);this.battleStartedAt=this.manager.now();this.phase='BATTLE';this.revision++;break;
    case 'END':if(this.phase!=='BATTLE')fail('PHASE_MISMATCH');this.finish();break;
-   case 'CONTINUE':if(this.phase!=='BATTLE'||!this.safePaused||this.lastFault)fail('CANNOT_CONTINUE');this.safePaused=false;this.debt=0;this.overloadSince=0;for(const m of this.members.values())m.peer?.send('OVERLOAD',{paused:false});break;
+   case 'CONTINUE':if(this.phase!=='BATTLE'||!this.safePaused||this.lastFault)fail('CANNOT_CONTINUE');
+    cancelCombatInputs(this.world);this.safePaused=false;this.debt=0;this.overloadSince=0;this.revision++;
+    // A fresh connection epoch also rejects pre-pause packets still in flight.
+    // FULL_STATE restores sequence floors/life/profiles before input is enabled.
+    for(const m of this.members.values())if(m.peer){m.epoch++;m.peer.epoch=m.epoch;m.peer.restore?.();m.peer.send('OVERLOAD',{paused:false});}break;
    case 'CLOSE_ROOM':if(this.phase==='BATTLE')fail('END_BATTLE_FIRST');queueMicrotask(()=>this.manager.remove(this));break;
    case 'REMATCH':{
     if(this.phase!=='RESULTS')fail('PHASE_MISMATCH');if(this.world)destroyWorld(this.world);this.world=null;this.result=null;this.static=null;this.safePaused=false;this.lastFault=null;this.debt=0;this.overloadSince=0;this.lastBoard=0;this.battleStartedAt=0;this.matchId=randomUUID();this.round++;this.phase='LOBBY';this.revision++;
@@ -89,7 +94,13 @@ export class Room{
   return {accepted:true};
  }
  finish(){if(this.phase!=='BATTLE')return;this.result=exportResult(this.world);this.world.finished=true;this.phase='RESULTS';this.revision++;this.manager.onResult?.(this.matchId,this.result);}
- publicState(member){return {simulationFault:this.phase==='BATTLE'&&!!this.lastFault,id:this.id,code:this.code,matchId:this.matchId,round:this.round,phase:this.phase,revision:this.revision,config:this.config,
+ pause(fault=null){
+  if(this.safePaused)return;this.safePaused=true;this.lastFault=fault;this.revision++;cancelCombatInputs(this.world);
+  for(const m of this.members.values())if(m.peer){m.peer.pendingSnapshot=null;m.peer.send('OVERLOAD',{paused:true,debtMs:this.debt,fault:!!fault},{reliable:true});m.peer.restore?.();}
+  if(fault)for(const m of this.members.values())m.peer?.send('ERROR',{code:'SIMULATION_PAUSED'});
+  this.manager.changed(this);
+ }
+ publicState(member){return {safePaused:this.phase==='BATTLE'&&!!this.safePaused,simulationFault:this.phase==='BATTLE'&&!!this.lastFault,id:this.id,code:this.code,matchId:this.matchId,round:this.round,phase:this.phase,revision:this.revision,config:this.config,
   serverTime:this.manager.now(),quizEndsAt:this.quizEndsAt||0,battleStartedAt:this.battleStartedAt||0,
   quizRemainingMs:Math.max(0,(this.quizEndsAt||0)-this.manager.now()),
   players:this.students().map(p=>({id:p.id,name:p.name,team:p.team,connected:p.connected,ready:!!p.draft?.ready,score:p.quiz?.score||0,...(member.role==='host'?{draft:p.draft||null}:{})})),

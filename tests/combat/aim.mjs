@@ -93,7 +93,7 @@ try{
  report.push({renderFault:'resynced in same battle'});
  // Inject a simulation failure on the isolated room only: a teacher can
  // distinguish this from a dropped socket and end the still-connected match.
- w.game.update=()=>{throw Error('FIXTURE_SIMULATION_FAULT');};h.room.safePaused=false;
+ w.game.update=()=>{throw Error('FIXTURE_SIMULATION_FAULT');};h.room.fixtureFrozen=false;
  await h.host.getByRole('button',{name:'결과로 종료'}).click();await page.locator('#br-results').waitFor();
  await h.host.locator('#br-rematch-room').click();await page.locator('#br-student-wait').waitFor();
  await h.command('START_QUIZ');await h.command('BEGIN_DRAFT');await h.command('START_BATTLE');await page.locator('#br-student-battle').waitFor();

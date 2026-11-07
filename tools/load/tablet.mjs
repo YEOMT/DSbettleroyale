@@ -9,20 +9,21 @@ import {chromium,webkit} from 'playwright';
 import {connect} from '../../tests/integration/client.mjs';
 import {installBrowserTelemetry} from './browser-telemetry.mjs';
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
-export async function tabletLoad({players=30,seconds=605,mode='solo',label='before',engine='chromium',quality='balanced',matrix=false,dense=false,roster="original",transitionSeconds=null,recoverOverload=true,out=`artifacts/tablet-stability/${label}-${mode}-${players}.json`}={}){
+export async function tabletLoad({players=30,seconds=605,mode='solo',label='before',engine='chromium',quality='balanced',matrix=false,dense=false,roster="original",transitionSeconds=null,recoverOverload=true,stopOnOverload=false,out=`artifacts/tablet-stability/${label}-${mode}-${players}.json`}={}){
+ let firstOverload=null;
  const started=performance.now(),report={label,players,seconds,mode,engine,quality,roster,started:new Date().toISOString(),fixture:'Private IPC: six representative characters, extended health/refill to sustain combat; real movement, attacks, cooldowns, damage, 60Hz physics and 20Hz WS. 30 connected participants enter the late-game fixture with 6 alive, then 5 and 3. Capture keeps all participants alive as a separate extreme stress case, not natural deaths/respawns. No production test routes. Three simultaneous browser surfaces on one PC; not three physical devices.',samples:[],errors:[]};
  report.fixtureHash=createHash('sha256').update(['tablet.mjs','server.mjs','telemetry.mjs','browser-telemetry.mjs'].map(f=>fs.readFileSync(new URL(f,import.meta.url),'utf8').replaceAll('\r\n','\n')).join('\n')).digest('hex');
  const profileDir=process.env.LOAD_CPU_PROFILE;if(profileDir)fs.mkdirSync(profileDir,{recursive:true});
  const child=fork(fileURLToPath(new URL('./server.mjs',import.meta.url)),[],{stdio:['ignore','inherit','inherit','ipc'],windowsHide:true,execArgv:profileDir?['--cpu-prof','--cpu-prof-interval=1000','--cpu-prof-dir='+path.resolve(profileDir)]:[]});
  const port=await new Promise((resolve,reject)=>{child.once('message',m=>resolve(m.port));child.once('error',reject);});let id=0;const pending=new Map();
- child.on('message',m=>{const p=pending.get(m.id);if(p){pending.delete(m.id);clearTimeout(p.timer);m.error?p.reject(Error(m.error)):p.resolve(m.value);}});
+ child.on('message',m=>{if(m.type==='fixture-overload'&&!firstOverload)firstOverload=m.value;const p=pending.get(m.id);if(p){pending.delete(m.id);clearTimeout(p.timer);m.error?p.reject(Error(m.error)):p.resolve(m.value);}});
  const rpc=(type,args={})=>new Promise((resolve,reject)=>{const seq=++id,timer=setTimeout(()=>{pending.delete(seq);reject(Error('IPC_TIMEOUT '+type));},10000);pending.set(seq,{resolve,reject,timer});child.send({id:seq,type,...args});});
  const target='http://127.0.0.1:'+port,vite=await createServer({configFile:'apps/client/vite.config.js',server:{watch:null,hmr:false,port:0,proxy:{'/ws':{target:target.replace('http:','ws:'),ws:true},'/version':target,'/healthz':target}}});await vite.listen();
  const url='http://127.0.0.1:'+vite.httpServer.address().port;await rpc('fixture-origin',{origin:url});
  const browser=await (engine==='webkit'?webkit:chromium).launch({headless:true,...(engine==='chromium'&&process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{})}),pages=[],clients=[];
  const startAlive=mode==='solo'&&players>6?6:players;report.survivors=mode==='solo'&&players>6?[6,5,3]:[players];report.dense=!!dense;
  let code,host,tick=0,round=0,driveTimer,phaseStart,startSimTimes;
- recoverOverload=recoverOverload===true||recoverOverload==='true';report.recoverOverload=recoverOverload;report.transitions=[];report.roundStarts=[];
+ stopOnOverload=stopOnOverload===true||stopOnOverload==='true';recoverOverload=!stopOnOverload&&(recoverOverload===true||recoverOverload==='true');report.recoverOverload=recoverOverload;report.stopOnOverload=stopOnOverload;report.transitions=[];report.roundStarts=[];
  async function page(role,renderer){const ctx=await browser.newContext({viewport:{width:1024,height:768},deviceScaleFactor:2,hasTouch:true});await ctx.route(/dropbox/,r=>r.abort());const p=await ctx.newPage();p.on('pageerror',e=>report.errors.push({role,error:e.message}));await p.goto(url+'/?renderer='+renderer);await p.evaluate(async()=>{await(await import('/src/main.js')).renderer.ready;});
   if(role==='host'){await p.locator('#ws-host-secret').fill('test-host');await p.locator('#br-create-btn').click();await p.locator('#br-host-room').waitFor();code=(await p.locator('#br-room-code').textContent()).trim();}
   else{await p.locator('#br-join-code').fill(code);await p.locator('#br-player-name').fill(role);await p.locator('#br-join-btn').click();await p.locator('#br-student-wait').waitFor();}
@@ -61,7 +62,7 @@ export async function tabletLoad({players=30,seconds=605,mode='solo',label='befo
    }
   }else{
    let alive=startAlive,nextSample=5;
-   while(performance.now()-phaseStart<seconds*1000){const elapsed=(performance.now()-phaseStart)/1000;
+   while(performance.now()-phaseStart<seconds*1000){if(stopOnOverload&&firstOverload){report.firstOverload=firstOverload;report.simulatedMs=Object.fromEntries(Object.entries(startSimTimes).map(([role,t])=>[role,firstOverload.simTime-t]));clearInterval(driveTimer);await sample('first-overload');throw Error('FIRST_OVERLOAD: stopped, no CONTINUE or paused-screen duration counted');}const elapsed=(performance.now()-phaseStart)/1000;
     if(mode==='solo'&&players>6){const transitions=transitionSeconds?String(transitionSeconds).split(',').map(Number):[60,360];const next=elapsed>=transitions[1]?3:elapsed>=transitions[0]?5:6;if(next!==alive){alive=next;await rpc('fixture-stability',{alive});report.transitions.push({elapsedSeconds:elapsed,alive});}}
     if(elapsed>=nextSample){await sample('continuous-'+alive);nextSample+=elapsed<20?5:30;}
     await delay(200);

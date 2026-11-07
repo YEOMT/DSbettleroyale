@@ -29,7 +29,7 @@ try{
  await attacker.evaluate(()=>{gameTest.controls.seq=100000;gameTest.controls.clientTick=100000;gameTest.controls.actions={attack:1000,skill:1000};gameTest.controls.sendSample({x:0,y:0},true);});
  await attacker.keyboard.press('Space');await attacker.keyboard.press('q');
  await wait('high action queues',()=>w.actionPending.get(p.remoteId)?.length===2);
- h.room.safePaused=false;
+ h.room.fixtureFrozen=false;
  await wait('both real casts',()=>p.firedAttackSeq===1001&&p.firedSkillSeq===1001);
  const id=p.remoteId,oldEpoch=h.room.students()[0].epoch,identity={id,team:p.team,ability:p.ability.id,life:p.lifeSeq,level:p.run.level};
  await attacker.reload();await app(attacker);await attacker.locator('#br-student-battle').waitFor();
@@ -76,7 +76,7 @@ try{
  p.pos=new w.Vec2(960,340);other.pos=new w.Vec2(1070,340);h.publish();
  // Sample each short-lived cast on its own authoritative ticks. Otherwise three
  // software-rendered browser windows can miss the swing between two key presses.
- h.room.safePaused=true;
+ h.room.fixtureFrozen=true;
  const captureCast=async(key,kind,field)=>{
   const previous=p[field];await attacker.keyboard.press(key);
   await wait(kind+' queued',()=>w.actionPending.get(id)?.some(c=>c.kind===kind));
@@ -111,7 +111,7 @@ try{
   },{id,seq:p.firedSkillSeq});assert.ok(result.changed>20,JSON.stringify(result));assert.equal(result.pixi,renderer==='pixi');screens.push({quality,...result});
   if(quality==='low')await page.screenshot({path:dir+'/'+renderer+'-'+['attacker','opponent','host'][i]+'.png'});
  }}
- h.room.safePaused=false;
+ h.room.fixtureFrozen=false;
  report.checks.push({id:'T06',fired:{attack:p.firedAttackSeq,skill:p.firedSkillSeq},screens});
  await wait('orbits expire',()=>!w.game.projectiles.some(q=>q.type==='ORBIT'),6500);
  for(const page of pages)await page.waitForFunction(()=>!gameTest.timeline.frame()?.shots.some(q=>q.type==='ORBIT'));

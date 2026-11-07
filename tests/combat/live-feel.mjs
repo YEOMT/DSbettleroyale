@@ -45,7 +45,7 @@ try{
  }
  for(const [i,page] of pages.entries())assert.equal(await page.evaluate(()=>!!m.renderer.pixi),modeFor(roles[i])==='pixi','actual renderer for '+roles[i]);
  const toggle=h.host.locator('#br-focus-toggle');await toggle.click();assert.match(await toggle.textContent(),/전투 집중/);await toggle.click();assert.match(await toggle.textContent(),/전체 관전/);
- h.room.safePaused=false;await delay(500);
+ h.room.fixtureFrozen=false;await delay(500);
  for(const [abilityId,kind,family] of [['emoji-013','attack','slash'],['emoji-025','attack','heavy'],['emoji-023','skill','recoil'],['emoji-003','skill','burst'],['emoji-024','skill','orbit'],['emoji-010','skill','field']]){
   w.BRRework.clearWorld(w.game,'next-case');w.game.projectiles.length=0;w.game.zones.length=0;
   for(const [i,p] of [a,b].entries()){

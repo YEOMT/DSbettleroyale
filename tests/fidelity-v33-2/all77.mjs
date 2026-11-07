@@ -6,7 +6,7 @@ const renderers=selectCases(['canvas','pixi'],process.argv[2],'RENDERER'),qualit
 if(process.argv.length>4)throw Error('UNEXPECTED_ARGUMENT');
 fs.mkdirSync('artifacts/fidelity-v33-2',{recursive:true});const report=[];
 for(const renderer of renderers)for(const quality of qualities){
- const h=await openFidelity({renderer}),ref=await openBaseline();try{const w=h.room.world;h.room.safePaused=true;h.room.config.graphicsPreset=quality;h.app.manager.changed(h.room);w.game.smokes=[];w.game.walls=[];w.game.zones=[];w.brFarm.dispose(w.game);
+ const h=await openFidelity({renderer}),ref=await openBaseline();try{const w=h.room.world;h.room.fixtureFrozen=true;h.room.config.graphicsPreset=quality;h.app.manager.changed(h.room);w.game.smokes=[];w.game.walls=[];w.game.zones=[];w.brFarm.dispose(w.game);
  for(const page of h.pages)await page.evaluate(async()=>{const a=fidelity.app;a.controls.enabled=false;a.renderer.enabled=false;fidelity.matrix=[];fidelity.castEvents=[];a.net.addEventListener('event',e=>fidelity.castEvents.push(e.detail));});
  for(const ability of roster){
   w.BRRework.clearWorld(w.game,'matrix');w.game.projectiles=[];w.game.retiredShots=[];w.game.zones=[];w.actionPending.clear();w.inputPending.clear();w.brFarm.dispose(w.game);

@@ -1,6 +1,8 @@
 import {contentHash} from '../../content/src/manifest.js';
 export const PROTOCOL_VERSION=33;
-export const ENGINE_REVISION='v33-authority-1';
+// Paired clients require reliable PROFILE_STATE hydration before referenced
+// self snapshots; older clients must fail HELLO rather than use stale aim data.
+export const ENGINE_REVISION='v33-authority-2-profile-revisions';
 export const BUILD_ID=typeof __DSBR_BUILD_ID__==='string'?__DSBR_BUILD_ID__:'v33.0.0-dev';
 export const fingerprint={protocolVersion:PROTOCOL_VERSION,contentHash,engineRevision:ENGINE_REVISION,buildId:BUILD_ID};
 export const PHASES=['LOBBY','QUIZ','DRAFT','BATTLE','RESULTS'];
