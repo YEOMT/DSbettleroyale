@@ -70,7 +70,7 @@ export async function tabletLoad({players=30,seconds=605,mode='solo',label='befo
   report.server=await rpc('status');assert.equal(report.server.overloads,0,'server overload');assert.equal(report.server.connected,players,'all participants remain connected');assert.deepEqual(report.errors,[]);for(const row of report.samples)for(const [role,s]of Object.entries(row.surfaces)){assert.equal(s.blocked,false,role+' render blocked');assert.equal(s.renderer,role==='studentCanvas'?'canvas':'pixi',role+' fallback');assert.equal(s.error,null,role+' renderer error');}
   if(!matrix&&seconds>=600&&mode==='solo'&&players>6)for(const alive of [6,5,3])assert.ok(report.samples.some(s=>s.server.window.alive===alive),'missing survivor transition '+alive);
   report.status='PASS';
- }catch(e){report.status='FAIL';report.failure=e.stack;}
+ }catch(e){report.status='FAIL';report.failure=e.stack;report.server=await rpc('status');}
  finally{clearInterval(driveTimer);for(const p of pages)await p.page.evaluate(()=>tabletProbe.close()).catch(()=>{});await browser.close();for(const c of clients)await c.close();await vite.close();report.cleanup=await rpc('close');report.elapsedMs=performance.now()-started;fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');}
  console.log(JSON.stringify({out,status:report.status,elapsedMs:report.elapsedMs,failure:report.failure}));return report;
 }

@@ -63,8 +63,10 @@ try{
  await h.command('END');await h.command('REMATCH');for(const page of pages)await page.waitForFunction(()=>m.ui.room.phase==='LOBBY');assert.deepEqual(h.errors,[]);report.status='PASS';
 }catch(error){report.status='FAIL';report.error=error.stack;throw error;}
 finally{
- if(h){report.errors=h.errors;report.metrics=h.app.metrics.report(h.app.manager);await h.close();}
- if(video){try{const saved=path.resolve(out,'attacker-live.webm');await video.saveAs(saved);report.video=saved;}catch(error){report.status='FAIL';report.videoError=error.message;process.exitCode=1;}}
+ if(h){report.errors=h.errors;report.metrics=h.app.metrics.report(h.app.manager);}
+ // Finalize the recording while the Playwright browser connection is alive.
+ if(video){try{const saved=path.resolve(out,'attacker-live.webm'),saving=video.saveAs(saved);await Promise.all(h.contexts.map(c=>c.close()));await saving;report.video=saved;}catch(error){report.status='FAIL';report.videoError=error.message;process.exitCode=1;}}
+ if(h)await h.close();
  report.ms=performance.now()-started;report.scope='Four short unpaused Canvas combats on actual attacker/opponent/host WS screens; normal controls.fire and keyboard movement, no manual step/draw. Video is moving-combat evidence, not a long-load or physical-device verdict.';
  fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify({status:report.status,ms:report.ms,video:report.video}));
 }

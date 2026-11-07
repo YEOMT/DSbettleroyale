@@ -123,6 +123,8 @@ jobs:
         with: {node-version-file: .nvmrc, cache: npm}
       - run: npm ci
       - run: node tests/roster10/flow.mjs ${{ matrix.renderer }}
+      - if: matrix.renderer == 'canvas'
+        run: node tests/roster10/live.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
