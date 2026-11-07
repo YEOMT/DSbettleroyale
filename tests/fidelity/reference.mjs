@@ -5,7 +5,7 @@ import {openBaseline} from '../../tools/baseline/browser.mjs';
 import {stepWorld} from '../../packages/engine/src/index.js';
 const h=await openFidelity(),ref=await openBaseline();
 try{
- h.room.safePaused=true;const w=h.room.world;for(const [i,p]of h.players.entries()){p.pos=new w.Vec2(i*250,0);p.vel=new w.Vec2(0,0);p.stunned=0;}h.staticState();h.publish();await delay(100);
+ h.room.fixtureFrozen=true;const w=h.room.world;for(const [i,p]of h.players.entries()){p.pos=new w.Vec2(i*250,0);p.vel=new w.Vec2(0,0);p.stunned=0;}h.staticState();h.publish();await delay(100);
  await h.pages[0].evaluate(()=>fidelity.app.controls.fire('attack',{aim:{x:1,y:0}}));await delay(35);for(let i=0;i<6;i++)stepWorld(w);h.publish();await delay(90);
  const scene=await h.pages[0].evaluate(()=>{const r=fidelity.app.renderer,t=fidelity.app.timeline;r.enabled=false;fidelity.app.controls.enabled=false;const v=t.frame();r.draw(v,performance.now());v.effects=v.effects.filter(f=>!f.preview);r.draw(v,performance.now());return {v,map:t.static};});
  await h.pages[0].locator('#br-student-canvas').screenshot({path:'artifacts/fidelity/matched-ws-scene.png'});

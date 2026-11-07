@@ -38,7 +38,7 @@ try{
   b.hp=b.maxHp=100000;w.game.rebuildSpatialGrid();h.publish();
   await h.student.waitForFunction(({id,life})=>m.timeline.predicted?.abilityId===id&&m.net.lifeSeq===life&&m.controls.enabled&&m.renderer.enabled&&!m.net.restoring,{id,life:a.lifeSeq});
   for(const page of pages)await page.evaluate(()=>{liveFrames=[];liveEvents=[];});
-  if(number===141)h.room.safePaused=false; // Harness setup pause ends once; never pause a case.
+  if(number===141)h.room.fixtureFrozen=false; // Harness setup pause ends once; never pause a case.
   assert.equal(h.room.safePaused,false);const tick=w.game.frame,snapshot=h.room.snapshotSeq,at=performance.now(),start={x:a.pos.x,y:a.pos.y,applied:a.lastAppliedSeq||0};
   const fire=kind=>h.student.evaluate(kind=>{const before=m.controls.actions[kind];m.controls.fire(kind,{aim:{x:1,y:0},power:1,tap:false});return {before,seq:m.controls.actions[kind],life:m.net.lifeSeq};},kind);
   await h.student.keyboard.down('s');

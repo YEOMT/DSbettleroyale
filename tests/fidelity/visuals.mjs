@@ -7,7 +7,7 @@ const h=await openFidelity({renderer:process.env.FIDELITY_RENDERER||'canvas'}),r
 const cases=[['basic','emoji-000','attack',55],['slash','emoji-001','attack',45],['sniper','emoji-023','skill',100],['wizard','emoji-003','skill',150],['bubble','emoji-056','skill',180],['bats','emoji-036','skill',180],['boomerang','emoji-066','skill',180],['tennis','emoji-045','skill',180],['basketball','emoji-089','skill',200],['genie','emoji-012','skill',280],['void','emoji-132','skill',180],['dynamite','emoji-039','skill',150],['beast12','emoji-140','skill',170]];
 fs.mkdirSync('artifacts/fidelity',{recursive:true});let comparison;
 try{
- const w=h.room.world;h.room.safePaused=true;w.game.smokes=[];w.game.zones=[];
+ const w=h.room.world;h.room.fixtureFrozen=true;w.game.smokes=[];w.game.zones=[];
  let serverEvents=[];const sink=w.eventSink;w.eventSink=e=>{serverEvents.push(structuredClone(e));sink(e);};
  // Keep early short-lived shots as well as the latest return/terminal frames.
  // Software WebGL screenshots on CI can outlast a last-500-only ring buffer.

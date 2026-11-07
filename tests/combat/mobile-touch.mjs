@@ -22,7 +22,7 @@ try{
  w.brFarm.dispose(w.game);w.game.walls=[];w.game.smokes=[];other.pos=new w.Vec2(-600,-300);
  const ability=w.EMOJI_DB.find(a=>a.id==='emoji-001'),id=p.remoteId,life=p.lifeSeq+1,team=p.team;
  Object.assign(p,new w.Participant(1,'Touch',ability,new w.Vec2(0,0),team),{remoteId:id,sessionId:id,lifeSeq:life,abilityId:ability.id,team,humanControlled:true,connected:true,applyPlayerInput:w.brApplyPlayerInput,aimProfileKey:null,rw:null,spawnProtectionUntilFrame:0});w.brInitRun(p);h.staticState();h.publish();
- await page.waitForFunction(l=>m.timeline.predicted?.lifeSeq===l,life);h.room.safePaused=false;
+ await page.waitForFunction(l=>m.timeline.predicted?.lifeSeq===l,life);h.room.fixtureFrozen=false;
  await page.evaluate(()=>{window.sentActions=[];const send=m.net.command.bind(m.net);m.net.command=(kind,p)=>{if(kind==='ACTION')sentActions.push(p);return send(kind,p);};});
  if(browserEngine==='chromium')native=await page.context().newCDPSession(page);
  const touch=(type,points)=>native.send('Input.dispatchTouchEvent',{type,touchPoints:points});

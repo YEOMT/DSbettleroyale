@@ -1,10 +1,12 @@
 import {envelope,PROTOCOL_VERSION} from '../../../../packages/protocol/src/index.js';
 import {MAX_EVENT_BATCH,MAX_EVENT_BATCH_BYTES} from '../../../../packages/protocol/src/server-events.js';
+import {privateProfileState} from './profile-state.js';
 export class Peer{
  constructor(socket,config,metrics,transport){this.socket=socket;this.transport=transport;this.batchDepth=0;this.config=config;this.metrics=metrics;this.queue=[];this.queueBytes=0;this.pendingSnapshot=null;this.highAt=0;this.hello=false;this.tokens=180;this.refillAt=performance.now();this.errors=0;this.alive=true;}
  beginBatch(){this.batchDepth++;}
  endBatch(){if(this.batchDepth)this.batchDepth--;if(!this.batchDepth)this.flush();}
  scope(){return this.room?{roomInstanceId:this.room.id,matchId:this.room.matchId,connectionEpoch:this.member.epoch}:{};}
+ selfState(self,options){return privateProfileState(this,self,options);}
  rate(){const now=performance.now();this.tokens=Math.min(180,this.tokens+(now-this.refillAt)*.09);this.refillAt=now;if(this.tokens<1)return false;this.tokens--;return true;}
  send(type,payload,{snapshot=false,reliable=false,payloadJson}={}){
   if(this.socket.readyState!==1)return;
@@ -43,5 +45,5 @@ export class Peer{
    if(!this.queue.length&&this.pendingSnapshot&&ws.bufferedAmount<this.config.bufferWarn){const data=Buffer.isBuffer(this.pendingSnapshot)?this.pendingSnapshot:Buffer.from(this.pendingSnapshot);this.pendingSnapshot=null;ws.send(data,{binary:false,compress:false});this.metrics.sentBytes+=data.length;}
   }finally{this.transport?.uncork();}
  }
- close(code,reason){if(this.socket.readyState<2)this.socket.close(code,reason);this.pendingSnapshot=null;this.queue=[];this.queueBytes=0;}
+ close(code,reason){if(this.socket.readyState<2)this.socket.close(code,reason);this.pendingSnapshot=null;this.profileState=null;this.queue=[];this.queueBytes=0;}
 }

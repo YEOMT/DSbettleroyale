@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {freezeableFixture} from '../simulation-fixture.mjs';
 import assert from 'node:assert/strict';
 import {createGameServer} from '../../apps/server/src/main.js';
 import {connect} from './client.mjs';
@@ -16,10 +17,10 @@ test('all ten new IDs use rank-first assignment in every public mode without cha
 });
 test('all ten: actual WS assignment/input/actions/cooldown/resume/refire/rematch preserve identity', {timeout:90000},async t=>{
  const app=await createGameServer({port:0,hostSecret:'test-host'});t.after(()=>app.close());
- const host=await(await connect(app)).host(),room=app.manager.rooms.get(host.room.code);let a=await(await connect(app)).join(room.code,'Synthetic new actor');const rival=await(await connect(app)).join(room.code,'Synthetic target');
+ const host=await(await connect(app)).host(),room=freezeableFixture(app,app.manager.rooms.get(host.room.code));let a=await(await connect(app)).join(room.code,'Synthetic new actor');const rival=await(await connect(app)).join(room.code,'Synthetic target');
  for(const id of ids){
   await host.command('CONFIGURE',{mode:'team-capture'});await host.command('START_QUIZ');await host.command('BEGIN_DRAFT');room.members.get(a.session.playerId).draft.abilityId=id;room.members.get(rival.session.playerId).draft.abilityId='emoji-114';
-  await host.command('START_BATTLE');await a.phase('BATTLE');await a.next('SNAPSHOT');room.safePaused=true;
+  room.fixtureFrozen=false;await host.command('START_BATTLE');await a.phase('BATTLE');await a.next('SNAPSHOT');room.fixtureFrozen=true;
   const w=room.world,p=w.byId.get(a.session.playerId),q=w.byId.get(rival.session.playerId);w.brFarm.dispose(w.game);w.game.walls=[];w.game.smokes=[];p.pos=new w.Vec2(0,0);q.pos=new w.Vec2(240,0);p.team=1;q.team=2;p.spawnProtectionUntilFrame=q.spawnProtectionUntilFrame=0;q.hp=q.maxHp=100000;p.cooldown=p.basicCooldown=0;
   assert.equal(p.ability.id,id);const initialX=p.pos.x;
   a.send('INPUT_BATCH',{commands:[{seq:100000,clientTick:100000,move:{x:1,y:0},aim:{x:1,y:0}}]});await yieldTurn();await new Promise(r=>setTimeout(r,5));

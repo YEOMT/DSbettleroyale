@@ -27,7 +27,7 @@ try{
  }else{
   run(['tests/combat/session.mjs',renderer]);
   run(['tests/combat/aim.mjs',renderer]);
-  if(renderer==='canvas'){run(['tests/combat/origin-contract.mjs']);run(['tests/combat/motion.mjs']);run(['tests/releaseops/audio.mjs']);}
+  if(renderer==='canvas'){run(['tests/combat/safe-pause.mjs']);run(['tests/combat/origin-contract.mjs']);run(['tests/combat/motion.mjs']);run(['tests/releaseops/audio.mjs']);}
   run(['tests/fidelity-v33-2/all77.mjs',renderer,'balanced'],{FIDELITY_CHARACTERS:'emoji-006,emoji-012,emoji-066,emoji-085,emoji-132'});
  }
 }finally{fs.writeFileSync('artifacts/combat/jobs-'+suite+'-'+renderer+(pixiRole?'-'+pixiRole:'')+'.json',JSON.stringify({ms:Date.now()-started,steps},null,2));}

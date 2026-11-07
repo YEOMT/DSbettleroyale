@@ -1,11 +1,12 @@
 // Test harness only. Fixture controls use private IPC, never a production HTTP/WS route.
-import {createGameServer} from '../../apps/server/src/main.js';
+// Optional exact deploy bundle; fixtures/telemetry remain private IPC wrappers.
+const {createGameServer}=await import(process.env.LOAD_BUILT==='1'?'../../dist/server/main.js':'../../apps/server/src/main.js');
 import {manifest} from '../../packages/content/src/manifest.js';
 import {sourceHash} from '../build-id.mjs';
 import {loadTelemetry} from './telemetry.mjs';
 const source=sourceHash();
 const app=await createGameServer({port:0,hostSecret:'test-host'});
-const telemetry=loadTelemetry(app);
+const telemetry=loadTelemetry(app,{onOverload:value=>process.send?.({type:'fixture-overload',value})});
 process.send({ready:true,port:app.address.port});
 process.on('message',async m=>{try{let value;const room=[...app.manager.rooms.values()][0];
  if(m.type==='fixture-origin'){app.config.origins.push(m.origin);value=true;}

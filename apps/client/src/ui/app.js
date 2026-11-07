@@ -22,6 +22,7 @@ export class AppUI{
    this.banner.classList.remove('br-hidden');
   });
   net.addEventListener('maintenance',e=>this.toast(e.detail.message));
+  net.addEventListener('profile_status',e=>{if(!e.detail.ready)this.clearCombatInputs();this.syncCombatState();});
   setInterval(()=>this.clock(),100);
  }
  toast(message){text('br-toast',message);$('br-toast').classList.add('show');clearTimeout(this.toastTimer);this.toastTimer=setTimeout(()=>$('br-toast').classList.remove('show'),3500);}
@@ -67,25 +68,41 @@ export class AppUI{
   button.title=capture?'점령전은 A/B/C와 팀 시작 지역을 함께 표시합니다.':'전체 관전과 전투 집중 전환';
  }
  config(){return {mapIndex:$('br-map').value==='random'?-1:Number($('br-map').value),mode:$('br-mode').value,teamCount:Number($('br-team-count').value),matchSeconds:Number($('br-match-seconds').value),quizSeconds:Number($('br-quiz-seconds').value),graphicsPreset:$('br-graphics-preset').value,quizText:$('br-question-bank').value};}
+ clearCombatInputs(){
+  this.controls.enabled=false;this.controls.neutral(false);this.controls.sounds.clear();
+  this.timeline.history=[];this.timeline.pendingInputs.clear();this.timeline.previews.clear();this.timeline.effects=this.timeline.effects.filter(e=>!e.preview);
+  const authoritative=this.timeline.samples.at(-1)?.state.self;if(authoritative)this.timeline.predicted={...authoritative};this.timeline.offset={x:0,y:0};
+ }
+ syncCombatState(){
+  const battle=this.room?.phase==='BATTLE',paused=battle&&(this.pauseWaiting||this.room?.safePaused||this.room?.simulationFault);
+  this.timeline.paused=!!paused;this.audio.pause(!!paused);
+  this.controls.enabled=!!(battle&&!paused&&this.room.self.role==='student'&&!this.net.restoring&&this.net.profilesReady!==false&&this.net.ws?.readyState===1);
+ }
+ pauseBanner(){
+  if(!this.timeline.paused)return;
+  this.banner.replaceChildren(this.room?.simulationFault?'서버의 전투 계산 오류로 경기가 일시정지되었습니다.':'서버 처리 지연으로 안전 일시정지되었습니다. ');this.banner.classList.remove('br-hidden');
+  if(this.room?.self.role==='host')this.banner.append(this.room.simulationFault?button('결과로 종료',()=>this.run(()=>this.net.command('END'))):button('계속',()=>this.run(()=>this.net.command('CONTINUE'))));
+ }
  receive(type,p){
   if(type==='room_state')this.renderRoom(p);
   if(type==='leaderboard'){this.board=p;this.renderer.session.matchKey=p.matchKey;if(p.capture||this.room?.config.mode==='team-respawn')this.original.live(p,this.renderer.teacher);if(this.renderer.session.tkBoardOpen)this.original.board(p);}
-  if(type==='full_state'){this.requestedStatic=null;this.controls.syncFloor(p.self?.inputFloor);if(p.static)this.timeline.setStatic(p.static);this.renderRoom(p.room);if(p.snapshot)this.receive('snapshot',{...p.snapshot,self:p.self});else if(p.self)this.self(p.self);}
+  if(type==='full_state'){this.requestedStatic=null;this.controls.syncFloor(p.self?.inputFloor);if(p.static)this.timeline.setStatic(p.static);this.renderRoom(p.room,true);if(p.snapshot)this.receive('snapshot',{...p.snapshot,self:p.self});else if(p.self)this.self(p.self);}
   if(type==='snapshot'){if(!this.timeline.static&&this.requestedStatic!==this.net.scope.matchId){this.requestedStatic=this.net.scope.matchId;this.net.send('RESYNC',{});}const previousTick=this.timeline.samples.at(-1)?.state.serverTick;if(!this.timeline.accept(p))return;this.renderer.poses.snapshot(p,previousTick,performance.now());if(p.self)this.self(p.self);this.lastView=p;this.battleHud(p);}
   if(type==='private_state'&&p)this.self(p);
   if(type==='event'){this.timeline.event(p);this.controls.confirmShot(p);if(this.renderer.teacher)this.renderer.camera.observe(p);this.renderer.poses.accept(p,this.timeline.samples.at(-1)?.state.actors||[],performance.now());this.audio.effect(p,this.net.session?.playerId);if(p.type==='DEATH'&&p.data.playerId===this.net.session?.playerId){const c=p.data.cause,a=manifest.roster.find(a=>a.id===c?.ability),suffix={zone:'위험구역 피해로 탈락',dot:'지속 피해로 탈락',reflection:'반사 피해로 탈락',environment:'환경 피해로 탈락',unknown:'탈락 · 원인 정보 없음'}[c?.kind];text('br-death-cause',suffix||(a?a.name+'의 '+c.skill+'에 탈락':'탈락 · 원인 정보 없음'));show('br-death-cause');}}
 
-  if(type==='error'&&p.code==='SIMULATION_PAUSED'){this.banner.textContent='서버의 전투 계산 오류로 경기가 일시정지되었습니다.';this.banner.classList.remove('br-hidden');if(this.room?.self.role==='host')this.banner.append(button('결과로 종료',()=>this.run(()=>this.net.command('END'))));}
-  if(type==='error'&&!(p.code==='BATTLE_REQUIRED'&&this.room?.phase!=='BATTLE'))this.toast(p.code);
+  if(type==='error'&&p.code==='SIMULATION_PAUSED'){if(this.room)this.room.simulationFault=true;this.pauseWaiting=true;this.clearCombatInputs();this.syncCombatState();this.pauseBanner();}
+  if(type==='error'&&!['SAFE_PAUSED','SIMULATION_PAUSED'].includes(p.code)&&!(p.code==='BATTLE_REQUIRED'&&this.room?.phase!=='BATTLE'))this.toast(p.code);
   if(type==='ended'){this.banner.textContent=({ROOM_EXPIRED:'경기 세션이 만료되었습니다. 새 방에 참가하세요.',VERSION_MISMATCH:'버전이 바뀌었습니다. 새로고침 후 참가하세요.',SUPERSEDED:'다른 연결에서 경기를 이어가고 있습니다.'})[p]||p||'연결이 종료되었습니다. 다시 참가하세요.';this.banner.classList.remove('br-hidden');this.controls.enabled=false;if(this.net.token)this.banner.append(button('기존 경기로 다시 연결',()=>this.run(()=>this.net.reconnect())));}
-  if(type==='status'){if(!p.connected){this.renderer.poses.clear();this.controls.neutral(false);this.timeline.history=[];this.timeline.pendingInputs.clear();this.timeline.previews.clear();this.timeline.effects=this.timeline.effects.filter(e=>!e.preview);}this.banner.textContent=p.connected?'':'연결 복구 중 · 서버에서 경기는 계속됩니다';this.banner.classList.toggle('br-hidden',p.connected);if(p.connected&&this.room?.simulationFault)this.receive('error',{code:'SIMULATION_PAUSED'});}
-  if(type==='overload'){this.timeline.paused=p.paused;this.audio.pause(p.paused);this.banner.replaceChildren();this.banner.classList.toggle('br-hidden',!p.paused);if(p.paused){this.banner.append('서버 처리 지연으로 안전 일시정지되었습니다. ');if(this.room?.self.role==='host')this.banner.append(button('계속',()=>this.run(()=>this.net.command('CONTINUE'))));}}
+  if(type==='status'){if(!p.connected){this.renderer.poses.clear();this.clearCombatInputs();}this.banner.textContent=p.connected?'':'연결 복구 중 · 서버에서 경기는 계속됩니다';this.banner.classList.toggle('br-hidden',p.connected);if(p.connected){this.syncCombatState();this.pauseBanner();}}
+  if(type==='overload'){if(p.paused){this.pauseWaiting=true;if(this.room){this.room.safePaused=true;this.room.simulationFault=!!p.fault;}this.clearCombatInputs();}this.syncCombatState();this.banner.classList.toggle('br-hidden',!this.timeline.paused);this.pauseBanner();}
  }
  screen(id){const battle=id==='br-student-battle',host=battle&&this.room?.self.role==='host';const bannerParent=battle&&!host?$('br-student-battle'):document.body;if(this.banner.parentElement!==bannerParent)bannerParent.append(this.banner);document.querySelectorAll('.br-screen').forEach(e=>e.classList.add('br-hidden'));show('br-student-battle',battle&&!host);show('game-screen',host);show('br-host-live',host);show(id,!host);show('br-app',!battle);if(battle){const parent=host?$('canvas-wrapper'):$('br-student-battle');if(this.renderer.canvas.parentElement!==parent)parent.prepend(this.renderer.canvas);}}
 
- renderRoom(room){
+ renderRoom(room,restored=false){
   const changed=!this.room||this.room.phase!==room.phase||this.room.matchId!==room.matchId;const oldQuality=this.room?.config.graphicsPreset;this.room=room;this.roomAt=performance.now();this.quizClock.accept(room);this.audio.sync(room);if(oldQuality!==room.config.graphicsPreset)this.renderer.resize();
-  const host=room.self.role==='host';this.renderer.teacher=host;this.renderer.enabled=room.phase==='BATTLE';this.controls.enabled=!host&&room.phase==='BATTLE';const musicVisible=host?['LOBBY','QUIZ','DRAFT','BATTLE'].includes(room.phase):room.phase==='LOBBY';show('br-music-controls',musicVisible);$('br-music-controls').classList.toggle('br-music-host',host);document.body.classList.toggle('br-host-music-visible',host&&musicVisible);
+  if(restored||room.phase!=='BATTLE')this.pauseWaiting=!!room.safePaused;if(room.safePaused||room.simulationFault){this.pauseWaiting=true;this.clearCombatInputs();}
+  const host=room.self.role==='host';this.renderer.teacher=host;this.renderer.enabled=room.phase==='BATTLE';this.syncCombatState();this.pauseBanner();const musicVisible=host?['LOBBY','QUIZ','DRAFT','BATTLE'].includes(room.phase):room.phase==='LOBBY';show('br-music-controls',musicVisible);$('br-music-controls').classList.toggle('br-music-host',host);document.body.classList.toggle('br-host-music-visible',host&&musicVisible);
   show('br-tk-host-bar',host&&room.phase==='BATTLE'&&room.config.mode==='team-respawn');if(room.phase!=='BATTLE'){show('br-tk-leaderboard',false);captureHud(null);}
   if(changed){this.original.reset();this.board=null;clearTimeout(this.quizNextTimer);this.quizPending=null;this.boundQuiz='';if(room.phase!=='BATTLE'){this.timeline.reset();this.controls.reset();this.renderer.reset();}}
   if(room.phase==='RESULTS'){this.banner.classList.add('br-hidden');this.screen('br-results');this.results(room.result);return;}

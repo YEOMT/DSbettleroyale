@@ -14,7 +14,7 @@ export async function createGameServer(overrides={}){
  const config={...readConfig(),...overrides},manager=new RoomManager(config),metrics=new Metrics(),peers=new Set();
  const eventLoop=monitorEventLoopDelay({resolution:20});eventLoop.enable();
  manager.changed=room=>{for(const member of room.members.values())if(member.connected)member.peer?.send('ROOM_STATE',room.publicState(member));};
- const stopSimulation=attachSimulation(manager,metrics);
+ const simulation=attachSimulation(manager,metrics);
  const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://localhost');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','no-referrer');
   const origin=req.headers.origin;if(origin&&config.origins.includes(origin)){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');}
@@ -51,7 +51,7 @@ export async function createGameServer(overrides={}){
  const maintenance=setInterval(()=>{manager.sweep();for(const peer of peers)peer.flush();},100);maintenance.unref();
  const heartbeat=setInterval(()=>{for(const peer of peers){if(!peer.alive){peer.socket.terminate();continue;}peer.alive=false;peer.socket.ping();peer.trimEvents();}},15000);heartbeat.unref();
  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(config.port,config.host,resolve);});
- return {server,wss,manager,metrics,config,peers,address:server.address(),async close(){stopSimulation();clearInterval(maintenance);clearInterval(heartbeat);eventLoop.disable();manager.close();for(const p of peers)p.socket.terminate();await new Promise(r=>wss.close(r));await new Promise(r=>server.close(r));}};
+ return {server,wss,manager,metrics,config,peers,simulation,address:server.address(),async close(){simulation.stop();clearInterval(maintenance);clearInterval(heartbeat);eventLoop.disable();manager.close();for(const p of peers)p.socket.terminate();await new Promise(r=>wss.close(r));await new Promise(r=>server.close(r));}};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const app=await createGameServer();console.log(`DSBR ${fingerprint.buildId} listening on http://${app.config.host}:${app.address.port}`);

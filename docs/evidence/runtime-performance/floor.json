@@ -1,0 +1,517 @@
+{
+  "base": "056f75e1d6e9d2d55b3477cd2d9789795f155853",
+  "notes": "Same bundled Renderer and authoritative static snapshot, balanced, DPR2; draw CPU submission and intervals between actual draws, NOT GPU completed time or live network performance.",
+  "cases": [
+    {
+      "role": "studentCanvas",
+      "label": "before",
+      "drawMs": {
+        "count": 300,
+        "mean": 1.7080000002185505,
+        "p95": 2.300000011920929,
+        "max": 77.7000000178814
+      },
+      "actualDrawGapMs": {
+        "count": 299,
+        "mean": 16.889966555164012,
+        "p95": 17.099999994039536,
+        "max": 79.40000000596046
+      },
+      "baseClears": 0,
+      "renderer": "canvas",
+      "moving": {
+        "drawMs": {
+          "count": 90,
+          "mean": 1.8522222214274937,
+          "p95": 2.600000023841858,
+          "max": 3.699999988079071
+        },
+        "actualDrawGapMs": {
+          "count": 89,
+          "mean": 16.669662921281343,
+          "p95": 17.099999994039536,
+          "max": 17.400000005960464
+        },
+        "baseClears": 0,
+        "renderer": "canvas"
+      },
+      "reset": {
+        "paths": false,
+        "textures": 0
+      }
+    },
+    {
+      "role": "studentCanvas",
+      "label": "after",
+      "drawMs": {
+        "count": 300,
+        "mean": 1.6120000000794728,
+        "p95": 2.2999999821186066,
+        "max": 80.80000001192093
+      },
+      "actualDrawGapMs": {
+        "count": 299,
+        "mean": 16.83511705681632,
+        "p95": 17,
+        "max": 82.40000000596046
+      },
+      "baseClears": 0,
+      "stats": {
+        "floorBuilds": 0,
+        "gridBuilds": 0,
+        "outlineBuilds": 0
+      },
+      "renderer": "canvas",
+      "moving": {
+        "drawMs": {
+          "count": 90,
+          "mean": 2.1522222230831782,
+          "p95": 3.300000011920929,
+          "max": 5.0999999940395355
+        },
+        "actualDrawGapMs": {
+          "count": 89,
+          "mean": 16.66741573040405,
+          "p95": 17.200000017881393,
+          "max": 21.30000001192093
+        },
+        "baseClears": 0,
+        "stats": {
+          "floorBuilds": 0,
+          "gridBuilds": 0,
+          "outlineBuilds": 0
+        },
+        "renderer": "canvas"
+      },
+      "reset": {
+        "paths": false,
+        "textures": 0
+      },
+      "pixels": [
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        }
+      ]
+    },
+    {
+      "role": "studentPixi",
+      "label": "before",
+      "drawMs": {
+        "count": 300,
+        "mean": 5.06833333303531,
+        "p95": 8.200000017881393,
+        "max": 227.5
+      },
+      "actualDrawGapMs": {
+        "count": 299,
+        "mean": 17.37123745819398,
+        "p95": 17.30000001192093,
+        "max": 229.40000000596046
+      },
+      "baseClears": 300,
+      "renderer": "pixi",
+      "moving": {
+        "drawMs": {
+          "count": 90,
+          "mean": 5.593333333399561,
+          "p95": 8.299999982118607,
+          "max": 9.599999994039536
+        },
+        "actualDrawGapMs": {
+          "count": 89,
+          "mean": 16.671910112493492,
+          "p95": 17.5,
+          "max": 21.69999998807907
+        },
+        "baseClears": 90,
+        "renderer": "pixi"
+      },
+      "reset": {
+        "paths": false,
+        "baseInstructions": 0,
+        "textures": 0
+      }
+    },
+    {
+      "role": "studentPixi",
+      "label": "after",
+      "drawMs": {
+        "count": 300,
+        "mean": 4.285666667918364,
+        "p95": 7.300000011920929,
+        "max": 115.69999998807907
+      },
+      "actualDrawGapMs": {
+        "count": 299,
+        "mean": 17.002006688943275,
+        "p95": 17.299999982118607,
+        "max": 117.40000000596046
+      },
+      "baseClears": 1,
+      "stats": {
+        "floorBuilds": 1,
+        "gridBuilds": 1,
+        "outlineBuilds": 0
+      },
+      "renderer": "pixi",
+      "moving": {
+        "drawMs": {
+          "count": 90,
+          "mean": 4.382222220963902,
+          "p95": 6.4000000059604645,
+          "max": 9.699999988079071
+        },
+        "actualDrawGapMs": {
+          "count": 89,
+          "mean": 16.66741573006919,
+          "p95": 16.900000005960464,
+          "max": 17.299999982118607
+        },
+        "baseClears": 0,
+        "stats": {
+          "floorBuilds": 1,
+          "gridBuilds": 6,
+          "outlineBuilds": 0
+        },
+        "renderer": "pixi"
+      },
+      "reset": {
+        "paths": false,
+        "baseInstructions": 0,
+        "gridInstructions": 0,
+        "outlineInstructions": 0,
+        "textures": 0
+      },
+      "pixels": [
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        }
+      ]
+    },
+    {
+      "role": "hostPixi",
+      "label": "before",
+      "drawMs": {
+        "count": 300,
+        "mean": 5.601666667163372,
+        "p95": 9.400000005960464,
+        "max": 149.7000000178814
+      },
+      "actualDrawGapMs": {
+        "count": 299,
+        "mean": 17.11571906362489,
+        "p95": 17.30000001192093,
+        "max": 150.30000001192093
+      },
+      "baseClears": 300,
+      "renderer": "pixi",
+      "moving": {
+        "drawMs": {
+          "count": 90,
+          "mean": 6.241111110978657,
+          "p95": 9.5,
+          "max": 12
+        },
+        "actualDrawGapMs": {
+          "count": 89,
+          "mean": 16.66741573006919,
+          "p95": 17.19999998807907,
+          "max": 17.5
+        },
+        "baseClears": 90,
+        "renderer": "pixi"
+      },
+      "reset": {
+        "paths": false,
+        "baseInstructions": 0,
+        "textures": 0
+      }
+    },
+    {
+      "role": "hostPixi",
+      "label": "after",
+      "drawMs": {
+        "count": 300,
+        "mean": 5.051000000039736,
+        "p95": 8,
+        "max": 155.19999998807907
+      },
+      "actualDrawGapMs": {
+        "count": 299,
+        "mean": 17.124749163819796,
+        "p95": 17,
+        "max": 156.19999998807907
+      },
+      "baseClears": 1,
+      "stats": {
+        "floorBuilds": 1,
+        "gridBuilds": 1,
+        "outlineBuilds": 0
+      },
+      "renderer": "pixi",
+      "moving": {
+        "drawMs": {
+          "count": 90,
+          "mean": 6.285555555754238,
+          "p95": 9.200000017881393,
+          "max": 12
+        },
+        "actualDrawGapMs": {
+          "count": 89,
+          "mean": 16.67078651671999,
+          "p95": 16.900000005960464,
+          "max": 17.100000023841858
+        },
+        "baseClears": 0,
+        "stats": {
+          "floorBuilds": 1,
+          "gridBuilds": 7,
+          "outlineBuilds": 0
+        },
+        "renderer": "pixi"
+      },
+      "reset": {
+        "paths": false,
+        "baseInstructions": 0,
+        "gridInstructions": 0,
+        "outlineInstructions": 0,
+        "textures": 0
+      },
+      "pixels": [
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        },
+        {
+          "max": 0,
+          "changed": 0,
+          "bytes": 7077888
+        }
+      ]
+    }
+  ],
+  "status": "PASS",
+  "errors": [],
+  "commandSeconds": 48.4303789,
+  "unit": {
+    "status": "PASS",
+    "tests": 3,
+    "ms": 88.6099
+  },
+  "priorAttempts": [
+    {
+      "status": "INFRA_FAILURE",
+      "seconds": 7.5325591,
+      "reason": "Standalone fixture lacked ring HUD DOM; no game change.",
+      "evidence": {
+        "base": "056f75e1d6e9d2d55b3477cd2d9789795f155853",
+        "notes": "Same bundled Renderer and authoritative static snapshot, balanced, DPR2; draw CPU submission and intervals between actual draws, NOT GPU completed time or live network performance.",
+        "cases": [],
+        "status": "FAIL",
+        "failure": "page.evaluate: TypeError: Cannot read properties of null (reading 'style')\n    at Object.u [as ringHud] (http://127.0.0.1:60293/before.js:911:380632)\n    at dl.draw (http://127.0.0.1:60293/before.js:911:444281)\n    at window.floorRun (http://127.0.0.1:60293/before.js:911:465261)\n    at async <anonymous>:316:30",
+        "errors": []
+      }
+    },
+    {
+      "status": "INFRA_FAILURE",
+      "seconds": 9.3845898,
+      "reason": "Standalone fixture supplied incomplete hostEffects object; fixed fixture.",
+      "evidence": {
+        "base": "056f75e1d6e9d2d55b3477cd2d9789795f155853",
+        "notes": "Same bundled Renderer and authoritative static snapshot, balanced, DPR2; draw CPU submission and intervals between actual draws, NOT GPU completed time or live network performance.",
+        "cases": [],
+        "status": "FAIL",
+        "failure": "page.evaluate: TypeError: e.rings is not iterable\n    at vl (http://127.0.0.1:62832/before.js:911:347247)\n    at dl.draw (http://127.0.0.1:62832/before.js:911:440354)\n    at window.floorImage (http://127.0.0.1:62832/before.js:911:466095)\n    at eval (eval at evaluate (:290:30), <anonymous>:1:4)\n    at UtilityScript.evaluate (<anonymous>:292:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+        "errors": []
+      }
+    },
+    {
+      "status": "FAIL",
+      "seconds": 17.8219673,
+      "reason": "Canvas Path2D batched grid altered pixels and did not improve draw cost. Reverted Canvas drawing to original.",
+      "evidence": {
+        "base": "056f75e1d6e9d2d55b3477cd2d9789795f155853",
+        "notes": "Same bundled Renderer and authoritative static snapshot, balanced, DPR2; draw CPU submission and intervals between actual draws, NOT GPU completed time or live network performance.",
+        "cases": [
+          {
+            "role": "studentCanvas",
+            "label": "before",
+            "drawMs": {
+              "count": 300,
+              "mean": 1.5756666665275891,
+              "p95": 2.199999988079071,
+              "max": 72.59999999403954
+            },
+            "actualDrawGapMs": {
+              "count": 299,
+              "mean": 16.89163879596669,
+              "p95": 17,
+              "max": 74
+            },
+            "baseClears": 0,
+            "renderer": "canvas",
+            "moving": {
+              "drawMs": {
+                "count": 90,
+                "mean": 1.8033333344591989,
+                "p95": 2.5,
+                "max": 2.699999988079071
+              },
+              "actualDrawGapMs": {
+                "count": 89,
+                "mean": 16.6651685391919,
+                "p95": 17.099999994039536,
+                "max": 17.100000023841858
+              },
+              "baseClears": 0,
+              "renderer": "canvas"
+            },
+            "reset": {
+              "paths": false,
+              "textures": 0
+            }
+          },
+          {
+            "role": "studentCanvas",
+            "label": "after",
+            "drawMs": {
+              "count": 300,
+              "mean": 1.8016666655739149,
+              "p95": 2.9000000059604645,
+              "max": 77.59999999403954
+            },
+            "actualDrawGapMs": {
+              "count": 299,
+              "mean": 16.83745819399987,
+              "p95": 17.200000017881393,
+              "max": 79.2999999821186
+            },
+            "baseClears": 0,
+            "stats": {
+              "floorBuilds": 1,
+              "gridBuilds": 1,
+              "outlineBuilds": 0
+            },
+            "renderer": "canvas",
+            "moving": {
+              "drawMs": {
+                "count": 90,
+                "mean": 2.005555553568734,
+                "p95": 3.5,
+                "max": 4.0999999940395355
+              },
+              "actualDrawGapMs": {
+                "count": 89,
+                "mean": 16.66179775287596,
+                "p95": 17.599999994039536,
+                "max": 22.600000023841858
+              },
+              "baseClears": 0,
+              "stats": {
+                "floorBuilds": 1,
+                "gridBuilds": 6,
+                "outlineBuilds": 0
+              },
+              "renderer": "canvas"
+            },
+            "reset": {
+              "paths": false,
+              "textures": 0
+            },
+            "pixels": [
+              {
+                "max": 1,
+                "changed": 30924,
+                "bytes": 7077888
+              },
+              {
+                "max": 4,
+                "changed": 86336,
+                "bytes": 7077888
+              },
+              {
+                "max": 3,
+                "changed": 54716,
+                "bytes": 7077888
+              },
+              {
+                "max": 0,
+                "changed": 0,
+                "bytes": 7077888
+              },
+              {
+                "max": 16,
+                "changed": 34229,
+                "bytes": 7077888
+              }
+            ]
+          }
+        ],
+        "status": "FAIL",
+        "failure": "floor pixels changed: [{\"max\":1,\"changed\":30924,\"bytes\":7077888},{\"max\":4,\"changed\":86336,\"bytes\":7077888},{\"max\":3,\"changed\":54716,\"bytes\":7077888},{\"max\":0,\"changed\":0,\"bytes\":7077888},{\"max\":16,\"changed\":34229,\"bytes\":7077888}]",
+        "errors": []
+      }
+    }
+  ],
+  "interpretation": "Static Pixi reconstruction is removed and isolated draw CPU submission improved in this pair. Moving host mean did not improve. Canvas rendering remains original after rejecting Path2D experiment; no Canvas speedup claim. Frame intervals do not measure GPU completion; whole deployed app/live network validation is separate."
+}
