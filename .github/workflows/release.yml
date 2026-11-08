@@ -90,6 +90,9 @@ jobs:
         with:
           name: release-${{ env.RELEASE_SHA }}
           path: artifacts/candidate/
+          # The sealed manifest includes ops/deploy/.env.example. candidate.mjs
+          # excludes actual .env secrets; preserve sealed hidden example files.
+          include-hidden-files: true
           retention-days: 30
       - run: 'echo "ARTIFACT_READY is not a deployment. Staging: $STAGING_HTTP_URL; production: https://yeomt.github.io/DSbettleroyale/; release $RELEASE_SHA" >> "$GITHUB_STEP_SUMMARY"'
   staging:
