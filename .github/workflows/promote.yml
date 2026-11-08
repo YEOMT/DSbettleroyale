@@ -10,6 +10,11 @@ on:
         description: Successful Paired candidate run ID retaining this artifact
         required: true
         type: string
+      initial_resume_warning:
+        description: One-time approved db3ce3bb first Pages transition only; post-resume timeout is WARNING
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: read
   actions: read
@@ -73,6 +78,7 @@ jobs:
       RELEASE_SHA: ${{ inputs.release_id }}
       CONTROLLER_SHA: ${{ github.sha }}
       CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id }}
+      INITIAL_RESUME_WARNING: ${{ inputs.initial_resume_warning }}
       GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Validate trusted main ancestry before checkout or npm
@@ -143,7 +149,9 @@ jobs:
         if: always()
         with:
           name: production-state-${{ inputs.release_id }}
-          path: artifacts/transaction.json
+          path: |
+            artifacts/transaction.json
+            artifacts/public-smoke.json
           retention-days: 30
   blocked:
     if: vars.PRODUCTION_WS_ENABLED != 'true'

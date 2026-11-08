@@ -2,6 +2,7 @@ import fs from 'node:fs';import path from 'node:path';import os from 'node:os';i
 import {fileURLToPath} from 'node:url';
 import {verifyPages} from './verify-pages.mjs';
 import {createHash} from 'node:crypto';
+import {warningRequested,validatePublicSmoke} from './resume-warning.mjs';
 const action=process.argv[2],target=process.env.TARGET,sha=process.env.RELEASE_SHA,root=process.env.DEPLOY_STATE_DIR,host=process.env.DEPLOY_HOST,user=process.env.DEPLOY_USER;
 if(!['staging','production'].includes(target)||!/^[/a-zA-Z0-9_.-]+$/.test(root||'')||!root.startsWith('/')||!/^[-a-zA-Z0-9.]+$/.test(host||'')||!/^[-a-zA-Z0-9_]+$/.test(user||'')||!sha?.match(/^[a-f0-9]{40}$/)||!process.env.SSH_KEY||!process.env.KNOWN_HOSTS)throw Error('BLOCKED_CONFIGURATION');
 const sshDir=path.join(os.homedir(),'.ssh');fs.mkdirSync(sshDir,{recursive:true,mode:0o700});fs.writeFileSync(sshDir+'/release-key',process.env.SSH_KEY,{mode:0o600});fs.writeFileSync(sshDir+'/release-hosts',process.env.KNOWN_HOSTS,{mode:0o600});
@@ -18,11 +19,14 @@ async function smoke(version,config){
  fs.writeFileSync('artifacts/expected-release.json',JSON.stringify(version));
  execFileSync(process.execPath,[fileURLToPath(new URL('./smoke.mjs',import.meta.url))],{stdio:'inherit',timeout:45000,env:{...process.env,DEPLOY_RUNTIME:path.resolve(bundle+'/ops/package.json'),RELEASE_FILE:'artifacts/expected-release.json',PUBLIC_HTTP_API_URL:config.http,PUBLIC_WSS_URL:config.ws,CLIENT_ORIGIN:target==='production'?'https://yeomt.github.io':config.http}});
 }
-if(action==='upload'){
+if(action==='upload'||action==='upload-controller'){
+ if(action==='upload'){
  ssh(`test -f ${q(root+'/config.json')} && mkdir -p ${q(root+'/incoming/'+sha)}`);
  // Upload into a temporary location; never overwrite an already retained release.
  scp(bundle+'/.',remote+':'+root+'/incoming/'+sha+'/');
  ssh(`if test -d ${q(folder)}; then cmp ${q(folder+'/manifest.json')} ${q(root+'/incoming/'+sha+'/manifest.json')}; else mv ${q(root+'/incoming/'+sha)} ${q(folder)}; fi`);
+ }
+ if(action==='upload-controller'&&!controller)throw Error('TRUSTED_CONTROLLER_REQUIRED');
  if(controller){
   const repo=fileURLToPath(new URL('../../',import.meta.url)),source=fileURLToPath(new URL('./host.py',import.meta.url));
   if(execFileSync('git',['-C',repo,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==controller||execFileSync('git',['-C',repo,'status','--porcelain','--','tools/deploy'],{encoding:'utf8'}).trim())throw Error('UNTRUSTED_CONTROLLER_CHECKOUT');
@@ -38,10 +42,13 @@ if(action==='upload'){
  const incoming=root+'/incoming/validation-'+sha+'.json';scp(proof,remote+':'+incoming);console.log(command('record-validation',incoming));
 }else if(action==='preflight'){console.log(command('preflight'));
 }else if(action==='stage'){
- console.log(command(process.env.RELEASE_MODE==='rollback'?'rollback':'stage'));
+ const m=JSON.parse(fs.readFileSync(bundle+'/manifest.json'));
+ const allow=warningRequested({requested:process.env.INITIAL_RESUME_WARNING==='true',releaseId:sha,candidateRunId:process.env.CANDIDATE_RUN_ID,target,url:m.targets.pages.http});
+ if(allow&&process.env.RELEASE_MODE!=='promote')throw Error('INITIAL_WARNING_PROMOTE_ONLY');
+ console.log(command(process.env.RELEASE_MODE==='rollback'?'rollback':'stage',...(allow?['initial-resume-warning']:[])));
  const s=status();fs.writeFileSync('artifacts/transaction.json',JSON.stringify(s));
  if(target==='production'){for(const [remoteDir,localDir]of [['pages-previous','previous-pages'],['pages-publish','publish-pages']]){fs.mkdirSync('artifacts/'+localDir,{recursive:true});scp(remote+':'+root+'/production/'+remoteDir+'/.','artifacts/'+localDir+'/');}}
- const m=JSON.parse(fs.readFileSync(bundle+'/manifest.json'));await smoke(m.fingerprint,m.targets[target]);
+ await smoke(m.fingerprint,m.targets[target]);
 }else if(action==='publishing'){console.log(command('publishing'));
 }else if(action==='commit'){
  const m=JSON.parse(fs.readFileSync(bundle+'/manifest.json'));await smoke(m.fingerprint,m.targets[target]);
@@ -50,11 +57,14 @@ if(action==='upload'){
  await smoke(m.fingerprint,m.targets[target]);
  // Read existing secret over authenticated SSH into child memory only, never outputs/artifacts.
  const secret=ssh('python3 -c '+q(`import sys,json;sys.path.insert(0,${JSON.stringify(folder+'/ops/tools/deploy')});from host import env_values;c=json.load(open(${JSON.stringify(root+'/config.json')}));print(env_values(c[${JSON.stringify(target)}]['env'])['HOST_AUTH_SECRET'])`)).trim();
- execFileSync(process.execPath,[fileURLToPath(new URL('./browser-smoke.mjs',import.meta.url))],{stdio:'inherit',timeout:180000,env:{...process.env,DEPLOY_RUNTIME:path.resolve(bundle+'/ops/package.json'),SMOKE_URL:target==='production'?m.targets.pages.http:m.targets.staging.http,SMOKE_HOST_SECRET:secret}});
- console.log(command('verified'));
- if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,`DEPLOYED_VERIFIED: ${target} ${sha}\n\n${m.targets[target].http}\nPrevious: ${status().previous?.releaseId||'none (first staging)'}\n`);
+ const allowed=!!status().initialResumeWarning;
+ execFileSync(process.execPath,[fileURLToPath(new URL('./browser-smoke.mjs',import.meta.url))],{stdio:'inherit',timeout:180000,env:{...process.env,INITIAL_RESUME_WARNING:String(allowed),DEPLOY_RUNTIME:path.resolve(bundle+'/ops/package.json'),SMOKE_URL:target==='production'?m.targets.pages.http:m.targets.staging.http,SMOKE_HOST_SECRET:secret}});
+ const report=JSON.parse(fs.readFileSync('artifacts/public-smoke.json'));validatePublicSmoke(report,{releaseId:sha,allowed});
+ const incoming=root+'/incoming/public-smoke-'+sha+'.json';scp('artifacts/public-smoke.json',remote+':'+incoming);console.log(command('verified',incoming));
+ const final=status();fs.writeFileSync('artifacts/transaction.json',JSON.stringify(final));
+ if(process.env.GITHUB_STEP_SUMMARY)fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,`${final.phase}: ${target} ${sha}\n\n${m.targets[target].http}\nPrevious: ${final.previous?.releaseId||'none (first staging)'}\n${report.status==='DEGRADED_RELEASE'?'Post-resume control WARNING; NOT a full functional pass. Separate manual confirmation required; restore immediately if actual controls fail.':''}\n`);
 }else if(action==='restore'){
- const before=status();if(!before||before.release!==sha){if(before&&!['DEPLOYED_VERIFIED','ROLLED_BACK','DEFERRED'].includes(before.phase))throw Error('OTHER_TRANSACTION_ACTIVE');if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,'pages=false\n');console.log('No transaction for this release; existing pair preserved.');process.exit(0);}
+ const before=status();if(!before||before.release!==sha){if(before&&!['DEPLOYED_VERIFIED','DEGRADED_RELEASE','ROLLED_BACK','DEFERRED'].includes(before.phase))throw Error('OTHER_TRANSACTION_ACTIVE');if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,'pages=false\n');console.log('No transaction for this release; existing pair preserved.');process.exit(0);}
  console.log(command('restore'));const s=status();fs.writeFileSync('artifacts/transaction.json',JSON.stringify(s));
  if(s.phase==='ROLLBACK_STAGED'&&target==='production'){fs.mkdirSync('artifacts/previous-pages',{recursive:true});scp(remote+':'+root+'/production/pages-previous/.','artifacts/previous-pages/');}
  if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,`pages=${s.phase==='ROLLBACK_STAGED'&&target==='production'}\n`);

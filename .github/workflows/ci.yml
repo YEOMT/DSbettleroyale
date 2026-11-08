@@ -105,11 +105,15 @@ jobs:
         env:
           RELEASE_SHA: ${{ steps.fixture.outputs.sha }}
           CANDIDATE_RUN_ID: ${{ steps.fixture.outputs.run }}
+      - name: Inject observer loss and require Results and Rematch after the warning
+        run: node tests/releaseops/resume-warning-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: isolated-ci-${{ github.sha }}
-          path: artifacts/isolated-validation.json
+          path: |
+            artifacts/isolated-validation.json
+            artifacts/resume-warning-fixture.json
           retention-days: 30
   combat:
     needs: quick

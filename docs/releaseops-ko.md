@@ -4,17 +4,29 @@
 
 ## 1GB 서버: Actions 격리 검증 모드
 
-이 서버에서는 운영과 staging을 동시에 실행하지 않는다. 아래의 기존 staging 설치 안내는 별도 여유 자원이 있는 환경용이며, 이 서버에는 `RELEASE_VALIDATION_MODE=github-actions`, `STAGING_ENABLED=false`를 사용한다. 서버 `.releaseops/config.json`의 `validationMode`도 `github-actions`로 설정한다. `minMemoryBytes=536870912`는 유지한다. 검증 모드는 기본값이 staging이며, 알 수 없는 값이나 증거 누락은 차단한다.
+이 서버에서는 운영과 staging을 동시에 실행하지 않는다. 아래의 기존 staging 설치 안내는 별도 여유 자원이 있는 환경용이며, 이 서버에는 `RELEASE_VALIDATION_MODE=github-actions`, `STAGING_ENABLED=false`를 사용한다. 서버 `.releaseops/config.json`의 `validationMode`도 `github-actions`로 설정한다. 저장소 기본 `minMemoryBytes=536870912`는 유지한다. 현재 AWS 한 대의 config만 사용자 승인으로402653184(384MiB)이며 백업이 보존되어 있다. 검증 모드는 기본값이 staging이며, 알 수 없는 값이나 증거 누락은 차단한다.
 
 정식 반영은 계속 명시적인 `workflow_dispatch` 승인으로만 시작한다. 선택한 후보 SHA/run의 기존 산출물을 별도 Actions runner에 내려받아 checksum, 실제 production Docker 이미지, 버전 네 필드, 정확한 Origin 허용/거부, 교사1·학생2의 조작·재접속·재경기를 검사한다. 이 runner에는 SSH/배포 secrets가 없다. 원래 AWS WSS 대상 주소를 확인한 뒤 격리 컨테이너에 동일 프로토콜/Origin을 전달하므로, 공개 DNS/TLS 연결 확인은 뒤의 정식 공개 smoke에서 별도로 수행한다.
 
 privileged job은 GitHub API로 **동일 main workflow_dispatch/run/attempt의 isolated job 성공**, 후보 실행 출처, manifest hash, image ID, buildId 쌍과 모든 필수 결과를 다시 확인한다. 로컬 결과나 PR CI 결과는 정식 반영 증거로 사용할 수 없다. 검증된 receipt만 SSH로 서버에 기록한다. 선택한 후보는 재빌드하거나 수정하지 않으며, 검토된 dispatch main의 배포 제어 도구만 별도 SHA 경로로 보관해 실행한다.
 
-배포 전 실제 이미지·환경·Compose·Caddy·Pages를 보존하고 기존 drain/seal/복구 절차를 따른다. 기존 512MiB MemAvailable 조건을 준비 전과 이미지 load 후 다시 검사하며 PSI `some`/`full`, OOM 카운트를 별도로 기록한다. 기준 미달이면 기존 서버를 보존하고 중단한다. 격리 검증 성공은 이 자원 조건을 면제하지 않는다. staging 메모리/CPU 제한이나 게임 과부하 기준을 변경하지 않는다.
+배포 전 실제 이미지·환경·Compose·Caddy·Pages를 보존하고 기존 drain/seal/복구 절차를 따른다. config의 MemAvailable 조건(기본512MiB, 위 승인 서버384MiB)을 준비 전과 이미지 load 후 다시 검사하며 PSI `some`/`full`, OOM 카운트를 별도로 기록한다. 기준 미달이면 기존 서버를 보존하고 중단한다. 격리 검증 성공은 이 자원 조건을 면제하지 않는다. staging 메모리/CPU 제한이나 게임 과부하 기준을 변경하지 않는다.
 
 ReleaseOps PR의 `isolated-release` CI는 정확한 PR base SHA의 보존된 후보로 Docker 경로를 검사한다. 해당 artifact가 없거나 만료되면 `INFRA_FAILURE`로 차단하며 임의의 latest를 대신 사용하지 않는다. 최초 Firebase→v33 전환 중 실패/중단은 **중단된 배포 복구**에 실패한 전환 SHA를 지정한다. 아직 정식 검증 기록이 없는 구 AWS SHA로 일반 롤백을 요청하지 않는다.
 
 ## 일상 흐름
+
+### 승인된 최초 전환의 재접속 조작 WARNING
+
+2026-11-09 승인에 따라 **이번 최초 Firebase Pages → v33 전환**에만 `정식 반영`의 `initial_resume_warning` 입력을 명시적으로 켤 수 있다. 기본값은 false다. 대상은 `db3ce3bb10d96f3b2a2d7cc14a0b645afbad10e6` / candidate run `42475042049`에 고정되어 있으며, 다른 후보·staging·rollback에는 적용되지 않는다. 호스트는 기존 AWS SHA0816f1c와 실제 보존 Firebase Pages hash, 검증 receipt, 최초 전환 완료 이력도 확인한다. 한 번 완료하면 소비 표식을 남겨 이후 배포와 복구 후 재시도에서 예외가 다시 활성화되지 않는다.
+
+격리 검증은 여전히 모든13항목 PASS를 요구한다. 공개 smoke에서 **성공한 재접속 이후** 이동·평타·스킬의 서버 권위 상태 대기 시간 초과만 WARNING으로 기록한다. 일반 조작, 재접속 자체, 버전/WSS, 브라우저 오류, 과부하 오류, Results, Rematch 등은 그대로 차단 조건이다. WARNING 이후에도 Results·Rematch·방 종료를 실제 수행하고 검사한다. 실행하지 못한 나머지 재접속 조작은 NOT_RUN이며 PASS로 바꾸지 않는다.
+
+예외가 실제 사용되면 workflow 요약·호스트 transaction·receipt는 **DEGRADED_RELEASE**다. `production-degraded.json`에 별도로 기록하며 `production-verified.json`을 만들지 않는다. 전체 기능 PASS나 장시간 안정성 성공을 의미하지 않는다. 기록에는 교사/학생A/학생B의 고정 역할 별칭, 연결 epoch, INPUT_BATCH의 수·epoch·좌표 입력, 서버 권위 좌표/행동 카운터, 실제 브라우저 입력 이벤트만 제한된 링 버퍼로 남긴다. 방 코드·이름·참가자 ID·비밀번호·재접속 토큰·화면 문구는 저장하지 않는다. 공개 검사 실패 시에도 `public-smoke.json` artifact를 보존한다.
+
+사용자 병합 이후 새 workflow_dispatch로 같은 후보를 선택한다. 후보 산출물 재빌드나 기존 실패 실행의 재실행은 하지 않는다. 이 AWS에 한해 승인된384MiB 설정과 이미지 로드 전후 검사, RAM128MiB 하한/OOM/지속 PSI 감시는 유지한다. 저장소 기본512MiB는 바뀌지 않는다. 배포 담당자는 기존 모니터의 버전 일치 관측을 DEGRADED_RELEASE에서도 유지하며, 전환 후 공식 주소에서 별도의 교사1·학생2 수동 기본 기능 및 재접속 후 조작을 확인한다. 수동 결과는 자동검사 결과와 구분한다.
+
+실제 재접속 조작 불가, OOM·지속 장애·버전 불일치가 확인되면 **중단된 배포 복구**(`recover.yml`, target=production, release_id=위 db3 SHA)를 새로 실행한다. DEGRADED_RELEASE에서도 drain/seal→이전 AWS+Pages 복구→쌍 확인→입장 재개 경로를 따른다. 아직 정식 검증되지 않은 이전0816 SHA로 일반 rollback을 요청하지 않는다. 자동검사에서 다른 필수 항목이 실패하면 기존 자동 복구가 그대로 실행된다.
 
 1. 패치 PR → `CI / quick`, 선택된 `targeted`, `required-checks` 확인 → 사용자가 Merge.
 2. 정확한 main 병합본 CI가 성공하면 `Paired candidate`가 해당 SHA의 산출물을 만들고, 설정된 경우 staging만 갱신한다. Merge는 운영 교체를 실행하지 않는다.

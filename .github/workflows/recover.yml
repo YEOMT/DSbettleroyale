@@ -33,6 +33,7 @@ jobs:
       DEPLOY_STATE_DIR: ${{ vars.DEPLOY_STATE_DIR }}
       TARGET: ${{ inputs.target }}
       RELEASE_SHA: ${{ inputs.release_id }}
+      CONTROLLER_SHA: ${{ github.sha }}
     steps:
       - name: Validate trusted main ancestry before checkout or npm
         env:
@@ -47,9 +48,15 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: node tools/deploy/remote.mjs download
+      - name: Use reviewed main recovery tools for DEGRADED_RELEASE drain and restore
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .release-controller
+      - run: node .release-controller/tools/deploy/remote.mjs download
+      - run: node .release-controller/tools/deploy/remote.mjs upload-controller
       - id: restore
-        run: node artifacts/candidate/ops/tools/deploy/remote.mjs restore
+        run: node .release-controller/tools/deploy/remote.mjs restore
       - if: steps.restore.outputs.pages == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
@@ -59,4 +66,4 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           artifact_name: restore-pages
-      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs finish-rollback
+      - run: node .release-controller/tools/deploy/remote.mjs finish-rollback
