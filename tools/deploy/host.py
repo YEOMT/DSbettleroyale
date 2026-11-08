@@ -1,7 +1,29 @@
 """Host transaction adapter; no secret values enter reports. Python 3 + Docker Compose."""
 import os, sys, json, pathlib, subprocess, urllib.request, time, hashlib, shutil, re, tarfile
 KEYS=('buildId','contentHash','engineRevision','protocolVersion')
-TERMINAL=('DEPLOYED_VERIFIED','ROLLED_BACK','DEFERRED')
+TERMINAL=('DEPLOYED_VERIFIED','DEGRADED_RELEASE','ROLLED_BACK','DEFERRED')
+INITIAL_RELEASE='db3ce3bb10d96f3b2a2d7cc14a0b645afbad10e6'
+INITIAL_CANDIDATE_RUN='42475042049'
+INITIAL_PREVIOUS='0816f1caf796dda66e8a651c72b3356f800c1985'
+INITIAL_PAGES_HASH='a006aa596c5640ffe127774f271fce7afce81a4769525979fa453f9107ac5d36'
+PUBLIC_CONTROLS=('lobby','quiz','draft','move','attack','skill','resume','resumeMove','resumeAttack','resumeSkill','results','rematch','closed')
+RESUME_CONTROLS=('resumeMove','resumeAttack','resumeSkill')
+
+def validate_public_smoke(report,release,allowed=False):
+    if report.get('buildId')!=release or report.get('status') not in ('PASS','DEGRADED_RELEASE'):raise RuntimeError('INVALID_PUBLIC_SMOKE')
+    degraded=report['status']=='DEGRADED_RELEASE';warnings=report.get('warnings');controls=report.get('controls',{})
+    if not isinstance(warnings,list):raise RuntimeError('INVALID_PUBLIC_WARNINGS')
+    if degraded:
+        if not allowed or len(warnings)!=1 or warnings[0].get('code')!='POST_RESUME_CONTROL_TIMEOUT' or warnings[0].get('failedCheck') not in RESUME_CONTROLS:raise RuntimeError('UNAPPROVED_PUBLIC_WARNING')
+    elif warnings:raise RuntimeError('UNEXPECTED_PUBLIC_WARNING')
+    for name in PUBLIC_CONTROLS:
+        value=controls.get(name)
+        if degraded and name in RESUME_CONTROLS:
+            if name==warnings[0]['failedCheck']:
+                if value!='WARNING':raise RuntimeError('INVALID_RESUME_RESULT')
+            elif value is not True and value!='NOT_RUN':raise RuntimeError('INVALID_RESUME_RESULT')
+        elif value is not True:raise RuntimeError('REQUIRED_PUBLIC_CONTROL_FAILED:'+name)
+    return 'DEGRADED_RELEASE' if degraded else 'DEPLOYED_VERIFIED'
 def atomic(path,data):
     path=pathlib.Path(path);path.parent.mkdir(parents=True,exist_ok=True)
     tmp=path.with_suffix('.tmp');tmp.write_text(data);tmp.chmod(0o600);tmp.replace(path)
@@ -178,7 +200,14 @@ class Host:
             if self.api('/admin/status')['protectedRooms']==0:self.api('/admin/seal',True);return
             time.sleep(2)
         atomic(self.admission,'open');self.api('/admin/undrain',True);self.save('DEFERRED');raise RuntimeError('DRAIN_TIMEOUT')
-    def stage(self,release,rollback=False):
+    def initial_warning(self,release,previous):
+        if self.target!='production' or self.cfg.get('validationMode')!='github-actions' or release!=INITIAL_RELEASE or previous.get('releaseId')!=INITIAL_PREVIOUS or self.c['public']!='https://15-165-114-145.sslip.io' or self.cfg.get('pagesOrigin')!='https://yeomt.github.io':raise RuntimeError('INITIAL_WARNING_SCOPE_MISMATCH')
+        if (self.root/'initial-resume-warning-consumed.json').exists() or any((self.root/'releases').glob('*/production-verified.json')) or any((self.root/'releases').glob('*/production-degraded.json')):raise RuntimeError('INITIAL_TRANSITION_ALREADY_COMPLETED')
+        if sha(self.root/'pages-current/index.html')!=INITIAL_PAGES_HASH:raise RuntimeError('NOT_INITIAL_FIREBASE_PAGES')
+        receipt=read(self.root/'validations'/(release+'.json'))
+        if str(receipt.get('candidateRunId'))!=INITIAL_CANDIDATE_RUN:raise RuntimeError('INITIAL_WARNING_CANDIDATE_MISMATCH')
+        return {'releaseId':release,'candidateRunId':INITIAL_CANDIDATE_RUN,'validationRunId':receipt['runId'],'previousPagesHash':INITIAL_PAGES_HASH}
+    def stage(self,release,rollback=False,initial_warning=False):
         if self.state and self.state['phase'] not in TERMINAL:raise RuntimeError('RECOVERY_REQUIRED')
         self.check_config();folder,m=self.bundle(release)
         if self.target=='production' and not rollback:
@@ -187,7 +216,10 @@ class Host:
         previous=self.observed()
         if self.target=='production' and previous is None:raise RuntimeError('PREVIOUS_PAIR_REQUIRED')
         if self.target=='production' and not (self.root/'pages-current'/'index.html').exists():raise RuntimeError('PREVIOUS_PAGES_REQUIRED')
+        if initial_warning and rollback:raise RuntimeError('INITIAL_WARNING_PROMOTE_ONLY')
+        warning=self.initial_warning(release,previous or {}) if initial_warning else None
         self.state={'release':release,'previous':previous,'replaced':False,'pagesMayChange':False,'target':self.target,'settingsBackup':self.backup_settings(release)}
+        if warning:self.state['initialResumeWarning']=warning
         self.save('PREPARING')
         if self.target=='production':
             backup=self.dir/'pages-previous'
@@ -239,13 +271,27 @@ class Host:
             shutil.copytree(self.dir/'pages-previous',current)
         self.save('ROLLED_BACK' if rollback else 'ADMITTED_PENDING_SMOKE')
         atomic(self.dir/('receipt-'+self.state['release']+'.json'),json.dumps(self.state,indent=2))
-    def verified(self):
+    def verified(self,report_path=None):
         if self.state['phase']!='ADMITTED_PENDING_SMOKE':raise RuntimeError('INVALID_PHASE')
-        if self.target=='production':atomic(self.root/'releases'/self.state['release']/'production-verified.json',json.dumps({'time':int(time.time())}))
-        self.save('DEPLOYED_VERIFIED');atomic(self.dir/('receipt-'+self.state['release']+'.json'),json.dumps(self.state,indent=2))
+        allowed=bool(self.state.get('initialResumeWarning'));phase='DEPLOYED_VERIFIED'
+        if allowed and not report_path:raise RuntimeError('PUBLIC_SMOKE_REPORT_REQUIRED')
+        if report_path:
+            report_path=pathlib.Path(report_path).resolve()
+            if not report_path.is_relative_to((self.root/'incoming').resolve()) or report_path.stat().st_size>1048576:raise RuntimeError('INVALID_PUBLIC_REPORT_PATH')
+            report=read(report_path);phase=validate_public_smoke(report,self.state['release'],allowed)
+            self.state['publicSmoke']={'status':report['status'],'controls':report['controls'],'warnings':[{k:w[k] for k in ('code','failedCheck','stage')} for w in report['warnings']]}
+            atomic(self.dir/('public-smoke-'+self.state['release']+'.json'),json.dumps(report,indent=2))
+        if allowed:
+            if (self.root/'initial-resume-warning-consumed.json').exists():raise RuntimeError('INITIAL_TRANSITION_ALREADY_COMPLETED')
+            atomic(self.root/'initial-resume-warning-consumed.json',json.dumps({**self.state['initialResumeWarning'],'result':phase,'time':int(time.time())}))
+        if self.target=='production':
+            name='production-degraded.json' if phase=='DEGRADED_RELEASE' else 'production-verified.json'
+            atomic(self.root/'releases'/self.state['release']/name,json.dumps({'time':int(time.time()),'status':phase}))
+        if phase=='DEGRADED_RELEASE':self.state['manualResumeConfirmation']='PENDING: restore if actual controls fail'
+        self.save(phase);atomic(self.dir/('receipt-'+self.state['release']+'.json'),json.dumps(self.state,indent=2))
     def restore(self):
         if not self.state or self.state['phase'] in ('DEFERRED','ROLLED_BACK'):return
-        if self.state['phase'] in ('DEPLOYED_VERIFIED','ADMITTED_PENDING_SMOKE'):self.drain()
+        if self.state['phase'] in ('DEPLOYED_VERIFIED','DEGRADED_RELEASE','ADMITTED_PENDING_SMOKE'):self.drain()
         if not self.state['replaced']:
             atomic(self.admission,'open');self.api('/admin/undrain',True);self.save('ROLLED_BACK');return
         atomic(self.admission,'closed');p=self.state['previous']
@@ -263,10 +309,12 @@ def main():
         other=root/('production' if target=='staging' else 'staging')/'transaction.json'
         if other.exists() and read(other)['phase'] not in TERMINAL:raise RuntimeError('OTHER_TRANSACTION_ACTIVE')
         if action not in ('stage','rollback','status','preflight','record-validation') and (not host.state or host.state['release']!=args[0]):raise RuntimeError('TRANSACTION_ID_MISMATCH')
-        if action in ('stage','rollback'):host.stage(args[0],action=='rollback')
+        if action in ('stage','rollback'):
+            if len(args)>1 and args[1:]!=['initial-resume-warning']:raise RuntimeError('INVALID_STAGE_OPTION')
+            host.stage(args[0],action=='rollback',len(args)>1)
         elif action=='publishing':host.publishing()
         elif action=='commit':host.finish()
-        elif action=='verified':host.verified()
+        elif action=='verified':host.verified(args[1] if len(args)>1 else None)
         elif action=='restore':host.restore()
         elif action=='finish-rollback':host.finish(True)
         elif action=='rollback-failed':host.save('ROLLBACK_FAILED')
