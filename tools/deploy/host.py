@@ -1,5 +1,5 @@
 """Host transaction adapter; no secret values enter reports. Python 3 + Docker Compose."""
-import os, sys, json, pathlib, subprocess, urllib.request, time, hashlib, shutil, re
+import os, sys, json, pathlib, subprocess, urllib.request, time, hashlib, shutil, re, tarfile
 KEYS=('buildId','contentHash','engineRevision','protocolVersion')
 TERMINAL=('DEPLOYED_VERIFIED','ROLLED_BACK','DEFERRED')
 def atomic(path,data):
@@ -13,6 +13,28 @@ def sha(path):
     with open(path,'rb') as stream:
         for chunk in iter(lambda:stream.read(1024*1024),b''):digest.update(chunk)
     return digest.hexdigest()
+def saved_oci_identity(archive,expected):
+    """Resolve a sealed config ID to its hashed OCI manifest, never a mutable tag."""
+    if not re.fullmatch('sha256:[a-f0-9]{64}',expected):raise RuntimeError('INVALID_IMAGE_DIGEST')
+    with tarfile.open(archive) as saved:
+        def data(name):
+            member=saved.getmember(name)
+            if not member.isfile() or member.size>2097152:raise RuntimeError('INVALID_IMAGE_METADATA')
+            return saved.extractfile(member).read()
+        def blob(digest):
+            if not re.fullmatch('sha256:[a-f0-9]{64}',digest):raise RuntimeError('INVALID_IMAGE_DIGEST')
+            raw=data('blobs/sha256/'+digest[7:])
+            if 'sha256:'+hashlib.sha256(raw).hexdigest()!=digest:raise RuntimeError('IMAGE_METADATA_CHECKSUM')
+            return json.loads(raw),len(raw)
+        config,_=blob(expected);index=json.loads(data('index.json'));matches=[]
+        if index.get('schemaVersion')!=2:raise RuntimeError('INVALID_IMAGE_INDEX')
+        for descriptor in index.get('manifests',[]):
+            if descriptor.get('mediaType') not in ('application/vnd.oci.image.manifest.v1+json','application/vnd.docker.distribution.manifest.v2+json'):continue
+            manifest,size=blob(descriptor['digest'])
+            if descriptor.get('size')!=size:raise RuntimeError('IMAGE_METADATA_SIZE')
+            if manifest.get('schemaVersion')==2 and manifest.get('config',{}).get('digest')==expected:matches.append(descriptor['digest'])
+        if len(matches)!=1 or config.get('rootfs',{}).get('type')!='layers' or not config.get('os') or not config.get('architecture'):raise RuntimeError('AMBIGUOUS_IMAGE_IDENTITY')
+        return {'reference':matches[0],'configDigest':expected,'os':config['os'],'architecture':config['architecture'],'layers':config['rootfs']['diff_ids']}
 def env_values(path):
     values={}
     for line in pathlib.Path(path).read_text().splitlines():
@@ -126,6 +148,19 @@ class Host:
         if not re.fullmatch('[0-9a-f]{40}',release):raise RuntimeError('PREVIOUS_SHA_REQUIRED')
         folder=self.root/'releases'/release;folder.mkdir(parents=True,exist_ok=True)
         return {'releaseId':release,'image':image,'version':version}
+    def resolve_image(self,folder,manifest):
+        expected=manifest['images'][self.target]
+        try:
+            self.run(['docker','image','inspect',expected]);return expected
+        except subprocess.CalledProcessError:
+            # Docker 29 containerd reports OCI manifest IDs; classic stores use config IDs.
+            # bundle() already verified the entire saved archive against the sealed manifest.
+            identity=saved_oci_identity(folder/(self.target+'-image.tar'),expected)
+            loaded=json.loads(self.run(['docker','image','inspect',identity['reference']]))
+            if len(loaded)!=1:raise RuntimeError('IMAGE_IDENTITY_MISMATCH')
+            image=loaded[0]
+            if image.get('Id')!=identity['reference'] or image.get('Os')!=identity['os'] or image.get('Architecture')!=identity['architecture'] or image.get('RootFS',{}).get('Layers')!=identity['layers']:raise RuntimeError('IMAGE_IDENTITY_MISMATCH')
+            return identity['reference']
     def verify(self,version):
         for attempt in range(30):
             try:
@@ -163,7 +198,7 @@ class Host:
             backup=self.root/'releases'/previous['releaseId']/(self.target+'-previous.tar')
             if not backup.exists():self.run(['docker','save','-o',str(backup),previous['image']],timeout=300)
         self.run(['docker','load','-i',str(folder/(self.target+'-image.tar'))],timeout=300)
-        image=m['images'][self.target];self.run(['docker','image','inspect',image])
+        image=self.resolve_image(folder,m);self.state['imageReference']=image
         self.check_memory() # image preparation may change available memory; do not relax the original bound
         assets=self.dir/'assets';assets.mkdir(exist_ok=True)
         shutil.copytree(folder/self.target/'client/assets',assets,dirs_exist_ok=True)
@@ -188,7 +223,8 @@ class Host:
             image,version=p['image'],p['version']
         else:
             if self.state['phase'] not in ('SERVER_STAGED_DRAINED','PUBLISHING_PAGES'):raise RuntimeError('INVALID_PHASE')
-            _,m=self.bundle(self.state['release']);image,version=m['images'][self.target],m['fingerprint']
+            folder,m=self.bundle(self.state['release']);image,version=self.resolve_image(folder,m),m['fingerprint']
+            if self.state.get('imageReference',image)!=image:raise RuntimeError('IMAGE_IDENTITY_CHANGED')
         self.verify(version)
         # Pair has passed public checks. Remove the temporary startup override too.
         persist_env(self.c['env'],image);self.compose('up','-d','--no-deps','game',image=image,drain=False)

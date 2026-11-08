@@ -82,4 +82,12 @@ class Transactions(unittest.TestCase):
         stored=h.read(a.dir/'memory-preflight.json');self.assertEqual(stored['minimumBytes'],536870912);self.assertNotEqual(stored['psi']['some'],stored['psi']['full']);self.assertEqual(a.calls,[])
     def test_settings_backup_preserves_existing_secret_values(self):
         a=self.host;before=pathlib.Path(a.c['env']).read_bytes();saved=pathlib.Path(a.backup_settings('a'*40));self.assertEqual((saved/'environment').read_bytes(),before);self.assertEqual(pathlib.Path(a.c['env']).read_bytes(),before)
+    def test_finish_persists_verified_containerd_reference(self):
+        a=self.staged();a.state['imageReference']='sha256:oci';(a.dir/'pages-publish').mkdir();h.atomic(a.dir/'pages-publish/index.html','new')
+        with patch.object(a,'resolve_image',return_value='sha256:oci'):a.finish()
+        self.assertEqual(h.env_values(a.c['env'])['SERVER_IMAGE'],'sha256:oci');self.assertEqual(a.state['phase'],'ADMITTED_PENDING_SMOKE')
+    def test_changed_image_reference_cannot_commit_or_undrain(self):
+        a=self.staged();a.state['imageReference']='sha256:original'
+        with patch.object(a,'resolve_image',return_value='sha256:changed'),self.assertRaisesRegex(RuntimeError,'IMAGE_IDENTITY_CHANGED'):a.finish()
+        self.assertNotIn('/admin/undrain',a.calls);self.assertEqual(h.env_values(a.c['env'])['SERVER_IMAGE'],'old')
 if __name__=='__main__':unittest.main()
