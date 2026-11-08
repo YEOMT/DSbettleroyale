@@ -1,4 +1,5 @@
-import unittest,tempfile,pathlib,sys,json,importlib.util
+import unittest,tempfile,pathlib,sys,json,importlib.util,copy
+from unittest.mock import patch
 spec=importlib.util.spec_from_file_location('host',pathlib.Path(__file__).resolve().parents[2]/'tools/deploy/host.py');h=importlib.util.module_from_spec(spec);spec.loader.exec_module(h)
 class Fake(h.Host):
     def __init__(self,root):
@@ -54,4 +55,31 @@ class Transactions(unittest.TestCase):
         h.atomic(folder/'payload','tampered');h.atomic(folder/'manifest.json',json.dumps({'releaseId':release,'sourceSha':release,'checksums':{'payload':'bad'}}))
         with self.assertRaisesRegex(RuntimeError,'ARTIFACT_CHECKSUM'):h.Host.bundle(a,release)
         self.assertEqual(a.calls,[])
+    def isolated(self):
+        a=self.host;a.cfg['validationMode']='github-actions';release='a'*40
+        m={'releaseId':release,'images':{'production':'sha256:image'},'fingerprint':{'buildId':release,'contentHash':'content','engineRevision':'engine','protocolVersion':33}}
+        h.atomic(a.root/'manifest.json',json.dumps(m))
+        receipt={'schema':1,'kind':'github-actions-isolated-docker','status':'PASS','oomKilled':False,'verifiedWorkflow':'.github/workflows/promote.yml','releaseId':release,'manifestSha256':h.sha(a.root/'manifest.json'),'imageId':m['images']['production'],'fingerprint':m['fingerprint'],'runId':'10','candidateRunId':'5','runAttempt':1,'toolsSha':'b'*40,'checks':[{'name':n,'status':'PASS'} for n in ('bundle','image','http-version','origins','lifecycle-controls')],'controls':{n:True for n in ('lobby','quiz','draft','move','attack','skill','resume','resumeMove','resumeAttack','resumeSkill','results','rematch','closed')}}
+        return a,release,m,receipt
+    def test_github_validation_does_not_require_a_second_server(self):
+        a,release,m,r=self.isolated();h.atomic(a.root/'validations'/(release+'.json'),json.dumps(r));a.require_validation(release,a.root,m)
+        self.assertFalse((a.root/'staging/transaction.json').exists());self.assertEqual(a.calls,[])
+    def test_production_only_host_refuses_colocated_staging(self):
+        a=self.host;a.target='staging';a.cfg['validationMode']='github-actions'
+        with self.assertRaisesRegex(RuntimeError,'COLOCATED_STAGING_DISABLED'):h.Host.check_config(a)
+        self.assertEqual(a.calls,[])
+    def test_wrong_or_incomplete_receipt_blocks_before_mutation(self):
+        a,release,m,r=self.isolated()
+        for change in ({'releaseId':'c'*40},{'manifestSha256':'tampered'},{'status':'FAIL'},{'kind':'local-isolated-fixture'},{'imageId':'wrong'},{'oomKilled':True},{'checks':[]},{'controls':{**r['controls'],'resumeSkill':False}},{'verifiedWorkflow':'.github/workflows/ci.yml'}):
+            v={**copy.deepcopy(r),**change};h.atomic(a.root/'validations'/(release+'.json'),json.dumps(v))
+            with self.assertRaises(RuntimeError):a.require_validation(release,a.root,m)
+        self.assertEqual(a.calls,[])
+    def test_production_memory_threshold_and_psi_components_are_preserved(self):
+        a=self.host;a.cfg['minMemoryBytes']=536870912
+        metrics={'availableBytes':536870911,'oomKills':0,'psi':{'some':{'avg10':1.2},'full':{'avg10':0.0}}}
+        with patch.object(h,'memory_status',return_value=metrics):
+            with self.assertRaisesRegex(RuntimeError,'INSUFFICIENT_MEMORY'):a.check_memory()
+        stored=h.read(a.dir/'memory-preflight.json');self.assertEqual(stored['minimumBytes'],536870912);self.assertNotEqual(stored['psi']['some'],stored['psi']['full']);self.assertEqual(a.calls,[])
+    def test_settings_backup_preserves_existing_secret_values(self):
+        a=self.host;before=pathlib.Path(a.c['env']).read_bytes();saved=pathlib.Path(a.backup_settings('a'*40));self.assertEqual((saved/'environment').read_bytes(),before);self.assertEqual(pathlib.Path(a.c['env']).read_bytes(),before)
 if __name__=='__main__':unittest.main()

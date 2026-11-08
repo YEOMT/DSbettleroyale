@@ -19,7 +19,43 @@ concurrency:
   group: releaseops-host
   cancel-in-progress: false
 jobs:
+  isolated:
+    if: github.ref == 'refs/heads/main' && vars.PRODUCTION_WS_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    env:
+      RELEASE_SHA: ${{ inputs.release_id }}
+      CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Verify the selected candidate before downloading or executing it
+        run: node --input-type=module -e 'import {trustedRun,github} from "./tools/deploy/trust.mjs";const sha=process.env.RELEASE_SHA,id=process.env.CANDIDATE_RUN_ID;if(!/^[a-f0-9]{40}$/.test(sha)||!/^\d+$/.test(id))throw Error("INVALID_SELECTION");const r=await github("/repos/"+process.env.GITHUB_REPOSITORY+"/actions/runs/"+id);trustedRun(r,process.env.GITHUB_REPOSITORY,sha,".github/workflows/release.yml");const c=await github("/repos/"+process.env.GITHUB_REPOSITORY+"/compare/main..."+sha);if(!["behind","identical"].includes(c.status))throw Error("NOT_TRUSTED_MAIN_ANCESTOR");'
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ inputs.release_id }}
+          run-id: ${{ inputs.candidate_run_id }}
+          github-token: ${{ github.token }}
+          path: artifacts/candidate
+      - run: node artifacts/candidate/ops/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Verify sealed production image and paired Pages controls in isolation
+        run: node tools/deploy/isolated.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: isolated-${{ inputs.release_id }}
+          path: artifacts/isolated-validation.json
+          retention-days: 30
   deploy:
+    needs: isolated
     if: github.ref == 'refs/heads/main' && vars.PRODUCTION_WS_ENABLED == 'true'
     environment:
       name: production
@@ -35,6 +71,9 @@ jobs:
       TARGET: production
       RELEASE_MODE: promote
       RELEASE_SHA: ${{ inputs.release_id }}
+      CONTROLLER_SHA: ${{ github.sha }}
+      CANDIDATE_RUN_ID: ${{ inputs.candidate_run_id }}
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Validate trusted main ancestry before checkout or npm
         env:
@@ -49,6 +88,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - name: Use reviewed main deployment tools without changing the selected game artifact
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .release-controller
       - name: Validate immutable candidate provenance
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -60,11 +104,19 @@ jobs:
           run-id: ${{ inputs.candidate_run_id }}
           github-token: ${{ github.token }}
           path: artifacts/candidate
-      - run: node tools/deploy/remote.mjs upload
+      - uses: actions/download-artifact@v4
+        with:
+          name: isolated-${{ inputs.release_id }}
+          path: artifacts
+      - name: Verify GitHub run, job, candidate and receipt identities
+        run: node .release-controller/tools/deploy/verify-validation.mjs
+      - run: node .release-controller/tools/deploy/remote.mjs upload
+      - run: node .release-controller/tools/deploy/remote.mjs record-validation
+      - run: node .release-controller/tools/deploy/remote.mjs preflight
       - run: node artifacts/candidate/ops/node_modules/playwright/cli.js install --with-deps chromium
       - id: stage
-        run: node artifacts/candidate/ops/tools/deploy/remote.mjs stage
-      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs publishing
+        run: node .release-controller/tools/deploy/remote.mjs stage
+      - run: node .release-controller/tools/deploy/remote.mjs publishing
       - uses: actions/upload-pages-artifact@v3
         with:
           path: artifacts/publish-pages
@@ -72,10 +124,10 @@ jobs:
       - uses: actions/deploy-pages@v4
         with:
           artifact_name: candidate-pages
-      - run: node artifacts/candidate/ops/tools/deploy/remote.mjs commit
+      - run: node .release-controller/tools/deploy/remote.mjs commit
       - id: restore
-        if: failure()
-        run: node artifacts/candidate/ops/tools/deploy/remote.mjs restore
+        if: failure() && (steps.stage.outcome == 'success' || steps.stage.outcome == 'failure')
+        run: node .release-controller/tools/deploy/remote.mjs restore
       - if: failure() && steps.restore.outputs.pages == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
@@ -85,8 +137,8 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           artifact_name: restore-pages
-      - if: failure()
-        run: node artifacts/candidate/ops/tools/deploy/remote.mjs finish-rollback
+      - if: failure() && steps.restore.outcome == 'success'
+        run: node .release-controller/tools/deploy/remote.mjs finish-rollback
       - uses: actions/upload-artifact@v4
         if: always()
         with:

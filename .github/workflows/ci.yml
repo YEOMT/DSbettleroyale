@@ -17,6 +17,7 @@ jobs:
       docs: ${{ steps.plan.outputs.docs }}
       combat: ${{ steps.plan.outputs.combat }}
       roster10: ${{ steps.plan.outputs.roster10 }}
+      releaseops: ${{ steps.plan.outputs.releaseops }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -75,6 +76,40 @@ jobs:
             artifacts/
             playwright-report/
             test-results/
+          retention-days: 30
+  isolated-release:
+    needs: quick
+    if: needs.quick.outputs.releaseops == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc}
+      - id: fixture
+        run: node tools/deploy/select-validation-fixture.mjs
+        env:
+          FIXTURE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ steps.fixture.outputs.sha }}
+          run-id: ${{ steps.fixture.outputs.run }}
+          github-token: ${{ github.token }}
+          path: artifacts/candidate
+      - run: node artifacts/candidate/ops/node_modules/playwright/cli.js install --with-deps chromium
+      - run: node tools/deploy/isolated.mjs
+        env:
+          RELEASE_SHA: ${{ steps.fixture.outputs.sha }}
+          CANDIDATE_RUN_ID: ${{ steps.fixture.outputs.run }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: isolated-ci-${{ github.sha }}
+          path: artifacts/isolated-validation.json
           retention-days: 30
   combat:
     needs: quick
@@ -138,6 +173,7 @@ jobs:
       - targeted
       - combat
       - roster10
+      - isolated-release
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
@@ -149,4 +185,6 @@ jobs:
           DOCS: ${{ needs.quick.outputs.docs }}
           ROSTER10: ${{ needs.roster10.result }}
           NEW_SELECTED: ${{ needs.quick.outputs.roster10 }}
-        run: node -e 'if(process.env.ROSTER10!==(process.env.NEW_SELECTED==="true"?"success":"skipped")||process.env.COMBAT!==(process.env.SELECTED==="true"?"success":"skipped")||process.env.QUICK!=="success"||(process.env.DOCS==="true"?process.env.TARGET!=="skipped":process.env.TARGET!=="success"))process.exit(1)'
+          ISOLATED: ${{ needs.isolated-release.result }}
+          OPS_SELECTED: ${{ needs.quick.outputs.releaseops }}
+        run: node -e 'if(process.env.ISOLATED!==(process.env.OPS_SELECTED==="true"?"success":"skipped")||process.env.ROSTER10!==(process.env.NEW_SELECTED==="true"?"success":"skipped")||process.env.COMBAT!==(process.env.SELECTED==="true"?"success":"skipped")||process.env.QUICK!=="success"||(process.env.DOCS==="true"?process.env.TARGET!=="skipped":process.env.TARGET!=="success"))process.exit(1)'

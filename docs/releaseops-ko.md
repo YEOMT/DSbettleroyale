@@ -1,12 +1,24 @@
 # v33.2 ReleaseOps 사용법
 
-상태: **구현/로컬 검증**, 공개 배포는 **BLOCKED_CONFIGURATION**. 이번 PR은 AWS, Pages 게시 설정, Firebase를 변경하지 않는다. 26/30명 600초 과부하 실패와 실기기 미검증 기록은 그대로다.
+현재 공개 전환 상태와 실제 설정 이력은 [production-cutover.md](production-cutover.md), 격리 검증 변경은 [isolated-release-validation.md](isolated-release-validation.md)를 확인한다. 26/30명 600초 과부하 실패와 실기기 미검증 기록은 그대로다.
+
+## 1GB 서버: Actions 격리 검증 모드
+
+이 서버에서는 운영과 staging을 동시에 실행하지 않는다. 아래의 기존 staging 설치 안내는 별도 여유 자원이 있는 환경용이며, 이 서버에는 `RELEASE_VALIDATION_MODE=github-actions`, `STAGING_ENABLED=false`를 사용한다. 서버 `.releaseops/config.json`의 `validationMode`도 `github-actions`로 설정한다. `minMemoryBytes=536870912`는 유지한다. 검증 모드는 기본값이 staging이며, 알 수 없는 값이나 증거 누락은 차단한다.
+
+정식 반영은 계속 명시적인 `workflow_dispatch` 승인으로만 시작한다. 선택한 후보 SHA/run의 기존 산출물을 별도 Actions runner에 내려받아 checksum, 실제 production Docker 이미지, 버전 네 필드, 정확한 Origin 허용/거부, 교사1·학생2의 조작·재접속·재경기를 검사한다. 이 runner에는 SSH/배포 secrets가 없다. 원래 AWS WSS 대상 주소를 확인한 뒤 격리 컨테이너에 동일 프로토콜/Origin을 전달하므로, 공개 DNS/TLS 연결 확인은 뒤의 정식 공개 smoke에서 별도로 수행한다.
+
+privileged job은 GitHub API로 **동일 main workflow_dispatch/run/attempt의 isolated job 성공**, 후보 실행 출처, manifest hash, image ID, buildId 쌍과 모든 필수 결과를 다시 확인한다. 로컬 결과나 PR CI 결과는 정식 반영 증거로 사용할 수 없다. 검증된 receipt만 SSH로 서버에 기록한다. 선택한 후보는 재빌드하거나 수정하지 않으며, 검토된 dispatch main의 배포 제어 도구만 별도 SHA 경로로 보관해 실행한다.
+
+배포 전 실제 이미지·환경·Compose·Caddy·Pages를 보존하고 기존 drain/seal/복구 절차를 따른다. 기존 512MiB MemAvailable 조건을 준비 전과 이미지 load 후 다시 검사하며 PSI `some`/`full`, OOM 카운트를 별도로 기록한다. 기준 미달이면 기존 서버를 보존하고 중단한다. 격리 검증 성공은 이 자원 조건을 면제하지 않는다. staging 메모리/CPU 제한이나 게임 과부하 기준을 변경하지 않는다.
+
+ReleaseOps PR의 `isolated-release` CI는 정확한 PR base SHA의 보존된 후보로 Docker 경로를 검사한다. 해당 artifact가 없거나 만료되면 `INFRA_FAILURE`로 차단하며 임의의 latest를 대신 사용하지 않는다. 최초 Firebase→v33 전환 중 실패/중단은 **중단된 배포 복구**에 실패한 전환 SHA를 지정한다. 아직 정식 검증 기록이 없는 구 AWS SHA로 일반 롤백을 요청하지 않는다.
 
 ## 일상 흐름
 
 1. 패치 PR → `CI / quick`, 선택된 `targeted`, `required-checks` 확인 → 사용자가 Merge.
 2. 정확한 main 병합본 CI가 성공하면 `Paired candidate`가 해당 SHA의 산출물을 만들고, 설정된 경우 staging만 갱신한다. Merge는 운영 교체를 실행하지 않는다.
-3. staging 플레이 후 Actions **정식 반영**에서 `release_id`(40자리 SHA), `candidate_run_id`(성공한 후보 실행 번호)를 입력해 실행한다. 이것이 명시적 승인이다. production environment의 reviewer를 설정했다면 그 승인도 필요하다. 계정에 reviewer 기능이 없다면 권한 있는 사용자의 dispatch가 승인 경계다.
+3. Actions **정식 반영**에서 `release_id`(40자리 SHA), `candidate_run_id`(성공한 후보 실행 번호)를 입력해 실행한다. `github-actions` 모드에서는 앞 절의 격리 검증이 필수이며, 기본 staging 모드에서는 같은 후보의 staging 검증을 요구한다. 이것이 명시적 승인이다. production environment의 reviewer를 설정했다면 그 승인도 필요하다. 계정에 reviewer 기능이 없다면 권한 있는 사용자의 dispatch가 승인 경계다.
 4. **이전 정식 버전으로 복구**에서 이전 정상 SHA를 입력한다. 서버에 보존한 이미지/Pages/배포 도구를 내려받아 사용하며 과거 npm 설치·빌드를 하지 않는다. 보존 artifact가 삭제/손상됐으면 실패로 차단한다. 자동으로 latest나 재빌드로 대체하지 않는다.
 5. SSH/runner 종료로 작업이 중단됐으면 **중단된 배포 복구**에서 그 작업의 SHA와 환경을 지정한다. 서버에 남은 transaction과 이전 Pages를 이용해 복구한다. 잠금이 남아 있으면 새 릴리스를 억지로 적용하지 않는다.
 

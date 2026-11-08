@@ -1,5 +1,6 @@
 import fs from 'node:fs';
-import WebSocket from 'ws';
+import path from 'node:path';import {createRequire} from 'node:module';
+const WebSocket=createRequire(path.resolve(process.env.DEPLOY_RUNTIME||'package.json'))('ws');
 const expected=JSON.parse(fs.readFileSync(process.env.RELEASE_FILE||'dist/release.json','utf8'));
 const base=process.env.PUBLIC_HTTP_API_URL,wsUrl=process.env.PUBLIC_WSS_URL,origin=process.env.CLIENT_ORIGIN;
 if(!base||!wsUrl||!origin)throw Error('PUBLIC_HTTP_API_URL, PUBLIC_WSS_URL and CLIENT_ORIGIN required');
