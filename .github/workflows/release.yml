@@ -97,7 +97,7 @@ jobs:
       - run: 'echo "ARTIFACT_READY is not a deployment. Staging: $STAGING_HTTP_URL; production: https://yeomt.github.io/DSbettleroyale/; release $RELEASE_SHA" >> "$GITHUB_STEP_SUMMARY"'
   staging:
     needs: candidate
-    if: needs.candidate.outputs.ready == 'true' && vars.STAGING_ENABLED == 'true'
+    if: needs.candidate.outputs.ready == 'true' && vars.STAGING_ENABLED == 'true' && vars.RELEASE_VALIDATION_MODE != 'github-actions'
     environment: staging
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -146,4 +146,5 @@ jobs:
       - env:
           ENABLED: ${{ vars.STAGING_ENABLED }}
           RESULT: ${{ needs.staging.result }}
-        run: 'if [ "$ENABLED" != true ]; then echo "BLOCKED_CONFIGURATION: staging bootstrap/Secrets not enabled; no server changed." >> "$GITHUB_STEP_SUMMARY"; else echo "staging job: $RESULT" >> "$GITHUB_STEP_SUMMARY"; fi'
+          VALIDATION_MODE: ${{ vars.RELEASE_VALIDATION_MODE }}
+        run: 'if [ "$VALIDATION_MODE" = github-actions ]; then echo "ARTIFACT_READY: isolated image/control validation runs on a separate Actions runner during explicit promotion; no AWS staging." >> "$GITHUB_STEP_SUMMARY"; elif [ "$ENABLED" != true ]; then echo "BLOCKED_CONFIGURATION: staging bootstrap/Secrets not enabled; no server changed." >> "$GITHUB_STEP_SUMMARY"; else echo "staging job: $RESULT" >> "$GITHUB_STEP_SUMMARY"; fi'

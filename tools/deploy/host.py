@@ -26,6 +26,25 @@ def persist_env(path,image):
     for line in pathlib.Path(path).read_text().splitlines():
         key=line.split('=',1)[0];out.append(key+'='+values.pop(key) if key in values else line)
     out.extend(k+'='+v for k,v in values.items());atomic(path,'\n'.join(out)+'\n')
+def memory_status():
+    result={'minimumBytes':536870912}
+    if os.path.exists('/proc/meminfo'):
+        result['availableBytes']=int(re.search(r'MemAvailable:\s+(\d+)',pathlib.Path('/proc/meminfo').read_text())[1])*1024
+        result['oomKills']=int(re.search(r'^oom_kill\s+(\d+)',pathlib.Path('/proc/vmstat').read_text(),re.M)[1])
+    if os.path.exists('/proc/pressure/memory'):
+        result['psi']={line.split()[0]:{k:float(v) for k,v in (item.split('=') for item in line.split()[1:])} for line in pathlib.Path('/proc/pressure/memory').read_text().splitlines()}
+    return result
+def validate_isolated(receipt,manifest,digest):
+    if receipt.get('schema')!=1 or receipt.get('kind')!='github-actions-isolated-docker' or receipt.get('status')!='PASS' or receipt.get('oomKilled') is not False or receipt.get('verifiedWorkflow')!='.github/workflows/promote.yml':raise RuntimeError('UNTRUSTED_ISOLATED_RECEIPT')
+    if receipt.get('releaseId')!=manifest['releaseId'] or receipt.get('manifestSha256')!=digest or receipt.get('imageId')!=manifest['images']['production']:raise RuntimeError('ISOLATED_CANDIDATE_MISMATCH')
+    fingerprint(receipt.get('fingerprint',{}),manifest['fingerprint'])
+    for key in ('runId','candidateRunId','runAttempt'):
+        if not str(receipt.get(key,'')).isdigit() or int(receipt[key])<1:raise RuntimeError('INVALID_VALIDATION_RUN')
+    if not re.fullmatch('[a-f0-9]{40}',receipt.get('toolsSha','')):raise RuntimeError('INVALID_VALIDATION_SOURCE')
+    for name in ('bundle','image','http-version','origins','lifecycle-controls'):
+        if sum(c.get('name')==name and c.get('status')=='PASS' for c in receipt.get('checks',[]))!=1:raise RuntimeError('INCOMPLETE_ISOLATED_CHECKS')
+    for name in ('lobby','quiz','draft','move','attack','skill','resume','resumeMove','resumeAttack','resumeSkill','results','rematch','closed'):
+        if receipt.get('controls',{}).get(name) is not True:raise RuntimeError('INCOMPLETE_CONTROL_CHECKS')
 class Host:
     def __init__(self,root,target):
         self.root=pathlib.Path(root).resolve();self.cfg=read(self.root/'config.json');self.target=target
@@ -43,6 +62,7 @@ class Host:
     def compose(self,*args,image=None,drain=None):
         return self.run(['docker','compose','--project-name',self.c['project'],'--env-file',self.c['env'],'-f',self.c['compose'],'-f',self.c['override'],*args],env={**os.environ,**({'SERVER_IMAGE':image} if image else {}),**({'DRAIN_ON_START':str(drain).lower()} if drain is not None else {})})
     def check_config(self):
+        if self.target=='staging' and self.cfg.get('validationMode')=='github-actions':raise RuntimeError('COLOCATED_STAGING_DISABLED')
         p,s=self.cfg['production'],self.cfg['staging']
         for k in ('project','port','env','public'):
             if p[k]==s[k]:raise RuntimeError('ENVIRONMENT_COLLISION_'+k)
@@ -52,13 +72,41 @@ class Host:
         if shutil.disk_usage(self.root).free<self.cfg.get('minFreeBytes',2147483648):raise RuntimeError('INSUFFICIENT_DISK')
         size=sum(f.stat().st_size for f in (self.root/'releases').rglob('*') if f.is_file())
         if size>self.cfg.get('maxArchiveBytes',21474836480):raise RuntimeError('ARCHIVE_CAPACITY_BLOCKED: no automatic pruning')
-        if os.path.exists('/proc/meminfo'):
-            available=int(re.search(r'MemAvailable:\s+(\d+)',pathlib.Path('/proc/meminfo').read_text())[1])*1024
-            if available<self.cfg.get('minMemoryBytes',536870912):raise RuntimeError('INSUFFICIENT_MEMORY')
+        self.check_memory()
         if self.target=='staging':
             req=urllib.request.Request('http://127.0.0.1:'+str(p['port'])+'/admin/status',headers={'Authorization':'Bearer '+env_values(p['env'])['ADMIN_SECRET']})
             with urllib.request.urlopen(req,timeout=5) as r:
                 if json.load(r)['protectedRooms']:raise RuntimeError('DEFERRED_PRODUCTION_MATCH')
+    def check_memory(self):
+        metrics=memory_status();metrics['minimumBytes']=self.cfg.get('minMemoryBytes',536870912)
+        atomic(self.dir/'memory-preflight.json',json.dumps(metrics,indent=2))
+        if metrics.get('availableBytes',metrics['minimumBytes'])<metrics['minimumBytes']:raise RuntimeError('INSUFFICIENT_MEMORY')
+        return metrics
+    def record_validation(self,release,incoming):
+        if not re.fullmatch('[a-f0-9]{40}',release):raise RuntimeError('INVALID_RELEASE')
+        incoming=pathlib.Path(incoming).resolve()
+        if not incoming.is_relative_to((self.root/'incoming').resolve()):raise RuntimeError('INVALID_VALIDATION_PATH')
+        manifest=self.root/'releases'/release/'manifest.json';m=read(manifest);receipt=read(incoming)
+        if m['releaseId']!=release:raise RuntimeError('ARTIFACT_IDENTITY')
+        validate_isolated(receipt,m,sha(manifest));atomic(self.root/'validations'/(release+'.json'),json.dumps(receipt,indent=2))
+    def require_validation(self,release,folder,m):
+        mode=self.cfg.get('validationMode','staging')
+        if mode=='github-actions':
+            validate_isolated(read(self.root/'validations'/(release+'.json')),m,sha(folder/'manifest.json'))
+        elif mode=='staging':
+            staged=read(self.root/'staging'/'transaction.json')
+            if staged['release']!=release or staged['phase']!='DEPLOYED_VERIFIED':raise RuntimeError('SUPERSEDED_OR_UNVERIFIED_STAGING')
+        else:raise RuntimeError('INVALID_VALIDATION_MODE')
+    def backup_settings(self,release):
+        folder=self.dir/'backups'/(str(time.time_ns())+'-'+release);folder.mkdir(parents=True,mode=0o700)
+        paths={'config.json':self.root/'config.json','environment':pathlib.Path(self.c['env'])}
+        for key in ('compose','override'):
+            if self.c.get(key):paths[key]=pathlib.Path(self.c[key])
+        caddy=self.root.parent/'deploy/Caddyfile'
+        if caddy.exists():paths['Caddyfile']=caddy
+        for name,p in paths.items():
+            if p.exists():dest=folder/name;dest.write_bytes(p.read_bytes());dest.chmod(0o600)
+        return str(folder)
     def bundle(self,release):
         if not re.fullmatch('[0-9a-f]{40}',release):raise RuntimeError('INVALID_RELEASE')
         folder=self.root/'releases'/release;m=read(folder/'manifest.json')
@@ -99,13 +147,12 @@ class Host:
         if self.state and self.state['phase'] not in TERMINAL:raise RuntimeError('RECOVERY_REQUIRED')
         self.check_config();folder,m=self.bundle(release)
         if self.target=='production' and not rollback:
-            staged=read(self.root/'staging'/'transaction.json')
-            if staged['release']!=release or staged['phase']!='DEPLOYED_VERIFIED':raise RuntimeError('SUPERSEDED_OR_UNVERIFIED_STAGING')
+            self.require_validation(release,folder,m)
         if rollback and not (folder/'production-verified.json').exists():raise RuntimeError('ROLLBACK_NOT_PREVIOUSLY_VERIFIED')
         previous=self.observed()
         if self.target=='production' and previous is None:raise RuntimeError('PREVIOUS_PAIR_REQUIRED')
         if self.target=='production' and not (self.root/'pages-current'/'index.html').exists():raise RuntimeError('PREVIOUS_PAGES_REQUIRED')
-        self.state={'release':release,'previous':previous,'replaced':False,'pagesMayChange':False,'target':self.target}
+        self.state={'release':release,'previous':previous,'replaced':False,'pagesMayChange':False,'target':self.target,'settingsBackup':self.backup_settings(release)}
         self.save('PREPARING')
         if self.target=='production':
             backup=self.dir/'pages-previous'
@@ -117,6 +164,7 @@ class Host:
             if not backup.exists():self.run(['docker','save','-o',str(backup),previous['image']],timeout=300)
         self.run(['docker','load','-i',str(folder/(self.target+'-image.tar'))],timeout=300)
         image=m['images'][self.target];self.run(['docker','image','inspect',image])
+        self.check_memory() # image preparation may change available memory; do not relax the original bound
         assets=self.dir/'assets';assets.mkdir(exist_ok=True)
         shutil.copytree(folder/self.target/'client/assets',assets,dirs_exist_ok=True)
         if self.target=='production':
@@ -178,7 +226,7 @@ def main():
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB);host=Host(root,target)
         other=root/('production' if target=='staging' else 'staging')/'transaction.json'
         if other.exists() and read(other)['phase'] not in TERMINAL:raise RuntimeError('OTHER_TRANSACTION_ACTIVE')
-        if action not in ('stage','rollback','status') and (not host.state or host.state['release']!=args[0]):raise RuntimeError('TRANSACTION_ID_MISMATCH')
+        if action not in ('stage','rollback','status','preflight','record-validation') and (not host.state or host.state['release']!=args[0]):raise RuntimeError('TRANSACTION_ID_MISMATCH')
         if action in ('stage','rollback'):host.stage(args[0],action=='rollback')
         elif action=='publishing':host.publishing()
         elif action=='commit':host.finish()
@@ -187,6 +235,8 @@ def main():
         elif action=='finish-rollback':host.finish(True)
         elif action=='rollback-failed':host.save('ROLLBACK_FAILED')
         elif action=='status':print(json.dumps(host.state))
+        elif action=='preflight':host.check_config();print(json.dumps(memory_status()))
+        elif action=='record-validation':host.record_validation(args[0],args[1])
         else:raise RuntimeError('INVALID_ACTION')
 if __name__=='__main__':
     try:main()

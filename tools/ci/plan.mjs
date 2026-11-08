@@ -31,6 +31,6 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  let diff=execFileSync('git',['diff','--unified=0',base,'--',...inputs],{encoding:'utf8',maxBuffer:20e6});
  for(const file of execFileSync('git',['ls-files','--others','--exclude-standard','--',...inputs],{encoding:'utf8'}).trim().split('\n').filter(Boolean))diff+='\n'+fs.readFileSync(file,'utf8');
  const plan=classify(files,diff);fs.mkdirSync('artifacts',{recursive:true});fs.writeFileSync('artifacts/check-plan.json',JSON.stringify(plan,null,2));
- if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,`docs=${plan.docsOnly}\ncombat=${plan.combat}\nroster10=${plan.roster10}\n`);
+ if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,`docs=${plan.docsOnly}\ncombat=${plan.combat}\nroster10=${plan.roster10}\nreleaseops=${plan.areas.includes('releaseops')}\n`);
  console.log(JSON.stringify(plan,null,2));
 }
