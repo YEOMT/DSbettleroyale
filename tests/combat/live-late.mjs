@@ -6,7 +6,8 @@ const label=process.argv[2]||'candidate',data=[];
 for(const focus of [false,true]){
  const h=await auditHarness({players:6,renderer:'canvas',quality:'balanced',mode:'solo',browserArgs:['--disable-accelerated-2d-canvas']});
  try{
-  h.room.matchId='late-feel-fixed';h.app.manager.changed(h.room);await delay(60);
+  h.room.matchId='late-feel-fixed';h.room.round++;h.room.revision++;h.app.manager.changed(h.room);
+  for(const page of [h.host,h.student])await page.waitForFunction(()=>auditApp.ui.room.matchId==='late-feel-fixed');
   await h.command('START_QUIZ');await h.command('BEGIN_DRAFT');const ids=['emoji-024','emoji-003','emoji-023','emoji-029','emoji-013','emoji-025'];
   h.room.students().forEach((m,i)=>m.draft.abilityId=ids[i]);await h.command('START_BATTLE');
   await h.host.waitForFunction(async()=>!!(await import('/src/main.js')).renderer.cameraPose);

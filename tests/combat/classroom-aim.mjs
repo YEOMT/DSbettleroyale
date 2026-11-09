@@ -14,11 +14,14 @@ try{
   Object.assign(p,new w.Participant(1,'Aim actor',ability,new w.Vec2(0,0),0),{remoteId,sessionId:remoteId,lifeSeq:life,abilityId:id,alive:true,connected:true,humanControlled:true,applyPlayerInput:w.brApplyPlayerInput,aimProfileKey:null,rw:null,cooldown:0,basicCooldown:0,spawnProtectionUntilFrame:0});w.brInitRun(p);p.vel=new w.Vec2(0,0);w.session.inputs[remoteId]={};w.game.rebuildSpatialGrid();h.publish();await h.student.waitForFunction(l=>m.timeline.predicted?.lifeSeq===l,life);
  }
  async function press(touch){
+  // Fixture life replacement is faster than a real respawn on CI. Wait for
+  // normal input readiness, including the unchanged 100ms duplicate-tap gate.
+  await h.student.waitForFunction(()=>m.controls.enabled&&!m.net.restoring&&m.net.profilesReady&&m.net.lifeSeq===m.timeline.predicted?.lifeSeq&&m.timeline.predicted?.alive&&!m.timeline.predicted.cooldown&&performance.now()-(m.controls.lastFire.skill??-Infinity)>=100);
   const box=await h.student.locator('#br-skill').boundingBox(),start={x:box.x+box.width/2,y:box.y+box.height/2},end={x:start.x-box.width,y:start.y};let release;
   if(touch){const cdp=await h.student.context().newCDPSession(h.student);await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:2});await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:1,...start}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{id:1,...end}]});release=async()=>{await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await cdp.detach();};}
   else{await h.student.mouse.move(start.x,start.y);await h.student.mouse.down();await h.student.mouse.move(end.x,end.y);release=()=>h.student.mouse.up();}
   await h.student.waitForFunction(()=>m.controls.gestures.get('skill')?.power===1&&m.renderer.aimGuide?.dx<-.99);const guide=await h.student.evaluate(()=>({...m.renderer.aimGuide}));await release();
-  for(let n=0;n<100&&!w.actionPending.get(p.remoteId)?.length;n++)await delay(10);assert.ok(w.actionPending.get(p.remoteId)?.length,'real action queued');return guide;
+  for(let n=0;n<100&&!w.actionPending.get(p.remoteId)?.length;n++)await delay(10);assert.ok(w.actionPending.get(p.remoteId)?.length,'real action queued '+JSON.stringify(await h.student.evaluate(()=>({last:m.controls.lastAction,enabled:m.controls.enabled,life:m.net.lifeSeq,cooldown:m.timeline.predicted?.cooldown,stunned:m.timeline.predicted?.stunned}))));return guide;
  }
  for(const touch of [false,true]){await reset('emoji-141');const guide=await press(touch);stepWorld(w);assert.ok(Math.abs(guide.x+400)<.01);assert.ok(Math.hypot(p.pos.x-guide.x,p.pos.y-guide.y)<1);assert.equal(p.cooldown,720);report.push({joker:touch?'CDP touch':'PC drag',guideRange:guide.range,actualX:p.pos.x});h.publish();}
  await reset('emoji-003');const guide=await press(false);assert.equal(guide.width,48);

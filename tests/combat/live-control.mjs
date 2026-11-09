@@ -7,7 +7,10 @@ const h=await auditHarness({players:2,mode:'team-elim',quality:'balanced',render
 const report={renderer,baseline},time=performance.now();
 const percentile=(rows,p)=>rows.slice().sort((a,b)=>a-b)[Math.ceil(p*rows.length)-1]??0;
 try{
- h.room.matchId='feel-control-fixture';h.app.manager.changed(h.room);await delay(100);
+ // A deterministic fixture is a new match, so advance its round as the real
+ // REMATCH transition does. Clients must still reject old/same-round IDs.
+ h.room.matchId='feel-control-fixture';h.room.round++;h.room.revision++;h.app.manager.changed(h.room);
+ for(const page of [h.host,h.student])await page.waitForFunction(()=>auditApp.ui.room.matchId==='feel-control-fixture');
  await h.command('START_QUIZ');await h.command('BEGIN_DRAFT');
  const [first,second]=h.room.students();first.draft.abilityId='emoji-023';second.draft.abilityId='emoji-025';
  await h.command('START_BATTLE');

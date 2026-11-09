@@ -52,6 +52,13 @@
 - **FAIL/INFRA_FAILURE 보존**: 초기 같은 프로세스 서버+가상 수신기+Vite/브라우저 실행의 과부하, 최초 sandbox Edge 시작 실패, 잘못된 fixture 좌표/종료 방향·쿨타임 기대 및 비동기 Playwright polling 오류는 원본 로그에 남겼다. 기존 분리 서버 도구와 최근 스냅샷만 보관하는 수신기로 시험 부담을 분리했다. 과부하 기준·게임 FPS·공격 정보를 바꿔 통과시키지 않았다.
 - **NOT_RUN**: 이번 패치의 실제 Samsung/iPhone/iPad·학교 Wi-Fi, 605초/전체87종×화질 Deep Audit, 운영 AWS/공식 Pages 배포. 기존 극한 부하 실패와 실기기 미검증을 해소한 것으로 표시하지 않는다.
 
+PR17 첫 CI42610600897은 Quick/빌드/Targeted, Pixi 신규10종, Pixi 재접속·조준, 터치(Canvas/Pixi 및 모바일 WebKit)가 PASS였고, 아래 시험 준비/기대값 문제로 전체 CI는 **FAIL**이었다. 동일 방5회와 countdown UI는 Canvas recovery 내부에서 이미 PASS했다. `all77.mjs` 호출은 기존 CI의 지정된5종만이며 전체 캐릭터 감사가 아니다.
+
+- 기존 live-control/live-late가 같은 round 안에서 matchId만 바꿔 새 stale-state 검증에 거부됐다. 시험용 고정 seed 전환도 round/revision을 증가시키고 양쪽 화면의 새 scope 수신을 기다리도록 수정했다. 오래된 경기 거부 규칙은 유지했다.
+- 연속 버섯 시험의 ‘상대·호스트도 미발동 버섯을 본다’는 이전 기대를 설치자만 공개로 바꿨다. 모두에게 독장판이 보이는 기존 단언은 유지했다.
+- 빠른 fixture 캐릭터 교체 후 조준 시험이 실제100ms 중복 탭 방지 시간 전에 다음 스킬을 시도할 수 있었다. 입력 준비·life·쿨타임과 원래100ms 경과를 기다리며, 실패 시 실제 lastAction/life 상태를 기록한다. 게임 debounce/쿨타임을 해제하지 않았다.
+- 해당 로컬 재검사만 수행: 조준 Canvas **PASS15.615초**, Pixi **PASS15.636초**; 연속 입력 Canvas **PASS13.613초**; 관전 전체/집중 최후반 **PASS30.596초**; 신규4종 연속 공격자·상대·호스트 **PASS22.015초**. 최종 커밋 CI 상태는 PR 본문에 별도 기록한다.
+
 재현: `node tools/ci/plan.mjs origin/main`, `npm run quick`, `npm run build`, `npm run test:targeted`. 집중: `node tests/combat/classroom-rematch.mjs`, `node tests/combat/classroom-ui.mjs`, `node tests/combat/classroom-aim.mjs canvas` / `pixi`, `ROSTER10_IDS=141,144,149 node tests/roster10/flow.mjs canvas` / `pixi`. Windows 브라우저 실행은 `PLAYWRIGHT_CHANNEL=msedge`를 사용했다. raw 측정은 ignored artifacts/classroom 및 CI artifacts에 남긴다.
 
 이후 후보는 사용자 PR 병합 후 기존 Paired candidate workflow로 생성한다. 배포 시 해당 후보의 정확한 buildId 쌍과 기존 승인·백업·drain/seal·복구 절차를 그대로 사용한다. 이번 브랜치를 기존 운영 주소에 적용했다고 보고하지 않는다.
