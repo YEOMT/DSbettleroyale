@@ -13,16 +13,20 @@ export class Room{
  }
  addMember(name,role='student'){
   if(role==='student'&&this.students().length>=this.manager.config.maxPlayers)fail('ROOM_FULL');
-  if(role==='student'&&this.phase!=='LOBBY')fail('JOIN_LOBBY_ONLY');
+  this.advanceCountdown();
+  if(role==='student'&&!(this.phase==='LOBBY'||this.phase==='QUIZ'&&this.manager.now()<this.quizEndsAt))fail('JOIN_QUIZ_CLOSED');
   name=String(name).normalize('NFC').trim();if(!name||name.length>24||/[\u0000-\u001f]/.test(name))fail('INVALID_NAME');
   if([...this.members.values()].some(p=>!p.revoked&&p.name===name))fail('NAME_IN_USE');
   const p={id:randomUUID(),token:randomBytes(32).toString('base64url'),name,role,epoch:0,connected:false,revoked:false,team:0,joinedAt:this.manager.now(),ledger:new Map(),events:[],eventBytes:0,cursor:0};
-  this.members.set(p.id,p);this.manager.tokens.set(p.token,{room:this,member:p});this.balanceLobbyTeams();this.revision++;return p;
+  if(role==='student'){if(this.config.mode!=='solo')this.assignNewTeam(p);if(this.phase==='QUIZ')initializeQuiz(this,p);}
+  this.members.set(p.id,p);this.manager.tokens.set(p.token,{room:this,member:p});this.revision++;return p;
  }
  students(){return [...this.members.values()].filter(p=>p.role==='student'&&!p.revoked);}
  balanceLobbyTeams(){if(this.phase!=='LOBBY'||this.config.mode!=='team-capture')return;const teams=this.rules.brTKBalancedTeams(this.students().map(p=>({...p,_id:p.id})),this.config.teamCount);for(const p of this.students())p.team=teams[p.id];}
+ assignNewTeam(p){const counts=Array(this.config.teamCount).fill(0);for(const m of this.students())if(m.team>0&&m.team<=counts.length)counts[m.team-1]++;p.team=counts.indexOf(Math.min(...counts))+1;}
+ advanceCountdown(){if(!this.countdown||this.manager.now()<this.countdown.endsAt)return false;const end=this.countdown.endsAt;this.countdown=null;for(const p of this.students())initializeQuiz(this,p);this.quizEndsAt=end+this.config.quizSeconds*1000;this.phase='QUIZ';this.revision++;return true;}
  configure(p){
-  if(this.phase!=='LOBBY')fail('PHASE_MISMATCH');const next={...this.config};
+  if(this.phase!=='LOBBY'||this.countdown)fail('PHASE_MISMATCH');const next={...this.config};
   if(p.mode!==undefined){const mode=p.mode==='team'?'team-elim':p.mode;if(!['solo','team-elim','team-capture','team-respawn'].includes(mode))fail('INVALID_MODE');next.mode=mode;}
   for(const [key,min,max]of [['teamCount',2,4],['quizSeconds',10,600],['rerollEvery',1,100]])if(p[key]!==undefined){if(!Number.isInteger(p[key])||p[key]<min||p[key]>max)fail('INVALID_CONFIG');next[key]=p[key];}
   if(p.matchSeconds!==undefined){if(![300,360].includes(p.matchSeconds))fail('INVALID_CONFIG');next.matchSeconds=p.matchSeconds;}
@@ -31,8 +35,9 @@ export class Room{
   let bank=this.quizBank;
   if(p.quizText!==undefined){if(typeof p.quizText!=='string'||p.quizText.length>200000)fail('QUIZ_TOO_LARGE');const parsed=this.rules.brValidateQuestionText(p.quizText);if(parsed.errors.length||!parsed.questions.length)fail('INVALID_QUIZ:'+JSON.stringify(parsed.errors.slice(0,3)));if(parsed.questions.some(q=>q.some(s=>s.length>1000)))fail('QUIZ_TEXT_TOO_LONG');bank=parsed.questions;}
   if(p.teams!==undefined){if(!p.teams||typeof p.teams!=='object'||Array.isArray(p.teams))fail('INVALID_TEAMS');for(const [id,team]of Object.entries(p.teams))if(!this.members.has(id)||!Number.isInteger(team)||team<1||team>next.teamCount)fail('INVALID_TEAMS');}
+  const teamRulesChanged=next.mode!==this.config.mode||next.teamCount!==this.config.teamCount;
   this.config=next;this.quizBank=bank;if(p.teams)for(const [id,team]of Object.entries(p.teams))this.members.get(id).team=team;
-  this.balanceLobbyTeams();this.revision++;
+  if(!p.teams&&teamRulesChanged)this.balanceLobbyTeams();this.revision++;
  }
  beginDraft(){
   if(this.phase!=='QUIZ')fail('PHASE_MISMATCH');
@@ -53,10 +58,10 @@ export class Room{
     target.revoked=true;this.manager.tokens.delete(target.token);target.peer?.close(4003,'KICKED');this.revision++;break;
    }
    case 'START_QUIZ':{
-    if(this.phase!=='LOBBY')fail('PHASE_MISMATCH');if(this.manager.draining)fail('SERVER_DRAINING');if(this.students().length<2)fail('NEED_TWO_PLAYERS');
+    if(this.phase!=='LOBBY'||this.countdown)fail('PHASE_MISMATCH');if(this.manager.draining)fail('SERVER_DRAINING');if(this.students().length<2)fail('NEED_TWO_PLAYERS');
     const teams=this.rules.brTKBalancedTeams(this.students().map(p=>({...p,_id:p.id})),this.config.teamCount);
-    for(const p of this.students()){p.team=this.config.mode==='solo'?0:teams[p.id];initializeQuiz(this,p);}
-    this.quizEndsAt=this.manager.now()+this.config.quizSeconds*1000;this.phase='QUIZ';this.revision++;break;
+    for(const p of this.students())p.team=this.config.mode==='solo'?0:p.team>=1&&p.team<=this.config.teamCount?p.team:teams[p.id];
+    const at=this.manager.now();this.countdown={id:this.matchId,startsAt:at,endsAt:at+5000};this.revision++;break;
    }
    case 'BEGIN_DRAFT':this.beginDraft();break;
    case 'QUIZ_ANSWER':if(this.phase!=='QUIZ'||member.role!=='student')fail('PHASE_MISMATCH');return answer(this,member,p,this.manager.now());
@@ -85,8 +90,8 @@ export class Room{
     for(const m of this.members.values())if(m.peer){m.epoch++;m.peer.epoch=m.epoch;m.peer.restore?.();m.peer.send('OVERLOAD',{paused:false});}break;
    case 'CLOSE_ROOM':if(this.phase==='BATTLE')fail('END_BATTLE_FIRST');queueMicrotask(()=>this.manager.remove(this));break;
    case 'REMATCH':{
-    if(this.phase!=='RESULTS')fail('PHASE_MISMATCH');if(this.world)destroyWorld(this.world);this.world=null;this.result=null;this.static=null;this.safePaused=false;this.lastFault=null;this.debt=0;this.overloadSince=0;this.lastBoard=0;this.battleStartedAt=0;this.matchId=randomUUID();this.round++;this.phase='LOBBY';this.revision++;
-    for(const m of this.members.values()){m.quiz=null;m.draft=null;m.ledger.clear();m.events=[];m.eventBytes=0;}break;
+    if(this.phase!=='RESULTS')fail('PHASE_MISMATCH');if(this.world)destroyWorld(this.world);this.world=null;this.result=null;this.static=null;this.safePaused=false;this.lastFault=null;this.debt=0;this.overloadSince=0;this.lastBoard=0;this.battleStartedAt=0;this.quizEndsAt=0;this.countdown=null;this.snapshotSeq=0;this.lastSnapshot=0;this.nextSnapshot=0;this.matchId=randomUUID();this.round++;this.phase='LOBBY';this.revision++;
+    for(const m of this.members.values()){m.quiz=null;m.draft=null;m.ledger.clear();m.events=[];m.eventBytes=0;m.peer?.resetMatch();}break;
    }
    case 'AUGMENT_CHOOSE':case 'RESPAWN':if(this.phase!=='BATTLE')fail('PHASE_MISMATCH');return applyCommand(this.world,{...p,type,playerId:member.id,lifeSeq:this.world.byId.get(member.id)?.lifeSeq,requestId});
    default:fail('UNKNOWN_COMMAND');
@@ -101,7 +106,7 @@ export class Room{
   this.manager.changed(this);
  }
  publicState(member){return {safePaused:this.phase==='BATTLE'&&!!this.safePaused,simulationFault:this.phase==='BATTLE'&&!!this.lastFault,id:this.id,code:this.code,matchId:this.matchId,round:this.round,phase:this.phase,revision:this.revision,config:this.config,
-  serverTime:this.manager.now(),quizEndsAt:this.quizEndsAt||0,battleStartedAt:this.battleStartedAt||0,
+  serverTime:this.manager.now(),countdown:this.countdown||null,quizEndsAt:this.quizEndsAt||0,battleStartedAt:this.battleStartedAt||0,
   quizRemainingMs:Math.max(0,(this.quizEndsAt||0)-this.manager.now()),
   players:this.students().map(p=>({id:p.id,name:p.name,team:p.team,connected:p.connected,ready:!!p.draft?.ready,score:p.quiz?.score||0,...(member.role==='host'?{draft:p.draft||null}:{})})),
   self:{id:member.id,name:member.name,role:member.role,team:member.team,draft:member.draft||null,quiz:member.role==='student'&&this.phase==='QUIZ'?publicQuiz(member,this.manager.now()):null},
@@ -111,8 +116,8 @@ export class RoomManager{
  constructor(config,{now=()=>Date.now()}={}){this.config=config;this.now=now;this.rooms=new Map();this.tokens=new Map();this.draining=!!config.drainOnStart;this.startBattle=()=>fail('ENGINE_NOT_ATTACHED');}
  create(name){if(this.draining)fail('SERVER_DRAINING');if(this.rooms.size>=this.config.maxRooms)fail('ROOM_CAPACITY');let code;do{code=String(randomInt(100000,1000000));}while(this.rooms.has(code));const room=new Room(this,code,name);this.rooms.set(code,room);return room;}
  activeBattles(){return [...this.rooms.values()].filter(r=>r.phase==='BATTLE').length;}
- protectedRooms(){return [...this.rooms.values()].filter(r=>['QUIZ','DRAFT','BATTLE'].includes(r.phase)).length;}
+ protectedRooms(){return [...this.rooms.values()].filter(r=>r.countdown||['QUIZ','DRAFT','BATTLE'].includes(r.phase)).length;}
  remove(room){if(room.world)destroyWorld(room.world);room.world=null;for(const p of room.members.values()){p.revoked=true;this.tokens.delete(p.token);p.peer?.close(4004,'ROOM_EXPIRED');p.ledger.clear();p.events=[];p.peer=null;}room.members.clear();this.rooms.delete(room.code);}
- sweep(){for(const [code,r]of this.rooms){if([...r.members.values()].some(p=>p.connected))r.lastOccupied=this.now();else if(this.now()-r.lastOccupied>this.config.roomTtlMs){if(r.world)destroyWorld(r.world);for(const p of r.members.values())this.tokens.delete(p.token);r.members.clear();this.rooms.delete(code);continue;}if(r.phase==='QUIZ'&&this.now()>=r.quizEndsAt){r.beginDraft();this.changed?.(r);}}}
+ sweep(){for(const [code,r]of this.rooms){if([...r.members.values()].some(p=>p.connected))r.lastOccupied=this.now();else if(this.now()-r.lastOccupied>this.config.roomTtlMs){if(r.world)destroyWorld(r.world);for(const p of r.members.values())this.tokens.delete(p.token);r.members.clear();this.rooms.delete(code);continue;}if(r.advanceCountdown())this.changed?.(r);if(r.phase==='QUIZ'&&this.now()>=r.quizEndsAt){r.beginDraft();this.changed?.(r);}}}
  close(){for(const r of this.rooms.values()){for(const p of r.members.values())p.peer?.close(1001,'SERVER_SHUTDOWN');if(r.world)destroyWorld(r.world);}this.rooms.clear();this.tokens.clear();}
 }

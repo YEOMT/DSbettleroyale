@@ -27,5 +27,14 @@ export class GameAudio{
   if(d.kind==='elimination'&&own)this.controller.sfx('elimination',true);
 
  }
+ countdown(id,number,host){
+  const key=id? id+':'+number:'';if(this.countdownKey===key)return;this.countdownKey=key;
+  if(!id||!host||!this.effects||this.volume<=0||document.hidden)return;
+  // No scheduled series: a resumed tab plays only its current number. Reuse audio context.
+  const ac=this.controller.ensure();if(!ac||ac.state!=='running')return;
+  const osc=ac.createOscillator(),gain=ac.createGain(),at=ac.currentTime;
+  osc.type='sine';osc.frequency.setValueAtTime(number===5?880:660,at);gain.gain.setValueAtTime(.15*this.volume,at);gain.gain.exponentialRampToValueAtTime(.001,at+.14);
+  osc.connect(gain);gain.connect(ac.destination);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(at);osc.stop(at+.15);
+ }
  action(kind,weight=2){if(!this.effects)return;this.controller.ensure();this.controller.sfx(kind,weight);}
 }

@@ -17,7 +17,7 @@ export class Connection extends EventTarget{
   ws.onopen=()=>ws.send(JSON.stringify(envelope('HELLO',fingerprint)));
   ws.onmessage=e=>{if(this.ws!==ws)return;const m=JSON.parse(e.data);this.receive(m);if((m.type==='FULL_STATE'||m.type==='WELCOME')&&!this.restoring){clearTimeout(timeout);resolveConnect();this.connecting=null;}};
   ws.onerror=()=>rejectConnect(Error('서버에 연결할 수 없습니다.'));
-  ws.onclose=e=>{if(this.ws!==ws)return;clearInterval(this.pingTimer);this.restoring=!!this.token;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(Error('연결이 끊겼습니다.'));}this.pending.clear();this.emit('status',{connected:false,reason:e.reason});
+  ws.onclose=e=>{if(this.ws!==ws)return;clearInterval(this.pingTimer);this.restoring=!!this.token;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(Error('연결이 끊겼습니다.'));}this.pending.clear();this.emit('status',{connected:false,reason:e.reason,code:e.code});
    clearTimeout(timeout);rejectConnect(Error('연결이 종료되었습니다.'));this.connecting=null;
    if([4002,4003,4004,4009].includes(e.code)||this.stopped){this.stopped=true;if([4002,4003,4004,4009].includes(e.code)||e.reason==='LEFT'){this.token=null;sessionStorage.removeItem('dsbr-resume');}this.emit('ended',e.reason);return;}
    this.retryStart??=performance.now();if(performance.now()-this.retryStart>60000){this.stopped=true;this.emit('ended','재연결 시간이 초과되었습니다. 다시 참가해 주세요.');return;}
@@ -28,15 +28,25 @@ export class Connection extends EventTarget{
  receive(m){
   const batch=eventBatchMessages(m);if(batch){for(const event of batch)this.receive(event);return;}
   if(m.type==='VERSION_MISMATCH'){this.stopped=true;this.emit('ended','게임 버전이 바뀌었습니다. 새로고침 후 참가하세요.');return;}
-  if(m.type==='WELCOME'){this.emit('welcome',m.payload);this.restoring=!!this.token;if(!this.restoring){this.retry=0;this.retryStart=null;this.emit('status',{connected:true});}if(this.token)this.send('RESUME',{token:this.token,cursor:this.cursor},false);this.pingTimer=setInterval(()=>this.send('PING',{clientTime:performance.now()},false),2000);return;}
+  if(m.type==='WELCOME'){this.emit('welcome',m.payload);this.restoring=!!this.token;if(!this.restoring){this.retry=0;this.retryStart=null;this.emit('status',{connected:true});}if(this.token)this.send('RESUME',{token:this.token,cursor:this.cursor},false);clearInterval(this.pingTimer);this.pingTimer=setInterval(()=>this.send('PING',{clientTime:performance.now()},false),2000);return;}
   if(m.roomInstanceId){if(this.scope.roomInstanceId&&m.roomInstanceId!==this.scope.roomInstanceId&&m.type!=='SESSION')return;
+   if(m.type==='SESSION'&&m.roomInstanceId!==this.scope.roomInstanceId){this.round=0;this.roomRevision=0;this.cursor=0;}
+   if(m.type==='SESSION'&&m.roomInstanceId===this.scope.roomInstanceId&&m.connectionEpoch===this.scope.connectionEpoch&&m.matchId!==this.scope.matchId)return;
    if(this.scope.connectionEpoch&&m.connectionEpoch<this.scope.connectionEpoch)return;
    // REMATCH's successful reply carries the new match scope. Accept only the
    // reply to our own outstanding transition; unrelated late replies stay rejected.
    const pendingTransition=m.type==='COMMAND_RESULT'&&m.payload?.accepted&&m.payload.command==='REMATCH'&&this.pending.get(m.payload.requestId);
    const rematchAck=pendingTransition&&pendingTransition.type==='REMATCH'&&pendingTransition.matchId===this.scope.matchId;
    if(this.scope.matchId&&this.scope.matchId!==m.matchId&&!['ROOM_STATE','SESSION','FULL_STATE'].includes(m.type)&&!rematchAck)return;
-   if(this.scope.matchId!==m.matchId)this.emit('reset',{});this.scope={roomInstanceId:m.roomInstanceId,matchId:m.matchId,connectionEpoch:m.connectionEpoch};}
+   const room=m.type==='ROOM_STATE'?m.payload:m.type==='FULL_STATE'?m.payload.room:null;
+   if(room&&this.scope.roomInstanceId===m.roomInstanceId&&(room.round<this.round||room.round===this.round&&room.revision<this.roomRevision))return;
+   if(room&&this.scope.matchId&&this.scope.matchId!==m.matchId&&room.round<=this.round)return;
+   if(this.scope.matchId!==m.matchId){
+    for(const [id,p]of this.pending)if(!rematchAck||id!==m.payload.requestId){clearTimeout(p.timer);this.pending.delete(id);p.reject(Error('MATCH_CHANGED'));}
+    this.profiles.clear();this.profileRecoveryAt=-Infinity;this.lifeSeq=0;this.profileReady(this.session?.role==='host');this.emit('reset',{});
+   }
+   if(room){this.round=room.round;this.roomRevision=room.revision;}
+   this.scope={roomInstanceId:m.roomInstanceId,matchId:m.matchId,connectionEpoch:m.connectionEpoch};}
   if(m.eventSeq){if(m.eventSeq<=this.cursor)return;this.cursor=m.eventSeq;}
   if(m.type==='SESSION'){this.profiles.clear();this.profileRecoveryAt=-Infinity;this.profileReady(m.payload.role==='host');this.token=m.payload.token;this.session=m.payload;sessionStorage.setItem('dsbr-resume',this.token);}
   if(m.type==='OVERLOAD'&&m.payload.paused)this.combatPause(true);
@@ -56,7 +66,7 @@ export class Connection extends EventTarget{
    }
    this.cursor=m.payload.cursor;this.lifeSeq=m.payload.self?.lifeSeq||0;this.emit('reset',{});}
   if(m.type==='PONG'){const now=performance.now(),rtt=now-m.payload.clientTime,offset=m.payload.serverNow-(now-rtt/2);this.clock={rtt,offset:this.clock.rtt?this.clock.offset*.85+offset*.15:offset,uncertainty:rtt/2};}
-  if(m.type==='COMMAND_RESULT'){const pending=this.pending.get(m.payload.requestId);if(pending){clearTimeout(pending.timer);this.pending.delete(m.payload.requestId);m.payload.accepted?pending.resolve(m.payload):pending.reject(Error(m.payload.reason||'요청을 처리하지 못했습니다.'));}}
+  if(m.type==='COMMAND_RESULT'){const pending=this.pending.get(m.payload.requestId);if(pending&&((pending.matchId===m.matchId)||m.payload.command==='REMATCH'&&m.payload.accepted)){clearTimeout(pending.timer);this.pending.delete(m.payload.requestId);m.payload.accepted?pending.resolve(m.payload):pending.reject(Error(m.payload.reason||'요청을 처리하지 못했습니다.'));}}
   if(m.type==='AUTH_OK'){this.emit('auth',{});return;}
   this.emit(m.type.toLowerCase(),m.payload);if(m.type==='FULL_STATE'){this.restoring=false;this.retry=0;this.retryStart=null;this.emit('status',{connected:true});}
  }

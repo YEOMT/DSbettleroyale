@@ -106,5 +106,5 @@ export class Controls{
   if(edgeOnly)this.nextRegularAt=now+tickMs;
   this.sendSample(move,edge);}
  syncFloor(f){if(!f)return;this.restoreFloor=f;this.seq=Math.max(this.seq,f.move);this.clientTick=Math.max(this.clientTick,f.tick);for(const kind of ['attack','skill'])this.actions[kind]=Math.max(this.actions[kind],f[kind]);}
- reset(){this.neutral(false);this.nextRegularAt=0;this.sampleAt=-Infinity;this.sounds.clear();this.lastDirection=this.aim={x:1,y:0};this.lastAction=null;this.lastMove={x:0,y:0};this.seq=0;this.clientTick=0;this.actions={attack:0,skill:0};this.lastFire={};}
+ reset(){this.assist.scope.BRMP.aimHelpHeld=null;this.assist.targets=[];this.assist.context=null;this.restoreFloor=null;this.neutral(false);this.nextRegularAt=0;this.sampleAt=-Infinity;this.sounds.clear();this.lastDirection=this.aim={x:1,y:0};this.lastAction=null;this.lastMove={x:0,y:0};this.seq=0;this.clientTick=0;this.actions={attack:0,skill:0};this.lastFire={};}
 }

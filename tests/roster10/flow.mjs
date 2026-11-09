@@ -29,13 +29,13 @@ try{
   for(const [i,data]of basic.entries()){assert.ok(data.events>0,id+' '+roles[i]+' basic events');assert.ok(data.drawn.some(f=>f.actors.includes(a.remoteId)),id+' actor rendered');assert.ok(data.drawn.every(f=>f.pixi===(renderer==='pixi')),roles[i]+' actual backend');}
   // Start each skill from an unobstructed common geometry; no skill lock or
   // cooldown is removed after the actual skill command.
-  a.pos=new w.Vec2(0,0);b.pos=new w.Vec2(200,0);a.vel=new w.Vec2();b.vel=new w.Vec2();a.stunned=0;await paint();
+  a.pos=new w.Vec2(0,0);b.pos=new w.Vec2(200,0);a.vel=new w.Vec2(0,0);b.vel=new w.Vec2(0,0);a.stunned=0;await paint();
   assert.equal((await send('skill')).accepted,true);await step(60);assert.ok(a.firedSkillSeq>0,id+' skill fired');assert.ok(a.cooldown>0,id+' cooldown');
   if(number===144){const trap=w.game.rw.entities.find(e=>!e.dead&&e.kind==='mushroom');assert.ok(trap);b.pos=new w.Vec2(trap.pos.x,trap.pos.y);await step(12);}
   const expected=({141:'decoy',142:'grapple',143:'ring-wall',144:'mushroom'})[number];
   const screens=await Promise.all(pages.map(p=>p.evaluate(()=>({frames:drawn.length,visible:[...new Set(drawn.flatMap(f=>f.visible))],shots:[...new Set(drawn.flatMap(f=>f.shots.map(s=>s.kind)))],walls:Math.max(...drawn.map(f=>f.walls)),effects:received.filter(e=>e.type==='FX').length}))));
   rows.push({id,basic:basic.map(x=>({events:x.events,frames:x.drawn.length})),screens,skill:a.firedSkillSeq,authority:{received:a.receivedSkillSeq,resolved:a.resolvedSkillSeq,cooldown:a.cooldown,entities:w.game.rw.entities.map(e=>({kind:e.kind,end:e.end})),tick:w.game.frame},status:'CHECKING'});
-  if(expected)for(const [i,s]of screens.entries()){assert.ok(s.shots.includes(expected),id+' '+roles[i]+' snapshot '+expected+' '+JSON.stringify(rows.at(-1)));assert.ok(s.visible.length>0,id+' '+roles[i]+' persistent entity painted');}
+  if(expected)for(const [i,s]of screens.entries()){assert.equal(s.shots.includes(expected),number!==144||i===0,id+' '+roles[i]+' snapshot visibility '+expected+' '+JSON.stringify(rows.at(-1)));if(number===144&&i!==0)assert.ok(!s.shots.includes('mushroom'),'untriggered trap hidden');assert.ok(s.visible.length>0,id+' '+roles[i]+' persistent entity painted');}
   if(number===144)for(const s of screens)assert.ok(s.shots.includes('poison'),'confirmed mushroom trigger painted poison');
   for(const [i,page]of pages.entries())if(number<=144)await page.screenshot({path:`artifacts/roster10/${renderer}-${id}-${roles[i]}.png`});
   rows.at(-1).status='PASS';

@@ -7,6 +7,7 @@ for(const mode of ['solo','team-elim','team-capture'])test(`${mode}: original sc
  await expect(host.locator('#br-host-room')).toBeVisible();await expect(host.locator('#br-room-code')).toHaveText(/^[1-9]\d{5}$/);const code=await host.locator('#br-room-code').innerText();
  for(const [page,name]of [[a,'학생A'],[b,'학생B']]){await page.goto('/?room='+code+'&netdebug=1');await page.locator('#br-player-name').fill(name);await page.locator('#br-join-btn').click();await expect(page.locator('#br-student-wait')).toBeVisible();}
  await host.locator('#br-mode').selectOption(mode);await host.locator('#br-question-bank').evaluate(e=>e.value='단어 | 정답 | 오답1 | 오답2 | 오답3');await host.locator('#br-start-quiz').click();
+ await expect(a.locator('#br-countdown')).toBeVisible();await expect(a.locator('#br-countdown')).toBeHidden({timeout:8000});
  await expect(a.locator('#br-quiz')).toBeVisible();await a.getByRole('button',{name:'정답',exact:true}).click();await expect(a.locator('#br-quiz-score')).toHaveText('1');
  await host.locator('#br-skip-to-draft').click();await expect(a.locator('#br-draft')).toBeVisible();await expect(a.locator('#br-draft-name')).not.toHaveText('뽑는 중…');await a.locator('#br-ready-btn').click();await b.locator('#br-ready-btn').click();await host.locator('#br-start-battle').click();
  await expect(a.locator('#br-student-battle')).toBeVisible();await expect(a.locator('#br-battle-status')).toContainText('HP');await a.keyboard.down('d');await a.waitForTimeout(400);await a.keyboard.up('d');await a.locator('#br-attack').click();await a.waitForTimeout(300);

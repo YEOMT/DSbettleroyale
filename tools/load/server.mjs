@@ -9,6 +9,7 @@ const app=await createGameServer({port:0,hostSecret:'test-host'});
 const telemetry=loadTelemetry(app,{onOverload:value=>process.send?.({type:'fixture-overload',value})});
 process.send({ready:true,port:app.address.port});
 process.on('message',async m=>{try{let value;const room=[...app.manager.rooms.values()][0];
+ if(m.type.startsWith('classroom-'))value=(await import('../../tests/combat/classroom-authority.mjs')).classroomFixture(app,m);
  if(m.type==='fixture-origin'){app.config.origins.push(m.origin);value=true;}
  if(m.type==='fixture-draft'){const ids=m.roster==='new'?[...manifest.roster.filter(a=>Number(a.id.slice(6))>=141),...manifest.roster.filter(a=>Number(a.id.slice(6))<141).slice(0,10)]:manifest.roster;room.students().forEach((p,i)=>p.draft.abilityId=ids[(i+(m.roster==='new'?0:m.round*m.players))%ids.length].id);value=true;}
  if(m.type==='fixture-stability-draft'){

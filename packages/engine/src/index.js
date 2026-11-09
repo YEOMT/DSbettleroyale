@@ -143,6 +143,8 @@ function state(world,players,shots){const g=world.game;return {serverTick:g.fram
   movingWalls:g.walls.map((w,i)=>w.spinSpeed?[i,w.angle]:null).filter(Boolean),...(g.dynamicObstacles?{dynamicWalls:world.BRRework.dynamicWalls(g)}:{}),
  ring:g.ringGeometry,capture:g.capture?world.brCapturePacket(g):null,farm:world.brFarm.snapshot(g),
  zones:g.zones.map(z=>({x:z.pos.x,y:z.pos.y,radius:z.radius,type:z.type,color:z.color,duration:z.duration,meta:{endFrame:g.frame+Math.max(0,z.duration),span:Math.max(1,z.maxDuration||z.duration),ownerId:z.owner?.remoteId||'',...(z.type==='pull'?{...world.brZoneGeometry(z.radius,z.type,z.owner?.ability?.sub),soon:z.duration<=36}:{})}})),finished:!!world.finished};}
+// Internal shared frame includes private traps; only wire views filter them.
+export function getHostVisibleState(prepared){return {...prepared,shots:prepared.shots.filter(s=>s.kind!=='mushroom')};}
 export function getTeacherState(world){const g=world.game,pos=p=>({x:p.x,y:p.y});return {...state(world,g.participants,projectileStates(world)),turrets:g.turrets.filter(t=>t.life>0).map(t=>({x:t.pos.x,y:t.pos.y,golden:!!t.isGolden,emoji:t.owner?.ability?.e||''})),hostEffects:{
  particles:g.particles.map(q=>({pos:pos(q.pos),size:q.size,color:q.color,life:q.life,maxLife:q.maxLife})),
  rings:g.rings.map(q=>({pos:pos(q.pos),radius:q.radius,color:q.color,lineWidth:q.lineWidth,life:q.life,maxLife:q.maxLife})),
@@ -155,6 +157,7 @@ export function getVisibleState(world,id,interest,prepared=getTeacherState(world
  const bounds=world.brViewerBounds(p,interest?{aspect:interest.width/interest.height}:world.session.inputs[id]);
  const visible=world.game.participants.filter(q=>q===p||(!world.game.isConcealedFrom(q,p)&&world.brViewContains(bounds,q.pos.x,q.pos.y,q.radius)));
  const shots=prepared.shots.filter(s=>{
+  if(s.kind==='mushroom'&&s.owner!==id)return false;
   if(s.kind==='decoy'&&s.owner!==id&&world.game.isConcealedFrom({id:s.id,pos:{x:s.x,y:s.y},team:s.team||0,alive:true,lifeSeq:s.life},p))return false;
   return world.brViewContains(bounds,s.x,s.y,Math.max(s.radius||20,s.range||s.length||0))||world.brViewSegment(bounds,s.x,s.y,s.x+(s.dx||0)*(s.native?1:s.speed||0)*12,s.y+(s.dy||0)*(s.native?1:s.speed||0)*12,s.radius||20);
  });
@@ -166,4 +169,4 @@ export function getVisibleState(world,id,interest,prepared=getTeacherState(world
 export function exportResult(world){
  return {...world.brBuildResults(),matchId:world.matchId};
 }
-export function destroyWorld(world){if(world.disposed)return;world.BRRework.clearWorld(world.game,'destroy');world.brFarm.dispose(world.game);world.game.participants.length=0;world.byId.clear();world.inputPending.clear();world.actionPending.clear();world.session.inputs={};world.session.players={};world.disposed=true;}
+export function destroyWorld(world){if(world.disposed)return;world.BRRework.clearWorld(world.game,'destroy');world.brFarm.dispose(world.game);world.game.participants.length=0;world.byId.clear();world.inputPending.clear();world.actionPending.clear();world.session.inputs={};world.session.players={};world.lastInputAt.clear();world.onInputApplied=null;world.eventSink=null;world.entitySpawn=null;world.entityEnd=null;world.events.length=0;for(const key of ['projectiles','zones','turrets','particles','rings','texts','signatureEffects'])if(Array.isArray(world.game[key]))world.game[key].length=0;world.disposed=true;}

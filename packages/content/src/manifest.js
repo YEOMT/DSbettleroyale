@@ -1,5 +1,5 @@
 // Generated from current authority runtime by npm run content:generate; legacy baseline remains immutable.
-export const contentHash="fd780afb06e75dfb6dab229bc5fbc1a1ae5bfedf7cd6eff688dd41bdf3ce7e68";
+export const contentHash="556deb6eec6f9be7e4123c5674777c872e21fff4d168e165b4f50d8f19280eec";
 export const manifest={
   "roster": [
     {
@@ -388,7 +388,7 @@ export const manifest={
         "shape": "line",
         "cooldownFrames": 1200,
         "range": 1110,
-        "width": 38,
+        "width": 48,
         "speed": 31.5,
         "damage": 11.55,
         "count": 14,
@@ -396,9 +396,9 @@ export const manifest={
         "intervalFrames": 4,
         "windupFrames": 10,
         "finalDamage": 17.85,
-        "finalRadius": 26,
+        "finalRadius": 32,
         "knockback": 1.5,
-        "description": "짧은 집중 후 같은 방향으로 14발 순차 연사(4프레임 간격) · 마지막 강화탄 · 기본 피해 160 · 쿨타임 20초",
+        "description": "짧은 집중 후 같은 방향으로 반경 24의 14발 순차 연사(4프레임 간격) · 마지막 강화탄 반경 32 · 기본 피해 160 · 쿨타임 20초",
         "capabilities": {
           "damage": true,
           "projectile": true,
@@ -7939,10 +7939,10 @@ export const manifest={
         "sub": "ROSTER10_141",
         "sizeMult": 1,
         "category": "근접형",
-        "desc": "최대 240 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
-        "concept": "최대 240 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
+        "desc": "최대 400 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
+        "concept": "최대 400 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
         "basicSummary": "짧은 카드 베기",
-        "skillSummary": "최대 240 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
+        "skillSummary": "최대 400 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
         "pTrail": "#c084fc",
         "projEmoji": "🤡"
       },
@@ -7966,11 +7966,11 @@ export const manifest={
         "kind": "decoy-blink",
         "shape": "target",
         "cooldownFrames": 720,
-        "range": 240,
+        "range": 400,
         "durationFrames": 300,
         "stealthFrames": 72,
         "maxPerOwner": 1,
-        "description": "최대 240 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
+        "description": "최대 400 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
         "capabilities": {
           "damage": false,
           "projectile": false,
@@ -8265,10 +8265,10 @@ export const manifest={
         "sub": "ROSTER10_144",
         "sizeMult": 1,
         "category": "원거리형",
-        "desc": "최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
-        "concept": "최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
+        "desc": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
+        "concept": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
         "basicSummary": "포자 단발",
-        "skillSummary": "최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
+        "skillSummary": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
         "pTrail": "#86efac",
         "projEmoji": "🍄"
       },
@@ -8318,7 +8318,7 @@ export const manifest={
         "waitFrames": 1200,
         "maxPerOwner": 3,
         "hp": 20,
-        "description": "최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
+        "description": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -8815,7 +8815,7 @@ export const manifest={
         "pTrail": "#f9a8d4",
         "projEmoji": "🐖"
       },
-      "maxHp": 180,
+      "maxHp": 240,
       "radius": 30.400000000000002,
       "speed": 2.3,
       "damageMult": 1.25,
@@ -10723,7 +10723,7 @@ export const manifest={
         "shape": "line",
         "cooldownFrames": 1200,
         "range": 1110,
-        "width": 38,
+        "width": 48,
         "speed": 31.5,
         "damage": 11.55,
         "count": 14,
@@ -10731,9 +10731,9 @@ export const manifest={
         "intervalFrames": 4,
         "windupFrames": 10,
         "finalDamage": 17.85,
-        "finalRadius": 26,
+        "finalRadius": 32,
         "knockback": 1.5,
-        "description": "짧은 집중 후 같은 방향으로 14발 순차 연사(4프레임 간격) · 마지막 강화탄 · 기본 피해 160 · 쿨타임 20초",
+        "description": "짧은 집중 후 같은 방향으로 반경 24의 14발 순차 연사(4프레임 간격) · 마지막 강화탄 반경 32 · 기본 피해 160 · 쿨타임 20초",
         "capabilities": {
           "damage": true,
           "projectile": true,
@@ -15293,11 +15293,11 @@ export const manifest={
         "kind": "decoy-blink",
         "shape": "target",
         "cooldownFrames": 720,
-        "range": 240,
+        "range": 400,
         "durationFrames": 300,
         "stealthFrames": 72,
         "maxPerOwner": 1,
-        "description": "최대 240 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
+        "description": "최대 400 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개",
         "capabilities": {
           "damage": false,
           "projectile": false,
@@ -15563,7 +15563,7 @@ export const manifest={
         "waitFrames": 1200,
         "maxPerOwner": 3,
         "hp": 20,
-        "description": "최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
+        "description": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -16030,7 +16030,7 @@ export const manifest={
         "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement"
       },
       "stats": {
-        "finalBaseHp": 180,
+        "finalBaseHp": 240,
         "speed": 2.3,
         "radius": 30.400000000000002
       }

@@ -12,3 +12,5 @@ body.br-capture-host #br-focus-toggle:disabled{display:inline-block;cursor:defau
    retain native scroll and pinch zoom; the viewport meta stays unrestricted. */
 #br-student-battle,#br-student-battle *{touch-action:none;overscroll-behavior:none}
 #br-student-battle{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+.br-countdown{position:fixed;z-index:120;top:25%;left:50%;transform:translateX(-50%);padding:16px 28px;border-radius:22px;background:#101827ee;color:#fff;font-size:clamp(32px,6vw,64px);font-weight:900;pointer-events:none;text-align:center}

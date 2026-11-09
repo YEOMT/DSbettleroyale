@@ -26,7 +26,7 @@ export const initializers=[[310,S=>{
   skill={...skill,key:'rework-'+id,label:skill.label||name,cooldown:skill.cooldownFrames,duration:skill.durationFrames||0,windup:0,interval:skill.intervalFrames||0,stun:0,units:{time:'frames@60Hz',distance:'world units',width:'full width',speed:'world units/frame',damage:'base coefficient before rank/run modifiers'}};
   skill.caps=skill.capabilities;skill.cancelPolicy='owner death/life change/match reset remove; movement cancels on stun or forced movement';
   const ability={id,legacyIndex:number,timingSeed:'roster10-'+number,t:tier,e:emoji,n:name,type:close?'MELEE':'PROJ',sub:'ROSTER10_'+number,sizeMult:1,category:close?'근접형':'원거리형',desc:skill.description,concept:skill.description,basicSummary:basicText,skillSummary:skill.description,pTrail:color,projEmoji:emoji};
-  S.EMOJI_DB.push(ability);R.register(id,{referenceName:name,rank:tier,role:ability.category,category:ability.category,statType:ability.type,tankRole:false,basic,skill,stats:{...ROSTER10_BASES[tier+'_'+(close?'melee':'ranged')]}},c=>handler(fixed(c),skill));
+  S.EMOJI_DB.push(ability);R.register(id,{referenceName:name,rank:tier,role:ability.category,category:ability.category,statType:ability.type,tankRole:false,basic,skill,stats:{...ROSTER10_BASES[tier+'_'+(close?'melee':'ranged')],...(number===149?{finalBaseHp:240}:{})}},c=>handler(fixed(c),skill));
  }
  function removeStealth(p){if(!p.rw?.jokerStealth)return;p.rw.jokerStealth=null;p.invisible=false;}
  function targetable(c,kind,opts,tick){const e=R.entity(c,kind,{...opts,maxHp:opts.hp,cancelOnStun:false},tick);Object.assign(e,{alive:true,isReworkTurret:true,owner:c.owner,team:c.owner.team,remoteId:e.id,lifeSeq:0});R.world(c.g).turretFrame=-1;return e;}
@@ -71,7 +71,7 @@ export const initializers=[[310,S=>{
  }
  R.dynamicWalls=g=>{const d=g.dynamicObstacles;if(!d)return {revision:0,walls:[],rings:[]};if(!d.wire)d.wire={revision:d.revision,walls:g.walls.filter(w=>w.dynamic).map(({id,x,y,w,h,angle,owner,life,end})=>({id,x,y,w,h,angle,owner,life,end})),rings:[...d.rings.values()].map(e=>({id:e.id,x:e.pos.x,y:e.pos.y,radius:e.radius,start:e.start,end:e.end,owner:e.ctx.ownerId,life:e.ctx.ownerLifeSeq}))};return d.wire;};
  R.roster10={travel,ring};
- register(141,{kind:'decoy-blink',shape:'target',cooldownFrames:720,range:240,durationFrames:300,stealthFrames:72,maxPerOwner:1,description:'최대 240 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개',capabilities:caps({dash:true,signatureRange:true})},(c,s)=>{
+ register(141,{kind:'decoy-blink',shape:'target',cooldownFrames:720,range:400,durationFrames:300,stealthFrames:72,maxPerOwner:1,description:'최대 400 안전 순간이동 · 1.2초 은신(실제 공격·스킬·피격 시 해제) · 최대 HP 25%의 5초 미끼 분신 1개',capabilities:caps({dash:true,signatureRange:true})},(c,s)=>{
   const p=c.owner,from=copy(p.pos),to=placement(c,s.range,p.radius,true);R.teleport(c,to,{prevalidated:true,concealArrival:true});const st=R.state(p);st.jokerStealth={end:now(c.g)+72,life:c.ownerLifeSeq};p.invisible=true;
   targetable(c,'decoy',{pos:from,radius:p.radius,hp:p.maxHp*.25,duration:300,maxPerOwner:1,emoji:p.ability.e,name:p.name,color:'#c084fc'},(ctx,e)=>{const input=S.session.inputs[ctx.ownerId],dx=Number(input?.dx||0),dy=Number(input?.dy||0),length=Math.hypot(dx,dy);if(length>.05&&!R.inputLocks(p,c.g).move){const amount=Math.min(1,length),speed=S.brHumanMoveSpeed(p)*(.24+.76*amount),to=e.pos.add(V(dx/length*speed,dy/length*speed));e.pos=moveBody(ctx,e.pos,to,e.radius);}R.world(c.g).turretFrame=-1;});
  });
@@ -100,7 +100,7 @@ export const initializers=[[310,S=>{
    ledger.poisonHits.set(key,true);R.hit(best.ctx,p,4,{periodic:true,knockback:0,stun:0,direction:V()});
   }
  });}
- register(144,{kind:'mushroom',shape:'target',cooldownFrames:540,range:320,radius:95,damage:20,poisonDamage:4,poisonRadius:90,durationFrames:180,intervalFrames:30,armFrames:30,waitFrames:1200,maxPerOwner:3,hp:20,description:'최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)',capabilities:caps({damage:true,expandable:true,area:true,trap:true,signatureRange:true})},(c,s)=>{
+ register(144,{kind:'mushroom',shape:'target',cooldownFrames:540,range:320,radius:95,damage:20,poisonDamage:4,poisonRadius:90,durationFrames:180,intervalFrames:30,armFrames:30,waitFrames:1200,maxPerOwner:3,hp:20,description:'미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)',capabilities:caps({damage:true,expandable:true,area:true,trap:true,signatureRange:true})},(c,s)=>{
   const pos=placement(c,s.range,26);targetable(c,'mushroom',{pos,radius:26,hp:20,armFrames:30,duration:1230,maxPerOwner:3,emoji:'🍄',color:'#86efac'},(ctx,e)=>{
    if(e.age<30)return;const reach=26+(c.g.maxBodyRadius||160)+(c.g.maxParticipantStep||0),candidates=c.g.getNearbyParticipants(e.pos,reach);
    for(const p of candidates){if(!R.hostile(ctx,p)||p.isClone||p.isReworkTurret)continue;const from=Number(p.combatPreviousWarp||0)===Number(p.warpSeq||0)&&Number.isFinite(p.combatPreviousX)?V(p.combatPreviousX,p.combatPreviousY):p.pos;

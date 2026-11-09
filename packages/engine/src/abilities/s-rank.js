@@ -61,8 +61,8 @@ export const initializers=[
     {statType:'MELEE',tankRole:false,basicSummary:'근접 포획 타격',stats:{maxHp:600,speed:2.0}});
 
     register('emoji-003','대마법사','원거리형',{}, {
-        kind:'sequential-barrage',shape:'line',cooldownFrames:1200,range:1110,width:38,speed:30,damage:11,count:14,countCap:22,intervalFrames:4,windupFrames:10,finalDamage:17,finalRadius:26,knockback:1.5,
-        description:'짧은 집중 후 같은 방향으로 14발 순차 연사(4프레임 간격) · 마지막 강화탄 · 기본 피해 160 · 쿨타임 20초',
+        kind:'sequential-barrage',shape:'line',cooldownFrames:1200,range:1110,width:48,speed:30,damage:11,count:14,countCap:22,intervalFrames:4,windupFrames:10,finalDamage:17,finalRadius:32,knockback:1.5,
+        description:'짧은 집중 후 같은 방향으로 반경 24의 14발 순차 연사(4프레임 간격) · 마지막 강화탄 반경 32 · 기본 피해 160 · 쿨타임 20초',
         capabilities:caps({projectile:true,multicast:true,cc:true})
     },function(c,s){shots(c,s,function(i,count){R.projectile(c,{dir:c.aim,speed:s.speed,range:s.range,radius:i===count-1?s.finalRadius:s.width/2,damage:i===count-1?s.finalDamage:s.damage,knockback:s.knockback,stun:0,shotIndex:i,color:'#a78bfa',emoji:'🔮'});});});
 

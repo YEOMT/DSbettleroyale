@@ -1,4 +1,4 @@
-import {createWorld,stepWorld,getTeacherState,getVisibleState,getStaticState,FIXED_DT_MS} from '../../../../packages/engine/src/index.js';
+import {createWorld,stepWorld,getTeacherState,getHostVisibleState,getVisibleState,getStaticState,FIXED_DT_MS} from '../../../../packages/engine/src/index.js';
 import {snapshotEncoder} from '../ws/snapshot.js';
 import {presentationState} from '../ws/presentation-state.js';
 export function attachSimulation(manager,metrics){
@@ -15,6 +15,8 @@ export function attachSimulation(manager,metrics){
   const payloadJson=JSON.stringify(event);
   for(const m of room.members.values()){
    if(!m.peer)continue;
+   if(event.data.kind==='mushroom'&&event.type==='SHOT_SPAWN'&&event.data.owner!==m.id)continue;
+   if(event.data.kind==='mushroom'&&event.type==='SHOT_END'&&!['trigger','destroyed'].includes(event.data.reason)&&event.data.owner!==m.id)continue;
    if(m.role!=='host'){
     const self=world.byId.get(m.id);if(!self)continue;
     if(event.type==='DEATH'&&event.data.playerId!==m.id)continue;
@@ -49,7 +51,7 @@ export function attachSimulation(manager,metrics){
     const publicTeacher=presentationState(room.world,teacher),encode=snapshotEncoder(publicTeacher,room.snapshotSeq,now);
     for(const member of room.members.values()){
      if(!member.connected)continue;
-     const view=member.role==='host'?publicTeacher:getVisibleState(room.world,member.id,undefined,publicTeacher);
+     const view=member.role==='host'?getHostVisibleState(publicTeacher):getVisibleState(room.world,member.id,undefined,publicTeacher);
      if(member.peer)member.peer.snapshot(encode(view.self?{...view,self:member.peer.selfState(view.self)}:view,member.peer.scope()));
     }
     metrics.snapshotCpu.add(performance.now()-start);

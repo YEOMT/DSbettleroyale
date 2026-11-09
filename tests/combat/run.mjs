@@ -25,6 +25,8 @@ try{
   run(['tests/combat/mobile-touch.mjs',renderer]);
   if(renderer==='canvas')run(['tests/combat/mobile-touch.mjs','canvas','webkit']);
  }else{
+  if(renderer==='canvas'){run(['tests/combat/classroom-rematch.mjs']);run(['tests/combat/classroom-ui.mjs']);}
+  run(['tests/combat/classroom-aim.mjs',renderer]);
   run(['tests/combat/session.mjs',renderer]);
   run(['tests/combat/aim.mjs',renderer]);
   if(renderer==='canvas'){run(['tests/combat/safe-pause.mjs']);run(['tests/combat/origin-contract.mjs']);run(['tests/combat/motion.mjs']);run(['tests/releaseops/audio.mjs']);}

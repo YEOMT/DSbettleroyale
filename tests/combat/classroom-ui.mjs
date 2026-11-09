@@ -1,0 +1,19 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';
+import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';
+const started=performance.now(),report=[],h=await auditHarness({players:2});
+async function observe(page){await page.evaluate(async()=>{window.m=await import('/src/main.js');window.numbers=[];window.tones=0;const ac=m.audio.controller.ensure(),create=ac.createOscillator.bind(ac);ac.createOscillator=()=>{tones++;return create();};new MutationObserver(()=>{const s=document.getElementById('br-countdown').textContent,n=Number(s.split(' ').at(-1));if(n&&!numbers.includes(n))numbers.push(n);}).observe(document.getElementById('br-countdown'),{childList:true});});}
+async function join(name){const context=await h.browser.newContext();h.contexts.push(context);await context.route(/dropbox/,r=>r.abort());const page=await context.newPage();page.on('pageerror',e=>h.errors.push(e.message));await page.goto(h.url+'/?room='+h.room.code+'&renderer=canvas');await page.locator('#br-player-name').fill(name);await page.locator('#br-join-btn').click();await page.evaluate(async()=>{window.m=await import('/src/main.js');});await page.waitForFunction(()=>!!m.ui.room);return page;}
+try{
+ await observe(h.host);await observe(h.student);await h.host.locator('#br-start-quiz').click();await h.student.locator('#br-countdown').waitFor();
+ const end=h.room.countdown.endsAt;assert.equal(await h.host.locator('#br-start-quiz').isDisabled(),true);assert.equal(h.room.phase,'LOBBY');assert.ok(await h.host.locator('#br-qr canvas').isVisible());
+ const late=await join('Countdown newcomer');assert.equal(await late.evaluate(async()=>(await import('/src/main.js')).ui.room.countdown.endsAt),end);assert.equal(h.room.students().at(-1).quiz,undefined);
+ assert.ok(await h.host.evaluate(()=>tones>0),'teacher gesture unlocked alert synthesis');assert.equal(await h.student.evaluate(()=>tones),0,'student countdown is silent');
+ await h.host.reload();await h.host.locator('#br-host-room').waitFor();assert.equal(h.room.countdown?.endsAt,end);await h.student.locator('#br-quiz').waitFor();
+ assert.equal(h.room.quizEndsAt,end+60000);assert.deepEqual(await h.student.evaluate(()=>numbers),[5,4,3,2,1]);
+ const member=h.room.students()[0],choice=member.quiz.current.answers.find(a=>a.correct);await h.student.locator('[data-answer-id="'+choice.id+'"]').click();await h.student.waitForFunction(()=>m.ui.room.self.quiz.score===1);const question=member.quiz.current.id,deadline=h.room.quizEndsAt;
+ const quizLate=await join('Quiz newcomer');await quizLate.locator('#br-quiz').waitFor();assert.equal(h.room.students().at(-1).quiz.score,0);assert.equal(member.quiz.score,1);assert.equal(member.quiz.current.id,question);assert.equal(h.room.quizEndsAt,deadline);
+ await quizLate.reload();await quizLate.locator('#br-quiz').waitFor();assert.equal(h.room.students().length,4);report.push({countdown:[5,4,3,2,1],teacherTone:true,studentTone:false,teacherRefresh:true,lateJoin:true,quizResume:true,quizMs:60000});
+ await h.command('BEGIN_DRAFT');assert.ok(h.room.students().every(p=>p.draft?.abilityId));await h.command('START_BATTLE');h.room.fixtureFrozen=true;await h.command('END');await h.command('REMATCH');await h.host.locator('#br-start-quiz').waitFor();
+ await observe(h.host);await h.host.evaluate(()=>{m.audio.effects=false;});await h.host.locator('#br-start-quiz').click();await h.student.locator('#br-quiz').waitFor();assert.equal(await h.host.evaluate(()=>tones),0);assert.deepEqual(await h.host.evaluate(()=>numbers),[5,4,3,2,1]);report.push({mutedCountdown:true});
+ assert.deepEqual(h.errors,[]);console.log('classroom UI PASS');
+}finally{fs.mkdirSync('artifacts/classroom',{recursive:true});fs.writeFileSync('artifacts/classroom/ui.json',JSON.stringify({ms:performance.now()-started,report,errors:h.errors},null,2));await h.close();}
