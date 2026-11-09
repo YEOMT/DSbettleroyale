@@ -1,5 +1,11 @@
 # Official Pages cutover — 2026-11-07
 
+**Latest outcome, 2026-11-09 KST: DEPLOYED_VERIFIED.** [Official game](https://yeomt.github.io/DSbettleroyale/) now serves `db3ce3bb10d96f3b2a2d7cc14a0b645afbad10e6`, paired with the existing AWS server. [New promotion42527228873](https://github.com/YEOMT/DSbettleroyale/actions/runs/42527228873) used merged PR16 controller `b1916572f810de3df01d8d85b295392d6f98fbb5` and unchanged candidate42475042049. Isolated and public13 checks passed, including post-resume controls, Results and Rematch; the one-time WARNING exception was not used. Separate operator-stepped public browser controls also passed. See the final entry in [progress.md](progress.md) for timings, harness failures, memory observations and limitations. Earlier blocked/failed attempts below are historical and remain preserved.
+
+Host-only384MiB guards passed before preparation and after image load (445.03MiB). Existing1GiB/2CPU container limits, game protection, password/environment, Compose/Caddy and Firebase data remain unchanged. Previous image/archive, original Pages and settings backups are retained. Normal30s health/version/RAM/PSI/OOM monitoring is active. Final private report: `.releaseops/production/final-report-42527228873.json`.
+
+To restore the initial previous AWS+Firebase Pages pair, explicitly dispatch **중단된 배포 복구** (`recover.yml`) on main with `target=production`, `release_id=db3ce3bb10d96f3b2a2d7cc14a0b645afbad10e6`; it drains/seals, restores and verifies the saved pair before reopening admission. Do not request ordinary rollback to the unverified0816 release. Future patches use PR/CI → user merge → exact Paired candidate → explicit **정식 반영** dispatch; merge alone never deploys production. This short functional release verification does not resolve prior long-load/classroom performance uncertainty.
+
 User approved the first official v33 transition, accepting intermittent overload risk. No additional classroom/605-second/all-character test is a prerequisite. Prior failures and physical-device limitations remain in the runtime performance report.
 
 ## Selected pair and current observation

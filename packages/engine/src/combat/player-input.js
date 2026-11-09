@@ -397,7 +397,11 @@ __brScope.brAimHelpProfile = function brAimHelpProfile(a,kind,radius=38,power=1,
             else if(!spec.dash&&!spec.teleport&&!def?.caps?.dash&&!def?.capabilities?.dash&&['line','cone','rect'].includes(spec.shape)) {
                 name=/hook|sniper|precision|channel|laser/.test(def?.kind||'')||a.sub==='SNIPE'||a.sub==='AIMED_SHOT'||spec.beam?'precision':'skill';
             }
-            return {name,reason:name==='none'?reason:'',...__brScope.BR_AIM_HELP[name],spec,basic,kind,
+            // Opt in only single straight bullets and these actual straight projectile casts.
+            const straight=kind==='attack'?name==='ranged'&&basic.type==='bullet'&&basic.count===1&&!basic.bounces&&!basic.boomerang&&!['SNIPE','AIMED_SHOT'].includes(a.sub)&&!['sniper','precision','bb-sniper'].includes(def?.kind):
+                name==='skill'&&['fireball','sequential-barrage','hunter-mark','power-shot','heavy-book','thorn-pot'].includes(def?.kind);
+            const help={...__brScope.BR_AIM_HELP[name],...(straight?(kind==='attack'?{cone:14,max:5,gain:.36}:{cone:12,max:4,gain:.36}):{})};
+            return {name,reason:name==='none'?reason:'',...help,spec,basic,kind,
                 range:Math.max(0,spec.range||0),width:kind==='attack'&&!basic.close?__brScope.brBasicShotSize(a,true,mods)*Number(mods.basicSize||1):Math.max(0,(spec.width||0)/2),
                 slow:kind==='attack'?!basic.close&&basic.speed<13:!!def?.speed&&def.speed<13};
         };
@@ -427,7 +431,7 @@ __brScope.brAimHelpTarget = function brAimHelpTarget(c,entry) {
                 else {const id=entry.id.slice(2);if(__brScope.session.drawPlayers?.get(id)!==p||!p.row?.[7]||(c.team&&Number(p.row[8])===c.team)||(Number(p.row[23])&32)||c.now-p.last>__brScope.BR_AIM_HELP.freshMs||entry.life!==Number(p.rw?.life||0))return null;
                     x=p.x;y=p.y;r=Number(p.row[15]);vx=p.vx||0;vy=p.vy||0;}
             }else if(entry.type==='turret'){
-                if(c.host){if(p.dead||p.hp<=0||p.owner===c.self||(c.team&&p.team===c.team)||c.g.isConcealedFrom(p,c.self))return null;x=p.pos.x;y=p.pos.y;r=p.radius;}
+                if(c.host){if(p.kind==='mushroom'||p.dead||p.hp<=0||p.owner===c.self||(c.team&&p.team===c.team)||c.g.isConcealedFrom(p,c.self))return null;x=p.pos.x;y=p.pos.y;r=p.radius;}
                 else {if(!(p.hp>0)||!__brScope.session.latestView?.rw?.entities?.includes(p)||p.owner===String(__brScope.session.playerId)||(c.team&&p.team===c.team)||c.now-Number(__brScope.session.lastActorPacketAt||0)>__brScope.BR_AIM_HELP.freshMs)return null;x=p.x;y=p.y;r=p.radius;}
             } else {
                 if(c.host){if(p.hp<=0||!c.boxes.includes(p))return null;x=p.pos.x;y=p.pos.y;r=p.halfSize;box=p;}

@@ -10,10 +10,10 @@ export class TestClient{
  async open(version=fingerprint){await new Promise((resolve,reject)=>{this.ws.once('open',resolve);this.ws.once('error',reject);});this.send('HELLO',version,false);await this.next('WELCOME');return this;}
  send(type,payload={},scoped=true,requestId){this.ws.send(JSON.stringify(envelope(type,payload,{...(scoped?this.scope:{}),...(scoped?{lifeSeq:this.lifeSeq}:{}),...(requestId?{requestId}:{})})));}
  next(type,predicate=()=>true,timeout=5000){const accept=m=>m.type===type&&predicate(m.payload,m);const i=this.messages.findIndex(accept);if(i>=0)return Promise.resolve(this.messages.splice(i,1)[0]);return new Promise((resolve,reject)=>{const w={predicate:accept,resolve};w.timer=setTimeout(()=>{this.waiters=this.waiters.filter(x=>x!==w);reject(Error('TIMEOUT '+type));},timeout);this.waiters.push(w);});}
- async command(type,payload={},requestId=randomUUID()){this.send(type,payload,true,requestId);const m=await this.next('COMMAND_RESULT',p=>p.requestId===requestId);return m.payload;}
+ async command(type,payload={},requestId=randomUUID()){this.send(type,payload,true,requestId);const m=await this.next('COMMAND_RESULT',p=>p.requestId===requestId);if(type==='START_QUIZ'&&m.payload.accepted)await this.phase('QUIZ');return m.payload;}
  async host(){this.send('AUTH',{secret:'test-host'},false);await this.next('AUTH_OK');this.send('CREATE',{name:'Teacher'},false);await this.next('SESSION');await this.next('ROOM_STATE');return this;}
  async join(code,name){this.send('JOIN',{code,name},false);await this.next('SESSION');await this.next('ROOM_STATE');return this;}
- async phase(phase){if(this.room?.phase===phase)return this.room;return (await this.next('ROOM_STATE',r=>r.phase===phase)).payload;}
+ async phase(phase){if(this.room?.phase===phase)return this.room;return (await this.next('ROOM_STATE',r=>r.phase===phase,8000)).payload;}
  async close(){if(this.ws.readyState>=2)return;await new Promise(resolve=>{this.ws.once('close',resolve);this.ws.close();});}
 }
 export async function connect(app,options){return new TestClient(`ws://127.0.0.1:${app.address.port}/ws`,options).open();}

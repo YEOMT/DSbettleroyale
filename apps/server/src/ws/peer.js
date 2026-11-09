@@ -45,5 +45,6 @@ export class Peer{
    if(!this.queue.length&&this.pendingSnapshot&&ws.bufferedAmount<this.config.bufferWarn){const data=Buffer.isBuffer(this.pendingSnapshot)?this.pendingSnapshot:Buffer.from(this.pendingSnapshot);this.pendingSnapshot=null;ws.send(data,{binary:false,compress:false});this.metrics.sentBytes+=data.length;}
   }finally{this.transport?.uncork();}
  }
+ resetMatch(){this.pendingSnapshot=null;this.profileState=null;this.queue=[];this.queueBytes=0;if(this.socket.bufferedAmount<this.config.bufferWarn)this.highAt=0;}
  close(code,reason){if(this.socket.readyState<2)this.socket.close(code,reason);this.pendingSnapshot=null;this.profileState=null;this.queue=[];this.queueBytes=0;}
 }

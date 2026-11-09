@@ -17,6 +17,7 @@ export function effectiveContent(){
  // Historical prose is immutable display input, not a source of current stats.
  // New descriptions and Genie's two approved numeric changes use current rules.
  const cards=Object.fromEntries(r.EMOJI_DB.map(a=>{const d=r.BRRework.defs[a.id],old=legacyDisplay.cards[a.id];return [a.id,old?structuredClone(old):{basic:d.basic.description,skill:d.skill.description,passive:'',cooldown:(d.skill.cooldownFrames/60)+'초',label:a.n,category:d.category,concept:a.concept}];}));
+ cards['emoji-003'].skill=r.BRRework.defs['emoji-003'].skill.description;
  const genie=r.BRRework.defs['emoji-012'].skill;
  cards['emoji-012'].skill=`HP ${genie.turretHp} 포탑 설치 · 동시 ${genie.maxTurrets||3}개 / 각 ${genie.durationFrames/60}초 · 4번째는 가장 오래된 포탑 교체 · 4회마다 강화탄`;
  const display={rosterVersion:r.BR_ROSTER_VERSION,odds:r.BR_TIER_CHANCES.map(([rank,p])=>rank+' '+Math.round(p*100)+'%').join(' · '),cards};

@@ -1,6 +1,6 @@
 import {createHash,timingSafeEqual} from 'node:crypto';
 import {decodeClient,fingerprint,matchesFingerprint} from '../../../../packages/protocol/src/index.js';
-import {applyCommand,getStaticState,getPrivateSelfState,getTeacherState,getVisibleState} from '../../../../packages/engine/src/index.js';
+import {applyCommand,getStaticState,getPrivateSelfState,getTeacherState,getHostVisibleState,getVisibleState} from '../../../../packages/engine/src/index.js';
 import {Peer} from './peer.js';
 import {presentationState} from './presentation-state.js';
 const digest=s=>createHash('sha256').update(s).digest();
@@ -16,7 +16,7 @@ export function attachConnection(socket,manager,config,metrics,transport){
   let snapshot=null;
   if(world&&room.phase==='BATTLE'){
    const teacher=presentationState(world,getTeacherState(world));
-   const view=member.role==='host'?teacher:getVisibleState(world,member.id,undefined,teacher);
+   const view=member.role==='host'?getHostVisibleState(teacher):getVisibleState(world,member.id,undefined,teacher);
    const {self:privateRow,...publicView}=view;
    snapshot={...publicView,snapshotSeq:++room.snapshotSeq,serverNow:performance.now()};
   }
@@ -67,6 +67,6 @@ export function attachConnection(socket,manager,config,metrics,transport){
    if(!['ACTION','AUGMENT_CHOOSE','RESPAWN'].includes(message.type))manager.changed(room);else if(result.reason!=='SAFE_PAUSED')peer.send('PRIVATE_STATE',peer.selfState(getPrivateSelfState(room.world,member.id)));
   }catch(error){metrics.rejected++;if(message?.requestId)peer.send('COMMAND_RESULT',{requestId:message.requestId,accepted:false,reason:error.message});else peer.send('ERROR',{code:error.message});if(['ROOM_EXPIRED','SESSION_REVOKED'].includes(error.message))peer.close(4004,error.message);else if(!['LIFE_MISMATCH','SCOPE_MISMATCH','BATTLE_REQUIRED'].includes(error.message)&&++peer.errors>=8)peer.close(4007,'INVALID_MESSAGES');}
  });
- socket.on('close',()=>{clearTimeout(authTimer);metrics.closed++;const p=peer.member;if(p?.peer===peer){p.connected=false;p.disconnectedAt=Date.now();p.peer=null;if(peer.room.world?.session.players[p.id])peer.room.world.session.players[p.id].connected=false;manager.changed(peer.room);}peer.queue=[];peer.pendingSnapshot=null;peer.profileState=null;peer.restore=null;});
+ socket.on('close',(code,reason)=>{metrics.lastClose={code,reason:String(reason).slice(0,80)};clearTimeout(authTimer);metrics.closed++;const p=peer.member;if(p?.peer===peer){p.connected=false;p.disconnectedAt=Date.now();p.peer=null;if(peer.room.world?.session.players[p.id])peer.room.world.session.players[p.id].connected=false;manager.changed(peer.room);}peer.queue=[];peer.queueBytes=0;peer.pendingSnapshot=null;peer.profileState=null;peer.restore=null;});
  return peer;
 }
