@@ -69,7 +69,7 @@ export const initializers=[
     add('emoji-029','스카이 하이','A','기동형',melee('slash',{pushScale:.3}),
         {kind:'leap',shape:'target',cooldown:frames(11),range:670,radius:150,duration:30,damage:48,knockback:7,color:'#bae6fd',wallPolicy:'airborne-safe-landing',caps:{...aoeCaps,dash:true,cc:true,signatureRange:true},
          description:'벽을 넘어 표시 지점으로 비행해 착지 충격을 줍니다. 공중 이동은 무적이 아니며 기절·포획되면 추가 타격 없이 정착합니다.',strength:'벽을 넘는 진입',success:'적의 퇴로에 착지',failure:'착지까지 시간이 필요',counterplay:'착지 표시 회피 또는 공중 제어'},
-        (ctx,s)=>{const pos=safePoint(ctx,R.targetPoint(ctx,s.range),ctx.owner.radius),leap=R.leap(ctx,{pos,duration:s.duration,damage:s.damage,radius:s.radius,knockback:s.knockback});R.marker(ctx,{pos:leap.to,shape:'circle',radius:s.radius,duration:s.duration,color:s.color});});
+        (ctx,s)=>{const pos=safePoint(ctx,R.targetPoint(ctx,s.range),ctx.owner.radius),capture=!!__brScope.brArenaRect(ctx.g),marker={pos,shape:'circle',radius:s.radius,duration:s.duration,color:s.color};if(!capture)R.marker(ctx,marker);const leap=R.leap(ctx,{pos,duration:s.duration,damage:s.damage,radius:s.radius,knockback:s.knockback});if(capture)R.marker(ctx,{...marker,pos:leap.to});});
     // A07: three swept tentacles, once per target, shared safe hook core.
     add('emoji-030','크라켄','A','근접형',melee('slash',{rangeBonus:95}),
         {kind:'hook',shape:'cone',cooldown:frames(14),range:780,width:34,radius:17,speed:36,damage:24,maxTargets:3,halfAngle:.28,stun:60,stunCap:78,color:'#c084fc',caps:{damage:true,projectile:true,expandable:true,cc:true,signatureRange:true},
