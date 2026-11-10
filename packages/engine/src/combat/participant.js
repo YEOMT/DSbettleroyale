@@ -366,7 +366,7 @@ __brScope.Participant = class Participant {
                 if (isNaN(nextPos.x) || isNaN(nextPos.y)) { this.vel = new __brScope.Vec2(0,0); return; }
 
                 const phasesWalls=this.ability.sub==='GHOST_MOVE'||(this.ability.sub==='FLY_DASH'&&this.dashFrames>0);
-                const moved=__brScope.combatMoveCircle(this.pos,this.vel,this.radius,phasesWalls?[]:__brScope.brHostBodyWalls(game),!!playerDashStep,this._combatMoveResult);
+                const moved=__brScope.combatMoveCircle(this.pos,this.vel,this.radius,phasesWalls?(game.boundary?.blocks||[]):__brScope.brHostBodyWalls(game),!!playerDashStep,this._combatMoveResult);
                 const wallHit=moved.hit;
                 if(wallHit&&!playerDashStep)game.handleWallCrash(this,this.vel.mag());
                 this.pos.x=moved.x;this.pos.y=moved.y;this.vel.x=this.alive?moved.vx:0;this.vel.y=this.alive?moved.vy:0;

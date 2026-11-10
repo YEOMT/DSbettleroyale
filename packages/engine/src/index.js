@@ -1,3 +1,4 @@
+import {initEscape,updateEscape} from './world/escape.js';
 import {visualProfiles} from './presentation.js';
 import {installRules} from './registry.js';
 import {manifest,contentHash} from '../../content/src/manifest.js';
@@ -39,9 +40,10 @@ export function createWorld(content=manifest,config={},seed='1',initialPlayers=[
  });
  room.game=new room.GameWorld(players);
  room.brRingInitWorld(room.game,0);
+ initEscape(room);
  room.byId=new Map(players.map(p=>[p.remoteId,p]));
  room.inputPending=new Map();room.actionPending=new Map();room.lastInputAt=new Map();room.eventSink=eventSink;
- room.eventSequence=0;
+ room.eventSequence=0;room.publishEscape=data=>emit(room,'ESCAPE_STATE',data);
  const beginNative=room.brBeginProjectileVisual,endNative=room.brEndProjectileVisual;
  room.brBeginProjectileVisual=(g,p)=>{beginNative(g,p);if(!p._brNetId)p._brNetId='q'+(++g.visualShotSeq);if(!p._wsBorn){p._brBornFrame??=g.frame;p._wsBorn=true;emit(room,'SHOT_SPAWN',nativeShot(room,p));}};
  room.brEndProjectileVisual=(g,p)=>{endNative(g,p);if(p.life<=0&&!p._wsEnded){p._wsEnded=true;emit(room,'SHOT_END',{...nativeShot(room,p),reason:p._endReason||'expired'});}};
@@ -108,6 +110,7 @@ export function stepWorld(world,dt=FIXED_DT_MS){
   world.session.inputs[p.remoteId]=prior;
  }
  world.game.update();
+ if(world.game.escape)updateEscape(world,world.publishEscape);
  if(world.game.participants.some(p=>p.runtimeFaults))throw Error('COMBAT_RUNTIME_FAULT');
  for(const p of world.game.participants){
   if(!p.alive&&!p.deathHandled){p.deathHandled=true;p.deaths=(p.deaths||0)+1;emit(world,'DEATH',{playerId:p.remoteId,lifeSeq:p.lifeSeq,cause:p.lastDeathCause});if(world.session.respawnMode){world.brTeamKillDeath(p);p.deathHandled=true;world.session.inputs[p.remoteId]={};world.inputPending.delete(p.remoteId);world.actionPending.delete(p.remoteId);}}
@@ -135,8 +138,8 @@ export function getPrivateSelfState(world,id,preparedActor,restore=false){
   heldTicks:p.heldTicks||0,replacedInputSeq:p.replacedInputSeq||0,inputNeutral:!!p.inputNeutral,
   actions:{attack:p.resolvedAttackSeq||0,skill:p.resolvedSkillSeq||0,firedAttack:p.firedAttackSeq||0,firedSkill:p.firedSkillSeq||0}};
 }
-export function getStaticState(world){const g=world.game;return {revision:1,worldRadius:g.worldRadius,mapRadius:g.mapRadius,mapName:g.mapName,
- boundary:g.boundary||null,walls:g.walls.filter(w=>!w.dynamic).map(w=>({x:w.pos?.x??w.x,y:w.pos?.y??w.y,w:w.w??w.width,h:w.h??w.height,angle:w.angle||0,kind:w.kind||'wall'})),
+export function getStaticState(world){const g=world.game;return {revision:2,escapeMap:g.escapeMap||null,escapeState:g.escape?{...g.escape,pads:g.escape.pads.slice()}:null,worldRadius:g.worldRadius,mapRadius:g.mapRadius,mapName:g.mapName,
+ boundary:g.boundary||null,walls:g.walls.filter(w=>!w.dynamic).map(w=>({x:w.pos?.x??w.x,y:w.pos?.y??w.y,w:w.w??w.width,h:w.h??w.height,angle:w.angle||0,kind:w.kind||'wall',terrain:!!w.terrain})),
  smokes:g.smokes.map(s=>({x:s.pos.x,y:s.pos.y,radius:s.radius})),captureMap:g.capture?.map||null};}
 function state(world,players,shots){const g=world.game;return {serverTick:g.frame,simTime:world.timeMs,actors:players.map(p=>actor(world,p)),shots,aliveCount:g.participants.filter(p=>p.alive).length,
   presentation:{finalPhase:!!g.finalPhase,gameOver:!!g.isGameOver,eventFocusFrames:g.eventFocusFrames||0,eventFocusPos:g.eventFocusPos?{x:g.eventFocusPos.x,y:g.eventFocusPos.y}:null,announcement:g.announcement||'',announcementLife:g.announcementLife||0,feed:(g.eventFeed||[]).slice(0,3).map(e=>({text:e.text,color:e.color,life:e.life}))},
@@ -169,4 +172,4 @@ export function getVisibleState(world,id,interest,prepared=getTeacherState(world
 export function exportResult(world){
  return {...world.brBuildResults(),matchId:world.matchId};
 }
-export function destroyWorld(world){if(world.disposed)return;world.BRRework.clearWorld(world.game,'destroy');world.brFarm.dispose(world.game);world.game.participants.length=0;world.byId.clear();world.inputPending.clear();world.actionPending.clear();world.session.inputs={};world.session.players={};world.lastInputAt.clear();world.onInputApplied=null;world.eventSink=null;world.entitySpawn=null;world.entityEnd=null;world.events.length=0;for(const key of ['projectiles','zones','turrets','particles','rings','texts','signatureEffects'])if(Array.isArray(world.game[key]))world.game[key].length=0;world.disposed=true;}
+export function destroyWorld(world){if(world.disposed)return;world.BRRework.clearWorld(world.game,'destroy');world.brFarm.dispose(world.game);world.game.participants.length=0;world.byId.clear();world.inputPending.clear();world.actionPending.clear();world.session.inputs={};world.session.players={};world.lastInputAt.clear();world.onInputApplied=null;world.eventSink=null;world.entitySpawn=null;world.entityEnd=null;world.events.length=0;for(const key of ['projectiles','zones','turrets','particles','rings','texts','signatureEffects'])if(Array.isArray(world.game[key]))world.game[key].length=0;world.publishEscape=null;world.game.escape=null;world.game.escapeMap=null;world.game.escapeBlocks=null;world.disposed=true;}

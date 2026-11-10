@@ -1,0 +1,161 @@
+{
+  "baseline": "790fb11a0618d6c706d1aee044379939940415af",
+  "condition": "Same Windows PC, Vite, separate Node server process, 20 synthetic/browser students, host and two student Canvas screens, fixed map0 and match seed, 3 rounds; not physical classroom or 600s evidence",
+  "status": "Functional rounds PASS; performance non-regression NOT_CONFIRMED; retain every completed comparison",
+  "measurements": [
+    {
+      "mode": "solo",
+      "phase": "before",
+      "seconds": 39.767,
+      "step": 5.021,
+      "snapshot": 10.067,
+      "bytes": 211782451,
+      "KiBps": 5307.8,
+      "rssMiB": 124.7,
+      "heapMiB": 40.6,
+      "cpuUserMs": 6531,
+      "cpuSysMs": 1687,
+      "draw": [
+        4.4,
+        1.9,
+        2.2
+      ],
+      "gap": [
+        16.9,
+        16.9,
+        16.9
+      ],
+      "overloads": 0,
+      "connected": 20
+    },
+    {
+      "mode": "solo",
+      "phase": "final",
+      "seconds": 40.441,
+      "step": 7.568,
+      "snapshot": 12.641,
+      "bytes": 205725237,
+      "KiBps": 5055.4,
+      "rssMiB": 157.8,
+      "heapMiB": 41.7,
+      "cpuUserMs": 6812,
+      "cpuSysMs": 1656,
+      "draw": [
+        4.4,
+        2.9,
+        2.5
+      ],
+      "gap": [
+        16.9,
+        16.8,
+        16.9
+      ],
+      "overloads": 0,
+      "connected": 20
+    },
+    {
+      "mode": "capture",
+      "phase": "before",
+      "seconds": 40.768,
+      "step": 6.399,
+      "snapshot": 10.762,
+      "bytes": 223035638,
+      "KiBps": 5425.9,
+      "rssMiB": 121.5,
+      "heapMiB": 34.3,
+      "cpuUserMs": 6671,
+      "cpuSysMs": 1734,
+      "draw": [
+        3.7,
+        2,
+        2.3
+      ],
+      "gap": [
+        16.9,
+        16.9,
+        16.9
+      ],
+      "overloads": 0,
+      "connected": 20
+    },
+    {
+      "mode": "capture",
+      "phase": "final",
+      "seconds": 41.025,
+      "step": 5.485,
+      "snapshot": 9.359,
+      "bytes": 215405132,
+      "KiBps": 5207.7,
+      "rssMiB": 184.7,
+      "heapMiB": 42.3,
+      "cpuUserMs": 6937,
+      "cpuSysMs": 1953,
+      "draw": [
+        3.4,
+        2,
+        2.3
+      ],
+      "gap": [
+        16.9,
+        16.9,
+        16.9
+      ],
+      "overloads": 0,
+      "connected": 20
+    },
+    {
+      "mode": "solo",
+      "phase": "optimized",
+      "seconds": 39.7,
+      "step": 5.6,
+      "snapshot": 10.3,
+      "bytes": 200687737,
+      "KiBps": 5028.5,
+      "rssMiB": 120.5,
+      "heapMiB": 34.9,
+      "cpuUserMs": 7296,
+      "cpuSysMs": 1921,
+      "draw": [
+        4.3,
+        2.3,
+        2.2
+      ],
+      "gap": [
+        16.8,
+        16.9,
+        16.8
+      ],
+      "overloads": 0,
+      "connected": 20,
+      "rounds": 3,
+      "errors": []
+    },
+    {
+      "mode": "capture",
+      "phase": "optimized",
+      "seconds": 40.5,
+      "step": 5.6,
+      "snapshot": 12.3,
+      "bytes": 217410820,
+      "KiBps": 5321.9,
+      "rssMiB": 168.9,
+      "heapMiB": 58.8,
+      "cpuUserMs": 6984,
+      "cpuSysMs": 1937,
+      "draw": [
+        2.9,
+        2.2,
+        2
+      ],
+      "gap": [
+        16.9,
+        16.9,
+        16.9
+      ],
+      "overloads": 0,
+      "connected": 20,
+      "rounds": 3,
+      "errors": []
+    }
+  ]
+}

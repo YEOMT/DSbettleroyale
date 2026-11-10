@@ -58,6 +58,12 @@ export function aimGuide(actor,kind,gesture,map,kernel,walls,visible=[],objects=
    ({x,y}=clampPoint({x,y},map,pad));
   }
  }
+ // A non-teleport airborne target can cross ordinary cover, but cannot leave
+ // the X arena through its solid terrain sides. Match the authoritative leap.
+ if(spec.shape==='target'&&spec.teleport===false&&kernel&&map?.boundary?.blocks?.length){
+  const length=Math.hypot(x-actor.x,y-actor.y),hit=kernel.combatTraceWalls(actor,{x,y},pad,map.boundary.blocks,[]);
+  if(hit&&length>0){const t=Math.max(0,length*hit.t-.01)/length;x=actor.x+(x-actor.x)*t;y=actor.y+(y-actor.y)*t;}
+ }
  return {...spec,range,x,y,dx,dy};
 }
 export function paintGuide(p,a,g,z){

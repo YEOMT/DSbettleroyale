@@ -30,6 +30,15 @@ export const initializers=[
     function safePoint(ctx,pos,radius) {return R.safe(ctx.g,pos,radius,ctx.owner);}
     function groundPoint(ctx,pos,radius) {if(__brScope.brArenaRect(ctx.g)){const p=__brScope.brArenaClamp(ctx.g,pos,radius+4),m=__brScope.combatMoveCircle(p,{x:0,y:0},radius,ctx.g.walls,false);return __brScope.brArenaClamp(ctx.g,new __brScope.Vec2(m.x,m.y),radius+4);}const moved=__brScope.combatMoveCircle(pos,new __brScope.Vec2(0,0),radius,ctx.g.walls,false),point=new __brScope.Vec2(moved.x,moved.y),center=ctx.g.center||new __brScope.Vec2(0,0),delta=point.sub(center),edge=Math.max(10,(ctx.g.worldRadius||__brScope.BR_WORLD_RADIUS)-radius-4),n=delta.mag();return n>edge?center.add(delta.mult(edge/n)):point;}
     function buffRing(ctx,s,color) {R.marker(ctx,{pos:copy(ctx.owner.pos),shape:'circle',radius:s.radius||ctx.owner.radius*1.7,duration:24,color:color||s.color});}
+    // One straight, piercing strike; existing projectile hit ledger guarantees one hit per life.
+    add('emoji-034','볼링 챔피언','A','원거리형',{},
+        {label:'스트라이크',kind:'bowling-strike',shape:'line',cooldown:945,range:900,width:72,radius:36,speed:22,damage:21,knockback:42,count:1,countCap:1,bounces:0,pierce:true,color:'#c4b5fd',emoji:'🎳',caps:{...projectileCaps,cc:true},
+         description:'반경 36의 큰 볼링공 한 개가 900 거리까지 직진하며 적마다 한 번 타격하고 진행 방향으로 밀어냅니다. 벽에 닿으면 사라지며 반사·기절은 없습니다.',strength:'일렬의 적을 관통하는 밀침',success:'여러 적이 늘어선 방향 조준',failure:'벽에 막히는 고정 직선',counterplay:'측면 회피와 엄폐'},
+        (ctx,s)=>shot(ctx,s,{pierce:true,bounces:0}));
+    add('emoji-070','다트 챔피언','B','원거리형',{},
+        {label:'집중 투척',kind:'dart-haste',shape:'circle',cooldown:990,duration:300,radius:0,attackHaste:1.3,color:'#fb7185',caps:{duration:true,utility:true},
+         description:'5초 동안 일반 공격 속도가 30% 증가합니다. 추가 투사체 없이 이동하며 공격할 수 있습니다. 관통 다트 평타는 상대 몸 중심 35%를 지나는 궤적일 때 피해가 1.5배입니다.',strength:'정확한 평타를 빠르게 반복',success:'중앙을 겨눈 다트 적중',failure:'스킬 자체 피해 없음',counterplay:'측면 이동으로 중앙 조준 회피'},
+        (ctx,s)=>{R.buff(ctx,ctx.owner,'basicHaste',s.attackHaste,s.duration);buffRing(ctx,s);});
     // A01: thin, first-contact sniper. The marker and final direction share ctx.aim.
     add('emoji-023','헤드슈터','A','원거리형',{},
         {kind:'sniper',shape:'line',cooldown:frames(12),windup:24,range:1380,width:14,radius:7,speed:90,damage:76,knockback:2,color:'#fbbf24',emoji:'•',caps:projectileCaps,
@@ -60,7 +69,7 @@ export const initializers=[
     add('emoji-029','스카이 하이','A','기동형',melee('slash',{pushScale:.3}),
         {kind:'leap',shape:'target',cooldown:frames(11),range:670,radius:150,duration:30,damage:48,knockback:7,color:'#bae6fd',wallPolicy:'airborne-safe-landing',caps:{...aoeCaps,dash:true,cc:true,signatureRange:true},
          description:'벽을 넘어 표시 지점으로 비행해 착지 충격을 줍니다. 공중 이동은 무적이 아니며 기절·포획되면 추가 타격 없이 정착합니다.',strength:'벽을 넘는 진입',success:'적의 퇴로에 착지',failure:'착지까지 시간이 필요',counterplay:'착지 표시 회피 또는 공중 제어'},
-        (ctx,s)=>{const pos=safePoint(ctx,R.targetPoint(ctx,s.range),ctx.owner.radius);R.marker(ctx,{pos,shape:'circle',radius:s.radius,duration:s.duration,color:s.color});R.leap(ctx,{pos,duration:s.duration,damage:s.damage,radius:s.radius,knockback:s.knockback});});
+        (ctx,s)=>{const pos=safePoint(ctx,R.targetPoint(ctx,s.range),ctx.owner.radius),capture=!!__brScope.brArenaRect(ctx.g),marker={pos,shape:'circle',radius:s.radius,duration:s.duration,color:s.color};if(!capture)R.marker(ctx,marker);const leap=R.leap(ctx,{pos,duration:s.duration,damage:s.damage,radius:s.radius,knockback:s.knockback});if(capture)R.marker(ctx,{...marker,pos:leap.to});});
     // A07: three swept tentacles, once per target, shared safe hook core.
     add('emoji-030','크라켄','A','근접형',melee('slash',{rangeBonus:95}),
         {kind:'hook',shape:'cone',cooldown:frames(14),range:780,width:34,radius:17,speed:36,damage:24,maxTargets:3,halfAngle:.28,stun:60,stunCap:78,color:'#c084fc',caps:{damage:true,projectile:true,expandable:true,cc:true,signatureRange:true},
@@ -113,12 +122,6 @@ export const initializers=[
         (ctx,s)=>prepared(ctx,s,c=>{let hits=0;R.dash(c,{range:s.range,speed:s.speed,width:s.width,damage:s.damage,stun:s.stun,stunCap:s.stunCap,knockback:s.knockback,onHit:(cc,t,res)=>{if(res.valid&&t.id!==999){hits++;R.shield(cc,cc.owner,Math.min(s.shieldCap,s.shield+(hits-1)*s.shieldPerExtra),s.shieldDuration);}}});},'rect'),
         {basicSummary:'근접 영혼 검격 · 스킬 적중 시 별도 흡수 보호막'});
     // B01: lower-rank short-range hook, no arrival stun.
-    add('emoji-065','자석포','B','근접형',melee('punch',{rangeBonus:82,pushScale:.25}),
-        {kind:'hook',shape:'line',cooldown:frames(8),range:690,width:30,radius:15,speed:38,damage:19,maxTargets:1,stun:0,color:'#f87171',caps:{damage:true,projectile:true,expandable:true,cc:true,signatureRange:true},
-         description:'빠른 자석 한 발로 첫 적을 안전한 전방 위치로 끌어옵니다. 끌리는 동안만 조작을 제한하고 도착 후 긴 기절은 없습니다.',strength:'짧은 간격의 단순 포획',success:'단일 자석 명중',failure:'낮은 피해와 짧은 사거리',counterplay:'벽 엄폐 또는 옆으로 피하기'},
-        (ctx,s)=>R.hook(ctx,{range:s.range,speed:s.speed,width:s.width,damage:s.damage,maxTargets:1,arrivalStun:0}),
-        {statType:'MELEE',basicSummary:'근접 자석 타격 · 스킬은 원거리 훅',stats:{hpMultiplier:.66,speedMultiplier:1.02}});
-    // B02: airborne bomb ignores flight contacts; blast once at marked ground.
     add('emoji-039','다이너마이트','B','원거리형',{},
         {kind:'lob',shape:'target',cooldown:frames(11),range:740,radius:205,innerRadius:92,damage:29,centerDamage:47,flightFrames:48,duration:48,knockback:8,color:'#f97316',emoji:'🧨',caps:{...aoeCaps,cc:true,signatureRange:true},
          description:'목표 지점을 표시한 뒤 0.8초 포물선 비행 후 한 번 폭발합니다. 중심부 피해가 더 크며 폭발 지점과 적 사이의 벽은 피해를 막습니다.',strength:'넓은 지점 폭격',success:'느린 착탄을 예측해 조준',failure:'피할 수 있는 긴 비행 시간',counterplay:'경고 원에서 이탈하거나 벽 뒤로 이동'},
@@ -160,10 +163,6 @@ export const initializers=[
         (ctx,s)=>{let allies=R.allies(ctx,ctx.owner.pos,s.radius).filter(p=>p!==ctx.owner);if(!allies.length)allies=[ctx.owner];allies.sort((a,b)=>a.hp/Math.max(1,a.maxHp)-b.hp/Math.max(1,b.maxHp)||String(a.id).localeCompare(String(b.id)));for(const a of allies.slice(0,s.maxTargets))R.shield(ctx,a,s.shield,s.duration);buffRing(ctx,s);},
         {teamOnly:true});
     // C01-C04: simple projectiles with distinct trajectories; no hidden stun.
-    add('emoji-073','교과서 투척','C','원거리형',{},
-        {kind:'heavy-book',shape:'line',cooldown:frames(8),range:740,radius:27,speed:17,damage:21,knockback:23,color:'#93c5fd',emoji:'📚',caps:{...projectileCaps,cc:true},
-         description:'크고 무거운 교과서 한 발로 접근하는 첫 적을 크게 밀어냅니다. 침묵·기절은 없습니다.',strength:'읽기 쉬운 강한 밀침',success:'접근하는 적에게 책 적중',failure:'느린 단발',counterplay:'측면 이동'},
-        (ctx,s)=>shot(ctx,s));
     add('emoji-074','슬리퍼 스나이퍼','C','원거리형',{},
         {kind:'precision',shape:'line',cooldown:frames(7),range:1100,radius:13,speed:38,damage:24,knockback:4,color:'#fda4af',emoji:'🥿',caps:projectileCaps,
          description:'빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.',strength:'빠른 정밀 단발',success:'긴 직선 조준 적중',failure:'추적과 폭발 없음',counterplay:'엄폐와 방향 전환'},

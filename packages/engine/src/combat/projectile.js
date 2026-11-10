@@ -123,7 +123,15 @@ __brScope.Projectile = class Projectile {
 
                 // Test the travelled segment against moving targets, in impact order.
                 // ORBIT remains a contact weapon and retains its existing repeat-hit interval.
-                if(game.capture&&this.type!=='ORBIT'){const edge=__brScope.brCaptureBoundaryHit(shotStart,this.pos,this.size);if(edge&&(!wallContact||edge.t<wallContact.t))wallContact=edge;}
+                if(game.capture&&this.type!=='ORBIT'){
+                    // These native types keep passing ordinary cover. The X sides
+                    // are arena boundaries, so reuse their existing edge response.
+                    const terrain=game.boundary?.blocks;
+                    const edge=terrain?.length&&(this.type==='BOOMERANG'||this.type==='GHOST')
+                        ?__brScope.combatTraceWalls(shotStart,this.pos,this.size,terrain,this._wallCandidates)
+                        :__brScope.brCaptureBoundaryHit(shotStart,this.pos,this.size);
+                    if(edge&&(!wallContact||edge.t<wallContact.t)){edge.boundary=true;wallContact=edge;}
+                }
                 const shotEnd=this._shotEnd;shotEnd.x=this.pos.x;shotEnd.y=this.pos.y;
                 const travel=this._travel;travel.x=shotEnd.x-shotStart.x;travel.y=shotEnd.y-shotStart.y;
                 const orbit=this.type==='ORBIT';
@@ -161,7 +169,18 @@ __brScope.Projectile = class Projectile {
                     if(!p.alive)continue;
                     this.hitMemory[p.id]=game.frame;
                     this.pos=orbit?shotEnd:shotStart.add(travel.mult(t));
-                    this.hit(game,p);
+                    // Classify the incoming swept trajectory, never its first outer-surface
+                    // contact point. Relative motion uses the same previous/current target
+                    // positions as the accepted collision above. Only real Dart basic hits
+                    // can gain this multiplier; farm/turret/reflection paths stay unchanged.
+                    let central=false;
+                    if(this.ownerAbilityId==='emoji-070'&&this.inputKind==='attack'&&this.impactStyle==='ranged-basic'&&!p.clone&&!p.isReworkTurret&&p.id!==999&&!p.invisible&&!game.isConcealedFrom(p,this.owner)){
+                        const px=Number.isFinite(p.combatPreviousX)?p.combatPreviousX:p.pos.x,py=Number.isFinite(p.combatPreviousY)?p.combatPreviousY:p.pos.y;
+                        const dx=travel.x-(p.pos.x-px),dy=travel.y-(p.pos.y-py),x=shotStart.x-px,y=shotStart.y-py,length2=dx*dx+dy*dy;
+                        const closest=length2>0?-(x*dx+y*dy)/length2:0;
+                        central=length2>0&&closest>=t&&closest<=Math.max(1,1+this.life)&&(x*dy-y*dx)**2/length2<=(p.radius*.35)**2;
+                    }
+                    this.hit(game,p,central);
                     if(this.detonated||(this.type!=='ORBIT'&&this.type!=='BOOMERANG'&&!this.pierce))return;
                 }
                 this.pos=shotEnd;
@@ -206,19 +225,19 @@ __brScope.Projectile = class Projectile {
                     }
                 } finally {if(this.owner)this.owner.currentImpactStyle=previousStyle||'';}
             }
-            hit(game, target) {
+            hit(game, target, central=false) {
                 if(!__brScope.brCanHostileTarget(target,this.owner))return;
                 if(this.playerSkillBlast){this.detonatePlayerSkill(game,target);return;}
                 // ✨ v15: 궤도형은 hitMemory의 개별 재타격 쿨다운만 사용한다.
                 // 과거의 global frame % 15 조건 때문에 실제로 닿아도 대부분 피해가 무효화되던 문제 수정.
                 if(this.type !== 'ORBIT' && !this.pierce && this.type !== 'BOOMERANG') this.life = 0;
 
-                game.spawnImpact(this.pos, Math.max(20, this.size * 1.7), this.impactColor, Math.min(1.8, 0.7 + this.damage/30));
+                game.spawnImpact(this.pos, Math.max(20, this.size * 1.7), central?'#fbbf24':this.impactColor, Math.min(1.8, 0.7 + this.damage*(central?1.5:1)/30));
                 // Contact intensity comes from the actual result in takeDamage below.
                 const dealDamage=(victim)=>{
                     const previousStyle=this.owner&&this.owner.currentImpactStyle;
                     if(this.owner&&this.impactStyle)this.owner.currentImpactStyle=this.impactStyle;
-                    try { return victim.takeDamage(this.damage,this.owner,false,this.explodeRadius>0?victim.pos.sub(this.pos):(this.type==='ORBIT'?victim.pos.sub(this.owner.pos):this.vel),{scaled:true,wangguiPower:this.wangguiPower,basic:this.impactStyle==='ranged-basic',attackId:this.basicAttackId,basicSnapshot:this.basicSnapshot,contact:{x:this.pos.x,y:this.pos.y},projectileId:this._brNetId||'',actionKind:this.inputKind,ordinal:this.shotOrdinal||0,visualPeriodic:this.type==='ORBIT',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:this.explodeRadius}); }
+                    try { return victim.takeDamage(this.damage*(central?1.5:1),this.owner,false,this.explodeRadius>0?victim.pos.sub(this.pos):(this.type==='ORBIT'?victim.pos.sub(this.owner.pos):this.vel),{scaled:true,wangguiPower:this.wangguiPower,basic:this.impactStyle==='ranged-basic',...(central?{style:'dart-center'}:{}),attackId:this.basicAttackId,basicSnapshot:this.basicSnapshot,contact:{x:this.pos.x,y:this.pos.y},projectileId:this._brNetId||'',actionKind:this.inputKind,ordinal:this.shotOrdinal||0,visualPeriodic:this.type==='ORBIT',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:this.explodeRadius}); }
                     finally { if(this.owner)this.owner.currentImpactStyle=previousStyle||''; }
                 };
                 

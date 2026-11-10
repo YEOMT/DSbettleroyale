@@ -14,3 +14,14 @@ body.br-capture-host #br-focus-toggle:disabled{display:inline-block;cursor:defau
 #br-student-battle{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 
 .br-countdown{position:fixed;z-index:120;top:25%;left:50%;transform:translateX(-50%);padding:16px 28px;border-radius:22px;background:#101827ee;color:#fff;font-size:clamp(32px,6vw,64px);font-weight:900;pointer-events:none;text-align:center}
+
+.br-escape-map{position:absolute;right:8px;top:110px;width:90px;height:90px;border-radius:8px;pointer-events:none;z-index:2}
+.br-cap-objectives{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.br-cap-objectives>div{background:#0f172ae8;border:1px solid #64748b;border-radius:7px;padding:5px;font-size:11px;line-height:1.4}.br-cap-notice{pointer-events:none;text-align:center;background:#172554eb;color:#f8fafc;padding:5px;font-weight:700}
+
+/* Capture HUD follows its actual bounded content height, including notices. */
+.br-capture-student .br-battle-hud{top:calc(var(--br-cap-bottom,143px) + 8px)}
+.br-capture-student .br-run-ui{top:calc(var(--br-cap-bottom,143px) + 100px)}
+.br-capture-student .br-run-level-alert{top:calc(var(--br-cap-bottom,143px) + 65px)!important}
+@media(max-width:560px){#br-capture-scoreboard .br-cap-cards{display:grid;grid-template-columns:repeat(var(--br-cap-teams,2),minmax(0,1fr))}#br-capture-scoreboard .br-cap-card{min-width:0;padding:5px}#br-capture-scoreboard .br-cap-card b{font-size:10px}#br-capture-scoreboard .br-cap-card strong{font-size:16px}}
+
+.br-capture-map{top:calc(var(--br-cap-bottom,143px) + 100px);width:72px;height:72px}
