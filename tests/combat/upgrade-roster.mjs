@@ -1,0 +1,23 @@
+// Two approved reworks on three real WS/renderer surfaces; bounded manual ticks.
+import fs from 'node:fs';import assert from 'node:assert/strict';
+import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';import {stepWorld} from '../../packages/engine/src/index.js';
+const renderer=process.argv[2]||'canvas',start=performance.now(),rows=[],h=await auditHarness({players:1,renderer,quality:'low',viewport:{width:844,height:640},studentContext:{hasTouch:true}});
+fs.mkdirSync('artifacts/upgrade',{recursive:true});
+try{
+ const ctx=await h.browser.newContext({viewport:{width:844,height:640}});h.contexts.push(ctx);await ctx.route(/dropbox/,r=>r.abort());const rival=await ctx.newPage();rival.on('pageerror',e=>h.errors.push(e.message));await rival.goto(h.url+'/?room='+h.room.code+'&renderer='+renderer);await rival.locator('#br-player-name').fill('Rival');await rival.locator('#br-join-btn').click();await rival.locator('#br-student-wait').waitFor();await h.battle();
+ const pages=[h.student,rival,h.host],w=h.room.world,[p,q]=h.room.students().map(m=>w.byId.get(m.id));w.brFarm.dispose(w.game);w.game.walls=[];w.game.smokes=[];h.staticState();
+ for(const page of pages)await page.evaluate(async()=>{window.m=await import('/src/main.js');window.seen={shots:[],events:[],frames:0};const draw=m.renderer.draw.bind(m.renderer);m.renderer.draw=(v,t)=>{draw(v,t);seen.frames++;for(const s of v.shots)if(!s.preview&&!seen.shots.some(q=>q.id===s.id))seen.shots.push({id:s.id,radius:s.radius,kind:s.kind,action:s.actionKind});};m.net.addEventListener('event',e=>seen.events.push({type:e.detail.type,data:e.detail.data}));});
+ async function publish(n=1){for(let i=0;i<n;i++){stepWorld(w);h.publish();await delay(35);}}
+ for(const id of ['emoji-034','emoji-070']){
+  w.BRRework.clearWorld(w.game,'case');w.game.projectiles=[];w.game.retiredShots=[];w.inputPending.clear();w.actionPending.clear();const a=w.EMOJI_DB.find(a=>a.id===id),remoteId=p.remoteId,life=p.lifeSeq+1;
+  Object.assign(p,new w.Participant(1,'Actor',a,new w.Vec2(0,0),0),{remoteId,sessionId:remoteId,lifeSeq:life,abilityId:id,alive:true,connected:true,humanControlled:true,applyPlayerInput:w.brApplyPlayerInput,aimProfileKey:null,rw:null,spawnProtectionUntilFrame:0});w.brInitRun(p);p.vel=new w.Vec2(0,0);w.session.inputs[remoteId]={};q.pos=new w.Vec2(240,0);q.vel=new w.Vec2(0,0);q.hp=q.maxHp=10000;q.spawnProtectionUntilFrame=0;w.game.rebuildSpatialGrid();h.publish();
+  await h.student.waitForFunction(l=>m.net.lifeSeq===l&&m.timeline.predicted?.lifeSeq===l&&m.net.profilesReady&&!m.net.restoring&&m.controls.enabled&&performance.now()-(m.controls.lastFire.skill??-Infinity)>=100,life);
+  for(const page of pages)await page.evaluate(()=>{seen.shots=[];seen.events=[];seen.frames=0;});
+  await h.student.keyboard.press('q');for(let i=0;i<100&&!w.actionPending.get(remoteId)?.length;i++)await delay(10);assert.ok(w.actionPending.get(remoteId)?.some(a=>a.kind==='skill'));await publish(12);assert.ok(p.firedSkillSeq>0);assert.ok(p.cooldown>0);
+  if(id==='emoji-034'){for(const page of pages)await page.waitForFunction(()=>seen.shots.some(s=>s.action==='skill'&&s.radius===36));assert.ok(q.hp<q.maxHp);}
+  else{assert.equal(w.BRRework.cooldownRate(p,'attack'),1.3);await h.student.waitForFunction(()=>m.timeline.predicted.rw.attackRate===1.3);assert.equal(w.game.rw.entities.filter(e=>!e.dead&&e.kind==='projectile').length,0);await h.student.keyboard.press('Space');for(let i=0;i<100&&!w.actionPending.get(remoteId)?.length;i++)await delay(10);assert.ok(w.actionPending.get(remoteId)?.some(a=>a.kind==='attack'));await publish(18);assert.ok(p.firedAttackSeq>0);for(const page of pages)await page.waitForFunction(()=>seen.events.some(e=>e.type==='FX'&&e.data.style==='dart-center'));}
+  const screens=[];for(const [role,page]of pages.entries()){screens.push(await page.evaluate(()=>({frames:seen.frames,shots:seen.shots,pixi:!!m.renderer.pixi,hit:seen.events.filter(e=>e.type==='FX'&&e.data.kind==='hit').length})));await page.screenshot({path:`artifacts/upgrade/${renderer}-${id}-${role}.png`});}
+  for(const screen of screens){assert.equal(screen.pixi,renderer==='pixi');assert.ok(screen.frames>2);}rows.push({id,screens,damage:q.maxHp-q.hp,skill:p.firedSkillSeq,attack:p.firedAttackSeq});
+ }
+ await h.command('END');await h.command('REMATCH');for(const page of pages)await page.waitForFunction(()=>m.ui.room.phase==='LOBBY'&&!m.renderer.enabled&&m.renderer.textures.size===0);assert.deepEqual(h.errors,[]);console.log('upgrade roster',renderer,'PASS');
+}finally{fs.writeFileSync(`artifacts/upgrade/roster-${renderer}.json`,JSON.stringify({ms:performance.now()-start,rows,errors:h.errors},null,2));await h.close();}

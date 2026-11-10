@@ -17,7 +17,7 @@ export class ObjectiveArrows{
   this.root.hidden=false;const key=w+'|'+h+'|'+packet.n;if(this.layoutKey!==key){this.layoutKey=key;this.top=Math.max(100,(document.getElementById('br-capture-scoreboard')?.getBoundingClientRect().bottom||80)+24);}
   const positions=[];for(const [i,z]of map.points.entries()){const node=this.nodes[i],pos=position(z,cam,w,h,zoom,this.top,h-(h>w?190:160));node.el.hidden=!pos;if(!pos)continue;
    for(const prior of positions)if(Math.hypot(pos.x-prior.x,pos.y-prior.y)<44)pos.y=Math.max(this.top,Math.min(h-160,pos.y+(pos.y<h/2?44:-44)));positions.push(pos);
-   const enabled=!!(packet.am&(1<<i)),row=packet.z[i],col=!enabled?'#94a3b8':row[0]==='scoring'?color(row[1]):'#f8fafc',text=!enabled?'🔒 '+z.id:z.id+(i===1?' ×1.5':''),state=text+'|'+col;
+   const enabled=!!(packet.am&(1<<i)),row=packet.z[i],col=!enabled?'#94a3b8':row[0]==='scoring'?color(row[1]):'#f8fafc',text=!enabled?'🔒 '+z.id:z.id,state=text+'|'+col;
    if(node.key!==state){node.key=state;node.label.textContent=text;node.el.style.color=col;}
    node.el.style.transform='translate('+pos.x.toFixed(1)+'px,'+pos.y.toFixed(1)+'px) translate(-50%,-50%)';node.arrow.style.transform='rotate('+pos.angle+'rad)';
   }

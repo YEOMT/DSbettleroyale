@@ -4,9 +4,9 @@ import {createMovementKernel,predictMovement} from '../../../../packages/engine/
 import {sampleFlight} from './flight.js';
 export class Timeline{
  constructor(){this.kernel=createMovementKernel();this.reset();this.metrics={accepted:0,discarded:0,corrections:[],arrivalGaps:[],sourceGaps:[],holds:0,interpolated:0};}
- reset(){this.static=null;this.walls=[];this.staticWalls=[];this.dynamicRevision=-1;this.collisionCache=null;this.samples=[];this.history=[];this.predicted=null;this.lastSeq=0;this.renderTick=0;this.lifeKey='';this.effects=[];this.terminals=new Map();this.spawns=new Map();this.previews=new Map();this.pendingInputs=new Map();this.offset={x:0,y:0};this.correctedAt=0;}
+ reset(){this.escape=null;this.static=null;this.walls=[];this.staticWalls=[];this.dynamicRevision=-1;this.collisionCache=null;this.samples=[];this.history=[];this.predicted=null;this.lastSeq=0;this.renderTick=0;this.lifeKey='';this.effects=[];this.terminals=new Map();this.spawns=new Map();this.previews=new Map();this.pendingInputs=new Map();this.offset={x:0,y:0};this.correctedAt=0;}
  displayOffset(now){const k=.8**(Math.max(0,now-this.correctedAt)*.06);return {x:this.offset.x*k,y:this.offset.y*k};}
- setStatic(data){this.static=data;this.staticWalls=(data.walls||[]).map(w=>({...w,pos:{x:w.x,y:w.y},width:w.w,height:w.h}));this.walls=this.staticWalls;this.dynamicRevision=-1;this.collisionCache=null;}
+ setStatic(data){this.static=data;this.escape=data.escapeState||null;this.staticWalls=(data.walls||[]).map(w=>({...w,pos:{x:w.x,y:w.y},width:w.w,height:w.h}));this.walls=this.staticWalls;this.dynamicRevision=-1;this.collisionCache=null;}
  accept(s,now=performance.now()){
   if(s.snapshotSeq<=this.lastSeq){this.metrics.discarded++;return false;}this.lastSeq=s.snapshotSeq;this.metrics.accepted++;
   const prev=this.samples.at(-1);if(prev){this.metrics.arrivalGaps.push(now-prev.at);this.metrics.sourceGaps.push((s.serverTick-prev.state.serverTick)*1000/60);}
@@ -33,7 +33,7 @@ export class Timeline{
  predict(input){if(this.paused||!this.predicted)return;this.history.push(input);if(this.history.length>120)this.history.shift();this.predicted=predictMovement(this.kernel,this.predicted,input,this.collisionWalls(),this.static);}
  preview(kind,seq,aim,power=1){const self=this.predicted;if(this.paused||!self)return;const now=performance.now();this.pendingInputs.set(kind+':'+seq,{kind,seq,until:now+3000});for(const q of previewShots(self,kind,seq,aim,now,power))this.previews.set(shotKey(q),q);const cue=previewCue(self,kind,seq,aim,this.renderTick);if(cue)this.effects.push(cue);}
  cancelPreview(kind,seq){this.pendingInputs.delete(kind+':'+seq);for(const [id,q]of this.previews)if(q.actionKind===kind&&q.actionSeq===seq)this.previews.delete(id);this.effects=this.effects.filter(f=>!f.preview||f.actionKind!==kind||f.actionSeq!==seq);}
- event(e,now=performance.now()){const d=e.data;if(e.type==='SHOT_SPAWN'){this.spawns.set(d.id,{...d,tick:e.serverTick,seenInSnapshot:false});}else if(e.type==='SHOT_END')this.terminals.set(d.id,{...d,tick:e.serverTick});else if(e.type==='FX'){if(d.sourceId===this.predicted?.id&&d.geometry?.seq)this.effects=this.effects.filter(f=>!f.preview||f.actionKind!==d.geometry.kind||f.actionSeq!==d.geometry.seq);this.effects.push({...d,id:e.eventId,tick:e.serverTick,receivedAt:now});}if(this.effects.length>300)this.effects.splice(0,this.effects.length-300);for(const map of [this.terminals,this.spawns])while(map.size>2048)map.delete(map.keys().next().value);}
+ event(e,now=performance.now()){const d=e.data;if(e.type==='ESCAPE_STATE'){if(!this.escape||d.revision>this.escape.revision)this.escape=d;return;}if(e.type==='SHOT_SPAWN'){this.spawns.set(d.id,{...d,tick:e.serverTick,seenInSnapshot:false});}else if(e.type==='SHOT_END')this.terminals.set(d.id,{...d,tick:e.serverTick});else if(e.type==='FX'){if(d.sourceId===this.predicted?.id&&d.geometry?.seq)this.effects=this.effects.filter(f=>!f.preview||f.actionKind!==d.geometry.kind||f.actionSeq!==d.geometry.seq);this.effects.push({...d,id:e.eventId,tick:e.serverTick,receivedAt:now});}if(this.effects.length>300)this.effects.splice(0,this.effects.length-300);for(const map of [this.terminals,this.spawns])while(map.size>2048)map.delete(map.keys().next().value);}
  frame(now=performance.now()){
   const last=this.samples.at(-1);if(!last)return null;
   this.renderTick=Math.max(this.renderTick,last.state.serverTick+Math.min(150,now-last.at)*.06-4.5);
@@ -72,6 +72,6 @@ export class Timeline{
     e.firstVisibleAt=now;e.displayTick=Math.max(e.tick,this.renderTick-2);
    }
    return this.renderTick-(e.displayTick??e.tick)<effectLife(e)*.06&&(e.firstVisibleAt==null||now-e.firstVisibleAt<effectLife(e));
-  });return {...right.state,actors,shots,renderTick:this.renderTick,effects:this.effects.filter(e=>e.tick<=this.renderTick).concat(residuals)};
+  });return {...right.state,escape:this.escape,actors,shots,renderTick:this.renderTick,effects:this.effects.filter(e=>e.tick<=this.renderTick).concat(residuals)};
  }
 }

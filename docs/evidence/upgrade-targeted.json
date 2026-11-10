@@ -1,0 +1,53 @@
+{
+  "ms": 198094,
+  "results": [
+    {
+      "command": "node_modules/@playwright/test/cli.js test --config artifacts/upgrade-playwright.config.mjs",
+      "ms": 58052,
+      "status": "PASS"
+    },
+    {
+      "command": "tests/fidelity/visuals.mjs",
+      "ms": 27139,
+      "status": "PASS"
+    },
+    {
+      "command": "tests/fidelity/visuals.mjs",
+      "ms": 25076,
+      "status": "PASS"
+    },
+    {
+      "command": "tests/fidelity-v33-2/all77.mjs canvas balanced",
+      "ms": 16182,
+      "status": "PASS"
+    },
+    {
+      "command": "tests/fidelity-v33-2/all77.mjs pixi balanced",
+      "ms": 16661,
+      "status": "PASS"
+    },
+    {
+      "command": "tests/releaseops/layout.mjs",
+      "ms": 6514,
+      "status": "PASS"
+    },
+    {
+      "command": "tests/combat/resource-lifetime.mjs",
+      "ms": 11686,
+      "status": "PASS"
+    },
+    {
+      "command": "tools/load/run.mjs --players=26 --seconds=30",
+      "ms": 36784,
+      "status": "PASS"
+    }
+  ],
+  "notRun": [
+    "all77",
+    "full-camera",
+    "full-layout",
+    "real-time-quiz",
+    "600s-load",
+    "physical-classroom"
+  ]
+}

@@ -1,6 +1,8 @@
+import {manifest} from '../../packages/content/src/manifest.js';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {parseManifest,reviewedMigrationScope} from './roster-scope.mjs';
 // Only inert CSS/Markdown changes can be low risk. JS under ui may send commands.
 export function classify(files, diff='') {
  const docs=files.length>0&&files.every(f=>/^(docs\/.*\.md|README\.md)$/.test(f));
@@ -27,10 +29,19 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  const files=[...new Set((execFileSync('git',['diff','--name-only',base],{encoding:'utf8'})+execFileSync('git',['ls-files','--others','--exclude-standard'],{encoding:'utf8'})).trim().split('\n').filter(Boolean))];
  // Generated full manifests are checked for all IDs by Quick. Their formatting
  // must not turn a ten-character patch into a full browser Deep Audit.
- const inputs=['apps/client','packages',':(exclude)packages/content/src/manifest.js',':(exclude)packages/content/src/display.js'];
+ const inputs=['apps/client','packages',':(exclude)packages/content/src/manifest.js',':(exclude)packages/content/src/display.js',':(exclude)packages/engine/src/world/roster-text.js'];
  let diff=execFileSync('git',['diff','--unified=0',base,'--',...inputs],{encoding:'utf8',maxBuffer:20e6});
  for(const file of execFileSync('git',['ls-files','--others','--exclude-standard','--',...inputs],{encoding:'utf8'}).trim().split('\n').filter(Boolean))diff+='\n'+fs.readFileSync(file,'utf8');
- const plan=classify(files,diff);fs.mkdirSync('artifacts',{recursive:true});fs.writeFileSync('artifacts/check-plan.json',JSON.stringify(plan,null,2));
+ const plan=classify(files,diff);plan.characters=plan.characters.filter(id=>manifest.roster.some(a=>a.id===id));
+ if(files.includes('packages/engine/src/world/roster-text.js')){
+  const previous=parseManifest(execFileSync('git',['show',base+':packages/content/src/manifest.js'],{encoding:'utf8',maxBuffer:20e6}));
+  const focusedInputs=[...inputs,':(exclude)packages/engine/src/world/rules.js'];
+  let focused=execFileSync('git',['diff','--unified=0',base,'--',...focusedInputs],{encoding:'utf8',maxBuffer:20e6});
+  for(const file of execFileSync('git',['ls-files','--others','--exclude-standard','--',...focusedInputs],{encoding:'utf8'}).trim().split('\n').filter(Boolean))focused+='\n'+fs.readFileSync(file,'utf8');
+  const scope=reviewedMigrationScope(previous,manifest,[...focused.matchAll(/emoji-\d{3}/g)].map(m=>m[0]));
+  if(scope){plan.characters=scope.characters;plan.rosterTextMigration={base,preservedAuthorityEntries:scope.preserved,changed:scope.changed,removed:scope.removed,reason:'83-card text migration: full authority projection preserves 81 kits; retain both reworks and every explicit non-registry code reference. Quick/combat/representative/load unchanged.'};}
+ }
+ fs.mkdirSync('artifacts',{recursive:true});fs.writeFileSync('artifacts/check-plan.json',JSON.stringify(plan,null,2));
  if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,`docs=${plan.docsOnly}\ncombat=${plan.combat}\nroster10=${plan.roster10}\nreleaseops=${plan.areas.includes('releaseops')}\n`);
  console.log(JSON.stringify(plan,null,2));
 }

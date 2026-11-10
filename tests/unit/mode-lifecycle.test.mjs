@@ -4,7 +4,7 @@ import {createWorld,createRuleContext,stepWorld,destroyWorld,exportResult} from 
 for(const teamCount of [2,3,4])for(const seconds of [300,360])test(`capture ${teamCount} teams ${seconds}s: full fixed-tick timeout and awards`,()=>{
  const players=Array.from({length:teamCount},(_,i)=>({id:'p'+i,name:'Bot'+i,team:i+1,abilityId:'emoji-114'})),w=createWorld(undefined,{mode:'team-capture',teamCount,matchSeconds:seconds},'capture-'+teamCount,players);
  for(let tick=0;tick<=seconds*60+2&&!w.finished;tick++)stepWorld(w);
- assert.equal(w.game.capture.finalized,true);assert.equal(w.game.capture.active,seconds);assert.equal(w.game.capture.activeMask,7);assert.equal(w.game.capture.phase,'FEVER');
+ assert.equal(w.game.capture.finalized,true);assert.equal(w.game.capture.active,seconds);assert.equal(w.game.capture.activeMask,3);assert.equal(w.game.capture.phase,'FEVER');
  const result=exportResult(w);assert.equal(result.players.length,teamCount);assert.deepEqual(result.awards.map(a=>a.key),['capture','combat','support']);assert.equal(result.mode,'team-capture');assert.equal(result.duration,seconds);destroyWorld(w);
 });
 test('wanggui exclusion, S prohibition and idempotent HP ratio recomputation',()=>{

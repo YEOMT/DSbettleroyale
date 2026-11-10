@@ -3,20 +3,22 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {createRuleContext,createWorld,stepWorld,destroyWorld,getTeacherState} from '../../packages/engine/src/index.js';
 import {manifest} from '../../packages/content/src/manifest.js';
+const retired=new Set(['emoji-048','emoji-065','emoji-073','emoji-076']),reworked=new Set(['emoji-034','emoji-070']);
 const fixtures=JSON.parse(fs.readFileSync('tests/baseline/combat.json','utf8'));
 function parity(actual,expected,path='root'){
  if(typeof expected==='number'){assert.ok(Math.abs(actual-expected)<=1e-10,`${path}: ${actual} != ${expected}`);return;}
  if(expected&&typeof expected==='object'){assert.deepEqual(Object.keys(actual).sort(),Object.keys(expected).sort(),path);for(const key of Object.keys(expected))parity(actual[key],expected[key],path+'.'+key);return;}
  assert.equal(actual,expected,path);
 }
-test('all 77 effective actor stats and final basic profiles match the real browser baseline',()=>{
+test('all active effective actor stats and final basic profiles match the real browser baseline',()=>{
  const r=createRuleContext();
  for(const a of manifest.roster){const ability=r.EMOJI_DB.find(b=>b.id===a.id),p=new r.Participant(1,'actor',ability,new r.Vec2(0,0));
   for(const key of ['maxHp','radius','speed','damageMult'])assert.equal(p[key],a[key],`${a.id} ${key}`);
   parity(JSON.parse(JSON.stringify(r.brProgressionCombat.basicProfile(ability))),a.basic,a.id);
  }
 });
-for(const expected of fixtures)test(`legacy parity with only approved balance deltas normalized: ${expected.id}`,()=>{
+for(const expected of fixtures)test(`${retired.has(expected.id)?'approved retirement rejects historical ID':reworked.has(expected.id)?'approved rework replaces historical skill only':'legacy parity with only approved balance deltas normalized'}: ${expected.id}`,()=>{
+ if(retired.has(expected.id)){assert.throws(()=>createWorld(undefined,{},'retired-fixture',[{id:'retired',name:'Retired',abilityId:expected.id}]),/INVALID_ABILITY/);return;}
  const r=createRuleContext({seed:'fixture',matchId:'fixture|1|1'});
  // Preserve every original combat fixture/assertion. The live defaults are
  // separately checked by roster10 balance tests, never by rewriting goldens.
@@ -35,7 +37,12 @@ for(const expected of fixtures)test(`legacy parity with only approved balance de
  const start={basic:basic===true,skill:skill!==false,projectiles:r.game.projectiles.length,zones:r.game.zones.length,turrets:r.game.turrets.length,reworks:r.game.rw?.entities.map(e=>e.kind)||[]};
  for(let tick=1;tick<=180;tick++){r.timeMs=tick*1000/60;r.game.update();}
  const end={frame:r.game.frame,hp:p.hp,targetHp:q.hp,x:p.pos.x,y:p.pos.y,targetX:q.pos.x,targetY:q.pos.y,damage:p.damageDealt,alive:p.alive,projectiles:r.game.projectiles.length,zones:r.game.zones.length,reworks:r.game.rw?.entities.filter(e=>!e.dead).map(e=>e.kind)||[],runtimeFaults:(p.runtimeFaults||0)+(q.runtimeFaults||0)};
- parity(start,expected.start);parity(end,expected.end);
+ if(reworked.has(expected.id)){
+  assert.equal(start.basic,true);assert.equal(start.skill,true);assert.equal(end.runtimeFaults,0);
+  const definition=r.BRRework.defs[expected.id].skill;
+  if(expected.id==='emoji-034'){assert.deepEqual(start.reworks,['projectile']);assert.deepEqual([definition.radius,definition.speed,definition.range,definition.damage,definition.knockback,definition.bounces],[36,22,900,21,42,0]);assert.ok(end.targetHp<q.maxHp);}
+  else{assert.deepEqual(start.reworks,['warning']);assert.deepEqual([definition.duration,definition.attackHaste,definition.cooldown],[300,1.3,990]);assert.equal(r.BRRework.cooldownRate(p,'attack'),1.3);}
+ }else{parity(start,expected.start);parity(end,expected.end);}
 });
 test('two room simulations have isolated mutable registries, world state and RNG',()=>{
  const entries=[{id:'a',name:'A',abilityId:'emoji-003'},{id:'b',name:'B',abilityId:'emoji-114'}];

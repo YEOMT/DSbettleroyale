@@ -176,7 +176,7 @@ export const initializers=[
                     const near=players[i%Math.max(1,players.length)],angle=random()*Math.PI*2;
                     const distance=tries<24&&near?180+random()*220:Math.sqrt(random())*(combatRadius-240);
                     const pos=tries===0&&side?side:g.capture?__brScope.brCaptureRandomPoint(g,140,random):tries<24&&near?new __brScope.Vec2(near.pos.x+Math.cos(angle)*distance,near.pos.y+Math.sin(angle)*distance):new __brScope.Vec2(Math.cos(angle)*distance,Math.sin(angle)*distance);
-                    if((g.capture?!__brScope.brCaptureFarmClear(g,pos,BOUND):pos.dist(g.center)>combatRadius-140)||(g.checkWallCollision(pos,BOUND+28)||g.blocksCoverEntry?.(pos,BOUND)))continue;
+                    if((g.capture?!__brScope.brCaptureFarmClear(g,pos,BOUND):pos.dist(g.center)>combatRadius-140)||(g.escapeBlocks?.(pos,BOUND)||g.checkWallCollision(pos,BOUND+28)||g.blocksCoverEntry?.(pos,BOUND)))continue;
                     if(g.farmBoxes.some(b=>b.pos.dist(pos)<BOUND*2+24)||players.some(p=>p.pos.dist(pos)<p.radius+BOUND+30))continue;
                     addBox(g,{id:++g.farmSeq,pos,halfSize:HALF,radius:BOUND,hp:UNITS_TO_BREAK,maxHp:UNITS_TO_BREAK,kind:'xp',born:g.frame,lastHits:new Map()});if(sideWanted){if(pos===side)g.sideFarm.placed++;else g.sideFarm.fallback++;used=true;}break;
                 }if(sideWanted&&!used)g.sideFarm.fallback++;}
@@ -211,7 +211,7 @@ export const initializers=[
                     const distance=minRadius+Math.sqrt(random())*Math.max(0,safeRadius-minRadius);
                     const pos=g.capture?__brScope.brCaptureRandomPoint(g,140,random):new __brScope.Vec2(Math.cos(angle)*distance,Math.sin(angle)*distance);
                     if(!__brScope.brCaptureFarmClear(g,pos,BOUND))continue;
-                    if((g.checkWallCollision(pos,BOUND+26)||g.blocksCoverEntry?.(pos,BOUND)))continue;
+                    if((g.escapeBlocks?.(pos,BOUND)||g.checkWallCollision(pos,BOUND+26)||g.blocksCoverEntry?.(pos,BOUND)))continue;
                     if(g.farmBoxes.some(b=>b.pos.dist(pos)<BOUND*2+28)||alive.some(p=>p.pos.dist(pos)<p.radius+BOUND+34))continue;
                     const hp=UNITS_TO_BREAK*1.3;
                     addBox(g,{id:++g.farmSeq,pos,halfSize:HALF,radius:BOUND,hp,maxHp:hp,kind:'heal',born:g.frame,lastHits:new Map()});created++;break;
@@ -231,7 +231,7 @@ export const initializers=[
                     const distance=minRadius+Math.sqrt(random())*(safeRadius-minRadius);
                     const pos=tries===0&&side?side:g.capture?__brScope.brCaptureRandomPoint(g,140,random):new __brScope.Vec2(g.center.x+Math.cos(angle)*distance,g.center.y+Math.sin(angle)*distance);
                     if(!__brScope.brCaptureFarmClear(g,pos,BOUND))continue;
-                    if((g.checkWallCollision(pos,BOUND+26)||g.blocksCoverEntry?.(pos,BOUND)))continue;
+                    if((g.escapeBlocks?.(pos,BOUND)||g.checkWallCollision(pos,BOUND+26)||g.blocksCoverEntry?.(pos,BOUND)))continue;
                     if(g.farmBoxes.some(b=>b.pos.dist(pos)<BOUND*2+28)||alive.some(p=>p.pos.dist(pos)<p.radius+BOUND+34))continue;
                     addBox(g,{id:++g.farmSeq,pos,halfSize:HALF,radius:BOUND,hp:UNITS_TO_BREAK,maxHp:UNITS_TO_BREAK,
                         kind:'xp',born:g.frame,waveSpawn:true,lastHits:new Map()});created++;if(sideWanted){if(pos===side)g.sideFarm.placed++;else g.sideFarm.fallback++;used=true;}break;
@@ -350,7 +350,7 @@ export const initializers=[
                     for(let tries=0;tries<80;tries++){
                         const angle=random()*Math.PI*2,distance=Math.sqrt(random())*radius,pos=g.capture?__brScope.brCaptureRandomPoint(g,140,random):new __brScope.Vec2(g.center.x+Math.cos(angle)*distance,g.center.y+Math.sin(angle)*distance);
                         if(!__brScope.brCaptureFarmClear(g,pos,BOUND))continue;
-                        if(Math.hypot(pos.x-pending.x,pos.y-pending.y)<200||(g.checkWallCollision(pos,BOUND+28)||g.blocksCoverEntry?.(pos,BOUND)))continue;
+                        if(Math.hypot(pos.x-pending.x,pos.y-pending.y)<200||(g.escapeBlocks?.(pos,BOUND)||g.checkWallCollision(pos,BOUND+28)||g.blocksCoverEntry?.(pos,BOUND)))continue;
                         if(g.farmBoxes.some(b=>b.pos.dist(pos)<BOUND*2+28)||alive.some(p=>p.pos.dist(pos)<p.radius+BOUND+34))continue;
                         if(g.zones.some(z=>z.duration>0&&z.pos.dist(pos)<z.radius+BOUND))continue;
                         const hp=pending.kind==='heal'?UNITS_TO_BREAK*1.3:UNITS_TO_BREAK;

@@ -15,6 +15,7 @@ function run(args,env={}){
 }
 try{
  if(suite==='continuous'){
+  if(!pixiRole||pixiRole==='attacker')for(const file of ['escape','capture-x','upgrade-roster'])run(['tests/combat/'+file+'.mjs',renderer]);
   if(!pixiRole||pixiRole==='attacker')run(['tests/combat/live-control.mjs',renderer]);
   // Software-GPU readback/encoding can stall all Pixi surfaces past the short
   // effect lifetime. Keep every live assertion; record Canvas in CI. Hardware

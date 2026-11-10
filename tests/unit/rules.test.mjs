@@ -13,14 +13,14 @@ test('level 6, XP 20, five actual offers, III cap and mutually exclusive growth'
 for(const mode of ['solo','team-elim','team-capture','team-respawn'])test(`headless mode ${mode} creates and advances`,()=>{
  const w=createWorld(undefined,{mode,teamCount:2},'mode',players);for(let i=0;i<61;i++)stepWorld(w);
  assert.equal(w.game.frame,61);assert.equal(getTeacherState(w).actors.length,2);
- assert.equal(w.byId.get('a').modeHpMultiplier,mode==='team-capture'?.7:mode==='team-respawn'?.5:1);
+ assert.equal(w.byId.get('a').modeHpMultiplier,mode==='team-capture'?.85:mode==='team-respawn'?.5:1);
  destroyWorld(w);
 });
-test('capture uses population difference, middle multiplier, fever, 120-second activation',()=>{
+test('capture uses population difference, equal two points and final fever',()=>{
  const w=createRuleContext({mode:'team-capture'}),c=w.BRCapture.create(4,300,'test');
- assert.equal(c.activeMask,5);assert.equal(w.brCapturePointRate([0,4,3,0,0],0,false),w.brCapturePointRate([0,1,0,0,0],0,false));
- assert.equal(w.brCapturePointRate([0,1,0],1,true),w.brCapturePointRate([0,1,0],0,false)*3);
- w.BRCapture.integrate(c,120);assert.equal(c.activeMask,7);w.BRCapture.integrate(c,120);assert.equal(c.phase,'FEVER');
+ assert.equal(c.activeMask,3);assert.equal(w.brCapturePointRate([0,4,3,0,0],0,false),w.brCapturePointRate([0,1,0,0,0],0,false));
+ assert.equal(w.brCapturePointRate([0,1,0],1,true),w.brCapturePointRate([0,1,0],0,false)*2);
+ w.BRCapture.integrate(c,120);assert.equal(c.activeMask,3);w.BRCapture.integrate(c,120);assert.equal(c.phase,'FEVER');
  w.BRCapture.integrate(c,60);assert.equal(c.finalized,true);assert.deepEqual(c.winners,[1,2,3,4]);
 });
 test('stale input becomes neutral and cannot accelerate ticks',()=>{

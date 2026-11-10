@@ -122,5 +122,5 @@ export const initializers=[[310,S=>{
  const cleanup=R.cleanup;R.cleanup=(p,g,reason)=>{removeStealth(p);return cleanup(p,g,reason);};
  const wirePlayer=R.wirePlayer;R.wirePlayer=(p,g)=>{const row=wirePlayer(p,g);if(['emoji-145','emoji-149'].includes(p.ability.id)&&R.state(p).buffs.some(b=>b.kind==='moveHaste'&&b.ctx.owner===p&&b.end>now(g)))row.roster10Move=true;return row;};
  const aimSpec=R.aimSpec;R.aimSpec=(ability,kind,radius,...args)=>{const spec=aimSpec(ability,kind,radius,...args);if(['emoji-141','emoji-143','emoji-144','emoji-147','emoji-150'].includes(ability.id)){spec.clipPath=true;spec.collisionRadius=ability.id==='emoji-144'?26:radius;spec.clipBodies=ability.id!=='emoji-144';spec.bodyPadding=ability.id==='emoji-141'?5:1;}if(ability.id==='emoji-142')spec.clipRope=true;return spec;};
- S.BR_ROSTER_VERSION='emoji87-roster10-v33';
+ S.BR_ROSTER_VERSION='emoji83-xmap-v33';
 }]];

@@ -164,5 +164,5 @@ export const initializers=[
 [99,__brScope=>{ __brScope.BR_CONTACT = Object.freeze({dashBody:.82,dashTarget:.72,beamTarget:.55,skillConeTarget:.45});;}],
 [109,__brScope=>{ __brScope.BR_FEEL_MELEE_PUSH_IDS=new Set(['emoji-004','emoji-006','emoji-013','emoji-037','emoji-131',
             'emoji-024','emoji-027','emoji-029','emoji-031','emoji-035','emoji-038','emoji-043','emoji-044',
-            'emoji-048','emoji-127','emoji-128']);;}]
+            'emoji-127','emoji-128']);;}]
 ];

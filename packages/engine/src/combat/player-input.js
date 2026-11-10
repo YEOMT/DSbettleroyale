@@ -264,7 +264,7 @@ __brScope.brBaseWalkingSpeed = function brBaseWalkingSpeed(p) {
         };
 
 __brScope.brHumanMoveSpeed = function brHumanMoveSpeed(p) {
-            return __brScope.brBaseWalkingSpeed(p)*(p.teamHasteFrames>0?1.12:1)*(p.playerChaseFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*__brScope.brRunMod(p,'moveSpeed')*(__brScope.BRRework?.moveRate(p)??1);
+            return __brScope.brBaseWalkingSpeed(p)*(p.escapeBoostUntil>Number(__brScope.game?.frame||0)?1.30:1)*(p.teamHasteFrames>0?1.12:1)*(p.playerChaseFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*__brScope.brRunMod(p,'moveSpeed')*(__brScope.BRRework?.moveRate(p)??1);
         };
 
 __brScope.brApplyPlayerInput = function brApplyPlayerInput(p,g) {

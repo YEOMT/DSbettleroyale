@@ -1,6 +1,7 @@
+import {captureContains,captureClamp} from '../movement/capture-boundary.js';
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
 export function install(__brScope){
-__brScope.brModeHpMultiplier = function brModeHpMultiplier(mode){return mode==='team-capture'?.70:mode==='team-respawn'?__brScope.BR_TEAM_KILL_RULES.hpMultiplier:1;};
+__brScope.brModeHpMultiplier = function brModeHpMultiplier(mode){return mode==='team-capture'?.85:mode==='team-respawn'?__brScope.BR_TEAM_KILL_RULES.hpMultiplier:1;};
 
 __brScope.brRespawnMode = function brRespawnMode(mode){return mode==='team-respawn'||mode==='team-capture';};
 
@@ -12,15 +13,15 @@ __brScope.brCapturePointRate = function brCapturePointRate(counts,index,fever){r
 
 __brScope.brArenaRect = function brArenaRect(g){if(!__brScope.brCaptureMode())return null;return g?.boundary?.kind==='rect'?g.boundary:__brScope.BRCapture.layout(__brScope.session?.roomMeta?.teamCount||2).boundary;};
 
-__brScope.brArenaContains = function brArenaContains(g,pos,r=0){const b=__brScope.brArenaRect(g);return b?pos.x>=b.minX+r-1e-8&&pos.x<=b.maxX-r+1e-8&&pos.y>=b.minY+r-1e-8&&pos.y<=b.maxY-r+1e-8:true;};
+__brScope.brArenaContains = function brArenaContains(g,pos,r=0){const b=__brScope.brArenaRect(g);return !b||captureContains(b,pos,r);};
 
-__brScope.brArenaClamp = function brArenaClamp(g,pos,r=0){const b=__brScope.brArenaRect(g);return b?new __brScope.Vec2(Math.max(b.minX+r,Math.min(b.maxX-r,pos.x)),Math.max(b.minY+r,Math.min(b.maxY-r,pos.y))):pos;};
+__brScope.brArenaClamp = function brArenaClamp(g,pos,r=0){const b=__brScope.brArenaRect(g);if(!b)return pos;const p=captureClamp(b,pos,r,__brScope);return new __brScope.Vec2(p.x,p.y);};
 
-__brScope.brArenaRay = function brArenaRay(g,from,dir,max,r=0){const b=__brScope.brArenaRect(g);if(!b)return max;let d=max;for(const [v,a,lo,hi] of [[from.x,dir.x,b.minX+r,b.maxX-r],[from.y,dir.y,b.minY+r,b.maxY-r]])if(Math.abs(a)>1e-10)d=Math.min(d,Math.max(0,((a>0?hi:lo)-v)/a));return d;};
+__brScope.brArenaRay = function brArenaRay(g,from,dir,max,r=0){const b=__brScope.brArenaRect(g);if(!b)return max;const to={x:from.x+dir.x*max,y:from.y+dir.y*max},hit=__brScope.combatTraceWalls(from,to,r,b.blocks||[]);return hit?Math.max(0,max*hit.t-.01):max;};
 
 __brScope.brCaptureFarmClear = function brCaptureFarmClear(g,pos,r=0){if(!g.capture)return true;return __brScope.brArenaContains(g,pos,r+20)&&!g.capture.map.points.some(z=>Math.hypot(pos.x-z.x,pos.y-z.y)<z.radius+r+70)&&!g.capture.map.bases.some(b=>Math.abs(pos.x-b.x)<b.rx+r+160&&Math.abs(pos.y-b.y)<b.ry+r+160);};
 
-__brScope.brCaptureRandomPoint = function brCaptureRandomPoint(g,r=80,random=__brScope.rand){const b=__brScope.brArenaRect(g);return new __brScope.Vec2(b.minX+r+random()*(b.maxX-b.minX-2*r),b.minY+r+random()*(b.maxY-b.minY-2*r));};
+__brScope.brCaptureRandomPoint = function brCaptureRandomPoint(g,r=80,random=__brScope.rand){const b=__brScope.brArenaRect(g);return __brScope.brArenaClamp(g,new __brScope.Vec2(b.minX+r+random()*(b.maxX-b.minX-2*r),b.minY+r+random()*(b.maxY-b.minY-2*r)),r);};
 
 __brScope.brCaptureSpawn = function brCaptureSpawn(g,p,placed=g.participants.filter(q=>q!==p&&q.alive)){
             const base=g.capture.map.bases[p.team-1];if(!base)return null;let best=null,bestScore=-Infinity;
@@ -36,7 +37,7 @@ __brScope.brCaptureSpawn = function brCaptureSpawn(g,p,placed=g.participants.fil
         };
 
 __brScope.brCaptureSetupMap = function brCaptureSetupMap(g){const map=__brScope.BRCapture.layout(__brScope.session?.roomMeta?.teamCount||2);g.boundary=map.boundary;g.capture=__brScope.BRCapture.create(map.count,Number(__brScope.session?.roomMeta?.matchSeconds||360),__brScope.brRingKey());
-            g.mapRevision=map.revision;g.mapName='가로형 점령 아레나';g.walls=map.walls.map(w=>Object.assign(Object.create(__brScope.Wall.prototype),w));
+            g.mapRevision=map.revision;g.mapName='넓은 X자 점령 아레나';g.walls=map.walls.map(w=>Object.assign(Object.create(__brScope.Wall.prototype),w));
             g.smokes=map.smokes.map(([x,y,r],i)=>new __brScope.SmokeCover(x,y,r,i+1));__brScope.combatWallGridCache.delete(g.walls);g.combatCover=[];
         };
 
@@ -44,21 +45,22 @@ __brScope.brCaptureBoundaryHit = function brCaptureBoundaryHit(from,to,r=0){cons
             for(const [axis,lo,hi] of axes){const d=to[axis]-from[axis];if(Math.abs(d)<1e-10)continue;const edge=d>0?hi:lo;if(d>0?to[axis]<=edge:to[axis]>=edge)continue;const t=Math.max(0,(edge-from[axis])/d);if(t>1||hit&&t>=hit.t)continue;hit={t,nx:axis==='x'?(d>0?-1:1):0,ny:axis==='y'?(d>0?-1:1):0,depth:0,boundary:true};}return hit;};
 }
 export const initializers=[
-[244,__brScope=>{ __brScope.BR_CAPTURE_RULES=Object.freeze({version:3,mapRevision:'capture-landscape-4',seconds:[300,360],defaultSeconds:360,
-            mapScale:.88,openingMask:5,pointMultipliers:Object.freeze([1,1.5,1]),rates:Object.freeze([0,.24,.30,.36]),epsilon:1e-8,pointRadius:250,centerRadius:320,openingSeconds:120,feverSeconds:60,feverMultiplier:2,publishMs:200,staleMs:1800});;}],
+[244,__brScope=>{ __brScope.BR_CAPTURE_RULES=Object.freeze({version:4,mapRevision:'capture-x-1',seconds:[300,360],defaultSeconds:360,
+            mapScale:1,openingMask:3,pointMultipliers:Object.freeze([1,1]),rates:Object.freeze([0,.24,.30,.36]),epsilon:1e-8,pointRadius:400,centerRadius:400,openingSeconds:0,feverSeconds:60,feverMultiplier:2,publishMs:200,staleMs:1800});;}],
 [250,__brScope=>{ __brScope.BRCapture=__brScope.BRCapture=(()=>{
             const EPS=__brScope.BR_CAPTURE_RULES.epsilon,layouts=new Map(),id=p=>String(p.remoteId??p.id),clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
             function layout(count){count=clamp(Number(count)||2,2,4);if(layouts.has(count))return layouts.get(count);
-                const scale=__brScope.BR_CAPTURE_RULES.mapScale,boundary={kind:'rect',minX:-3600*scale,maxX:3600*scale,minY:-2025*scale,maxY:2025*scale,revision:__brScope.BR_CAPTURE_RULES.mapRevision+'-'+count};
-                const bases=(count===2?[[-2900,0],[2900,0]]:count===3?[[0,-1650],[-1428.941916,825],[1428.941916,825]]:[[-3000,-1540],[3000,1540],[3000,-1540],[-3000,1540]])
-                    .map(([x,y],i)=>({team:i+1,x:x*scale,y:y*scale,rx:count===2?560:480,ry:count===2?480:320}));
-                const points=[[-1700,0],[0,0],[1700,0]]
-                    .map(([x,y],i)=>({id:'ABC'[i],x:x*scale,y:y*scale,radius:i===1?__brScope.BR_CAPTURE_RULES.centerRadius:__brScope.BR_CAPTURE_RULES.pointRadius}));
-                // Sparse detached cover. No closed rooms or wall inside a scoring circle.
-                const walls=(count===3?[[-850,-350,440,44],[850,-350,440,44],[-2700,-700,400,44],[2700,-700,400,44],[-2700,700,400,44],[2700,700,400,44]]:
-                    [[-1520,-760,540,44],[1520,760,540,44],[-1520,760,540,44],[1520,-760,540,44],[-620,-1630,480,44],[620,1630,480,44]])
-                    .map(([x,y,w,h])=>{x*=scale;y*=scale;return {x,y,w,h,angle:0,kind:'wall',spinSpeed:0,minX:x-w/2,maxX:x+w/2,minY:y-h/2,maxY:y+h/2};});
-                const smokes=[[-650,-1080,185],[650,1080,185],[-650,1080,185],[650,-1080,185]];
+                const boundary={kind:'rect',minX:-3000,maxX:3000,minY:-3000,maxY:3000,xArm:1600,revision:__brScope.BR_CAPTURE_RULES.mapRevision+'-'+count};
+                const slots=[[-2250,-2250],[2250,-2250],[-2250,2250],[2250,2250]];
+                const bases=(count===2?[slots[0],slots[3]]:slots.slice(0,count)).map(([x,y],i)=>({team:i+1,x,y,rx:480,ry:480}));
+                const points=[[-550,0],[550,0]].map(([x,y],i)=>({id:'AB'[i],x,y,radius:__brScope.BR_CAPTURE_RULES.pointRadius}));
+                const wall=(x,y,w,h,angle=0,terrain=false)=>{const ex=(Math.abs(Math.cos(angle))*w+Math.abs(Math.sin(angle))*h)/2,ey=(Math.abs(Math.sin(angle))*w+Math.abs(Math.cos(angle))*h)/2;return {x,y,w,h,angle,kind:'wall',terrain,spinSpeed:0,minX:x-ex,maxX:x+ex,minY:y-ey,maxY:y+ey};};
+                // Four ordinary rotated square walls clip the cardinal sides of
+                // the outer rectangle. Their inner edges form broad X corridors.
+                const blocks=[[4400,0],[-4400,0],[0,4400],[0,-4400]].map(([x,y])=>wall(x,y,5600/Math.SQRT2,5600/Math.SQRT2,Math.PI/4,true));
+                boundary.blocks=blocks;
+                const cover=[[-1050,-900],[1050,-900],[-1050,900],[1050,900]].map(([x,y])=>wall(x,y,260,60));
+                const walls=[...blocks,...cover],smokes=[[-1650,-1900,160],[1650,-1900,160],[-1650,1900,160],[1650,1900,160]];
                 const out={revision:boundary.revision,count,boundary,bases,points,walls,smokes};layouts.set(count,out);return out;
             }
             function inside(p,point){return (p.x-point.x)**2+(p.y-point.y)**2<=point.radius**2+EPS;}
@@ -68,10 +70,10 @@ export const initializers=[
                 if(ties.length>1)return {state:'contested',team:0,delta:0,rate:0,ties};
                 const delta=n1-n2;return {state:'scoring',team,delta,rate:__brScope.BR_CAPTURE_RULES.rates[Math.min(3,delta)],ties:[]};
             }
-            function phase(active,seconds){return active+EPS>=seconds-__brScope.BR_CAPTURE_RULES.feverSeconds?'FEVER':active+EPS>=__brScope.BR_CAPTURE_RULES.openingSeconds?'ALL_OBJECTIVES':'OPENING';}
-            function setPhase(s){s.phase=phase(s.active,s.seconds);s.activeMask=s.phase==='OPENING'?__brScope.BR_CAPTURE_RULES.openingMask:7;s.fever=s.phase==='FEVER';s.multiplier=s.fever?__brScope.BR_CAPTURE_RULES.feverMultiplier:1;}
+            function phase(active,seconds){return active+EPS>=seconds-__brScope.BR_CAPTURE_RULES.feverSeconds?'FEVER':'ALL_OBJECTIVES';}
+            function setPhase(s){s.phase=phase(s.active,s.seconds);s.activeMask=3;s.fever=s.phase==='FEVER';s.multiplier=s.fever?__brScope.BR_CAPTURE_RULES.feverMultiplier:1;}
             function create(count,seconds,key){const map=layout(count);return {version:__brScope.BR_CAPTURE_RULES.version,key,map,count:map.count,seconds:__brScope.BR_CAPTURE_RULES.seconds.includes(seconds)?seconds:360,
-                active:0,phase:'OPENING',activeMask:__brScope.BR_CAPTURE_RULES.openingMask,fever:false,multiplier:1,seq:0,frame:0,finalized:false,winners:[],reason:'',scores:Array(map.count+1).fill(0),rates:Array(map.count+1).fill(0),
+                active:0,phase:'ALL_OBJECTIVES',activeMask:__brScope.BR_CAPTURE_RULES.openingMask,fever:false,multiplier:1,seq:0,frame:0,finalized:false,winners:[],reason:'',scores:Array(map.count+1).fill(0),rates:Array(map.count+1).fill(0),
                 points:map.points.map((p,i)=>({...p,enabled:!!(__brScope.BR_CAPTURE_RULES.openingMask&(1<<i)),counts:Array(map.count+1).fill(0),members:[],state:__brScope.BR_CAPTURE_RULES.openingMask&(1<<i)?'neutral':'locked',team:0,rate:0,ties:[]})),records:new Map(),lastFrame:-1};}
             // Match totals belong to remoteId, independently of the replaceable life body.
             function record(s,p){const key=id(p);let r=s.records.get(key);if(!r){r={id:key,name:p.name||key,team:Number(p.team),session:String(p.sessionId||''),kills:0,deaths:0,assists:0,damageDealt:0,damageTaken:0,points:0,scoringSeconds:0,contestedSeconds:0,pointKills:0,pointAssists:0,heal:0,shield:0,quizCorrect:0,rerollCount:0,usedAbilities:[],lastDeathLife:null};s.records.set(key,r);}
