@@ -97,6 +97,7 @@
 | PASS | X 지형 도약 / 가이드 / 실제 착지 |집중1검사0.2465초. 합법 양 끝 사이 막힌 영역 관통 금지, 외곽 및 일반 엄폐 넘기 유지. 스킬 수치·metadata 변경 없음 |
 | PASS | 최종 로컬 Targeted |198.094초:3모드 E2E, 대표 Canvas/Pixi, 선택034/070/127/128 balanced Canvas/Pixi, layout, resource-lifetime,26명30초 부하. 전체83종 전수 아님 |
 | FAIL→PASS | 마지막 도약 수정의 기존 순서 회귀 |개인전029의 warning/leap 생성 순서 비교 FAIL0.174초. 개인전 원래 순서 복구 후 원본 parity+점령 경계2검사 PASS0.2198초. content:check PASS. 위 로컬 Targeted/빌드는 이 순서 보완 전이며 최종 HEAD 빌드·회귀는 CI에서 수행 |
+| FAIL→PASS(집중 재검사) | CI42836046902 Pixi 점령 HUD fixture |12개 검사 Job PASS, Pixi attacker만 동결 snapshot이 캡처 중1.5초를 초과하여 stale HUD에서 실패.1.8초 지연 주입으로14.364초에 재현(age2001.5ms). 각 화면 직전 실제 WS snapshot/sequence 수신 대기만 추가한 후 같은 지연 조건14.149초 PASS. 모든 기존 단언 유지+age<1500 단언 추가; 게임/UI 코드 변경 없음. 첫 두 진단 시작은 브라우저 경로/샌드박스 INFRA_FAILURE |
 | PR Checks 참조 | 제출 HEAD GitHub CI |이 문서 작성 시 실행 전. 실행되지 않은 CI를 PASS로 표시하지 않으며 최종 SHA/실행 URL/결과는 PR 본문에 기록 |
 | NOT_RUN | 새605초 부하, 전83종×전체 화질 시각 matrix, 실물 Samsung/iPhone/iPad, 실제 교실20기기 |이번 변경 범위에서 요구하지 않은 전수/장시간 시험을 새로 실행하지 않음. 기존 극후반 호스트 지연·과거 극한부하 FAIL·실기기 미검증은 보존 |
 | NOT_RUN | AWS/정식 Pages/Firebase 배포·main 병합 |이번 권한 밖. PR 검토/사용자 병합 후 기존 paired candidate와 승인 배포 절차 사용 |
