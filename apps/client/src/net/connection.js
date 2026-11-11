@@ -2,6 +2,7 @@ import {fingerprint,envelope} from '../../../../packages/protocol/src/index.js';
 import {requestId} from './request-id.js';
 import {eventBatchMessages} from '../../../../packages/protocol/src/server-events.js';
 import {ProfileCache} from './profile-cache.js';
+const CONNECTION_TIMEOUT_MS=8000;
 export class Connection extends EventTarget{
  constructor(url){super();this.url=url;this.scope={};this.pending=new Map();this.profiles=new ProfileCache();this.profilesReady=true;this.profileRecoveryAt=-Infinity;this.lifeSeq=0;this.cursor=0;this.token=sessionStorage.getItem('dsbr-resume');this.retry=0;this.stopped=false;this.clock={rtt:0,offset:0,uncertainty:0};}
  emit(type,data){this.dispatchEvent(new CustomEvent(type,{detail:data}));}
@@ -13,7 +14,7 @@ export class Connection extends EventTarget{
   if(this.connecting)return this.connecting;if(this.ws?.readyState===WebSocket.OPEN)return;clearTimeout(this.retryTimer);
   this.stopped=false;this.ws=new WebSocket(this.url);const ws=this.ws;
   let resolveConnect,rejectConnect;this.connecting=new Promise((resolve,reject)=>{resolveConnect=resolve;rejectConnect=reject;});
-  const timeout=setTimeout(()=>{rejectConnect(Error('서버 연결 시간이 초과되었습니다.'));ws.close();},8000);
+  const timeout=setTimeout(()=>{rejectConnect(Error('서버 연결 시간이 초과되었습니다.'));ws.close();},CONNECTION_TIMEOUT_MS);
   ws.onopen=()=>ws.send(JSON.stringify(envelope('HELLO',fingerprint)));
   ws.onmessage=e=>{if(this.ws!==ws)return;const m=JSON.parse(e.data);this.receive(m);if((m.type==='FULL_STATE'||m.type==='WELCOME')&&!this.restoring){clearTimeout(timeout);resolveConnect();this.connecting=null;}};
   ws.onerror=()=>rejectConnect(Error('서버에 연결할 수 없습니다.'));
@@ -65,7 +66,13 @@ export class Connection extends EventTarget{
     this.restoring=true;this.ws?.close(4007,'INCOMPLETE_RECOVERY_STATE');return;
    }
    this.cursor=m.payload.cursor;this.lifeSeq=m.payload.self?.lifeSeq||0;this.emit('reset',{});}
-  if(m.type==='PONG'){const now=performance.now(),rtt=now-m.payload.clientTime,offset=m.payload.serverNow-(now-rtt/2);this.clock={rtt,offset:this.clock.rtt?this.clock.offset*.85+offset*.15:offset,uncertainty:rtt/2};}
+  if(m.type==='PONG'){
+   const now=performance.now(),rtt=now-m.payload.clientTime,offset=m.payload.serverNow-(now-rtt/2);
+   this.clock={rtt,offset:this.clock.rtt?this.clock.offset*.85+offset*.15:offset,uncertainty:rtt/2};
+   // The server handles messages synchronously on this ordered socket. A reply
+   // to a later PING means the reader has passed the last END response.
+   for(const p of this.pending.values())if(p.endSentAt!==undefined&&m.payload.clientTime>p.endSentAt)p.expire();
+  }
   if(m.type==='COMMAND_RESULT'){const pending=this.pending.get(m.payload.requestId);if(pending&&((pending.matchId===m.matchId)||m.payload.command==='REMATCH'&&m.payload.accepted)){clearTimeout(pending.timer);this.pending.delete(m.payload.requestId);m.payload.accepted?pending.resolve(m.payload):pending.reject(Error(m.payload.reason||'요청을 처리하지 못했습니다.'));}}
   if(m.type==='AUTH_OK'){this.emit('auth',{});return;}
   this.emit(m.type.toLowerCase(),m.payload);if(m.type==='FULL_STATE'){this.restoring=false;this.retry=0;this.retryStart=null;this.emit('status',{connected:true});}
@@ -76,7 +83,24 @@ export class Connection extends EventTarget{
   if(type==='ACTION'&&this.profilesReady===false)return Promise.reject(Error('PROFILE_RECOVERY'));
   if(this.restoring)return Promise.reject(Error('경기 상태를 복원하는 중입니다.'));
   const id=requestId(),scope={...this.scope,lifeSeq:this.lifeSeq};return new Promise((resolve,reject)=>{
-   const p={resolve,reject,retries:0,type,matchId:scope.matchId};const attempt=()=>{if(p.retries++>=3||scope.connectionEpoch!==this.scope.connectionEpoch||scope.matchId!==this.scope.matchId||scope.lifeSeq!==this.lifeSeq){this.pending.delete(id);reject(Error('응답을 확인할 수 없습니다. 현재 상태를 확인하세요.'));return;}if(this.ws?.readyState===1)this.ws.send(JSON.stringify(envelope(type,payload,{...scope,connectionEpoch:this.scope.connectionEpoch,requestId:id})));p.timer=setTimeout(attempt,1500);};this.pending.set(id,p);attempt();
+   const expire=()=>{clearTimeout(p.timer);this.pending.delete(id);reject(Error('응답을 확인할 수 없습니다. 현재 상태를 확인하세요.'));};
+   const p={resolve,reject,retries:0,type,matchId:scope.matchId,expire};
+   const attempt=()=>{
+    if(p.retries>=3||scope.connectionEpoch!==this.scope.connectionEpoch||scope.matchId!==this.scope.matchId||scope.lifeSeq!==this.lifeSeq){expire();return;}
+    p.retries++;
+    if(this.ws?.readyState===1){
+     this.ws.send(JSON.stringify(envelope(type,payload,{...scope,requestId:id})));
+     if(type==='END'&&this.session?.role==='host'&&p.retries===3){
+      // A busy spectator may still be reading pre-END combat frames. Keep the
+      // original request until its real ACK, a later ordered PONG, or loss of
+      // liveness. Never resend a fourth time or infer success from RESULTS.
+      p.endSentAt=performance.now();
+      p.timer=setTimeout(expire,CONNECTION_TIMEOUT_MS);return;
+     }
+    }
+    p.timer=setTimeout(attempt,1500);
+   };
+   this.pending.set(id,p);attempt();
   });
  }
  async authenticate(secret){this.send('AUTH',{secret},false);await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('교사 인증을 확인해 주세요.')),5000);this.addEventListener('auth',()=>{clearTimeout(timer);resolve();},{once:true});});}

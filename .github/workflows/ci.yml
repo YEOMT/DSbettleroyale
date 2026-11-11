@@ -54,6 +54,7 @@ jobs:
     if: needs.quick.outputs.docs != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
         with:
@@ -66,7 +67,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: quick-${{ github.sha }}
-      - run: npx playwright install --with-deps chromium
       - run: npm run test:targeted
       - uses: actions/upload-artifact@v4
         if: always()
@@ -127,10 +127,13 @@ jobs:
         suite: [recovery, continuous, touch]
         exclude:
           - {renderer: pixi, suite: continuous}
+          - {renderer: pixi, suite: recovery}
         include:
           - {renderer: pixi, suite: continuous, role: attacker}
           - {renderer: pixi, suite: continuous, role: opponent}
           - {renderer: pixi, suite: continuous, role: host}
+          - {renderer: pixi, suite: recovery, part: controls}
+          - {renderer: pixi, suite: recovery, part: roster}
     container: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
@@ -140,10 +143,11 @@ jobs:
       - run: node tests/combat/run.mjs ${{ matrix.renderer }} ${{ matrix.suite }}
         env:
           COMBAT_PIXI_ROLE: ${{ matrix.role || '' }}
+          COMBAT_RECOVERY_PART: ${{ matrix.part || '' }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: combat-${{ matrix.renderer }}-${{ matrix.suite }}-${{ matrix.role || 'all' }}-${{ github.sha }}
+          name: combat-${{ matrix.renderer }}-${{ matrix.suite }}-${{ matrix.role || matrix.part || 'all' }}-${{ github.sha }}
           path: artifacts/
           retention-days: 30
   roster10:

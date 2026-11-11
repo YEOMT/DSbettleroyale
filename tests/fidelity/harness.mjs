@@ -1,4 +1,5 @@
 import {freezeableFixture} from '../simulation-fixture.mjs';
+import {leaveGamePages} from '../leave-game-pages.mjs';
 import {createServer} from 'vite';
 import {chromium} from 'playwright';
 import {createGameServer} from '../../apps/server/src/main.js';
@@ -18,5 +19,8 @@ export async function openFidelity({renderer='canvas',touch=false}={}){
  const students=room.students(),players=students.map(s=>room.world.byId.get(s.id));
  function publish(){const w=room.world,teacher=getTeacherState(w),encode=snapshotEncoder(teacher,++room.snapshotSeq,performance.now());for(const m of room.members.values())if(m.connected){const view=m.role==='host'?getHostVisibleState(teacher):getVisibleState(w,m.id,undefined,teacher);m.peer.snapshot(encode(view.self?{...view,self:m.peer.selfState(view.self)}:view,m.peer.scope()));}}
  function staticState(){room.static=getStaticState(room.world);for(const m of room.members.values())m.peer?.send('STATIC_STATE',room.static);}
- return {app,vite,browser,host,room,players,students,pages,contexts,url,errors,publish,staticState,async close(){await browser.close();await host.close();await vite.close();await app.close();}};
+ return {app,vite,browser,host,room,players,students,pages,contexts,url,errors,publish,staticState,async close(){
+  try{await leaveGamePages(browser,url);}
+  finally{await browser.close();await host.close();await vite.close();await app.close();}
+ }};
 }
