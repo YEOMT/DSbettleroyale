@@ -32,3 +32,17 @@ main 실행 [42866022240](https://github.com/YEOMT/DSbettleroyale/actions/runs/4
 점령 X 지형의 네 변은 큰 회전 사각형이다. 20인 기준선에서 작은 셀 인덱스의 생성 bucket 합계가 714→7,858로 늘었다. 동일 고정 지도에서 기존 인덱스는 786개 bucket을 사용했다. 큰 terrain 벽의 범위를 각각 한 번 보관할 때 작은 벽·상자의 bucket은 47개이고 큰 벽 기록은 4개다. 후보를 기존 벽 순서로 정렬하고 같은 정밀 충돌 함수를 사용한다. 64방향 × 3개 반경에서 전체 벽 검사와 가장 먼저 닿는 대상·시각을 대조했고, X 경계·도약·특수탄까지 집중 13검사를 통과했다. 이 비용으로 과거 RSS 차이 전체를 설명할 수는 없다.
 
 실물 교실 20대, 장시간 605초, 전 캐릭터·화질 전수 리그 및 공개 배포는 NOT_RUN이다.
+
+## Windows 비교와 한계
+
+두 기준 버전은 각 모드에서 20명·3라운드·과부하 0회를 기록했다. 790fb11→d28b2d8의 개인전 CPU 총시간은 8,406→8,202ms, 점령은 9,139→9,015ms, 점령 마지막 RSS는 187.76→158.08MiB였다. PR #18 때의 +12.2%/+6.1% 및 +47.4MiB는 이번 기준선에서 재현되지 않았다. [로컬 원자료](evidence/v34-local-performance.json)
+
+**v34 Windows 개인전 FAIL**. 첫 라운드에서 과부하 보호 1회, step p95 16.14ms, snapshot p95 32.68ms, 최대 debt 490.02ms. 뒤이은 Windows 점령 비교는 NOT_RUN이다. 실패 직후 다른 게임과 그 클라이언트가 같은 PC에서 여러 코어를 사용 중이었다. 단일 원인은 미확정이다.
+
+별도 렌더링·소켓 없는 20인, 270틱, 21수신자 교차 시험에서는 예열 후 d28/v34/v34/d28 순서로 평균 CPU 1,297→1,359ms(+4.8%), step +11.5%, snapshot −2.7%였다. 20명 전원이 공격과 스킬을 썼고 인코딩은 매번 69,625,746 bytes였다. [교차 시험 원자료](evidence/v34-server-crossover.json)
+
+PR 본문의 `[classroom-compare]`로 같은 GitHub 러너에서 세 버전의 6개 비교 실행을 기존 검사에 추가한다. `node tests/combat/classroom-compare.mjs`가 SHA별 export에 동일한 시험 도구를 넣어 순차 측정하고 `artifacts/v34-comparison/comparison.json`을 남긴다. 비교의 최종 값과 CI 결과는 PR 본문에 기록한다.
+
+**전원 가위 극단 표본**. 20명 × 3회 × 8발 = 480발, 최대 동시 활성 120개. Pixi 그리기 p95는 학생 20.7/19.9ms, 교사 42.5ms였고 교사 프레임 간격 p95는 66.7ms였다. 945개 준비 snapshot의 p95는 120,750 bytes였다. 동일 횟수의 권위 틱을 진행시킨 시험이며 두 렌더러의 wall time은 다르다. [검사 증거와 fixture의 생명 교체 한계](evidence/v34-roster/README.md)
+
+로컬 Quick 공통 298개 PASS 210.03초. 이후 신호등 벽 고정·무효 증강 자격, 알림 fade와 시험 도구를 보완했다. 최종 집중 29개 PASS 2.619초, content:check PASS, paired build PASS(Vite 17.87초). 실제 WS 로스터 Canvas/Pixi 20.726/38.100초, 공지·보급·카메라 31.125/32.622초 PASS. 마지막 경계/표시 수정 이후의 최종 브라우저 결과와 동일 방 5회 재경기는 PR Checks에서 확인한다.
