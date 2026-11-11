@@ -1,0 +1,145 @@
+{
+  "failedCI": {
+    "run": 43018289605,
+    "job": 130516542050,
+    "observed": "Expected walking-target slow missing. Warning visible in screenshot. Resolution input/position was not recorded in this run."
+  },
+  "reproduction": {
+    "status": "FAIL",
+    "ms": 30490.8775,
+    "condition": "Real key held; rival page JS paused via CDP after warning capture to delay the WS input sampler. Authority stepped through 30 ticks.",
+    "resolution": {
+      "frame": 200,
+      "castStart": 164,
+      "appliedSeq": 372,
+      "appliedTick": 176,
+      "move": [
+        0,
+        0
+      ],
+      "ageMs": null,
+      "lifeMatches": true,
+      "sessionMatches": true,
+      "matchMatches": true,
+      "actor": [
+        0,
+        0
+      ],
+      "target": [
+        386.2354637451056,
+        0
+      ],
+      "prior": [
+        386.2294739081484,
+        0
+      ],
+      "forwardStep": 0,
+      "warpMatches": true,
+      "hostile": true,
+      "visible": true,
+      "inCone": true,
+      "locks": {
+        "move": false,
+        "attack": false,
+        "skill": false,
+        "steerAllowed": false
+      },
+      "drive": 0
+    }
+  },
+  "intermediate": {
+    "status": "TIMEOUT",
+    "ms": 48779.05,
+    "case": "Old fixture replaced Participant life inside a battle and did not reach the initial readiness gate."
+  },
+  "fixed": {
+    "renderer": "pixi",
+    "status": "PASS",
+    "signalResolution": {
+      "frame": 37,
+      "castStart": 1,
+      "appliedSeq": 116,
+      "appliedTick": 37,
+      "move": [
+        1,
+        0
+      ],
+      "ageMs": 0,
+      "lifeMatches": true,
+      "sessionMatches": true,
+      "matchMatches": true,
+      "actor": [
+        0,
+        0
+      ],
+      "target": [
+        368.36506395467745,
+        0
+      ],
+      "prior": [
+        363.8016017049282,
+        0
+      ],
+      "forwardStep": 4.56346224974925,
+      "warpMatches": true,
+      "hostile": true,
+      "visible": true,
+      "inCone": true,
+      "locks": {
+        "move": false,
+        "attack": false,
+        "skill": false,
+        "steerAllowed": false
+      },
+      "drive": 4.66643268
+    },
+    "signal": {
+      "renderedBy": 3,
+      "slow": 0.35,
+      "remaining": 103
+    },
+    "alien": {
+      "restoredRecast": true,
+      "warp": 1,
+      "cooldown": 420
+    },
+    "scissors": {
+      "participants": 20,
+      "uses": 3,
+      "count": 8,
+      "shots": 480,
+      "peakShots": 120,
+      "screens": [
+        {
+          "maxShots": 123,
+          "frames": 600,
+          "drawP95": 28.799999952316284,
+          "gapP95": 39.89999999999782,
+          "renderer": "pixi"
+        },
+        {
+          "maxShots": 115,
+          "frames": 600,
+          "drawP95": 27.600000023841858,
+          "gapP95": 37.69999999999709,
+          "renderer": "pixi"
+        },
+        {
+          "maxShots": 120,
+          "frames": 440,
+          "drawP95": 49.90000009536743,
+          "gapP95": 64.5,
+          "renderer": "pixi"
+        }
+      ],
+      "elapsedMs": 18571.3356,
+      "cpuMs": 9547,
+      "processRssBefore": 131371008,
+      "processRssAfter": 235741184,
+      "sentBytes": 84456841,
+      "snapshotP95": 120592,
+      "snapshots": 945
+    },
+    "ms": 60962.7969
+  }
+}

@@ -2,10 +2,14 @@
 // test instrumentation, lockfile dependencies, browser and sequential workload.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import {execFileSync,spawnSync} from 'node:child_process';
 
 const root=process.cwd(), artifacts=path.join(root,'artifacts');
+// The Actions container and checkout have different OS owners. Trust only
+// this resolved workspace for these Git commands, without a global setting.
+const gitArgs=['-c','safe.directory='+fs.realpathSync(root)];
 fs.mkdirSync(artifacts,{recursive:true});
 const scratch=fs.mkdtempSync(path.join(artifacts,'comparison-sources-'));
 const evidence=path.join(artifacts,'v34-comparison');
@@ -13,16 +17,15 @@ fs.mkdirSync(evidence,{recursive:true});
 const versions=[
  {label:'790fb11',sha:'790fb11a0618d6c706d1aee044379939940415af'},
  {label:'d28b2d8',sha:'d28b2d81692876cc353b75e85350c442b7948398'},
- {label:'v34',sha:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()}
+ {label:'v34',sha:execFileSync('git',[...gitArgs,'rev-parse','HEAD'],{encoding:'utf8'}).trim()}
 ];
 function checkout(version){
- if(version.label==='v34')return root;
- const exists=spawnSync('git',['cat-file','-e',version.sha+'^{commit}'],{stdio:'ignore'}).status===0;
- if(!exists)execFileSync('git',['fetch','--no-tags','--depth=1','origin',version.sha],{stdio:'inherit'});
- assert.equal(execFileSync('git',['rev-parse',version.sha],{encoding:'utf8'}).trim(),version.sha);
+ const exists=spawnSync('git',[...gitArgs,'cat-file','-e',version.sha+'^{commit}'],{stdio:'ignore'}).status===0;
+ if(!exists)execFileSync('git',[...gitArgs,'fetch','--no-tags','--depth=1','origin',version.sha],{stdio:'inherit'});
+ assert.equal(execFileSync('git',[...gitArgs,'rev-parse',version.sha+'^{commit}'],{encoding:'utf8'}).trim(),version.sha);
  const dir=path.join(scratch,version.label),archive=dir+'.tar';
  fs.mkdirSync(dir);
- execFileSync('git',['archive','--format=tar','-o',archive,version.sha]);
+ execFileSync('git',[...gitArgs,'archive','--format=tar','-o',archive,version.sha]);
  execFileSync('tar',['-xf',archive,'-C',dir]);
  for(const file of ['classroom-rematch.mjs','classroom-authority.mjs','classroom-meter.mjs']){
   fs.copyFileSync(path.join(root,'tests/combat',file),path.join(dir,'tests/combat',file));
@@ -42,27 +45,33 @@ function summarize(run){
   estimatedHeapAllocationMiB:n(meter.estimatedHeapAllocationBytes/2**20),gcMs:n(meter.gcMs),gcCount:meter.gcCount,
   geometry:meter.costs,frameGapP95Ms:last.screens.map(s=>n(s.gap.p95)),drawP95Ms:last.screens.map(s=>n(s.draw.p95)),
   participants:last.connected,overloads:last.overloads,unsentAtSampling:last.screens.map(s=>s.unsentInputs),
-  unsentAfterRematch:rows.map(r=>r.lobby.reduce((sum,s)=>sum+s.unsentInputs,0)),errors:run.errors};
+  unsentAfterRematch:rows.map(r=>r.lobby?.reduce((sum,s)=>sum+s.unsentInputs,0)??null),
+  errors:run.errors,...(run.rows.at(-1)?.error?{failedAssertion:run.rows.at(-1).error}:{})};
 }
-const results=[];
+const results=[], machine={platform:process.platform,architecture:process.arch,node:process.version,
+ logicalCpus:os.availableParallelism(),totalMemoryBytes:os.totalmem()};
 try {
  for(const version of versions){
   const cwd=checkout(version);
   for(const mode of ['solo','team-capture']){
    const label='compare-'+version.label+'-'+mode;
-   let failure;
+   let status='PASS',failure;
    try{execFileSync(process.execPath,['tests/combat/classroom-rematch.mjs',label],{cwd,stdio:'inherit',
     env:{...process.env,CLASSROOM_UPGRADE:'1',CLASSROOM_METER:'1',CLASSROOM_MODE:mode},timeout:135000});}
-   catch(e){failure=e.code||'SCENARIO_FAILED';process.exitCode=1;}
+   catch(e){
+    failure=e.code||'SCENARIO_FAILED';
+    status=e.code==='ETIMEDOUT'?'TIMEOUT':e.code?'INFRA_FAILURE':'FAIL';
+    process.exitCode=1;
+   }
    const file=path.join(cwd,'artifacts/classroom',label+'-rematch.json');
    const result=fs.existsSync(file)?summarize(JSON.parse(fs.readFileSync(file))):{};
-   results.push({...version,mode,status:failure?'FAIL':'PASS',failure,...result});
+   results.push({...version,mode,status,failure,machine,...result});
    fs.writeFileSync(path.join(evidence,'comparison.json'),JSON.stringify(results,null,2)+'\n');
    console.log(JSON.stringify(results.at(-1)));
   }
  }
 } finally {
- // Only the two immutable source exports created by this process are temporary.
+ // Remove only the immutable source exports created by this process.
  if(path.dirname(fs.realpathSync(scratch))===fs.realpathSync(artifacts) && path.basename(scratch).startsWith('comparison-sources-'))
   fs.rmSync(scratch,{recursive:true,force:true});
 }

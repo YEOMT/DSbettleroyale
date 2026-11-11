@@ -11,11 +11,10 @@ try{
  const context=await h.browser.newContext({hasTouch:true,viewport:{width:390,height:844}});h.contexts.push(context);
  await context.route(/dropbox/,r=>r.abort());const rival=await context.newPage();rival.on('pageerror',e=>h.errors.push(e.message));
  await rival.goto(h.url+'/?room='+h.room.code+'&renderer='+renderer);await rival.locator('#br-player-name').fill('Rival');
- await rival.locator('#br-join-btn').click();await rival.locator('#br-student-wait').waitFor();await h.battle();
- const w=h.room.world,g=w.game,members=h.room.students(),p=w.byId.get(members[0].id),q=w.byId.get(members.at(-1).id);
+ await rival.locator('#br-join-btn').click();await rival.locator('#br-student-wait').waitFor();
+ const members=h.room.students();let w,g,p,q;
  assert.equal(members.length,20);const pages=[h.student,rival,h.host],v=(x=0,y=0)=>new w.Vec2(x,y);
  // Fixed fixture geometry isolates return collisions/cone timing from the map seed.
- w.brFarm.dispose(g);g.walls=[];g.smokes=[];h.staticState();
  for(const c of h.clients)c.onMessage=m=>{if(m.type==='SNAPSHOT')c.messages=c.messages.filter(row=>row.type!=='SNAPSHOT'||row===m);};
  async function observe(page){await page.evaluate(async()=>{
   window.m=await import('/src/main.js');window.observed={warning:false,maxShots:0,drawMs:[],frameGaps:[],last:0};
@@ -34,27 +33,66 @@ try{
   }
  }
  async function setCase(id,all=false){
-  w.BRRework.clearWorld(g,'fixture-case');g.projectiles=[];g.retiredShots=[];w.inputPending.clear();w.actionPending.clear();
-  for(const [i,actor]of g.participants.entries()){
-   const ability=w.EMOJI_DB.find(a=>a.id===(all||actor===p?id:'emoji-114')),remoteId=actor.remoteId,lifeSeq=actor.lifeSeq+1;
-   const pos=actor===p?v():actor===q?v(260,0):v(1400*Math.cos(i*.32),1400*Math.sin(i*.32));
-   Object.assign(actor,new w.Participant(i+1,'Fixture'+i,ability,pos,all?1:actor===q?2:1),
-    {remoteId,sessionId:remoteId,lifeSeq,abilityId:ability.id,abilityIndex:w.EMOJI_DB.indexOf(ability),humanControlled:true,alive:true,connected:true,
-     applyPlayerInput:w.brApplyPlayerInput,spawnProtectionUntilFrame:0,basicCooldown:0,cooldown:0,aimProfileKey:null,rw:null,lastAimDir:v(1,0)});
-   w.brInitRun(actor);if(all)actor.run.mods.skillCount=3;w.session.inputs[remoteId]={};
+  if(h.room.phase==='BATTLE'){
+   await h.command('END');await h.command('REMATCH');
+   for(const page of pages)await page.waitForFunction(()=>m.ui.room.phase==='LOBBY'&&!m.renderer.enabled);
   }
-  g.rebuildSpatialGrid();h.publish();
-  for(const [page,actor]of [[h.student,p],[rival,q]])await page.waitForFunction(l=>m.net.lifeSeq===l&&m.timeline.predicted?.lifeSeq===l&&m.net.profilesReady&&m.controls.enabled,actor.lifeSeq);
-  for(const c of h.clients)await until(()=>c.lifeSeq===p.lifeSeq,'bot failed to receive new life');
+  await h.command('START_QUIZ');await h.command('BEGIN_DRAFT');
+  // Select content at the existing draft fixture seam, so each real match
+  // begins with its own life, profiles and input scope for the same 20 users.
+  for(const member of members)member.draft.abilityId=all||member===members[0]?id:'emoji-114';
+  h.room.fixtureFrozen=true;await h.command('START_BATTLE');
+  w=h.room.world;g=w.game;p=w.byId.get(members[0].id);q=w.byId.get(members.at(-1).id);
+  w.brFarm.dispose(g);g.walls=[];g.smokes=[];
+  for(const [i,actor]of g.participants.entries()){
+   assert.equal(actor.ability.id,all||actor===p?id:'emoji-114');
+   actor.pos=actor===p?v():actor===q?v(260,0):v(1400*Math.cos(i*.32),1400*Math.sin(i*.32));
+   actor.vel=v();actor.team=all?1:actor===q?2:1;actor.spawnProtectionUntilFrame=0;
+   if(all)actor.run.mods.skillCount=3;
+  }
+  g.rebuildSpatialGrid();h.staticState();
+  for(const page of pages)await page.waitForFunction(match=>m.ui.room?.phase==='BATTLE'&&m.ui.room.matchId===match,h.room.matchId);
+  h.publish();
+  for(const [page,actor]of [[h.student,p],[rival,q]])await page.waitForFunction(({id,life})=>m.timeline.predicted?.abilityId===id&&m.net.lifeSeq===life&&m.timeline.predicted?.lifeSeq===life&&m.net.profilesReady&&m.controls.enabled,{id:actor.ability.id,life:actor.lifeSeq});
+  for(const c of h.clients)await until(()=>c.scope.matchId===h.room.matchId&&c.snapshot?.self?.abilityId===w.byId.get(c.session.playerId).ability.id,'bot failed to receive current match');
  }
  async function fire(page,actor,aim={x:1,y:0}){
   await page.waitForFunction(()=>!m.net.restoring&&m.controls.enabled&&!m.timeline.predicted?.rw?.locks?.skill&&performance.now()-(m.controls.lastFire.skill??-Infinity)>=100);
   await page.evaluate(aim=>m.controls.fire('skill',{aim,power:1}),aim);
   await until(()=>w.actionPending.get(actor.remoteId)?.some(a=>a.kind==='skill'),'student skill did not reach authority');
  }
- await setCase('emoji-151');await rival.keyboard.down('d');await fire(h.student,p);await ticks(12);
+ await setCase('emoji-151');await fire(h.student,p);await ticks(12);
+ const scheduled=g.rw.entities.find(e=>e.kind==='scheduled'&&e.ctx.abilityId==='emoji-151');
+ assert.ok(scheduled,'authority scheduled red-light resolution');
+ const resolveWarning=scheduled.tick;
+ scheduled.tick=(ctx,e)=>{
+  if(e.age===36){
+   const input=w.session.inputs[q.remoteId],drive=Math.hypot(q.presentationDriveX,q.presentationDriveY);
+   report.signalResolution={frame:g.frame,castStart:ctx.startedFrame,appliedSeq:q.lastAppliedSeq,appliedTick:q.inputAppliedAt,
+    move:[input?.dx,input?.dy],ageMs:Number.isFinite(input?._receivedAt)?w.brNow()-input._receivedAt:null,lifeMatches:input?.life===q.lifeSeq,
+    sessionMatches:input?.sessionId===q.sessionId,matchMatches:input?.matchKey===w.matchId,actor:[p.pos.x,p.pos.y],target:[q.pos.x,q.pos.y],
+    prior:[q.combatPreviousX,q.combatPreviousY],forwardStep:drive?((q.pos.x-q.combatPreviousX)*q.presentationDriveX+(q.pos.y-q.combatPreviousY)*q.presentationDriveY)/drive:0,
+    warpMatches:(q.warpSeq||0)===q.combatPreviousWarp,hostile:w.BRRework.hostile(ctx,q),visible:w.BRRework.visible(ctx,q,p.pos),
+    inCone:w.brSectorTouches(p.pos,q,ctx.aim,780,80*Math.PI/180,w.BR_CONTACT.skillConeTarget),locks:w.BRRework.inputLocks(q,g),drive};
+  }
+  return resolveWarning(ctx,e);
+ };
  for(const page of pages)await page.waitForFunction(()=>observed.warning);
- await rival.screenshot({path:dir+'/red-light.png'});await ticks(30);await rival.keyboard.up('d');
+ await rival.screenshot({path:dir+'/red-light.png'});
+ // The authority clock is manual, while the physical key and WS input sampler
+ // use the browser clock. Advance each snapshot interval only after receiving
+ // the next held-key sample. The actual move, lifetime and hit stay authoritative.
+ await rival.bringToFront();await rival.keyboard.down('d');
+ for(let i=0;i<10;i++){
+  const previous=q.lastAppliedSeq||0;
+  await until(()=>{
+   const input=w.inputPending.get(q.remoteId);
+   return input?.seq>previous&&input.lifeSeq===q.lifeSeq&&input.move.x>.9;
+  },'no fresh walking input from the real rival browser before signal tick '+(g.frame+1));
+  await ticks(3);
+ }
+ await rival.keyboard.up('d');
+ assert.ok(report.signalResolution.forwardStep>.1&&report.signalResolution.ageMs!==null&&report.signalResolution.ageMs<250,'rival was walking on fresh input at the resolution tick');
  assert.ok(q.rw.trafficSlowUntil>g.frame);await rival.waitForFunction(()=>m.timeline.predicted.rw.slow===.35);
  report.signal={renderedBy:3,slow:q.rw.buffs.find(b=>b.kind==='slow').value,remaining:q.rw.trafficSlowUntil-g.frame};
  await setCase('emoji-147');const origin={x:p.pos.x,y:p.pos.y};await fire(h.student,p);await ticks(15);

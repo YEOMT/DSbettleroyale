@@ -46,3 +46,12 @@ PR 본문의 `[classroom-compare]`로 같은 GitHub 러너에서 세 버전의 6
 **전원 가위 극단 표본**. 20명 × 3회 × 8발 = 480발, 최대 동시 활성 120개. Pixi 그리기 p95는 학생 20.7/19.9ms, 교사 42.5ms였고 교사 프레임 간격 p95는 66.7ms였다. 945개 준비 snapshot의 p95는 120,750 bytes였다. 동일 횟수의 권위 틱을 진행시킨 시험이며 두 렌더러의 wall time은 다르다. [검사 증거와 fixture의 생명 교체 한계](evidence/v34-roster/README.md)
 
 로컬 Quick 공통 298개 PASS 210.03초. 이후 신호등 벽 고정·무효 증강 자격, 알림 fade와 시험 도구를 보완했다. 최종 집중 29개 PASS 2.619초, content:check PASS, paired build PASS(Vite 17.87초). 실제 WS 로스터 Canvas/Pixi 20.726/38.100초, 공지·보급·카메라 31.125/32.622초 PASS. 마지막 경계/표시 수정 이후의 최종 브라우저 결과와 동일 방 5회 재경기는 PR Checks에서 확인한다.
+
+## PR CI 첫 실행과 시험 보완
+
+[실행 43018289605](https://github.com/YEOMT/DSbettleroyale/actions/runs/43018289605)의 Quick 공통 300개·빌드·Targeted·26명/30초 부하·동일방 20명 5회 재경기·Canvas 최대 가위·기존 두 렌더러 로스터와 터치 검사가 통과했다. 처음 문제였던 Pixi 점령 HUD와 새 점령·보급·공지 화면 검사도 통과했다. 전체 실행은 FAIL이었다.
+
+- 격리 비교는 러너 컨테이너와 체크아웃 소유자가 달라 첫 `git rev-parse`부터 INFRA_FAILURE였다. 시험의 Git 호출에만 실경로 하나를 지정했다. 세 버전 모두 새 디렉터리에 export하며 기계 사양과 실패도 결과에 남긴다.
+- Pixi 신호등 시험은 걷는 학생의 둔화 단언에서 FAIL이었다. 기존 CI artifact에는 발동 틱의 입력 상태가 없어 그 실행의 원인은 확정할 수 없다. 로컬 Pixi에서 학생 브라우저 처리 지연을 주입했을 때 마지막 이동 입력이 24틱(400ms) 전이어서 권위 로직이 정상적으로 정지로 판정하는 같은 실패를 재현했다. 시험은 이제 실제 브라우저의 키 입력이 WS로 도착한 뒤 권위 틱을 진행하고 발동 때의 입력·실제 이동·시선·범위도 기록한다. 게임 수치와 입력의 250ms 유효 기준은 그대로다.
+
+서버 단독 교차 진단은 `node --expose-gc tests/combat/classroom-server-crossover.mjs <d28b2d8-export-dir>`로 재현한다. 실시간 WS 비교는 `tests/combat/classroom-compare.mjs`를 사용한다.
