@@ -26,10 +26,22 @@ try{
   };
  });}
  for(const page of pages)await observe(page);
- let peakShots=0;
- async function ticks(n){
-  for(let i=0;i<n;i++){stepWorld(w);peakShots=Math.max(peakShots,g.rw.entities.filter(e=>!e.dead&&e.kind==='projectile').length);
-   if(i%3===2||i===n-1){h.publish();await delay(30);}
+ let peakShots=0,lastPublish=0;
+ async function ticks(n,onLastSnapshot){
+  const peers=[...h.room.members.values()].filter(m=>m.connected).map(m=>m.peer);
+  for(let i=0;i<n;i++){
+   const publish=i%3===2||i===n-1;
+   if(publish){const wait=lastPublish+50-performance.now();if(wait>0)await delay(wait);}
+   // The normal 60 Hz pump batches simultaneous reliable events, sends the
+   // replaceable snapshot at 20 Hz, then releases the batch. Manual physics
+   // must preserve this transport behavior during a synchronized 20-caster volley.
+   for(const peer of peers)peer.beginBatch();
+   try{
+    stepWorld(w);peakShots=Math.max(peakShots,g.rw.entities.filter(e=>!e.dead&&e.kind==='projectile').length);
+    if(publish){h.publish();lastPublish=performance.now();}
+   }finally{for(const peer of peers)peer.endBatch();}
+   if(i===n-1)onLastSnapshot?.();
+   if(i<n-1)await delay(1000/60);
   }
  }
  async function setCase(id,all=false){
@@ -106,14 +118,59 @@ try{
  const snapshotSizes=[];for(const member of h.room.members.values()){const peer=member.peer,send=peer.snapshot.bind(peer);peer.snapshot=(data,...args)=>{snapshotSizes.push(data.length);return send(data,...args);};}
  for(const page of pages)await page.evaluate(()=>Object.assign(observed,{maxShots:0,drawMs:[],frameGaps:[],last:0}));
  const cpu=process.cpuUsage(),rss=process.memoryUsage.rss(),bytes=h.app.metrics.sentBytes,begin=performance.now();
+ const hostMember=[...h.room.members.values()].find(m=>m.role==='host'),hostPeer=hostMember.peer;
+ const serverTrace=report.hostCommands={frames:{EVENT:0,EVENT_BATCH:0,SNAPSHOT:0},commands:[],steps:[],closes:[]};
+ function transportState(){
+  return {ms:Math.round(performance.now()-begin),phase:h.room.phase,epoch:hostMember.epoch,
+   ready:hostMember.peer?.socket.readyState??null,buffered:hostPeer.socket.bufferedAmount,
+   queued:hostPeer.queueBytes,pendingSnapshot:!!hostPeer.pendingSnapshot,snapshotSeq:h.room.snapshotSeq,
+   replaced:h.app.metrics.replacedSnapshots,highWater:h.app.metrics.bufferHighWatermark,rss:process.memoryUsage.rss()};
+ }
+ hostPeer.socket.on('close',(code,reason)=>serverTrace.closes.push({code,reason:String(reason),...transportState()}));
+ hostPeer.socket.prependListener('message',data=>{
+  const m=JSON.parse(data);if(m.type==='END'||m.type==='REMATCH')serverTrace.commands.push({direction:'received',type:m.type,...transportState()});
+ });
+ const sendHost=hostPeer.socket.send.bind(hostPeer.socket);
+ hostPeer.socket.send=(data,...args)=>{
+  const type=String(data.subarray(0,48)).match(/^\{"type":"([A-Z_]+)"/)?.[1];
+  if(Object.hasOwn(serverTrace.frames,type))serverTrace.frames[type]++;
+  if(type==='COMMAND_RESULT'){
+   const m=JSON.parse(data);if(['END','REMATCH'].includes(m.payload.command))serverTrace.commands.push({direction:'sent',type:m.payload.command,accepted:m.payload.accepted,...transportState()});
+  }
+  return sendHost(data,...args);
+ };
+ await h.host.evaluate(()=>{
+  window.controlAck=[];m.net.addEventListener('command_result',e=>{if(['END','REMATCH'].includes(e.detail.command))
+   controlAck.push({type:e.detail.command,accepted:e.detail.accepted,phase:m.ui.room.phase,seq:m.timeline.lastSeq,epoch:m.net.scope.connectionEpoch});});
+ });
+ async function hostPhaseCommand(type){
+  serverTrace.steps.push({at:'issue '+type,...transportState()});
+  try{const ack=await h.command(type);assert.equal(ack.accepted,true);return ack;}
+  finally{
+   serverTrace.steps.push({at:'after '+type,...transportState()});
+   serverTrace.client=await h.host.evaluate(()=>({ack:controlAck,phase:m.ui.room?.phase,seq:m.timeline.lastSeq,
+    ready:m.net.ws?.readyState,restoring:m.net.restoring,epoch:m.net.scope.connectionEpoch,pending:m.net.pending.size}));
+  }
+ }
+ let endAck,burstEnd;
  for(let wave=0;wave<3;wave++){
   const aim=[{x:1,y:0},{x:0,y:1},{x:-1,y:0}][wave];
   await Promise.all([fire(h.student,p,aim),fire(rival,q,aim),...h.clients.map(async c=>{
    const actor=w.byId.get(c.session.playerId),ack=await c.command('ACTION',{kind:'skill',seq:1000+wave,aim,aimPower:1,castId:actor.rw?.recast?.ctx.castId||''});assert.equal(ack.accepted,true);
-  })]);await ticks(45);
+  })]);
+  if(wave===2){
+   await ticks(3);
+   await h.student.waitForFunction(()=>document.getElementById('br-skill-count').textContent==='재사용 0/2');
+   await ticks(42,()=>{
+    burstEnd=performance.now();
+    // Issue END immediately after the last live snapshot, including when the
+    // host has queued frames. Never wait for its buffer or rendered frame first.
+    endAck=hostPhaseCommand('END');endAck.catch(()=>{});
+   });
+  }else await ticks(45);
   for(const actor of g.participants){assert.equal(actor.rw.recast?.left??0,2-wave);if(wave<2)assert.equal(actor.cooldown,0);else assert.ok(actor.cooldown>0);}
   const wanted='재사용 '+(2-wave)+'/2';
-  await h.student.waitForFunction(s=>document.getElementById('br-skill-count').textContent===s,wanted);
+  if(wave<2)await h.student.waitForFunction(s=>document.getElementById('br-skill-count').textContent===s,wanted);
  }
  assert.equal(shots,480);assert.equal(h.room.students().filter(m=>m.connected).length,20);
  const screens=await Promise.all(pages.map(page=>page.evaluate(()=>{
@@ -122,9 +179,16 @@ try{
  })));
  for(const s of screens){assert.equal(s.renderer,renderer);assert.ok(s.maxShots>=1);assert.ok(s.frames>2);}
  snapshotSizes.sort((a,b)=>a-b);const used=process.cpuUsage(cpu);
- report.scissors={participants:20,uses:3,count:8,shots,peakShots,screens,elapsedMs:performance.now()-begin,cpuMs:(used.user+used.system)/1000,
+ report.scissors={participants:20,uses:3,count:8,shots,peakShots,screens,elapsedMs:burstEnd-begin,cpuMs:(used.user+used.system)/1000,
   processRssBefore:rss,processRssAfter:process.memoryUsage.rss(),sentBytes:h.app.metrics.sentBytes-bytes,snapshotP95:snapshotSizes[Math.floor(snapshotSizes.length*.95)],snapshots:snapshotSizes.length};
- await h.command('END');await h.command('REMATCH');for(const page of pages)await page.waitForFunction(()=>m.ui.room.phase==='LOBBY'&&m.renderer.textures.size===0);
+ await endAck;
+ for(const page of pages)await page.waitForFunction(()=>m.ui.room.phase==='RESULTS');
+ await until(()=>h.clients.every(c=>c.room?.phase==='RESULTS'),'all virtual students received Results');
+ assert.equal(h.room.phase,'RESULTS');
+ await hostPhaseCommand('REMATCH');
+ for(const page of pages)await page.waitForFunction(()=>m.ui.room.phase==='LOBBY'&&m.renderer.textures.size===0);
+ await until(()=>h.clients.every(c=>c.room?.phase==='LOBBY'&&c.scope.matchId===h.room.matchId),'all virtual students received Rematch');
+ assert.equal(h.room.world,null);assert.equal(h.room.students().filter(m=>m.connected).length,20);
  assert.deepEqual(h.errors,[]);report.status='PASS';console.log('v34 roster',renderer,'PASS',JSON.stringify(report.scissors));
 }catch(error){report.status='FAIL';report.error=error.stack;throw error;}
 finally{report.ms=performance.now()-started;fs.writeFileSync(dir+'/result.json',JSON.stringify(report,null,2));await h.close();}

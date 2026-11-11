@@ -1,0 +1,448 @@
+{
+  "failedCi": {
+    "run": 43021497481,
+    "job": 130527337483,
+    "status": "FAIL",
+    "ms": 72892.741667,
+    "error": "Host END command did not receive confirmation within the ordinary client retry budget. No recorded host request arrival, ACK wire or queue state.",
+    "signal": {
+      "renderedBy": 3,
+      "slow": 0.35,
+      "remaining": 103
+    },
+    "alien": {
+      "restoredRecast": true,
+      "warp": 1,
+      "cooldown": 420
+    },
+    "scissors": {
+      "participants": 20,
+      "uses": 3,
+      "count": 8,
+      "shots": 480,
+      "peakShots": 120,
+      "screens": [
+        {
+          "maxShots": 113,
+          "frames": 32,
+          "drawP95": 55,
+          "gapP95": 500,
+          "renderer": "pixi"
+        },
+        {
+          "maxShots": 112,
+          "frames": 32,
+          "drawP95": 48,
+          "gapP95": 516.5999999999985,
+          "renderer": "pixi"
+        },
+        {
+          "maxShots": 120,
+          "frames": 32,
+          "drawP95": 69.5,
+          "gapP95": 500,
+          "renderer": "pixi"
+        }
+      ],
+      "elapsedMs": 13942.525999000005,
+      "cpuMs": 2402.288,
+      "processRssBefore": 314044416,
+      "processRssAfter": 384327680,
+      "sentBytes": 84494465,
+      "snapshotP95": 120594,
+      "snapshots": 945
+    }
+  },
+  "sameMachine": "Windows Edge, ANGLE SwiftShader, 20 real WS student sessions (2 browser and 18 peers), host browser. Vite, virtual peers, server and driver share a Node process.",
+  "prior": {
+    "status": "PASS",
+    "ms": 35276.4654,
+    "scissors": {
+      "participants": 20,
+      "uses": 3,
+      "count": 8,
+      "shots": 480,
+      "peakShots": 120,
+      "screens": [
+        {
+          "maxShots": 119,
+          "frames": 50,
+          "drawP95": 15.5,
+          "gapP95": 166.6999999999989,
+          "renderer": "pixi"
+        },
+        {
+          "maxShots": 105,
+          "frames": 50,
+          "drawP95": 15.400000095367432,
+          "gapP95": 166.59999999999854,
+          "renderer": "pixi"
+        },
+        {
+          "maxShots": 120,
+          "frames": 29,
+          "drawP95": 25.399999976158142,
+          "gapP95": 166.6999999999971,
+          "renderer": "pixi"
+        }
+      ],
+      "elapsedMs": 3971.6011,
+      "cpuMs": 3110,
+      "processRssBefore": 119943168,
+      "processRssAfter": 260136960,
+      "sentBytes": 84451415,
+      "snapshotP95": 120592,
+      "snapshots": 945
+    },
+    "host": {
+      "frames": {
+        "EVENT": 1380,
+        "EVENT_BATCH": 0,
+        "SNAPSHOT": 45
+      },
+      "commands": [
+        {
+          "direction": "received",
+          "type": "END",
+          "ms": 3975,
+          "phase": "BATTLE",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 260141056
+        },
+        {
+          "direction": "sent",
+          "type": "END",
+          "accepted": true,
+          "ms": 3976,
+          "phase": "RESULTS",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 260141056
+        },
+        {
+          "direction": "received",
+          "type": "REMATCH",
+          "ms": 4163,
+          "phase": "RESULTS",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 261009408
+        },
+        {
+          "direction": "sent",
+          "type": "REMATCH",
+          "accepted": true,
+          "ms": 4220,
+          "phase": "LOBBY",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 0,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 261586944
+        }
+      ],
+      "steps": [
+        {
+          "at": "issue END",
+          "ms": 3972,
+          "phase": "BATTLE",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 260136960
+        },
+        {
+          "at": "after END",
+          "ms": 3992,
+          "phase": "RESULTS",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 260997120
+        },
+        {
+          "at": "issue REMATCH",
+          "ms": 4161,
+          "phase": "RESULTS",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 261009408
+        },
+        {
+          "at": "after REMATCH",
+          "ms": 4260,
+          "phase": "LOBBY",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 0,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 262094848
+        }
+      ],
+      "closes": [],
+      "client": {
+        "ack": [
+          {
+            "type": "END",
+            "accepted": true,
+            "phase": "BATTLE",
+            "seq": 46,
+            "epoch": 1
+          },
+          {
+            "type": "REMATCH",
+            "accepted": true,
+            "phase": "RESULTS",
+            "seq": 0,
+            "epoch": 1
+          }
+        ],
+        "phase": "LOBBY",
+        "seq": 0,
+        "ready": 1,
+        "restoring": false,
+        "epoch": 1,
+        "pending": 0
+      }
+    }
+  },
+  "paced": {
+    "status": "PASS",
+    "ms": 38226.754799999995,
+    "scissors": {
+      "participants": 20,
+      "uses": 3,
+      "count": 8,
+      "shots": 480,
+      "peakShots": 120,
+      "screens": [
+        {
+          "maxShots": 120,
+          "frames": 50,
+          "drawP95": 23.100000023841858,
+          "gapP95": 166.70000000000073,
+          "renderer": "pixi"
+        },
+        {
+          "maxShots": 106,
+          "frames": 51,
+          "drawP95": 14.299999952316284,
+          "gapP95": 166.70000000000073,
+          "renderer": "pixi"
+        },
+        {
+          "maxShots": 120,
+          "frames": 30,
+          "drawP95": 30,
+          "gapP95": 166.70000000000437,
+          "renderer": "pixi"
+        }
+      ],
+      "elapsedMs": 4011.4193000000014,
+      "cpuMs": 2343,
+      "processRssBefore": 220155904,
+      "processRssAfter": 298835968,
+      "sentBytes": 84542833,
+      "snapshotP95": 120648,
+      "snapshots": 945
+    },
+    "host": {
+      "frames": {
+        "EVENT": 100,
+        "EVENT_BATCH": 43,
+        "SNAPSHOT": 45
+      },
+      "commands": [
+        {
+          "direction": "received",
+          "type": "END",
+          "ms": 4058,
+          "phase": "BATTLE",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 298835968
+        },
+        {
+          "direction": "sent",
+          "type": "END",
+          "accepted": true,
+          "ms": 4058,
+          "phase": "RESULTS",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 298835968
+        },
+        {
+          "direction": "received",
+          "type": "REMATCH",
+          "ms": 4169,
+          "phase": "RESULTS",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 300171264
+        },
+        {
+          "direction": "sent",
+          "type": "REMATCH",
+          "accepted": true,
+          "ms": 4230,
+          "phase": "LOBBY",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 0,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 301604864
+        }
+      ],
+      "steps": [
+        {
+          "at": "issue END",
+          "ms": 4012,
+          "phase": "BATTLE",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 290992128
+        },
+        {
+          "at": "after END",
+          "ms": 4087,
+          "phase": "RESULTS",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 299266048
+        },
+        {
+          "at": "issue REMATCH",
+          "ms": 4167,
+          "phase": "RESULTS",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 46,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 300171264
+        },
+        {
+          "at": "after REMATCH",
+          "ms": 4330,
+          "phase": "LOBBY",
+          "epoch": 1,
+          "ready": 1,
+          "buffered": 0,
+          "queued": 0,
+          "pendingSnapshot": false,
+          "snapshotSeq": 0,
+          "replaced": 0,
+          "highWater": 0,
+          "rss": 301805568
+        }
+      ],
+      "closes": [],
+      "client": {
+        "ack": [
+          {
+            "type": "END",
+            "accepted": true,
+            "phase": "BATTLE",
+            "seq": 46,
+            "epoch": 1
+          },
+          {
+            "type": "REMATCH",
+            "accepted": true,
+            "phase": "RESULTS",
+            "seq": 0,
+            "epoch": 1
+          }
+        ],
+        "phase": "LOBBY",
+        "seq": 0,
+        "ready": 1,
+        "restoring": false,
+        "epoch": 1,
+        "pending": 0
+      }
+    }
+  },
+  "conclusion": "Original timeout not reproduced locally. The unbatched fixture emitted 1380 individual host event frames. The corrected fixture batches each tick, paces snapshots at most 20 Hz, issues END directly following the final snapshot and confirms receipt of RESULTS and a new LOBBY by all participants. No waiting for buffer drain before END."
+}
