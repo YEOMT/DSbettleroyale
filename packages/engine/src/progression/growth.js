@@ -169,7 +169,7 @@ __brScope.brUpdateRunWorld = function brUpdateRunWorld(g){
 }
 export const initializers=[
 [1137,__brScope=>{ __brScope.BR_RUN_XP=[0,2,3,4,5,6];;}],
-[1138,__brScope=>{ __brScope.BR_WANGGUI=Object.freeze({"A":[[1.165,1.165],[1.33,1.33],[1.495,1.495]],"B":[[1.275,1.275],[1.55,1.55],[1.77,1.77]],"C":[[1.385,1.44],[1.77,1.88],[2.1,2.32]],"F":[[1.66,1.88],[2.32,2.76],[2.76,3.64]]});;}],
+[1138,__brScope=>{ __brScope.BR_WANGGUI=Object.freeze({"A":[[1.165,1.165],[1.33,1.33],[1.495,1.495]],"B":[[1.275,1.275],[1.55,1.55],[1.77,1.77]],"C":[[1.385,1.44],[1.77,1.88],[2.1,2.32]],"F":[[2,2.25],[2.85,3.45],[3.6,4.85]]});;}],
 [1141,__brScope=>{ __brScope.BR_RUN_PATHS={
             wanggui:{name:'왕귀',icon:'👑',family:'BODY',tiers:[{},{},{}],text:['왕귀 I','왕귀 II','왕귀 III']},
             rapid:{"name":"RAPID","icon":"⚡","family":"BASIC","tiers":[{"basicSpeed":1.44,"basicDamage":0.9},{"basicSpeed":1.825,"basicDamage":0.95},{"basicSpeed":2.43,"basicDamage":1.055}]},

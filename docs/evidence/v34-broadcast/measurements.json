@@ -1,0 +1,1304 @@
+{
+  "baseline": "d28b2d81692876cc353b75e85350c442b7948398",
+  "source": "Live local WS, Edge on Windows, low quality. Frozen battle between explicit authoritative snapshots. No physical device.",
+  "runs": {
+    "before-canvas": {
+      "ms": 27780.3939,
+      "status": "PASS",
+      "scenes": [
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1280,
+            720
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            1551.7999999999997,
+            249.8
+          ],
+          "screen": [
+            640,
+            357.65625
+          ],
+          "zoom": 1.35,
+          "hudClear": [
+            111,
+            653.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1280,
+            720
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            1551.7999999999997,
+            249.8
+          ],
+          "screen": [
+            640,
+            357.65625
+          ],
+          "zoom": 1.35,
+          "hudClear": [
+            111,
+            653.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1024,
+            768
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            1551.7999999999997,
+            249.8
+          ],
+          "screen": [
+            512,
+            380.15625
+          ],
+          "zoom": 1.35,
+          "hudClear": [
+            111,
+            701.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1024,
+            768
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            1551.7999999999997,
+            249.8
+          ],
+          "screen": [
+            512,
+            380.15625
+          ],
+          "zoom": 1.35,
+          "hudClear": [
+            111,
+            701.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            390,
+            844
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            1551.7999999999997,
+            249.8
+          ],
+          "screen": [
+            195,
+            432.65625
+          ],
+          "zoom": 0.9267595818815323,
+          "hudClear": [
+            140,
+            777.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            390,
+            844
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            1551.7999999999997,
+            249.8
+          ],
+          "screen": [
+            195,
+            432.65625
+          ],
+          "zoom": 0.9267595818815323,
+          "hudClear": [
+            140,
+            777.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 2,
+          "size": [
+            1280,
+            720
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            640,
+            399
+          ],
+          "zoom": 0.091,
+          "hudClear": [
+            152.390625,
+            653.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 2,
+          "size": [
+            1280,
+            720
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            640,
+            399
+          ],
+          "zoom": 0.091,
+          "hudClear": [
+            152.390625,
+            653.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 3,
+          "size": [
+            1024,
+            768
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            512,
+            423
+          ],
+          "zoom": 0.099,
+          "hudClear": [
+            152.390625,
+            701.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 3,
+          "size": [
+            1024,
+            768
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            512,
+            423
+          ],
+          "zoom": 0.099,
+          "hudClear": [
+            152.390625,
+            701.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 4,
+          "size": [
+            390,
+            844
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            195,
+            461
+          ],
+          "zoom": 0.057,
+          "hudClear": [
+            139.78125,
+            762
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 4,
+          "size": [
+            390,
+            844
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            195,
+            461
+          ],
+          "zoom": 0.057,
+          "hudClear": [
+            139.78125,
+            762
+          ]
+        }
+      ],
+      "banners": []
+    },
+    "after-canvas": {
+      "ms": 31125.293100000003,
+      "status": "PASS",
+      "scenes": [
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1280,
+            720
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            640,
+            382.15625
+          ],
+          "zoom": 0.4855859375,
+          "hudClear": [
+            111,
+            653.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1280,
+            720
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            640,
+            382.15625
+          ],
+          "zoom": 0.4855859375,
+          "hudClear": [
+            111,
+            653.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1024,
+            768
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            512,
+            406.15625
+          ],
+          "zoom": 0.4881466218414489,
+          "hudClear": [
+            111,
+            701.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1024,
+            768
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            512,
+            406.15625
+          ],
+          "zoom": 0.4881466218414489,
+          "hudClear": [
+            111,
+            701.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            390,
+            844
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            195.00000000000003,
+            458.65625
+          ],
+          "zoom": 0.17307016592560465,
+          "hudClear": [
+            140,
+            777.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            390,
+            844
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            195.00000000000003,
+            458.65625
+          ],
+          "zoom": 0.17307016592560465,
+          "hudClear": [
+            140,
+            777.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 2,
+          "size": [
+            1280,
+            720
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            640,
+            402.8515625
+          ],
+          "zoom": 0.0808203125,
+          "hudClear": [
+            152.390625,
+            653.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 2,
+          "size": [
+            1280,
+            720
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            640,
+            402.8515625
+          ],
+          "zoom": 0.0808203125,
+          "hudClear": [
+            152.390625,
+            653.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 3,
+          "size": [
+            1024,
+            768
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            512,
+            426.8515625
+          ],
+          "zoom": 0.0888203125,
+          "hudClear": [
+            152.390625,
+            701.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 3,
+          "size": [
+            1024,
+            768
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            512,
+            426.8515625
+          ],
+          "zoom": 0.0888203125,
+          "hudClear": [
+            152.390625,
+            701.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 4,
+          "size": [
+            390,
+            844
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            195,
+            450.890625
+          ],
+          "zoom": 0.057,
+          "hudClear": [
+            139.78125,
+            762
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 4,
+          "size": [
+            390,
+            844
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            195,
+            450.890625
+          ],
+          "zoom": 0.057,
+          "hudClear": [
+            139.78125,
+            762
+          ]
+        }
+      ],
+      "banners": [
+        {
+          "text": "FIRST BLOOD! · Audit Studen",
+          "height": 32,
+          "overlaps": [],
+          "aria": "polite",
+          "queue": 0
+        },
+        {
+          "text": "FIRST BLOOD! · Audit Studen",
+          "height": 32,
+          "overlaps": [],
+          "aria": "polite",
+          "queue": 0
+        }
+      ],
+      "supply": {
+        "kind": "guard",
+        "warningTicks": 180,
+        "buffTicks": 600,
+        "hostAndStudentDraw": true,
+        "peerSeesBuff": true,
+        "hud": "HP 355 / 355 · KILL 0 · 🛡️ 10초"
+      }
+    },
+    "before-pixi": {
+      "ms": 29104.731900000002,
+      "status": "PASS",
+      "scenes": [
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1280,
+            720
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            1546.5408,
+            244.5408000000001
+          ],
+          "screen": [
+            640,
+            357.65625
+          ],
+          "zoom": 1.35,
+          "hudClear": [
+            111,
+            653.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1280,
+            720
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            1546.5408,
+            244.5408000000001
+          ],
+          "screen": [
+            640,
+            357.65625
+          ],
+          "zoom": 1.35,
+          "hudClear": [
+            111,
+            653.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1024,
+            768
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            1546.5408,
+            244.5408000000001
+          ],
+          "screen": [
+            512,
+            380.15625
+          ],
+          "zoom": 1.35,
+          "hudClear": [
+            111,
+            701.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1024,
+            768
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            1546.5408,
+            244.5408000000001
+          ],
+          "screen": [
+            512,
+            380.15625
+          ],
+          "zoom": 1.35,
+          "hudClear": [
+            111,
+            701.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            390,
+            844
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            1546.5408,
+            244.5408000000001
+          ],
+          "screen": [
+            195,
+            432.65625
+          ],
+          "zoom": 0.8761793074368845,
+          "hudClear": [
+            140,
+            777.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            390,
+            844
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            1546.5408,
+            244.5408000000001
+          ],
+          "screen": [
+            195,
+            432.65625
+          ],
+          "zoom": 0.8761793074368845,
+          "hudClear": [
+            140,
+            777.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 2,
+          "size": [
+            1280,
+            720
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            640,
+            399
+          ],
+          "zoom": 0.091,
+          "hudClear": [
+            152.390625,
+            653.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 2,
+          "size": [
+            1280,
+            720
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            640,
+            399
+          ],
+          "zoom": 0.091,
+          "hudClear": [
+            152.390625,
+            653.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 3,
+          "size": [
+            1024,
+            768
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            512,
+            423
+          ],
+          "zoom": 0.099,
+          "hudClear": [
+            152.390625,
+            701.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 3,
+          "size": [
+            1024,
+            768
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            512,
+            423
+          ],
+          "zoom": 0.099,
+          "hudClear": [
+            152.390625,
+            701.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 4,
+          "size": [
+            390,
+            844
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            195,
+            461
+          ],
+          "zoom": 0.057,
+          "hudClear": [
+            139.78125,
+            762
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 4,
+          "size": [
+            390,
+            844
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            195,
+            461
+          ],
+          "zoom": 0.057,
+          "hudClear": [
+            139.78125,
+            762
+          ]
+        }
+      ],
+      "banners": []
+    },
+    "after-pixi": {
+      "ms": 32621.822200000002,
+      "status": "PASS",
+      "scenes": [
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1280,
+            720
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            640,
+            382.15625
+          ],
+          "zoom": 0.4855859375,
+          "hudClear": [
+            111,
+            653.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1280,
+            720
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            640,
+            382.15625
+          ],
+          "zoom": 0.4855859375,
+          "hudClear": [
+            111,
+            653.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1024,
+            768
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            512,
+            406.15625
+          ],
+          "zoom": 0.4871428571428572,
+          "hudClear": [
+            111,
+            701.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            1024,
+            768
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            512,
+            406.15625
+          ],
+          "zoom": 0.4871428571428572,
+          "hudClear": [
+            111,
+            701.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            390,
+            844
+          ],
+          "music": true,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            195.00000000000003,
+            458.65625
+          ],
+          "zoom": 0.17271428571428576,
+          "hudClear": [
+            140,
+            777.3125
+          ]
+        },
+        {
+          "mode": "solo",
+          "teams": 0,
+          "size": [
+            390,
+            844
+          ],
+          "music": false,
+          "bounds": null,
+          "world": [
+            800,
+            120
+          ],
+          "screen": [
+            195.00000000000003,
+            458.65625
+          ],
+          "zoom": 0.17271428571428576,
+          "hudClear": [
+            140,
+            777.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 2,
+          "size": [
+            1280,
+            720
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            640,
+            402.8515625
+          ],
+          "zoom": 0.0808203125,
+          "hudClear": [
+            152.390625,
+            653.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 2,
+          "size": [
+            1280,
+            720
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            640,
+            402.8515625
+          ],
+          "zoom": 0.0808203125,
+          "hudClear": [
+            152.390625,
+            653.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 3,
+          "size": [
+            1024,
+            768
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            512,
+            426.8515625
+          ],
+          "zoom": 0.0888203125,
+          "hudClear": [
+            152.390625,
+            701.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 3,
+          "size": [
+            1024,
+            768
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            512,
+            426.8515625
+          ],
+          "zoom": 0.0888203125,
+          "hudClear": [
+            152.390625,
+            701.3125
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 4,
+          "size": [
+            390,
+            844
+          ],
+          "music": true,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            195,
+            450.890625
+          ],
+          "zoom": 0.057,
+          "hudClear": [
+            139.78125,
+            762
+          ]
+        },
+        {
+          "mode": "capture",
+          "teams": 4,
+          "size": [
+            390,
+            844
+          ],
+          "music": false,
+          "bounds": [
+            -3000,
+            3000,
+            -3000,
+            3000
+          ],
+          "world": [
+            0,
+            0
+          ],
+          "screen": [
+            195,
+            450.890625
+          ],
+          "zoom": 0.057,
+          "hudClear": [
+            139.78125,
+            762
+          ]
+        }
+      ],
+      "banners": [
+        {
+          "text": "FIRST BLOOD! · Audit Studen",
+          "height": 32,
+          "overlaps": [],
+          "aria": "polite",
+          "queue": 0
+        },
+        {
+          "text": "FIRST BLOOD! · Audit Studen",
+          "height": 32,
+          "overlaps": [],
+          "aria": "polite",
+          "queue": 0
+        }
+      ],
+      "supply": {
+        "kind": "attack",
+        "warningTicks": 180,
+        "buffTicks": 600,
+        "hostAndStudentDraw": true,
+        "peerSeesBuff": true,
+        "hud": "HP 335 / 335 · KILL 0 · 🔥 10초"
+      }
+    }
+  }
+}

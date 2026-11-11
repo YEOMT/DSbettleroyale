@@ -1,0 +1,306 @@
+[
+  {
+    "ref": "790fb11",
+    "mode": "solo",
+    "status": "PASS",
+    "ms": 44773.6936,
+    "completedRounds": 3,
+    "cpu": {
+      "user": 6578000,
+      "system": 1828000
+    },
+    "memory": {
+      "rss": 130523136,
+      "heapTotal": 63328256,
+      "heapUsed": 41543728,
+      "external": 14860620,
+      "arrayBuffers": 10771985
+    },
+    "step": {
+      "count": 855,
+      "mean": 1.8918149707603211,
+      "p95": 5.302199999998265,
+      "p99": 9.823199999998906,
+      "max": 16.06039999999848
+    },
+    "snapshot": {
+      "count": 289,
+      "mean": 5.4053512110727615,
+      "p95": 9.560400000002119,
+      "p99": 12.82930000000124,
+      "max": 15.609400000001187
+    },
+    "wireBytes": 213902134,
+    "frameGaps": [
+      16.900000000001455,
+      16.90000000000009,
+      16.900000000001455
+    ],
+    "overloads": 0,
+    "measurement": {
+      "snapshots": {
+        "count": 6053,
+        "mean": 31322.103254584505,
+        "p95": 55321,
+        "p99": 63879,
+        "max": 70687
+      },
+      "resident": {
+        "count": 130,
+        "mean": 116903620.92307693,
+        "p95": 151887872,
+        "p99": 154050560,
+        "max": 161292288
+      },
+      "peakRssBytes": 167374848,
+      "gcCount": 105,
+      "gcMs": 181.5327,
+      "estimatedHeapAllocationBytes": 592687728,
+      "costs": {
+        "grids": 7,
+        "gridBuckets": 631,
+        "unchangedClampCopies": 0,
+        "clamps": 0
+      }
+    }
+  },
+  {
+    "ref": "790fb11",
+    "mode": "team-capture",
+    "status": "PASS",
+    "ms": 39921.3027,
+    "completedRounds": 3,
+    "cpu": {
+      "user": 7171000,
+      "system": 1968000
+    },
+    "memory": {
+      "rss": 196878336,
+      "heapTotal": 166088704,
+      "heapUsed": 69844248,
+      "external": 30162917,
+      "arrayBuffers": 26074282
+    },
+    "step": {
+      "count": 869,
+      "mean": 2.1870903337169496,
+      "p95": 6.754999999997381,
+      "p99": 14.488199999999779,
+      "max": 22.313399999999092
+    },
+    "snapshot": {
+      "count": 289,
+      "mean": 5.943816608996549,
+      "p95": 10.990200000000186,
+      "p99": 15.658599999995204,
+      "max": 22.744800000000396
+    },
+    "wireBytes": 226259690,
+    "frameGaps": [
+      16.900000000001455,
+      16.90000000000009,
+      16.899999999997817
+    ],
+    "overloads": 0,
+    "measurement": {
+      "snapshots": {
+        "count": 6066,
+        "mean": 32064.631882624464,
+        "p95": 57855,
+        "p99": 65873,
+        "max": 91816
+      },
+      "resident": {
+        "count": 131,
+        "mean": 132546466.19847329,
+        "p95": 167272448,
+        "p99": 183115776,
+        "max": 200007680
+      },
+      "peakRssBytes": 205639680,
+      "gcCount": 57,
+      "gcMs": 156.9058,
+      "estimatedHeapAllocationBytes": 655563448,
+      "costs": {
+        "grids": 16,
+        "gridBuckets": 714,
+        "unchangedClampCopies": 20257,
+        "clamps": 20257
+      }
+    }
+  },
+  {
+    "ref": "d28b2d8",
+    "mode": "solo",
+    "status": "PASS",
+    "ms": 40371.960499999994,
+    "completedRounds": 3,
+    "cpu": {
+      "user": 6609000,
+      "system": 1593000
+    },
+    "memory": {
+      "rss": 153935872,
+      "heapTotal": 97431552,
+      "heapUsed": 34415032,
+      "external": 8823115,
+      "arrayBuffers": 4734480
+    },
+    "step": {
+      "count": 856,
+      "mean": 2.001639135513984,
+      "p95": 5.335000000000946,
+      "p99": 9.845900000000256,
+      "max": 42.024499999999534
+    },
+    "snapshot": {
+      "count": 287,
+      "mean": 5.722977351916322,
+      "p95": 10.358799999999974,
+      "p99": 15.032099999996717,
+      "max": 19.113400000000183
+    },
+    "wireBytes": 202148001,
+    "frameGaps": [
+      16.80000000000291,
+      16.899999999999864,
+      16.80000000000291
+    ],
+    "overloads": 0,
+    "measurement": {
+      "snapshots": {
+        "count": 6030,
+        "mean": 30020.77495854063,
+        "p95": 49729,
+        "p99": 53566,
+        "max": 57782
+      },
+      "resident": {
+        "count": 131,
+        "mean": 124363002.13740458,
+        "p95": 156258304,
+        "p99": 162074624,
+        "max": 166019072
+      },
+      "peakRssBytes": 166019072,
+      "gcCount": 78,
+      "gcMs": 155.7491,
+      "estimatedHeapAllocationBytes": 588029608,
+      "costs": {
+        "grids": 4,
+        "gridBuckets": 352,
+        "unchangedClampCopies": 0,
+        "clamps": 0
+      }
+    }
+  },
+  {
+    "ref": "d28b2d8",
+    "mode": "team-capture",
+    "status": "PASS",
+    "ms": 40926.0749,
+    "completedRounds": 3,
+    "cpu": {
+      "user": 7015000,
+      "system": 2000000
+    },
+    "memory": {
+      "rss": 165761024,
+      "heapTotal": 96907264,
+      "heapUsed": 44472768,
+      "external": 15871948,
+      "arrayBuffers": 11783313
+    },
+    "step": {
+      "count": 877,
+      "mean": 2.1056036488028655,
+      "p95": 5.822700000000623,
+      "p99": 12.113399999998364,
+      "max": 21.179599999995844
+    },
+    "snapshot": {
+      "count": 295,
+      "mean": 5.72306203389823,
+      "p95": 10.190800000000309,
+      "p99": 15.126900000002934,
+      "max": 25.853799999997136
+    },
+    "wireBytes": 217564310,
+    "frameGaps": [
+      16.80000000000291,
+      16.90000000000009,
+      16.80000000000291
+    ],
+    "overloads": 0,
+    "measurement": {
+      "snapshots": {
+        "count": 6191,
+        "mean": 30486.588919399128,
+        "p95": 50983,
+        "p99": 56260,
+        "max": 72720
+      },
+      "resident": {
+        "count": 133,
+        "mean": 128305105.80451128,
+        "p95": 166006784,
+        "p99": 170090496,
+        "max": 172240896
+      },
+      "peakRssBytes": 172957696,
+      "gcCount": 82,
+      "gcMs": 158.35659999999996,
+      "estimatedHeapAllocationBytes": 660261096,
+      "costs": {
+        "grids": 10,
+        "gridBuckets": 7858,
+        "unchangedClampCopies": 21004,
+        "clamps": 21004
+      }
+    }
+  },
+  {
+    "ref": "v34",
+    "mode": "solo",
+    "status": "FAIL",
+    "ms": 37763.4484,
+    "completedRounds": 1,
+    "cpu": {
+      "user": 3968000,
+      "system": 1359000
+    },
+    "memory": {
+      "rss": 100081664,
+      "heapTotal": 60493824,
+      "heapUsed": 35561888,
+      "external": 7761509,
+      "arrayBuffers": 3667404
+    },
+    "step": {
+      "count": 247,
+      "mean": 6.329891093117222,
+      "p95": 16.141799999997602,
+      "p99": 51.23080000000118,
+      "max": 112.15820000000167
+    },
+    "snapshot": {
+      "count": 58,
+      "mean": 19.92523103448247,
+      "p95": 32.682700000001205,
+      "p99": 34.59139999999752,
+      "max": 34.64899999999761
+    },
+    "wireBytes": 39735185,
+    "frameGaps": [
+      32.599999999998545,
+      30.19999999999891,
+      32.70000000000073
+    ],
+    "overloads": 1
+  },
+  {
+    "ref": "v34",
+    "mode": "team-capture",
+    "status": "NOT_RUN"
+  }
+]

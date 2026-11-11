@@ -44,11 +44,18 @@ for(const renderer of renderers){
        else{game.draw();pose={x:game.lookAt.x,y:game.lookAt.y,zoom:game.zoom,screenX:canvas.width/2,screenY:game.capture?Math.min(126,canvas.height*.22)+(canvas.height-Math.min(126,canvas.height*.22)-48)/2:canvas.height/2};}out.push(pose);
       }return out;
      },{...received,renderer});
-     // Capture keeps the legacy fixed viewport. The requested non-capture camera
-     // intentionally changes the framing; test its actual visible subjects on every frame.
+     // v34 frames the actual capture boundary within the visible HUD insets.
+     // Keep the legacy trace for comparison and check all four corners on every frame.
+     const insets=await h.host.evaluate(()=>auditApp.renderer.hostInsets());
      for(const [n,p] of current.entries()){
       assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.zoom>0&&Number.isFinite(p.zoom));
-      if(capture){for(const key of ['x','y','zoom','screenX','screenY'])assert.ok(Math.abs(p[key]-original[n][key])<1e-8);continue;}
+      if(capture){
+       const b=received.map.boundary, width=viewport.width-insets.left-insets.right-48, height=viewport.height-insets.top-insets.bottom;
+       assert.equal(p.x,(b.minX+b.maxX)/2);assert.equal(p.y,(b.minY+b.maxY)/2);
+       assert.equal(p.zoom,Math.min(width/(b.maxX-b.minX),height/(b.maxY-b.minY)));
+       assert.equal(p.screenX,insets.left+24+width/2);assert.equal(p.screenY,insets.top+height/2);
+       continue;
+      }
       const subjects=received.view.actors.filter(a=>a.alive&&!a.clone&&(!p.pair||p.pair.includes(a.id)));
       for(const a of subjects){const x=p.screenX+(a.x-p.x)*p.zoom,y=p.screenY+(a.y-p.y)*p.zoom;
        assert.ok(x>=24&&x<=viewport.width-24&&y>=30&&y<=viewport.height-24,'subject outside safe frame');}

@@ -53,11 +53,19 @@ export class HostCamera{
   const alive=view.actors.filter(p=>p.alive&&!p.clone&&finitePoint(p));
   // LOD is independent of the teacher's chosen camera.
   const lod=alive.length>12?'performance':alive.length<=5?'broadcast':'normal';
+  const capture = !!(view.capture && map.boundary);
+  const top = clamp(insets.top ?? (capture ? Math.min(126,h*.22) : 86),0,h-1);
+  const bottom = clamp(insets.bottom ?? (capture ? 48 : 54),0,h-top-1);
+  const side = capture ? 24 : Math.min(28,w*.06);
+  const left = (insets.left ?? 0) + side, right = (insets.right ?? 0) + side;
+  const width = Math.max(1,w-left-right), height = Math.max(1,h-top-bottom);
+  const screenX = left + width/2, screenY = top + height/2;
   if(view.capture&&map.boundary){
-   const b=map.boundary,top=Math.min(126,h*.22),bottom=48;
-   this.x=this.y=0;this.zoom=Math.max(.01,Math.min((w-48)/(b.maxX-b.minX),(h-top-bottom)/(b.maxY-b.minY)));
-   this.pair=null;this.initial=true;this.target={x:0,y:0,zoom:this.zoom};
-   return {...this.target,screenX:w/2,screenY:top+(h-top-bottom)/2,mode:'capture',lod:'capture',target:this.target};
+   const b=map.boundary;
+   this.x=(b.minX+b.maxX)/2;this.y=(b.minY+b.maxY)/2;
+   this.zoom=Math.min(width/(b.maxX-b.minX),height/(b.maxY-b.minY));
+   this.pair=null;this.initial=true;this.target={x:this.x,y:this.y,zoom:this.zoom};
+   return {...this.target,screenX,screenY,mode:'capture',lod:'capture',target:this.target};
   }
   let subjects=alive;
   if(focus){
@@ -72,10 +80,17 @@ export class HostCamera{
   this.focused=focus;
   const mode=this.pair?'combat':'overview',r=Math.max(1,map.worldRadius||1);
   const box=subjects.length?bounds(subjects,this.pair?138:90):{left:-r,right:r,top:-r,bottom:r};
-  const top=clamp(insets.top??86,0,h*.32),bottom=clamp(insets.bottom??54,0,h*.22);
-  const width=Math.max(1,w-2*Math.min(28,w*.06)),height=Math.max(1,h-top-bottom);
-  const screenX=w/2,screenY=top+height/2;
-  const x=clamp((box.left+box.right)/2,-r,r),y=clamp((box.top+box.bottom)/2,-r,r);
+  let x=(box.left+box.right)/2,y=(box.top+box.bottom)/2;
+  if(!this.pair){
+   const ring=view.ring;
+   x=Number.isFinite(ring?.cx)?ring.cx:map.center?.x??0;
+   y=Number.isFinite(ring?.cy)?ring.cy:map.center?.y??0;
+   // Keep the field centre and every live body in the overview. As players
+   // leave, retain less empty ring context around the remaining fight.
+   const radius=Math.max(0,ring?.radius??r)*(.2+.8*Math.min(1,alive.length/20));
+   const halfX=Math.max(radius,x-box.left,box.right-x),halfY=Math.max(radius,y-box.top,box.bottom-y);
+   box.left=x-halfX;box.right=x+halfX;box.top=y-halfY;box.bottom=y+halfY;
+  }
   const fit=Math.min(width/(box.right-box.left),height/(box.bottom-box.top));
   const zoom=Math.min(this.pair?1.55:1.35,fit*.93);
   if(this.count!==alive.length||this.mode!==mode)this.allowZoomIn=this.time+240;

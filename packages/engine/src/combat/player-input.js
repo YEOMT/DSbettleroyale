@@ -1,4 +1,5 @@
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
+import {activeSupply} from '../farm/combat-supplies.js';
 export function install(__brScope){
 __brScope.brFindDirectionalTarget = function brFindDirectionalTarget(p,g,aim,spec,endpointOnly) {
             var best=null,bestScore=Infinity,range=Math.max(1,Number(spec.range||0));
@@ -260,11 +261,18 @@ __brScope.brClosePolish = function brClosePolish(ability) {return !!ability&&abi
 
 __brScope.brBaseWalkingSpeed = function brBaseWalkingSpeed(p) {
             if(p.ability.id==='emoji-139')return __brScope.BR_V29_ZOMBIE_WALK;
-            return .7*Math.max(5.6,p.speed*4.05)*(p.ability.sub==='STONE'?.48:1)*(__brScope.brClosePolish(p.ability)?1.04:1)*(__brScope.brBasicCombatProfile(p.ability).close?1:.95);
+            // Preserve each affected kit's existing speed floor proportion when raising its base stat.
+            const speedFloor=5.6*(p.ability.walkFloorRatio||1);
+            return .7*Math.max(speedFloor,p.speed*4.05)*(p.ability.sub==='STONE'?.48:1)*(__brScope.brClosePolish(p.ability)?1.04:1)*(__brScope.brBasicCombatProfile(p.ability).close?1:.95);
         };
 
 __brScope.brHumanMoveSpeed = function brHumanMoveSpeed(p) {
-            return __brScope.brBaseWalkingSpeed(p)*(p.escapeBoostUntil>Number(__brScope.game?.frame||0)?1.30:1)*(p.teamHasteFrames>0?1.12:1)*(p.playerChaseFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*__brScope.brRunMod(p,'moveSpeed')*(__brScope.BRRework?.moveRate(p)??1);
+            const base = __brScope.brBaseWalkingSpeed(p), tick = Number(__brScope.game?.frame || 0);
+            const speed = base*(p.escapeBoostUntil>tick?1.30:1)*(p.teamHasteFrames>0?1.12:1)*(p.playerChaseFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*__brScope.brRunMod(p,'moveSpeed')*(__brScope.BRRework?.moveRate(p)??1);
+            if (!p.combatBuff || activeSupply(p, tick)?.kind !== 'haste') return speed;
+            // The supply can add walking speed up to 2x base; existing stronger
+            // movement modifiers are never weakened by picking it up.
+            return Math.max(speed, Math.min(speed * 1.45, base * 2));
         };
 
 __brScope.brApplyPlayerInput = function brApplyPlayerInput(p,g) {
@@ -360,9 +368,10 @@ __brScope.brBasicAttack = function brBasicAttack(p,g,aim) {
                     if(!__brScope.brMeleeTargetIntersectsCone(p.pos,o,aim,range,profile.halfAngle)||g.checkWallBetween(p.pos,o.pos))continue;
                     var bodyContact=__brScope.isTankAbility(p.ability)&&o.pos.dist(p.pos)<=p.radius+o.radius+.5;
                     var hitPush=push+(bodyContact?3:0),hitStyle=bodyContact?'body-check':'basic-'+profile.style;
+                    if(rwBasic?.kickPush)hitPush*=rwBasic.kickPush;
                     var before=o.hp,previous=p.currentImpactStyle;p.currentImpactStyle='basic-'+profile.style;
                     try{o.takeDamage(damage*p.damageMult*.72*__brScope.brCombatPower(p),p,false,aim,{basic:true,attackId:rwAttackId,basicSnapshot:rwBasic,attackFrames:cd,knockback:hitPush});}finally{p.currentImpactStyle=previous||'';}
-                    const dealt=Math.max(0,before-o.hp);if(!o._lastDamageResult?.valid)continue;totalDealt+=dealt;
+                    const dealt=Math.max(0,before-o.hp);if(!o._lastDamageResult?.valid)continue;totalDealt+=dealt;if(rwBasic?.kickPush)rwBasic.kickPush=0;
                     if(!o.alive){hit=true;continue;}__brScope.BRRework.nativeImpulse(o,p,aim,hitPush,g,null,{hardForce:false});
                     // Basic soft impulse never arms skill cancellation or a secondary collision attack.
                     // Basic attacks never create stun, including heavy melee hits.

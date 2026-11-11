@@ -52,7 +52,7 @@ export function attachSimulation(manager,metrics){
     for(const member of room.members.values()){
      if(!member.connected)continue;
      const view=member.role==='host'?getHostVisibleState(publicTeacher):getVisibleState(room.world,member.id,undefined,publicTeacher);
-     if(member.peer)member.peer.snapshot(encode(view.self?{...view,self:member.peer.selfState(view.self)}:view,member.peer.scope()));
+     if(member.peer)member.peer.snapshot(encode(view.self?{...view,self:member.peer.selfState(view.self)}:view,member.peer.scope(),member.peer.deliveredAnnouncement),teacher.announcements?.seq);
     }
     metrics.snapshotCpu.add(performance.now()-start);
     if(now-(room.lastBoard||0)>=500){room.lastBoard=now;const board=room.world.session.respawnMode?room.world.brTKBuildBoard(false):{players:teacher.actors.map(a=>({id:a.id,name:a.name,team:a.team,kills:a.kills,deaths:a.deaths,rank:0})),teams:[]};for(const m of room.members.values())m.peer?.send('LEADERBOARD',board);}

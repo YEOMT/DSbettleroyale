@@ -1,4 +1,6 @@
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
+import {initSoloSupplies, scheduleSoloSupplies, updateSoloSupplies} from '../farm/combat-supplies.js';
+import {announcePlayerKill,recordClassroomEvent} from './classroom-announcements.js';
 export function install(__brScope){
 __brScope.GameWorld = class GameWorld {
             constructor(participants) {
@@ -62,6 +64,7 @@ __brScope.GameWorld = class GameWorld {
                 this.supplyDrop = null;
                 this.supplyDropSpawned = false;
                 this.supplyDropSpawnFrame = Math.round(__brScope.randRange(1050,1750));
+                initSoloSupplies(__brScope, this);
 
                 if(__brScope.brCaptureMode())__brScope.brCaptureSetupMap(this);else{this.initMap();this.scaleArenaLayout();this.addCombatCover();}this.initParticipants();__brScope.brSurvivalTerrain(this);
                 if(__brScope.session?.active&&__brScope.brProgression){
@@ -497,10 +500,14 @@ __brScope.GameWorld = class GameWorld {
                 if(this.eventFeed.length>3) this.eventFeed.length=3;
             }
 
+            announceClassroom(kind, fields) {
+                recordClassroomEvent(this, kind, fields);
+            }
+
             registerKillEvent(attacker, victim) {
                 if(!attacker || !victim) return;
                 if(__brScope.session?.isRespawnMode()) {
-                    if(__brScope.brTKRecordKill)__brScope.brTKRecordKill(attacker,victim,this);
+                    if(__brScope.brTKRecordKill?.(attacker,victim,this))announcePlayerKill(this,attacker,victim);
                     return;
                 }
                 const now=this.frame;
@@ -509,7 +516,7 @@ __brScope.GameWorld = class GameWorld {
                 attacker.lastKillFrame = now;
                 attacker.killTimes.push(now);
 
-                if(!this.firstBloodDone)this.firstBloodDone=true;
+                announcePlayerKill(this,attacker,victim);
                 this.pushCombatEvent(`⚔ ${attacker.name} eliminated ${victim.name}`,'#f8fafc',1,null);
 
             }
@@ -684,6 +691,7 @@ __brScope.GameWorld = class GameWorld {
                 if(this.finalPhaseTriggered||!alive||alive.length<2||alive.length>3) return;
                 this.finalPhaseTriggered=true; this.finalPhase=true; this.finalPhaseStartedAt=this.frame;
                 this.announce('🔥 FINAL 3 BURNING!',125);
+                this.announceClassroom('final-three');
                 // 한 번만 보정한다. 한 프레임에 4→2명이 되더라도 최종전이 빠지지 않는다.
                 alive.forEach((p,idx)=>{
                     p.hp=Math.min(p.maxHp,p.hp+p.maxHp*0.12);
@@ -905,7 +913,8 @@ __brScope.GameWorld = class GameWorld {
                     if (this.shakeAmount > 0) this.shakeAmount *= 0.85; // 프레임마다 진동 서서히 감소
                     if (this.shakeAmount < 0.5) this.shakeAmount = 0;
 
-                    if(!this.supplyDropSpawned&&this.frame>=this.supplyDropSpawnFrame&&this.aliveRealPlayers.length>1) this.spawnSupplyDrop();
+                    if (this.soloSupplies) scheduleSoloSupplies(__brScope, this);
+                    else if(!this.supplyDropSpawned&&this.frame>=this.supplyDropSpawnFrame&&this.aliveRealPlayers.length>1) this.spawnSupplyDrop();
 
                     // 장식 애니메이션은 성능 모드에서 20fps만 갱신한다. 충돌/전투 판정과는 무관하다.
                     if(!this.isPerformanceMode()||this.frame%3===0) {
@@ -915,6 +924,7 @@ __brScope.GameWorld = class GameWorld {
                     
                     // v21.16: 한 플레이어의 입력/능력 런타임 오류가 경기 전체 requestAnimationFrame을 죽이지 않게 격리.
                     for(const p of this.activeParticipants) {
+                        if (p.combatBuff && (p.combatBuff.end <= this.frame || p.combatBuff.life !== p.lifeSeq)) p.combatBuff = null;
                         try {
                             p.update(this);
                         } catch(err) {
@@ -945,6 +955,7 @@ __brScope.GameWorld = class GameWorld {
                     } finally {this.resolvingDashContacts=false;this.pendingDashContacts.length=0;}
                     if(dashRelocated)this.rebuildSpatialGrid(); // Only flight settlement changes positions here.
                     __brScope.brFarm.update(this);
+                    if (this.soloSupplies && (this.combatSupply || this.supplyDrop)) updateSoloSupplies(__brScope, this);
                     if(this.supplyDrop) {
                         this.supplyDrop.update(this);
                         if(this.supplyDrop.claimed||this.supplyDrop.life<=0) {

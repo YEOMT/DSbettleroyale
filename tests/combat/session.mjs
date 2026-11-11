@@ -31,12 +31,34 @@ try{
  await wait('high action queues',()=>w.actionPending.get(p.remoteId)?.length===2);
  h.room.fixtureFrozen=false;
  await wait('both real casts',()=>p.firedAttackSeq===1001&&p.firedSkillSeq===1001);
+ // Recovery, touch gestures and CDP thaw can take substantial wall time on a
+ // software GPU. A held test joystick must not play the rest of a team match
+ // while the driver is checking its pointer and overlay state.
+ h.room.fixtureFrozen=true;h.publish();
+ async function verifyMovement(label,key,axis,minDistance,inputFloor=0){
+  const origin=p.pos[axis];
+  const previous=Math.max(p.lastAppliedSeq||0,await attacker.evaluate(()=>gameTest.controls.seq));
+  let intendedSeq=0;
+  try{
+   await attacker.keyboard.down(key);
+   await wait(label,()=>{
+    assert.equal(h.room.phase,'BATTLE',label+' requires a live match');
+    assert.equal(p.alive,true,label+' requires a live actor');
+    const pending=w.inputPending.get(p.remoteId);
+    if(!intendedSeq&&pending?.move[axis]>.5&&pending.seq>Math.max(previous,inputFloor)){
+     intendedSeq=pending.seq;h.room.fixtureFrozen=false;
+    }
+    return intendedSeq>0&&p.lastAppliedSeq>=intendedSeq&&p.pos[axis]>origin+minDistance;
+   });
+  }finally{h.room.fixtureFrozen=true;await attacker.keyboard.up(key);}
+  h.publish();return p.pos[axis]-origin;
+ }
  const id=p.remoteId,oldEpoch=h.room.students()[0].epoch,identity={id,team:p.team,ability:p.ability.id,life:p.lifeSeq,level:p.run.level};
  await attacker.reload();await app(attacker);await attacker.locator('#br-student-battle').waitFor();
  await attacker.waitForFunction(()=>!gameTest.net.restoring&&gameTest.timeline.predicted?.alive&&gameTest.controls.seq>=100000);
  assert.equal(h.room.students()[0].epoch,oldEpoch+1);assert.deepEqual({id:p.remoteId,team:p.team,ability:p.ability.id,life:p.lifeSeq,level:p.run.level},identity);
- await observe(attacker);const x=p.pos.x;await attacker.keyboard.down('d');await wait('applied move after refresh',()=>p.pos.x>x+30&&p.lastAppliedSeq>100000);await attacker.keyboard.up('d');
- report.checks.push({id:'T04',playerRestored:true,applied:p.lastAppliedSeq,moved:p.pos.x-x});
+ await observe(attacker);const movedAfterRefresh=await verifyMovement('applied move after refresh','d','x',30,100000);
+ report.checks.push({id:'T04',playerRestored:true,applied:p.lastAppliedSeq,moved:movedAfterRefresh});
  // A true transport interruption (not merely toggling an offline indicator).
  await attacker.evaluate(()=>{window.lateSocket=gameTest.net.ws;});
  const epoch=h.room.students()[0].epoch;
@@ -45,8 +67,8 @@ try{
  const ignored=await attacker.evaluate(()=>{const n=gameTest.net,ws=n.ws;lateSocket.onmessage({data:JSON.stringify({type:'VERSION_MISMATCH',payload:{}})});lateSocket.onclose({code:1000,reason:'old'});return !n.stopped&&ws===n.ws&&ws.readyState===1;});assert.ok(ignored);
  await attacker.evaluate(()=>{gameTest.net.retryStart=performance.now()-61000;});binding.peer.socket.terminate();
  await attacker.getByRole('button',{name:'기존 경기로 다시 연결'}).click();await wait('manual recovery',()=>binding.epoch===epoch+2);await attacker.waitForFunction(()=>!gameTest.net.restoring&&gameTest.controls.enabled);
- const y=p.pos.y;await attacker.keyboard.down('s');await wait('fresh epoch movement',()=>p.pos.y>y+20);await attacker.keyboard.up('s');
- report.checks.push({id:'T05',epoch:binding.epoch,moved:p.pos.y-y});
+ const movedAfterReconnect=await verifyMovement('fresh epoch movement','s','y',20);
+ report.checks.push({id:'T05',epoch:binding.epoch,moved:movedAfterReconnect});
  const touch=await attacker.context().newCDPSession(attacker);await touch.send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:3});
  const center=async sel=>{const b=await attacker.locator(sel).boundingBox();return {x:b.x+b.width/2,y:b.y+b.height/2};},stick=await center('#br-joystick'),act=await center('#br-attack');
  const event=(type,points)=>touch.send('Input.dispatchTouchEvent',{type,touchPoints:points});
@@ -69,8 +91,10 @@ try{
  await wait('augment selection applies',()=>p.run.offer?.id!==oldOffer);if(await attacker.locator('#br-run-panel').isVisible())await attacker.locator('#br-run-later').click();await attacker.locator('#br-run-panel').waitFor({state:'hidden'});
  await attacker.evaluate(()=>{const input=document.createElement('input');document.body.append(input);input.focus();input.remove();});
  const lifecycle=await attacker.context().newCDPSession(attacker);await lifecycle.send('Page.setWebLifecycleState',{state:'frozen'});await delay(150);await lifecycle.send('Page.setWebLifecycleState',{state:'active'});
- const afterFocus=p.pos.x;await attacker.keyboard.down('d');await wait('movement after overlay',()=>p.pos.x>afterFocus+8);await attacker.keyboard.up('d');
- report.checks.push({id:'T01/T02',transport:'Chromium CDP multi-touch',ghostFires:0});
+ await attacker.bringToFront();
+ const movedAfterOverlay=await verifyMovement('movement after overlay','d','x',8);
+ report.checks.push({id:'T01/T02',transport:'Chromium CDP multi-touch',ghostFires:0,movedAfterOverlay,applied:p.lastAppliedSeq,battleFrame:w.game.frame});
+ h.room.fixtureFrozen=false;
  await wait('legitimate cooldown',()=>p.cooldown<=0&&p.basicCooldown<=0,20000);
  // Place participants in a clear lane; the casts below must come from student UI.
  p.pos=new w.Vec2(960,340);other.pos=new w.Vec2(1070,340);h.publish();
@@ -118,5 +142,5 @@ try{
  await h.command('END');await h.command('REMATCH');await attacker.locator('#br-student-wait').waitFor();
  assert.deepEqual(h.errors,[]);report.checks.push({id:'T07/T09',expired:true,rematch:true});report.status='PASS';
 }catch(error){
- const world=h.room.world;report.fail={message:error.message,phase:h.room.phase,paused:h.room.safePaused,fault:h.room.lastFault,actors:world?.game.participants.map(a=>({alive:a.alive,cooldown:a.cooldown,basic:a.basicCooldown,fault:a.lastRuntimeFault,frame:world.game.frame,runtimeFaults:a.runtimeFaults})),errors:h.errors};console.error(report.fail);throw error;
+ const world=h.room.world;report.fail={message:error.message,phase:h.room.phase,paused:h.room.safePaused,fault:h.room.lastFault,ring:world?.game.ringGeometry,actors:world?.game.participants.map(a=>({alive:a.alive,x:a.pos.x,y:a.pos.y,life:a.lifeSeq,applied:a.lastAppliedSeq,received:a.lastReceivedSeq,death:a.lastDeathCause?.kind,cooldown:a.cooldown,basic:a.basicCooldown,fault:a.lastRuntimeFault,frame:world.game.frame,runtimeFaults:a.runtimeFaults})),browser:await h.student.evaluate(()=>({visible:document.visibilityState,focus:document.hasFocus(),active:document.activeElement?.tagName,enabled:window.gameTest?.controls.enabled,move:window.gameTest?.controls.lastMove,epoch:window.gameTest?.net.scope.connectionEpoch})).catch(()=>null),errors:h.errors};console.error(report.fail);throw error;
 }finally{report.ms=Date.now()-started;fs.writeFileSync(dir+'/'+renderer+'.json',JSON.stringify(report,null,2));await h.close();}

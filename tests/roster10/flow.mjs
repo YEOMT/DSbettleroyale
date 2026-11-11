@@ -30,7 +30,12 @@ try{
   // Start each skill from an unobstructed common geometry; no skill lock or
   // cooldown is removed after the actual skill command.
   a.pos=new w.Vec2(0,0);b.pos=new w.Vec2(200,0);a.vel=new w.Vec2(0,0);b.vel=new w.Vec2(0,0);a.stunned=0;await paint();
-  assert.equal((await send('skill')).accepted,true);await step(60);assert.ok(a.firedSkillSeq>0,id+' skill fired');assert.ok(a.cooldown>0,id+' cooldown');
+  assert.equal((await send('skill')).accepted,true);await step(60);assert.ok(a.firedSkillSeq>0,id+' skill fired');if(number===147){
+   const rec=a.rw.recast;assert.equal(rec.left,1);assert.equal(a.cooldown,0);
+   const ack=await h.student.evaluate(()=>m.net.command('ACTION',{kind:'skill',seq:++m.controls.actions.skill,castId:m.timeline.predicted.rw.recast.id,aim:{x:1,y:0},aimPower:1}));
+   assert.equal(ack.accepted,true);await step(1);assert.equal(a.rw.recast,null);
+  }
+  assert.ok(a.cooldown>0,id+' cooldown');
   if(number===144){const trap=w.game.rw.entities.find(e=>!e.dead&&e.kind==='mushroom');assert.ok(trap);b.pos=new w.Vec2(trap.pos.x,trap.pos.y);await step(12);}
   const expected=({141:'decoy',142:'grapple',143:'ring-wall',144:'mushroom'})[number];
   const screens=await Promise.all(pages.map(p=>p.evaluate(()=>({frames:drawn.length,visible:[...new Set(drawn.flatMap(f=>f.visible))],shots:[...new Set(drawn.flatMap(f=>f.shots.map(s=>s.kind)))],walls:Math.max(...drawn.map(f=>f.walls)),effects:received.filter(e=>e.type==='FX').length}))));

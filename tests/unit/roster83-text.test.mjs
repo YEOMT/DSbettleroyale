@@ -5,8 +5,8 @@ import {display} from '../../packages/content/src/display.js';
 import {currentCard} from '../../tools/content/cards.mjs';
 import {applyRosterText,reviewedTextIds} from '../../packages/engine/src/world/roster-text.js';
 const deleted=['emoji-048','emoji-065','emoji-073','emoji-076'];
-test('83 active IDs have reviewed current text, exact generated cards and authority facts',()=>{
- const r=createRuleContext(),ids=r.EMOJI_DB.map(a=>a.id);assert.equal(ids.length,83);assert.equal(new Set(ids).size,83);
+test('84 active IDs have reviewed current text, exact generated cards and authority facts',()=>{
+ const r=createRuleContext(),ids=r.EMOJI_DB.map(a=>a.id);assert.equal(ids.length,84);assert.equal(new Set(ids).size,84);
  for(const group of [reviewedTextIds,Object.keys(display.cards),manifest.roster.map(a=>a.id)])assert.deepEqual([...group].sort(),[...ids].sort());
  for(const id of deleted){assert.ok(!ids.includes(id));assert.equal(display.cards[id],undefined);assert.equal(r.BRRework.defs[id],undefined);assert.ok(!r.BR_V32_NATIVE_SKILLS.has(id));}
  for(const a of r.EMOJI_DB){
@@ -29,7 +29,7 @@ test('reviewed text pass changes only declared prose keys, never numeric or iden
 test('known stale concepts, duplicate basic tags and two reworks match the current kit',()=>{
  assert.doesNotMatch(display.cards['emoji-089'].concept,/원반/);assert.match(display.cards['emoji-089'].concept,/농구/);
  assert.doesNotMatch(display.cards['emoji-122'].concept,/화분/);assert.match(display.cards['emoji-122'].concept,/통조림/);
- assert.doesNotMatch(display.cards['emoji-127'].concept,/폭탄/);assert.match(display.cards['emoji-127'].skill,/폭탄·종료 장판·재시전은 없습니다/);
+ assert.doesNotMatch(display.cards['emoji-127'].concept,/폭탄/);assert.match(display.cards['emoji-127'].skill,/넉백이 45% 증가/);
  assert.match(display.cards['emoji-034'].skill,/반사|직선/);assert.equal(display.cards['emoji-034'].facts.skill.cooldownFrames,945);
  assert.match(display.cards['emoji-070'].basic,/×1.5/);assert.match(display.cards['emoji-070'].skill,/5초/);assert.equal(display.cards['emoji-070'].facts.skill.durationFrames,300);
  assert.equal((display.cards['emoji-013'].basic.match(/흡혈/g)||[]).length,1);

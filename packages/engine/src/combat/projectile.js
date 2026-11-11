@@ -2,6 +2,7 @@
 export function install(__brScope){
 __brScope.Projectile = class Projectile {
             constructor(owner, pos, dir, speed, damage, size, type, color, explodeRadius=0, emoji=null, opts={}) {
+                if (opts.supplyIndirect) this.supplyIndirect = true;
                 this.runSkill=opts.impactStyle==='ranged-basic'?null:(opts.runSkill||owner?._runSkillCast||(owner?.dashFrames>0?owner._runLastSkill:null)||__brScope.brRunSkillSnapshot(owner));
                 this.dotDamageMult=this.runSkill?.damage||Number(opts.basicDamageMultiplier||1);
                 if(this.runSkill){damage*=this.runSkill.damage;size*=this.runSkill.size;explodeRadius*=this.runSkill.size;}
@@ -215,7 +216,7 @@ __brScope.Projectile = class Projectile {
                         const distance=victim.pos.dist(this.pos);
                         if(victim!==primaryTarget&&(distance>radius+victim.radius*.35||game.checkWallBetween(this.pos,victim.pos)))continue;
                         const falloff=victim===primaryTarget?1:1-.35*Math.min(1,distance/radius);
-                        victim.takeDamage(this.damage*falloff,this.owner,false,victim.pos.sub(this.pos),{scaled:true,wangguiPower:this.wangguiPower,style:this.impactStyle||'ranged-power',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:radius,projectileId:this._brNetId||'',ordinal:this.shotOrdinal||0,actionKind:this.inputKind,contact:{x:victim.pos.x,y:victim.pos.y}});
+                        victim.takeDamage(this.damage*falloff,this.owner,false,victim.pos.sub(this.pos),{scaled:true,wangguiPower:this.wangguiPower,style:this.impactStyle||'ranged-power',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:radius,projectileId:this._brNetId||'',ordinal:this.shotOrdinal||0,actionKind:this.inputKind,supplyIndirect:this.supplyIndirect,contact:{x:victim.pos.x,y:victim.pos.y}});
                         const outward=victim.pos.sub(this.pos),dir=outward.mag()>.01?outward.norm():this.vel.norm();
                         const push=this.knockback*falloff;
                         __brScope.BRRework.nativeImpulse(victim,this.owner,dir,push,game,this.runSkill,{hardForce:this.baseKnockback*falloff>=14});
@@ -237,7 +238,7 @@ __brScope.Projectile = class Projectile {
                 const dealDamage=(victim)=>{
                     const previousStyle=this.owner&&this.owner.currentImpactStyle;
                     if(this.owner&&this.impactStyle)this.owner.currentImpactStyle=this.impactStyle;
-                    try { return victim.takeDamage(this.damage*(central?1.5:1),this.owner,false,this.explodeRadius>0?victim.pos.sub(this.pos):(this.type==='ORBIT'?victim.pos.sub(this.owner.pos):this.vel),{scaled:true,wangguiPower:this.wangguiPower,basic:this.impactStyle==='ranged-basic',...(central?{style:'dart-center'}:{}),attackId:this.basicAttackId,basicSnapshot:this.basicSnapshot,contact:{x:this.pos.x,y:this.pos.y},projectileId:this._brNetId||'',actionKind:this.inputKind,ordinal:this.shotOrdinal||0,visualPeriodic:this.type==='ORBIT',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:this.explodeRadius}); }
+                    try { return victim.takeDamage(this.damage*(central?1.5:1),this.owner,false,this.explodeRadius>0?victim.pos.sub(this.pos):(this.type==='ORBIT'?victim.pos.sub(this.owner.pos):this.vel),{scaled:true,wangguiPower:this.wangguiPower,basic:this.impactStyle==='ranged-basic',...(central?{style:'dart-center'}:{}),attackId:this.basicAttackId,basicSnapshot:this.basicSnapshot,contact:{x:this.pos.x,y:this.pos.y},projectileId:this._brNetId||'',actionKind:this.inputKind,supplyIndirect:this.supplyIndirect,ordinal:this.shotOrdinal||0,visualPeriodic:this.type==='ORBIT',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:this.explodeRadius}); }
                     finally { if(this.owner)this.owner.currentImpactStyle=previousStyle||''; }
                 };
                 

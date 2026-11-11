@@ -1,5 +1,5 @@
 // Generated from current authority runtime by npm run content:generate; legacy baseline remains immutable.
-export const contentHash="87c44dcd8a38dbcd0fe0d5721327ef31131f6879446839e7af9ba0fdda57280b";
+export const contentHash="8f35f243ad7ee3770ffe3bbbeaf2ad6f4fd2760c7a511c8e196fceb920d6fd6b";
 export const manifest={
   "roster": [
     {
@@ -694,12 +694,14 @@ export const manifest={
         "concept": "자신을 중심으로 위험 구역을 만드는 방사능 투사",
         "basicSummary": "방사능 탄",
         "skillSummary": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 7.35) · 사망 폭발은 30, 생명당 1회",
+        "finalBaseSpeed": 1.3,
+        "walkFloorRatio": 1.0833333333333335,
         "skillLabel": "폴아웃",
         "skillDesc": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 7.35) · 사망 폭발은 30, 생명당 1회"
       },
       "maxHp": 459,
       "radius": 68.4,
-      "speed": 1.2,
+      "speed": 1.3,
       "damageMult": 1,
       "basic": {
         "close": false,
@@ -1914,7 +1916,7 @@ export const manifest={
         "statusPower": 0,
         "spin": 0.22,
         "face": false,
-        "homingTurnRate": 0.045
+        "homingTurnRate": 0.04
       },
       "skill": {
         "kind": "homing-eyes",
@@ -1927,7 +1929,7 @@ export const manifest={
         "count": 4,
         "countCap": 6,
         "spread": 0.1,
-        "turnRate": 0.052,
+        "turnRate": 0.046,
         "homingCone": 0.38092482436688185,
         "stunFrames": 45,
         "stunCap": 60,
@@ -2229,18 +2231,18 @@ export const manifest={
         "e": "✂️",
         "n": "가위 수호자",
         "type": "MELEE",
-        "desc": "근접 가위질과 같은 방향의 순차 가위 투척을 섞는다",
+        "desc": "근접 가위질과 방향을 바꿔 최대 세 번 던지는 5연발을 섞는다",
         "sub": "SCISSOR_DASH",
         "sizeMult": 1.34,
         "id": "emoji-131",
         "legacyIndex": 131,
         "timingSeed": "가위 수호자",
         "category": "근접형",
-        "concept": "근접 가위질과 같은 방향의 순차 가위 투척을 섞는다",
+        "concept": "근접 가위질과 방향을 바꿔 최대 세 번 던지는 5연발을 섞는다",
         "basicSummary": "가위 근접 베기",
-        "skillSummary": "같은 조준 방향으로 가위 5발 · 0.1초 간격 순차 발사 · 탄당 피해 26 · 기절/옛 근접 연격 없음",
+        "skillSummary": "한 방향으로 가위 5발을 0.1초 간격으로 던집니다. 최초 시전 후 3초 안에 방향을 바꿔 두 번 더 사용합니다. 탄당 기본 피해는 차례로 26 / 15.6 / 11.7이며 각 연사가 끝나야 재사용할 수 있습니다.",
         "skillLabel": "가위 수호자",
-        "skillDesc": "같은 조준 방향으로 가위 5발 · 0.1초 간격 순차 발사 · 탄당 피해 26 · 기절/옛 근접 연격 없음"
+        "skillDesc": "한 방향으로 가위 5발을 0.1초 간격으로 던집니다. 최초 시전 후 3초 안에 방향을 바꿔 두 번 더 사용합니다. 탄당 기본 피해는 차례로 26 / 15.6 / 11.7이며 각 연사가 끝나야 재사용할 수 있습니다."
       },
       "maxHp": 604.5341255856002,
       "radius": 57.19334400000001,
@@ -2270,7 +2272,7 @@ export const manifest={
         "intervalFrames": 6,
         "windupFrames": 0,
         "knockback": 1.2,
-        "description": "같은 조준 방향으로 가위 5발 · 0.1초 간격 순차 발사 · 탄당 피해 26 · 기절/옛 근접 연격 없음",
+        "description": "한 방향으로 가위 5발을 0.1초 간격으로 던집니다. 최초 시전 후 3초 안에 방향을 바꿔 두 번 더 사용합니다. 탄당 기본 피해는 차례로 26 / 15.6 / 11.7이며 각 연사가 끝나야 재사용할 수 있습니다.",
         "capabilities": {
           "damage": true,
           "projectile": true,
@@ -2319,7 +2321,13 @@ export const manifest={
           "speed": "world units/frame",
           "damage": "base coefficient before rank/run modifiers"
         },
-        "cancelPolicy": "death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel"
+        "cancelPolicy": "death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel",
+        "extraUses": 2,
+        "recastWindow": 180,
+        "recastDamage": [
+          0.6,
+          0.45
+        ]
       },
       "timing": {
         "cooldown": 960
@@ -2344,13 +2352,15 @@ export const manifest={
         "category": "원거리형",
         "concept": "제자리에 서서 방향을 돌리는 지속 광선으로 길을 막는다",
         "basicSummary": "가느다란 공허탄",
-        "skillSummary": "2.5초 지속 광선 · 0.1초마다 피해 계수 8.736 · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음",
+        "skillSummary": "2.5초 지속 광선 · 0.1초마다 피해 계수 10 · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음",
+        "finalBaseSpeed": 1.38,
+        "walkFloorRatio": 1.0648148148148147,
         "skillLabel": "공허 파괴자",
-        "skillDesc": "2.5초 지속 광선 · 0.1초마다 피해 계수 8.736 · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음"
+        "skillDesc": "2.5초 지속 광선 · 0.1초마다 피해 계수 10 · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음"
       },
       "maxHp": 422.48400000000004,
       "radius": 57.76,
-      "speed": 1.296,
+      "speed": 1.38,
       "damageMult": 1,
       "basic": {
         "close": false,
@@ -2384,7 +2394,7 @@ export const manifest={
         "cooldownFrames": 1200,
         "range": 1393.6,
         "width": 116,
-        "damage": 8.736,
+        "damage": 10,
         "durationFrames": 150,
         "intervalFrames": 6,
         "turnRate": 0.038,
@@ -2392,7 +2402,7 @@ export const manifest={
         "countCap": 1,
         "knockback": 0,
         "stunFrames": 0,
-        "description": "2.5초 지속 광선 · 0.1초마다 피해 계수 8.736 · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음",
+        "description": "2.5초 지속 광선 · 0.1초마다 피해 계수 10 · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -2963,12 +2973,14 @@ export const manifest={
         "concept": "상대 공격을 받아내며 반격 각도를 만든다",
         "basicSummary": "갑옷 근접 타격",
         "skillSummary": "2초 동안 받는 피해가 28% 줄고, 적의 직접 공격으로 실제 잃은 HP의 50%를 그 공격자에게 즉시 반환합니다. 지속·환경·반격 피해는 반환하지 않습니다.",
+        "finalBaseSpeed": 1.27,
+        "walkFloorRatio": 1.1140350877192984,
         "skillLabel": "아이언월",
         "skillDesc": "2초 동안 받는 피해가 28% 줄고, 적의 직접 공격으로 실제 잃은 HP의 50%를 그 공격자에게 즉시 반환합니다. 지속·환경·반격 피해는 반환하지 않습니다."
       },
       "maxHp": 367.53506999999996,
       "radius": 66.538,
-      "speed": 1.14,
+      "speed": 1.27,
       "damageMult": 1.248,
       "basic": {
         "close": true,
@@ -3755,7 +3767,7 @@ export const manifest={
         "targetBudget": 1,
         "speed": 18,
         "spread": 0.12,
-        "turnRate": 0.055,
+        "turnRate": 0.048,
         "markDuration": 240,
         "color": "#c084fc",
         "emoji": "🦇",
@@ -7223,20 +7235,20 @@ export const manifest={
         "e": "🛼",
         "n": "롤러스케이트",
         "type": "DASH",
-        "desc": "짧은 직선 돌진으로 한 번 부딪히고 빠져나간다",
+        "desc": "직선 돌진 후 강화된 스케이트 킥으로 첫 적을 밀어낸다",
         "sub": "BOMB_TRAIL",
         "sizeMult": 1,
         "id": "emoji-127",
         "legacyIndex": 127,
         "timingSeed": "롤러스케이트",
         "category": "기동형",
-        "concept": "짧은 직선 돌진으로 한 번 부딪히고 빠져나간다",
+        "concept": "직선 돌진 후 강화된 스케이트 킥으로 첫 적을 밀어낸다",
         "basicSummary": "스케이트 근접 타격",
-        "skillSummary": "짧은 직선 돌진으로 접촉한 적에게 한 번만 작은 피해와 밀침을 줍니다. 폭탄·종료 장판·재시전은 없습니다.",
+        "skillSummary": "직선 돌진으로 접촉한 적에게 작은 피해와 밀침을 줍니다. 돌진 종료 후 2초 안에 시도한 다음 평타는 첫 유효 대상의 넉백이 45% 증가합니다. 빗나가도 사용됩니다.",
         "dashSpeed": 29,
         "dashDuration": 30,
         "skillLabel": "롤러스케이트",
-        "skillDesc": "짧은 직선 돌진으로 접촉한 적에게 한 번만 작은 피해와 밀침을 줍니다. 폭탄·종료 장판·재시전은 없습니다."
+        "skillDesc": "직선 돌진으로 접촉한 적에게 작은 피해와 밀침을 줍니다. 돌진 종료 후 2초 안에 시도한 다음 평타는 첫 유효 대상의 넉백이 45% 증가합니다. 빗나가도 사용됩니다."
       },
       "maxHp": 332.27502,
       "radius": 38,
@@ -7291,7 +7303,7 @@ export const manifest={
           "utility": false,
           "signatureRange": true
         },
-        "description": "짧은 직선 돌진으로 접촉한 적에게 한 번만 작은 피해와 밀침을 줍니다. 폭탄·종료 장판·재시전은 없습니다.",
+        "description": "직선 돌진으로 접촉한 적에게 작은 피해와 밀침을 줍니다. 돌진 종료 후 2초 안에 시도한 다음 평타는 첫 유효 대상의 넉백이 45% 증가합니다. 빗나가도 사용됩니다.",
         "strength": "간단한 진입과 이탈",
         "success": "필요한 방향으로 짧게 이동",
         "failure": "추가 피해 수단 없음",
@@ -7317,7 +7329,9 @@ export const manifest={
         "durationFrames": 0,
         "intervalFrames": 0,
         "stunFrames": 0,
-        "speed": 23
+        "speed": 23,
+        "kickWindow": 120,
+        "kickPush": 1.45
       },
       "timing": {
         "cooldown": 420
@@ -7676,11 +7690,12 @@ export const manifest={
         "skillSummary": "4초 동안 0.5초마다 자신의 최대 HP 2.625% 재생(총 21%). 승인된 재생은 기절 중에도 지속되며 사망 시 끝납니다.",
         "skillLabel": "느린 재생",
         "tankRole": true,
+        "finalBaseSpeed": 1.18,
         "skillDesc": "4초 동안 0.5초마다 자신의 최대 HP 2.625% 재생(총 21%). 승인된 재생은 기절 중에도 지속되며 사망 시 끝납니다."
       },
       "maxHp": 450,
       "radius": 71.02218240000002,
-      "speed": 1,
+      "speed": 1.18,
       "damageMult": 1.3,
       "basic": {
         "close": true,
@@ -8514,14 +8529,14 @@ export const manifest={
         "sub": "ROSTER10_147",
         "sizeMult": 1,
         "category": "원거리형",
-        "desc": "공격 부작용 없는 짧은 대시로 위치를 바꾼다",
-        "concept": "공격 부작용 없는 짧은 대시로 위치를 바꾼다",
+        "desc": "짧게 돌진한 뒤 출발 좌표로 한 번 귀환할 수 있다",
+        "concept": "짧게 돌진한 뒤 출발 좌표로 한 번 귀환할 수 있다",
         "basicSummary": "작은 에너지탄",
-        "skillSummary": "최대 260 / 속도 26의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음",
+        "skillSummary": "최대 260 대시 후 첫 시전부터 3초 안에 한 번 더 사용해 출발 위치로 귀환합니다. 귀환 경로 또는 도착점이 막히면 제자리에 머뭅니다. 귀환 시도 또는 시간 만료 후 대기 7초.",
         "pTrail": "#a3e635",
         "projEmoji": "👽",
         "skillLabel": "외계인",
-        "skillDesc": "최대 260 / 속도 26의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음"
+        "skillDesc": "최대 260 대시 후 첫 시전부터 3초 안에 한 번 더 사용해 출발 위치로 귀환합니다. 귀환 경로 또는 도착점이 막히면 제자리에 머뭅니다. 귀환 시도 또는 시간 만료 후 대기 7초."
       },
       "maxHp": 274.27500000000003,
       "radius": 38,
@@ -8561,7 +8576,9 @@ export const manifest={
         "range": 260,
         "speed": 26,
         "damage": 0,
-        "description": "최대 260 / 속도 26의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음",
+        "extraUses": 1,
+        "recastWindow": 180,
+        "description": "최대 260 대시 후 첫 시전부터 3초 안에 한 번 더 사용해 출발 위치로 귀환합니다. 귀환 경로 또는 도착점이 막히면 제자리에 머뭅니다. 귀환 시도 또는 시간 만료 후 대기 7초.",
         "capabilities": {
           "damage": false,
           "projectile": false,
@@ -8937,6 +8954,128 @@ export const manifest={
       },
       "timing": {
         "cooldown": 540
+      }
+    },
+    {
+      "id": "emoji-151",
+      "name": "신호등",
+      "tier": "B",
+      "emoji": "🚦",
+      "ability": {
+        "id": "emoji-151",
+        "legacyIndex": 151,
+        "timingSeed": "roster10-151",
+        "t": "B",
+        "e": "🚦",
+        "n": "신호등",
+        "type": "PROJ",
+        "sub": "ROSTER10_151",
+        "sizeMult": 1,
+        "category": "원거리형",
+        "desc": "빨간불을 예고해 움직이는 적을 늦추고 멈출지를 선택하게 한다",
+        "concept": "빨간불을 예고해 움직이는 적을 늦추고 멈출지를 선택하게 한다",
+        "basicSummary": "직선 신호탄",
+        "skillSummary": "전방 160°·거리 780을 0.6초 예고합니다. 빨간불이 켜지는 순간 걷고 있는 적의 걸음 속도를 1.8초 동안 65% 낮춥니다. 멈추거나 벽 뒤로 피할 수 있습니다.",
+        "pTrail": "#f87171",
+        "projEmoji": "🚦",
+        "skillLabel": "빨간불!",
+        "skillDesc": "전방 160°·거리 780을 0.6초 예고합니다. 빨간불이 켜지는 순간 걷고 있는 적의 걸음 속도를 1.8초 동안 65% 낮춥니다. 멈추거나 벽 뒤로 피할 수 있습니다."
+      },
+      "maxHp": 274.27500000000003,
+      "radius": 38,
+      "speed": 1.5,
+      "damageMult": 2.2,
+      "basic": {
+        "close": false,
+        "rangeBonus": 86,
+        "halfAngle": 1.5207754699891267,
+        "cooldownScale": 1,
+        "damageScale": 1,
+        "pushScale": 1,
+        "stun": 0,
+        "reward": "",
+        "style": "standard",
+        "range": 739,
+        "speed": 15.3,
+        "count": 1,
+        "knockback": 7.199999999999999,
+        "explodeRadius": 0,
+        "emoji": "🚦",
+        "type": "bullet",
+        "spread": 0,
+        "pierce": false,
+        "bounces": 0,
+        "explode": 0,
+        "status": null,
+        "statusPower": 0,
+        "spin": 0,
+        "face": false,
+        "description": "직선 신호탄"
+      },
+      "skill": {
+        "label": "빨간불!",
+        "kind": "red-light",
+        "shape": "cone",
+        "range": 780,
+        "halfAngle": 1.3962634015954636,
+        "windupFrames": 36,
+        "durationFrames": 108,
+        "slowRate": 0.35,
+        "deadzone": 0.12,
+        "cooldownFrames": 1020,
+        "damage": 0,
+        "description": "전방 160°·거리 780을 0.6초 예고합니다. 빨간불이 켜지는 순간 걷고 있는 적의 걸음 속도를 1.8초 동안 65% 낮춥니다. 멈추거나 벽 뒤로 피할 수 있습니다.",
+        "capabilities": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": false,
+          "cc": false,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "key": "rework-emoji-151",
+        "cooldown": 1020,
+        "duration": 108,
+        "windup": 36,
+        "interval": 0,
+        "stun": 0,
+        "units": {
+          "time": "frames@60Hz",
+          "distance": "world units",
+          "width": "full width",
+          "speed": "world units/frame",
+          "damage": "base coefficient before rank/run modifiers"
+        },
+        "caps": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": false,
+          "cc": false,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement"
+      },
+      "timing": {
+        "cooldown": 1020
       }
     }
   ],
@@ -11678,7 +11817,7 @@ export const manifest={
         "stun": 0,
         "status": null,
         "statusPower": 0,
-        "homingTurnRate": 0.045
+        "homingTurnRate": 0.04
       },
       "skill": {
         "kind": "homing-eyes",
@@ -11691,7 +11830,7 @@ export const manifest={
         "count": 4,
         "countCap": 6,
         "spread": 0.1,
-        "turnRate": 0.052,
+        "turnRate": 0.046,
         "homingCone": 0.38092482436688185,
         "stunFrames": 45,
         "stunCap": 60,
@@ -11945,7 +12084,7 @@ export const manifest={
         "intervalFrames": 6,
         "windupFrames": 0,
         "knockback": 1.2,
-        "description": "같은 조준 방향으로 가위 5발 · 0.1초 간격 순차 발사 · 탄당 피해 26 · 기절/옛 근접 연격 없음",
+        "description": "한 방향으로 가위 5발을 0.1초 간격으로 던집니다. 최초 시전 후 3초 안에 방향을 바꿔 두 번 더 사용합니다. 탄당 기본 피해는 차례로 26 / 15.6 / 11.7이며 각 연사가 끝나야 재사용할 수 있습니다.",
         "capabilities": {
           "damage": true,
           "projectile": true,
@@ -11994,12 +12133,18 @@ export const manifest={
           "speed": "world units/frame",
           "damage": "base coefficient before rank/run modifiers"
         },
-        "cancelPolicy": "death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel"
+        "cancelPolicy": "death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel",
+        "extraUses": 2,
+        "recastWindow": 180,
+        "recastDamage": [
+          0.6,
+          0.45
+        ]
       },
       "statType": "MELEE",
       "tankRole": false,
       "basicSummary": "가위 근접 베기",
-      "concept": "근접 가위질과 같은 방향의 순차 가위 투척을 섞는다"
+      "concept": "근접 가위질과 방향을 바꿔 최대 세 번 던지는 5연발을 섞는다"
     },
     "emoji-132": {
       "referenceName": "공허 파괴자",
@@ -12013,7 +12158,7 @@ export const manifest={
         "cooldownFrames": 1200,
         "range": 1393.6,
         "width": 116,
-        "damage": 8.736,
+        "damage": 10,
         "durationFrames": 150,
         "intervalFrames": 6,
         "turnRate": 0.038,
@@ -12021,7 +12166,7 @@ export const manifest={
         "countCap": 1,
         "knockback": 0,
         "stunFrames": 0,
-        "description": "2.5초 지속 광선 · 0.1초마다 피해 계수 8.736 · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음",
+        "description": "2.5초 지속 광선 · 0.1초마다 피해 계수 10 · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -12888,7 +13033,7 @@ export const manifest={
         "targetBudget": 1,
         "speed": 18,
         "spread": 0.12,
-        "turnRate": 0.055,
+        "turnRate": 0.048,
         "markDuration": 240,
         "color": "#c084fc",
         "emoji": "🦇",
@@ -14795,7 +14940,7 @@ export const manifest={
           "utility": false,
           "signatureRange": true
         },
-        "description": "짧은 직선 돌진으로 접촉한 적에게 한 번만 작은 피해와 밀침을 줍니다. 폭탄·종료 장판·재시전은 없습니다.",
+        "description": "직선 돌진으로 접촉한 적에게 작은 피해와 밀침을 줍니다. 돌진 종료 후 2초 안에 시도한 다음 평타는 첫 유효 대상의 넉백이 45% 증가합니다. 빗나가도 사용됩니다.",
         "strength": "간단한 진입과 이탈",
         "success": "필요한 방향으로 짧게 이동",
         "failure": "추가 피해 수단 없음",
@@ -14820,11 +14965,13 @@ export const manifest={
         "windupFrames": 0,
         "durationFrames": 0,
         "intervalFrames": 0,
-        "stunFrames": 0
+        "stunFrames": 0,
+        "kickWindow": 120,
+        "kickPush": 1.45
       },
       "stats": {},
       "basicSummary": "스케이트 근접 타격",
-      "concept": "짧은 직선 돌진으로 한 번 부딪히고 빠져나간다"
+      "concept": "직선 돌진 후 강화된 스케이트 킥으로 첫 적을 밀어낸다"
     },
     "emoji-056": {
       "name": "비눗방울 놀이",
@@ -15818,7 +15965,9 @@ export const manifest={
         "range": 260,
         "speed": 26,
         "damage": 0,
-        "description": "최대 260 / 속도 26의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음",
+        "extraUses": 1,
+        "recastWindow": 180,
+        "description": "최대 260 대시 후 첫 시전부터 3초 안에 한 번 더 사용해 출발 위치로 귀환합니다. 귀환 경로 또는 도착점이 막히면 제자리에 머뭅니다. 귀환 시도 또는 시간 만료 후 대기 7초.",
         "capabilities": {
           "damage": false,
           "projectile": false,
@@ -15874,7 +16023,7 @@ export const manifest={
         "speed": 1.5,
         "radius": 38
       },
-      "concept": "공격 부작용 없는 짧은 대시로 위치를 바꾼다",
+      "concept": "짧게 돌진한 뒤 출발 좌표로 한 번 귀환할 수 있다",
       "basicSummary": "작은 에너지탄"
     },
     "emoji-148": {
@@ -16131,6 +16280,96 @@ export const manifest={
       },
       "concept": "짧은 대시와 작은 단발 탄으로 거리를 조절한다",
       "basicSummary": "작은 단발 탄"
+    },
+    "emoji-151": {
+      "referenceName": "신호등",
+      "rank": "B",
+      "role": "원거리형",
+      "category": "원거리형",
+      "statType": "PROJ",
+      "tankRole": false,
+      "basic": {
+        "close": false,
+        "description": "직선 신호탄",
+        "style": "standard",
+        "type": "bullet",
+        "count": 1,
+        "spread": 0,
+        "pierce": false,
+        "bounces": 0,
+        "explode": 0,
+        "status": null,
+        "statusPower": 0
+      },
+      "skill": {
+        "label": "빨간불!",
+        "kind": "red-light",
+        "shape": "cone",
+        "range": 780,
+        "halfAngle": 1.3962634015954636,
+        "windupFrames": 36,
+        "durationFrames": 108,
+        "slowRate": 0.35,
+        "deadzone": 0.12,
+        "cooldownFrames": 1020,
+        "damage": 0,
+        "description": "전방 160°·거리 780을 0.6초 예고합니다. 빨간불이 켜지는 순간 걷고 있는 적의 걸음 속도를 1.8초 동안 65% 낮춥니다. 멈추거나 벽 뒤로 피할 수 있습니다.",
+        "capabilities": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": false,
+          "cc": false,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "key": "rework-emoji-151",
+        "cooldown": 1020,
+        "duration": 108,
+        "windup": 36,
+        "interval": 0,
+        "stun": 0,
+        "units": {
+          "time": "frames@60Hz",
+          "distance": "world units",
+          "width": "full width",
+          "speed": "world units/frame",
+          "damage": "base coefficient before rank/run modifiers"
+        },
+        "caps": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": false,
+          "cc": false,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement"
+      },
+      "stats": {
+        "finalBaseHp": 258.75,
+        "speed": 1.5,
+        "radius": 38
+      },
+      "concept": "빨간불을 예고해 움직이는 적을 늦추고 멈출지를 선택하게 한다",
+      "basicSummary": "직선 신호탄"
     }
   },
   "augments": {
@@ -16608,16 +16847,16 @@ export const manifest={
     ],
     "F": [
       [
-        1.66,
-        1.88
+        2,
+        2.25
       ],
       [
-        2.32,
-        2.76
+        2.85,
+        3.45
       ],
       [
-        2.76,
-        3.64
+        3.6,
+        4.85
       ]
     ]
   },
@@ -17087,7 +17326,7 @@ export const manifest={
       "n. 통신, 의사소통"
     ]
   ],
-  "rosterVersion": "emoji83-xmap-v33",
+  "rosterVersion": "emoji84-v34",
   "balancePolicy": {
     "bcBaseHp": 1.06,
     "rangedOutwardPush": 0.88,

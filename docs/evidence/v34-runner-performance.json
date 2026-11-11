@@ -1,0 +1,421 @@
+{
+  "ciRun": 43021497481,
+  "branchHead": "39d00082a5cca93eb01f432adad784e3ba809c85",
+  "conditions": "Same 4-vCPU GitHub Linux runner, three immutable source exports, same fixed seed / actors / 20 student sessions and three Canvas browsers, 3 same-room rounds in each mode. v34 sha below is the synthetic PR merge checkout.",
+  "results": [
+    {
+      "label": "790fb11",
+      "sha": "790fb11a0618d6c706d1aee044379939940415af",
+      "mode": "solo",
+      "status": "PASS",
+      "machine": {
+        "platform": "linux",
+        "architecture": "x64",
+        "node": "v24.22.1",
+        "logicalCpus": 4,
+        "totalMemoryBytes": 16760344576
+      },
+      "rounds": 3,
+      "wallSeconds": 37.74,
+      "cpuMs": 5883.525,
+      "stepP95Ms": 6.9,
+      "snapshotP95Ms": 9.48,
+      "inputApplyP95Ms": 17.76,
+      "snapshotHz": 17.52,
+      "snapshotGapP95Ms": 55.7,
+      "wireKiBps": 5737.59,
+      "snapshotBytesMean": 31028.44,
+      "snapshotBytesP95": 55319,
+      "wireBytes": 217662621,
+      "roundEndRssMiB": [
+        132.59,
+        166.86,
+        175.53
+      ],
+      "roundEndHeapMiB": [
+        37.19,
+        30.05,
+        36.44
+      ],
+      "rssMeanMiB": 138.46,
+      "peakRssMiB": 176.86,
+      "estimatedHeapAllocationMiB": 601.46,
+      "gcMs": 290.79,
+      "gcCount": 57,
+      "geometry": {
+        "grids": 7,
+        "gridBuckets": 631,
+        "unchangedClampCopies": 0,
+        "clamps": 0
+      },
+      "frameGapP95Ms": [
+        16.8,
+        16.8,
+        16.8
+      ],
+      "drawP95Ms": [
+        5,
+        2.4,
+        2
+      ],
+      "participants": 20,
+      "overloads": 0,
+      "unsentAtSampling": [
+        0,
+        1,
+        1
+      ],
+      "unsentAfterRematch": [
+        0,
+        0,
+        0
+      ],
+      "errors": []
+    },
+    {
+      "label": "790fb11",
+      "sha": "790fb11a0618d6c706d1aee044379939940415af",
+      "mode": "team-capture",
+      "status": "PASS",
+      "machine": {
+        "platform": "linux",
+        "architecture": "x64",
+        "node": "v24.22.1",
+        "logicalCpus": 4,
+        "totalMemoryBytes": 16760344576
+      },
+      "rounds": 3,
+      "wallSeconds": 36.86,
+      "cpuMs": 5532.517,
+      "stepP95Ms": 6.35,
+      "snapshotP95Ms": 9.65,
+      "inputApplyP95Ms": 19.65,
+      "snapshotHz": 17.23,
+      "snapshotGapP95Ms": 53.78,
+      "wireKiBps": 6092.38,
+      "snapshotBytesMean": 32318.47,
+      "snapshotBytesP95": 59150,
+      "wireBytes": 226566786,
+      "roundEndRssMiB": [
+        136.65,
+        188.65,
+        249.15
+      ],
+      "roundEndHeapMiB": [
+        35.2,
+        44.46,
+        51
+      ],
+      "rssMeanMiB": 153.05,
+      "peakRssMiB": 253.77,
+      "estimatedHeapAllocationMiB": 617.05,
+      "gcMs": 182.02,
+      "gcCount": 45,
+      "geometry": {
+        "grids": 16,
+        "gridBuckets": 714,
+        "unchangedClampCopies": 21250,
+        "clamps": 21250
+      },
+      "frameGapP95Ms": [
+        16.7,
+        16.7,
+        16.8
+      ],
+      "drawP95Ms": [
+        5.2,
+        2.8,
+        2.8
+      ],
+      "participants": 20,
+      "overloads": 0,
+      "unsentAtSampling": [
+        0,
+        1,
+        1
+      ],
+      "unsentAfterRematch": [
+        0,
+        0,
+        0
+      ],
+      "errors": []
+    },
+    {
+      "label": "d28b2d8",
+      "sha": "d28b2d81692876cc353b75e85350c442b7948398",
+      "mode": "solo",
+      "status": "PASS",
+      "machine": {
+        "platform": "linux",
+        "architecture": "x64",
+        "node": "v24.22.1",
+        "logicalCpus": 4,
+        "totalMemoryBytes": 16760344576
+      },
+      "rounds": 3,
+      "wallSeconds": 37.42,
+      "cpuMs": 5545.184,
+      "stepP95Ms": 6.07,
+      "snapshotP95Ms": 10.3,
+      "inputApplyP95Ms": 17.7,
+      "snapshotHz": 17.31,
+      "snapshotGapP95Ms": 57.86,
+      "wireKiBps": 5429.34,
+      "snapshotBytesMean": 30031.55,
+      "snapshotBytesP95": 49514,
+      "wireBytes": 204460224,
+      "roundEndRssMiB": [
+        129.8,
+        166.65,
+        179.68
+      ],
+      "roundEndHeapMiB": [
+        34.24,
+        38.5,
+        55.02
+      ],
+      "rssMeanMiB": 138.54,
+      "peakRssMiB": 180.18,
+      "estimatedHeapAllocationMiB": 574.36,
+      "gcMs": 198.96,
+      "gcCount": 50,
+      "geometry": {
+        "grids": 4,
+        "gridBuckets": 352,
+        "unchangedClampCopies": 0,
+        "clamps": 0
+      },
+      "frameGapP95Ms": [
+        16.8,
+        16.8,
+        16.8
+      ],
+      "drawP95Ms": [
+        5.5,
+        2.6,
+        2.6
+      ],
+      "participants": 20,
+      "overloads": 0,
+      "unsentAtSampling": [
+        0,
+        0,
+        0
+      ],
+      "unsentAfterRematch": [
+        0,
+        0,
+        0
+      ],
+      "errors": []
+    },
+    {
+      "label": "d28b2d8",
+      "sha": "d28b2d81692876cc353b75e85350c442b7948398",
+      "mode": "team-capture",
+      "status": "PASS",
+      "machine": {
+        "platform": "linux",
+        "architecture": "x64",
+        "node": "v24.22.1",
+        "logicalCpus": 4,
+        "totalMemoryBytes": 16760344576
+      },
+      "rounds": 3,
+      "wallSeconds": 37.47,
+      "cpuMs": 5913.049,
+      "stepP95Ms": 6.3,
+      "snapshotP95Ms": 10.45,
+      "inputApplyP95Ms": 20.26,
+      "snapshotHz": 17.27,
+      "snapshotGapP95Ms": 56.19,
+      "wireKiBps": 5774.68,
+      "snapshotBytesMean": 30648.73,
+      "snapshotBytesP95": 51481,
+      "wireBytes": 217293931,
+      "roundEndRssMiB": [
+        135.52,
+        179.65,
+        251.4
+      ],
+      "roundEndHeapMiB": [
+        37.26,
+        55.42,
+        33.59
+      ],
+      "rssMeanMiB": 153.66,
+      "peakRssMiB": 251.65,
+      "estimatedHeapAllocationMiB": 627.62,
+      "gcMs": 220.27,
+      "gcCount": 44,
+      "geometry": {
+        "grids": 10,
+        "gridBuckets": 7858,
+        "unchangedClampCopies": 21107,
+        "clamps": 21107
+      },
+      "frameGapP95Ms": [
+        16.7,
+        16.7,
+        16.8
+      ],
+      "drawP95Ms": [
+        5,
+        2,
+        2.5
+      ],
+      "participants": 20,
+      "overloads": 0,
+      "unsentAtSampling": [
+        0,
+        1,
+        0
+      ],
+      "unsentAfterRematch": [
+        0,
+        0,
+        0
+      ],
+      "errors": []
+    },
+    {
+      "label": "v34",
+      "sha": "1129594f6f2eea48e1aee4328006cd9343d6de2e",
+      "mode": "solo",
+      "status": "PASS",
+      "machine": {
+        "platform": "linux",
+        "architecture": "x64",
+        "node": "v24.22.1",
+        "logicalCpus": 4,
+        "totalMemoryBytes": 16760344576
+      },
+      "rounds": 3,
+      "wallSeconds": 37.79,
+      "cpuMs": 5433.069,
+      "stepP95Ms": 5.31,
+      "snapshotP95Ms": 8.68,
+      "inputApplyP95Ms": 17.23,
+      "snapshotHz": 17.28,
+      "snapshotGapP95Ms": 56.11,
+      "wireKiBps": 5405.59,
+      "snapshotBytesMean": 29964.11,
+      "snapshotBytesP95": 49874,
+      "wireBytes": 205661350,
+      "roundEndRssMiB": [
+        131.4,
+        169.02,
+        184.36
+      ],
+      "roundEndHeapMiB": [
+        33.04,
+        35.07,
+        50.83
+      ],
+      "rssMeanMiB": 139.19,
+      "peakRssMiB": 186.61,
+      "estimatedHeapAllocationMiB": 567.16,
+      "gcMs": 207.21,
+      "gcCount": 46,
+      "geometry": {
+        "grids": 4,
+        "gridBuckets": 352,
+        "unchangedClampCopies": 0,
+        "clamps": 0
+      },
+      "frameGapP95Ms": [
+        16.8,
+        16.8,
+        16.8
+      ],
+      "drawP95Ms": [
+        5,
+        2.2,
+        3.3
+      ],
+      "participants": 20,
+      "overloads": 0,
+      "unsentAtSampling": [
+        0,
+        1,
+        0
+      ],
+      "unsentAfterRematch": [
+        0,
+        0,
+        0
+      ],
+      "errors": []
+    },
+    {
+      "label": "v34",
+      "sha": "1129594f6f2eea48e1aee4328006cd9343d6de2e",
+      "mode": "team-capture",
+      "status": "PASS",
+      "machine": {
+        "platform": "linux",
+        "architecture": "x64",
+        "node": "v24.22.1",
+        "logicalCpus": 4,
+        "totalMemoryBytes": 16760344576
+      },
+      "rounds": 3,
+      "wallSeconds": 37.34,
+      "cpuMs": 5835.667,
+      "stepP95Ms": 6.68,
+      "snapshotP95Ms": 10.46,
+      "inputApplyP95Ms": 17.99,
+      "snapshotHz": 17.31,
+      "snapshotGapP95Ms": 57.97,
+      "wireKiBps": 5724.94,
+      "snapshotBytesMean": 30643.31,
+      "snapshotBytesP95": 51147,
+      "wireBytes": 215426872,
+      "roundEndRssMiB": [
+        134.63,
+        170.34,
+        190.71
+      ],
+      "roundEndHeapMiB": [
+        29.17,
+        31.39,
+        45.84
+      ],
+      "rssMeanMiB": 142.23,
+      "peakRssMiB": 190.96,
+      "estimatedHeapAllocationMiB": 617.33,
+      "gcMs": 210.16,
+      "gcCount": 50,
+      "geometry": {
+        "grids": 10,
+        "gridBuckets": 400,
+        "unchangedClampCopies": 21644,
+        "clamps": 21644
+      },
+      "frameGapP95Ms": [
+        16.8,
+        16.7,
+        16.8
+      ],
+      "drawP95Ms": [
+        4.8,
+        1.6,
+        2.5
+      ],
+      "participants": 20,
+      "overloads": 0,
+      "unsentAtSampling": [
+        0,
+        0,
+        1
+      ],
+      "unsentAfterRematch": [
+        0,
+        0,
+        0
+      ],
+      "errors": []
+    }
+  ]
+}

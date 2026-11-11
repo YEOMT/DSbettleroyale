@@ -398,7 +398,7 @@ export const initializers=[
             {id:'emoji-140',t:'S',e:'🦍',requestedEmoji:'🫈',n:'짐승형 거인',type:'MELEE',sub:'BEAST_ROCKS',sizeMult:1.8,category:'근접형',timingSeed:'짐승형 거인',desc:'큰 몸집의 근접 전사 · 준비 후 작은 돌 12발 투척',basicSummary:'묵직한 근접 타격',skillSummary:'돌 무더기 투척 · 90도 12발'}
         );}],
 [59,__brScope=>{ __brScope.BR_V29_FINAL_HP=Object.freeze({'emoji-052':400,'emoji-054':180,'emoji-114':450,'emoji-122':240,'emoji-139':450,'emoji-140':560});;}],
-[60,__brScope=>{ __brScope.BR_V29_ZOMBIE_WALK=2.326968;;}],
+[60,__brScope=>{ __brScope.BR_V29_ZOMBIE_WALK=2.326968*1.18;;}],
 [68,__brScope=>{ __brScope.TEAM_SUPPORT_SUBS = new Set(__brScope.EMOJI_DB.filter(a=>a.teamOnly).map(a=>a.sub));;}],
 [213,__brScope=>{ __brScope.game = null;;}],
 [215,__brScope=>{ __brScope.teamMode = 0;;}],

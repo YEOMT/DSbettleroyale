@@ -1,4 +1,5 @@
 import {escapeScene} from './escape-scene.js';
+import {drawSupply, supplyTypes} from './supplies.js';
 import {StaticFloor} from './static-floor.js';
 import {hostAssetsReady} from './host-projectile.js';
 import {captureScene,captureFrameCost} from './capture-scene.js';
@@ -24,6 +25,12 @@ export class Renderer{
  constructor(canvas,timeline,session){this.staticFloor=new StaticFloor();this.camera=new HostCamera();this.studentCamera=new StudentCamera();this.poses=new AttackPoses();this.objectives=new ObjectiveArrows();this.canvas=canvas;this.timeline=timeline;this.session=session;this.paint=createPainters(session);this.scene=createScene(session);this.hostTracks=new Map();this.hostCanvas=createHostCanvas(this);this.canvasFx=createFx(session);this.wallImages=new Map();this.deaths=new Map();this.textures=new Map();this.sprites=new Map();this.labels=new Map();this.tracks=new Map();this.frameTimes=[];this.enabled=false;this.teacher=false;this.cam={x:0,y:0};this.last=performance.now();this.ready=this.init();}
  async init(){
   await hostAssetsReady;
+  this.hostHudObserver=new ResizeObserver(()=>{this.hudInsets=null;});
+  for(const element of document.querySelectorAll('#hud-overlay .hud-box,#br-tk-host-bar,#br-music-controls,#br-host-live')){
+   this.hostHudObserver.observe(element);
+  }
+  document.addEventListener('dsbr-hud-layout',()=>{this.hudInsets=null;});
+  window.visualViewport?.addEventListener('scroll',()=>{this.hudInsets=null;});
   if(new URLSearchParams(location.search).get('renderer')!=='canvas')try{this.app=new Application();await this.app.init({canvas:this.canvas,width:innerWidth,height:innerHeight,background:'#07101d',antialias:this.paint.brGraphicsProfile().antialias,resolution:this.scene.resolution(innerWidth,innerHeight,this.paint.brGraphicsProfile().dpr),autoDensity:true,autoStart:false});this.world=new Container();this.base=new Graphics();this.grid=new Graphics();this.smoke=new Graphics();this.g=new Graphics();this.world.addChild(this.base,this.grid,this.smoke,this.g);this.fg=new Graphics();this.mapOutline=new Graphics();this.fg.addChild(this.mapOutline);this.world.addChild(this.fg);this.app.stage.addChild(this.world);this.screen=new Graphics();this.app.stage.addChild(this.screen);this.pixi=true;}catch(error){console.warn('Canvas fallback:',error.message);this.useCanvas(error);}
   if(this.pixi)this.canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();this.useCanvas(new Error('WEBGL_CONTEXT_LOST'));this.resize();},{once:true});
   if(!this.pixi)this.ctx=this.canvas.getContext('2d');this.resize();addEventListener('resize',()=>this.resize());visualViewport?.addEventListener('resize',()=>this.resize());requestAnimationFrame(t=>this.frame(t));
@@ -46,9 +53,17 @@ export class Renderer{
  }
  hostInsets(){
   if(this.hudInsets)return this.hudInsets;
-  const rect=id=>document.getElementById(id)?.getBoundingClientRect();
-  const top=Math.max(32,...['hud-overlay','br-tk-host-bar','br-music-controls'].map(id=>rect(id)?.bottom||0));
-  this.hudInsets={top:top+12,bottom:Math.max(28,innerHeight-(rect('br-host-live')?.top||innerHeight)+8)};
+  const visible=window.visualViewport,originY=visible?.offsetTop||0,visibleEnd=originY+(visible?.height||innerHeight);
+  const centreY=(originY+visibleEnd)/2;
+  let top=originY+12,bottom=innerHeight-visibleEnd+12;
+  for(const element of document.querySelectorAll('#hud-overlay .hud-box,#br-tk-host-bar,#br-music-controls,#br-capture-scoreboard,#br-host-live')){
+   const rect=element.getBoundingClientRect();
+   if(!rect.width||!rect.height)continue;
+   if((rect.top+rect.bottom)/2<centreY)top=Math.max(top,rect.bottom+8);
+   else bottom=Math.max(bottom,innerHeight-rect.top+8);
+  }
+  const left=visible?.offsetLeft||0,right=Math.max(0,innerWidth-left-(visible?.width||innerWidth));
+  this.hudInsets={top,bottom,left,right};
   return this.hudInsets;
  }
  reset(){this.escapeLayout=this.escapePoints=this.escapeMiniKey=null;this.escapeMini?.remove();this.escapeMini=null;this.staticFloor.reset();this.grid?.clear();this.mapOutline?.clear();this.hostLayoutActors=null;clearRoster10Scene(this);this.hostInfoSources?.clear();this.hostLayouts?.clear();this.smokeMap=null;this.base?.clear();this.smoke?.clear();this.g?.clear();this.fg?.clear();this.screen?.clear();this.actorIds?.clear();this.renderBlocked=false;this.hostNameLabels.clear();this.hostTracks.clear();this.session.capturePerf=null;this.session.captureAutoBalanced=false;this.session.captureDecorReduced=false;this.session.captureHostFPS=this.session.captureHostQuality==='balanced'?30:60;this.lastRendered=0;this.studentCamera.reset();this.poses.clear();this.cameraPose=null;this.hudInsets=null;this.drawAt=null;this.deaths.clear();this.wallImages.clear();this.camera.reset();this.cam={x:0,y:0};this.objectives.hide();this.seenFx=new Set();this.session.hitStates=new Map();this.session.sustainFeedbackAt=new Map();this.session.hitConfirm=null;this.session.killConfirm=null;this.session.studentShake=null;this.session.damageFlash=null;for(const s of this.sprites.values())s.destroy();this.sprites.clear();for(const l of this.labels.values())l.destroy();this.labels.clear();this.tracks.clear();this.hpTrails?.clear();for(const t of this.textures.values())t.destroy(true);this.textures.clear();this.session.nameSpriteCache?.clear();this.paint.BR_ACTOR_EMOJI_CACHE.clear();this.paint.BR_LEVEL_TEXTURES.clear();this.paint.brBulletSources.clear();}
@@ -105,7 +120,8 @@ export class Renderer{
 
   for(const b of view.farm?.b||[])this.paint.brPaintCrate(p,b);
   for(const d of view.farm?.x||[]){const heal=d[4]===2,radius=heal?28:d[4]?26:20,x=d[1],y=d[2];if(heal){p.circle(x,y,radius,'#dcfce7',1);p.circle(x,y,radius,'#22c55e',1,2);p.rect(x-4,y-13,8,26,'#16a34a',1);p.rect(x-13,y-4,26,8,'#16a34a',1);}else{const points=[[x,y-radius],[x+radius,y],[x,y+radius],[x-radius,y]];p.polygon(points,d[4]?'#c4b5fd':'#67e8f9',1);p.polygon(points,'#ecfeff',1,2);}if(zoom>.20)this.text(heal?'HP 20%':'XP ×'+d[3],x,y+radius+15,17,heal?'#bbf7d0':'#ecfeff','drop-'+d[0]);}
-  const supply=view.farm?.s;if(supply){p.circle(supply[0],supply[1],52,'#164e63',1);p[supply[2]?'circle':'dashedCircle'](supply[0],supply[1],52,'#67e8f9',1,4);if(zoom>.20){this.text(supply[2]?'📦':'↓',supply[0],supply[1],36,'#164e63','supply');this.text('SUPPLY +2 XP',supply[0],supply[1]+73,19,'#cffafe','supply-label');}}
+  drawSupply(this,p,view.farm?.s,zoom,!!map.escapeMap);
+  if(view.farm?.c)drawSupply(this,p,view.farm.c,zoom,true);
 
   if(view.capture&&map.captureMap)captureScene(this,view,map,zoom);
   escapeScene(this,p,view,map,zoom);
@@ -150,7 +166,14 @@ export class Renderer{
   if(this.teacher&&!this.pixi&&pose.lod!=='performance'&&!view.capture)hostEffects(this.ctx,view.hostEffects,'over');
   if(!view.capture&&view.ring){const ring={...view.ring,calibrated:true,running:!this.timeline.paused,stale:now-(this.timeline.samples.at(-1)?.at||now)>750};this.scene.boundary(foreground,ring,zoom);this.scene.preview(foreground,ring,zoom);if(self&&!this.teacher){const displaySelf={...self,row:{7:self.alive}};this.scene.self(foreground,displaySelf,ring,zoom);this.scene.ringHud(displaySelf,{_ring:ring},now);}}
   if(!this.teacher&&self?.alive)this.objectives.draw(map.captureMap,view.capture,this.cam,w,h,zoom,this.paint.brTeamKillColor);else this.objectives.hide();
-  const ids=this.actorIds??=new Set();ids.clear();for(const a of view.actors)ids.add(a.id);
+  const ids=this.actorIds??=new Set();ids.clear();
+  for(const a of view.actors){
+   ids.add(a.id);
+   if(a.alive && a.supply && a.supplyEnd>view.renderTick) {
+    const size=Math.max(8/zoom, a.radius*.34);
+    this.glyph(supplyTypes[a.supply].icon,a.x+a.radius+size*.5,a.y,size,'supply-buff-'+a.id);
+   }
+  }
   for(const map of [this.tracks,this.deaths,this.hostTracks])for(const id of map.keys())if(!ids.has(id))map.delete(id);
   if(this.pixi){for(const [key,s]of this.sprites){const prefix=['actor-','name-','level-','glow-','host-info-name-'].find(p=>key.startsWith(p));if(prefix&&!ids.has(key.slice(prefix.length))){s.destroy();this.sprites.delete(key);}}
    for(const [key,l]of this.labels)if(key.startsWith('host-name-')&&!ids.has(key.slice(10))){l.destroy();this.labels.delete(key);}}

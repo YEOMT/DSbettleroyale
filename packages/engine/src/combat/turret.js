@@ -28,11 +28,11 @@ __brScope.Turret = class Turret {
                                 (heavy ? 15 : 8.5) * this.owner.damageMult,
                                 heavy ? 10 : 7,
                                 'missile', '#fbbf24', heavy ? 48 : 0, null,
-                                {trailColor:'#fde68a', impactColor:'#fbbf24', knockback:heavy?12:6, vfx:'star',runSkill:this.runSkill}
+                                {trailColor:'#fde68a', impactColor:'#fbbf24', knockback:heavy?12:6, vfx:'star',runSkill:this.runSkill, supplyIndirect:true}
                             ));
                             if(heavy) game.addText(this.pos, '✨ GOLD SHOT!', '#fde047', 20, 20);
                         } else {
-                            game.projectiles.push(new __brScope.Projectile(this.owner, this.pos, dir, 7, 6*this.owner.damageMult, 5, 'bullet', '#cbd5e1',0,null,{runSkill:this.runSkill}));
+                            game.projectiles.push(new __brScope.Projectile(this.owner, this.pos, dir, 7, 6*this.owner.damageMult, 5, 'bullet', '#cbd5e1',0,null,{runSkill:this.runSkill,supplyIndirect:true}));
                         }
                     }
                 }

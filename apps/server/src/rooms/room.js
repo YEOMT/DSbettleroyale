@@ -3,6 +3,7 @@ import {createRuleContext,exportResult,destroyWorld,applyCommand} from '../../..
 import {manifest} from '../../../../packages/content/src/manifest.js';
 import {initializeQuiz,publicQuiz,answer} from './quiz.js';
 import {cancelCombatInputs} from './pause.js';
+import {classroomName} from '../../../../packages/protocol/src/player-name.js';
 const fail=code=>{throw Error(code);};
 export class Room{
  constructor(manager,code,hostName){
@@ -16,6 +17,7 @@ export class Room{
   this.advanceCountdown();
   if(role==='student'&&!(this.phase==='LOBBY'||this.phase==='QUIZ'&&this.manager.now()<this.quizEndsAt))fail('JOIN_QUIZ_CLOSED');
   name=String(name).normalize('NFC').trim();if(!name||name.length>24||/[\u0000-\u001f]/.test(name))fail('INVALID_NAME');
+  name=classroomName(name);if(!name)fail('INVALID_NAME');
   if([...this.members.values()].some(p=>!p.revoked&&p.name===name))fail('NAME_IN_USE');
   const p={id:randomUUID(),token:randomBytes(32).toString('base64url'),name,role,epoch:0,connected:false,revoked:false,team:0,joinedAt:this.manager.now(),ledger:new Map(),events:[],eventBytes:0,cursor:0};
   if(role==='student'){if(this.config.mode!=='solo')this.assignNewTeam(p);if(this.phase==='QUIZ')initializeQuiz(this,p);}
