@@ -1,4 +1,5 @@
 import {freezeableFixture} from '../simulation-fixture.mjs';
+import {leaveGamePages} from '../leave-game-pages.mjs';
 import {createServer} from 'vite';
 import {fork} from 'node:child_process';
 import {chromium,webkit} from 'playwright';
@@ -28,5 +29,8 @@ export async function auditHarness({players=20,mode='solo',renderer='canvas',hos
  async function battle(){await command('START_QUIZ');await command('BEGIN_DRAFT');await command('START_BATTLE');for(const p of [host,student])await p.waitForFunction(()=>auditApp.renderer.enabled&&!!auditApp.timeline.samples.length&&!!(auditApp.renderer.ctx||auditApp.renderer.pixi));room.fixtureFrozen=true;}
  function publish(){const w=room.world,teacher=getTeacherState(w),encode=snapshotEncoder(teacher,++room.snapshotSeq,performance.now());for(const m of room.members.values())if(m.connected){const view=m.role==='host'?getHostVisibleState(teacher):getVisibleState(w,m.id,undefined,teacher);m.peer.snapshot(encode(view.self?{...view,self:m.peer.selfState(view.self)}:view,m.peer.scope(),m.peer.deliveredAnnouncement),teacher.announcements?.seq);}}
  function staticState(){room.static=getStaticState(room.world);for(const m of room.members.values())m.peer?.send('STATIC_STATE',room.static);}
- return {app,rpc,vite,browser,contexts,host,student,clients,room,url,errors,command,battle,publish,staticState,async close(){await browser.close();for(const c of clients)await c.close();await vite.close();await app.close();}};
+ return {app,rpc,vite,browser,contexts,host,student,clients,room,url,errors,command,battle,publish,staticState,async close(){
+  try{await leaveGamePages(browser,url);}
+  finally{await browser.close();for(const c of clients)await c.close();await vite.close();await app.close();}
+ }};
 }

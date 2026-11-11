@@ -35,8 +35,14 @@ test('workflow gates and bounded selection are explicit; privileged operations n
  const load=n=>YAML.parse(fs.readFileSync('.github/workflows/'+n+'.yml','utf8')),ci=load('ci');
  assert.deepEqual(ci.on.push.branches,['main']);assert.ok(Object.hasOwn(ci.on,'pull_request'));assert.equal(ci.jobs.quick['timeout-minutes'],10);assert.equal(ci.jobs['required-checks'].if,'always()');assert.match(ci.jobs['required-checks'].steps[0].run,/skipped/);
  assert.deepEqual(ci.jobs.combat.strategy.matrix.renderer,['canvas','pixi']);assert.deepEqual(ci.jobs.combat.strategy.matrix.suite,['recovery','continuous','touch']);assert.equal(ci.jobs.combat['timeout-minutes'],10);assert.ok(ci.jobs['required-checks'].needs.includes('combat'));
- assert.deepEqual(ci.jobs.combat.strategy.matrix.exclude,[{renderer:'pixi',suite:'continuous'}]);assert.deepEqual(ci.jobs.combat.strategy.matrix.include,['attacker','opponent','host'].map(role=>({renderer:'pixi',suite:'continuous',role})));
+ assert.deepEqual(ci.jobs.combat.strategy.matrix.exclude,[{renderer:'pixi',suite:'continuous'},{renderer:'pixi',suite:'recovery'}]);
+ assert.deepEqual(ci.jobs.combat.strategy.matrix.include,[
+  ...['attacker','opponent','host'].map(role=>({renderer:'pixi',suite:'continuous',role})),
+  ...['controls','roster'].map(part=>({renderer:'pixi',suite:'recovery',part}))]);
+ assert.match(ci.jobs.combat.steps.find(s=>s.env?.COMBAT_RECOVERY_PART).env.COMBAT_RECOVERY_PART,/matrix\.part/);
  const playwrightVersion=JSON.parse(fs.readFileSync('package.json','utf8')).devDependencies['@playwright/test'];assert.equal(ci.jobs.combat.container,`mcr.microsoft.com/playwright:v${playwrightVersion}-noble`);
+ assert.equal(ci.jobs.targeted.container,ci.jobs.combat.container);
+ assert.ok(ci.jobs.targeted.steps.some(s=>s.run==='npm run test:targeted'));
  assert.deepEqual(ci.jobs.roster10.strategy.matrix.renderer,['canvas','pixi']);assert.equal(ci.jobs.roster10['timeout-minutes'],10);assert.ok(ci.jobs['required-checks'].needs.includes('roster10'));assert.match(ci.jobs['required-checks'].steps[0].run,/NEW_SELECTED/);
  const long=load('roster10-load');assert.ok(Object.hasOwn(long.on,'workflow_dispatch'));assert.equal(long.on.pull_request,undefined);assert.equal(long.jobs.load['timeout-minutes'],15);assert.deepEqual(long.jobs.load.strategy.matrix.scenario,['capture20','late30']);
  for(const name of ['release','promote','rollback','recover']){const w=load(name);assert.equal(w.concurrency['cancel-in-progress'],false);assert.equal(w.on.pull_request,undefined);for(const j of Object.values(w.jobs))for(const s of j.steps||[])assert.notEqual(s['continue-on-error'],true);}

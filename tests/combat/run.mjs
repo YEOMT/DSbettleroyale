@@ -2,9 +2,11 @@ import fs from 'node:fs';
 import {spawnSync} from 'node:child_process';
 const renderer=process.argv[2],suite=process.argv[3]||'recovery';
 const pixiRole=process.env.COMBAT_PIXI_ROLE||'';
+const recoveryPart=process.env.COMBAT_RECOVERY_PART||'';
 if(!['recovery','continuous','touch'].includes(suite))throw Error('INVALID_SUITE');
 if(!['canvas','pixi'].includes(renderer))throw Error('INVALID_RENDERER');
 if(pixiRole&&(renderer!=='pixi'||suite!=='continuous'||!['attacker','opponent','host'].includes(pixiRole)))throw Error('INVALID_PIXI_ROLE');
+if(recoveryPart&&(renderer!=='pixi'||suite!=='recovery'||!['controls','roster'].includes(recoveryPart)))throw Error('INVALID_RECOVERY_PART');
 const started=Date.now(),steps=[];
 fs.mkdirSync('artifacts/combat',{recursive:true});
 function run(args,env={}){
@@ -33,10 +35,13 @@ try{
   if(renderer==='canvas')run(['tests/combat/mobile-touch.mjs','canvas','webkit']);
  }else{
   if(renderer==='canvas'){run(['tests/combat/classroom-rematch.mjs']);run(['tests/combat/classroom-ui.mjs']);}
-  run(['tests/combat/classroom-aim.mjs',renderer]);
-  run(['tests/combat/session.mjs',renderer]);
-  run(['tests/combat/aim.mjs',renderer]);
+  if(recoveryPart!=='roster'){
+   run(['tests/combat/classroom-aim.mjs',renderer]);
+   run(['tests/combat/session.mjs',renderer]);
+   run(['tests/combat/aim.mjs',renderer]);
+   if(renderer==='pixi')run(['tests/combat/host-end-delivery.mjs']);
+  }
   if(renderer==='canvas'){run(['tests/combat/safe-pause.mjs']);run(['tests/combat/origin-contract.mjs']);run(['tests/combat/motion.mjs']);run(['tests/releaseops/audio.mjs']);}
-  run(['tests/fidelity-v33-2/all77.mjs',renderer,'balanced'],{FIDELITY_CHARACTERS:'emoji-006,emoji-012,emoji-066,emoji-085,emoji-132'});
+  if(recoveryPart!=='controls')run(['tests/fidelity-v33-2/all77.mjs',renderer,'balanced'],{FIDELITY_CHARACTERS:'emoji-006,emoji-012,emoji-066,emoji-085,emoji-132'});
  }
-}finally{fs.writeFileSync('artifacts/combat/jobs-'+suite+'-'+renderer+(pixiRole?'-'+pixiRole:'')+'.json',JSON.stringify({ms:Date.now()-started,steps},null,2));}
+}finally{const part=pixiRole||recoveryPart;fs.writeFileSync('artifacts/combat/jobs-'+suite+'-'+renderer+(part?'-'+part:'')+'.json',JSON.stringify({ms:Date.now()-started,steps},null,2));}
