@@ -25,7 +25,7 @@ export const initializers=[
     function shots(ctx,skill,fire) {
         const count=R.count(ctx,skill.count,skill.countCap);
         const last=(count-1)*skill.intervalFrames+skill.windupFrames;
-        R.lock(ctx,{attack:true,moveScale:.82},last+1);
+        R.lock(ctx,{attack:true,skill:skill.extraUses>0,moveScale:.82},last+1);
         for(let i=0;i<count;i++)R.schedule(ctx,skill.windupFrames+i*skill.intervalFrames,function(){fire(i,count);},{cancelOnStun:true});
     }
     function impactExpiry(reason){return reason==='hit'||reason==='impact'||reason==='wall'||reason==='range'||reason==='expired';}
@@ -170,8 +170,8 @@ export const initializers=[
     },function(c,s){R.buff(c,c.owner,'regen',c.owner.maxHp*s.healFractionPerTick,s.durationFrames);},
     {statType:'MELEE',tankRole:false,basicSummary:'구급차 근접 타격',stats:{maxHp:390,speed:2.15}});
 
-    register('emoji-085','심연의 눈','원거리형',{close:false,type:'missile',speed:19,damageScale:1.10,count:1,stun:0,status:null,statusPower:0,homingTurnRate:.045}, {
-        kind:'homing-eyes',shape:'line',cooldownFrames:1080,range:1110,width:48,speed:22,damage:27,count:4,countCap:6,spread:.10,turnRate:.052,homingCone:Math.cos(1.18),stunFrames:45,stunCap:60,knockback:2,
+    register('emoji-085','심연의 눈','원거리형',{close:false,type:'missile',speed:19,damageScale:1.10,count:1,stun:0,status:null,statusPower:0,homingTurnRate:.040}, {
+        kind:'homing-eyes',shape:'line',cooldownFrames:1080,range:1110,width:48,speed:22,damage:27,count:4,countCap:6,spread:.10,turnRate:.046,homingCone:Math.cos(1.18),stunFrames:45,stunCap:60,knockback:2,
         description:'큰 유도 마안 4발 · 탄당 피해 27.81 · 대상별 시전당 1회 0.75초 기절 · 회전 상한/벽/은신/사거리 적용',
         capabilities:caps({projectile:true,multicast:true,cc:true})
     },function(c,s){const count=R.count(c,s.count,s.countCap),base=Math.atan2(c.aim.y,c.aim.x);for(let i=0;i<count;i++){const a=base+(i-(count-1)/2)*s.spread;R.projectile(c,{dir:{x:Math.cos(a),y:Math.sin(a)},speed:s.speed,range:s.range,radius:s.width/2,damage:s.damage,homing:true,homingCone:s.homingCone,turnRate:s.turnRate,stun:s.stunFrames,stunCap:s.stunCap,knockback:s.knockback,shotIndex:i,color:'#818cf8',emoji:'🧿'});}});
@@ -191,16 +191,26 @@ export const initializers=[
     {statType:'MELEE',tankRole:true,basicSummary:'묵직한 뿔 근접 타격',stats:{maxHp:620,speed:1.85}});
 
     register('emoji-131','가위 수호자','근접형',melee({style:'scissor',halfAngle:1.14,cooldownScale:.84,damageScale:.84,pushScale:.18}),{
-        kind:'scissor-volley',shape:'line',cooldownFrames:960,range:900,width:36,speed:29,damage:26,count:5,countCap:8,intervalFrames:6,windupFrames:0,knockback:1.2,
-        description:'같은 조준 방향으로 가위 5발 · 0.1초 간격 순차 발사 · 탄당 피해 26 · 기절/옛 근접 연격 없음',
+        kind:'scissor-volley',shape:'line',cooldownFrames:960,range:900,width:36,speed:29,damage:26,count:5,countCap:8,extraUses:2,recastWindow:180,recastDamage:[.60,.45],intervalFrames:6,windupFrames:0,knockback:1.2,
+        description:'한 방향으로 가위 5발을 0.1초 간격으로 던집니다. 최초 시전 후 3초 안에 방향을 바꿔 두 번 더 사용합니다. 탄당 기본 피해는 차례로 26 / 15.6 / 11.7이며 각 연사가 끝나야 재사용할 수 있습니다.',
         capabilities:caps({projectile:true,multicast:true,cc:true})
-    },function(c,s){shots(c,s,function(i){R.projectile(c,{dir:c.aim,speed:s.speed,range:s.range,radius:s.width/2,damage:s.damage,knockback:s.knockback,stun:0,shotIndex:i,color:'#fda4af',emoji:'✂️'});});},
+    },function(c,s){
+        function volley(ctx,factor){
+            shots(ctx,s,i=>R.projectile(ctx,{dir:ctx.aim,speed:s.speed,range:s.range,radius:s.width/2,damage:s.damage*factor,
+                knockback:s.knockback,stun:0,shotIndex:i,color:'#fda4af',emoji:'✂️'}));
+        }
+        volley(c,1);
+        R.openRecast(c,{duration:s.recastWindow,uses:s.extraUses,cooldownFrames:s.cooldownFrames,handler:(ctx,n)=>volley(ctx,s.recastDamage[n-1])});
+    },
     {statType:'MELEE',tankRole:false,basicSummary:'빠른 가위 근접 베기'});
 
+    const voidBeamDamage=10;
     register('emoji-132','공허 파괴자','원거리형',{}, {
-        kind:'channel-beam',shape:'line',cooldownFrames:1200,range:1340,width:116,damage:8.4,durationFrames:150,intervalFrames:6,turnRate:.038,count:1,countCap:1,knockback:0,stunFrames:0,
-        description:'2.5초 굵은 지속 광선 · 0.1초마다 피해 8.736(전 틱 210) · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음',
+        kind:'channel-beam',shape:'line',cooldownFrames:1200,range:1340,width:116,damage:voidBeamDamage,durationFrames:150,intervalFrames:6,turnRate:.038,count:1,countCap:1,knockback:0,stunFrames:0,
+        description:'2.5초 굵은 지속 광선 · 0.1초마다 기본 피해 계수 10(25틱 총 250) · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음',
         capabilities:caps({area:true,duration:true,signatureDuration:true})
     },function(c,s){R.channel(c,{duration:s.durationFrames,range:s.range,width:s.width,tickEvery:s.intervalFrames,damage:s.damage,turnRate:s.turnRate,knockback:0,stun:0,color:'#a78bfa'});});
+    // Registration applies the legacy range and damage together. Keep its range, then install v34's base tick once.
+    R.defs['emoji-132'].skill.damage=voidBeamDamage;
 })(__brScope.BRRework);}]
 ];

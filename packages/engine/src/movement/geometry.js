@@ -59,23 +59,33 @@ __brScope.combatWallGrid = function combatWallGrid(walls) {
             // reuse it directly instead of re-reading all wall spin flags first.
             for(const wall of walls)if(!Array.isArray(wall)&&Math.abs(Number(wall.spinSpeed||0))>1e-10)return null;
             const cellSize=420,grid=new Map();
+            let largeTerrain;
             for(let index=0;index<walls.length;index++) {
                 const wall=walls[index],w=__brScope.combatWallShape(wall),c=w._contactCos,s=w._contactSin;
                 w._combatWallOrder=index;
                 const ex=Math.abs(c)*w.w*.5+Math.abs(s)*w.h*.5,ey=Math.abs(s)*w.w*.5+Math.abs(c)*w.h*.5;
                 const minX=Math.floor((w.x-ex)/cellSize),maxX=Math.floor((w.x+ex)/cellSize);
                 const minY=Math.floor((w.y-ey)/cellSize),maxY=Math.floor((w.y+ey)/cellSize);
+                // The four X sides span hundreds of cells. Keep their bounds
+                // once and pass intersecting sides to the same exact sweep.
+                if(w.terrain && (maxX-minX+1)*(maxY-minY+1)>64){
+                    (largeTerrain??=[]).push({wall,minX:w.x-ex,maxX:w.x+ex,minY:w.y-ey,maxY:w.y+ey});
+                    continue;
+                }
                 for(let x=minX;x<=maxX;x++)for(let y=minY;y<=maxY;y++) {
                     const key=__brScope.combatGridKey(x,y);let bucket=grid.get(key);
                     if(!bucket){bucket=[];grid.set(key,bucket);}bucket.push(wall);
                 }
             }
-            cached={length:walls.length,cellSize,grid};__brScope.combatWallGridCache.set(walls,cached);return cached;
+            cached={length:walls.length,cellSize,grid,largeTerrain};__brScope.combatWallGridCache.set(walls,cached);return cached;
         };
 
 __brScope.combatWallCandidates = function combatWallCandidates(walls,minX,minY,maxX,maxY,out=[]) {
             const indexed=__brScope.combatWallGrid(walls);if(!indexed)return walls;
             out.length=0;const cs=indexed.cellSize,seq=++__brScope.combatWallQuerySeq;
+            if(indexed.largeTerrain)for(const entry of indexed.largeTerrain){
+                if(maxX>=entry.minX && minX<=entry.maxX && maxY>=entry.minY && minY<=entry.maxY)out.push(entry.wall);
+            }
             for(let x=Math.floor(minX/cs);x<=Math.floor(maxX/cs);x++)for(let y=Math.floor(minY/cs);y<=Math.floor(maxY/cs);y++) {
                 const bucket=indexed.grid.get(__brScope.combatGridKey(x,y));if(!bucket)continue;
                 for(const wall of bucket){const w=__brScope.combatWallShape(wall);if(w._combatWallQuery===seq)continue;w._combatWallQuery=seq;out.push(wall);}

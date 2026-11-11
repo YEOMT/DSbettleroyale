@@ -1,0 +1,52 @@
+{
+  "renderer": "canvas",
+  "status": "PASS",
+  "signal": {
+    "renderedBy": 3,
+    "slow": 0.35,
+    "remaining": 103
+  },
+  "alien": {
+    "restoredRecast": true,
+    "warp": 1,
+    "cooldown": 420
+  },
+  "scissors": {
+    "participants": 20,
+    "uses": 3,
+    "count": 8,
+    "shots": 480,
+    "peakShots": 120,
+    "screens": [
+      {
+        "maxShots": 123,
+        "frames": 283,
+        "drawP95": 3.899999976158142,
+        "gapP95": 33.30000000000018,
+        "renderer": "canvas"
+      },
+      {
+        "maxShots": 115,
+        "frames": 280,
+        "drawP95": 3.5,
+        "gapP95": 33.30000000000109,
+        "renderer": "canvas"
+      },
+      {
+        "maxShots": 120,
+        "frames": 282,
+        "drawP95": 5,
+        "gapP95": 33.30000000000109,
+        "renderer": "canvas"
+      }
+    ],
+    "elapsedMs": 5043.245400000002,
+    "cpuMs": 3501,
+    "processRssBefore": 201707520,
+    "processRssAfter": 299319296,
+    "sentBytes": 84593439,
+    "snapshotP95": 120750,
+    "snapshots": 945
+  },
+  "ms": 20725.8958
+}

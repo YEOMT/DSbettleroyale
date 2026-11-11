@@ -1,4 +1,5 @@
 import {initEscape,updateEscape} from './world/escape.js';
+import {activeSupply} from './farm/combat-supplies.js';
 import {visualProfiles} from './presentation.js';
 import {installRules} from './registry.js';
 import {manifest,contentHash} from '../../content/src/manifest.js';
@@ -119,14 +120,19 @@ export function stepWorld(world,dt=FIXED_DT_MS){
  if(world.game.capture?.finalized)world.finished=true;
  if(world.game.isGameOver)world.finished=true;
 }
-function actor(world,p){return {id:p.remoteId,name:p.name,abilityId:p.ability.id,emoji:p.ability.e,tier:p.ability.t,team:p.team,humanControlled:!!p.humanControlled,clone:!!p.isClone,
+function actor(world,p){const row={id:p.remoteId,name:p.name,abilityId:p.ability.id,emoji:p.ability.e,tier:p.ability.t,team:p.team,humanControlled:!!p.humanControlled,clone:!!p.isClone,
  visual:{id:p.id,flashUntilFrame:p.flashUntilFrame||0,supportPulseFrames:p.supportPulseFrames||0,supportPulseKind:p.supportPulseKind||'',teamGuardFrames:p.teamGuardFrames||0,frenzyFrames:p.frenzyFrames||0},
  x:p.pos.x,y:p.pos.y,vx:p.vel.x,vy:p.vel.y,radius:p.radius,hp:Math.max(0,p.hp),maxHp:p.maxHp,alive:p.alive,level:p.run?.level||1,
  cover:world.game.getCoverTypeAt?.(p.pos)||'',flags:(p.playerMoveBoostFrames>0?8:0)|(p.playerAttackHasteFrames>0?16:0)|(p.invisible?32:0)|(p.finalPhaseBoosted?64:0),skillUsesLeft:p.skillUsesLeft??-1,lifeSeq:p.lifeSeq,warpSeq:p.warpSeq||0,kills:p.kills||0,deaths:p.deaths||0,stunned:p.stunned||0,
  cooldown:p.cooldown,basicCooldown:p.basicCooldown||0,skillCooldownMax:p.skillCooldownMax||p.maxCooldown,basicCooldownMax:p.basicCooldownMax,
   moveSpeed:world.brHumanMoveSpeed(p),phaseWalls:p.ability.sub==='GHOST_MOVE'||p.ability.sub==='FLY_DASH'&&p.dashFrames>0,
   dash:p.playerDash?{dx:p.playerDash.dir.x,dy:p.playerDash.dir.y,speed:p.playerDash.speed,remaining:p.playerDash.remaining}:null,
-  rw:world.BRRework.wirePlayer(p,world.game)};}
+  rw:world.BRRework.wirePlayer(p,world.game)};
+ if (p.combatBuff) {
+  const buff = activeSupply(p, world.game.frame);
+  if (buff) { row.supply=buff.kind; row.supplyEnd=buff.end; }
+ }
+ return row;}
 export function getPrivateSelfState(world,id,preparedActor,restore=false){
  const p=world.byId.get(id);if(!p)return null;
  const aimKey=p.ability.id+':'+p.radius+':'+p.run?.revision;
@@ -138,10 +144,11 @@ export function getPrivateSelfState(world,id,preparedActor,restore=false){
   heldTicks:p.heldTicks||0,replacedInputSeq:p.replacedInputSeq||0,inputNeutral:!!p.inputNeutral,
   actions:{attack:p.resolvedAttackSeq||0,skill:p.resolvedSkillSeq||0,firedAttack:p.firedAttackSeq||0,firedSkill:p.firedSkillSeq||0}};
 }
-export function getStaticState(world){const g=world.game;return {revision:2,escapeMap:g.escapeMap||null,escapeState:g.escape?{...g.escape,pads:g.escape.pads.slice()}:null,worldRadius:g.worldRadius,mapRadius:g.mapRadius,mapName:g.mapName,
+export function getStaticState(world){const g=world.game;return {revision:2,escapeMap:g.escapeMap||null,escapeState:g.escape?{...g.escape,pads:g.escape.pads.slice()}:null,center:{x:g.center?.x||0,y:g.center?.y||0},worldRadius:g.worldRadius,mapRadius:g.mapRadius,mapName:g.mapName,
  boundary:g.boundary||null,walls:g.walls.filter(w=>!w.dynamic).map(w=>({x:w.pos?.x??w.x,y:w.pos?.y??w.y,w:w.w??w.width,h:w.h??w.height,angle:w.angle||0,kind:w.kind||'wall',terrain:!!w.terrain})),
  smokes:g.smokes.map(s=>({x:s.pos.x,y:s.pos.y,radius:s.radius})),captureMap:g.capture?.map||null};}
 function state(world,players,shots){const g=world.game;return {serverTick:g.frame,simTime:world.timeMs,actors:players.map(p=>actor(world,p)),shots,aliveCount:g.participants.filter(p=>p.alive).length,
+  ...(g.classroomAnnouncements?{announcements:g.classroomAnnouncements}:{}),
   presentation:{finalPhase:!!g.finalPhase,gameOver:!!g.isGameOver,eventFocusFrames:g.eventFocusFrames||0,eventFocusPos:g.eventFocusPos?{x:g.eventFocusPos.x,y:g.eventFocusPos.y}:null,announcement:g.announcement||'',announcementLife:g.announcementLife||0,feed:(g.eventFeed||[]).slice(0,3).map(e=>({text:e.text,color:e.color,life:e.life}))},
   movingWalls:g.walls.map((w,i)=>w.spinSpeed?[i,w.angle]:null).filter(Boolean),...(g.dynamicObstacles?{dynamicWalls:world.BRRework.dynamicWalls(g)}:{}),
  ring:g.ringGeometry,capture:g.capture?world.brCapturePacket(g):null,farm:world.brFarm.snapshot(g),
@@ -172,4 +179,4 @@ export function getVisibleState(world,id,interest,prepared=getTeacherState(world
 export function exportResult(world){
  return {...world.brBuildResults(),matchId:world.matchId};
 }
-export function destroyWorld(world){if(world.disposed)return;world.BRRework.clearWorld(world.game,'destroy');world.brFarm.dispose(world.game);world.game.participants.length=0;world.byId.clear();world.inputPending.clear();world.actionPending.clear();world.session.inputs={};world.session.players={};world.lastInputAt.clear();world.onInputApplied=null;world.eventSink=null;world.entitySpawn=null;world.entityEnd=null;world.events.length=0;for(const key of ['projectiles','zones','turrets','particles','rings','texts','signatureEffects'])if(Array.isArray(world.game[key]))world.game[key].length=0;world.publishEscape=null;world.game.escape=null;world.game.escapeMap=null;world.game.escapeBlocks=null;world.disposed=true;}
+export function destroyWorld(world){if(world.disposed)return;if(world.game.soloSupplies){for(const p of world.game.participants)p.combatBuff=null;world.game.soloSupplies=null;world.game.combatSupply=null;world.game.supplyDrop=null;}world.BRRework.clearWorld(world.game,'destroy');world.brFarm.dispose(world.game);world.game.participants.length=0;world.byId.clear();world.inputPending.clear();world.actionPending.clear();world.session.inputs={};world.session.players={};world.lastInputAt.clear();world.onInputApplied=null;world.eventSink=null;world.entitySpawn=null;world.entityEnd=null;world.events.length=0;for(const key of ['projectiles','zones','turrets','particles','rings','texts','signatureEffects'])if(Array.isArray(world.game[key]))world.game[key].length=0;world.publishEscape=null;world.game.classroomAnnouncements=null;world.game.escape=null;world.game.escapeMap=null;world.game.escapeBlocks=null;world.disposed=true;}

@@ -101,9 +101,10 @@ __brScope.SupplyDrop = class SupplyDrop {
                 this.life--;
                 let picker=null,best=Infinity;
                 for(const p of game.getNearbyParticipants(this.pos,game.farmPickupSearchRadius||150)) {
-                    if(!p.alive || p.id===999) continue;
+                    if(!p.alive || p.id===999 || (game.soloSupplies && (!p.remoteId || p.isClone || p.cloneOwner))) continue;
                     const d=p.pos.dist(this.pos);
-                    if(d<p.radius+38 && d<best){best=d;picker=p;}
+                    const reach = game.soloSupplies ? 43 : 38;
+                    if(d<p.radius+reach && d<best && (!game.soloSupplies || !game.checkWallBetween(p.pos, this.pos))){best=d;picker=p;}
                 }
                 if(picker) {
                     this.claimed=true;
@@ -389,7 +390,10 @@ export const initializers=[
             function snapshot(g) {
                 if(g._farmSnapshot)return g._farmSnapshot;
                 const supply=g.supplyDrop&&!g.supplyDrop.claimed&&g.supplyDrop.life>0?g.supplyDrop:null;
-                return g._farmSnapshot={r:g.farmRevision||0,b:(g.farmBoxes||[]).map(b=>[b.id,b.pos.x,b.pos.y,Math.round(b.hp/Math.max(.01,b.maxHp||1)*100),b.kind||'xp',__brScope.brCrateHalf(b)]),x:(g.xpBundles||[]).map(d=>[d.id,Math.round(d.pos.x),Math.round(d.pos.y),d.amount,d.source]),s:supply?[Math.round(supply.pos.x),Math.round(supply.pos.y),supply.landed?1:0]:null};
+                const snapshot={r:g.farmRevision||0,b:(g.farmBoxes||[]).map(b=>[b.id,b.pos.x,b.pos.y,Math.round(b.hp/Math.max(.01,b.maxHp||1)*100),b.kind||'xp',__brScope.brCrateHalf(b)]),x:(g.xpBundles||[]).map(d=>[d.id,Math.round(d.pos.x),Math.round(d.pos.y),d.amount,d.source]),s:supply?[Math.round(supply.pos.x),Math.round(supply.pos.y),supply.landed?1:0]:null};
+                const combat = g.combatSupply;
+                if (combat) snapshot.c = [Math.round(combat.pos.x), Math.round(combat.pos.y), combat.landed ? 1 : 0, combat.kind];
+                return g._farmSnapshot = snapshot;
             }
             
             // Count complete attack intervals, including the first hit at time zero.

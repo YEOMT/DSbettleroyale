@@ -7,8 +7,8 @@ function fixture(id='emoji-034'){
  w.game.walls=[];w.game.smokes=[];w.brFarm.dispose(w.game);for(const [i,a]of [p,q,z].entries()){a.pos=new w.Vec2(i*240,0);a.vel=new w.Vec2(0,0);a.spawnProtectionUntilFrame=0;a.hp=a.maxHp=10000;a.combatPreviousX=a.pos.x;a.combatPreviousY=0;}w.game.rebuildSpatialGrid();
  return {w,p,q,z,events,tick(n){for(let i=0;i<n;i++){w.game.frame++;w.timeMs=w.game.frame*1000/60;w.BRRework.tick(w.game);}}};
 }
-test('83 active stable IDs, deleted skills cannot instantiate, rank chances stay fixed',()=>{
- const r=createRuleContext();assert.equal(r.EMOJI_DB.length,83);assert.equal(new Set(r.EMOJI_DB.map(a=>a.id)).size,83);assert.deepEqual(r.BR_TIER_CHANCES,[['S',.1],['A',.2],['B',.25],['C',.3],['F',.15]]);
+test('84 active stable IDs, deleted skills cannot instantiate, rank chances stay fixed',()=>{
+ const r=createRuleContext();assert.equal(r.EMOJI_DB.length,84);assert.equal(new Set(r.EMOJI_DB.map(a=>a.id)).size,84);assert.deepEqual(r.BR_TIER_CHANCES,[['S',.1],['A',.2],['B',.25],['C',.3],['F',.15]]);
  for(const id of retired){assert.ok(!r.EMOJI_DB.some(a=>a.id===id));assert.ok(!r.BRRework.defs[id]);assert.ok(!r.BR_V32_NATIVE_SKILLS.has(id));assert.ok(!r.BR_V32_SKILL_FIELDS[id]);assert.throws(()=>createWorld(undefined,{},'removed',[{id:'old',name:'Old',abilityId:id}]),/INVALID_ABILITY/);}
  for(const id of ['emoji-034','emoji-070'])assert.ok(!r.BR_V32_NATIVE_SKILLS.has(id));
 });

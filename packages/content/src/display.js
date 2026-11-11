@@ -1,6 +1,6 @@
 // Generated from current authority runtime. Display text only; no client combat.
 export const display={
-  "rosterVersion": "emoji83-xmap-v33",
+  "rosterVersion": "emoji84-v34",
   "odds": "S 10% · A 20% · B 25% · C 30% · F 15%",
   "cards": {
     "emoji-000": {
@@ -804,12 +804,12 @@ export const display={
     },
     "emoji-131": {
       "basic": "가위 근접 베기",
-      "skill": "같은 조준 방향으로 가위 5발 · 0.1초 간격 순차 발사 · 탄당 피해 26 · 기절/옛 근접 연격 없음 · 최대 조준 거리 900 · 대기 16초",
+      "skill": "한 방향으로 가위 5발을 0.1초 간격으로 던집니다. 최초 시전 후 3초 안에 방향을 바꿔 두 번 더 사용합니다. 탄당 기본 피해는 차례로 26 / 15.6 / 11.7이며 각 연사가 끝나야 재사용할 수 있습니다. · 최대 조준 거리 900 · 대기 16초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 개수 · 제어",
       "cooldown": "16초",
       "label": "가위 수호자",
       "category": "근접형",
-      "concept": "근접 가위질과 같은 방향의 순차 가위 투척을 섞는다",
+      "concept": "근접 가위질과 방향을 바꿔 최대 세 번 던지는 5연발을 섞는다",
       "facts": {
         "level": 1,
         "damageUnits": "base coefficient before rank/run/defence modifiers",
@@ -846,7 +846,7 @@ export const display={
     },
     "emoji-132": {
       "basic": "가느다란 공허탄 · 1발",
-      "skill": "2.5초 지속 광선 · 0.1초마다 피해 계수 8.736 · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음 · 최대 조준 거리 1393.6 · 대기 20초",
+      "skill": "2.5초 지속 광선 · 0.1초마다 피해 계수 10 · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음 · 최대 조준 거리 1393.6 · 대기 20초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 고유 지속",
       "cooldown": "20초",
       "label": "공허 파괴자",
@@ -868,7 +868,7 @@ export const display={
           "cooldownFrames": 1200,
           "cooldownJitter": false,
           "durationFrames": 150,
-          "damageCoefficient": 8.736
+          "damageCoefficient": 10
         },
         "eligibleAugments": [
           "rapid",
@@ -2756,12 +2756,12 @@ export const display={
     },
     "emoji-127": {
       "basic": "스케이트 근접 타격",
-      "skill": "짧은 직선 돌진으로 접촉한 적에게 한 번만 작은 피해와 밀침을 줍니다. 폭탄·종료 장판·재시전은 없습니다. · 최대 조준 거리 370 · 대기 7초",
+      "skill": "직선 돌진으로 접촉한 적에게 작은 피해와 밀침을 줍니다. 돌진 종료 후 2초 안에 시도한 다음 평타는 첫 유효 대상의 넉백이 45% 증가합니다. 빗나가도 사용됩니다. · 최대 조준 거리 370 · 대기 7초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
       "cooldown": "7초",
       "label": "롤러스케이트",
       "category": "기동형",
-      "concept": "짧은 직선 돌진으로 한 번 부딪히고 빠져나간다",
+      "concept": "직선 돌진 후 강화된 스케이트 킥으로 첫 적을 밀어낸다",
       "facts": {
         "level": 1,
         "damageUnits": "base coefficient before rank/run/defence modifiers",
@@ -3330,12 +3330,12 @@ export const display={
     },
     "emoji-147": {
       "basic": "작은 에너지탄 · 1발",
-      "skill": "최대 260 / 속도 26의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음 · 최대 조준 거리 260 · 대기 7초",
+      "skill": "최대 260 대시 후 첫 시전부터 3초 안에 한 번 더 사용해 출발 위치로 귀환합니다. 귀환 경로 또는 도착점이 막히면 제자리에 머뭅니다. 귀환 시도 또는 시간 만료 후 대기 7초. · 최대 조준 거리 260 · 대기 7초",
       "passive": "스킬 증강: 대기 단축",
       "cooldown": "7초",
       "label": "외계인",
       "category": "원거리형",
-      "concept": "공격 부작용 없는 짧은 대시로 위치를 바꾼다",
+      "concept": "짧게 돌진한 뒤 출발 좌표로 한 번 귀환할 수 있다",
       "facts": {
         "level": 1,
         "damageUnits": "base coefficient before rank/run/defence modifiers",
@@ -3471,6 +3471,46 @@ export const display={
           "cooldownFrames": 540,
           "cooldownJitter": false,
           "durationFrames": 0,
+          "damageCoefficient": 0
+        },
+        "eligibleAugments": [
+          "wanggui",
+          "rapid",
+          "heavy",
+          "multi",
+          "giant",
+          "impact",
+          "quick",
+          "swift",
+          "titan",
+          "regen"
+        ]
+      }
+    },
+    "emoji-151": {
+      "basic": "직선 신호탄 · 1발",
+      "skill": "전방 160°·거리 780을 0.6초 예고합니다. 빨간불이 켜지는 순간 걷고 있는 적의 걸음 속도를 1.8초 동안 65% 낮춥니다. 멈추거나 벽 뒤로 피할 수 있습니다. · 최대 조준 거리 780 · 대기 17초",
+      "passive": "스킬 증강: 대기 단축",
+      "cooldown": "17초",
+      "label": "빨간불!",
+      "category": "원거리형",
+      "concept": "빨간불을 예고해 움직이는 적을 늦추고 멈출지를 선택하게 한다",
+      "facts": {
+        "level": 1,
+        "damageUnits": "base coefficient before rank/run/defence modifiers",
+        "basic": {
+          "close": false,
+          "count": 1,
+          "range": 739,
+          "intervalFrames": 46,
+          "coefficient": 15
+        },
+        "skill": {
+          "kind": "red-light",
+          "aimRange": 780,
+          "cooldownFrames": 1020,
+          "cooldownJitter": false,
+          "durationFrames": 108,
           "damageCoefficient": 0
         },
         "eligibleAugments": [

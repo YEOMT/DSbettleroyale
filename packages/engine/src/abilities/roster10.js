@@ -17,13 +17,14 @@ export const initializers=[[310,S=>{
   [143,'👑','킹 오브 데마시아','S',true,'검격','#facc15'],[144,'🍄','버섯돌보미','A',false,'포자 단발','#86efac'],
   [145,'🦈','부캉이','A',true,'짧은 깨물기','#7dd3fc'],[146,'🐼','푸바오','A',true,'대나무 타격','#bef264'],
   [147,'👽','외계인','B',false,'작은 에너지탄','#a3e635'],[148,'👹','도깨비','C',true,'방망이 타격','#fb7185'],
-  [149,'🐖','꿀꿀이','F',true,'짧은 들이밀기','#f9a8d4'],[150,'🐭','찍찍이','F',false,'작은 단발 탄','#cbd5e1']
+  [149,'🐖','꿀꿀이','F',true,'짧은 들이밀기','#f9a8d4'],[150,'🐭','찍찍이','F',false,'작은 단발 탄','#cbd5e1'],
+  [151,'🚦','신호등','B',false,'직선 신호탄','#f87171']
  ];
  function register(number,skill,handler){
   const [,emoji,name,tier,close,basicText,color]=entries.find(x=>x[0]===number),id='emoji-'+number;
   if(S.EMOJI_DB.some(a=>a.id===id)||R.defs[id])throw Error('ROSTER_ID_COLLISION:'+id);
   const basic={close,description:basicText,style:close?'slash':'standard',...(close?{rangeBonus:86,halfAngle:1.18,cooldownScale:1,damageScale:1,pushScale:.28,stun:0,reward:''}:{type:'bullet',count:1,spread:0,pierce:false,bounces:0,explode:0,status:null,statusPower:0})};
-  skill={...skill,key:'rework-'+id,label:skill.label||name,cooldown:skill.cooldownFrames,duration:skill.durationFrames||0,windup:0,interval:skill.intervalFrames||0,stun:0,units:{time:'frames@60Hz',distance:'world units',width:'full width',speed:'world units/frame',damage:'base coefficient before rank/run modifiers'}};
+  skill={...skill,key:'rework-'+id,label:skill.label||name,cooldown:skill.cooldownFrames,duration:skill.durationFrames||0,windup:skill.windupFrames||0,interval:skill.intervalFrames||0,stun:0,units:{time:'frames@60Hz',distance:'world units',width:'full width',speed:'world units/frame',damage:'base coefficient before rank/run modifiers'}};
   skill.caps=skill.capabilities;skill.cancelPolicy='owner death/life change/match reset remove; movement cancels on stun or forced movement';
   const ability={id,legacyIndex:number,timingSeed:'roster10-'+number,t:tier,e:emoji,n:name,type:close?'MELEE':'PROJ',sub:'ROSTER10_'+number,sizeMult:1,category:close?'근접형':'원거리형',desc:skill.description,concept:skill.description,basicSummary:basicText,skillSummary:skill.description,pTrail:color,projEmoji:emoji};
   S.EMOJI_DB.push(ability);R.register(id,{referenceName:name,rank:tier,role:ability.category,category:ability.category,statType:ability.type,tankRole:false,basic,skill,stats:{...ROSTER10_BASES[tier+'_'+(close?'melee':'ranged')],...(number===149?{finalBaseHp:240}:{})}},c=>handler(fixed(c),skill));
@@ -111,16 +112,60 @@ export const initializers=[[310,S=>{
  });
  register(145,{kind:'shark-haste',shape:'self',cooldownFrames:720,durationFrames:300,moveRate:1.2,attackRate:1.25,description:'정확히 5초 이동속도 ×1.20 · 평타 공격빈도 ×1.25(같은 효과 비누적)',capabilities:caps({})},c=>{R.buff(c,c.owner,'moveHaste',1.2,300);R.buff(c,c.owner,'basicHaste',1.25,300);});
  register(146,{kind:'panda-next-basic',shape:'self',cooldownFrames:600,durationFrames:360,healRatio:.1,basicMultiplier:1.5,description:'최대 HP 10% 즉시 회복 · 6초 안의 다음 실제 평타 행동 1회 피해 ×1.50(헛쳐도 소비)',capabilities:caps({heal:true})},c=>{R.heal(c,c.owner,c.owner.maxHp*.1);R.buff(c,c.owner,'pandaNextBasic',1.5,360);});
- register(147,{kind:'safe-dash',shape:'dash',cooldownFrames:420,range:260,speed:26,damage:0,description:'최대 260 / 속도 26의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음',capabilities:caps({dash:true,signatureRange:true})},(c,s)=>travel(c,s));
+ register(147,{kind:'safe-dash',shape:'dash',cooldownFrames:420,range:260,speed:26,damage:0,extraUses:1,recastWindow:180,
+  description:'최대 260 대시 후 첫 시전부터 3초 안에 한 번 더 사용해 출발 위치로 귀환합니다. 귀환 경로 또는 도착점이 막히면 제자리에 머뭅니다. 귀환 시도 또는 시간 만료 후 대기 7초.',
+  capabilities:caps({dash:true,signatureRange:true})},(c,s)=>{
+  const origin=copy(c.owner.pos);
+  travel(c,s);
+  R.openRecast(c,{duration:s.recastWindow,cooldownFrames:s.cooldownFrames,handler:ctx=>{
+   const {g,owner}=ctx,r=owner.radius,ring=g.ringGeometry;
+   if(S.session.roomMeta.mode==='solo'&&ring&&Math.hypot(origin.x-ring.cx,origin.y-ring.cy)+r>ring.radius)return;
+   if(dist(clampArena(g,origin,r),origin)>.01||S.brHostBodyWalls(g).some(wall=>S.combatWallContact(origin.x,origin.y,r,wall)))return;
+   if(S.combatTraceWalls(owner.pos,origin,r,S.brHostBodyWalls(g))||firstBody(ctx,owner.pos,origin,r))return;
+   R.teleport(ctx,origin,{prevalidated:true});
+  }});
+ });
  register(148,{kind:'goblin-shield',shape:'self',cooldownFrames:600,durationFrames:180,shieldRatio:.15,attackRate:1.2,description:'정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신)',capabilities:caps({shield:true})},c=>{R.shield(c,c.owner,c.owner.maxHp*.15,180);R.buff(c,c.owner,'basicHaste',1.2,180);});
  register(149,{kind:'pig-haste',shape:'self',cooldownFrames:480,durationFrames:180,moveRate:1.2,description:'정확히 3초 이동속도 ×1.20 · 별도 접촉 피해 없음',capabilities:caps({})},c=>R.buff(c,c.owner,'moveHaste',1.2,180));
  register(150,{kind:'safe-dash',shape:'dash',cooldownFrames:540,range:180,speed:22,damage:0,description:'최대 180 / 속도 22의 짧은 대시 · 벽·상자 앞 정지 · 공격 부작용 없음',capabilities:caps({dash:true,signatureRange:true})},(c,s)=>travel(c,s));
- const basicAttempt=R.basicAttempt;R.basicAttempt=(p,g,aim)=>{const result=basicAttempt(p,g,aim),s=R.state(p);removeStealth(p);const charge=s.buffs.find(b=>b.kind==='pandaNextBasic'&&b.end>now(g));if(charge){result.mult*=charge.value;s.buffs=s.buffs.filter(b=>b.kind!=='pandaNextBasic');}return result;};
+ register(151,{label:'빨간불!',kind:'red-light',shape:'cone',range:780,halfAngle:80*Math.PI/180,
+  windupFrames:36,durationFrames:108,slowRate:.35,deadzone:.12,cooldownFrames:1020,damage:0,
+  description:'전방 160°·거리 780을 0.6초 예고합니다. 빨간불이 켜지는 순간 걷고 있는 적의 걸음 속도를 1.8초 동안 65% 낮춥니다. 멈추거나 벽 뒤로 피할 수 있습니다.',
+  capabilities:caps({})},(c,s)=>{
+  const origin=copy(c.owner.pos);
+  R.entity(c,'red-light-warning',{pos:origin,shape:'cone',halfAngle:s.halfAngle,range:s.range,duration:s.windupFrames,color:'#f87171'});
+  R.schedule(c,s.windupFrames,ctx=>{
+   for(const target of R.enemies(ctx,origin,s.range)){
+    if(target.isClone||!target.remoteId||!R.visible(ctx,target,origin))continue;
+    if(!S.brSectorTouches(origin,target,ctx.aim,s.range,s.halfAngle,S.BR_CONTACT.skillConeTarget))continue;
+    const input=S.session.inputs[target.remoteId];
+    if(!input||input.life!==target.lifeSeq||input.matchKey!==S.brRingKey()||input.sessionId!==target.sessionId||S.brNow()-input._receivedAt>=250)continue;
+    if(Math.hypot(input.dx,input.dy)<=s.deadzone||R.inputLocks(target,ctx.g).move||target.playerDash||target.dashFrames>0)continue;
+    // Rework effects resolve before this tick's physics. Use the last completed
+    // displacement along the voluntary drive, excluding teleports and wall jitter.
+    const driveX=target.presentationDriveX||0,driveY=target.presentationDriveY||0,length=Math.hypot(driveX,driveY);
+    const dx=target.pos.x-target.combatPreviousX,dy=target.pos.y-target.combatPreviousY;
+    if(length<.1||!Number.isFinite(dx+dy)||Number(target.warpSeq||0)!==target.combatPreviousWarp||(dx*driveX+dy*driveY)/length<=.1)continue;
+    const effect=R.buff(ctx,target,'slow',s.slowRate,s.durationFrames);
+    R.state(target).trafficSlowUntil=effect.end;
+   }
+  });
+ });
+ const basicAttempt=R.basicAttempt;R.basicAttempt=(p,g,aim)=>{const result=basicAttempt(p,g,aim),s=R.state(p);removeStealth(p);if(p.ability.id==='emoji-127'){const kick=s.buffs.find(b=>b.kind==='rollerKick'&&b.end>now(g));if(kick){result.kickPush=kick.value;s.buffs.splice(s.buffs.indexOf(kick),1);}}const charge=s.buffs.find(b=>b.kind==='pandaNextBasic'&&b.end>now(g));if(charge){result.mult*=charge.value;s.buffs=s.buffs.filter(b=>b.kind!=='pandaNextBasic');}return result;};
  const onHpDamage=R.onHpDamage;R.onHpDamage=(p,attacker,actual,...args)=>{if(actual>0||p._lastDamageResult?.shieldAbsorbed>0)removeStealth(p);return onHpDamage(p,attacker,actual,...args);};
  const cast=R.cast;R.cast=(p,...args)=>{const prior=R.state(p).jokerStealth,result=cast(p,...args);if(result&&prior&&R.state(p).jokerStealth===prior)removeStealth(p);return result;};
  const tick=R.tick;R.tick=g=>{tick(g);for(const p of g.participants){const s=p.rw;if(s?.jokerStealth&&(s.jokerStealth.end<=now(g)||s.jokerStealth.life!==R.life(p)||!p.alive))removeStealth(p);}};
  const cleanup=R.cleanup;R.cleanup=(p,g,reason)=>{removeStealth(p);return cleanup(p,g,reason);};
  const wirePlayer=R.wirePlayer;R.wirePlayer=(p,g)=>{const row=wirePlayer(p,g);if(['emoji-145','emoji-149'].includes(p.ability.id)&&R.state(p).buffs.some(b=>b.kind==='moveHaste'&&b.ctx.owner===p&&b.end>now(g)))row.roster10Move=true;return row;};
  const aimSpec=R.aimSpec;R.aimSpec=(ability,kind,radius,...args)=>{const spec=aimSpec(ability,kind,radius,...args);if(['emoji-141','emoji-143','emoji-144','emoji-147','emoji-150'].includes(ability.id)){spec.clipPath=true;spec.collisionRadius=ability.id==='emoji-144'?26:radius;spec.clipBodies=ability.id!=='emoji-144';spec.bodyPadding=ability.id==='emoji-141'?5:1;}if(ability.id==='emoji-142')spec.clipRope=true;return spec;};
- S.BR_ROSTER_VERSION='emoji83-xmap-v33';
+ const movementUpdates = [
+  ['emoji-139',1.00,1.18], ['emoji-028',1.14,1.27],
+  ['emoji-007',1.20,1.30], ['emoji-132',1.296,1.38]
+ ];
+ for (const [id,oldSpeed,newSpeed] of movementUpdates) {
+  const ability=S.EMOJI_DB.find(a=>a.id===id);
+  ability.finalBaseSpeed=newSpeed;
+  if(id!=='emoji-139')ability.walkFloorRatio=newSpeed/oldSpeed;
+ }
+ S.BR_ROSTER_VERSION='emoji84-v34';
 }]];

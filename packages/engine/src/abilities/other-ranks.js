@@ -89,7 +89,7 @@ export const initializers=[
         {statType:'MELEE',basicSummary:'빠른 근접 전기톱 · 밀침 작음',stats:{hpMultiplier:.64,speedMultiplier:1.04}});
     // A10: ordinary hits mark one visible enemy per caster; bats prefer that life.
     add('emoji-036','뱀파이어 떼','A','원거리형',{},
-        {kind:'marked-homing',shape:'cone',cooldown:frames(10),range:910,radius:16,speed:18,damage:19,count:3,countCap:8,spread:.12,turnRate:.055,markDuration:240,knockback:1,color:'#c084fc',emoji:'🦇',caps:{...projectileCaps,multicast:true},
+        {kind:'marked-homing',shape:'cone',cooldown:frames(10),range:910,radius:16,speed:18,damage:19,count:3,countCap:8,spread:.12,turnRate:.048,markDuration:240,knockback:1,color:'#c084fc',emoji:'🦇',caps:{...projectileCaps,multicast:true},
          description:'일반 공격으로 마지막 적 한 명에게 4초 사냥 표식을 남깁니다. 스킬 박쥐 무리는 유효한 표식 대상을 우선 추적하며 벽·은신을 무시하지 않습니다.',strength:'표식 후 집중 사격',success:'평타 표식 후 박쥐 적중',failure:'벽이나 은신에 표적 상실',counterplay:'엄폐로 표식 추적 끊기'},
         (ctx,s)=>{const count=liveCount(ctx,s);for(let i=0;i<count;i++)shot(ctx,s,{dir:rotate(ctx.aim,(i-(count-1)/2)*s.spread),homing:true,turnRate:s.turnRate,preferredMark:'hunt'});},
         {onBasicHit:(ctx,target,result)=>{if(result.valid&&target.id!==999)R.mark(ctx,target,{kind:'hunt',duration:240,charges:1,bonus:0});}});
@@ -210,9 +210,12 @@ export const initializers=[
         (ctx,s)=>{for(let i=1;i<=s.count;i++){const own=R.world(ctx.g).entities.filter(e=>!e.dead&&e.kind==='pin-trap'&&e.ctx.ownerId===ctx.ownerId);while(own.length>=s.trapCap)R.end(own.shift(),'replaced');const raw=ctx.owner.pos.add(ctx.aim.mult(R.ranged(ctx,s.range)*ctx.aimRangeFactor*i/(s.count+1))),pos=groundPoint(ctx,raw,R.sized(ctx,s.radius));R.entity(ctx,'pin-trap',{pos,radius:R.sized(ctx,s.radius),damage:s.damage,duration:R.duration(ctx,s.duration),armFrames:s.armFrames,maxPerOwner:s.trapCap,cancelOnStun:false,trap:true,color:s.color,emoji:s.emoji},(c,e)=>{if(e.age<s.armFrames)return;for(const t of R.enemies(c,e.pos,e.radius+85)){if(e.pos.dist(t.pos)>e.radius+Number(t.radius||0))continue;if(c.g.checkWallBetween(e.pos,t.pos))continue;const hit=R.hit(c,t,s.damage,{knockback:0,stun:0});if(hit.valid){R.end(e,'hit');break;}}});}});
     // C11: the simplest short dash, nothing is spawned behind it.
     add('emoji-127','롤러스케이트','C','기동형',melee('punch',{pushScale:.25}),
-        {kind:'simple-dash',shape:'dash',cooldown:frames(7),range:370,width:64,speed:23,damage:17,knockback:5,color:'#f9a8d4',caps:dashCaps,
-         description:'짧은 직선 돌진으로 접촉한 적에게 한 번만 작은 피해와 밀침을 줍니다. 폭탄·종료 장판·재시전은 없습니다.',strength:'간단한 진입과 이탈',success:'필요한 방향으로 짧게 이동',failure:'추가 피해 수단 없음',counterplay:'벽과 측면 회피'},
-        (ctx,s)=>R.dash(ctx,{range:s.range,speed:s.speed,width:s.width,damage:s.damage,knockback:s.knockback,stun:0}));
+        {kind:'simple-dash',shape:'dash',cooldown:frames(7),range:370,width:64,speed:23,damage:17,knockback:5,kickWindow:120,kickPush:1.45,color:'#f9a8d4',caps:dashCaps,
+         description:'직선 돌진으로 접촉한 적에게 작은 피해와 밀침을 줍니다. 돌진 종료 후 2초 안에 시도한 다음 평타는 첫 유효 대상의 넉백이 45% 증가합니다. 빗나가도 사용됩니다.',strength:'간단한 진입과 이탈',success:'필요한 방향으로 짧게 이동',failure:'추가 피해 수단 없음',counterplay:'벽과 측면 회피'},
+        (ctx,s)=>R.dash(ctx,{range:s.range,speed:s.speed,width:s.width,damage:s.damage,knockback:s.knockback,stun:0,
+            onEnd(c,e,reason){if(['range','wall','hit','expired'].includes(reason)&&R.validContext(c))
+                R.buff({...c,run:{...c.run,duration:1}},c.owner,'rollerKick',s.kickPush,s.kickWindow);}
+        }));
     // F: clear, modest identities rather than disguised high-rank effects.
     add('emoji-050','민달팽이','F','탱커',melee('punch',{cooldownScale:1.14,damageScale:.9,pushScale:.2}),
         {kind:'shell',shape:'circle',cooldown:frames(8),duration:150,radius:65,damageReduction:.32,color:'#a3e635',caps:{duration:true,utility:true},

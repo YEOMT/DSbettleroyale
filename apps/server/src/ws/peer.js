@@ -19,7 +19,7 @@ export class Peer{
   this.flush();
  }
  trimEvents(now=Date.now()){const p=this.member;if(!p)return;while(p.events.length&&(p.events.length>2048||p.eventBytes>1048576||now-p.events[0].at>10000)){const e=p.events.shift();p.eventBytes-=Buffer.byteLength(e.data);}}
- snapshot(data){if(this.socket.readyState!==1)return;if(this.pendingSnapshot)this.metrics.replacedSnapshots++;this.pendingSnapshot=data;this.flush();}
+ snapshot(data,announcementSeq=0){if(this.socket.readyState!==1)return;if(this.pendingSnapshot)this.metrics.replacedSnapshots++;this.pendingSnapshot=data;this.pendingAnnouncementSeq=announcementSeq;this.flush();}
  flush(){
   if(this.batchDepth)return;
   const ws=this.socket;if(ws.readyState!==1)return;const bytes=ws.bufferedAmount;this.metrics.bufferHighWatermark=Math.max(this.metrics.bufferHighWatermark,bytes);
@@ -42,9 +42,9 @@ export class Peer{
     }
     const data=Buffer.from(raw);ws.send(data,{binary:false,compress:false});this.metrics.sentBytes+=data.length;
    }
-   if(!this.queue.length&&this.pendingSnapshot&&ws.bufferedAmount<this.config.bufferWarn){const data=Buffer.isBuffer(this.pendingSnapshot)?this.pendingSnapshot:Buffer.from(this.pendingSnapshot);this.pendingSnapshot=null;ws.send(data,{binary:false,compress:false});this.metrics.sentBytes+=data.length;}
+   if(!this.queue.length&&this.pendingSnapshot&&ws.bufferedAmount<this.config.bufferWarn){const data=Buffer.isBuffer(this.pendingSnapshot)?this.pendingSnapshot:Buffer.from(this.pendingSnapshot);this.pendingSnapshot=null;ws.send(data,{binary:false,compress:false});this.metrics.sentBytes+=data.length;this.deliveredAnnouncement=this.pendingAnnouncementSeq||0;}
   }finally{this.transport?.uncork();}
  }
- resetMatch(){this.pendingSnapshot=null;this.profileState=null;this.queue=[];this.queueBytes=0;if(this.socket.bufferedAmount<this.config.bufferWarn)this.highAt=0;}
+ resetMatch(){this.pendingSnapshot=null;this.deliveredAnnouncement=this.pendingAnnouncementSeq=0;this.profileState=null;this.queue=[];this.queueBytes=0;if(this.socket.bufferedAmount<this.config.bufferWarn)this.highAt=0;}
  close(code,reason){if(this.socket.readyState<2)this.socket.close(code,reason);this.pendingSnapshot=null;this.profileState=null;this.queue=[];this.queueBytes=0;}
 }

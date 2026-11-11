@@ -25,7 +25,7 @@ const {content,display}=effectiveContent(),hash=crypto.createHash('sha256').upda
 const outputs={
  'packages/content/src/manifest.js':'// Generated from current authority runtime by npm run content:generate; legacy baseline remains immutable.\nexport const contentHash='+JSON.stringify(hash)+';\nexport const manifest='+JSON.stringify(content,null,2)+';\n',
  'packages/content/src/display.js':'// Generated from current authority runtime. Display text only; no client combat.\nexport const display='+JSON.stringify(display,null,2)+';\n',
- 'docs/roster83-text-audit.md':rosterAudit(content,display)
+ 'docs/roster84-text-audit.md':rosterAudit(content,display)
 };
 for(const [file,text]of Object.entries(outputs)){if(process.argv.includes('--check')){if(fs.readFileSync(file,'utf8').replaceAll('\r\n','\n')!==text)throw Error('STALE_GENERATED_CONTENT '+file);}else fs.writeFileSync(file,text);}
 console.log(JSON.stringify({roster:content.roster.length,rosterVersion:content.rosterVersion,contentHash:hash,check:process.argv.includes('--check')}));

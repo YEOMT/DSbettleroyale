@@ -90,6 +90,7 @@ __brScope.brRingScheduleCompression = function brRingScheduleCompression(g,time=
             s.plan.compression={start,end,amount,floor};s.lastCompressionTick=tick;s.revision++;
             g.lastConvergenceTrigger=g.frame;
             g.announce('⚠️ 1.5초 후 위험구역 압축 · 주황 점선 확인',100);
+            g.announceClassroom?.('compression');
             return true;
         };
 

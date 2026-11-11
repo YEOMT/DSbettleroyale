@@ -94,7 +94,7 @@ __visualScope.brPaintReworkStatus = function brPaintReworkStatus(p,x,y,r,zoom,st
             let ix=x+r+7/zoom,iy=y-r*.35+(hostCompact&&state.stunEnd>frame?12/zoom:0);
             if(state.bleed>0){p.circle(ix,iy,4/zoom,'#f43f5e',1);p.line(ix,iy-7/zoom,ix,iy-2/zoom,'#fecdd3',1,2/zoom);iy+=12/zoom;}
             if(state.mark>0){p.circle(ix,iy,5/zoom,'#fbbf24',.9,1.5/zoom);p.line(ix-7/zoom,iy,ix+7/zoom,iy,'#fde68a',1,1/zoom);iy+=12/zoom;}
-            if(state.slow<.99){p.line(x-8/zoom,y+r+(hostCompact?19:8)/zoom,x+8/zoom,y+r+(hostCompact?19:8)/zoom,'#93c5fd',.8,2/zoom);}
+            if(state.slow<.99){if(state.trafficSlowUntil>state.sourceTick)p.circle(x+8/zoom,y+r+(hostCompact?19:8)/zoom,3/zoom,'#ef4444',1);p.line(x-8/zoom,y+r+(hostCompact?19:8)/zoom,x+8/zoom,y+r+(hostCompact?19:8)/zoom,'#93c5fd',.8,2/zoom);}
             const buffs=Array.isArray(state.buffs)?state.buffs.filter(b=>b.end>frame):[],has=kind=>buffs.some(b=>b.kind===kind);
             if(has('damageReduction'))p.arc(x,y,r*1.12,-Math.PI*.75,Math.PI*.75,'#94a3b8',.8,2/zoom);
             if(has('basicHaste')||has('teamBasicHaste')||has('teamSkillHaste'))p.arc(x,y,r*.90,-Math.PI*.8,-Math.PI*.2,'#fde68a',.78,1.6/zoom);

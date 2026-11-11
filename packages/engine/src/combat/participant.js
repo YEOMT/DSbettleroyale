@@ -1,4 +1,5 @@
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
+import {activeSupply, supplyDirectHit} from '../farm/combat-supplies.js';
 export function install(__brScope){
 // Explicit room-scoped deltas let frozen parity fixtures neutralize only the
 // approved balance changes without replacing their original combat assertions.
@@ -152,6 +153,7 @@ __brScope.Participant = class Participant {
                 // New entries freeze the final pre-mode median after old role modifiers.
                 if(Number.isFinite(rwDef?.stats?.finalBaseHp))this.maxHp=rwDef.stats.finalBaseHp;
                 if(ability.t==='B'||ability.t==='C')this.maxHp*=__brScope.ROSTER10_BALANCE.bcHp;
+                if(ability.finalBaseSpeed)this.speed=ability.finalBaseSpeed;
                 if(ability.id==='emoji-114')this.speed=1.5827; // median existing A tank walk; native tank-punch retained
                 this.modeHpMultiplier=__brScope.brModeHpMultiplier(__brScope.session?.roomMeta?.mode);
                 this.maxHp*=this.modeHpMultiplier;this.hp=this.maxHp;
@@ -952,7 +954,12 @@ __brScope.Participant = class Participant {
                 
                 if (this.ability.sub === 'WEAK' || this.ability.sub === 'PAPER_THIN') amt *= 3;
                 const guard=this.teamGuardFrames>0?Number(this.teamGuardStrength||0):0;
-                const reduction=Math.max(guard,__brScope.BRRework?.damageReduction(this)||0);
+                let reduction=Math.max(guard,__brScope.BRRework?.damageReduction(this)||0);
+                if ((attacker?.combatBuff || this.combatBuff) && supplyDirectHit(attacker, this, reflected, damageContext)) {
+                    const tick = __brScope.game?.frame || 0;
+                    if (activeSupply(attacker, tick)?.kind === 'attack') amt *= 1.45;
+                    if (activeSupply(this, tick)?.kind === 'guard') reduction = Math.max(reduction, .4);
+                }
                 amt*=Math.max(.55,1-reduction);
                 const absorbed=__brScope.BRRework?__brScope.BRRework.absorb(this,amt):0;
                 const actualDamage = Math.max(0, Math.min(this.hp, amt-absorbed));
@@ -1016,7 +1023,7 @@ __brScope.Participant = class Participant {
                 }
                 
                 if(this.hp <= 0 && this.alive) {
-                    this.alive = false;this._lastDamageResult.killed=true;
+                    this.alive = false;this.combatBuff=null;this._lastDamageResult.killed=true;
                     if(__brScope.BRRework)__brScope.BRRework.onDeath(this,__brScope.game);
                     this.deathFrame = __brScope.game ? __brScope.game.frame : this.survivalFrames;
                     this.deathVisualUntilFrame = this.deathFrame + 45;

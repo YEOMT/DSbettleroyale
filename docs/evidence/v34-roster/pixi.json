@@ -1,0 +1,52 @@
+{
+  "renderer": "pixi",
+  "status": "PASS",
+  "signal": {
+    "renderedBy": 3,
+    "slow": 0.35,
+    "remaining": 103
+  },
+  "alien": {
+    "restoredRecast": true,
+    "warp": 1,
+    "cooldown": 420
+  },
+  "scissors": {
+    "participants": 20,
+    "uses": 3,
+    "count": 8,
+    "shots": 480,
+    "peakShots": 120,
+    "screens": [
+      {
+        "maxShots": 122,
+        "frames": 600,
+        "drawP95": 20.700000047683716,
+        "gapP95": 33.30000000000018,
+        "renderer": "pixi"
+      },
+      {
+        "maxShots": 114,
+        "frames": 600,
+        "drawP95": 19.899999976158142,
+        "gapP95": 33.20000000000073,
+        "renderer": "pixi"
+      },
+      {
+        "maxShots": 120,
+        "frames": 499,
+        "drawP95": 42.5,
+        "gapP95": 66.70000000000073,
+        "renderer": "pixi"
+      }
+    ],
+    "elapsedMs": 17370.295100000003,
+    "cpuMs": 5593,
+    "processRssBefore": 199966720,
+    "processRssAfter": 329396224,
+    "sentBytes": 84590360,
+    "snapshotP95": 120750,
+    "snapshots": 945
+  },
+  "ms": 38100.0147
+}

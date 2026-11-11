@@ -9,12 +9,30 @@ try{
  for(let i=0;i<145;i++){stepWorld(w);if(i%12===0){h.publish();await delay(30);}}
  for(const [i,p]of pages.entries()){
   if(i===1&&process.env.CAPTURE_ASSERT_DELAY_MS)await delay(Number(process.env.CAPTURE_ASSERT_DELAY_MS));
-  // The simulation is intentionally frozen. Slow CI screenshots must not
-  // turn the next student's live-HUD check into the 1.5s stale-HUD check.
-  // Send through the real WebSocket path and await this exact snapshot.
-  const expectedSeq=h.room.snapshotSeq+1;h.publish();await p.waitForFunction(seq=>m.timeline.lastSeq>=seq,expectedSeq);
-  await p.waitForFunction(()=>m.ui.lastCapture?.z[0][2][0]===2&&m.ui.lastCapture?.z[0][2][1]===1);
-  const data=await p.evaluate(()=>({backend:m.renderer.pixi?'pixi':'canvas',captureAgeMs:performance.now()-(m.renderer.session.captureReceivedAt||0),packet:m.ui.lastCapture?.z,receivedSeq:m.timeline.lastSeq,hud:document.getElementById('br-capture-scoreboard').innerText,points:m.timeline.static.captureMap.points.map(p=>[p.id,p.radius]),terrain:m.timeline.static.walls.filter(w=>w.terrain).length,wallPixels:[...m.renderer.wallImages.values()].reduce((n,c)=>n+c.width*c.height,0),maxTexture:Math.max(0,...[...m.renderer.wallImages.values()].map(c=>Math.max(c.width,c.height))),size:{width:innerWidth,scroll:document.documentElement.scrollWidth},hudBottom:document.getElementById('br-capture-scoreboard').getBoundingClientRect().bottom,battleTop:document.querySelector('.br-battle-hud').getBoundingClientRect().top,mini:!!document.querySelector('.br-capture-map'),resources:[m.renderer.sprites.size,m.renderer.textures.size,m.renderer.labels.size]}));
+  // Record the rendered HUD in the real snapshot dispatch, after App.receive.
+  // Slow screenshot readback / automation polling can resume after the 1.5s
+  // live-state window. Keep the original freshness and visible-text assertions.
+  const expectedSeq=h.room.snapshotSeq+1;
+  await p.evaluate(seq=>{
+   window.captureObservation=null;
+   const observe=({detail})=>{
+    if(detail.snapshotSeq!==seq)return;
+    m.net.removeEventListener('snapshot',observe);
+    window.captureObservation={backend:m.renderer.pixi?'pixi':'canvas',captureAgeMs:performance.now()-(m.renderer.session.captureReceivedAt||0),packet:m.ui.lastCapture?.z,receivedSeq:m.timeline.lastSeq,hud:document.getElementById('br-capture-scoreboard').innerText,points:m.timeline.static.captureMap.points.map(p=>[p.id,p.radius]),terrain:m.timeline.static.walls.filter(w=>w.terrain).length,wallPixels:[...m.renderer.wallImages.values()].reduce((n,c)=>n+c.width*c.height,0),maxTexture:Math.max(0,...[...m.renderer.wallImages.values()].map(c=>Math.max(c.width,c.height))),size:{width:innerWidth,scroll:document.documentElement.scrollWidth},hudBottom:document.getElementById('br-capture-scoreboard').getBoundingClientRect().bottom,battleTop:document.querySelector('.br-battle-hud').getBoundingClientRect().top,mini:!!document.querySelector('.br-capture-map'),resources:[m.renderer.sprites.size,m.renderer.textures.size,m.renderer.labels.size]};
+   };
+   m.net.addEventListener('snapshot',observe);
+  },expectedSeq);
+  h.publish();
+  if(i===1&&process.env.CAPTURE_OBSERVER_DELAY_MS)await delay(Number(process.env.CAPTURE_OBSERVER_DELAY_MS));
+  await p.waitForFunction(()=>window.captureObservation!==null);
+  const data=await p.evaluate(async()=>{
+   // Layout uses ResizeObserver. Measure its rendered bounds after paint;
+   // text and packet freshness above refer to the same delivered snapshot.
+   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+   return {...window.captureObservation,hudBottom:document.getElementById('br-capture-scoreboard').getBoundingClientRect().bottom,battleTop:document.querySelector('.br-battle-hud').getBoundingClientRect().top};
+  });
+  assert.equal(data.receivedSeq,expectedSeq);
+  assert.deepEqual(data.packet[0][2],[2,1,0]);
   report.steps.push({role:i,...data});
   assert.ok(data.captureAgeMs<1500,'live capture HUD is checked after a fresh authoritative snapshot');
   assert.equal(data.backend,renderer);assert.deepEqual(data.points,[['A',400],['B',400]]);assert.equal(data.terrain,4);assert.ok(data.hud.includes('BLUE 2 · RED 1 · GREEN 0'));assert.ok(data.hud.includes('BLUE 우세·득점 중'));assert.ok(!data.hud.includes('×1.5'));assert.ok(data.maxTexture<1024,'terrain never makes giant raster textures');assert.ok(data.size.scroll<=data.size.width,'mobile HUD does not widen viewport');if(i>0){assert.ok(data.battleTop>=data.hudBottom,'capture cards must not overlap player HP HUD');assert.ok(data.mini,'student X minimap');}await p.screenshot({path:out+'/'+i+'.png'});

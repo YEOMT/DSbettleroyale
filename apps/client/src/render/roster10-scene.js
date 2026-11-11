@@ -1,7 +1,7 @@
 import {Graphics} from 'pixi.js';
 import {hostDisplayRadius,hostInk} from './host-layout.js';
 
-export const roster10Kinds=new Set(['decoy','grapple','mushroom','poison','ring-wall']);
+export const roster10Kinds=new Set(['decoy','grapple','mushroom','poison','ring-wall','red-light-warning']);
 
 export function clearRoster10Scene(r){
  for(const entry of r.roster10Rings?.values()||[])if(entry.graphic&&!entry.graphic.destroyed)entry.graphic.destroy();
@@ -40,7 +40,11 @@ export function drawRoster10Scene(r,p,view,zoom){
  for(const e of view.shots){
   if(!roster10Kinds.has(e.kind)||e.kind==='ring-wall'||(e.displayFrame??view.renderTick)>=e.end)continue;
   visible.add(e.id);
-  if(e.kind==='decoy')decoy(r,p,e,z);
+  if(e.kind==='red-light-warning'){
+   const angle=Math.atan2(e.dy,e.dx),half=e.halfAngle,range=e.length;
+   p.sector(e.x,e.y,range,angle,half,e.color,.15);
+   p.arc(e.x,e.y,range,angle-half,angle+half,e.color,.95,2/z);
+  }else if(e.kind==='decoy')decoy(r,p,e,z);
   else if(e.kind==='grapple'){
    // The moving owner's current endpoint comes from the authoritative snapshot.
    // Never retain the original cast position or connect an invisible decoy owner.

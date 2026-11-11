@@ -27,6 +27,9 @@ for(const expected of fixtures)test(`${retired.has(expected.id)?'approved retire
  // Only the approved collision-size delta is normalized for the immutable golden.
  // Actual 24/32 radii and unchanged damage/timing are asserted by classroom tests.
  Object.assign(r.BRRework.defs['emoji-003'].skill,{width:38,finalRadius:26});
+ // Golden trajectories retain the legacy steering and beam coefficient. v34 live values have their own combat tests.
+ r.BRRework.defs['emoji-132'].skill.damage=8.736;
+ r.BRRework.defs['emoji-036'].skill.turnRate=.055;
  r.seedRandom('parity|'+expected.id);r.teamMode=0;
  const a=r.EMOJI_DB.find(a=>a.id===expected.id),target=r.EMOJI_DB.find(a=>a.id==='emoji-114');
  const p=new r.Participant(1,'actor',a,new r.Vec2(0,0)),q=new r.Participant(2,'target',target,new r.Vec2(180,0));
