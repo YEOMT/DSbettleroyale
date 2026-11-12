@@ -16,7 +16,7 @@ function fixture(id,mode='solo',players=2){
  return {w,g,p,q,R,v,tick(n){for(let i=0;i<n;i++){g.frame++;w.timeMs=g.frame*1000/60;R.tick(g);}},cast:(dir=v(1,0))=>R.cast(p,g,dir),close:()=>destroyWorld(w)};
 }
 test('all five F characters use each final HP/attack multiplier once and preserve current health ratio',()=>{
- const expected=[[2,2.25],[2.85,3.45],[3.6,4.85]];
+ const expected=[[2.2,2.6],[3.35,4.4],[4.8,7.2]];
  const ids=manifest.roster.filter(a=>a.tier==='F').map(a=>a.id);
  assert.deepEqual(ids,['emoji-052','emoji-054','emoji-056','emoji-149','emoji-150']);
  for(const id of ids){const f=fixture(id),{w,p,q}=f;try{
@@ -26,7 +26,7 @@ test('all five F characters use each final HP/attack multiplier once and preserv
    near(p.maxHp,base*hp);near(p.hp/p.maxHp,.75);near(p.run.mods.wangguiPower,attack);
    const before=q.hp;q.takeDamage(10,p,false,null,{scaled:true,basic:true});near(before-q.hp,10*attack);
   }
-  if(id==='emoji-052')assert.equal(p.maxHp,1440);
+  if(id==='emoji-052')assert.equal(p.maxHp,1920);
  }finally{f.close();}}
 });
 test('authoritative flat-world walk over 60 inputs increases only the four designated kit speeds',t=>{

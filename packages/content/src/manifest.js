@@ -1,5 +1,5 @@
 // Generated from current authority runtime by npm run content:generate; legacy baseline remains immutable.
-export const contentHash="8f35f243ad7ee3770ffe3bbbeaf2ad6f4fd2760c7a511c8e196fceb920d6fd6b";
+export const contentHash="8f4cf38107b74bfd8c37e32f80016c48d8265bc5b883cdf4914b08d427f77bdb";
 export const manifest={
   "roster": [
     {
@@ -21,9 +21,9 @@ export const manifest={
         "category": "원거리형",
         "concept": "큰 불덩이로 진입로를 막는 용 포격수",
         "basicSummary": "작은 화염구",
-        "skillSummary": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 8.4, 최대 2곳) · 기절 없음",
+        "skillSummary": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 12.6, 최대 2곳) · 기절 없음",
         "skillLabel": "용의 분노",
-        "skillDesc": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 8.4, 최대 2곳) · 기절 없음"
+        "skillDesc": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 12.6, 최대 2곳) · 기절 없음"
       },
       "maxHp": 540,
       "radius": 106.39999999999999,
@@ -67,12 +67,12 @@ export const manifest={
         "count": 1,
         "countCap": 1,
         "knockback": 18,
-        "zoneDamage": 8.4,
+        "zoneDamage": 12.6,
         "zoneRadius": 150,
         "durationFrames": 150,
         "intervalFrames": 30,
         "maxPerOwner": 2,
-        "description": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 8.4, 최대 2곳) · 기절 없음",
+        "description": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 12.6, 최대 2곳) · 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": true,
@@ -256,7 +256,7 @@ export const manifest={
       },
       "maxHp": 600,
       "radius": 106.70400000000001,
-      "speed": 2,
+      "speed": 2.08,
       "damageMult": 1,
       "basic": {
         "close": true,
@@ -272,9 +272,9 @@ export const manifest={
       "skill": {
         "kind": "hook",
         "shape": "line",
-        "cooldownFrames": 990,
+        "cooldownFrames": 840,
         "range": 1320,
-        "width": 38,
+        "width": 46,
         "speed": 38,
         "damage": 52,
         "count": 1,
@@ -301,7 +301,7 @@ export const manifest={
         },
         "key": "rework-emoji-002",
         "label": "우주 납치범",
-        "cooldown": 990,
+        "cooldown": 840,
         "duration": 0,
         "windup": 0,
         "interval": 0,
@@ -333,7 +333,7 @@ export const manifest={
         "cancelPolicy": "death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel"
       },
       "timing": {
-        "cooldown": 990
+        "cooldown": 840
       }
     },
     {
@@ -502,7 +502,7 @@ export const manifest={
       "skill": {
         "kind": "blink-finisher",
         "shape": "target",
-        "cooldownFrames": 900,
+        "cooldownFrames": 810,
         "range": 680,
         "radius": 135,
         "damage": 68,
@@ -531,7 +531,7 @@ export const manifest={
         },
         "key": "rework-emoji-004",
         "label": "공허 암살자",
-        "cooldown": 900,
+        "cooldown": 810,
         "duration": 0,
         "windup": 0,
         "interval": 0,
@@ -563,7 +563,7 @@ export const manifest={
         "cancelPolicy": "death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel"
       },
       "timing": {
-        "cooldown": 900
+        "cooldown": 810
       }
     },
     {
@@ -585,13 +585,15 @@ export const manifest={
         "category": "근접형",
         "concept": "회전 검 사이로 파고드는 연속 참격 검사",
         "basicSummary": "검 근접 베기",
-        "skillSummary": "3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음",
+        "skillSummary": "조준 방향으로 최대 300 무피해 돌진 · 벽이나 적 앞에서 정지 후 3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음",
+        "finalBaseSpeed": 1.48,
+        "walkFloorRatio": 1.108713891885413,
         "skillLabel": "검성",
-        "skillDesc": "3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음"
+        "skillDesc": "조준 방향으로 최대 300 무피해 돌진 · 벽이나 적 앞에서 정지 후 3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음"
       },
       "maxHp": 541.3262400000001,
       "radius": 71.13600000000001,
-      "speed": 1.33488,
+      "speed": 1.48,
       "damageMult": 1,
       "basic": {
         "close": true,
@@ -608,7 +610,7 @@ export const manifest={
         "kind": "orbit-finisher",
         "shape": "circle",
         "cooldownFrames": 1080,
-        "range": 200,
+        "range": 300,
         "radius": 150,
         "damage": 17,
         "durationFrames": 180,
@@ -619,7 +621,7 @@ export const manifest={
         "finisherRange": 260,
         "finisherWidth": 200,
         "knockback": 2,
-        "description": "3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음",
+        "description": "조준 방향으로 최대 300 무피해 돌진 · 벽이나 적 앞에서 정지 후 3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -668,7 +670,8 @@ export const manifest={
           "speed": "world units/frame",
           "damage": "base coefficient before rank/run modifiers"
         },
-        "cancelPolicy": "death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel"
+        "cancelPolicy": "death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel",
+        "dashRange": 300
       },
       "timing": {
         "cooldown": 1080
@@ -693,11 +696,11 @@ export const manifest={
         "category": "원거리형",
         "concept": "자신을 중심으로 위험 구역을 만드는 방사능 투사",
         "basicSummary": "방사능 탄",
-        "skillSummary": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 7.35) · 사망 폭발은 30, 생명당 1회",
+        "skillSummary": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 10.5) · 사망 폭발은 30, 생명당 1회",
         "finalBaseSpeed": 1.3,
         "walkFloorRatio": 1.0833333333333335,
         "skillLabel": "폴아웃",
-        "skillDesc": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 7.35) · 사망 폭발은 30, 생명당 1회"
+        "skillDesc": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 10.5) · 사망 폭발은 30, 생명당 1회"
       },
       "maxHp": 459,
       "radius": 68.4,
@@ -739,12 +742,12 @@ export const manifest={
         "windupFrames": 36,
         "knockback": 17,
         "zoneRadius": 245,
-        "zoneDamage": 7.35,
+        "zoneDamage": 10.5,
         "durationFrames": 150,
         "intervalFrames": 30,
         "deathDamage": 30,
         "deathRadius": 180,
-        "description": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 7.35) · 사망 폭발은 30, 생명당 1회",
+        "description": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 10.5) · 사망 폭발은 30, 생명당 1회",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -935,9 +938,9 @@ export const manifest={
         "category": "설치형",
         "concept": "중력장을 놓아 적의 동선을 끌어 모은다",
         "basicSummary": "행성 탄",
-        "skillSummary": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 8.24 · 자연 종료 때 반경 225 붕괴 63.86",
+        "skillSummary": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 10.815 · 자연 종료 때 반경 225 붕괴 63.86",
         "skillLabel": "블랙홀",
-        "skillDesc": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 8.24 · 자연 종료 때 반경 225 붕괴 63.86"
+        "skillDesc": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 10.815 · 자연 종료 때 반경 225 붕괴 63.86"
       },
       "maxHp": 500,
       "radius": 98.8,
@@ -977,13 +980,13 @@ export const manifest={
         "radius": 170,
         "pullRadius": 330,
         "collapseRadius": 225,
-        "damage": 8.24,
+        "damage": 10.815,
         "collapseDamage": 63.86,
         "pull": 1.1,
         "durationFrames": 210,
         "intervalFrames": 30,
         "maxPerOwner": 1,
-        "description": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 8.24 · 자연 종료 때 반경 225 붕괴 63.86",
+        "description": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 10.815 · 자연 종료 때 반경 225 붕괴 63.86",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -1288,9 +1291,9 @@ export const manifest={
         "category": "설치형",
         "concept": "퍼지는 독구름으로 공간을 빼앗는다",
         "basicSummary": "독성 구체",
-        "skillSummary": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 10.3 · 기절 없음",
+        "skillSummary": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 14.42 · 기절 없음",
         "skillLabel": "역병군주",
-        "skillDesc": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 10.3 · 기절 없음"
+        "skillDesc": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 14.42 · 기절 없음"
       },
       "maxHp": 460,
       "radius": 68.4,
@@ -1330,11 +1333,11 @@ export const manifest={
         "radius": 110,
         "maxRadius": 310,
         "growFrames": 150,
-        "damage": 10.3,
+        "damage": 14.42,
         "durationFrames": 300,
         "intervalFrames": 30,
         "maxPerOwner": 1,
-        "description": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 10.3 · 기절 없음",
+        "description": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 14.42 · 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -1522,12 +1525,14 @@ export const manifest={
         "concept": "별을 전방위로 뿌려 포위를 뚫는다",
         "basicSummary": "별 탄",
         "skillSummary": "자신 중심 별 6방향 파동을 0.35초 간격으로 2회 · 탄당 피해 25.2 · 개수 증강은 파동당 방향 수(최대 10)",
+        "finalBaseSpeed": 1.55,
+        "walkFloorRatio": 1.1959876543209877,
         "skillLabel": "초신성",
         "skillDesc": "자신 중심 별 6방향 파동을 0.35초 간격으로 2회 · 탄당 피해 25.2 · 개수 증강은 파동당 방향 수(최대 10)"
       },
       "maxHp": 416.925,
       "radius": 57,
-      "speed": 1.296,
+      "speed": 1.55,
       "damageMult": 1,
       "basic": {
         "close": false,
@@ -2476,9 +2481,9 @@ export const manifest={
         "category": "원거리형",
         "concept": "멀리서 정확한 한 발을 노리는 저격수",
         "basicSummary": "단발 저격탄",
-        "skillSummary": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다.",
+        "skillSummary": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배.",
         "skillLabel": "헤드슈터",
-        "skillDesc": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다."
+        "skillDesc": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배."
       },
       "maxHp": 349.2801,
       "radius": 45.6,
@@ -2549,7 +2554,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다.",
+        "description": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배.",
         "strength": "긴 사거리의 단발 화력",
         "success": "예고 뒤에도 탄도에 남은 적 적중",
         "failure": "방향 고정과 긴 재사용 대기",
@@ -2675,8 +2680,8 @@ export const manifest={
         "interval": 0,
         "count": 1,
         "countCap": 1,
-        "damage": 58,
-        "knockback": 30,
+        "damage": 110,
+        "knockback": 70,
         "stun": 0,
         "stunCap": 0,
         "range": 165,
@@ -2686,7 +2691,7 @@ export const manifest={
         "ownerDeath": "cancel",
         "wallPolicy": "blocked",
         "targetBudget": 1,
-        "wallDamage": 14,
+        "wallDamage": 26,
         "wallWindow": 90,
         "color": "#fb923c",
         "caps": {
@@ -2961,7 +2966,7 @@ export const manifest={
         "e": "🛡️",
         "n": "아이언월",
         "type": "BUFF",
-        "desc": "상대 공격을 받아내며 반격 각도를 만든다",
+        "desc": "몸에 닿은 적 탄을 원 발사자 방향으로 되돌리는 근접 방패병",
         "sub": "REFLECT",
         "sizeMult": 1.7,
         "tankRole": true,
@@ -2970,13 +2975,13 @@ export const manifest={
         "legacyIndex": 28,
         "timingSeed": "아이언월",
         "category": "탱커",
-        "concept": "상대 공격을 받아내며 반격 각도를 만든다",
+        "concept": "몸에 닿은 적 탄을 원 발사자 방향으로 되돌리는 근접 방패병",
         "basicSummary": "갑옷 근접 타격",
-        "skillSummary": "2초 동안 받는 피해가 28% 줄고, 적의 직접 공격으로 실제 잃은 HP의 50%를 그 공격자에게 즉시 반환합니다. 지속·환경·반격 피해는 반환하지 않습니다.",
+        "skillSummary": "5초간 몸에 닿은 적 탄을 한 번 원래 발사자 방향으로 반사합니다. 기절 중에도 유지되며 근접·광선·장판 피해는 받습니다.",
         "finalBaseSpeed": 1.27,
         "walkFloorRatio": 1.1140350877192984,
-        "skillLabel": "아이언월",
-        "skillDesc": "2초 동안 받는 피해가 28% 줄고, 적의 직접 공격으로 실제 잃은 HP의 50%를 그 공격자에게 즉시 반환합니다. 지속·환경·반격 피해는 반환하지 않습니다."
+        "skillLabel": "철벽 반사",
+        "skillDesc": "5초간 몸에 닿은 적 탄을 한 번 원래 발사자 방향으로 반사합니다. 기절 중에도 유지되며 근접·광선·장판 피해는 받습니다."
       },
       "maxHp": 367.53506999999996,
       "radius": 66.538,
@@ -2994,12 +2999,12 @@ export const manifest={
         "style": "punch"
       },
       "skill": {
-        "label": "아이언월",
-        "kind": "counter-immediate",
-        "shape": "circle",
+        "label": "철벽 반사",
+        "kind": "iron-reflect",
+        "shape": "self",
         "cooldown": 660,
         "windup": 0,
-        "duration": 120,
+        "duration": 300,
         "interval": 0,
         "count": 1,
         "countCap": 1,
@@ -3009,17 +3014,14 @@ export const manifest={
         "stunCap": 0,
         "range": 0,
         "width": 0,
-        "radius": 100,
+        "radius": 0,
         "cancelOnStun": true,
         "ownerDeath": "cancel",
         "wallPolicy": "blocked",
         "targetBudget": 1,
-        "damageReduction": 0.28,
-        "reflectRatio": 0.5,
-        "reflectRange": 1600,
         "color": "#93c5fd",
         "caps": {
-          "damage": true,
+          "damage": false,
           "projectile": false,
           "multicast": false,
           "expandable": false,
@@ -3030,16 +3032,16 @@ export const manifest={
           "dash": false,
           "summon": false,
           "trap": false,
-          "duration": true,
+          "duration": false,
           "utility": true
         },
-        "description": "2초 동안 받는 피해가 28% 줄고, 적의 직접 공격으로 실제 잃은 HP의 50%를 그 공격자에게 즉시 반환합니다. 지속·환경·반격 피해는 반환하지 않습니다.",
-        "strength": "집중 공격에 강한 지속 방어",
-        "success": "직접 공격 타이밍에 자세 유지",
-        "failure": "피해 없이 끝나면 반격 없음",
-        "counterplay": "방어가 끝날 때 공격",
+        "description": "5초간 몸에 닿은 적 탄을 한 번 원래 발사자 방향으로 반사합니다. 기절 중에도 유지되며 근접·광선·장판 피해는 받습니다.",
+        "strength": "적 비행탄 반사",
+        "success": "탄이 몸에 닿을 때 방어",
+        "failure": "다른 피해에는 방어 효과 없음",
+        "counterplay": "근접·광선·장판으로 공격",
         "capabilities": {
-          "damage": true,
+          "damage": false,
           "projectile": false,
           "multicast": false,
           "expandable": false,
@@ -3050,12 +3052,12 @@ export const manifest={
           "dash": false,
           "summon": false,
           "trap": false,
-          "duration": true,
+          "duration": false,
           "utility": true
         },
         "cooldownFrames": 660,
         "windupFrames": 0,
-        "durationFrames": 120,
+        "durationFrames": 300,
         "intervalFrames": 0,
         "stunFrames": 0
       },
@@ -5952,7 +5954,7 @@ export const manifest={
         "category": "원거리형",
         "concept": "빠른 관통 한 발을 맞히는 명사수",
         "basicSummary": "정밀 탄",
-        "skillSummary": "빠른 관통탄 한 발로 일렬의 적을 타격합니다. 자동 유도나 폭발은 없습니다.",
+        "skillSummary": "빠른 관통탄 한 발로 일렬의 적을 타격합니다. 시전당 40% 확률로 직접 피해 2배. 자동 유도나 폭발은 없습니다.",
         "projEmoji": "•",
         "pSize": 9,
         "pSpeed": 26,
@@ -5963,7 +5965,7 @@ export const manifest={
         "pTrail": "#fde68a",
         "pImpact": "#fff7cc",
         "skillLabel": "정조준 관통 사격",
-        "skillDesc": "빠른 관통탄 한 발로 일렬의 적을 타격합니다. 자동 유도나 폭발은 없습니다."
+        "skillDesc": "빠른 관통탄 한 발로 일렬의 적을 타격합니다. 시전당 40% 확률로 직접 피해 2배. 자동 유도나 폭발은 없습니다."
       },
       "maxHp": 257.81850000000003,
       "radius": 35.72,
@@ -5999,7 +6001,7 @@ export const manifest={
         "label": "정조준 관통 사격",
         "cooldown": 1080,
         "key": "native",
-        "desc": "빠른 관통탄 한 발로 일렬의 적을 타격합니다. 자동 유도나 폭발은 없습니다."
+        "desc": "빠른 관통탄 한 발로 일렬의 적을 타격합니다. 시전당 40% 확률로 직접 피해 2배. 자동 유도나 폭발은 없습니다."
       },
       "timing": {
         "cooldown": 273
@@ -6023,7 +6025,7 @@ export const manifest={
         "category": "원거리형",
         "concept": "긴 직선의 빠른 슬리퍼를 맞힌다",
         "basicSummary": "슬리퍼",
-        "skillSummary": "빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.",
+        "skillSummary": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.",
         "projEmoji": "🥿",
         "pCount": 2,
         "pSize": 14,
@@ -6033,7 +6035,7 @@ export const manifest={
         "pTrail": "#fb7185",
         "pImpact": "#ffe4e6",
         "skillLabel": "슬리퍼 스나이퍼",
-        "skillDesc": "빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다."
+        "skillDesc": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다."
       },
       "maxHp": 243.1905,
       "radius": 36.1,
@@ -6104,7 +6106,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.",
+        "description": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.",
         "strength": "빠른 정밀 단발",
         "success": "긴 직선 조준 적중",
         "failure": "추적과 폭발 없음",
@@ -9077,6 +9079,244 @@ export const manifest={
       "timing": {
         "cooldown": 1020
       }
+    },
+    {
+      "id": "emoji-152",
+      "name": "마이클 잭슨",
+      "tier": "S",
+      "emoji": "🕴",
+      "ability": {
+        "id": "emoji-152",
+        "legacyIndex": 152,
+        "timingSeed": "roster10-152",
+        "t": "S",
+        "e": "🕴",
+        "n": "마이클 잭슨",
+        "type": "PROJ",
+        "sub": "ROSTER10_152",
+        "sizeMult": 1,
+        "category": "원거리형",
+        "desc": "스포트라이트의 예고 범위에 남은 적을 기절시킨다",
+        "concept": "스포트라이트의 예고 범위에 남은 적을 기절시킨다",
+        "basicSummary": "단발 스타 탄",
+        "skillSummary": "0.6초 예고 후 자신 중심 반경 550 안의 모든 생존 적을 벽 너머에도 3초 기절시킵니다. 직접 피해 없음 · 제어 강화 상한 3.6초.",
+        "pTrail": "#fde68a",
+        "projEmoji": "🕴",
+        "skillLabel": "스포트라이트",
+        "skillDesc": "0.6초 예고 후 자신 중심 반경 550 안의 모든 생존 적을 벽 너머에도 3초 기절시킵니다. 직접 피해 없음 · 제어 강화 상한 3.6초."
+      },
+      "maxHp": 375,
+      "radius": 57.379999999999995,
+      "speed": 1.65,
+      "damageMult": 1,
+      "basic": {
+        "close": false,
+        "rangeBonus": 86,
+        "halfAngle": 1.5207754699891267,
+        "cooldownScale": 1,
+        "damageScale": 1,
+        "pushScale": 1,
+        "stun": 0,
+        "reward": "",
+        "style": "standard",
+        "range": 880,
+        "speed": 19.8,
+        "count": 1,
+        "knockback": 11.52,
+        "explodeRadius": 0,
+        "emoji": "🕴",
+        "type": "bullet",
+        "spread": 0,
+        "pierce": false,
+        "bounces": 0,
+        "explode": 0,
+        "status": null,
+        "statusPower": 0,
+        "spin": 0,
+        "face": false,
+        "description": "단발 스타 탄"
+      },
+      "skill": {
+        "label": "스포트라이트",
+        "kind": "spotlight",
+        "shape": "circle",
+        "radius": 550,
+        "windupFrames": 36,
+        "stunFrames": 180,
+        "stunCap": 216,
+        "cooldownFrames": 1440,
+        "description": "0.6초 예고 후 자신 중심 반경 550 안의 모든 생존 적을 벽 너머에도 3초 기절시킵니다. 직접 피해 없음 · 제어 강화 상한 3.6초.",
+        "capabilities": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": true,
+          "cc": true,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "key": "rework-emoji-152",
+        "cooldown": 1440,
+        "duration": 0,
+        "windup": 36,
+        "interval": 0,
+        "stun": 0,
+        "units": {
+          "time": "frames@60Hz",
+          "distance": "world units",
+          "width": "full width",
+          "speed": "world units/frame",
+          "damage": "base coefficient before rank/run modifiers"
+        },
+        "caps": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": true,
+          "cc": true,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement"
+      },
+      "timing": {
+        "cooldown": 1440
+      }
+    },
+    {
+      "id": "emoji-153",
+      "name": "미러링",
+      "tier": "A",
+      "emoji": "🪞",
+      "ability": {
+        "id": "emoji-153",
+        "legacyIndex": 153,
+        "timingSeed": "roster10-153",
+        "t": "A",
+        "e": "🪞",
+        "n": "미러링",
+        "type": "PROJ",
+        "sub": "ROSTER10_153",
+        "sizeMult": 1,
+        "category": "원거리형",
+        "desc": "일자 거울 장막의 앞면으로 적 탄을 되돌린다",
+        "concept": "일자 거울 장막의 앞면으로 적 탄을 되돌린다",
+        "basicSummary": "단발 은빛 탄",
+        "skillSummary": "전방 130에 길이 560의 일자 장막을 5초 설치합니다. 앞면에 닿는 적의 비행탄을 한 번 되돌리고 원 발사자를 약하게 추적합니다. 이동·근접·광선·장판은 통과합니다.",
+        "pTrail": "#cbd5e1",
+        "projEmoji": "🪞",
+        "skillLabel": "반사",
+        "skillDesc": "전방 130에 길이 560의 일자 장막을 5초 설치합니다. 앞면에 닿는 적의 비행탄을 한 번 되돌리고 원 발사자를 약하게 추적합니다. 이동·근접·광선·장판은 통과합니다."
+      },
+      "maxHp": 340,
+      "radius": 41.800000000000004,
+      "speed": 1.6,
+      "damageMult": 1.3,
+      "basic": {
+        "close": false,
+        "rangeBonus": 86,
+        "halfAngle": 1.5207754699891267,
+        "cooldownScale": 1,
+        "damageScale": 1,
+        "pushScale": 1,
+        "stun": 0,
+        "reward": "",
+        "style": "standard",
+        "range": 810,
+        "speed": 18,
+        "count": 1,
+        "knockback": 9.36,
+        "explodeRadius": 0,
+        "emoji": "🪞",
+        "type": "bullet",
+        "spread": 0,
+        "pierce": false,
+        "bounces": 0,
+        "explode": 0,
+        "status": null,
+        "statusPower": 0,
+        "spin": 0,
+        "face": false,
+        "description": "단발 은빛 탄"
+      },
+      "skill": {
+        "label": "반사",
+        "kind": "mirror",
+        "shape": "line",
+        "range": 130,
+        "width": 24,
+        "length": 560,
+        "durationFrames": 300,
+        "cooldownFrames": 1320,
+        "description": "전방 130에 길이 560의 일자 장막을 5초 설치합니다. 앞면에 닿는 적의 비행탄을 한 번 되돌리고 원 발사자를 약하게 추적합니다. 이동·근접·광선·장판은 통과합니다.",
+        "capabilities": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": false,
+          "cc": false,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "key": "rework-emoji-153",
+        "cooldown": 1320,
+        "duration": 300,
+        "windup": 0,
+        "interval": 0,
+        "stun": 0,
+        "units": {
+          "time": "frames@60Hz",
+          "distance": "world units",
+          "width": "full width",
+          "speed": "world units/frame",
+          "damage": "base coefficient before rank/run modifiers"
+        },
+        "caps": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": false,
+          "cc": false,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement"
+      },
+      "timing": {
+        "cooldown": 1320
+      }
     }
   ],
   "retired": [
@@ -10559,12 +10799,12 @@ export const manifest={
         "count": 1,
         "countCap": 1,
         "knockback": 18,
-        "zoneDamage": 8.4,
+        "zoneDamage": 12.6,
         "zoneRadius": 150,
         "durationFrames": 150,
         "intervalFrames": 30,
         "maxPerOwner": 2,
-        "description": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 8.4, 최대 2곳) · 기절 없음",
+        "description": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 12.6, 최대 2곳) · 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": true,
@@ -10718,9 +10958,9 @@ export const manifest={
       "skill": {
         "kind": "hook",
         "shape": "line",
-        "cooldownFrames": 990,
+        "cooldownFrames": 840,
         "range": 1320,
-        "width": 38,
+        "width": 46,
         "speed": 38,
         "damage": 52,
         "count": 1,
@@ -10747,7 +10987,7 @@ export const manifest={
         },
         "key": "rework-emoji-002",
         "label": "우주 납치범",
-        "cooldown": 990,
+        "cooldown": 840,
         "duration": 0,
         "windup": 0,
         "interval": 0,
@@ -10783,7 +11023,7 @@ export const manifest={
       "basicSummary": "근접 포획 타격",
       "stats": {
         "maxHp": 600,
-        "speed": 2
+        "speed": 2.08
       },
       "concept": "정확한 납치로 적을 내 앞으로 옮긴다"
     },
@@ -10881,7 +11121,7 @@ export const manifest={
       "skill": {
         "kind": "blink-finisher",
         "shape": "target",
-        "cooldownFrames": 900,
+        "cooldownFrames": 810,
         "range": 680,
         "radius": 135,
         "damage": 68,
@@ -10910,7 +11150,7 @@ export const manifest={
         },
         "key": "rework-emoji-004",
         "label": "공허 암살자",
-        "cooldown": 900,
+        "cooldown": 810,
         "duration": 0,
         "windup": 0,
         "interval": 0,
@@ -10964,7 +11204,7 @@ export const manifest={
         "kind": "orbit-finisher",
         "shape": "circle",
         "cooldownFrames": 1080,
-        "range": 200,
+        "range": 300,
         "radius": 150,
         "damage": 17,
         "durationFrames": 180,
@@ -10975,7 +11215,7 @@ export const manifest={
         "finisherRange": 260,
         "finisherWidth": 200,
         "knockback": 2,
-        "description": "3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음",
+        "description": "조준 방향으로 최대 300 무피해 돌진 · 벽이나 적 앞에서 정지 후 3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -11024,7 +11264,8 @@ export const manifest={
           "speed": "world units/frame",
           "damage": "base coefficient before rank/run modifiers"
         },
-        "cancelPolicy": "death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel"
+        "cancelPolicy": "death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel",
+        "dashRange": 300
       },
       "concept": "회전 검 사이로 파고드는 연속 참격 검사",
       "basicSummary": "검 근접 베기"
@@ -11045,12 +11286,12 @@ export const manifest={
         "windupFrames": 36,
         "knockback": 17,
         "zoneRadius": 245,
-        "zoneDamage": 7.35,
+        "zoneDamage": 10.5,
         "durationFrames": 150,
         "intervalFrames": 30,
         "deathDamage": 30,
         "deathRadius": 180,
-        "description": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 7.35) · 사망 폭발은 30, 생명당 1회",
+        "description": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 10.5) · 사망 폭발은 30, 생명당 1회",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -11187,13 +11428,13 @@ export const manifest={
         "radius": 170,
         "pullRadius": 330,
         "collapseRadius": 225,
-        "damage": 8.24,
+        "damage": 10.815,
         "collapseDamage": 63.86,
         "pull": 1.1,
         "durationFrames": 210,
         "intervalFrames": 30,
         "maxPerOwner": 1,
-        "description": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 8.24 · 자연 종료 때 반경 225 붕괴 63.86",
+        "description": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 10.815 · 자연 종료 때 반경 225 붕괴 63.86",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -11425,11 +11666,11 @@ export const manifest={
         "radius": 110,
         "maxRadius": 310,
         "growFrames": 150,
-        "damage": 10.3,
+        "damage": 14.42,
         "durationFrames": 300,
         "intervalFrames": 30,
         "maxPerOwner": 1,
-        "description": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 10.3 · 기절 없음",
+        "description": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 14.42 · 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -12267,7 +12508,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다.",
+        "description": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배.",
         "strength": "긴 사거리의 단발 화력",
         "success": "예고 뒤에도 탄도에 남은 적 적중",
         "failure": "방향 고정과 긴 재사용 대기",
@@ -12323,8 +12564,8 @@ export const manifest={
         "interval": 0,
         "count": 1,
         "countCap": 1,
-        "damage": 58,
-        "knockback": 30,
+        "damage": 110,
+        "knockback": 70,
         "stun": 0,
         "stunCap": 0,
         "range": 165,
@@ -12334,7 +12575,7 @@ export const manifest={
         "ownerDeath": "cancel",
         "wallPolicy": "blocked",
         "targetBudget": 1,
-        "wallDamage": 14,
+        "wallDamage": 26,
         "wallWindow": 90,
         "color": "#fb923c",
         "caps": {
@@ -12576,12 +12817,12 @@ export const manifest={
         "style": "punch"
       },
       "skill": {
-        "label": "아이언월",
-        "kind": "counter-immediate",
-        "shape": "circle",
+        "label": "철벽 반사",
+        "kind": "iron-reflect",
+        "shape": "self",
         "cooldown": 660,
         "windup": 0,
-        "duration": 120,
+        "duration": 300,
         "interval": 0,
         "count": 1,
         "countCap": 1,
@@ -12591,17 +12832,14 @@ export const manifest={
         "stunCap": 0,
         "range": 0,
         "width": 0,
-        "radius": 100,
+        "radius": 0,
         "cancelOnStun": true,
         "ownerDeath": "cancel",
         "wallPolicy": "blocked",
         "targetBudget": 1,
-        "damageReduction": 0.28,
-        "reflectRatio": 0.5,
-        "reflectRange": 1600,
         "color": "#93c5fd",
         "caps": {
-          "damage": true,
+          "damage": false,
           "projectile": false,
           "multicast": false,
           "expandable": false,
@@ -12612,16 +12850,16 @@ export const manifest={
           "dash": false,
           "summon": false,
           "trap": false,
-          "duration": true,
+          "duration": false,
           "utility": true
         },
-        "description": "2초 동안 받는 피해가 28% 줄고, 적의 직접 공격으로 실제 잃은 HP의 50%를 그 공격자에게 즉시 반환합니다. 지속·환경·반격 피해는 반환하지 않습니다.",
-        "strength": "집중 공격에 강한 지속 방어",
-        "success": "직접 공격 타이밍에 자세 유지",
-        "failure": "피해 없이 끝나면 반격 없음",
-        "counterplay": "방어가 끝날 때 공격",
+        "description": "5초간 몸에 닿은 적 탄을 한 번 원래 발사자 방향으로 반사합니다. 기절 중에도 유지되며 근접·광선·장판 피해는 받습니다.",
+        "strength": "적 비행탄 반사",
+        "success": "탄이 몸에 닿을 때 방어",
+        "failure": "다른 피해에는 방어 효과 없음",
+        "counterplay": "근접·광선·장판으로 공격",
         "capabilities": {
-          "damage": true,
+          "damage": false,
           "projectile": false,
           "multicast": false,
           "expandable": false,
@@ -12632,18 +12870,18 @@ export const manifest={
           "dash": false,
           "summon": false,
           "trap": false,
-          "duration": true,
+          "duration": false,
           "utility": true
         },
         "cooldownFrames": 660,
         "windupFrames": 0,
-        "durationFrames": 120,
+        "durationFrames": 300,
         "intervalFrames": 0,
         "stunFrames": 0
       },
       "stats": {},
       "basicSummary": "갑옷 근접 타격",
-      "concept": "상대 공격을 받아내며 반격 각도를 만든다"
+      "concept": "몸에 닿은 적 탄을 원 발사자 방향으로 되돌리는 근접 방패병"
     },
     "emoji-029": {
       "name": "스카이 하이",
@@ -14201,7 +14439,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.",
+        "description": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.",
         "strength": "빠른 정밀 단발",
         "success": "긴 직선 조준 적중",
         "failure": "추적과 폭발 없음",
@@ -16370,6 +16608,180 @@ export const manifest={
       },
       "concept": "빨간불을 예고해 움직이는 적을 늦추고 멈출지를 선택하게 한다",
       "basicSummary": "직선 신호탄"
+    },
+    "emoji-152": {
+      "referenceName": "마이클 잭슨",
+      "rank": "S",
+      "role": "원거리형",
+      "category": "원거리형",
+      "statType": "PROJ",
+      "tankRole": false,
+      "basic": {
+        "close": false,
+        "description": "단발 스타 탄",
+        "style": "standard",
+        "type": "bullet",
+        "count": 1,
+        "spread": 0,
+        "pierce": false,
+        "bounces": 0,
+        "explode": 0,
+        "status": null,
+        "statusPower": 0
+      },
+      "skill": {
+        "label": "스포트라이트",
+        "kind": "spotlight",
+        "shape": "circle",
+        "radius": 550,
+        "windupFrames": 36,
+        "stunFrames": 180,
+        "stunCap": 216,
+        "cooldownFrames": 1440,
+        "description": "0.6초 예고 후 자신 중심 반경 550 안의 모든 생존 적을 벽 너머에도 3초 기절시킵니다. 직접 피해 없음 · 제어 강화 상한 3.6초.",
+        "capabilities": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": true,
+          "cc": true,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "key": "rework-emoji-152",
+        "cooldown": 1440,
+        "duration": 0,
+        "windup": 36,
+        "interval": 0,
+        "stun": 0,
+        "units": {
+          "time": "frames@60Hz",
+          "distance": "world units",
+          "width": "full width",
+          "speed": "world units/frame",
+          "damage": "base coefficient before rank/run modifiers"
+        },
+        "caps": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": true,
+          "cc": true,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement"
+      },
+      "stats": {
+        "finalBaseHp": 375,
+        "speed": 1.65,
+        "radius": 57.379999999999995
+      },
+      "concept": "스포트라이트의 예고 범위에 남은 적을 기절시킨다",
+      "basicSummary": "단발 스타 탄"
+    },
+    "emoji-153": {
+      "referenceName": "미러링",
+      "rank": "A",
+      "role": "원거리형",
+      "category": "원거리형",
+      "statType": "PROJ",
+      "tankRole": false,
+      "basic": {
+        "close": false,
+        "description": "단발 은빛 탄",
+        "style": "standard",
+        "type": "bullet",
+        "count": 1,
+        "spread": 0,
+        "pierce": false,
+        "bounces": 0,
+        "explode": 0,
+        "status": null,
+        "statusPower": 0
+      },
+      "skill": {
+        "label": "반사",
+        "kind": "mirror",
+        "shape": "line",
+        "range": 130,
+        "width": 24,
+        "length": 560,
+        "durationFrames": 300,
+        "cooldownFrames": 1320,
+        "description": "전방 130에 길이 560의 일자 장막을 5초 설치합니다. 앞면에 닿는 적의 비행탄을 한 번 되돌리고 원 발사자를 약하게 추적합니다. 이동·근접·광선·장판은 통과합니다.",
+        "capabilities": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": false,
+          "cc": false,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "key": "rework-emoji-153",
+        "cooldown": 1320,
+        "duration": 300,
+        "windup": 0,
+        "interval": 0,
+        "stun": 0,
+        "units": {
+          "time": "frames@60Hz",
+          "distance": "world units",
+          "width": "full width",
+          "speed": "world units/frame",
+          "damage": "base coefficient before rank/run modifiers"
+        },
+        "caps": {
+          "damage": false,
+          "projectile": false,
+          "multicast": false,
+          "expandable": false,
+          "area": false,
+          "cc": false,
+          "heal": false,
+          "shield": false,
+          "dash": false,
+          "summon": false,
+          "trap": false,
+          "duration": false,
+          "utility": true,
+          "signatureRange": false,
+          "signatureDuration": false
+        },
+        "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement"
+      },
+      "stats": {
+        "finalBaseHp": 340,
+        "speed": 1.6,
+        "radius": 41.800000000000004
+      },
+      "concept": "일자 거울 장막의 앞면으로 적 탄을 되돌린다",
+      "basicSummary": "단발 은빛 탄"
     }
   },
   "augments": {
@@ -16410,6 +16822,20 @@ export const manifest={
         "공격속도 +44% (×1.44) · 일반 피해 10% 감소 (×0.9)",
         "공격속도 +82.5% (×1.83) · 일반 피해 5% 감소 (×0.95)",
         "공격속도 +143% (×2.43) · 일반 피해 +5.5% (×1.06)"
+      ],
+      "meleeTiers": [
+        {
+          "basicSpeed": 1.55,
+          "basicDamage": 0.9
+        },
+        {
+          "basicSpeed": 2,
+          "basicDamage": 0.95
+        },
+        {
+          "basicSpeed": 2.5,
+          "basicDamage": 1.055
+        }
       ]
     },
     "heavy": {
@@ -16434,6 +16860,20 @@ export const manifest={
         "일반 피해 +44% (×1.44) · 공격속도 10% 감소 (×0.9)",
         "일반 피해 +82.5% (×1.83) · 공격속도 5% 감소 (×0.95)",
         "일반 피해 +132% (×2.32) · 공격속도 기본 유지"
+      ],
+      "meleeTiers": [
+        {
+          "basicDamage": 1.6,
+          "basicSpeed": 0.9
+        },
+        {
+          "basicDamage": 2.05,
+          "basicSpeed": 0.95
+        },
+        {
+          "basicDamage": 2.65,
+          "basicSpeed": 1
+        }
       ]
     },
     "multi": {
@@ -16506,6 +16946,20 @@ export const manifest={
         "일반 넉백 +44% (×1.44) · 일반 피해 5% 감소 (×0.95)",
         "일반 넉백 +88% (×1.88) · 일반 피해 기본 유지",
         "일반 넉백 +143% (×2.43) · 일반 피해 +5.5% (×1.06)"
+      ],
+      "meleeTiers": [
+        {
+          "basicKnockback": 1.75,
+          "basicDamage": 0.95
+        },
+        {
+          "basicKnockback": 2.4,
+          "basicDamage": 1
+        },
+        {
+          "basicKnockback": 3.1,
+          "basicDamage": 1.055
+        }
       ]
     },
     "wide": {
@@ -16514,22 +16968,22 @@ export const manifest={
       "family": "BASIC",
       "tiers": [
         {
-          "basicRange": 1.22,
+          "basicRange": 1.35,
           "basicSpeed": 0.95
         },
         {
-          "basicRange": 1.44,
+          "basicRange": 1.75,
           "basicSpeed": 1
         },
         {
-          "basicRange": 1.715,
+          "basicRange": 2.2,
           "basicSpeed": 1.055
         }
       ],
       "text": [
-        "근접 범위 +22% (×1.22) · 공격속도 5% 감소 (×0.95)",
-        "근접 범위 +44% (×1.44) · 공격속도 기본 유지",
-        "근접 범위 +71.5% (×1.72) · 공격속도 +5.5% (×1.06)"
+        "근접 범위 +35% (×1.35) · 공격속도 5% 감소 (×0.95)",
+        "근접 범위 +75% (×1.75) · 공격속도 기본 유지",
+        "근접 범위 +120% (×2.2) · 공격속도 +5.5% (×1.06)"
       ]
     },
     "quick": {
@@ -16682,22 +17136,22 @@ export const manifest={
       "family": "BODY",
       "tiers": [
         {
-          "moveSpeed": 1.165,
+          "moveSpeed": 1.25,
           "maxHp": 0.95
         },
         {
-          "moveSpeed": 1.286,
+          "moveSpeed": 1.43,
           "maxHp": 1
         },
         {
-          "moveSpeed": 1.418,
+          "moveSpeed": 1.65,
           "maxHp": 1.055
         }
       ],
       "text": [
-        "이동속도 +16.5% (×1.17) · 최대 HP 5% 감소 (×0.95)",
-        "이동속도 +28.6% (×1.29) · 최대 HP 기본 유지",
-        "이동속도 +41.8% (×1.42) · 최대 HP +5.5% (×1.06)"
+        "이동속도 +25% (×1.25) · 최대 HP 5% 감소 (×0.95)",
+        "이동속도 +43% (×1.43) · 최대 HP 기본 유지",
+        "이동속도 +65% (×1.65) · 최대 HP +5.5% (×1.06)"
       ]
     },
     "titan": {
@@ -16706,22 +17160,22 @@ export const manifest={
       "family": "BODY",
       "tiers": [
         {
-          "maxHp": 1.33,
+          "maxHp": 1.5,
           "moveSpeed": 0.95
         },
         {
-          "maxHp": 1.55,
+          "maxHp": 1.85,
           "moveSpeed": 0.98
         },
         {
-          "maxHp": 1.825,
+          "maxHp": 2.25,
           "moveSpeed": 1
         }
       ],
       "text": [
-        "최대 HP +33% (×1.33) · 이동속도 5% 감소 (×0.95)",
-        "최대 HP +55% (×1.55) · 이동속도 2% 감소 (×0.98)",
-        "최대 HP +82.5% (×1.83) · 이동속도 기본 유지"
+        "최대 HP +50% (×1.5) · 이동속도 5% 감소 (×0.95)",
+        "최대 HP +85% (×1.85) · 이동속도 2% 감소 (×0.98)",
+        "최대 HP +125% (×2.25) · 이동속도 기본 유지"
       ]
     },
     "regen": {
@@ -16730,25 +17184,25 @@ export const manifest={
       "family": "BODY",
       "tiers": [
         {
-          "regenRate": 0.0198,
-          "regenDelay": 270,
+          "regenRate": 0.028,
+          "regenDelay": 240,
           "maxHp": 0.95
         },
         {
-          "regenRate": 0.0286,
-          "regenDelay": 210,
+          "regenRate": 0.045,
+          "regenDelay": 180,
           "maxHp": 1
         },
         {
-          "regenRate": 0.0385,
-          "regenDelay": 150,
+          "regenRate": 0.065,
+          "regenDelay": 120,
           "maxHp": 1.055
         }
       ],
       "text": [
-        "4.5초 무피격 후 초당 HP 1.98% · 최대 HP 5% 감소 (×0.95)",
-        "3.5초 무피격 후 초당 HP 2.86% · 최대 HP 기본 유지",
-        "2.5초 무피격 후 초당 HP 3.85% · 최대 HP +5.5% (×1.06)"
+        "4초 무피격 후 초당 HP 2.8% · 최대 HP 5% 감소 (×0.95)",
+        "3초 무피격 후 초당 HP 4.5% · 최대 HP 기본 유지",
+        "2초 무피격 후 초당 HP 6.5% · 최대 HP +5.5% (×1.06)"
       ]
     },
     "signature_range": {
@@ -16847,16 +17301,16 @@ export const manifest={
     ],
     "F": [
       [
-        2,
-        2.25
+        2.2,
+        2.6
       ],
       [
-        2.85,
-        3.45
+        3.35,
+        4.4
       ],
       [
-        3.6,
-        4.85
+        4.8,
+        7.2
       ]
     ]
   },
@@ -16883,7 +17337,7 @@ export const manifest={
     "staleMs": 900,
     "channelMs": 100,
     "shrinkSpeed": 0.7,
-    "soloMultiplier": 1.6,
+    "soloMultiplier": 1.95,
     "teamElimMultiplier": 1.1
   },
   "capture": {
@@ -17326,11 +17780,12 @@ export const manifest={
       "n. 통신, 의사소통"
     ]
   ],
-  "rosterVersion": "emoji84-v34",
+  "rosterVersion": "emoji86-v35",
   "balancePolicy": {
     "bcBaseHp": 1.06,
     "rangedOutwardPush": 0.88,
     "initialXp": 1.1,
+    "soloInitialMultiplier": 1.27,
     "xpWave": 1.1,
     "healWave": 1.15,
     "genieHp": 56,

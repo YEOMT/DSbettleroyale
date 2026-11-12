@@ -1,0 +1,15 @@
+[
+  {
+    "scenario": "spotlight",
+    "casts": 20,
+    "peakWarnings": 20,
+    "stunned": 2
+  },
+  {
+    "scenario": "reflection",
+    "shooters": 20,
+    "turns": 80,
+    "reliableBytes": 6356927,
+    "cpuMs": 1063
+  }
+]

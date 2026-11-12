@@ -42,11 +42,11 @@ export const initializers=[
     // A01: thin, first-contact sniper. The marker and final direction share ctx.aim.
     add('emoji-023','헤드슈터','A','원거리형',{},
         {kind:'sniper',shape:'line',cooldown:frames(12),windup:24,range:1380,width:14,radius:7,speed:90,damage:76,knockback:2,color:'#fbbf24',emoji:'•',caps:projectileCaps,
-         description:'0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다.',strength:'긴 사거리의 단발 화력',success:'예고 뒤에도 탄도에 남은 적 적중',failure:'방향 고정과 긴 재사용 대기',counterplay:'예고선 옆으로 이동하거나 벽 엄폐'},
+         description:'0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배.',strength:'긴 사거리의 단발 화력',success:'예고 뒤에도 탄도에 남은 적 적중',failure:'방향 고정과 긴 재사용 대기',counterplay:'예고선 옆으로 이동하거나 벽 엄폐'},
         (ctx,s)=>prepared(ctx,s,c=>shot(c,s),'line'));
     // A02: one front target and one optional wall collision; no generic stun.
     add('emoji-025','핵주먹','A','근접형',melee('punch',{halfAngle:1.02,cooldownScale:1.15,damageScale:1.15}),
-        {kind:'front',shape:'rect',cooldown:frames(10),windup:12,range:165,width:104,damage:58,knockback:30,wallDamage:14,wallWindow:90,color:'#fb923c',caps:{damage:true,area:true,expandable:true,cc:true},
+        {kind:'front',shape:'rect',cooldown:frames(10),windup:12,range:165,width:104,damage:110,knockback:70,wallDamage:26,wallWindow:90,color:'#fb923c',caps:{damage:true,area:true,expandable:true,cc:true},
          description:'전방 한 명에게 강한 펀치와 큰 밀침을 줍니다. 밀려난 적의 첫 벽 충돌에만 추가 피해가 적용됩니다.',strength:'방향성 강한 밀침',success:'가까운 전방 적을 벽 쪽으로 가격',failure:'짧은 사거리',counterplay:'측면 회피와 거리 유지'},
         (ctx,s)=>prepared(ctx,s,c=>R.front(c,{range:s.range,width:s.width,damage:s.damage,maxTargets:1,knockback:s.knockback,stun:0,wallDamage:s.wallDamage}),'rect'));
     // A03: role/basic changed independently from the radial skill.
@@ -60,11 +60,13 @@ export const initializers=[
         {kind:'recast-dash',shape:'dash',cooldown:frames(11),range:370,width:76,speed:25,damage:25,knockback:6,recastWindow:120,recastCount:2,color:'#fb7185',caps:dashCaps,
          description:'짧은 돌진 뒤 2초 안에 한 번 더 새 방향으로 돌진합니다. 두 번째 돌진 또는 창 만료 뒤 전체 대기시간이 시작됩니다.',strength:'두 방향 진입과 이탈',success:'첫 돌진으로 접근하고 재조준',failure:'두 번 사용 뒤 긴 공백',counterplay:'첫 돌진을 보고 두 번째 방향 예측'},
         (ctx,s)=>{const first=R.dash(ctx,{range:s.range,speed:s.speed,width:s.width,damage:s.damage,knockback:s.knockback,stun:0});R.openRecast(ctx,{duration:s.recastWindow+first.duration,cooldownFrames:s.cooldown,handler:c=>R.dash(c,{range:s.range,speed:s.speed,width:s.width,damage:s.damage,knockback:s.knockback,stun:0})});});
-    // A05: HP-derived immediate reflection cannot reflect reflection or periodic damage.
     add('emoji-028','아이언월','A','탱커',melee('punch',{pushScale:.25,cooldownScale:1.08}),
-        {kind:'counter-immediate',shape:'circle',cooldown:frames(11),duration:120,radius:100,damageReduction:.28,reflectRatio:.50,reflectRange:1600,color:'#93c5fd',caps:{damage:true,duration:true,utility:true},
-         description:'2초 동안 받는 피해가 28% 줄고, 적의 직접 공격으로 실제 잃은 HP의 50%를 그 공격자에게 즉시 반환합니다. 지속·환경·반격 피해는 반환하지 않습니다.',strength:'집중 공격에 강한 지속 방어',success:'직접 공격 타이밍에 자세 유지',failure:'피해 없이 끝나면 반격 없음',counterplay:'방어가 끝날 때 공격'},
-        (ctx,s)=>{R.buff(ctx,ctx.owner,'damageReduction',s.damageReduction,s.duration);R.buff(ctx,ctx.owner,'counterImmediate',s.reflectRatio,s.duration,{range:s.reflectRange});buffRing(ctx,s);});
+        {label:'철벽 반사',kind:'iron-reflect',shape:'self',cooldown:660,duration:300,radius:0,color:'#93c5fd',caps:{utility:true},
+         description:'5초간 몸에 닿은 적 탄을 한 번 원래 발사자 방향으로 반사합니다. 기절 중에도 유지되며 근접·광선·장판 피해는 받습니다.',strength:'적 비행탄 반사',success:'탄이 몸에 닿을 때 방어',failure:'다른 피해에는 방어 효과 없음',counterplay:'근접·광선·장판으로 공격'},
+        (ctx,s)=>{
+            const buff=R.buff({...ctx,run:{...ctx.run,duration:1}},ctx.owner,'ironReflect',1,s.duration);
+            ctx.g.rw.ironUntil=Math.max(ctx.g.rw.ironUntil||0,buff.end);
+        });
     // A06: airborne flight over walls with only landing damage.
     add('emoji-029','스카이 하이','A','기동형',melee('slash',{pushScale:.3}),
         {kind:'leap',shape:'target',cooldown:frames(11),range:670,radius:150,duration:30,damage:48,knockback:7,color:'#bae6fd',wallPolicy:'airborne-safe-landing',caps:{...aoeCaps,dash:true,cc:true,signatureRange:true},
@@ -165,7 +167,7 @@ export const initializers=[
     // C01-C04: simple projectiles with distinct trajectories; no hidden stun.
     add('emoji-074','슬리퍼 스나이퍼','C','원거리형',{},
         {kind:'precision',shape:'line',cooldown:frames(7),range:1100,radius:13,speed:38,damage:24,knockback:4,color:'#fda4af',emoji:'🥿',caps:projectileCaps,
-         description:'빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.',strength:'빠른 정밀 단발',success:'긴 직선 조준 적중',failure:'추적과 폭발 없음',counterplay:'엄폐와 방향 전환'},
+         description:'시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.',strength:'빠른 정밀 단발',success:'긴 직선 조준 적중',failure:'추적과 폭발 없음',counterplay:'엄폐와 방향 전환'},
         (ctx,s)=>shot(ctx,s));
     add('emoji-075','사과 투척','C','원거리형',{},
         {kind:'split-bounce',shape:'line',cooldown:frames(8),range:790,radius:20,speed:19,damage:21,bounces:1,fragmentCount:2,fragmentDamage:13,fragmentRadius:11,fragmentRange:400,fragmentSpeed:23,fragmentDuration:30,splitAngle:.28,knockback:3,color:'#f87171',emoji:'🍎',caps:projectileCaps,

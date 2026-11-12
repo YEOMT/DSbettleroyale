@@ -1,3 +1,4 @@
+import {sniperCast} from './reflection.js';
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
 import {activeSupply, supplyDirectHit} from '../farm/combat-supplies.js';
 export function install(__brScope){
@@ -289,7 +290,7 @@ __brScope.Participant = class Participant {
                 if(this.wallCrashCooldown > 0) this.wallCrashCooldown--;
                 if(this.attackCommitFrames > 0) this.attackCommitFrames--;
                 if(this.launchedFrames > 0) { this.launchedFrames--; if(this.launchedFrames <= 0) this.launchedById = null; }
-                if(this.stunned > 0) { this.stunned--; }
+                if(this.stunned > 0 && this.rw?.spotlightStart!==game.frame) { this.stunned--; }
                 if(this.blindedFrames > 0) this.blindedFrames--;
                 if(this.supportPulseFrames > 0) {
                     this.supportPulseFrames--;
@@ -515,11 +516,12 @@ __brScope.Participant = class Participant {
                     if(colors){opts.trailColor=colors[0];if(colors[1])opts.impactColor=colors[1];}
                     if(sub==='NOVA')opts.vfx='star';
                     if(sub==='ICE_SHARD')opts.vfx='ice';
+                    if(sub==='AIMED_SHOT')opts.sniper=sniperCast(__brScope,this.ability);
                     // AIMED_SHOT is a real projectile; its normal shot event supplies the direction cue.
                     const startAngle=sub==='NOVA'?0:-spread*(pCount-1)/2;
                     for(let i=0;i<pCount;i++) {
                         const shotDir=aimDir.rotate(startAngle+i*spread);
-                        const shot=new __brScope.Projectile(this,this.pos,shotDir,signature.speed,signature.damage*this.damageMult,
+                        const shot=new __brScope.Projectile(this,this.pos,shotDir,signature.speed,signature.damage*this.damageMult*(opts.sniper?.critical?2:1),
                             signature.size,signature.type,this.ability.pImpact||'#ff0',signature.explode,signature.emoji,opts);
                         if(signature.type!=='BOOMERANG')shot.life=Math.max(8,Math.ceil((manualRange||signature.range)/Math.max(1,signature.speed)));
                         else shot.returnAfterLife=Math.max(1,shot.life-Math.ceil((manualRange||31*signature.speed)/Math.max(1,signature.speed))+1);
@@ -946,7 +948,8 @@ __brScope.Participant = class Participant {
             takeDamage(amt, attacker, reflected=false, contactDirection=null, damageContext=null) {
                 this._lastDamageResult={valid:false,shieldAbsorbed:0,hpDamage:0,killed:false};
                 if(!this.alive||!Number.isFinite(amt)||amt<0||!__brScope.brCanHostileTarget(this,attacker))return 0;
-                if(damageContext?.basic&&__brScope.BRRework)amt=__brScope.BRRework.basicDamage(attacker,this,amt,damageContext.attackId,damageContext.basicSnapshot);
+                if(damageContext?.basic&&damageContext.returnSupply!==undefined)amt*=damageContext.basicSnapshot?.mult??1;
+                else if(damageContext?.basic&&__brScope.BRRework)amt=__brScope.BRRework.basicDamage(attacker,this,amt,damageContext.attackId,damageContext.basicSnapshot);
                 this._lastDamageResult.valid=true;
                 if(!reflected&&!damageContext?.scaled&&attacker?._runSkillCast)amt*=attacker._runSkillCast.damage;
                 if(attacker!==this)amt*=__brScope.brWangguiPower(attacker,damageContext,reflected);
@@ -955,9 +958,9 @@ __brScope.Participant = class Participant {
                 if (this.ability.sub === 'WEAK' || this.ability.sub === 'PAPER_THIN') amt *= 3;
                 const guard=this.teamGuardFrames>0?Number(this.teamGuardStrength||0):0;
                 let reduction=Math.max(guard,__brScope.BRRework?.damageReduction(this)||0);
-                if ((attacker?.combatBuff || this.combatBuff) && supplyDirectHit(attacker, this, reflected, damageContext)) {
+                if ((attacker?.combatBuff || this.combatBuff || damageContext?.returnSupply!==undefined || damageContext?.ctx?.returnSupply!==undefined) && supplyDirectHit(attacker, this, reflected, damageContext)) {
                     const tick = __brScope.game?.frame || 0;
-                    if (activeSupply(attacker, tick)?.kind === 'attack') amt *= 1.45;
+                    amt *= damageContext?.returnSupply??damageContext?.ctx?.returnSupply??(activeSupply(attacker,tick)?.kind==='attack'?1.45:1);
                     if (activeSupply(this, tick)?.kind === 'guard') reduction = Math.max(reduction, .4);
                 }
                 amt*=Math.max(.55,1-reduction);
@@ -1052,7 +1055,7 @@ __brScope.Participant = class Participant {
                         __brScope.game.zones.push(new __brScope.Zone(this, this.pos, 205, 7.2, 240, '#65a30d', 'dmg'));
                     }
                 }
-                if(damageContext?.basic&&__brScope.BRRework)__brScope.BRRework.basicHit(attacker,this,this._lastDamageResult,damageContext.basicSnapshot);
+                if(damageContext?.basic&&damageContext.returnSupply===undefined&&__brScope.BRRework)__brScope.BRRework.basicHit(attacker,this,this._lastDamageResult,damageContext.basicSnapshot);
                 if(counter?.attacker.alive&&counter.damage>0){
                     counter.attacker.takeDamage(counter.damage,this,true,null,{scaled:true,style:'guard-counter'});
                     if(__brScope.game)__brScope.game.drawLaser(this.pos,counter.attacker.pos,'#93c5fd',4,{owner:this,part:'counter-confirm'});

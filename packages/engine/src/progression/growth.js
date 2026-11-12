@@ -1,3 +1,4 @@
+import {recordClassroomEvent} from '../world/classroom-announcements.js';
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
 export function install(__brScope){
 __brScope.brWangguiValues = function brWangguiValues(a,tier){return __brScope.BR_WANGGUI[a?.t]?.[Number(tier)-1]||[1,1];};
@@ -18,15 +19,21 @@ __brScope.brInitRun = function brInitRun(p){
             p.run.rng=__brScope.brHashRandom(p.run.matchKey+'|build|'+String(p.remoteId??p.id));
         };
 
+__brScope.brRunTier = function brRunTier(id,tier,ability){
+            const path=__brScope.BR_RUN_PATHS[id];
+            const tiers=path?.meleeTiers && ability && __brScope.brRunBasicProfile(ability).close ? path.meleeTiers : path?.tiers;
+            return tiers?.[tier-1];
+        };
+
 __brScope.brRunModsForPaths = function brRunModsForPaths(paths,capabilities,ability){
             var m=__brScope.brRunDefaultMods();
-            Object.keys(paths||{}).forEach(function(id){var tier=Number(paths[id]||0),path=__brScope.BR_RUN_PATHS[id],d=path&&path.tiers[tier-1];if(!d)return;Object.keys(d).forEach(function(k){
+            Object.keys(paths||{}).forEach(function(id){var tier=Number(paths[id]||0),path=__brScope.BR_RUN_PATHS[id],d=path&&__brScope.brRunTier(id,tier,ability);if(!d)return;Object.keys(d).forEach(function(k){
                 if(k==='regenDelay'){m[k]=d[k];return;}
                 if(k==='regenRate'||k==='basicCount'||k==='skillCount'){m[k]+=d[k];return;}
                 if(id==='quick'&&k==='skillDamage'&&!capabilities.skill?.damage){if(capabilities.skill?.duration)m.skillDuration+=d[k]-1;else if(capabilities.skill?.heal||capabilities.skill?.shield)m.skillRestore+=d[k]-1;return;}
                 m[k]+=d[k]-1;
             });});
-            var caps={"basicSpeed":[0.5,2.5],"basicDamage":[0.25,2.75],"basicSize":[1,2.1],"basicVelocity":[0.75,1.25],"basicKnockback":[1,2.43],"basicRange":[1,1.715],"skillCooldown":[0.428,1.6],"skillDamage":[0.25,2.75],"skillSize":[1,2.045],"skillControl":[1,1.715],"skillRestore":[0.75,1.935],"skillDuration":[0.75,1],"moveSpeed":[0.75,1.418],"maxHp":[0.7,1.825],"signatureRange":[1,1.462],"signatureDuration":[1,1.55]};
+            var caps={"basicSpeed":[0.5,2.5],"basicDamage":[0.25,2.75],"basicSize":[1,2.1],"basicVelocity":[0.75,1.25],"basicKnockback":[1,3.10],"basicRange":[1,2.20],"skillCooldown":[0.428,1.6],"skillDamage":[0.25,2.75],"skillSize":[1,2.045],"skillControl":[1,1.715],"skillRestore":[0.75,1.935],"skillDuration":[0.75,1],"moveSpeed":[0.75,1.65],"maxHp":[0.7,2.25],"signatureRange":[1,1.462],"signatureDuration":[1,1.55]};
             Object.keys(caps).forEach(function(k){m[k]=__brScope.brClamp(m[k],caps[k][0],caps[k][1]);});m.basicCount=__brScope.brClamp(m.basicCount,0,3);m.skillCount=__brScope.brClamp(m.skillCount,0,3);
             if(__brScope.brWangguiAllowed(ability,paths)){const v=__brScope.brWangguiValues(ability,paths?.wanggui);m.wangguiHp=v[0];m.wangguiPower=v[1];}
             return m;
@@ -58,7 +65,7 @@ __brScope.brRunEffectiveValues = function brRunEffectiveValues(p,mods){const out
 __brScope.brRunEffectiveNext = function brRunEffectiveNext(p,id){const run=p.run,tier=Number(run.paths[id]||0)+1;if(tier>__brScope.BR_RUN_PATH_MAX_TIER||!__brScope.brRunEligible(p,id))return false;const next={...run.paths,[id]:tier},before=__brScope.brRunEffectiveValues(p,__brScope.brRunModsForPaths(run.paths,run.capabilities,p.ability)),after=__brScope.brRunEffectiveValues(p,__brScope.brRunModsForPaths(next,run.capabilities,p.ability));return Object.keys(before).some(k=>['basicFrames','skillFrames','regenDelay'].includes(k)?after[k]<before[k]-1e-7:after[k]>before[k]+1e-7);};
 
 __brScope.brRunCard = function brRunCard(p,id,tier){
-            var d=__brScope.BR_RUN_PATHS[id],effect=d.text[tier-1],capNote='';
+            var d=__brScope.BR_RUN_PATHS[id],effect=d.meleeTiers?__brScope.brRunTierText(id,__brScope.brRunTier(id,tier,p.ability)):d.text[tier-1],capNote='';
             if(id==='control'||id==='multicast'){const oldMods=__brScope.brRunModsForPaths(p.run.paths,p.run.capabilities,p.ability),newMods=__brScope.brRunModsForPaths({...p.run.paths,[id]:tier},p.run.capabilities,p.ability),oldActual=__brScope.brRunEffectiveValues(p,oldMods),newActual=__brScope.brRunEffectiveValues(p,newMods);
             if(id==='control'&&newActual.stunFrames>0&&newActual.stunFrames===oldActual.stunFrames)capNote='기절시간 상한 유지 · ';
             if(id==='multicast'&&newActual.skillCount===oldActual.skillCount)capNote='탄수 상한 유지 · ';}
@@ -102,7 +109,12 @@ __brScope.brRecomputeRun = function brRecomputeRun(p){
 __brScope.brChooseRun = function brChooseRun(p,offerId,id){
             var run=p&&p.run;if(!p||!p.alive||!run||run.matchKey!==__brScope.brRunMatchKey()||run.pending<=0||run.choices>=__brScope.BR_RUN_MAX_CHOICES||run.choices>=run.level-1||!run.offer||run.offer.id!==offerId)return false;
             var card=run.offer.cards.find(function(c){return c.id===id;});if(!card||card.tier!==Number(run.paths[id]||0)+1||!__brScope.brRunEffectiveNext(p,id)||Number(run.lifeSeq)!==Number(p.lifeSeq||0))return false;
-            run.paths[id]=card.tier;run.pending--;run.choices++;run.offer=null;__brScope.brRecomputeRun(p);__brScope.brRunOffer(p);run.revision++;return true;
+            run.paths[id]=card.tier;
+            if(id==='wanggui'&&card.tier===3&&p.ability.t==='F'&&p.remoteId&&__brScope.game){
+                const announced=__brScope.game.awakenedPlayers??=new Set();
+                if(!announced.has(p.remoteId)){announced.add(p.remoteId);recordClassroomEvent(__brScope.game,'awakening',{playerId:p.remoteId});}
+            }
+            run.pending--;run.choices++;run.offer=null;__brScope.brRecomputeRun(p);__brScope.brRunOffer(p);run.revision++;return true;
         };
 
 __brScope.brAwardRunXP = function brAwardRunXP(p,amount,healFraction){
@@ -169,24 +181,24 @@ __brScope.brUpdateRunWorld = function brUpdateRunWorld(g){
 }
 export const initializers=[
 [1137,__brScope=>{ __brScope.BR_RUN_XP=[0,2,3,4,5,6];;}],
-[1138,__brScope=>{ __brScope.BR_WANGGUI=Object.freeze({"A":[[1.165,1.165],[1.33,1.33],[1.495,1.495]],"B":[[1.275,1.275],[1.55,1.55],[1.77,1.77]],"C":[[1.385,1.44],[1.77,1.88],[2.1,2.32]],"F":[[2,2.25],[2.85,3.45],[3.6,4.85]]});;}],
+[1138,__brScope=>{ __brScope.BR_WANGGUI=Object.freeze({"A":[[1.165,1.165],[1.33,1.33],[1.495,1.495]],"B":[[1.275,1.275],[1.55,1.55],[1.77,1.77]],"C":[[1.385,1.44],[1.77,1.88],[2.1,2.32]],"F":[[2.2,2.6],[3.35,4.4],[4.8,7.2]]});;}],
 [1141,__brScope=>{ __brScope.BR_RUN_PATHS={
             wanggui:{name:'왕귀',icon:'👑',family:'BODY',tiers:[{},{},{}],text:['왕귀 I','왕귀 II','왕귀 III']},
-            rapid:{"name":"RAPID","icon":"⚡","family":"BASIC","tiers":[{"basicSpeed":1.44,"basicDamage":0.9},{"basicSpeed":1.825,"basicDamage":0.95},{"basicSpeed":2.43,"basicDamage":1.055}]},
-            heavy:{"name":"HEAVY","icon":"💥","family":"BASIC","tiers":[{"basicDamage":1.44,"basicSpeed":0.9},{"basicDamage":1.825,"basicSpeed":0.95},{"basicDamage":2.32,"basicSpeed":1}]},
+            rapid:{"name":"RAPID","icon":"⚡","family":"BASIC","tiers":[{"basicSpeed":1.44,"basicDamage":0.9},{"basicSpeed":1.825,"basicDamage":0.95},{"basicSpeed":2.43,"basicDamage":1.055}],"meleeTiers":[{"basicSpeed":1.55,"basicDamage":0.9},{"basicSpeed":2,"basicDamage":0.95},{"basicSpeed":2.5,"basicDamage":1.055}]},
+            heavy:{"name":"HEAVY","icon":"💥","family":"BASIC","tiers":[{"basicDamage":1.44,"basicSpeed":0.9},{"basicDamage":1.825,"basicSpeed":0.95},{"basicDamage":2.32,"basicSpeed":1}],"meleeTiers":[{"basicDamage":1.6,"basicSpeed":0.9},{"basicDamage":2.05,"basicSpeed":0.95},{"basicDamage":2.65,"basicSpeed":1}]},
             multi:{"name":"MULTI","icon":"🔱","family":"BASIC","tiers":[{"basicCount":1,"basicDamage":0.95},{"basicCount":2,"basicDamage":0.95},{"basicCount":3,"basicDamage":0.95}]},
             giant:{"name":"GIANT","icon":"🔵","family":"BASIC","tiers":[{"basicSize":1.385,"basicVelocity":0.95},{"basicSize":1.715,"basicVelocity":1},{"basicSize":2.1,"basicVelocity":1.055}]},
-            impact:{"name":"IMPACT","icon":"🥊","family":"BASIC","tiers":[{"basicKnockback":1.44,"basicDamage":0.95},{"basicKnockback":1.88,"basicDamage":1},{"basicKnockback":2.43,"basicDamage":1.055}]},
-            wide:{"name":"WIDE STRIKE","icon":"⚔️","family":"BASIC","tiers":[{"basicRange":1.22,"basicSpeed":0.95},{"basicRange":1.44,"basicSpeed":1},{"basicRange":1.715,"basicSpeed":1.055}]},
+            impact:{"name":"IMPACT","icon":"🥊","family":"BASIC","tiers":[{"basicKnockback":1.44,"basicDamage":0.95},{"basicKnockback":1.88,"basicDamage":1},{"basicKnockback":2.43,"basicDamage":1.055}],"meleeTiers":[{"basicKnockback":1.75,"basicDamage":0.95},{"basicKnockback":2.4,"basicDamage":1},{"basicKnockback":3.1,"basicDamage":1.055}]},
+            wide:{"name":"WIDE STRIKE","icon":"⚔️","family":"BASIC","tiers":[{"basicRange":1.35,"basicSpeed":0.95},{"basicRange":1.75,"basicSpeed":1},{"basicRange":2.20,"basicSpeed":1.055}]},
             quick:{"name":"QUICK CAST","icon":"⏱️","family":"SKILL","tiers":[{"skillCooldown":0.725,"skillDamage":0.92},{"skillCooldown":0.582,"skillDamage":0.97},{"skillCooldown":0.428,"skillDamage":1}]},
             amplify:{"name":"AMPLIFY","icon":"🔥","family":"SKILL","tiers":[{"skillDamage":1.44,"skillCooldown":1.1},{"skillDamage":1.825,"skillCooldown":1.05},{"skillDamage":2.32,"skillCooldown":1}]},
             expansion:{"name":"EXPANSION","icon":"🌀","family":"SKILL","tiers":[{"skillSize":1.33,"skillDamage":0.95},{"skillSize":1.66,"skillDamage":1},{"skillSize":2.045,"skillDamage":1.055}]},
             multicast:{"name":"MULTICAST","icon":"☄️","family":"SKILL","tiers":[{"skillCount":1,"skillDamage":0.95},{"skillCount":2,"skillDamage":0.95},{"skillCount":3,"skillDamage":0.95}]},
             control:{"name":"CONTROL","icon":"❄️","family":"SKILL","tiers":[{"skillControl":1.275,"skillDamage":0.95},{"skillControl":1.495,"skillDamage":1},{"skillControl":1.715,"skillDamage":1.055}]},
             restore:{"name":"RESTORE","icon":"💚","family":"SKILL","tiers":[{"skillRestore":1.33,"skillCooldown":1.05},{"skillRestore":1.605,"skillCooldown":1},{"skillRestore":1.935,"skillCooldown":1}]},
-            swift:{"name":"SWIFT","icon":"👟","family":"BODY","tiers":[{"moveSpeed":1.165,"maxHp":0.95},{"moveSpeed":1.286,"maxHp":1},{"moveSpeed":1.418,"maxHp":1.055}]},
-            titan:{"name":"TITAN","icon":"🛡️","family":"BODY","tiers":[{"maxHp":1.33,"moveSpeed":0.95},{"maxHp":1.55,"moveSpeed":0.98},{"maxHp":1.825,"moveSpeed":1}]},
-            regen:{"name":"REGEN","icon":"🌱","family":"BODY","tiers":[{"regenRate":0.0198,"regenDelay":270,"maxHp":0.95},{"regenRate":0.0286,"regenDelay":210,"maxHp":1},{"regenRate":0.0385,"regenDelay":150,"maxHp":1.055}]},
+            swift:{"name":"SWIFT","icon":"👟","family":"BODY","tiers":[{"moveSpeed":1.25,"maxHp":0.95},{"moveSpeed":1.43,"maxHp":1},{"moveSpeed":1.65,"maxHp":1.055}]},
+            titan:{"name":"TITAN","icon":"🛡️","family":"BODY","tiers":[{"maxHp":1.5,"moveSpeed":0.95},{"maxHp":1.85,"moveSpeed":0.98},{"maxHp":2.25,"moveSpeed":1}]},
+            regen:{"name":"REGEN","icon":"🌱","family":"BODY","tiers":[{"regenRate":.028,"regenDelay":240,"maxHp":0.95},{"regenRate":.045,"regenDelay":180,"maxHp":1},{"regenRate":.065,"regenDelay":120,"maxHp":1.055}]},
             signature_range:{"name":"LONG STEP","icon":"🪽","family":"SKILL","tiers":[{"signatureRange":1.165,"skillCooldown":1.05},{"signatureRange":1.308,"skillCooldown":1.02},{"signatureRange":1.462,"skillCooldown":1}],"signature":true},
             signature_duration:{"name":"AFTERGLOW","icon":"✨","family":"SKILL","tiers":[{"signatureDuration":1.22,"skillCooldown":1.08},{"signatureDuration":1.385,"skillCooldown":1.04},{"signatureDuration":1.55,"skillCooldown":1}],"signature":true}
         };;}],

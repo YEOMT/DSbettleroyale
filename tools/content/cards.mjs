@@ -1,3 +1,4 @@
+import {sniperChance} from '../../packages/engine/src/combat/reflection.js';
 // Build player-facing prose from the same final profiles used by the authority.
 // Facts are neutral Lv1 values; damage coefficients precede defence/run modifiers.
 const number=n=>String(Math.round(Number(n)*1000)/1000),seconds=n=>number(n/60)+'초';
@@ -17,6 +18,9 @@ export function currentCard(r,a){
  const cooldown=playable||s?seconds(baseCooldown):seconds(Math.round(baseCooldown*.9))+'~'+seconds(Math.round(baseCooldown*1.1));
  const text=s?.description||a.skillDesc;if(!text||/고유 스킬/.test(text))throw Error('MISSING_CURRENT_SKILL_TEXT '+a.id);
  const facts={level:1,damageUnits:'base coefficient before rank/run/defence modifiers',basic:{close:b.close,count:b.close?1:b.count,range:m.basicRange,intervalFrames:m.basicFrames,coefficient:m.basicDamage},skill:{kind:s?.kind||playable?.key||a.sub,aimRange:m.skillRange,cooldownFrames:baseCooldown,cooldownJitter:!(playable||s),durationFrames:s?.durationFrames??s?.duration??null,damageCoefficient:s?.damage??null,...(s?.finalDamage!=null?{finalDamageCoefficient:s.finalDamage}:{})},eligibleAugments:eligible};
+ if(sniperChance(a))Object.assign(facts.skill,{criticalChance:sniperChance(a),criticalDamage:2});
+ if(s?.kind==='mirror')Object.assign(facts.skill,{length:s.length,width:s.width,frontOnly:true});
+ if(s?.kind==='spotlight')Object.assign(facts.skill,{radius:s.radius,windupFrames:s.windupFrames,stunFrames:s.stunFrames,stunCap:s.stunCap});
  const reach=m.skillRange>0?'최대 조준 거리 '+number(m.skillRange):!s&&a.teamOnly&&r.brSupportProfile(a).global?'전장 전체':'자기 중심';
  return {basic:a.basicSummary+(tags.length?' · '+tags.join(' · '):''),skill:text+' · '+reach+' · 대기 '+cooldown,
   passive:'스킬 증강: '+(skillAugments.map(k=>pathLabels[k]).join(' · ')||'별도 강화 없음'),cooldown,label:s?.label||a.skillLabel||a.n,category:d?.category||d?.role||a.category||'기타',concept:a.concept,facts};

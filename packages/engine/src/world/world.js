@@ -18,7 +18,7 @@ __brScope.GameWorld = class GameWorld {
                 this.confetti = []; // ✨ 우승 꽃가루 배열
                 
                 // 20~30명이 서로 바로 마주치지 않도록 교실 대전 전장을 대폭 확장한다.
-                this.worldRadius = __brScope.BR_WORLD_RADIUS; this.mapRadius = __brScope.BR_WORLD_RADIUS*(__brScope.session?.isRespawnMode()?__brScope.BR_TEAM_KILL_RULES.arenaScale:1); this.center = new __brScope.Vec2(0, 0);
+                this.worldRadius = __brScope.session?.roomMeta?.mode==='solo'?3860:__brScope.BR_WORLD_RADIUS; this.mapRadius = this.worldRadius*(__brScope.session?.isRespawnMode()?__brScope.BR_TEAM_KILL_RULES.arenaScale:1); this.center = new __brScope.Vec2(0, 0);
                 const requestedMap=__brScope.session?.active ? __brScope.session.roomMeta?.mapIndex : -1;
                 this.mapIndex=Number.isInteger(requestedMap)&&requestedMap>=0&&requestedMap<5 ? requestedMap : Math.floor(__brScope.rand()*5);
                 this.mapNames=['🌪️ 유동 폐허','➕ 십자로','🌫️ 연막 폐허','🏟️ 네 갈래 광장','📦 화물 기지'];
@@ -190,7 +190,7 @@ __brScope.GameWorld = class GameWorld {
             scaleArenaLayout() {
                 // initMap builds the original design. Scale positions once, before spawning participants.
                 // Clear its broad-phase index: it may already have been created while placing cover.
-                const layoutScale=__brScope.BR_ARENA_SCALE*(__brScope.session?.isRespawnMode()?__brScope.BR_TEAM_KILL_RULES.arenaScale:1);
+                const layoutScale=this.worldRadius/__brScope.BR_WORLD_RADIUS*__brScope.BR_ARENA_SCALE*(__brScope.session?.isRespawnMode()?__brScope.BR_TEAM_KILL_RULES.arenaScale:1);
                 for(const w of this.walls) {
                     w.x*=layoutScale;w.y*=layoutScale;
                     w.minX=w.x-w.w/2;w.maxX=w.x+w.w/2;w.minY=w.y-w.h/2;w.maxY=w.y+w.h/2;
@@ -376,10 +376,10 @@ __brScope.GameWorld = class GameWorld {
                 this.participants.forEach((p,i)=>{
                     let chosen=null;
                     for(let tries=0;tries<36;tries++) {
-                        const candidate=this.findSafeMapPoint(420*__brScope.BR_ARENA_SCALE,2350*__brScope.BR_ARENA_SCALE,p.radius+34);
+                        const candidate=this.findSafeMapPoint(420*__brScope.BR_ARENA_SCALE,this.worldRadius*(2350/2800),p.radius+34);
                         if(!placed.some(q=>q.pos.dist(candidate)<q.radius+p.radius+38)){chosen=candidate;break;}
                     }
-                    p.pos=chosen || this.findSafeMapPoint(360*__brScope.BR_ARENA_SCALE,2250*__brScope.BR_ARENA_SCALE,p.radius+20);
+                    p.pos=chosen || this.findSafeMapPoint(360*__brScope.BR_ARENA_SCALE,this.worldRadius*(2250/2800),p.radius+20);
                     p.lastPos=new __brScope.Vec2(p.pos.x,p.pos.y);
                     placed.push(p);
                 });

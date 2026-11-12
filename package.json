@@ -1,6 +1,6 @@
 {
   "name": "dsbettleroyale",
-  "version": "33.0.0",
+  "version": "35.0.0",
   "private": true,
   "type": "module",
   "workspaces": [

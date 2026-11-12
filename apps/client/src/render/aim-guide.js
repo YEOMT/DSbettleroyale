@@ -68,6 +68,11 @@ export function aimGuide(actor,kind,gesture,map,kernel,walls,visible=[],objects=
 }
 export function paintGuide(p,a,g,z){
  const col='#baf4ff',stroke=Math.max(1.3,2/z),r=g.impactRadius||g.radius;
+ if(g.mirrorLength){
+  const tx=-g.dy*g.mirrorLength/2,ty=g.dx*g.mirrorLength/2;
+  p.line(g.x-tx,g.y-ty,g.x+tx,g.y+ty,'#dbeafe',.4,g.width);p.line(a.x,a.y,g.x,g.y,col,.55,stroke);
+  return;
+ }
  if(g.shape==='circle'||g.shape==='circleDir')p.dashedCircle(a.x,a.y,g.radius||g.range,col,.75,stroke);
  if(g.shape==='cone'){
   const angle=Math.atan2(g.dy,g.dx),spread=g.halfAngle||0;

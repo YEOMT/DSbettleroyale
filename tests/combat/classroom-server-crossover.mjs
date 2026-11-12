@@ -3,7 +3,8 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 // node --expose-gc tests/combat/classroom-server-crossover.mjs <exported-main>
 if(!global.gc)throw Error('Run this diagnostic with --expose-gc');
-fs.mkdirSync('artifacts/v34',{recursive:true});
+const evolution=process.argv[3]==='v35',out=evolution?'artifacts/v35-comparison':'artifacts/v34';
+fs.mkdirSync(out,{recursive:true});
 const root=process.cwd(),bases={A:path.resolve(process.argv[2]||'artifacts/v34/d28b2d8'),B:root};
 const versions={};
 for(const [key,base] of Object.entries(bases)){
@@ -42,4 +43,4 @@ function run(key,ticks,mode='solo'){
 }
 for(const key of ['A','B'])run(key,90);
 const rows=[];for(const key of ['A','B','B','A']){global.gc();const row=run(key,270);rows.push(row);console.log(JSON.stringify(row));}
-fs.writeFileSync('artifacts/v34/crossover-20.json', JSON.stringify({node:process.version, A:'d28b2d8',B:'working v34',mode:'solo',warmupTicks:90,ticks:270,order:'ABBA',players:20,renderers:0,sockets:0,recipients:21,rows},null,2));
+fs.writeFileSync(out+'/crossover-20.json', JSON.stringify({node:process.version, A:evolution?'v34-9a29a23':'d28b2d8',B:evolution?'v35':'working v34',mode:'solo',warmupTicks:90,ticks:270,order:'ABBA',players:20,renderers:0,sockets:0,recipients:21,rows},null,2));

@@ -30,6 +30,8 @@ export const initializers=[
         if(s.pullRadius)spec.pullRadius=finite(s.pullRadius)*size;
         if(s.burstRadius||s.collapseRadius)spec.burstRadius=finite(s.burstRadius??s.collapseRadius)*size;
         if(s.maxRadius)spec.maxRadius=finite(s.maxRadius)*size;
+        if(s.kind==='mirror'){spec.range=s.range;spec.mirrorLength=s.length;spec.width=s.width;}
+        if(s.dashRange){spec.shape='dash';spec.dash=true;spec.range=s.dashRange;spec.clipPath=true;spec.clipBodies=true;spec.collisionRadius=playerRadius;spec.bodyPadding=playerRadius;}
         return spec;
     };
     R.basicText=function(ability,mods,profile){

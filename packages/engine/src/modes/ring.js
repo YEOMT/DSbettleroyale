@@ -137,5 +137,5 @@ __brScope.brCombatTrace = function brCombatTrace(type,data){__brScope.trace(type
 }
 export const initializers=[
 [221,__brScope=>{ __brScope.BR_RING_RULES=Object.freeze({stepMs:1000/60,startTick:1200,noticeTicks:90,compressTicks:48,repeatTicks:600,
-            entryGraceMs:300,maxExtrapolateMs:1200,staleMs:900,channelMs:100,shrinkSpeed:.70,soloMultiplier:1.6,teamElimMultiplier:1.1});;}]
+            entryGraceMs:300,maxExtrapolateMs:1200,staleMs:900,channelMs:100,shrinkSpeed:.70,soloMultiplier:1.95,teamElimMultiplier:1.1});;}]
 ];

@@ -46,11 +46,11 @@ test('all active B/C actors receive exactly one final pre-mode +6%; other stats/
  }
 });
 
-test('initial XP targets use old final count ×1.10 and cap46; farm RNG stays separate',()=>{
+test('solo initial XP uses 1.27 times the v34 capped initial count; farm RNG stays separate',()=>{
  for(const count of [5,8,20,30,40]){
   const {r,g}=fixture(count),before=Math.min(42,Math.max(8,Math.round(count*1.28)));
-  assert.equal(g.farmBoxes.length,Math.min(46,Math.round(before*1.10)));
-  assert.equal(g.teamCrateCap,Math.min(46,Math.round(before*1.10))+4);
+  assert.equal(g.farmBoxes.length,Math.round(1.27*Math.min(46,Math.round(before*1.10))));
+  assert.equal(g.teamCrateCap,Math.round(1.27*Math.min(46,Math.round(before*1.10)))+4);
   evidence.initialCrates.push({players:count,before,after:g.farmBoxes.length,totalRespawnCap:g.teamCrateCap});
   r.seedRandom('untouched-combat');const expected=r.rand();r.seedRandom('untouched-combat');r.brFarm.init(g);assert.equal(r.rand(),expected);
   for(const box of g.farmBoxes){assert.equal(box.hp,1);assert.equal(box.maxHp,1);assert.equal(box.kind,'xp');}

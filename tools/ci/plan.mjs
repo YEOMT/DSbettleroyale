@@ -2,7 +2,8 @@ import {manifest} from '../../packages/content/src/manifest.js';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {parseManifest,reviewedMigrationScope} from './roster-scope.mjs';
+import {parseManifest,reviewedMigrationScope,rosterMechanics,sameMechanics} from './roster-scope.mjs';
+import {characterShards} from './character-shards.mjs';
 // Only inert CSS/Markdown changes can be low risk. JS under ui may send commands.
 export function classify(files, diff='') {
  const docs=files.length>0&&files.every(f=>/^(docs\/.*\.md|README\.md)$/.test(f));
@@ -41,7 +42,15 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   const scope=reviewedMigrationScope(previous,manifest,[...focused.matchAll(/emoji-\d{3}/g)].map(m=>m[0]));
   if(scope){plan.characters=scope.characters;plan.rosterTextMigration={base,preservedAuthorityEntries:scope.preserved,changed:scope.changed,removed:scope.removed,reason:'83-card text migration: full authority projection preserves 81 kits; retain both reworks and every explicit non-registry code reference. Quick/combat/representative/load unchanged.'};}
  }
+ if(files.includes('packages/content/src/manifest.js')){
+  // A numeric roster registration or a change far from a declaration may
+  // have no literal emoji ID in the source diff. Compare final mechanics too.
+  const prior=rosterMechanics(parseManifest(execFileSync('git',['show',base+':packages/content/src/manifest.js'],{encoding:'utf8',maxBuffer:20e6})));
+  const current=rosterMechanics(manifest);
+  plan.characters=[...new Set([...plan.characters,...Object.keys(current).filter(id=>!sameMechanics(prior[id],current[id]))])].sort();
+ }
  fs.mkdirSync('artifacts',{recursive:true});fs.writeFileSync('artifacts/check-plan.json',JSON.stringify(plan,null,2));
+ if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,'characterShards='+JSON.stringify(characterShards(plan.characters))+'\n');
  if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,`docs=${plan.docsOnly}\ncombat=${plan.combat}\nroster10=${plan.roster10}\nreleaseops=${plan.areas.includes('releaseops')}\n`);
  console.log(JSON.stringify(plan,null,2));
 }

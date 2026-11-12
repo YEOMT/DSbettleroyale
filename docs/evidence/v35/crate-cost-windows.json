@@ -1,0 +1,76 @@
+[
+  {
+    "role": "host",
+    "rows": [
+      {
+        "mode": "vectors",
+        "prepareMedian": 1.5,
+        "crates": 38,
+        "builds": 456,
+        "drawMedian": 65.79999999701977,
+        "drawP95": 115.5
+      },
+      {
+        "mode": "cache",
+        "prepareMedian": 0,
+        "crates": 38,
+        "builds": 0,
+        "drawMedian": 42.1000000089407,
+        "drawP95": 60.30000001192093
+      },
+      {
+        "mode": "cache",
+        "prepareMedian": 0,
+        "crates": 38,
+        "builds": 0,
+        "drawMedian": 41.70000000298023,
+        "drawP95": 42.70000000298023
+      },
+      {
+        "mode": "vectors",
+        "prepareMedian": 1.2000000029802322,
+        "crates": 38,
+        "builds": 456,
+        "drawMedian": 45.1000000089407,
+        "drawP95": 62.900000005960464
+      }
+    ]
+  },
+  {
+    "role": "student",
+    "rows": [
+      {
+        "mode": "vectors",
+        "prepareMedian": 0.29999999701976776,
+        "crates": 4,
+        "builds": 48,
+        "drawMedian": 2.9000000059604645,
+        "drawP95": 5.600000008940697
+      },
+      {
+        "mode": "cache",
+        "prepareMedian": 0,
+        "crates": 4,
+        "builds": 0,
+        "drawMedian": 2.2000000029802322,
+        "drawP95": 3.1000000089406967
+      },
+      {
+        "mode": "cache",
+        "prepareMedian": 0,
+        "crates": 4,
+        "builds": 0,
+        "drawMedian": 2,
+        "drawP95": 3.5
+      },
+      {
+        "mode": "vectors",
+        "prepareMedian": 0.20000000298023224,
+        "crates": 4,
+        "builds": 48,
+        "drawMedian": 2.300000011920929,
+        "drawP95": 2.7999999970197678
+      }
+    ]
+  }
+]

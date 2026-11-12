@@ -7,6 +7,7 @@ export function announcementText(event, players) {
     const name = classroomName(label) || '학생';
     const supply = supplyNames[event.supply];
     switch (event.kind) {
+        case 'awakening': return '👑 ' + name + ' F급 완전체 각성!';
         case 'first-blood': return 'FIRST BLOOD! · ' + name;
         case 'streak': return ({
             3: name + ' is on a killing spree!!', 5: name + ' is unstoppable!!',

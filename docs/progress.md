@@ -1,5 +1,11 @@
 # Progress
 
+## v35 Evolution & Reflection
+
+The review branch starts at v34 main `9a29a23`. Both runtime projectile paths, life-scoped stun/return state, solo map and farming, the 86-card content build, classroom events, Canvas and Pixi are implemented. Local three-screen WS, same-room Results/Rematch, 22-client focus fire, fixed-seed map durations, content generation/check and paired build ran. The first local Quick run passed 311 common tests plus 7 ReleaseOps tests. The final GitHub results, Linux resource comparisons, individual failed runs and hardware limits are recorded in the [v35 report](v35-evolution-report.md) and review PR. Physical classroom testing is NOT_RUN.
+
+PR21 intermediate Linux 20-player three-round comparisons, 30-player real sockets, 480-scissors and Canvas/Pixi authority screens passed in run 43219652371. Required run 43219652361 failed in the isolated v34 Results fault-injection fixture. Measured the cost of rebuilding unchanged farm vectors and retained the visible box geometry across frames. Local 20-player Edge/SwiftShader retained zero rebuilds across 12 steady frames and cleared resources on same-room Rematch. Latest CI and continuous comparisons are linked from the report.
+
 ## v34 main CI recovery (2026-11-12)
 
 - On `ea1dafc`, the original Pixi recovery steps passed in 64.2, 203.5 and 113.6 seconds. The five balanced raster cases then reached the shared 540-second limit after 158.8 seconds. Controls and the same five cases now run on independent runners with the existing deadlines. Targeted previously timed out resolving the Ubuntu package mirror during setup. It now uses the same version-pinned Playwright image as combat. [Original main CI](https://github.com/YEOMT/DSbettleroyale/actions/runs/43039695075/attempts/1)

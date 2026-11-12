@@ -1,0 +1,968 @@
+{
+  "comparisonRun": 43219652371,
+  "pairedRuns": {
+    "load30-": [
+      {
+        "label": "v34",
+        "sha": "9a29a23a8eb62095308501109e8e15c610379959",
+        "mode": "load30",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16760344576
+        },
+        "status": "PASS",
+        "players": 30,
+        "snapshots": 24831,
+        "bytes": 614773089,
+        "elapsedMs": 40027.612348,
+        "step": {
+          "count": 2406,
+          "mean": 0.9256310137157174,
+          "p95": 1.6269119999997201,
+          "p99": 2.760457000000315,
+          "max": 6.47205699999995
+        },
+        "snapshot": {
+          "count": 801,
+          "mean": 3.4013847041200003,
+          "p95": 4.535524999999325,
+          "p99": 5.63405000000057,
+          "max": 12.696710000000166
+        },
+        "rss": [
+          165613568,
+          177123328,
+          179904512,
+          181633024,
+          185282560,
+          191750144,
+          191254528
+        ],
+        "errors": [],
+        "overloads": 0,
+        "cleanup": {
+          "rooms": 0,
+          "tokens": 0,
+          "peers": 0
+        }
+      },
+      {
+        "label": "v35",
+        "sha": "43f3d98df41b2a8dea6686bae89d5df6bc0b2446",
+        "mode": "load30",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16760344576
+        },
+        "status": "PASS",
+        "players": 30,
+        "snapshots": 24800,
+        "bytes": 581784876,
+        "elapsedMs": 40008.881303999995,
+        "step": {
+          "count": 2405,
+          "mean": 0.9226311176715318,
+          "p95": 1.6327620000001843,
+          "p99": 2.7355689999994866,
+          "max": 7.13883000000078
+        },
+        "snapshot": {
+          "count": 801,
+          "mean": 3.4667687353308194,
+          "p95": 4.657683999997971,
+          "p99": 5.841295999999602,
+          "max": 14.036217000000761
+        },
+        "rss": [
+          169512960,
+          176005120,
+          178622464,
+          182923264,
+          186773504,
+          190169088,
+          190136320
+        ],
+        "errors": [],
+        "overloads": 0,
+        "cleanup": {
+          "rooms": 0,
+          "tokens": 0,
+          "peers": 0
+        }
+      }
+    ],
+    "scissors-": [
+      {
+        "label": "v34",
+        "sha": "9a29a23a8eb62095308501109e8e15c610379959",
+        "mode": "scissors",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16760344576
+        },
+        "status": "PASS",
+        "scissors": {
+          "participants": 20,
+          "uses": 3,
+          "count": 8,
+          "shots": 480,
+          "peakShots": 120,
+          "screens": [
+            {
+              "maxShots": 118,
+              "frames": 36,
+              "drawP95": 49.39999999999418,
+              "gapP95": 500,
+              "renderer": "pixi"
+            },
+            {
+              "maxShots": 113,
+              "frames": 36,
+              "drawP95": 44.39999999999418,
+              "gapP95": 516.5999999999985,
+              "renderer": "pixi"
+            },
+            {
+              "maxShots": 120,
+              "frames": 35,
+              "drawP95": 74,
+              "gapP95": 500,
+              "renderer": "pixi"
+            }
+          ],
+          "elapsedMs": 14856.827888999993,
+          "cpuMs": 2142.143,
+          "processRssBefore": 325758976,
+          "processRssAfter": 362131456,
+          "sentBytes": 84539906,
+          "snapshotP95": 120647,
+          "snapshots": 945
+        },
+        "host": [
+          {
+            "at": "issue END",
+            "ms": 14857,
+            "phase": "BATTLE",
+            "epoch": 1,
+            "ready": 1,
+            "buffered": 0,
+            "queued": 0,
+            "pendingSnapshot": false,
+            "snapshotSeq": 46,
+            "replaced": 0,
+            "highWater": 0,
+            "rss": 380575744
+          },
+          {
+            "at": "after END",
+            "ms": 25238,
+            "phase": "RESULTS",
+            "epoch": 1,
+            "ready": 1,
+            "buffered": 0,
+            "queued": 0,
+            "pendingSnapshot": false,
+            "snapshotSeq": 46,
+            "replaced": 0,
+            "highWater": 0,
+            "rss": 378777600
+          },
+          {
+            "at": "issue REMATCH",
+            "ms": 25319,
+            "phase": "RESULTS",
+            "epoch": 1,
+            "ready": 1,
+            "buffered": 0,
+            "queued": 0,
+            "pendingSnapshot": false,
+            "snapshotSeq": 46,
+            "replaced": 0,
+            "highWater": 0,
+            "rss": 378777600
+          },
+          {
+            "at": "after REMATCH",
+            "ms": 25360,
+            "phase": "LOBBY",
+            "epoch": 1,
+            "ready": 1,
+            "buffered": 0,
+            "queued": 0,
+            "pendingSnapshot": false,
+            "snapshotSeq": 0,
+            "replaced": 0,
+            "highWater": 0,
+            "rss": 378777600
+          }
+        ],
+        "phase": "LOBBY"
+      },
+      {
+        "label": "v35",
+        "sha": "43f3d98df41b2a8dea6686bae89d5df6bc0b2446",
+        "mode": "scissors",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16760344576
+        },
+        "status": "PASS",
+        "scissors": {
+          "participants": 20,
+          "uses": 3,
+          "count": 8,
+          "shots": 480,
+          "peakShots": 120,
+          "screens": [
+            {
+              "maxShots": 118,
+              "frames": 30,
+              "drawP95": 39,
+              "gapP95": 500,
+              "renderer": "pixi"
+            },
+            {
+              "maxShots": 112,
+              "frames": 29,
+              "drawP95": 50.70000000001164,
+              "gapP95": 516.5999999999985,
+              "renderer": "pixi"
+            },
+            {
+              "maxShots": 120,
+              "frames": 29,
+              "drawP95": 70.89999999999418,
+              "gapP95": 516.5999999999913,
+              "renderer": "pixi"
+            }
+          ],
+          "elapsedMs": 12705.345828000005,
+          "cpuMs": 2005.279,
+          "processRssBefore": 335564800,
+          "processRssAfter": 374607872,
+          "sentBytes": 84535239,
+          "snapshotP95": 120594,
+          "snapshots": 945
+        },
+        "host": [
+          {
+            "at": "issue END",
+            "ms": 12706,
+            "phase": "BATTLE",
+            "epoch": 1,
+            "ready": 1,
+            "buffered": 0,
+            "queued": 0,
+            "pendingSnapshot": false,
+            "snapshotSeq": 46,
+            "replaced": 0,
+            "highWater": 0,
+            "rss": 393637888
+          },
+          {
+            "at": "after END",
+            "ms": 19869,
+            "phase": "RESULTS",
+            "epoch": 1,
+            "ready": 1,
+            "buffered": 0,
+            "queued": 0,
+            "pendingSnapshot": false,
+            "snapshotSeq": 46,
+            "replaced": 0,
+            "highWater": 0,
+            "rss": 391909376
+          },
+          {
+            "at": "issue REMATCH",
+            "ms": 20013,
+            "phase": "RESULTS",
+            "epoch": 1,
+            "ready": 1,
+            "buffered": 0,
+            "queued": 0,
+            "pendingSnapshot": false,
+            "snapshotSeq": 46,
+            "replaced": 0,
+            "highWater": 0,
+            "rss": 391909376
+          },
+          {
+            "at": "after REMATCH",
+            "ms": 20055,
+            "phase": "LOBBY",
+            "epoch": 1,
+            "ready": 1,
+            "buffered": 0,
+            "queued": 0,
+            "pendingSnapshot": false,
+            "snapshotSeq": 0,
+            "replaced": 0,
+            "highWater": 0,
+            "rss": 392040448
+          }
+        ],
+        "phase": "LOBBY"
+      }
+    ],
+    "solo-canvas": [
+      {
+        "label": "v34",
+        "sha": "9a29a23a8eb62095308501109e8e15c610379959",
+        "mode": "solo",
+        "renderer": "canvas",
+        "status": "PASS",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16759300096
+        },
+        "rounds": 3,
+        "wallSeconds": 35.98,
+        "cpuMs": 4525.34,
+        "stepP95Ms": 4.7,
+        "snapshotP95Ms": 8.29,
+        "inputApplyP95Ms": 16.61,
+        "snapshotHz": 17.5,
+        "snapshotGapP95Ms": 54.76,
+        "wireKiBps": 5450.18,
+        "snapshotBytesMean": 30578.1,
+        "snapshotBytesP95": 50381,
+        "wireBytes": 197601165,
+        "roundEndRssMiB": [
+          130.47,
+          169.36,
+          182.71
+        ],
+        "roundEndHeapMiB": [
+          35.46,
+          48.11,
+          58.96
+        ],
+        "rssMeanMiB": 139.04,
+        "peakRssMiB": 182.85,
+        "estimatedHeapAllocationMiB": 556.51,
+        "gcMs": 166.61,
+        "gcCount": 43,
+        "geometry": {
+          "grids": 4,
+          "gridBuckets": 352,
+          "unchangedClampCopies": 0,
+          "clamps": 0
+        },
+        "frameGapP95Ms": [
+          16.7,
+          16.7,
+          16.8
+        ],
+        "drawP95Ms": [
+          5,
+          1.7,
+          2.9
+        ],
+        "participants": 20,
+        "overloads": 0,
+        "unsentAtSampling": [
+          0,
+          1,
+          0
+        ],
+        "unsentAfterRematch": [
+          0,
+          0,
+          0
+        ],
+        "errors": []
+      },
+      {
+        "label": "v35",
+        "sha": "43f3d98df41b2a8dea6686bae89d5df6bc0b2446",
+        "mode": "solo",
+        "renderer": "canvas",
+        "status": "PASS",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16759300096
+        },
+        "rounds": 3,
+        "wallSeconds": 36.08,
+        "cpuMs": 4439.964,
+        "stepP95Ms": 4.52,
+        "snapshotP95Ms": 7.64,
+        "inputApplyP95Ms": 15.77,
+        "snapshotHz": 17.32,
+        "snapshotGapP95Ms": 54.36,
+        "wireKiBps": 5399.73,
+        "snapshotBytesMean": 30638.74,
+        "snapshotBytesP95": 50774,
+        "wireBytes": 196977652,
+        "roundEndRssMiB": [
+          133.39,
+          170.64,
+          183.95
+        ],
+        "roundEndHeapMiB": [
+          37.65,
+          49.33,
+          61.71
+        ],
+        "rssMeanMiB": 140.41,
+        "peakRssMiB": 184.47,
+        "estimatedHeapAllocationMiB": 548.87,
+        "gcMs": 152.92,
+        "gcCount": 43,
+        "geometry": {
+          "grids": 3,
+          "gridBuckets": 323,
+          "unchangedClampCopies": 0,
+          "clamps": 0
+        },
+        "frameGapP95Ms": [
+          16.7,
+          16.7,
+          16.7
+        ],
+        "drawP95Ms": [
+          5.4,
+          1.9,
+          1.9
+        ],
+        "participants": 20,
+        "overloads": 0,
+        "unsentAtSampling": [
+          0,
+          1,
+          1
+        ],
+        "unsentAfterRematch": [
+          0,
+          0,
+          0
+        ],
+        "errors": []
+      }
+    ],
+    "solo-pixi": [
+      {
+        "label": "v34",
+        "sha": "9a29a23a8eb62095308501109e8e15c610379959",
+        "mode": "solo",
+        "renderer": "pixi",
+        "status": "PASS",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16760344576
+        },
+        "rounds": 3,
+        "wallSeconds": 79.81,
+        "cpuMs": 7289.271,
+        "stepP95Ms": 1.32,
+        "snapshotP95Ms": 3.83,
+        "inputApplyP95Ms": 16.5,
+        "snapshotHz": 18.53,
+        "snapshotGapP95Ms": 53.6,
+        "wireKiBps": 7124.66,
+        "snapshotBytesMean": 24259.11,
+        "snapshotBytesP95": 46647,
+        "wireBytes": 575953509,
+        "roundEndRssMiB": [
+          136.82,
+          177.35,
+          263.05
+        ],
+        "roundEndHeapMiB": [
+          38.1,
+          59.66,
+          59.38
+        ],
+        "rssMeanMiB": 161.58,
+        "peakRssMiB": 264.73,
+        "estimatedHeapAllocationMiB": 1330.62,
+        "gcMs": 381.49,
+        "gcCount": 98,
+        "geometry": {
+          "grids": 12,
+          "gridBuckets": 1075,
+          "unchangedClampCopies": 0,
+          "clamps": 0
+        },
+        "frameGapP95Ms": [
+          266.7,
+          233.4,
+          266.7
+        ],
+        "drawP95Ms": [
+          25,
+          21.5,
+          21.4
+        ],
+        "participants": 20,
+        "overloads": 0,
+        "unsentAtSampling": [
+          0,
+          1,
+          1
+        ],
+        "unsentAfterRematch": [
+          0,
+          0,
+          0
+        ],
+        "errors": []
+      },
+      {
+        "label": "v35",
+        "sha": "43f3d98df41b2a8dea6686bae89d5df6bc0b2446",
+        "mode": "solo",
+        "renderer": "pixi",
+        "status": "PASS",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16760344576
+        },
+        "rounds": 3,
+        "wallSeconds": 82.75,
+        "cpuMs": 7360.077,
+        "stepP95Ms": 1.45,
+        "snapshotP95Ms": 3.93,
+        "inputApplyP95Ms": 15.86,
+        "snapshotHz": 18.02,
+        "snapshotGapP95Ms": 53.45,
+        "wireKiBps": 6954.45,
+        "snapshotBytesMean": 24110.69,
+        "snapshotBytesP95": 28698,
+        "wireBytes": 583266368,
+        "roundEndRssMiB": [
+          132.21,
+          185.61,
+          269.64
+        ],
+        "roundEndHeapMiB": [
+          32.49,
+          51.27,
+          81.61
+        ],
+        "rssMeanMiB": 165.55,
+        "peakRssMiB": 270.64,
+        "estimatedHeapAllocationMiB": 1337.62,
+        "gcMs": 266.82,
+        "gcCount": 93,
+        "geometry": {
+          "grids": 6,
+          "gridBuckets": 655,
+          "unchangedClampCopies": 0,
+          "clamps": 0
+        },
+        "frameGapP95Ms": [
+          283.3,
+          300,
+          266.7
+        ],
+        "drawP95Ms": [
+          28.1,
+          29.5,
+          15.9
+        ],
+        "participants": 20,
+        "overloads": 0,
+        "unsentAtSampling": [
+          0,
+          1,
+          1
+        ],
+        "unsentAfterRematch": [
+          0,
+          0,
+          0
+        ],
+        "errors": []
+      }
+    ],
+    "team-capture-canvas": [
+      {
+        "label": "v34",
+        "sha": "9a29a23a8eb62095308501109e8e15c610379959",
+        "mode": "team-capture",
+        "renderer": "canvas",
+        "status": "PASS",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16759308288
+        },
+        "rounds": 3,
+        "wallSeconds": 35.77,
+        "cpuMs": 4188.069,
+        "stepP95Ms": 3.75,
+        "snapshotP95Ms": 5.78,
+        "inputApplyP95Ms": 17.64,
+        "snapshotHz": 17.43,
+        "snapshotGapP95Ms": 54.78,
+        "wireKiBps": 5699.37,
+        "snapshotBytesMean": 31622.91,
+        "snapshotBytesP95": 52011,
+        "wireBytes": 206072335,
+        "roundEndRssMiB": [
+          135.52,
+          175.5,
+          183.31
+        ],
+        "roundEndHeapMiB": [
+          32.15,
+          60.46,
+          54.37
+        ],
+        "rssMeanMiB": 142.23,
+        "peakRssMiB": 185.29,
+        "estimatedHeapAllocationMiB": 601.98,
+        "gcMs": 154.47,
+        "gcCount": 46,
+        "geometry": {
+          "grids": 10,
+          "gridBuckets": 400,
+          "unchangedClampCopies": 20531,
+          "clamps": 20531
+        },
+        "frameGapP95Ms": [
+          16.8,
+          16.7,
+          16.8
+        ],
+        "drawP95Ms": [
+          3.6,
+          1.3,
+          1.6
+        ],
+        "participants": 20,
+        "overloads": 0,
+        "unsentAtSampling": [
+          0,
+          1,
+          1
+        ],
+        "unsentAfterRematch": [
+          0,
+          0,
+          0
+        ],
+        "errors": []
+      },
+      {
+        "label": "v35",
+        "sha": "43f3d98df41b2a8dea6686bae89d5df6bc0b2446",
+        "mode": "team-capture",
+        "renderer": "canvas",
+        "status": "PASS",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16759308288
+        },
+        "rounds": 3,
+        "wallSeconds": 35.38,
+        "cpuMs": 4493.958,
+        "stepP95Ms": 4.26,
+        "snapshotP95Ms": 7.01,
+        "inputApplyP95Ms": 21.08,
+        "snapshotHz": 17.45,
+        "snapshotGapP95Ms": 53.49,
+        "wireKiBps": 5684.1,
+        "snapshotBytesMean": 31180.07,
+        "snapshotBytesP95": 51715,
+        "wireBytes": 203603392,
+        "roundEndRssMiB": [
+          134.17,
+          174.72,
+          179.72
+        ],
+        "roundEndHeapMiB": [
+          33.98,
+          28.83,
+          29.77
+        ],
+        "rssMeanMiB": 140.63,
+        "peakRssMiB": 183.64,
+        "estimatedHeapAllocationMiB": 580.81,
+        "gcMs": 170.29,
+        "gcCount": 52,
+        "geometry": {
+          "grids": 10,
+          "gridBuckets": 400,
+          "unchangedClampCopies": 18705,
+          "clamps": 18705
+        },
+        "frameGapP95Ms": [
+          16.8,
+          16.7,
+          16.8
+        ],
+        "drawP95Ms": [
+          3.1,
+          1.3,
+          2.5
+        ],
+        "participants": 20,
+        "overloads": 0,
+        "unsentAtSampling": [
+          0,
+          1,
+          0
+        ],
+        "unsentAfterRematch": [
+          0,
+          0,
+          0
+        ],
+        "errors": []
+      }
+    ],
+    "team-capture-pixi": [
+      {
+        "label": "v34",
+        "sha": "9a29a23a8eb62095308501109e8e15c610379959",
+        "mode": "team-capture",
+        "renderer": "pixi",
+        "status": "PASS",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16760336384
+        },
+        "rounds": 3,
+        "wallSeconds": 90.58,
+        "cpuMs": 9528.189,
+        "stepP95Ms": 1.38,
+        "snapshotP95Ms": 4.56,
+        "inputApplyP95Ms": 14.94,
+        "snapshotHz": 18.45,
+        "snapshotGapP95Ms": 53.32,
+        "wireKiBps": 7597.26,
+        "snapshotBytesMean": 24466.99,
+        "snapshotBytesP95": 27382,
+        "wireBytes": 679699410,
+        "roundEndRssMiB": [
+          137.6,
+          166.3,
+          181.89
+        ],
+        "roundEndHeapMiB": [
+          39.19,
+          30.75,
+          45.48
+        ],
+        "rssMeanMiB": 149.01,
+        "peakRssMiB": 186.64,
+        "estimatedHeapAllocationMiB": 1659.5,
+        "gcMs": 673.62,
+        "gcCount": 196,
+        "geometry": {
+          "grids": 14,
+          "gridBuckets": 596,
+          "unchangedClampCopies": 80452,
+          "clamps": 80453
+        },
+        "frameGapP95Ms": [
+          366.7,
+          283.3,
+          333.2
+        ],
+        "drawP95Ms": [
+          29,
+          14,
+          10.7
+        ],
+        "participants": 20,
+        "overloads": 0,
+        "unsentAtSampling": [
+          0,
+          0,
+          1
+        ],
+        "unsentAfterRematch": [
+          0,
+          0,
+          0
+        ],
+        "errors": []
+      },
+      {
+        "label": "v35",
+        "sha": "43f3d98df41b2a8dea6686bae89d5df6bc0b2446",
+        "mode": "team-capture",
+        "renderer": "pixi",
+        "status": "PASS",
+        "machine": {
+          "platform": "linux",
+          "architecture": "x64",
+          "node": "v24.22.1",
+          "logicalCpus": 4,
+          "totalMemoryBytes": 16760336384
+        },
+        "rounds": 3,
+        "wallSeconds": 79.28,
+        "cpuMs": 7772.011,
+        "stepP95Ms": 1.36,
+        "snapshotP95Ms": 4.32,
+        "inputApplyP95Ms": 15.81,
+        "snapshotHz": 18.65,
+        "snapshotGapP95Ms": 53.19,
+        "wireKiBps": 7719.22,
+        "snapshotBytesMean": 24652.96,
+        "snapshotBytesP95": 29130,
+        "wireBytes": 608310837,
+        "roundEndRssMiB": [
+          136.42,
+          170.71,
+          186.71
+        ],
+        "roundEndHeapMiB": [
+          37.04,
+          28.69,
+          46.99
+        ],
+        "rssMeanMiB": 147.32,
+        "peakRssMiB": 189.99,
+        "estimatedHeapAllocationMiB": 1455.31,
+        "gcMs": 429.18,
+        "gcCount": 137,
+        "geometry": {
+          "grids": 14,
+          "gridBuckets": 596,
+          "unchangedClampCopies": 69643,
+          "clamps": 69645
+        },
+        "frameGapP95Ms": [
+          333.3,
+          283.4,
+          300
+        ],
+        "drawP95Ms": [
+          35.7,
+          14,
+          11.3
+        ],
+        "participants": 20,
+        "overloads": 0,
+        "unsentAtSampling": [
+          0,
+          0,
+          1
+        ],
+        "unsentAfterRematch": [
+          0,
+          0,
+          0
+        ],
+        "errors": []
+      }
+    ]
+  },
+  "serverCrossover": {
+    "node": "v24.22.1",
+    "A": "v34-9a29a23",
+    "B": "v35",
+    "mode": "solo",
+    "warmupTicks": 90,
+    "ticks": 270,
+    "order": "ABBA",
+    "players": 20,
+    "renderers": 0,
+    "sockets": 0,
+    "recipients": 21,
+    "rows": [
+      {
+        "version": "A",
+        "ticks": 270,
+        "stepCpuMs": 288.181,
+        "snapshotCpuMs": 300.756,
+        "totalCpuMs": 589.955,
+        "elapsedMs": 367.03286,
+        "stepP95": 1.3947760000000926,
+        "snapshotP95": 3.2188979999999674,
+        "bytes": 69625746,
+        "attackedPlayers": 20,
+        "skillPlayers": 20,
+        "finalFrame": 270,
+        "rss": 134328320,
+        "heap": 33679136
+      },
+      {
+        "version": "B",
+        "ticks": 270,
+        "stepCpuMs": 294.267,
+        "snapshotCpuMs": 291.232,
+        "totalCpuMs": 586.515,
+        "elapsedMs": 363.14461700000004,
+        "stepP95": 1.230998999999997,
+        "snapshotP95": 3.024071999999933,
+        "bytes": 69825600,
+        "attackedPlayers": 20,
+        "skillPlayers": 20,
+        "finalFrame": 270,
+        "rss": 136511488,
+        "heap": 27631392
+      },
+      {
+        "version": "B",
+        "ticks": 270,
+        "stepCpuMs": 259.837,
+        "snapshotCpuMs": 276.211,
+        "totalCpuMs": 538.787,
+        "elapsedMs": 335.9327149999999,
+        "stepP95": 1.098109999999906,
+        "snapshotP95": 2.8759840000000167,
+        "bytes": 69825600,
+        "attackedPlayers": 20,
+        "skillPlayers": 20,
+        "finalFrame": 270,
+        "rss": 137048064,
+        "heap": 37146000
+      },
+      {
+        "version": "A",
+        "ticks": 270,
+        "stepCpuMs": 259.027,
+        "snapshotCpuMs": 298.878,
+        "totalCpuMs": 558.891,
+        "elapsedMs": 344.70525,
+        "stepP95": 1.2037270000000717,
+        "snapshotP95": 3.198989999999867,
+        "bytes": 69625746,
+        "attackedPlayers": 20,
+        "skillPlayers": 20,
+        "finalFrame": 270,
+        "rss": 137814016,
+        "heap": 25652136
+      }
+    ]
+  }
+}

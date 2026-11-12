@@ -33,7 +33,7 @@ export class Timeline{
  predict(input){if(this.paused||!this.predicted)return;this.history.push(input);if(this.history.length>120)this.history.shift();this.predicted=predictMovement(this.kernel,this.predicted,input,this.collisionWalls(),this.static);}
  preview(kind,seq,aim,power=1){const self=this.predicted;if(this.paused||!self)return;const now=performance.now();this.pendingInputs.set(kind+':'+seq,{kind,seq,until:now+3000});for(const q of previewShots(self,kind,seq,aim,now,power))this.previews.set(shotKey(q),q);const cue=previewCue(self,kind,seq,aim,this.renderTick);if(cue)this.effects.push(cue);}
  cancelPreview(kind,seq){this.pendingInputs.delete(kind+':'+seq);for(const [id,q]of this.previews)if(q.actionKind===kind&&q.actionSeq===seq)this.previews.delete(id);this.effects=this.effects.filter(f=>!f.preview||f.actionKind!==kind||f.actionSeq!==seq);}
- event(e,now=performance.now()){const d=e.data;if(e.type==='ESCAPE_STATE'){if(!this.escape||d.revision>this.escape.revision)this.escape=d;return;}if(e.type==='SHOT_SPAWN'){this.spawns.set(d.id,{...d,tick:e.serverTick,seenInSnapshot:false});}else if(e.type==='SHOT_END')this.terminals.set(d.id,{...d,tick:e.serverTick});else if(e.type==='FX'){if(d.sourceId===this.predicted?.id&&d.geometry?.seq)this.effects=this.effects.filter(f=>!f.preview||f.actionKind!==d.geometry.kind||f.actionSeq!==d.geometry.seq);this.effects.push({...d,id:e.eventId,tick:e.serverTick,receivedAt:now});}if(this.effects.length>300)this.effects.splice(0,this.effects.length-300);for(const map of [this.terminals,this.spawns])while(map.size>2048)map.delete(map.keys().next().value);}
+ event(e,now=performance.now()){const d=e.data;if(e.type==='ESCAPE_STATE'){if(!this.escape||d.revision>this.escape.revision)this.escape=d;return;}if(e.type==='SHOT_SPAWN'||e.type==='SHOT_TURN'){this.spawns.set(d.id,{...d,tick:e.serverTick,seenInSnapshot:false});}else if(e.type==='SHOT_END')this.terminals.set(d.id,{...d,tick:e.serverTick});else if(e.type==='FX'){if(d.sourceId===this.predicted?.id&&d.geometry?.seq)this.effects=this.effects.filter(f=>!f.preview||f.actionKind!==d.geometry.kind||f.actionSeq!==d.geometry.seq);this.effects.push({...d,id:e.eventId,tick:e.serverTick,receivedAt:now});}if(this.effects.length>300)this.effects.splice(0,this.effects.length-300);for(const map of [this.terminals,this.spawns])while(map.size>2048)map.delete(map.keys().next().value);}
  frame(now=performance.now()){
   const last=this.samples.at(-1);if(!last)return null;
   this.renderTick=Math.max(this.renderTick,last.state.serverTick+Math.min(150,now-last.at)*.06-4.5);
@@ -68,6 +68,14 @@ export class Timeline{
    // A busy first paint must not discard a newly received confirmed contact.
    // Only its display clock is adjusted, once; server tick/position and all
    // attack/warning timings remain authoritative. Old/replayed FX never renew.
+   if(e.style==='sniper-critical'&&e.firstVisibleAt==null&&e.tick<=this.renderTick){
+    // A single short confirmed cue must receive a first paint even on software
+    // WebGL. Do not resurrect old combat or extend it on subsequent frames.
+    // Bound freshness by authoritative progress. Slow software painting
+    // can consume a second while only a handful of new ticks arrive.
+    if(Math.max(this.renderTick,last.state.serverTick)-e.tick>45||now-e.receivedAt>3000)return false;
+    e.firstVisibleAt=now;e.displayTick=this.renderTick;
+   }
    if(e.kind==='hit'&&e.geometry?.confirmed&&!e.geometry.periodic&&e.firstVisibleAt==null&&e.tick<=this.renderTick&&this.renderTick-e.tick<=45&&now-e.receivedAt<=240){
     e.firstVisibleAt=now;e.displayTick=Math.max(e.tick,this.renderTick-2);
    }

@@ -12,12 +12,16 @@ const root=process.cwd(), artifacts=path.join(root,'artifacts');
 const gitArgs=['-c','safe.directory='+fs.realpathSync(root)];
 fs.mkdirSync(artifacts,{recursive:true});
 const scratch=fs.mkdtempSync(path.join(artifacts,'comparison-sources-'));
-const evidence=path.join(artifacts,'v34-comparison');
+const evolution=process.argv[2]==='v35',mode=process.argv[3],backend=process.argv[4];
+const stress=evolution&&['scissors','load30'].includes(mode);
+if(evolution&&!stress&&(!['solo','team-capture'].includes(mode)||!['canvas','pixi'].includes(backend)))throw Error('INVALID_COMPARISON_CASE');
+const evidence=path.join(artifacts,evolution?'v35-comparison':'v34-comparison');
 fs.mkdirSync(evidence,{recursive:true});
-const versions=[
+const head=execFileSync('git',[...gitArgs,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
+const versions=evolution?[{label:'v34',sha:'9a29a23a8eb62095308501109e8e15c610379959'},{label:'v35',sha:head}]:[
  {label:'790fb11',sha:'790fb11a0618d6c706d1aee044379939940415af'},
  {label:'d28b2d8',sha:'d28b2d81692876cc353b75e85350c442b7948398'},
- {label:'v34',sha:execFileSync('git',[...gitArgs,'rev-parse','HEAD'],{encoding:'utf8'}).trim()}
+ {label:'v34',sha:head}
 ];
 function checkout(version){
  const exists=spawnSync('git',[...gitArgs,'cat-file','-e',version.sha+'^{commit}'],{stdio:'ignore'}).status===0;
@@ -53,11 +57,27 @@ const results=[], machine={platform:process.platform,architecture:process.arch,n
 try {
  for(const version of versions){
   const cwd=checkout(version);
-  for(const mode of ['solo','team-capture']){
-   const label='compare-'+version.label+'-'+mode;
+  if(stress){
+   const scissors=mode==='scissors',file=scissors?'artifacts/v34/roster-pixi/result.json':'artifacts/load-30-40.json';
+   const args=scissors?['tests/combat/v34-roster.mjs','pixi']:['tools/load/run.mjs','--players=30','--seconds=40'];
+   const run=spawnSync(process.execPath,args,{cwd,stdio:'inherit',timeout:240000});
+   const status=run.error?.code==='ETIMEDOUT'?'TIMEOUT':run.error?'INFRA_FAILURE':run.status===0?'PASS':'FAIL';
+   if(status!=='PASS')process.exitCode=1;
+   const report=fs.existsSync(path.join(cwd,file))?JSON.parse(fs.readFileSync(path.join(cwd,file))):{};
+   const cpu=report.server?.window?.cpuUsageUs;
+   const values=scissors?{scissors:report.scissors,host:report.hostCommands?.steps,phase:report.hostCommands?.client?.phase}:
+    {players:report.players,snapshots:report.snapshots,bytes:report.receivedBytes,elapsedMs:report.elapsedMs,step:report.server?.stepCpu,snapshot:report.server?.snapshotCpu,
+     cpuMs:cpu?(cpu.user+cpu.system)/1000:undefined,inputApply:report.server?.inputApply,ackP95Ms:report.ack?.p95,
+     wireKiBps:report.elapsedMs?n(report.receivedBytes*1000/report.elapsedMs/1024):undefined,rss:report.samples?.map(s=>s.server?.memory?.rss).filter(Number.isFinite),errors:report.errors,overloads:report.server?.overloads,cleanup:report.cleanup};
+   results.push({...version,mode,machine,status,...values,failure:report.failure||report.error||run.error?.message});
+   fs.writeFileSync(path.join(evidence,'comparison.json'),JSON.stringify(results,null,2)+'\n');
+   continue;
+  }
+  for(const scenario of (evolution?[mode]:['solo','team-capture'])){
+   const label='compare-'+version.label+'-'+scenario;
    let status='PASS',failure;
    try{execFileSync(process.execPath,['tests/combat/classroom-rematch.mjs',label],{cwd,stdio:'inherit',
-    env:{...process.env,CLASSROOM_UPGRADE:'1',CLASSROOM_METER:'1',CLASSROOM_MODE:mode},timeout:135000});}
+    env:{...process.env,CLASSROOM_UPGRADE:'1',CLASSROOM_METER:'1',CLASSROOM_MODE:scenario,...(evolution?{EVOLUTION_RENDERER:backend}:{})},timeout:evolution?240000:135000});}
    catch(e){
     failure=e.code||'SCENARIO_FAILED';
     status=e.code==='ETIMEDOUT'?'TIMEOUT':e.code?'INFRA_FAILURE':'FAIL';
@@ -65,11 +85,12 @@ try {
    }
    const file=path.join(cwd,'artifacts/classroom',label+'-rematch.json');
    const result=fs.existsSync(file)?summarize(JSON.parse(fs.readFileSync(file))):{};
-   results.push({...version,mode,status,failure,machine,...result});
+   results.push({...version,mode:scenario,renderer:evolution?backend:'canvas',status,failure,machine,...result});
    fs.writeFileSync(path.join(evidence,'comparison.json'),JSON.stringify(results,null,2)+'\n');
    console.log(JSON.stringify(results.at(-1)));
   }
  }
+ if(stress&&mode==='load30')execFileSync(process.execPath,['--expose-gc','tests/combat/classroom-server-crossover.mjs',path.join(scratch,'v34'),'v35'],{cwd:root,stdio:'inherit',timeout:120000});
 } finally {
  // Remove only the immutable source exports created by this process.
  if(path.dirname(fs.realpathSync(scratch))===fs.realpathSync(artifacts) && path.basename(scratch).startsWith('comparison-sources-'))
