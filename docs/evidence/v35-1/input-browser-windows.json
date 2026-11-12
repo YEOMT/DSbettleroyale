@@ -1,0 +1,300 @@
+{
+  "environment": "Windows x64, desktop Edge Chromium, local 2-player WebSocket, Canvas balanced 1366x768, synthetic keyboard and pointer input. 15/40/5/35ms ordered outbound snapshot delays in final segment. Browser and server durations each use their own monotonic clock.",
+  "v35": {
+    "renderer": "canvas",
+    "baseline": true,
+    "stationarySpan": 0,
+    "jitterSamples": 27,
+    "errors": [],
+    "edges": [
+      {
+        "key": "d",
+        "type": "keydown",
+        "at": 7413,
+        "seq": 42,
+        "predictMs": 17.69999998807907,
+        "x": 1,
+        "sentSeq": 43,
+        "displayMs": 32.5,
+        "applied": {
+          "seq": 43,
+          "x": 1,
+          "tick": 55
+        }
+      },
+      {
+        "key": "d",
+        "type": "keyup",
+        "at": 7768.699999988079,
+        "seq": 63,
+        "predictMs": 0.4000000059604645,
+        "x": 0,
+        "sentSeq": 64,
+        "displayMs": 11,
+        "applied": {
+          "seq": 64,
+          "x": 0,
+          "tick": 75
+        }
+      },
+      {
+        "key": "a",
+        "type": "keydown",
+        "at": 7840.199999988079,
+        "seq": 67,
+        "predictMs": 18.80000001192093,
+        "x": -1,
+        "sentSeq": 68,
+        "displayMs": 24,
+        "applied": {
+          "seq": 68,
+          "x": -1,
+          "tick": 80
+        }
+      },
+      {
+        "key": "a",
+        "type": "keyup",
+        "at": 8361.5,
+        "seq": 100,
+        "predictMs": 13.199999988079071,
+        "x": 0,
+        "sentSeq": 101,
+        "displayMs": 20,
+        "applied": {
+          "seq": 101,
+          "x": 0,
+          "tick": 112
+        }
+      }
+    ],
+    "casts": [
+      {
+        "seq": 1,
+        "kind": "attack",
+        "raw": {
+          "x": -1,
+          "y": 0
+        },
+        "power": 1
+      },
+      {
+        "seq": 1,
+        "kind": "skill",
+        "raw": {
+          "x": -1,
+          "y": 0
+        },
+        "power": 1
+      }
+    ],
+    "applied": 179,
+    "fired": {
+      "attack": 1,
+      "skill": 1
+    },
+    "raf": [
+      16.699999999999818,
+      16.80000000000109,
+      33.399999999999636
+    ],
+    "longFrameRate": [
+      0.012987012987012988,
+      0
+    ],
+    "drawP95": 1.2999999970197678,
+    "receiveP95": 92.20000000298023,
+    "holds": 0,
+    "objects": [
+      0,
+      0
+    ],
+    "correctionP95": 5.205400282471999,
+    "correctionCount": 5,
+    "predictionGapP95": 26.02655648607353,
+    "peakLead": 35.70898118615814,
+    "endLead": -0.00008071406026743944,
+    "stepP95": 1.0748999999996158,
+    "snapshotP95": 62.4343000000008,
+    "overloads": 0,
+    "bytes": 918236,
+    "bytesPerSecond": 283655,
+    "elapsedMs": 8424
+  },
+  "v351": {
+    "renderer": "canvas",
+    "baseline": false,
+    "stationarySpan": 0,
+    "jitterSamples": 27,
+    "errors": [],
+    "edges": [
+      {
+        "key": "d",
+        "type": "keydown",
+        "at": 7732.5,
+        "seq": 39,
+        "predictMs": 14.799999997019768,
+        "x": 1,
+        "sentSeq": 40,
+        "displayMs": 30,
+        "applied": {
+          "seq": 40,
+          "x": 1,
+          "tick": 54
+        }
+      },
+      {
+        "key": "d",
+        "type": "keyup",
+        "at": 8090.29999999702,
+        "seq": 61,
+        "predictMs": 7.799999997019768,
+        "x": 0,
+        "sentSeq": 62,
+        "displayMs": 22.5,
+        "applied": {
+          "seq": 62,
+          "x": 0,
+          "tick": 75
+        }
+      },
+      {
+        "key": "a",
+        "type": "keydown",
+        "at": 8161.399999991059,
+        "seq": 66,
+        "predictMs": 24.900000005960464,
+        "x": -1,
+        "sentSeq": 67,
+        "displayMs": 35.79999999701977,
+        "applied": {
+          "seq": 67,
+          "x": -1,
+          "tick": 82
+        }
+      },
+      {
+        "key": "a",
+        "type": "keyup",
+        "at": 8690.29999999702,
+        "seq": 99,
+        "predictMs": 11.899999991059303,
+        "x": 0,
+        "sentSeq": 100,
+        "displayMs": 23.299999997019768,
+        "applied": {
+          "seq": 100,
+          "x": 0,
+          "tick": 112
+        }
+      }
+    ],
+    "casts": [
+      {
+        "seq": 1,
+        "kind": "attack",
+        "raw": {
+          "x": -1,
+          "y": 0
+        },
+        "power": 1
+      },
+      {
+        "seq": 1,
+        "kind": "skill",
+        "raw": {
+          "x": -1,
+          "y": 0
+        },
+        "power": 1
+      }
+    ],
+    "applied": 176,
+    "actionMilestones": {
+      "browser": [
+        {
+          "kind": "attack",
+          "seq": 1,
+          "holdMs": 82.09999999403954,
+          "downToSendMs": 84.79999999701977,
+          "downToPreviewDrawMs": 99.20000000298023,
+          "downToAcceptedAckMs": 101.5,
+          "downToSpawnMs": 119.5,
+          "downToAuthorityDrawMs": 146.29999999701977,
+          "downToShotDrawMs": 162
+        },
+        {
+          "kind": "skill",
+          "seq": 1,
+          "holdMs": 0,
+          "downToSendMs": 0.3999999910593033,
+          "downToAcceptedAckMs": 13.899999991059303,
+          "downToAuthorityDrawMs": 121.79999999701977,
+          "downToAuthorityCueDrawMs": 124.29999999701977,
+          "downToSpawnMs": 417.09999999403954,
+          "downToShotDrawMs": 516.7999999970198
+        }
+      ],
+      "server": [
+        {
+          "kind": "attack",
+          "seq": 1,
+          "appliedMs": 15.797700000000987,
+          "firedMs": 28.29739999999947,
+          "fireTick": 80
+        },
+        {
+          "kind": "skill",
+          "seq": 1,
+          "appliedMs": 2.1181000000015047,
+          "firedMs": 4.183600000000297,
+          "fireTick": 135
+        }
+      ]
+    },
+    "fired": {
+      "attack": 1,
+      "skill": 1
+    },
+    "raf": [
+      16.699999999999818,
+      16.800000000000182,
+      33.399999999999636
+    ],
+    "longFrameRate": [
+      0.012658227848101266,
+      0.006329113924050633
+    ],
+    "drawP95": 1.4000000059604645,
+    "receiveP95": 99.3999999910593,
+    "holds": 0,
+    "objects": [
+      0,
+      0
+    ],
+    "correctionP95": 5.205402645678049,
+    "correctionCount": 7,
+    "predictionGapP95": 26.016067518938996,
+    "peakLead": 35.70810828174008,
+    "endLead": -0.00005785201842911647,
+    "stepP95": 1.7257000000008702,
+    "snapshotP95": 65.52189999999973,
+    "overloads": 0,
+    "bytes": 915807,
+    "bytesPerSecond": 284156,
+    "elapsedMs": 8357
+  },
+  "simultaneousReconnections": {
+    "connected": 20,
+    "resumed": 4,
+    "restoredMoves": 4,
+    "restoredBasicAttacks": 4,
+    "restoredSkills": 4,
+    "observers": [
+      "host",
+      "independent student"
+    ],
+    "atEnd": "20 RESULTS -> same room LOBBY",
+    "durationMs": 5902.7542
+  }
+}

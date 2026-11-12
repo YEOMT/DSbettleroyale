@@ -124,10 +124,24 @@ __brScope.brAwardRunXP = function brAwardRunXP(p,amount,healFraction){
             __brScope.brRunOffer(p);run.revision++;return true;
         };
 
+// An acquired card's display text depends on its build and ability, not the
+// battle tick. Keep one copy per live run; callers still get independent chips.
+const acquiredCards=new WeakMap();
 __brScope.brRunSnapshot = function brRunSnapshot(p){
             var r=p.run;if(!r)return null;
+            const keys=Object.keys(r.paths);
+            let chips=[];
+            if(keys.length){
+                let cache=acquiredCards.get(r);
+                if(!cache||cache.ability!==p.ability||cache.capabilities!==r.capabilities||cache.mods!==r.mods||
+                    keys.length!==cache.cards.length||keys.some((id,i)=>cache.cards[i].id!==id||cache.cards[i].tier!==r.paths[id])){
+                    cache={ability:p.ability,capabilities:r.capabilities,mods:r.mods,cards:keys.map(id=>__brScope.brRunCard(p,id,r.paths[id]))};
+                    acquiredCards.set(r,cache);
+                }
+                chips=cache.cards.map(card=>({...card}));
+            }
             return {matchKey:r.matchKey,lifeSeq:Number(p.lifeSeq||0),level:r.level,xp:r.xp,required:r.level<__brScope.BR_RUN_MAX_LEVEL?__brScope.BR_RUN_XP[r.level]:0,paths:Object.assign({},r.paths),mods:Object.assign({},r.mods),revision:r.revision,pending:r.pending,offer:p.alive?r.offer:null,alive:!!p.alive,abilityId:p.ability.id,
-                chips:Object.keys(r.paths).map(function(id){return __brScope.brRunCard(p,id,r.paths[id]);})};
+                chips};
         };
 
 __brScope.brRunMeasured = function brRunMeasured(p,mods){

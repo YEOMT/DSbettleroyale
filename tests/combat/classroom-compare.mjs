@@ -12,17 +12,27 @@ const root=process.cwd(), artifacts=path.join(root,'artifacts');
 const gitArgs=['-c','safe.directory='+fs.realpathSync(root)];
 fs.mkdirSync(artifacts,{recursive:true});
 const scratch=fs.mkdtempSync(path.join(artifacts,'comparison-sources-'));
-const evolution=process.argv[2]==='v35',mode=process.argv[3],backend=process.argv[4];
+// The existing opt-in Evolution workflow can select the classroom stability suite.
+const family=process.argv[2],mode=process.argv[3],backend=process.argv[4];
+const prBody=process.env.GITHUB_EVENT_NAME==='pull_request' && process.env.GITHUB_EVENT_PATH
+ ? JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH)).pull_request?.body : '';
+const stability=family==='v35.1'||(family==='v35'&&prBody?.includes('[classroom-smoothness]'));
+const evolution=stability||family==='v35';
 const stress=evolution&&['scissors','load30'].includes(mode);
 if(evolution&&!stress&&(!['solo','team-capture'].includes(mode)||!['canvas','pixi'].includes(backend)))throw Error('INVALID_COMPARISON_CASE');
 const evidence=path.join(artifacts,evolution?'v35-comparison':'v34-comparison');
 fs.mkdirSync(evidence,{recursive:true});
 const head=execFileSync('git',[...gitArgs,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
-const versions=evolution?[{label:'v34',sha:'9a29a23a8eb62095308501109e8e15c610379959'},{label:'v35',sha:head}]:[
+const v34='9a29a23a8eb62095308501109e8e15c610379959';
+const v35='f3549883674a2c456fdc1fd7e3fb18dc8c46cce3';
+const versions=stability?[{label:'v34',sha:v34},{label:'v35',sha:v35},{label:'v35.1',sha:head}]:evolution?[{label:'v34',sha:'9a29a23a8eb62095308501109e8e15c610379959'},{label:'v35',sha:head}]:[
  {label:'790fb11',sha:'790fb11a0618d6c706d1aee044379939940415af'},
  {label:'d28b2d8',sha:'d28b2d81692876cc353b75e85350c442b7948398'},
  {label:'v34',sha:head}
 ];
+// Reverse half of the browser cases so the candidate is not always measured
+// after both baselines. Each individual comparison stays on one runner.
+if(stability && !stress && ((mode==='solo')===(backend==='pixi')))versions.reverse();
 function checkout(version){
  const exists=spawnSync('git',[...gitArgs,'cat-file','-e',version.sha+'^{commit}'],{stdio:'ignore'}).status===0;
  if(!exists)execFileSync('git',[...gitArgs,'fetch','--no-tags','--depth=1','origin',version.sha],{stdio:'inherit'});
@@ -34,6 +44,7 @@ function checkout(version){
  for(const file of ['classroom-rematch.mjs','classroom-authority.mjs','classroom-meter.mjs']){
   fs.copyFileSync(path.join(root,'tests/combat',file),path.join(dir,'tests/combat',file));
  }
+ if(stability)for(const file of ['tools/load/run.mjs','tools/load/server.mjs'])fs.copyFileSync(path.join(root,file),path.join(dir,file));
  return dir;
 }
 const n=value=>Math.round(value*100)/100;
@@ -48,9 +59,18 @@ function summarize(run){
   rssMeanMiB:n(meter.resident.mean/2**20),peakRssMiB:n(meter.peakRssBytes/2**20),
   estimatedHeapAllocationMiB:n(meter.estimatedHeapAllocationBytes/2**20),gcMs:n(meter.gcMs),gcCount:meter.gcCount,
   geometry:meter.costs,frameGapP95Ms:last.screens.map(s=>n(s.gap.p95)),drawP95Ms:last.screens.map(s=>n(s.draw.p95)),
+  arenas:rows.filter(r=>r.arena).map(r=>r.arena),screensByRound:rows.map(r=>r.screens.map(s=>({gap:s.gap,draw:s.draw,raf:s.raf,lagTicks:s.lagTicks,timeline:s.timeline,resources:s.resources}))),
   participants:last.connected,overloads:last.overloads,unsentAtSampling:last.screens.map(s=>s.unsentInputs),
   unsentAfterRematch:rows.map(r=>r.lobby?.reduce((sum,s)=>sum+s.unsentInputs,0)??null),
   errors:run.errors,...(run.rows.at(-1)?.error?{failedAssertion:run.rows.at(-1).error}:{})};
+}
+function classroomCase(cwd,env,label,timeout=240000){
+ const file=path.join(cwd,'artifacts/classroom',label+'-rematch.json');
+ const child=spawnSync(process.execPath,['tests/combat/classroom-rematch.mjs',label],{cwd,env:{...process.env,...env},stdio:'inherit',timeout});
+ const report=fs.existsSync(file)?JSON.parse(fs.readFileSync(file)):null;
+ const status=child.error?.code==='ETIMEDOUT'?'TIMEOUT':child.error?'INFRA_FAILURE':child.status===0?'PASS':'FAIL';
+ if(status!=='PASS')process.exitCode=1;
+ return {status,failure:status==='PASS'?undefined:child.error?.code||'SCENARIO_FAILED',...(report?summarize(report):{})};
 }
 const results=[], machine={platform:process.platform,architecture:process.arch,node:process.version,
  logicalCpus:os.availableParallelism(),totalMemoryBytes:os.totalmem()};
@@ -60,7 +80,7 @@ try {
   if(stress){
    const scissors=mode==='scissors',file=scissors?'artifacts/v34/roster-pixi/result.json':'artifacts/load-30-40.json';
    const args=scissors?['tests/combat/v34-roster.mjs','pixi']:['tools/load/run.mjs','--players=30','--seconds=40'];
-   const run=spawnSync(process.execPath,args,{cwd,stdio:'inherit',timeout:240000});
+   const run=spawnSync(process.execPath,args,{cwd,stdio:'inherit',env:{...process.env,...(stability?{CLASSROOM_FIXED_SEED:'1'}:{})},timeout:240000});
    const status=run.error?.code==='ETIMEDOUT'?'TIMEOUT':run.error?'INFRA_FAILURE':run.status===0?'PASS':'FAIL';
    if(status!=='PASS')process.exitCode=1;
    const report=fs.existsSync(path.join(cwd,file))?JSON.parse(fs.readFileSync(path.join(cwd,file))):{};
@@ -75,19 +95,33 @@ try {
   }
   for(const scenario of (evolution?[mode]:['solo','team-capture'])){
    const label='compare-'+version.label+'-'+scenario;
-   let status='PASS',failure;
-   try{execFileSync(process.execPath,['tests/combat/classroom-rematch.mjs',label],{cwd,stdio:'inherit',
-    env:{...process.env,CLASSROOM_UPGRADE:'1',CLASSROOM_METER:'1',CLASSROOM_MODE:scenario,...(evolution?{EVOLUTION_RENDERER:backend}:{})},timeout:evolution?240000:135000});}
-   catch(e){
-    failure=e.code||'SCENARIO_FAILED';
-    status=e.code==='ETIMEDOUT'?'TIMEOUT':e.code?'INFRA_FAILURE':'FAIL';
-    process.exitCode=1;
-   }
-   const file=path.join(cwd,'artifacts/classroom',label+'-rematch.json');
-   const result=fs.existsSync(file)?summarize(JSON.parse(fs.readFileSync(file))):{};
-   results.push({...version,mode:scenario,renderer:evolution?backend:'canvas',status,failure,machine,...result});
+   const options={CLASSROOM_UPGRADE:'1',CLASSROOM_METER:'1',CLASSROOM_MODE:scenario,
+    CLASSROOM_SMOOTH_STATS:stability?'1':'0',CLASSROOM_EXPECT_ARENA:stability&&version.label==='v35.1'?'1':'0',
+    ...(evolution?{EVOLUTION_RENDERER:backend}:{})};
+   const result=classroomCase(cwd,options,label,evolution?240000:135000);
+   results.push({...version,mode:scenario,renderer:evolution?backend:'canvas',machine,...result});
    fs.writeFileSync(path.join(evidence,'comparison.json'),JSON.stringify(results,null,2)+'\n');
    console.log(JSON.stringify(results.at(-1)));
+  }
+ }
+ if(stability && mode==='load30') {
+  const {runLoad}=await import('../../tools/load/run.mjs');
+  const {summarizeLong}=await import('./smoothness-long.mjs');
+  process.env.CLASSROOM_FIXED_SEED='1';
+  const long=await runLoad({players:30,seconds:600,rematchSeconds:300,out:'artifacts/smoothness-long-local.json'});
+  fs.writeFileSync(path.join(evidence,'long-30.json'),JSON.stringify(summarizeLong(long),null,2));
+  assert.ok(long.pass,'30-player 600-second socket test');
+ }
+ if(stability && !stress && backend==='canvas'){
+  execFileSync(process.execPath,['--expose-gc','tests/combat/smooth-server.mjs',
+   path.join(scratch,'v34'),path.join(scratch,'v35'),path.join(scratch,'v35.1'),
+   path.join(evidence,'server-'+mode+'.json'),mode],{cwd:root,stdio:'inherit',timeout:120000});
+ }
+ if(stability && mode==='solo' && backend==='canvas'){
+  const extra=[];
+  for(let map=1;map<5;map++){
+   const result=classroomCase(path.join(scratch,'v35.1'),{CLASSROOM_UPGRADE:'1',CLASSROOM_METER:'1',CLASSROOM_MODE:'solo',CLASSROOM_MAP:String(map),CLASSROOM_SMOOTH_STATS:'1',CLASSROOM_EXPECT_ARENA:'1',EVOLUTION_RENDERER:'canvas'},'solo-map-'+map);
+   extra.push({map,...result});fs.writeFileSync(path.join(evidence,'solo-maps.json'),JSON.stringify(extra,null,2));
   }
  }
  if(stress&&mode==='load30')execFileSync(process.execPath,['--expose-gc','tests/combat/classroom-server-crossover.mjs',path.join(scratch,'v34'),'v35'],{cwd:root,stdio:'inherit',timeout:120000});

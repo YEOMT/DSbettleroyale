@@ -1,0 +1,242 @@
+[
+  {
+    "frames": 270,
+    "fps": 30,
+    "delays": [
+      20
+    ],
+    "peerStepErrorPx": [
+      0,
+      0,
+      0
+    ],
+    "shotStepErrorPx": [
+      0,
+      0,
+      0
+    ],
+    "authorityToDisplayMs": [
+      95,
+      95,
+      95
+    ],
+    "heldPeerFrames": 0,
+    "idleRangePx": 0
+  },
+  {
+    "frames": 540,
+    "fps": 60,
+    "delays": [
+      20
+    ],
+    "peerStepErrorPx": [
+      0,
+      0,
+      0
+    ],
+    "shotStepErrorPx": [
+      0,
+      0,
+      0
+    ],
+    "authorityToDisplayMs": [
+      95,
+      95,
+      95
+    ],
+    "heldPeerFrames": 0,
+    "idleRangePx": 0
+  },
+  {
+    "frames": 1080,
+    "fps": 120,
+    "delays": [
+      20
+    ],
+    "peerStepErrorPx": [
+      0,
+      0,
+      0
+    ],
+    "shotStepErrorPx": [
+      0,
+      0,
+      0
+    ],
+    "authorityToDisplayMs": [
+      95,
+      95,
+      95
+    ],
+    "heldPeerFrames": 0,
+    "idleRangePx": 0
+  },
+  {
+    "frames": 270,
+    "fps": 30,
+    "delays": [
+      15,
+      40,
+      5,
+      35
+    ],
+    "peerStepErrorPx": [
+      4.8,
+      8.4,
+      8.4
+    ],
+    "shotStepErrorPx": [
+      14.4,
+      25.2,
+      25.2
+    ],
+    "authorityToDisplayMs": [
+      90,
+      115,
+      115
+    ],
+    "heldPeerFrames": 0,
+    "idleRangePx": 0
+  },
+  {
+    "frames": 540,
+    "fps": 60,
+    "delays": [
+      15,
+      40,
+      5,
+      35
+    ],
+    "peerStepErrorPx": [
+      0,
+      6.4,
+      6.4
+    ],
+    "shotStepErrorPx": [
+      0,
+      19.2,
+      19.2
+    ],
+    "authorityToDisplayMs": [
+      90,
+      106.667,
+      106.667
+    ],
+    "heldPeerFrames": 45,
+    "idleRangePx": 0
+  },
+  {
+    "frames": 1080,
+    "fps": 120,
+    "delays": [
+      15,
+      40,
+      5,
+      35
+    ],
+    "peerStepErrorPx": [
+      0,
+      3.6,
+      6.4
+    ],
+    "shotStepErrorPx": [
+      0,
+      10.8,
+      19.2
+    ],
+    "authorityToDisplayMs": [
+      90,
+      105,
+      106.667
+    ],
+    "heldPeerFrames": 180,
+    "idleRangePx": 0
+  },
+  {
+    "frames": 270,
+    "fps": 30,
+    "delays": [
+      40,
+      4,
+      38,
+      5,
+      41,
+      10
+    ],
+    "peerStepErrorPx": [
+      0.4,
+      1.44,
+      1.44
+    ],
+    "shotStepErrorPx": [
+      0,
+      4.32,
+      4.32
+    ],
+    "authorityToDisplayMs": [
+      80,
+      85,
+      85
+    ],
+    "heldPeerFrames": 0,
+    "idleRangePx": 0
+  },
+  {
+    "frames": 540,
+    "fps": 60,
+    "delays": [
+      40,
+      4,
+      38,
+      5,
+      41,
+      10
+    ],
+    "peerStepErrorPx": [
+      0,
+      5.44,
+      5.44
+    ],
+    "shotStepErrorPx": [
+      0,
+      16.32,
+      16.32
+    ],
+    "authorityToDisplayMs": [
+      80,
+      101.667,
+      101.667
+    ],
+    "heldPeerFrames": 30,
+    "idleRangePx": 0
+  },
+  {
+    "frames": 1080,
+    "fps": 120,
+    "delays": [
+      40,
+      4,
+      38,
+      5,
+      41,
+      10
+    ],
+    "peerStepErrorPx": [
+      0,
+      4.8,
+      5.44
+    ],
+    "shotStepErrorPx": [
+      0,
+      14.4,
+      16.32
+    ],
+    "authorityToDisplayMs": [
+      80,
+      101.667,
+      105
+    ],
+    "heldPeerFrames": 150,
+    "idleRangePx": 0
+  }
+]

@@ -27,6 +27,11 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverO
   for(let i=0;i<players-(browser?1:0);i++){const c=await(await connect(app)).join(host.room.code,'Bot'+String(i+1).padStart(2,'0'));c.seq=0;c.action=0;c.sentInputs=new Map();track(c);clients.push(c);}
   async function begin(){
    if(host.room.phase==='RESULTS'){await host.command('REMATCH');await host.phase('LOBBY');const clean=await rpc('status');(report.rematchCleanup??=[]).push(clean.window);if(Object.values(clean.window.objects).some(n=>n!==0)||clean.window.roster10.retained!==0)throw Error('REMATCH_OBJECT_LEAK');}
+   if(process.env.CLASSROOM_FIXED_SEED==='1'){
+    await rpc('fixture-seed',{round:report.rounds});
+    const id='stability-fixture-'+report.rounds;
+    await Promise.all([host,...clients].map(c=>c.room?.matchId===id?undefined:c.next('ROOM_STATE',r=>r.matchId===id)));
+   }
    await host.command('CONFIGURE',{mode:'team-capture',teamCount:4,matchSeconds:300,quizText:'Load question | Correct | Wrong one | Wrong two | Wrong three'});
    await host.command('START_QUIZ');await host.command('BEGIN_DRAFT');
    await rpc('fixture-draft',{round:report.rounds,players,roster});for(const c of clients){c.seq=0;c.action=0;c.snapshot=null;c.lifeSeq=0;}
