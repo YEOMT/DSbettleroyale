@@ -8,7 +8,7 @@ export function classroomFixture(app,m){
  const room=[...app.manager.rooms.values()][0],w=room?.world;
  if(m.type==='classroom-meter-start'){meter=classroomMeter(app);meter.attach();return true;}
  if(m.type==='classroom-meter-finish'){const result=meter.finish();meter=null;return result;}
- if(m.type==='classroom-benchmark'){room.matchId='upgrade-fixed-'+m.round;room.round++;room.revision++;room.config.mapIndex=0;app.manager.changed(room);return room.matchId;}
+ if(m.type==='classroom-benchmark'){room.matchId='upgrade-fixed-'+m.round;room.round++;room.revision++;room.config.mapIndex=Number(process.env.CLASSROOM_MAP||0);app.manager.changed(room);return room.matchId;}
  if(m.type==='classroom-prepare'){
   app.simulation.suspend();
   room.students().forEach((p,i)=>p.draft.abilityId=(process.env.CLASSROOM_UPGRADE?['emoji-003','emoji-034','emoji-070','emoji-141']:['emoji-003','emoji-141','emoji-149','emoji-144'])[i%4]);return true;
@@ -18,6 +18,11 @@ export function classroomFixture(app,m){
   [...w.byId.values()].forEach((p,i)=>{p.pos=new w.Vec2((i%5)*330-700,Math.floor(i/5)*330-700);p.vel=new w.Vec2(0,0);});w.game.rebuildSpatialGrid();
   room.static=engine.getStaticState(w);const teacher=engine.getTeacherState(w),encode=snapshotEncoder(teacher,++room.snapshotSeq,performance.now());
   for(const p of room.members.values())if(p.peer){p.peer.send('STATIC_STATE',room.static);const view=p.role==='host'?(engine.getHostVisibleState?.(teacher)||teacher):engine.getVisibleState(w,p.id,undefined,teacher);p.peer.snapshot(encode(view.self?{...view,self:p.peer.selfState(view.self)}:view,p.peer.scope()));}return true;
+ }
+ if(m.type==='classroom-arena'){
+  const g=w.game;
+  return {map:g.mapIndex,radius:g.worldRadius,xp:g.farmBoxes.filter(b=>b.kind==='xp').length,
+   portal:!!g.escapeMap?.portal,pads:g.escapeMap?.pads.length,startTick:w.BR_RING_RULES.startTick};
  }
  if(m.type==='classroom-run'){app.simulation.resume();return true;}
  if(m.type==='classroom-disconnect'){room.students()[0].peer.socket.close(1012,'TEST_TRANSITION_RESUME');return true;}
