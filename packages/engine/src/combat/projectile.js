@@ -7,7 +7,7 @@ __brScope.Projectile = class Projectile {
                 this.runSkill=opts.impactStyle==='ranged-basic'?null:(opts.runSkill||owner?._runSkillCast||(owner?.dashFrames>0?owner._runLastSkill:null)||__brScope.brRunSkillSnapshot(owner));
                 this.dotDamageMult=this.runSkill?.damage||Number(opts.basicDamageMultiplier||1);
                 if(this.runSkill){damage*=this.runSkill.damage;size*=this.runSkill.size;explodeRadius*=this.runSkill.size;}
-                this.owner = owner;this.ownerLife=Number(owner?.lifeSeq||0);this.ownerAbilityId=owner?.ability?.id;this.homingTurnRate=Number(opts.homingTurnRate??.032);this.homingCone=Number(opts.homingCone??1.22);this.wangguiPower=Number(opts.basicSnapshot?.ctx?.run?.wangguiPower??this.runSkill?.wangguiPower??__brScope.brRunMod(owner,'wangguiPower'));this.basicSnapshot=opts.basicSnapshot||null;this.basicAttackId=opts.basicAttackId||null; this.pos = pos; this.vel = dir.mult(speed);
+                this.owner = owner;this.ownerLife=Number(owner?.lifeSeq||0);this.sourceAbilityId=this.ownerAbilityId=owner?.ability?.id;this.homingTurnRate=Number(opts.homingTurnRate??.032);this.homingCone=Number(opts.homingCone??1.22);this.wangguiPower=Number(opts.basicSnapshot?.ctx?.run?.wangguiPower??this.runSkill?.wangguiPower??__brScope.brRunMod(owner,'wangguiPower'));this.basicSnapshot=opts.basicSnapshot||null;this.basicAttackId=opts.basicAttackId||null; this.pos = pos; this.vel = dir.mult(speed);
                 this.sniper=opts.sniper;
                 this.launchSupply=launchSupply(owner,__brScope.game?.frame||0);
                 this.farmBornFrame=__brScope.game?.frame||0;
@@ -195,7 +195,7 @@ __brScope.Projectile = class Projectile {
                     // positions as the accepted collision above. Only real Dart basic hits
                     // can gain this multiplier; farm/turret/reflection paths stay unchanged.
                     let central=false;
-                    if(this.ownerAbilityId==='emoji-070'&&this.inputKind==='attack'&&this.impactStyle==='ranged-basic'&&!p.clone&&!p.isReworkTurret&&p.id!==999&&!p.invisible&&!game.isConcealedFrom(p,this.owner)){
+                    if(this.sourceAbilityId==='emoji-070'&&this.inputKind==='attack'&&this.impactStyle==='ranged-basic'&&!p.clone&&!p.isReworkTurret&&p.id!==999&&!p.invisible&&!game.isConcealedFrom(p,this.owner)){
                         const px=Number.isFinite(p.combatPreviousX)?p.combatPreviousX:p.pos.x,py=Number.isFinite(p.combatPreviousY)?p.combatPreviousY:p.pos.y;
                         const dx=travel.x-(p.pos.x-px),dy=travel.y-(p.pos.y-py),x=shotStart.x-px,y=shotStart.y-py,length2=dx*dx+dy*dy;
                         const closest=length2>0?-(x*dx+y*dy)/length2:0;

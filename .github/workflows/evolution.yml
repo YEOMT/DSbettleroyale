@@ -20,6 +20,9 @@ jobs:
       matrix:
         mode: [solo, team-capture]
         renderer: [canvas, pixi]
+        include:
+          - {mode: scissors, renderer: pixi}
+          - {mode: load30, renderer: sockets}
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
@@ -47,12 +50,8 @@ jobs:
         with: {node-version-file: .nvmrc, cache: npm}
       - run: npm ci
       - run: node tests/combat/evolution-browser.mjs ${{ matrix.renderer }}
-      - if: matrix.renderer == 'canvas'
-        run: node tools/load/run.mjs --players=30 --seconds=40
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: v35-screens-${{ matrix.renderer }}-${{ github.sha }}
-          path: |
-            artifacts/v35/
-            artifacts/load-30-40.json
+          path: artifacts/v35/

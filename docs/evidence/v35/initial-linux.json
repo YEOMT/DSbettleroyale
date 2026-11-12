@@ -1,0 +1,223 @@
+{
+  "run": 43217058752,
+  "head": "0276dcd061acf2b376a6eed477f73a5f5b96a172",
+  "scope": "before portal cache and first-paint fix; same Linux runner per version pair",
+  "rows": [
+    {
+      "label": "v34",
+      "sha": "9a29a23a8eb62095308501109e8e15c610379959",
+      "mode": "solo",
+      "renderer": "canvas",
+      "rounds": 3,
+      "wallSeconds": 35.54,
+      "cpuMs": 4203.789,
+      "stepP95Ms": 4.06,
+      "snapshotP95Ms": 6.87,
+      "inputApplyP95Ms": 16.82,
+      "snapshotBytesP95": 50457,
+      "peakRssMiB": 193.46,
+      "wireKiBps": 5391.39,
+      "frameGapP95Ms": [
+        16.7,
+        16.8,
+        16.7
+      ],
+      "drawP95Ms": [
+        3.2,
+        1.7,
+        1.8
+      ],
+      "overloads": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "v35",
+      "sha": "6525183f9aec5e926a778a3209415a7c666d3785",
+      "mode": "solo",
+      "renderer": "canvas",
+      "rounds": 3,
+      "wallSeconds": 35.95,
+      "cpuMs": 4679.422,
+      "stepP95Ms": 5.13,
+      "snapshotP95Ms": 6.56,
+      "inputApplyP95Ms": 16.4,
+      "snapshotBytesP95": 51420,
+      "peakRssMiB": 175.71,
+      "wireKiBps": 5361.46,
+      "frameGapP95Ms": [
+        16.8,
+        16.8,
+        16.8
+      ],
+      "drawP95Ms": [
+        4.5,
+        2.1,
+        1.9
+      ],
+      "overloads": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "v34",
+      "sha": "9a29a23a8eb62095308501109e8e15c610379959",
+      "mode": "team-capture",
+      "renderer": "canvas",
+      "rounds": 3,
+      "wallSeconds": 33.65,
+      "cpuMs": 3062.225,
+      "stepP95Ms": 2.29,
+      "snapshotP95Ms": 3.32,
+      "inputApplyP95Ms": 15.52,
+      "snapshotBytesP95": 52345,
+      "peakRssMiB": 193.26,
+      "wireKiBps": 5783.75,
+      "frameGapP95Ms": [
+        16.8,
+        16.7,
+        16.8
+      ],
+      "drawP95Ms": [
+        1.5,
+        1.3,
+        1.2
+      ],
+      "overloads": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "v35",
+      "sha": "6525183f9aec5e926a778a3209415a7c666d3785",
+      "mode": "team-capture",
+      "renderer": "canvas",
+      "rounds": 3,
+      "wallSeconds": 33.26,
+      "cpuMs": 3191.19,
+      "stepP95Ms": 2.43,
+      "snapshotP95Ms": 4.05,
+      "inputApplyP95Ms": 15.22,
+      "snapshotBytesP95": 52196,
+      "peakRssMiB": 186.88,
+      "wireKiBps": 5899.54,
+      "frameGapP95Ms": [
+        16.7,
+        16.7,
+        16.8
+      ],
+      "drawP95Ms": [
+        1.9,
+        1.3,
+        1.2
+      ],
+      "overloads": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "v34",
+      "sha": "9a29a23a8eb62095308501109e8e15c610379959",
+      "mode": "solo",
+      "renderer": "pixi",
+      "rounds": 3,
+      "wallSeconds": 80.07,
+      "cpuMs": 8109.121,
+      "stepP95Ms": 1.41,
+      "snapshotP95Ms": 3.78,
+      "inputApplyP95Ms": 17.04,
+      "snapshotBytesP95": 29501,
+      "peakRssMiB": 178.81,
+      "wireKiBps": 7128.94,
+      "frameGapP95Ms": [
+        266.7,
+        233.3,
+        266.6
+      ],
+      "drawP95Ms": [
+        38.1,
+        27.2,
+        17.9
+      ],
+      "overloads": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "v35",
+      "sha": "6525183f9aec5e926a778a3209415a7c666d3785",
+      "mode": "solo",
+      "renderer": "pixi",
+      "rounds": 3,
+      "wallSeconds": 78.13,
+      "cpuMs": 7511.481,
+      "stepP95Ms": 1.22,
+      "snapshotP95Ms": 3.6,
+      "inputApplyP95Ms": 15.35,
+      "snapshotBytesP95": 41113,
+      "peakRssMiB": 182.39,
+      "wireKiBps": 7136.64,
+      "frameGapP95Ms": [
+        266.7,
+        316.7,
+        266.7
+      ],
+      "drawP95Ms": [
+        22.9,
+        31.4,
+        18.9
+      ],
+      "overloads": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "v34",
+      "sha": "9a29a23a8eb62095308501109e8e15c610379959",
+      "mode": "team-capture",
+      "renderer": "pixi",
+      "rounds": 3,
+      "wallSeconds": 114.02,
+      "cpuMs": 12329.089,
+      "stepP95Ms": 1.23,
+      "snapshotP95Ms": 5.59,
+      "inputApplyP95Ms": 16.89,
+      "snapshotBytesP95": 24639,
+      "peakRssMiB": 246.23,
+      "wireKiBps": 7921.79,
+      "frameGapP95Ms": [
+        550,
+        483.3,
+        450
+      ],
+      "drawP95Ms": [
+        38.8,
+        23.2,
+        14.1
+      ],
+      "overloads": 0,
+      "status": "PASS"
+    },
+    {
+      "label": "v35",
+      "sha": "6525183f9aec5e926a778a3209415a7c666d3785",
+      "mode": "team-capture",
+      "renderer": "pixi",
+      "rounds": 3,
+      "wallSeconds": 115.34,
+      "cpuMs": 11552.396,
+      "stepP95Ms": 1.17,
+      "snapshotP95Ms": 5.27,
+      "inputApplyP95Ms": 18.15,
+      "snapshotBytesP95": 24622,
+      "peakRssMiB": 272.24,
+      "wireKiBps": 7684.4,
+      "frameGapP95Ms": [
+        433.3,
+        433.3,
+        416.7
+      ],
+      "drawP95Ms": [
+        37.4,
+        16.7,
+        16.8
+      ],
+      "overloads": 0,
+      "status": "PASS"
+    }
+  ]
+}

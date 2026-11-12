@@ -17,6 +17,7 @@ jobs:
       docs: ${{ steps.plan.outputs.docs }}
       combat: ${{ steps.plan.outputs.combat }}
       roster10: ${{ steps.plan.outputs.roster10 }}
+      characterShards: ${{ steps.plan.outputs.characterShards }}
       releaseops: ${{ steps.plan.outputs.releaseops }}
     steps:
       - uses: actions/checkout@v4
@@ -49,9 +50,33 @@ jobs:
             artifacts/quick-results.json
             dist/
           retention-days: 30
-  targeted:
+  characters:
     needs: quick
-    if: needs.quick.outputs.docs != 'true'
+    if: needs.quick.outputs.characterShards != '[]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.quick.outputs.characterShards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: node tests/fidelity-v33-2/all77.mjs ${{ matrix.shard.renderer }} balanced
+        env:
+          FIDELITY_CHARACTERS: ${{ matrix.shard.ids }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: characters-${{ github.sha }}-${{ matrix.shard.key }}
+          path: artifacts/fidelity-v33-2/
+          retention-days: 30
+  targeted:
+    needs: [quick, characters]
+    if: ${{ !cancelled() && needs.quick.result == 'success' && needs.quick.outputs.docs != 'true' && ((needs.quick.outputs.characterShards == '[]' && needs.characters.result == 'skipped') || needs.characters.result == 'success') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     container: mcr.microsoft.com/playwright:v1.56.1-noble
@@ -67,7 +92,14 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: quick-${{ github.sha }}
+      - if: needs.quick.outputs.characterShards != '[]'
+        uses: actions/download-artifact@v4
+        with:
+          pattern: characters-${{ github.sha }}-*
+          path: artifacts/character-shards
       - run: npm run test:targeted
+        env:
+          CI_CHARACTER_REPORTS: ${{ needs.quick.outputs.characterShards != '[]' && 'artifacts/character-shards' || '' }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

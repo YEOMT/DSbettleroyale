@@ -63,7 +63,10 @@ export const initializers=[
     add('emoji-028','아이언월','A','탱커',melee('punch',{pushScale:.25,cooldownScale:1.08}),
         {label:'철벽 반사',kind:'iron-reflect',shape:'self',cooldown:660,duration:300,radius:0,color:'#93c5fd',caps:{utility:true},
          description:'5초간 몸에 닿은 적 탄을 한 번 원래 발사자 방향으로 반사합니다. 기절 중에도 유지되며 근접·광선·장판 피해는 받습니다.',strength:'적 비행탄 반사',success:'탄이 몸에 닿을 때 방어',failure:'다른 피해에는 방어 효과 없음',counterplay:'근접·광선·장판으로 공격'},
-        (ctx,s)=>{R.buff({...ctx,run:{...ctx.run,duration:1}},ctx.owner,'ironReflect',1,s.duration);});
+        (ctx,s)=>{
+            const buff=R.buff({...ctx,run:{...ctx.run,duration:1}},ctx.owner,'ironReflect',1,s.duration);
+            ctx.g.rw.ironUntil=Math.max(ctx.g.rw.ironUntil||0,buff.end);
+        });
     // A06: airborne flight over walls with only landing damage.
     add('emoji-029','스카이 하이','A','기동형',melee('slash',{pushScale:.3}),
         {kind:'leap',shape:'target',cooldown:frames(11),range:670,radius:150,duration:30,damage:48,knockback:7,color:'#bae6fd',wallPolicy:'airborne-safe-landing',caps:{...aoeCaps,dash:true,cc:true,signatureRange:true},

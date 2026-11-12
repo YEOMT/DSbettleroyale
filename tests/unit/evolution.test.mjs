@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {createWorld,createRuleContext,stepWorld,destroyWorld,getTeacherState,getVisibleState} from '../../packages/engine/src/index.js';
 import {sniperCast,sniperChances} from '../../packages/engine/src/combat/reflection.js';
 import {manifest} from '../../packages/content/src/manifest.js';
+import {Timeline} from '../../apps/client/src/presentation/timeline.js';
+import {aimGuide} from '../../apps/client/src/render/aim-guide.js';
 
 function setup(t,ids){
  const w=createWorld(undefined,{mode:'team-elim',mapIndex:0},'evolution',ids.map((abilityId,i)=>({id:'p'+i,name:'Test '+i,abilityId,team:i?2:1})));
@@ -155,4 +157,36 @@ test('native and rework return retain the same network ID across different life 
   w.brFarm.init(g);const box=g.farmBoxes[0];p.pos=f.v(box.pos.x-180,box.pos.y);q.pos=f.v(box.pos.x+220,box.pos.y);g.rebuildSpatialGrid();
   const blocked=launch(f,p,kind);f.tick(4);assert.ok(!blocked.reflectedOnce);assert.equal(q.hp,already);
  }
+});
+
+test('a late first paint displays one recent critical cue; old cues do not reappear',()=>{
+ function frame(receivedAt){
+  const timeline=new Timeline(),actor={id:'a',x:0,y:0,radius:30,lifeSeq:2,alive:true};
+  timeline.accept({snapshotSeq:1,serverTick:48,actors:[actor],shots:[]},500);
+  timeline.event({type:'FX',eventId:'crit',serverTick:22,data:{kind:'impact',style:'sniper-critical',targetId:'a',x:0,y:0,geometry:{confirmed:true,displayMs:260,targetLife:2}}},receivedAt);
+  return timeline;
+ }
+ const t=frame(100);assert.equal(t.frame(500).effects[0].firstVisibleAt,500);
+ assert.equal(t.frame(700).effects[0].firstVisibleAt,500);assert.equal(t.frame(761).effects.length,0);
+ assert.equal(frame(-3200).frame(500).effects.length,0);
+});
+test('wide III guide matches actual eight-direction reach and normal melee impulse grows with IMPACT',t=>{
+ const f=setup(t,['emoji-025','emoji-114']),{w,g,v,R,players:[p,q]}=f;
+ for(let i=0;i<8;i++){
+  p.run.paths={wide:3};w.brRecomputeRun(p);const angle=i*Math.PI/4,dir=v(Math.cos(angle),Math.sin(angle));
+  f.place(p,0);p.basicCooldown=0;const mods=p.run.mods,range=w.brAimSpec(p.ability,'attack',p.radius,1,mods).range;
+  const spec=w.brAimSpec(p.ability,'attack',p.radius,1,mods);
+  const guide=aimGuide({x:0,y:0,radius:p.radius,aimProfiles:{attack:{range,rangeMin:range,spec}}},'attack',{aim:dir,power:1},{worldRadius:g.worldRadius},w,[]);
+  assert.equal(guide.shape,'cone');assert.ok(Math.abs(guide.range-range)<.001);
+  f.place(q,dir.x*(range-5),dir.y*(range-5));g.rebuildSpatialGrid();q.hp=4000;w.brBasicAttack(p,g,dir);assert.ok(q.hp<4000);
+  f.place(p,0);f.place(q,dir.x*(range+q.radius*2+100),dir.y*(range+q.radius*2+100));g.rebuildSpatialGrid();p.basicCooldown=0;q.hp=4000;
+  w.brBasicAttack(p,g,dir);assert.equal(q.hp,4000);
+ }
+ const shifts=[];
+ for(const tier of [0,3]){
+  p.run.paths={impact:tier};w.brRecomputeRun(p);R.state(q).impulse=null;
+  f.place(p,0);f.place(q,135);p.basicCooldown=0;q.hp=4000;g.rebuildSpatialGrid();
+  w.brBasicAttack(p,g,v(1));const x=q.pos.x;f.tick(1);shifts.push(q.pos.x-x);
+ }
+ assert.ok(shifts[0]>0&&shifts[1]>2*shifts[0],JSON.stringify(shifts));
 });

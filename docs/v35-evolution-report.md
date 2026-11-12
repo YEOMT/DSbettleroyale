@@ -56,3 +56,11 @@
 - `node tests/combat/evolution-browser.mjs canvas`, `node tests/combat/evolution-browser.mjs pixi`. 실제 학생·상대·호스트가 같은 반사·치명타를 확인했다. 방어자 피해 0, 원 공격자 피해 209.456. 벽 뒤 스턴 중 학생 화면을 새로고침하고 스턴 종료 및 같은 방 재경기를 검사했다. [학생 Pixi 장막](evidence/v35/student-pixi-mirror.png) · [호스트 Canvas 스포트라이트와 포탈](evidence/v35/host-canvas-spotlight.png)
 - `node tests/combat/evolution-map.mjs <v34-source> v34`, `node tests/combat/evolution-map.mjs . v35`. 실제 엔진의 압축·사망·종료를 사용하며 서버 tick을 가속한 결과다.
 - Linux 20인 3라운드 비교는 `node tests/combat/classroom-compare.mjs v35 <solo|team-capture> <canvas|pixi>`로 같은 러너에서 v34와 v35를 차례로 실행한다. PR에 두 버전의 서버 및 화면 측정과 CI 판정을 기록한다. 물리 태블릿 및 실제 수업은 NOT_RUN이다.
+
+## 첫 Linux 실행에서 발견한 문제
+
+첫 필수 CI는 미러링 가이드에 기존 클라이언트가 정의하지 않은 형상 이름을 넣은 것을 찾아냈다. 기존 line 형상을 사용하고 장막 길이만 부가 정보로 전달하도록 수정했다. 86종 전체의 공격·스킬 실제 가이드와 3단계 조준력 검사가 통과했다. [첫 CI](https://github.com/YEOMT/DSbettleroyale/actions/runs/43217058610)
+
+첫 비교의 20인 개인전·점령전은 두 렌더러 모두 3라운드를 완주했다. 별도 Pixi 화면 검사가 치명타 표시를 기다리다 실패했다. 추가 로컬 소프트웨어 WebGL 재현에서 세 화면 모두 37틱 반사와 40틱 치명타를 수신했으나 호스트만 글자를 그리기 전에 표시 시간이 끝났다. 최근 권위 틱의 첫 표시와 260ms 표시 수명을 구분했다. 초기 측정에서 Canvas 개인전 호스트 draw p95가 3.2→4.5ms로 늘어, 포탈 소용돌이와 연결선의 정적 도형을 캐시하고 화면 밖 도형은 생략했다. [첫 비교 실행](https://github.com/YEOMT/DSbettleroyale/actions/runs/43217058752) · [초기 Linux 수치](evidence/v35/initial-linux.json)
+
+Targeted는 원본 코드의 ID뿐 아니라 최종 manifest에서 실제 수치·기능이 달라진 캐릭터와 신규 2종도 포함한다. 4종을 넘으면 같은 balanced 공격·스킬·래스터 검사를 렌더러별 최대 4종씩 나눈다. 집계는 선택된 모든 ID의 결과가 있을 때만 성공한다.

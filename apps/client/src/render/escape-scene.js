@@ -1,34 +1,63 @@
+import {Graphics} from 'pixi.js';
 // Reuse renderer text/sprite caches; six landmarks and a single tiny minimap.
 import {supplyTypes} from './supplies.js';
 import {mirrorMiniState,drawMiniMirrors} from './roster10-scene.js';
-function portalRoute(a,b){
- const length=Math.hypot(b.x-a.x,b.y-a.y),dx=(b.x-a.x)/length,dy=(b.y-a.y)/length,segments=[];
- for(let t=70;t<length-70;t+=60)segments.push({x:a.x+t*dx,y:a.y+t*dy,arrow:segments.length%5===2});
- return {dx,dy,segments};
+export function clearPortalArt(r){
+ if(r.portalRoute?.graphic&&!r.portalRoute.graphic.destroyed)r.portalRoute.graphic.destroy();
+ r.portalRoute=null;r.portalEmblems=null;
+}
+function portalRoute(r,a,b,sparse){
+ const length=Math.hypot(b.x-a.x,b.y-a.y),dx=(b.x-a.x)/length,dy=(b.y-a.y)/length;
+ const graphic=r.pixi?new Graphics():null,path=graphic||new Path2D(),spacing=sparse?118:60;
+ for(let t=70,i=0;t<length-70;t+=spacing,i++){
+  const x=a.x+t*dx,y=a.y+t*dy,tip=spacing*.46;
+  path.moveTo(x,y);path.lineTo(x+dx*tip,y+dy*tip);
+  if(i%(sparse?3:5)===2)for(const sign of [-1,1]){
+   path.moveTo(x+dx*tip,y+dy*tip);path.lineTo(x+dx*(tip-15)-dy*9*sign,y+dy*(tip-15)+dx*9*sign);
+  }
+ }
+ if(graphic){graphic.stroke({color:0x67e8f9,width:sparse?8:4});r.world.addChildAt(graphic,r.world.getChildIndex(r.g));}
+ return {dx,dy,sparse,path,graphic};
+}
+function portalEmblem(r,index,color){
+ const cache=r.portalEmblems??=new Map(),key=index+color;
+ if(cache.has(key))return cache.get(key);
+ const c=document.createElement('canvas');c.width=c.height=160;
+ const ctx=c.getContext('2d');ctx.translate(80,80);const p=r.paint.brCombatPainter(ctx,false);
+ p.circle(0,0,64,color,.17);p.circle(0,0,64,color,1,5);
+ if(index===0){
+  for(let arm=0;arm<3;arm++)for(let n=0;n<8;n++){
+   const angle=arm*Math.PI*2/3+n*.29,next=angle+.29,rad=54-n*5;
+   p.line(Math.cos(angle)*rad,Math.sin(angle)*rad,Math.cos(next)*(rad-5),Math.sin(next)*(rad-5),color,.85,5);
+  }
+ }else{p.circle(0,0,43,color,.75,3);p.circle(0,0,73,color,.28,3);}
+ cache.set(key,c);return c;
 }
 function sameDrop(a,b){return a===b||!!(a&&b&&a[0]===b[0]&&a[1]===b[1]&&a[2]===b[2]&&a[3]===b[3]);}
 export function escapeScene(r,p,view,map,zoom){
  const layout=map.escapeMap,s=view.escape;if(!layout||!s)return;
- if(r.escapeLayout!==layout){r.escapeLayout=layout;r.escapePoints=[layout.portal.a,layout.portal.b,...layout.pads];r.portalRoute=portalRoute(layout.portal.a,layout.portal.b);r.escapeMiniKey=null;}
- const tick=view.renderTick,points=r.escapePoints;
- const {dx,dy,segments}=r.portalRoute,dim=s.blocked||s.nextReadyAt>tick,alpha=dim?.055:.13;
- const halfW=innerWidth/(2*zoom)+80,halfH=innerHeight/(2*zoom)+80;
- for(const q of segments){
-  if(Math.abs(q.x-r.cam.x)>halfW||Math.abs(q.y-r.cam.y)>halfH)continue;
-  p.line(q.x,q.y,q.x+dx*28,q.y+dy*28,'#67e8f9',alpha,2/zoom);
-  if(q.arrow){for(const sign of [-1,1])p.line(q.x+dx*28,q.y+dy*28,q.x+dx*13-dy*9*sign,q.y+dy*13+dx*9*sign,'#a5f3fc',alpha,3/zoom);}
+ const sparse=zoom<(r.portalRoute?.sparse?.30:.25);
+ if(r.escapeLayout!==layout||r.portalRoute?.sparse!==sparse){
+  r.portalRoute?.graphic?.destroy();r.escapeLayout=layout;r.escapePoints=[layout.portal.a,layout.portal.b,...layout.pads];
+  r.portalRoute=portalRoute(r,layout.portal.a,layout.portal.b,sparse);r.escapeMiniKey=null;
  }
+ const tick=view.renderTick,points=r.escapePoints,{dx,dy,graphic,path}=r.portalRoute;
+ const dim=s.blocked||s.nextReadyAt>tick,alpha=dim?.055:.13;
+ const halfW=innerWidth/(2*zoom)+100,halfH=innerHeight/(2*zoom)+100;
+ const [entry,exit]=points;
+ const visible=Math.max(entry.x,exit.x)>=r.cam.x-halfW&&Math.min(entry.x,exit.x)<=r.cam.x+halfW&&
+  Math.max(entry.y,exit.y)>=r.cam.y-halfH&&Math.min(entry.y,exit.y)<=r.cam.y+halfH;
+ if(graphic){graphic.visible=visible;graphic.alpha=alpha;}
+ else if(visible){const c=r.ctx;c.save();c.strokeStyle='#67e8f9';c.globalAlpha=alpha;c.lineWidth=2/zoom;c.stroke(path);c.restore();}
  for(let i=0;i<6;i++){
   const q=points[i],at=i<2?s.nextReadyAt:s.pads[i-2],blocked=i<2&&s.blocked,seconds=Math.max(0,Math.ceil((at-tick)/60)),color=blocked?'#ef4444':seconds?'#94a3b8':i<2?'#22d3ee':'#a3e635',radius=i<2?64:58;
   const ink=i===1&&!dim?'#c084fc':color;
-  p.circle(q.x,q.y,radius,ink,.17);p.circle(q.x,q.y,radius,ink,1,5);
-  if(i===0){
-   for(let arm=0;arm<3;arm++)for(let n=0;n<8;n++){
-    const angle=arm*Math.PI*2/3+n*.29,next=angle+.29,rad=54-n*5;
-    p.line(q.x+Math.cos(angle)*rad,q.y+Math.sin(angle)*rad,q.x+Math.cos(next)*(rad-5),q.y+Math.sin(next)*(rad-5),ink,.85,5);
-   }
-  }else if(i===1){p.circle(q.x,q.y,43,ink,.75,3);p.circle(q.x,q.y,73,ink,.28,3);}
-  else{p.line(q.x-22,q.y+14,q.x+22,q.y-14,color,1,5);p.line(q.x+22,q.y-14,q.x+3,q.y-14,color,1,5);}
+  if(Math.abs(q.x-r.cam.x)>halfW+100||Math.abs(q.y-r.cam.y)>halfH+60)continue;
+  if(i<2)r.image(portalEmblem(r,i,ink),q.x,q.y,80,'escape-portal-'+i);
+  else{
+   p.circle(q.x,q.y,radius,color,.17);p.circle(q.x,q.y,radius,color,1,5);
+   p.line(q.x-22,q.y+14,q.x+22,q.y-14,color,1,5);p.line(q.x+22,q.y-14,q.x+3,q.y-14,color,1,5);
+  }
   const name=i===0?'입구 A':i===1?'출구 B / 역이동 불가':'가속 +30%';
   const label=blocked?name+' · 출구 차단':seconds?(i<2?name+' · ':'')+seconds+'초':name;
   r.text(label,q.x,q.y+radius+22,20,ink,'escape-'+i,true);

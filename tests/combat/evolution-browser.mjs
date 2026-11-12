@@ -7,15 +7,23 @@ const renderer=process.argv[2]||'canvas',out='artifacts/v35/screens-'+renderer;
 fs.mkdirSync(out,{recursive:true});
 const h=await auditHarness({players:1,renderer,quality:'low',viewport:{width:960,height:640}});
 const report={renderer,cases:[]};
+let pages=[];
 try{
  const ctx=await h.browser.newContext({viewport:{width:844,height:640},hasTouch:true});h.contexts.push(ctx);
  await ctx.route(/dropbox/,route=>route.abort());
  const rival=await ctx.newPage();rival.on('pageerror',e=>h.errors.push(e.message));
  await rival.goto(h.url+'/?room='+h.room.code+'&renderer='+renderer);
  await rival.locator('#br-player-name').fill('Peer');await rival.locator('#br-join-btn').click();await rival.locator('#br-student-wait').waitFor();
- const pages=[h.student,rival,h.host];
+ pages=[h.student,rival,h.host];
  for(const page of pages)await page.evaluate(async()=>{
-  const m=window.m=await import('/src/main.js');window.seen={kinds:{},turns:[],critical:false,iron:false};
+  const m=window.m=await import('/src/main.js');window.seen={kinds:{},turns:[],critical:false,criticalText:false,criticalEvents:[],criticalFrames:[],iron:false};
+  const text=m.renderer.text.bind(m.renderer);m.renderer.text=(...args)=>{if(args[0]==='CRITICAL!')seen.criticalText=true;return text(...args);};
+  const frame=m.timeline.frame.bind(m.timeline);
+  m.timeline.frame=now=>{
+   const pending=m.timeline.effects.find(e=>e.style==='sniper-critical'),view=frame(now);
+   if(pending&&seen.criticalFrames.length<10)seen.criticalFrames.push({wait:Math.round(now-pending.receivedAt),serverTick:pending.tick,renderTick:view?.renderTick,shown:!!view?.effects.some(e=>e.id===pending.id)});
+   return view;
+  };
   const draw=m.renderer.draw.bind(m.renderer);
   m.renderer.draw=(view,now)=>{
    draw(view,now);
@@ -23,7 +31,9 @@ try{
    seen.iron||=view.actors.some(a=>a.rw?.buffs?.some(b=>b.kind==='ironReflect'));
    seen.critical||=view.effects.some(f=>f.style==='sniper-critical');
   };
-  m.net.addEventListener('event',e=>{if(e.detail.type==='SHOT_TURN')seen.turns.push(e.detail.data);});
+  m.net.addEventListener('event',e=>{const {type,data,serverTick}=e.detail;
+   if(type==='SHOT_TURN')seen.turns.push({id:data.id,crit:data.crit,tick:serverTick});
+   if(type==='FX'&&data.style==='sniper-critical')seen.criticalEvents.push({tick:serverTick,displayTick:m.timeline.renderTick});});
  });
  let w,g,p,q;
  async function battle(ids){
@@ -63,13 +73,15 @@ try{
  await rival.screenshot({path:out+'/mirror.png'});
  const before=p.hp,defense=q.hp;await skill(h.student,p,1);
  const random=w.rand;try{w.rand=()=>0;await ticks(1);}finally{w.rand=random;}
+ assert.equal(p.rw.lastCast.sniper.critical,true,'authority rolled the forced critical on the accepted cast');
  await ticks(45);
  assert.ok(p.hp<before);assert.equal(q.hp,defense);
  for(const page of pages){
-  await page.waitForFunction(()=>seen.turns.length===1&&seen.turns[0].crit===true&&seen.critical);
+  await page.waitForFunction(()=>seen.turns.length===1&&seen.turns[0].crit===true&&seen.critical&&seen.criticalText);
   assert.equal(await page.evaluate(()=>m.renderer.pixi?'pixi':'canvas'),renderer);
  }
- report.cases.push({skill:'mirror',turns:1,screens:3,defenderLoss:defense-q.hp,shooterLoss:before-p.hp});
+ report.cases.push({skill:'mirror',turns:1,screens:3,defenderLoss:defense-q.hp,shooterLoss:before-p.hp,
+  observers:await Promise.all(pages.map(page=>page.evaluate(()=>({turns:seen.turns.length,criticalText:seen.criticalText,frames:seen.criticalFrames}))))});
  await finish();await battle(['emoji-152','emoji-028']);
  g.walls=[new w.Wall(215,0,25,220,0)];h.staticState();
  await skill(rival,q,-1);await skill(h.student,p,1);await ticks(15);
@@ -81,5 +93,5 @@ try{
  await ticks(182);await rival.waitForFunction(()=>m.controls.enabled&&!m.timeline.predicted?.stunned);await finish();
  report.cases.push({skill:'spotlight',screens:3,behindCover:true,resumed:true});
  assert.deepEqual(h.errors,[]);report.status='PASS';console.log('evolution browser',renderer,report);
-}catch(error){report.status='FAIL';report.error=error.stack;throw error;}
+}catch(error){report.status='FAIL';report.error=error.stack;report.observers=await Promise.all(pages.map(page=>page.evaluate(()=>({seen:window.seen,phase:m.ui.room?.phase,renderTick:m.timeline.renderTick,lastSeq:m.timeline.lastSeq,renderer:m.renderer.pixi?'pixi':'canvas'})).catch(e=>({error:e.message}))));throw error;}
 finally{fs.writeFileSync(out+'/result.json',JSON.stringify(report,null,2));await h.close();}

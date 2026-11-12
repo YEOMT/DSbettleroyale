@@ -120,10 +120,11 @@ export const initializers=[
                 const left=e.phase==='return'?e.speed:Math.min(e.speed,e.range-e.distance),to=e._stepTo;
                 to.x=from.x+e.dir.x*Math.max(0,left);to.y=from.y+e.dir.y*Math.max(0,left);
                 const wall=__brScope.combatTraceWalls(from,to,e.radius,c.g.walls,e.wallScratch),contacts=e._contacts;contacts.length=0;
-                const queryRadius=left+e.radius+(c.g.maxBodyRadius||100)+(c.g.maxParticipantStep||0);
+                const ironInPlay=c.g.rw.ironUntil>c.g.frame;
+                const queryRadius=left+e.radius+(ironInPlay?(c.g.maxBodyRadius||100)+(c.g.maxParticipantStep||0):100);
                 for(const p of nearby(c.g,from,queryRadius)){
                     if(!hostile(c,p)||e.hits.has(targetKey(p)))continue;
-                    const movingIron=p.ability?.id==='emoji-028'&&ironActive(p,c.g.frame)&&Number.isFinite(p.combatPreviousX)&&p.combatPreviousWarp===(p.warpSeq||0);
+                    const movingIron=ironInPlay&&ironActive(p,c.g.frame)&&Number.isFinite(p.combatPreviousX)&&p.combatPreviousWarp===(p.warpSeq||0);
                     const t=movingIron?__brScope.combatSegmentCircleTime(from.x-p.combatPreviousX,from.y-p.combatPreviousY,to.x-from.x-p.pos.x+p.combatPreviousX,to.y-from.y-p.pos.y+p.combatPreviousY,e.radius+p.radius):sweepTime(from,to,p.pos,e.radius+(p.radius||0));
                     if(t!==null&&(!wall||t<wall.t))contacts.push({p,t});
                 }

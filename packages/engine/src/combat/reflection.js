@@ -12,7 +12,7 @@ export function criticalContact(cast,g,target,owner){
     if(!(target._lastDamageResult.hpDamage||target._lastDamageResult.shieldAbsorbed))return;
     cast.shown=true;
     g.emitStudentFx?.('impact',target.pos,{style:'sniper-critical',size:36,color:'#fde047',
-        sourceId:owner.remoteId,targetId:target.remoteId,geometry:{confirmed:true,displayMs:260}});
+        sourceId:owner.remoteId,targetId:target.remoteId,geometry:{confirmed:true,displayMs:260,targetLife:target.lifeSeq,lifeSeq:owner.lifeSeq}});
 }
 
 export function placeMirror(S,c,skill){
@@ -46,7 +46,7 @@ export function addMirrorContacts(S,g,shot,from,to,r,wall,contacts){
         if((to.x-from.x)*dir.x+(to.y-from.y)*dir.y>=0||
             (from.x-e.pos.x)*dir.x+(from.y-e.pos.y)*dir.y<0)continue;
         const hit=S.combatTraceWalls(from,to,r,surface.single);
-        if(hit&&!hit.boundary&&(!wall||hit.t<wall.t))contacts.push({mirror:owner,t:hit.t});
+        if(hit?.wall===surface&&(!wall||hit.t<wall.t))contacts.push({mirror:owner,t:hit.t});
     }
 }
 
@@ -54,7 +54,11 @@ export function addMirrorContacts(S,g,shot,from,to,r,wall,contacts){
 // and actors. Explicit IDs break ties without depending on grid traversal.
 function order(h){return h.farm?0:h.mirror?1:2;}
 export function contactOrder(a,b){
-    return a.t-b.t||order(a)-order(b)||Number((a.mirror||a.p||a.farm||a.rwTurret)?.id||0)-Number((b.mirror||b.p||b.farm||b.rwTurret)?.id||0);
+    const tie=a.t-b.t||order(a)-order(b);
+    if(tie)return tie;
+    const left=(a.mirror||a.p||a.farm||a.rwTurret).id,right=(b.mirror||b.p||b.farm||b.rwTurret).id;
+    if(typeof left==='number'&&typeof right==='number')return left-right;
+    return String(left).localeCompare(String(right),'en');
 }
 function targetVisible(g,source,life,from,owner){
     return source?.alive&&source.connected!==false&&source.lifeSeq===life&&!source.invisible&&

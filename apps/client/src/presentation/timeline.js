@@ -68,6 +68,14 @@ export class Timeline{
    // A busy first paint must not discard a newly received confirmed contact.
    // Only its display clock is adjusted, once; server tick/position and all
    // attack/warning timings remain authoritative. Old/replayed FX never renew.
+   if(e.style==='sniper-critical'&&e.firstVisibleAt==null&&e.tick<=this.renderTick){
+    // A single short confirmed cue must receive a first paint even on software
+    // WebGL. Do not resurrect old combat or extend it on subsequent frames.
+    // Bound freshness by authoritative progress. Slow software painting
+    // can consume a second while only a handful of new ticks arrive.
+    if(Math.max(this.renderTick,last.state.serverTick)-e.tick>45||now-e.receivedAt>3000)return false;
+    e.firstVisibleAt=now;e.displayTick=this.renderTick;
+   }
    if(e.kind==='hit'&&e.geometry?.confirmed&&!e.geometry.periodic&&e.firstVisibleAt==null&&e.tick<=this.renderTick&&this.renderTick-e.tick<=45&&now-e.receivedAt<=240){
     e.firstVisibleAt=now;e.displayTick=Math.max(e.tick,this.renderTick-2);
    }
