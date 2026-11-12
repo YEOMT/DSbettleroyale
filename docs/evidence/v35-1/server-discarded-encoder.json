@@ -1,0 +1,478 @@
+{
+  "node": "v24.22.1",
+  "platform": "win32",
+  "players": 30,
+  "recipients": 31,
+  "visibleRows": 930,
+  "order": [
+    "A",
+    "B",
+    "B",
+    "A"
+  ],
+  "rows": [
+    {
+      "repeat": 0,
+      "block": 0,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 89.95619999999997,
+      "cpuMs": 156,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 0,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 77.6413,
+      "cpuMs": 140,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 0,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 77.04250000000002,
+      "cpuMs": 94,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 0,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 81.2509,
+      "cpuMs": 79,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 1,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 76.08929999999987,
+      "cpuMs": 93,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 1,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 67.24979999999982,
+      "cpuMs": 78,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 1,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 89.07130000000006,
+      "cpuMs": 109,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 1,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 91.73720000000003,
+      "cpuMs": 79,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 2,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 80.22479999999996,
+      "cpuMs": 156,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 2,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 91.91380000000004,
+      "cpuMs": 78,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 2,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 151.35109999999986,
+      "cpuMs": 157,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 2,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 125.86940000000004,
+      "cpuMs": 187,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 3,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 153.85500000000002,
+      "cpuMs": 156,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 3,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 129.48800000000006,
+      "cpuMs": 125,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 3,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 137.55859999999984,
+      "cpuMs": 141,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 0,
+      "block": 3,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 121.3714,
+      "cpuMs": 187,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 0,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 117.14570000000003,
+      "cpuMs": 204,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 0,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 136.72760000000017,
+      "cpuMs": 109,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 0,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 79.44140000000016,
+      "cpuMs": 77,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 0,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 91.50549999999976,
+      "cpuMs": 126,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 1,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 69.11379999999963,
+      "cpuMs": 63,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 1,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 80.5272,
+      "cpuMs": 94,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 1,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 584.9036000000001,
+      "cpuMs": 296,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 1,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 1383.3687,
+      "cpuMs": 328,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 2,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 1327.3458,
+      "cpuMs": 282,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 2,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 1477.6868999999997,
+      "cpuMs": 218,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 2,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 1743.4764000000005,
+      "cpuMs": 297,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 2,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 1435.1993999999995,
+      "cpuMs": 172,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 3,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 1429.2960999999996,
+      "cpuMs": 297,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 3,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 1202.8209000000006,
+      "cpuMs": 360,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 3,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 2800.8174,
+      "cpuMs": 219,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 1,
+      "block": 3,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 1231.7415,
+      "cpuMs": 296,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 0,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 189.6121000000021,
+      "cpuMs": 281,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 0,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 161.10680000000139,
+      "cpuMs": 219,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 0,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 160.27760000000126,
+      "cpuMs": 219,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 0,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 164.00410000000193,
+      "cpuMs": 219,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 1,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 143.8611000000019,
+      "cpuMs": 203,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 1,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 179.00310000000172,
+      "cpuMs": 187,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 1,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 156.35879999999815,
+      "cpuMs": 156,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 1,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 162.80869999999777,
+      "cpuMs": 220,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 2,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 166.41559999999663,
+      "cpuMs": 171,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 2,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 169.04320000000007,
+      "cpuMs": 234,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 2,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 149.3194999999978,
+      "cpuMs": 204,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 2,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 153.43139999999767,
+      "cpuMs": 187,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 3,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 187.7559000000001,
+      "cpuMs": 219,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 3,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 178.9226000000017,
+      "cpuMs": 187,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 3,
+      "k": "B",
+      "n": 60,
+      "elapsedMs": 159.36160000000018,
+      "cpuMs": 172,
+      "bytes": 61293960
+    },
+    {
+      "repeat": 2,
+      "block": 3,
+      "k": "A",
+      "n": 60,
+      "elapsedMs": 219.8150999999998,
+      "cpuMs": 219,
+      "bytes": 61293960
+    }
+  ],
+  "growthRows": [
+    {
+      "k": "A",
+      "n": 200,
+      "chips": 21600,
+      "builds": 21600,
+      "elapsedMs": 122.62900000000081
+    },
+    {
+      "k": "B",
+      "n": 200,
+      "chips": 21600,
+      "builds": 0,
+      "elapsedMs": 17.891700000000128
+    },
+    {
+      "k": "B",
+      "n": 200,
+      "chips": 21600,
+      "builds": 0,
+      "elapsedMs": 20.842100000001665
+    },
+    {
+      "k": "A",
+      "n": 200,
+      "chips": 21600,
+      "builds": 21600,
+      "elapsedMs": 130.30459999999948
+    }
+  ],
+  "decision": "Reverted candidate row-block aggregation after independent same-state microtimings were inconsistent. These encoder rows are not the submitted patch. Growth rows tested the retained code."
+}
