@@ -5,8 +5,8 @@ import {display} from '../../packages/content/src/display.js';
 import {currentCard} from '../../tools/content/cards.mjs';
 import {applyRosterText,reviewedTextIds} from '../../packages/engine/src/world/roster-text.js';
 const deleted=['emoji-048','emoji-065','emoji-073','emoji-076'];
-test('84 active IDs have reviewed current text, exact generated cards and authority facts',()=>{
- const r=createRuleContext(),ids=r.EMOJI_DB.map(a=>a.id);assert.equal(ids.length,84);assert.equal(new Set(ids).size,84);
+test('86 active IDs have reviewed current text, exact generated cards and authority facts',()=>{
+ const r=createRuleContext(),ids=r.EMOJI_DB.map(a=>a.id);assert.equal(ids.length,86);assert.equal(new Set(ids).size,86);
  for(const group of [reviewedTextIds,Object.keys(display.cards),manifest.roster.map(a=>a.id)])assert.deepEqual([...group].sort(),[...ids].sort());
  for(const id of deleted){assert.ok(!ids.includes(id));assert.equal(display.cards[id],undefined);assert.equal(r.BRRework.defs[id],undefined);assert.ok(!r.BR_V32_NATIVE_SKILLS.has(id));}
  for(const a of r.EMOJI_DB){

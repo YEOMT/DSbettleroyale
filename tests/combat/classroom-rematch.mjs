@@ -4,7 +4,8 @@ import fs from 'node:fs';import assert from 'node:assert/strict';
 import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';
 import {lifetimeProbe} from './lifetime-probe.mjs';
 const label=process.argv[2]||'after',before=label==='before',start=performance.now(),rows=[],closes=[];
-const mixed=process.argv[3]==='mixed',h=await auditHarness({players:20,renderer:mixed?'pixi':'canvas',studentRenderer:'canvas',initScript:lifetimeProbe,serverProcess:true,mode:process.env.CLASSROOM_MODE||'solo'});
+const mixed=process.argv[3]==='mixed',backend=process.env.EVOLUTION_RENDERER||(mixed?'pixi':'canvas');
+const h=await auditHarness({players:20,renderer:backend,studentRenderer:process.env.EVOLUTION_RENDERER||'canvas',...(process.env.EVOLUTION_RENDERER?{viewport:{width:844,height:640}}:{}),initScript:lifetimeProbe,serverProcess:true,mode:process.env.CLASSROOM_MODE||'solo'});
 let inputTimer,measurement;
 const stats=a=>{const s=a.slice().sort((a,b)=>a-b);return {n:s.length,p95:s[Math.floor(s.length*.95)]||0,max:s.at(-1)||0};};
 try{
@@ -15,7 +16,7 @@ try{
   c.onMessage=m=>{if(['SNAPSHOT','PRIVATE_STATE'].includes(m.type))c.messages=c.messages.filter(x=>x.type!==m.type||x===m);};
  }
  const secondBot=h.clients.pop(),secondContext=await h.browser.newContext({viewport:{width:1100,height:760},hasTouch:true});await secondContext.addInitScript(lifetimeProbe);await secondContext.route(/dropbox/,r=>r.abort());
- await secondContext.addInitScript(token=>sessionStorage.setItem('dsbr-resume',token),secondBot.session.token);const second=await secondContext.newPage();second.on('pageerror',e=>h.errors.push(e.message));await second.goto(h.url+'/?renderer='+(mixed?'pixi':'canvas'));await second.locator('#br-student-wait').waitFor();await secondBot.close();
+ await secondContext.addInitScript(token=>sessionStorage.setItem('dsbr-resume',token),secondBot.session.token);const second=await secondContext.newPage();second.on('pageerror',e=>h.errors.push(e.message));await second.goto(h.url+'/?renderer='+backend);await second.locator('#br-student-wait').waitFor();await secondBot.close();
  const pages=[h.host,h.student,second],identity=await h.rpc('classroom-state');
  async function instrument(p){await p.evaluate(async()=>{window.m=await import('/src/main.js');window.measure={draw:[],gap:[],close:[],last:0};const draw=m.renderer.draw.bind(m.renderer);m.renderer.draw=(v,t)=>{const at=performance.now();draw(v,t);measure.draw.push(performance.now()-at);if(measure.last)measure.gap.push(t-measure.last);measure.last=t;};m.net.addEventListener('status',e=>{if(e.detail.connected===false)measure.close.push(e.detail);});});}
  for(const p of pages)await instrument(p);

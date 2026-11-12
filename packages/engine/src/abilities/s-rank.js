@@ -20,7 +20,11 @@ export const initializers=[
         skill.units={time:'frames@60Hz',distance:'world units',width:'full width',speed:'world units/frame',damage:'base coefficient before rank/run modifiers'};
         skill.cancelPolicy=skill.cancelPolicy||'death/life change/match reset cancel; hard control cancels active windup, burst, dash, orbit, hook and channel';
         const def=Object.assign({referenceName:name,rank:'S',role,category:role,basic:basic||{},skill},extra||{});
+        // Preserve the original per-skill coefficient tuning on the new base ticks.
+        const periodic={'emoji-000':['zoneDamage',1.05],'emoji-007':['zoneDamage',1.05],'emoji-010':['damage',1.03],'emoji-014':['damage',1.03]}[id];
+        const tickDamage=periodic?Number((skill[periodic[0]]*periodic[1]).toFixed(3)):0;
         R.register(id,def,function(ctx){return handler(ctx,skill);});
+        if(periodic)skill[periodic[0]]=tickDamage;
     }
     function shots(ctx,skill,fire) {
         const count=R.count(ctx,skill.count,skill.countCap);
@@ -32,8 +36,8 @@ export const initializers=[
 
     register('emoji-000','용의 분노','원거리형',{}, {
         kind:'fireball',shape:'line',cooldownFrames:1020,range:940,width:68,radius:150,speed:10,damage:76,count:1,countCap:1,knockback:18,
-        zoneDamage:8,zoneRadius:150,durationFrames:150,intervalFrames:30,maxPerOwner:2,
-        description:'느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 8.4, 최대 2곳) · 기절 없음',
+        zoneDamage:12,zoneRadius:150,durationFrames:150,intervalFrames:30,maxPerOwner:2,
+        description:'느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 12.6, 최대 2곳) · 기절 없음',
         capabilities:caps({projectile:true,area:true,duration:true,cc:true})
     },function(c,s){
         R.projectile(c,{speed:s.speed,range:s.range,radius:s.width/2,damage:0,knockback:0,stun:0,color:'#f97316',emoji:'🔥',
@@ -54,11 +58,11 @@ export const initializers=[
     });
 
     register('emoji-002','우주 납치범','근접형',melee({style:'capture',pushScale:.12}),{
-        kind:'hook',shape:'line',cooldownFrames:990,range:1320,width:38,speed:38,damage:52,count:1,countCap:1,stunFrames:36,stunCap:48,
+        kind:'hook',shape:'line',cooldownFrames:840,range:1320,width:46,speed:38,damage:52,count:1,countCap:1,stunFrames:36,stunCap:48,
         description:'최장거리 포획탄 · 첫 적을 고정된 앞 지점으로 끌어옴 · 도착 후 0.6초 기절 · 벽 차단',
         capabilities:caps({projectile:true,cc:true,signatureRange:true})
     },function(c,s){R.hook(c,{range:s.range,speed:s.speed,width:s.width,damage:s.damage,maxTargets:1,arrivalStun:s.stunFrames,stunCap:s.stunCap,color:'#67e8f9',emoji:'🛸'});},
-    {statType:'MELEE',tankRole:false,basicSummary:'근접 포획 타격',stats:{maxHp:600,speed:2.0}});
+    {statType:'MELEE',tankRole:false,basicSummary:'근접 포획 타격',stats:{maxHp:600,speed:2.08}});
 
     register('emoji-003','대마법사','원거리형',{}, {
         kind:'sequential-barrage',shape:'line',cooldownFrames:1200,range:1110,width:48,speed:30,damage:11,count:14,countCap:22,intervalFrames:4,windupFrames:10,finalDamage:17,finalRadius:32,knockback:1.5,
@@ -67,7 +71,7 @@ export const initializers=[
     },function(c,s){shots(c,s,function(i,count){R.projectile(c,{dir:c.aim,speed:s.speed,range:s.range,radius:i===count-1?s.finalRadius:s.width/2,damage:i===count-1?s.finalDamage:s.damage,knockback:s.knockback,stun:0,shotIndex:i,color:'#a78bfa',emoji:'🔮'});});});
 
     register('emoji-004','공허 암살자','암살자',melee({halfAngle:.95,cooldownScale:1.08,damageScale:1.08}),{
-        kind:'blink-finisher',shape:'target',cooldownFrames:900,range:680,radius:135,damage:68,executeThreshold:.35,executeBonus:54,count:1,countCap:1,knockback:2,
+        kind:'blink-finisher',shape:'target',cooldownFrames:810,range:680,radius:135,damage:68,executeThreshold:.35,executeBonus:54,count:1,countCap:1,knockback:2,
         description:'조준 지점으로 순간이동 · 착지 반경 135의 적 1명에게 68 · HP 35% 이하라면 추가 54(즉사 아님)',
         capabilities:caps({area:true,dash:true,cc:true,signatureRange:true})
     },function(c,s){
@@ -77,16 +81,23 @@ export const initializers=[
     });
 
     register('emoji-006','검성','근접형',melee(),{
-        kind:'orbit-finisher',shape:'circle',cooldownFrames:1080,range:200,radius:150,damage:17,durationFrames:180,intervalFrames:24,count:4,countCap:4,finisherDamage:60,finisherRange:260,finisherWidth:200,knockback:2,
-        description:'3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음',
+        kind:'orbit-finisher',shape:'circle',cooldownFrames:1080,range:300,dashRange:300,radius:150,damage:17,durationFrames:180,intervalFrames:24,count:4,countCap:4,finisherDamage:60,finisherRange:260,finisherWidth:200,knockback:2,
+        description:'조준 방향으로 최대 300 무피해 돌진 · 벽이나 적 앞에서 정지 후 3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음',
         capabilities:caps({area:true,duration:true,cc:true,signatureDuration:true})
-    },function(c,s){R.orbit(c,{duration:s.durationFrames,radius:s.radius,damage:s.damage,tickEvery:s.intervalFrames,count:s.count,knockback:s.knockback,color:'#cbd5e1',
-        onEnd:function(ctx,e,reason){if(reason!=='expired')return;const next=Object.assign({},ctx,{aim:ctx.owner.lastAimDir||ctx.aim});R.front(next,{range:s.finisherRange,width:s.finisherWidth,damage:s.finisherDamage,knockback:10,stun:0,color:'#f8fafc'});}});});
+    },function(c,s){
+        R.dash(c,{range:s.dashRange,speed:30,width:c.owner.radius*2,travelOnly:true,stopOnEnemy:true,
+            onEnd:(ctx,e,reason)=>{
+                if(!['expired','wall','hit','boundary'].includes(reason)||!R.validContext(ctx)||ctx.owner.stunned>0)return;
+                R.orbit(ctx,{duration:s.durationFrames,radius:s.radius,damage:s.damage,tickEvery:s.intervalFrames,count:s.count,knockback:s.knockback,color:'#cbd5e1',
+        onEnd:function(ctx,e,reason){if(reason!=='expired')return;const next=Object.assign({},ctx,{aim:ctx.owner.lastAimDir||ctx.aim});R.front(next,{range:s.finisherRange,width:s.finisherWidth,damage:s.finisherDamage,knockback:10,stun:0,color:'#f8fafc'});}});
+            }
+        });
+    });
 
     register('emoji-007','폴아웃','원거리형',{}, {
         kind:'nuclear-pulse',shape:'circle',cooldownFrames:1140,radius:290,range:0,damage:82,windupFrames:36,knockback:17,
-        zoneRadius:245,zoneDamage:7,durationFrames:150,intervalFrames:30,deathDamage:30,deathRadius:180,
-        description:'0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 7.35) · 사망 폭발은 30, 생명당 1회',
+        zoneRadius:245,zoneDamage:10,durationFrames:150,intervalFrames:30,deathDamage:30,deathRadius:180,
+        description:'0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 10.5) · 사망 폭발은 30, 생명당 1회',
         capabilities:caps({area:true,duration:true,cc:true})
     },function(c,s){
         const center=point(c.owner.pos);
@@ -101,8 +112,8 @@ export const initializers=[
     },function(c,s){R.buff(c,c.owner,'ghost',1,s.durationFrames);R.buff(c,c.owner,'ambush',s.ambushMultiplier,s.ambushWindowFrames);});
 
     register('emoji-010','블랙홀','설치형',{}, {
-        kind:'gravity-field',shape:'target',cooldownFrames:1140,range:700,radius:170,pullRadius:330,collapseRadius:225,damage:8,collapseDamage:62,pull:1.1,durationFrames:210,intervalFrames:30,maxPerOwner:1,
-        description:'3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 8.24 · 자연 종료 때 반경 225 붕괴 63.86',
+        kind:'gravity-field',shape:'target',cooldownFrames:1140,range:700,radius:170,pullRadius:330,collapseRadius:225,damage:10.5,collapseDamage:62,pull:1.1,durationFrames:210,intervalFrames:30,maxPerOwner:1,
+        description:'3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 10.815 · 자연 종료 때 반경 225 붕괴 63.86',
         capabilities:caps({area:true,duration:true,cc:true,trap:true,signatureDuration:true})
     },function(c,s){R.zone(c,{pos:R.targetPoint(c,s.range),radius:s.radius,pullRadius:s.pullRadius,collapseRadius:s.collapseRadius,damage:s.damage,duration:s.durationFrames,tickEvery:s.intervalFrames,pull:s.pull,maxPerOwner:1,kind:'gravity',color:'#8b5cf6',
         onEnd:function(ctx,e,reason){if(reason==='expired')R.area(ctx,e.pos,s.collapseRadius,s.collapseDamage,{stun:0,knockback:4,color:'#c4b5fd',style:'gravity-collapse'});}});});
@@ -133,8 +144,8 @@ export const initializers=[
     },{statType:'MELEE',tankRole:false,basicSummary:'피의 근접 베기 · 실제 HP 피해 20% 흡혈',stats:{maxHp:465,speed:2.1}});
 
     register('emoji-014','역병군주','설치형',{}, {
-        kind:'growing-poison',shape:'target',cooldownFrames:1020,range:690,radius:110,maxRadius:310,growFrames:150,damage:10,durationFrames:300,intervalFrames:30,maxPerOwner:1,
-        description:'5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 10.3 · 기절 없음',
+        kind:'growing-poison',shape:'target',cooldownFrames:1020,range:690,radius:110,maxRadius:310,growFrames:150,damage:14,durationFrames:300,intervalFrames:30,maxPerOwner:1,
+        description:'5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 14.42 · 기절 없음',
         capabilities:caps({area:true,duration:true,trap:true,signatureDuration:true})
     },function(c,s){R.zone(c,{pos:R.targetPoint(c,s.range),radius:s.radius,maxRadius:s.maxRadius,growFrames:s.growFrames,damage:s.damage,duration:s.durationFrames,tickEvery:s.intervalFrames,maxPerOwner:1,kind:'poison',color:'#65a30d'});});
 

@@ -1,4 +1,4 @@
-export const shotKey=s=>[s.owner,s.life,s.actionKind,s.actionSeq,s.ordinal??0].join(':');
+export const shotKey=s=>s.returned?'return:'+s.id:[s.owner,s.life,s.actionKind,s.actionSeq,s.ordinal??0].join(':');
 export function previewShots(self,kind,seq,aim,now,power=1){
  const v=self.visualProfiles?.[kind];if(!v)return [];
  const count=v.close?0:v.count||0,range=kind==='skill'&&self.aimProfiles?.skill?self.aimProfiles.skill.rangeMin+(self.aimProfiles.skill.range-self.aimProfiles.skill.rangeMin)*Math.max(0,Math.min(1,(power-.18)/.82)):v.range;

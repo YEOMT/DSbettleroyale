@@ -30,6 +30,9 @@ for(const expected of fixtures)test(`${retired.has(expected.id)?'approved retire
  // Golden trajectories retain the legacy steering and beam coefficient. v34 live values have their own combat tests.
  r.BRRework.defs['emoji-132'].skill.damage=8.736;
  r.BRRework.defs['emoji-036'].skill.turnRate=.055;
+ // Compare the historical trajectory at historical coefficients. The v35
+ // authority tests separately exercise the live projectiles, impulse and HP.
+ for(const [id,fields] of Object.entries({'emoji-000':{zoneDamage:8.4},'emoji-007':{zoneDamage:7.35},'emoji-010':{damage:8.24},'emoji-014':{damage:10.3},'emoji-025':{damage:58,knockback:30,wallDamage:14}}))Object.assign(r.BRRework.defs[id].skill,fields);
  r.seedRandom('parity|'+expected.id);r.teamMode=0;
  const a=r.EMOJI_DB.find(a=>a.id===expected.id),target=r.EMOJI_DB.find(a=>a.id==='emoji-114');
  const p=new r.Participant(1,'actor',a,new r.Vec2(0,0)),q=new r.Participant(2,'target',target,new r.Vec2(180,0));
@@ -40,7 +43,12 @@ for(const expected of fixtures)test(`${retired.has(expected.id)?'approved retire
  const start={basic:basic===true,skill:skill!==false,projectiles:r.game.projectiles.length,zones:r.game.zones.length,turrets:r.game.turrets.length,reworks:r.game.rw?.entities.map(e=>e.kind)||[]};
  for(let tick=1;tick<=180;tick++){r.timeMs=tick*1000/60;r.game.update();}
  const end={frame:r.game.frame,hp:p.hp,targetHp:q.hp,x:p.pos.x,y:p.pos.y,targetX:q.pos.x,targetY:q.pos.y,damage:p.damageDealt,alive:p.alive,projectiles:r.game.projectiles.length,zones:r.game.zones.length,reworks:r.game.rw?.entities.filter(e=>!e.dead).map(e=>e.kind)||[],runtimeFaults:(p.runtimeFaults||0)+(q.runtimeFaults||0)};
- if(reworked.has(expected.id)){
+ if(expected.id==='emoji-006'||expected.id==='emoji-028'){
+  assert.equal(start.skill,true);assert.equal(start.basic,true);assert.equal(end.runtimeFaults,0);assert.equal(end.frame,expected.end.frame);
+  assert.deepEqual(start.reworks,expected.id==='emoji-006'?['dash']:[]);
+  assert.equal(end.alive,true);assert.ok(end.hp>0);assert.ok(end.targetHp<=q.maxHp);
+  assert.equal(end.projectiles,0);assert.equal(end.zones,0);
+ }else if(reworked.has(expected.id)){
   assert.equal(start.basic,true);assert.equal(start.skill,true);assert.equal(end.runtimeFaults,0);
   const definition=r.BRRework.defs[expected.id].skill;
   if(expected.id==='emoji-034'){assert.deepEqual(start.reworks,['projectile']);assert.deepEqual([definition.radius,definition.speed,definition.range,definition.damage,definition.knockback,definition.bounces],[36,22,900,21,42,0]);assert.ok(end.targetHp<q.maxHp);}

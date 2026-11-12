@@ -1,0 +1,209 @@
+{
+  "label": "v35",
+  "counts": [
+    {
+      "map": 0,
+      "n": 15,
+      "xp": 27,
+      "outer": 0.863698096908629,
+      "maxSpawnToXp": 373
+    },
+    {
+      "map": 0,
+      "n": 20,
+      "xp": 37,
+      "outer": 0.9191182282939554,
+      "maxSpawnToXp": 394
+    },
+    {
+      "map": 0,
+      "n": 25,
+      "xp": 44,
+      "outer": 0.8833480767746976,
+      "maxSpawnToXp": 368
+    },
+    {
+      "map": 0,
+      "n": 30,
+      "xp": 53,
+      "outer": 0.9101932907849551,
+      "maxSpawnToXp": 393
+    },
+    {
+      "map": 1,
+      "n": 15,
+      "xp": 28,
+      "outer": 0.8987910612300039,
+      "maxSpawnToXp": 375
+    },
+    {
+      "map": 1,
+      "n": 20,
+      "xp": 37,
+      "outer": 0.8975901953503489,
+      "maxSpawnToXp": 397
+    },
+    {
+      "map": 1,
+      "n": 25,
+      "xp": 46,
+      "outer": 0.8943637865538833,
+      "maxSpawnToXp": 387
+    },
+    {
+      "map": 1,
+      "n": 30,
+      "xp": 56,
+      "outer": 0.9076417592167855,
+      "maxSpawnToXp": 389
+    },
+    {
+      "map": 2,
+      "n": 15,
+      "xp": 28,
+      "outer": 0.9167233725264669,
+      "maxSpawnToXp": 398
+    },
+    {
+      "map": 2,
+      "n": 20,
+      "xp": 38,
+      "outer": 0.9172786589339376,
+      "maxSpawnToXp": 383
+    },
+    {
+      "map": 2,
+      "n": 25,
+      "xp": 47,
+      "outer": 0.8826764523803006,
+      "maxSpawnToXp": 392
+    },
+    {
+      "map": 2,
+      "n": 30,
+      "xp": 57,
+      "outer": 0.9025600919127464,
+      "maxSpawnToXp": 388
+    },
+    {
+      "map": 3,
+      "n": 15,
+      "xp": 27,
+      "outer": 0.917431078888476,
+      "maxSpawnToXp": 381
+    },
+    {
+      "map": 3,
+      "n": 20,
+      "xp": 37,
+      "outer": 0.9092966228350998,
+      "maxSpawnToXp": 391
+    },
+    {
+      "map": 3,
+      "n": 25,
+      "xp": 44,
+      "outer": 0.9192197915166617,
+      "maxSpawnToXp": 370
+    },
+    {
+      "map": 3,
+      "n": 30,
+      "xp": 53,
+      "outer": 0.9161653816699982,
+      "maxSpawnToXp": 377
+    },
+    {
+      "map": 4,
+      "n": 15,
+      "xp": 28,
+      "outer": 0.9184186882952389,
+      "maxSpawnToXp": 344
+    },
+    {
+      "map": 4,
+      "n": 20,
+      "xp": 38,
+      "outer": 0.8956333636119964,
+      "maxSpawnToXp": 395
+    },
+    {
+      "map": 4,
+      "n": 25,
+      "xp": 47,
+      "outer": 0.9128783636983988,
+      "maxSpawnToXp": 392
+    },
+    {
+      "map": 4,
+      "n": 30,
+      "xp": 56,
+      "outer": 0.8957934709638359,
+      "maxSpawnToXp": 394
+    }
+  ],
+  "matches": [
+    {
+      "map": 0,
+      "active": false,
+      "seconds": 89.81666666666666,
+      "compressionTicks": 962
+    },
+    {
+      "map": 0,
+      "active": true,
+      "seconds": 51.53333333333333,
+      "compressionTicks": 138
+    },
+    {
+      "map": 1,
+      "active": false,
+      "seconds": 104.15,
+      "compressionTicks": 1238
+    },
+    {
+      "map": 1,
+      "active": true,
+      "seconds": 105.73333333333333,
+      "compressionTicks": 688
+    },
+    {
+      "map": 2,
+      "active": false,
+      "seconds": 99.56666666666666,
+      "compressionTicks": 1100
+    },
+    {
+      "map": 2,
+      "active": true,
+      "seconds": 49.2,
+      "compressionTicks": 0
+    },
+    {
+      "map": 3,
+      "active": false,
+      "seconds": 105.38333333333334,
+      "compressionTicks": 1238
+    },
+    {
+      "map": 3,
+      "active": true,
+      "seconds": 98.75,
+      "compressionTicks": 824
+    },
+    {
+      "map": 4,
+      "active": false,
+      "seconds": 88.26666666666667,
+      "compressionTicks": 962
+    },
+    {
+      "map": 4,
+      "active": true,
+      "seconds": 38.3,
+      "compressionTicks": 0
+    }
+  ],
+  "median": 94.28333333333333,
+  "p90": 105.38333333333334
+}

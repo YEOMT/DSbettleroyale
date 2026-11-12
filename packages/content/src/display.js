@@ -1,11 +1,11 @@
 // Generated from current authority runtime. Display text only; no client combat.
 export const display={
-  "rosterVersion": "emoji84-v34",
+  "rosterVersion": "emoji86-v35",
   "odds": "S 10% · A 20% · B 25% · C 30% · F 15%",
   "cards": {
     "emoji-000": {
       "basic": "작은 화염구 · 1발 · 작은 폭발",
-      "skill": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 8.4, 최대 2곳) · 기절 없음 · 최대 조준 거리 940 · 대기 17초",
+      "skill": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 12.6, 최대 2곳) · 기절 없음 · 최대 조준 거리 940 · 대기 17초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
       "cooldown": "17초",
       "label": "용의 분노",
@@ -89,9 +89,9 @@ export const display={
     },
     "emoji-002": {
       "basic": "근접 포획 타격",
-      "skill": "최장거리 포획탄 · 첫 적을 고정된 앞 지점으로 끌어옴 · 도착 후 0.6초 기절 · 벽 차단 · 최대 조준 거리 1320 · 대기 16.5초",
+      "skill": "최장거리 포획탄 · 첫 적을 고정된 앞 지점으로 끌어옴 · 도착 후 0.6초 기절 · 벽 차단 · 최대 조준 거리 1320 · 대기 14초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 사거리",
-      "cooldown": "16.5초",
+      "cooldown": "14초",
       "label": "우주 납치범",
       "category": "근접형",
       "concept": "정확한 납치로 적을 내 앞으로 옮긴다",
@@ -108,7 +108,7 @@ export const display={
         "skill": {
           "kind": "hook",
           "aimRange": 1320,
-          "cooldownFrames": 990,
+          "cooldownFrames": 840,
           "cooldownJitter": false,
           "durationFrames": 0,
           "damageCoefficient": 52
@@ -175,9 +175,9 @@ export const display={
     },
     "emoji-004": {
       "basic": "단도 근접 베기",
-      "skill": "조준 지점으로 순간이동 · 착지 반경 135의 적 1명에게 68 · HP 35% 이하라면 추가 54(즉사 아님) · 최대 조준 거리 680 · 대기 15초",
+      "skill": "조준 지점으로 순간이동 · 착지 반경 135의 적 1명에게 68 · HP 35% 이하라면 추가 54(즉사 아님) · 최대 조준 거리 680 · 대기 13.5초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 사거리",
-      "cooldown": "15초",
+      "cooldown": "13.5초",
       "label": "공허 암살자",
       "category": "암살자",
       "concept": "순간이동으로 약해진 적을 마무리한다",
@@ -194,7 +194,7 @@ export const display={
         "skill": {
           "kind": "blink-finisher",
           "aimRange": 680,
-          "cooldownFrames": 900,
+          "cooldownFrames": 810,
           "cooldownJitter": false,
           "durationFrames": 0,
           "damageCoefficient": 68
@@ -217,7 +217,7 @@ export const display={
     },
     "emoji-006": {
       "basic": "검 근접 베기",
-      "skill": "3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음 · 최대 조준 거리 200 · 대기 18초",
+      "skill": "조준 방향으로 최대 300 무피해 돌진 · 벽이나 적 앞에서 정지 후 3초 회전 검 · 동일 대상 0.4초 간격 피해 17 · 자연 종료 때 현재 방향 마지막 베기 60 · 기절 없음 · 최대 조준 거리 300 · 대기 18초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 지속",
       "cooldown": "18초",
       "label": "검성",
@@ -235,7 +235,7 @@ export const display={
         },
         "skill": {
           "kind": "orbit-finisher",
-          "aimRange": 200,
+          "aimRange": 300,
           "cooldownFrames": 1080,
           "cooldownJitter": false,
           "durationFrames": 180,
@@ -259,7 +259,7 @@ export const display={
     },
     "emoji-007": {
       "basic": "방사능 탄 · 1발",
-      "skill": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 7.35) · 사망 폭발은 30, 생명당 1회 · 자기 중심 · 대기 19초",
+      "skill": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 10.5) · 사망 폭발은 30, 생명당 1회 · 자기 중심 · 대기 19초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
       "cooldown": "19초",
       "label": "폴아웃",
@@ -341,7 +341,7 @@ export const display={
     },
     "emoji-010": {
       "basic": "행성 탄 · 1발",
-      "skill": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 8.24 · 자연 종료 때 반경 225 붕괴 63.86 · 최대 조준 거리 700 · 대기 19초",
+      "skill": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 10.815 · 자연 종료 때 반경 225 붕괴 63.86 · 최대 조준 거리 700 · 대기 19초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 지속",
       "cooldown": "19초",
       "label": "블랙홀",
@@ -363,7 +363,7 @@ export const display={
           "cooldownFrames": 1140,
           "cooldownJitter": false,
           "durationFrames": 210,
-          "damageCoefficient": 8.24
+          "damageCoefficient": 10.815
         },
         "eligibleAugments": [
           "rapid",
@@ -468,7 +468,7 @@ export const display={
     },
     "emoji-014": {
       "basic": "독성 구체 · 1발",
-      "skill": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 10.3 · 기절 없음 · 최대 조준 거리 690 · 대기 17초",
+      "skill": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 14.42 · 기절 없음 · 최대 조준 거리 690 · 대기 17초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 고유 지속",
       "cooldown": "17초",
       "label": "역병군주",
@@ -490,7 +490,7 @@ export const display={
           "cooldownFrames": 1020,
           "cooldownJitter": false,
           "durationFrames": 300,
-          "damageCoefficient": 10.3
+          "damageCoefficient": 14.42
         },
         "eligibleAugments": [
           "rapid",
@@ -888,7 +888,7 @@ export const display={
     },
     "emoji-023": {
       "basic": "단발 저격탄 · 1발",
-      "skill": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. · 최대 조준 거리 1380 · 대기 12초",
+      "skill": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배. · 최대 조준 거리 1380 · 대기 12초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위",
       "cooldown": "12초",
       "label": "헤드슈터",
@@ -910,7 +910,9 @@ export const display={
           "cooldownFrames": 720,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 80.56
+          "damageCoefficient": 80.56,
+          "criticalChance": 0.5,
+          "criticalDamage": 2
         },
         "eligibleAugments": [
           "wanggui",
@@ -995,7 +997,7 @@ export const display={
           "cooldownFrames": 600,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 58
+          "damageCoefficient": 110
         },
         "eligibleAugments": [
           "wanggui",
@@ -1100,12 +1102,12 @@ export const display={
     },
     "emoji-028": {
       "basic": "갑옷 근접 타격",
-      "skill": "2초 동안 받는 피해가 28% 줄고, 적의 직접 공격으로 실제 잃은 HP의 50%를 그 공격자에게 즉시 반환합니다. 지속·환경·반격 피해는 반환하지 않습니다. · 자기 중심 · 대기 11초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 고유 지속",
+      "skill": "5초간 몸에 닿은 적 탄을 한 번 원래 발사자 방향으로 반사합니다. 기절 중에도 유지되며 근접·광선·장판 피해는 받습니다. · 자기 중심 · 대기 11초",
+      "passive": "스킬 증강: 대기 단축",
       "cooldown": "11초",
-      "label": "아이언월",
+      "label": "철벽 반사",
       "category": "탱커",
-      "concept": "상대 공격을 받아내며 반격 각도를 만든다",
+      "concept": "몸에 닿은 적 탄을 원 발사자 방향으로 되돌리는 근접 방패병",
       "facts": {
         "level": 1,
         "damageUnits": "base coefficient before rank/run/defence modifiers",
@@ -1117,11 +1119,11 @@ export const display={
           "coefficient": 28.576800000000002
         },
         "skill": {
-          "kind": "counter-immediate",
+          "kind": "iron-reflect",
           "aimRange": 0,
           "cooldownFrames": 660,
           "cooldownJitter": false,
-          "durationFrames": 120,
+          "durationFrames": 300,
           "damageCoefficient": 0
         },
         "eligibleAugments": [
@@ -1131,11 +1133,9 @@ export const display={
           "impact",
           "wide",
           "quick",
-          "amplify",
           "swift",
           "titan",
-          "regen",
-          "signature_duration"
+          "regen"
         ]
       }
     },
@@ -2292,7 +2292,7 @@ export const display={
     },
     "emoji-137": {
       "basic": "정밀 탄 · 1발 · 관통",
-      "skill": "빠른 관통탄 한 발로 일렬의 적을 타격합니다. 자동 유도나 폭발은 없습니다. · 최대 조준 거리 1070 · 대기 18초",
+      "skill": "빠른 관통탄 한 발로 일렬의 적을 타격합니다. 시전당 40% 확률로 직접 피해 2배. 자동 유도나 폭발은 없습니다. · 최대 조준 거리 1070 · 대기 18초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 개수 · 제어",
       "cooldown": "18초",
       "label": "정조준 관통 사격",
@@ -2314,7 +2314,9 @@ export const display={
           "cooldownFrames": 1080,
           "cooldownJitter": false,
           "durationFrames": null,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "criticalChance": 0.4,
+          "criticalDamage": 2
         },
         "eligibleAugments": [
           "wanggui",
@@ -2336,7 +2338,7 @@ export const display={
     },
     "emoji-074": {
       "basic": "슬리퍼 · 2발",
-      "skill": "빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다. · 최대 조준 거리 1100 · 대기 7초",
+      "skill": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다. · 최대 조준 거리 1100 · 대기 7초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위",
       "cooldown": "7초",
       "label": "슬리퍼 스나이퍼",
@@ -2358,7 +2360,9 @@ export const display={
           "cooldownFrames": 420,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 25.44
+          "damageCoefficient": 25.44,
+          "criticalChance": 0.3,
+          "criticalDamage": 2
         },
         "eligibleAugments": [
           "wanggui",
@@ -3512,6 +3516,93 @@ export const display={
           "cooldownJitter": false,
           "durationFrames": 108,
           "damageCoefficient": 0
+        },
+        "eligibleAugments": [
+          "wanggui",
+          "rapid",
+          "heavy",
+          "multi",
+          "giant",
+          "impact",
+          "quick",
+          "swift",
+          "titan",
+          "regen"
+        ]
+      }
+    },
+    "emoji-152": {
+      "basic": "단발 스타 탄 · 1발",
+      "skill": "0.6초 예고 후 자신 중심 반경 550 안의 모든 생존 적을 벽 너머에도 3초 기절시킵니다. 직접 피해 없음 · 제어 강화 상한 3.6초. · 자기 중심 · 대기 24초",
+      "passive": "스킬 증강: 대기 단축 · 제어",
+      "cooldown": "24초",
+      "label": "스포트라이트",
+      "category": "원거리형",
+      "concept": "스포트라이트의 예고 범위에 남은 적을 기절시킨다",
+      "facts": {
+        "level": 1,
+        "damageUnits": "base coefficient before rank/run/defence modifiers",
+        "basic": {
+          "close": false,
+          "count": 1,
+          "range": 880,
+          "intervalFrames": 36,
+          "coefficient": 21
+        },
+        "skill": {
+          "kind": "spotlight",
+          "aimRange": 0,
+          "cooldownFrames": 1440,
+          "cooldownJitter": false,
+          "durationFrames": 0,
+          "damageCoefficient": null,
+          "radius": 550,
+          "windupFrames": 36,
+          "stunFrames": 180,
+          "stunCap": 216
+        },
+        "eligibleAugments": [
+          "rapid",
+          "heavy",
+          "multi",
+          "giant",
+          "impact",
+          "quick",
+          "control",
+          "swift",
+          "titan",
+          "regen"
+        ]
+      }
+    },
+    "emoji-153": {
+      "basic": "단발 은빛 탄 · 1발",
+      "skill": "전방 130에 길이 560의 일자 장막을 5초 설치합니다. 앞면에 닿는 적의 비행탄을 한 번 되돌리고 원 발사자를 약하게 추적합니다. 이동·근접·광선·장판은 통과합니다. · 최대 조준 거리 130 · 대기 22초",
+      "passive": "스킬 증강: 대기 단축",
+      "cooldown": "22초",
+      "label": "반사",
+      "category": "원거리형",
+      "concept": "일자 거울 장막의 앞면으로 적 탄을 되돌린다",
+      "facts": {
+        "level": 1,
+        "damageUnits": "base coefficient before rank/run/defence modifiers",
+        "basic": {
+          "close": false,
+          "count": 1,
+          "range": 810,
+          "intervalFrames": 37,
+          "coefficient": 18
+        },
+        "skill": {
+          "kind": "mirror",
+          "aimRange": 130,
+          "cooldownFrames": 1320,
+          "cooldownJitter": false,
+          "durationFrames": 300,
+          "damageCoefficient": null,
+          "length": 560,
+          "width": 24,
+          "frontOnly": true
         },
         "eligibleAugments": [
           "wanggui",

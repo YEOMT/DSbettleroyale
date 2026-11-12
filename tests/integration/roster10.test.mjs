@@ -12,7 +12,7 @@ test('all ten new IDs use rank-first assignment in every public mode without cha
  for(const mode of ['solo','team-elim','team-capture'])for(const [rank,p]of boundaries){const pool=r.EMOJI_DB.filter(a=>a.t===rank&&!(mode==='solo'&&a.teamOnly));
   for(const [j,a]of pool.entries()){let draws=0;const ix=r.brAbilityIndex(mode,-1,null,()=>draws++? (j+.5)/pool.length:p);assert.equal(r.EMOJI_DB[ix].id,a.id);assert.equal(draws,2);}
  }
- assert.equal(manifest.roster.length,84);for(const id of ids)assert.ok(manifest.roster.some(a=>a.id===id));
+ assert.equal(manifest.roster.length,86);for(const id of ids)assert.ok(manifest.roster.some(a=>a.id===id));
  assert.deepEqual(r.BR_TIER_CHANCES,[['S',.1],['A',.2],['B',.25],['C',.3],['F',.15]]);
 });
 test('all ten: actual WS assignment/input/actions/cooldown/resume/refire/rematch preserve identity', {timeout:90000},async t=>{

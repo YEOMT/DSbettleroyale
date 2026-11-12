@@ -97,13 +97,13 @@ test('F III direct damage/pickup defense and TTK; indirect hits and environmenta
     const w=fixture(),g=w.game,[p,q]=g.participants;
     try{
         for(const a of [p,q]){a.spawnProtectionUntilFrame=0;a.run.paths={wanggui:3};w.brRecomputeRun(a);}
-        assert.equal(q.maxHp,1440);
+        assert.equal(q.maxHp,1920);
         const buff=(a,kind)=>a.combatBuff={kind,end:g.frame+600,life:a.lifeSeq};
         const hit=(ctx,attacker=p,reflected=false)=>{q.hp=q.maxHp;q.takeDamage(20,attacker,reflected,null,ctx);return q.maxHp-q.hp;};
-        const base=hit({basic:true});near(base,97);
-        buff(p,'attack');near(hit({basic:true}),140.65);near(hit({rw:true}),140.65);
-        buff(q,'guard');near(hit({basic:true}),84.39);
-        q.teamGuardFrames=5;q.teamGuardStrength=.8;near(hit({basic:true}),140.65*.55);q.teamGuardFrames=0;
+        const base=hit({basic:true});near(base,144);
+        buff(p,'attack');near(hit({basic:true}),208.8);near(hit({rw:true}),208.8);
+        buff(q,'guard');near(hit({basic:true}),125.28);
+        q.teamGuardFrames=5;q.teamGuardStrength=.8;near(hit({basic:true}),208.8*.55);q.teamGuardFrames=0;
         for(const ctx of [{periodic:true},{basic:true,visualPeriodic:true},{actionKind:'summon'},{rw:true,entity:{actionKind:'summon'}},{actionKind:'skill',supplyIndirect:true},{rw:true,style:'mushroom-impact'},{rw:true,ctx:{abilityId:'emoji-126'}}])near(hit(ctx),base);
         near(hit({attackKind:'zone'},null),20);near(hit({},p,true),20);
         p.combatBuff=null;
@@ -117,9 +117,9 @@ test('F III direct damage/pickup defense and TTK; indirect hits and environmenta
             return {hits,seconds:(hits-1)*.5};
         }
         const baseline=untilKo(false),guard=untilKo(true);
-        assert.deepEqual(baseline,{hits:15,seconds:7});
-        assert.deepEqual(guard,{hits:23,seconds:11}); // Guard expires after the first twenty hits.
-        t.diagnostic(JSON.stringify({baseHp:q.maxHp,neutralCoefficient:20,FIII:base,attack:140.65,attackGuard:84.39,baseline,guard}));
+        assert.deepEqual(baseline,{hits:14,seconds:6.5});
+        assert.deepEqual(guard,{hits:22,seconds:10.5}); // Guard expires after the first twenty hits.
+        t.diagnostic(JSON.stringify({baseHp:q.maxHp,neutralCoefficient:20,FIII:base,attack:208.8,attackGuard:125.28,baseline,guard}));
     }finally{destroyWorld(w);}
 });
 
@@ -146,7 +146,7 @@ test('F III Brick fired basic single-hit KO sample across five fresh Lv1 defende
             Object.assign(q,{remoteId:'target'+i,lifeSeq:0,spawnProtectionUntilFrame:0});
             w.brInitRun(q);shot.hit(g,q);
             rows.push({id,hp:q.maxHp,damage:q.maxHp-q.hp,ko:!q.alive});
-            near(q.maxHp-q.hp,Math.min(q.maxHp,shot.damage*4.85*1.45*((ability.sub==='WEAK'||ability.sub==='PAPER_THIN')?3:1)));
+            near(q.maxHp-q.hp,Math.min(q.maxHp,shot.damage*7.2*1.45*((ability.sub==='WEAK'||ability.sub==='PAPER_THIN')?3:1)));
         }
         t.diagnostic(JSON.stringify({sample:'one confirmed fired FIII Brick basic, attack supply active',shotDamage:shot.damage,oneHit:rows.filter(r=>r.ko).length,defenders:rows.length,rows}));
     }finally{destroyWorld(w);}

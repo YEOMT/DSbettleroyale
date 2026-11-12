@@ -160,7 +160,9 @@ export const initializers=[
                 dispose(g);g.farmRevision=1;g.farmSeq=0;g.farmGrid=new Map();
                 const players=g.participants.filter(real),density=[1.28,1.32,1.36,1.28,1.34][g.mapIndex]||1.30;
                 const oldCount=Math.min(42,Math.max(8,Math.round(players.length*density)));
-                const count=Math.min(P.initialCap,Math.round(oldCount*P.farmInitial));
+                const solo=__brScope.session?.roomMeta?.mode==='solo';
+                const baseCount=Math.min(P.initialCap,Math.round(oldCount*P.farmInitial));
+                const count=solo?Math.round(baseCount*1.27):baseCount;
                 g.farmPickupSearchRadius=Math.max(100,...players.map(p=>p.radius+__brScope.BR_COLLECTIBLE_RULES.pickupExtra));
                 // Separate random stream leaves map, character and combat RNG untouched.
                 let seed=2166136261;
@@ -173,11 +175,13 @@ export const initializers=[
                 g.nextXpCrateFrame=g.frame+XP_INTERVAL;g.xpWave=0;g.xpWaveCarry=0;
                 const combatRadius=__brScope.session?.isRespawnMode()?g.mapRadius:g.worldRadius;
                 g.teamCrateQueue=[];g.teamCrateCap=count+P.respawnExtra;g.teamXpCrateCap=count;
-                for(let i=0;i<count;i++){const sideWanted=__brScope.brSurvivalFarmSlot(g),side=sideWanted?__brScope.brSurvivalFarmPoint(g,combatRadius-140,BOUND,players):null;let used=false;for(let tries=0;tries<140;tries++) {
+                for(let i=0;i<count;i++){const starter=solo&&i<players.length,outer=solo&&!starter&&i%3===0;const sideWanted=__brScope.brSurvivalFarmSlot(g),side=sideWanted?__brScope.brSurvivalFarmPoint(g,combatRadius-140,BOUND,players):null;let used=false;for(let tries=0;tries<140;tries++) {
                     const near=players[i%Math.max(1,players.length)],angle=random()*Math.PI*2;
-                    const distance=tries<24&&near?180+random()*220:Math.sqrt(random())*(combatRadius-240);
-                    const pos=tries===0&&side?side:g.capture?__brScope.brCaptureRandomPoint(g,140,random):tries<24&&near?new __brScope.Vec2(near.pos.x+Math.cos(angle)*distance,near.pos.y+Math.sin(angle)*distance):new __brScope.Vec2(Math.cos(angle)*distance,Math.sin(angle)*distance);
+                    const closeToSpawn=near&&!outer&&(starter?tries<110:tries<24);
+                    const distance=outer?combatRadius*(.76+.16*random()):closeToSpawn?180+random()*220:Math.sqrt(random())*(combatRadius-240);
+                    const pos=!starter&&!outer&&tries===0&&side?side:g.capture?__brScope.brCaptureRandomPoint(g,140,random):closeToSpawn?new __brScope.Vec2(near.pos.x+Math.cos(angle)*distance,near.pos.y+Math.sin(angle)*distance):new __brScope.Vec2(Math.cos(angle)*distance,Math.sin(angle)*distance);
                     if((g.capture?!__brScope.brCaptureFarmClear(g,pos,BOUND):pos.dist(g.center)>combatRadius-140)||(g.escapeBlocks?.(pos,BOUND)||g.checkWallCollision(pos,BOUND+28)||g.blocksCoverEntry?.(pos,BOUND)))continue;
+                    if(starter&&closeToSpawn&&g.checkWallBetween(near.pos,pos))continue;
                     if(g.farmBoxes.some(b=>b.pos.dist(pos)<BOUND*2+24)||players.some(p=>p.pos.dist(pos)<p.radius+BOUND+30))continue;
                     addBox(g,{id:++g.farmSeq,pos,halfSize:HALF,radius:BOUND,hp:UNITS_TO_BREAK,maxHp:UNITS_TO_BREAK,kind:'xp',born:g.frame,lastHits:new Map()});if(sideWanted){if(pos===side)g.sideFarm.placed++;else g.sideFarm.fallback++;used=true;}break;
                 }if(sideWanted&&!used)g.sideFarm.fallback++;}

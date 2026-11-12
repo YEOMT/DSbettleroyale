@@ -1,3 +1,4 @@
+import {addMirrorContacts,contactOrder,criticalContact,ironActive,launchSupply,reflectedDirection,steerReturn} from './reflection.js';
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
 export function install(__brScope){
 __brScope.Projectile = class Projectile {
@@ -7,11 +8,13 @@ __brScope.Projectile = class Projectile {
                 this.dotDamageMult=this.runSkill?.damage||Number(opts.basicDamageMultiplier||1);
                 if(this.runSkill){damage*=this.runSkill.damage;size*=this.runSkill.size;explodeRadius*=this.runSkill.size;}
                 this.owner = owner;this.ownerLife=Number(owner?.lifeSeq||0);this.ownerAbilityId=owner?.ability?.id;this.homingTurnRate=Number(opts.homingTurnRate??.032);this.homingCone=Number(opts.homingCone??1.22);this.wangguiPower=Number(opts.basicSnapshot?.ctx?.run?.wangguiPower??this.runSkill?.wangguiPower??__brScope.brRunMod(owner,'wangguiPower'));this.basicSnapshot=opts.basicSnapshot||null;this.basicAttackId=opts.basicAttackId||null; this.pos = pos; this.vel = dir.mult(speed);
+                this.sniper=opts.sniper;
+                this.launchSupply=launchSupply(owner,__brScope.game?.frame||0);
                 this.farmBornFrame=__brScope.game?.frame||0;
                 const action=owner?.activeInputCommand;
                 this.inputKind=opts.attackKind||action?.kind||(opts.basicAttackId?'attack':'skill');this.inputSeq=Number(action?.seq||0);
                 this.shotOrdinal=action?Number(action.shotOrdinal||0):0;if(action)action.shotOrdinal=this.shotOrdinal+1;
-                this.visualLife=this.ownerLife;
+                this.launchLife=this.visualLife=this.ownerLife;
 
                 // v22.7: 상위랭크 원거리(PROJ) 화력 보강.
                 // S는 체감될 정도, A는 소폭만 올리고 B/C/F는 그대로 유지.
@@ -77,6 +80,7 @@ __brScope.Projectile = class Projectile {
             }
             update(game) {
                 if(this.life<=0)return;
+                if(this.reflectedOnce&&!this.owner.alive){this.life=0;return;}
                 if(this.owner&&(Number(this.owner.lifeSeq||0)!==this.ownerLife||this.owner.ability.id!==this.ownerAbilityId)){this.life=0;return;}
                 const shotStart=this._shotStart;shotStart.x=this.pos.x;shotStart.y=this.pos.y;let wallContact=null;
                 if(this.type === 'ORBIT') {
@@ -106,11 +110,12 @@ __brScope.Projectile = class Projectile {
                     let travel=this.vel;
                     if(this.rangeRemaining!==null&&travel.mag()>this.rangeRemaining)travel=travel.norm().mult(this.rangeRemaining);
                     let nextPos = this.pos.add(travel);
-                    if(this.type!=='GHOST')wallContact=__brScope.combatTraceWalls(this.pos,nextPos,this.size,game.walls,this._wallCandidates);
+                    if(this.reflectedOnce||this.type!=='GHOST')wallContact=__brScope.combatTraceWalls(this.pos,nextPos,this.size,game.walls,this._wallCandidates);
                     this.pos = nextPos;
                     this.life--;
                     if(this.rangeRemaining!==null)this.rangeRemaining=Math.max(0,this.rangeRemaining-travel.mag());
-                    if(this.type === 'missile'&&__brScope.BRRework)__brScope.BRRework.nativeHoming(this,game);
+                    if(this.returnTarget)this.vel=steerReturn(game,this,this.vel);
+                    else if(!this.reflectedOnce&&this.type === 'missile'&&__brScope.BRRework)__brScope.BRRework.nativeHoming(this,game);
                 }
                 // ✨ v13: 개성 있는 투사체 잔상. 너무 많이 쌓이지 않도록 간격을 둠.
                 const trailEvery = game.getProjectileTrailCadence();
@@ -158,8 +163,23 @@ __brScope.Projectile = class Projectile {
                 }
                 __brScope.brFarm.projectileContacts(game,this,shotStart,shotEnd,wallContact,contacts);
                 __brScope.BRRework?.nativeProjectileContacts(game,this,shotStart,shotEnd,wallContact,contacts);
-                contacts.sort((a,b)=>a.t-b.t||Number(a.p?.id??a.farm?.id??a.rwTurret?.id??0)-Number(b.p?.id??b.farm?.id??b.rwTurret?.id??0));
-                for(const {p,t,farm,rwTurret} of contacts) {
+                const canReflect=!orbit&&this.type!=='BOOMERANG'&&!this.reflectedOnce;
+                if(canReflect)addMirrorContacts(__brScope,game,this,shotStart,shotEnd,this.size,wallContact,contacts);
+                if(contacts.length>1)contacts.sort(contactOrder);
+                for(const {p,t,farm,rwTurret,mirror} of contacts) {
+                    if(wallContact&&t>=wallContact.t)break;
+                    if(canReflect&&(mirror||ironActive(p,game.frame))){
+                        const defender=mirror||p,point=shotStart.add(travel.mult(t)),speed=this.vel.mag();
+                        const dir=reflectedDirection(__brScope,game,this,point,this.vel,defender,!!mirror);
+                        this.pos=point;this.vel=dir.mult(speed);this.owner=defender;
+                        this.ownerLife=this.visualLife=defender.lifeSeq;this.ownerAbilityId=defender.ability.id;
+                        this.hitMemory=Object.create(null);this._brTurn=(this._brTurn||0)+1;
+                        if(this.rangeRemaining!==null)this.rangeRemaining+=travel.mag()*(1-t);
+                        __brScope.brRecordFlightPath(this,game.frame-1,shotStart.x,shotStart.y,this._brTurn-1,true);
+                        __brScope.brRecordFlightPath(this,game.frame,point.x,point.y,this._brTurn,true);
+                        __brScope.publishTurn?.(this,true);
+                        return;
+                    }
                     if(rwTurret){if(__brScope.BRRework.nativeProjectileTurretHit(game,this,rwTurret,shotStart.add(travel.mult(t))))return;continue;}
                     if(farm) {
                         if(farm.hp<=0)continue;
@@ -216,7 +236,7 @@ __brScope.Projectile = class Projectile {
                         const distance=victim.pos.dist(this.pos);
                         if(victim!==primaryTarget&&(distance>radius+victim.radius*.35||game.checkWallBetween(this.pos,victim.pos)))continue;
                         const falloff=victim===primaryTarget?1:1-.35*Math.min(1,distance/radius);
-                        victim.takeDamage(this.damage*falloff,this.owner,false,victim.pos.sub(this.pos),{scaled:true,wangguiPower:this.wangguiPower,style:this.impactStyle||'ranged-power',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:radius,projectileId:this._brNetId||'',ordinal:this.shotOrdinal||0,actionKind:this.inputKind,supplyIndirect:this.supplyIndirect,contact:{x:victim.pos.x,y:victim.pos.y}});
+                        victim.takeDamage(this.damage*falloff,this.owner,false,victim.pos.sub(this.pos),{scaled:true,wangguiPower:this.wangguiPower,style:this.impactStyle||'ranged-power',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:radius,projectileId:this._brNetId||'',ordinal:this.shotOrdinal||0,actionKind:this.inputKind,returnSupply:this.returnSupply,supplyIndirect:this.supplyIndirect,contact:{x:victim.pos.x,y:victim.pos.y}});
                         const outward=victim.pos.sub(this.pos),dir=outward.mag()>.01?outward.norm():this.vel.norm();
                         const push=this.knockback*falloff;
                         __brScope.BRRework.nativeImpulse(victim,this.owner,dir,push,game,this.runSkill,{hardForce:this.baseKnockback*falloff>=14});
@@ -238,7 +258,7 @@ __brScope.Projectile = class Projectile {
                 const dealDamage=(victim)=>{
                     const previousStyle=this.owner&&this.owner.currentImpactStyle;
                     if(this.owner&&this.impactStyle)this.owner.currentImpactStyle=this.impactStyle;
-                    try { return victim.takeDamage(this.damage*(central?1.5:1),this.owner,false,this.explodeRadius>0?victim.pos.sub(this.pos):(this.type==='ORBIT'?victim.pos.sub(this.owner.pos):this.vel),{scaled:true,wangguiPower:this.wangguiPower,basic:this.impactStyle==='ranged-basic',...(central?{style:'dart-center'}:{}),attackId:this.basicAttackId,basicSnapshot:this.basicSnapshot,contact:{x:this.pos.x,y:this.pos.y},projectileId:this._brNetId||'',actionKind:this.inputKind,supplyIndirect:this.supplyIndirect,ordinal:this.shotOrdinal||0,visualPeriodic:this.type==='ORBIT',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:this.explodeRadius}); }
+                    try { return victim.takeDamage(this.damage*(central?1.5:1),this.owner,false,this.explodeRadius>0?victim.pos.sub(this.pos):(this.type==='ORBIT'?victim.pos.sub(this.owner.pos):this.vel),{scaled:true,wangguiPower:this.wangguiPower,basic:this.impactStyle==='ranged-basic',...(central?{style:'dart-center'}:{}),attackId:this.basicAttackId,basicSnapshot:this.basicSnapshot,contact:{x:this.pos.x,y:this.pos.y},projectileId:this._brNetId||'',actionKind:this.inputKind,returnSupply:this.returnSupply,supplyIndirect:this.supplyIndirect,ordinal:this.shotOrdinal||0,visualPeriodic:this.type==='ORBIT',projectileStyle:this.weaponStyle,knockback:this.knockback,explodeRadius:this.explodeRadius}); }
                     finally { if(this.owner)this.owner.currentImpactStyle=previousStyle||''; }
                 };
                 
@@ -256,7 +276,7 @@ __brScope.Projectile = class Projectile {
                     }
                     if(this.owner?.ability?.sub==='SODA_BOMB') game.addText(this.pos,'🥤 POP!','#e0f2fe',18,18);
                 } else {
-                    const dealt=dealDamage(target);if(!target.alive||!target._lastDamageResult?.valid)return;
+                    const dealt=dealDamage(target);criticalContact(this.sniper,game,target,this.owner);if(!target.alive||!target._lastDamageResult?.valid)return;
                     if(this.type === 'ICE_SHARD'&&this.impactStyle!=='ranged-basic')__brScope.brApplyStun(target,20,this.owner,this.runSkill);
                     if(this.status === 'stun'&&this.impactStyle!=='ranged-basic')__brScope.brApplyStun(target,this.statusPower??24,this.owner,this.runSkill);
                     if(this.status === 'poison' && this.owner && this.owner.alive) {

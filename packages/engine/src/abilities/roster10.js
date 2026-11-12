@@ -1,3 +1,4 @@
+import {placeMirror} from '../combat/reflection.js';
 // New roster only: explicit frozen pre-patch medians, existing 60 Hz entity lifecycle.
 export function install(){}
 export const ROSTER10_BASES=Object.freeze({
@@ -18,7 +19,9 @@ export const initializers=[[310,S=>{
   [145,'🦈','부캉이','A',true,'짧은 깨물기','#7dd3fc'],[146,'🐼','푸바오','A',true,'대나무 타격','#bef264'],
   [147,'👽','외계인','B',false,'작은 에너지탄','#a3e635'],[148,'👹','도깨비','C',true,'방망이 타격','#fb7185'],
   [149,'🐖','꿀꿀이','F',true,'짧은 들이밀기','#f9a8d4'],[150,'🐭','찍찍이','F',false,'작은 단발 탄','#cbd5e1'],
-  [151,'🚦','신호등','B',false,'직선 신호탄','#f87171']
+  [151,'🚦','신호등','B',false,'직선 신호탄','#f87171'],
+  [152,'🕴','마이클 잭슨','S',false,'단발 스타 탄','#fde68a'],
+  [153,'🪞','미러링','A',false,'단발 은빛 탄','#cbd5e1']
  ];
  function register(number,skill,handler){
   const [,emoji,name,tier,close,basicText,color]=entries.find(x=>x[0]===number),id='emoji-'+number;
@@ -27,7 +30,7 @@ export const initializers=[[310,S=>{
   skill={...skill,key:'rework-'+id,label:skill.label||name,cooldown:skill.cooldownFrames,duration:skill.durationFrames||0,windup:skill.windupFrames||0,interval:skill.intervalFrames||0,stun:0,units:{time:'frames@60Hz',distance:'world units',width:'full width',speed:'world units/frame',damage:'base coefficient before rank/run modifiers'}};
   skill.caps=skill.capabilities;skill.cancelPolicy='owner death/life change/match reset remove; movement cancels on stun or forced movement';
   const ability={id,legacyIndex:number,timingSeed:'roster10-'+number,t:tier,e:emoji,n:name,type:close?'MELEE':'PROJ',sub:'ROSTER10_'+number,sizeMult:1,category:close?'근접형':'원거리형',desc:skill.description,concept:skill.description,basicSummary:basicText,skillSummary:skill.description,pTrail:color,projEmoji:emoji};
-  S.EMOJI_DB.push(ability);R.register(id,{referenceName:name,rank:tier,role:ability.category,category:ability.category,statType:ability.type,tankRole:false,basic,skill,stats:{...ROSTER10_BASES[tier+'_'+(close?'melee':'ranged')],...(number===149?{finalBaseHp:240}:{})}},c=>handler(fixed(c),skill));
+  S.EMOJI_DB.push(ability);R.register(id,{referenceName:name,rank:tier,role:ability.category,category:ability.category,statType:ability.type,tankRole:false,basic,skill,stats:{...ROSTER10_BASES[tier+'_'+(close?'melee':'ranged')],...(number===149?{finalBaseHp:240}:number===152?{finalBaseHp:375,speed:1.65}:number===153?{finalBaseHp:340,speed:1.60}:{})}},c=>handler(fixed(c),skill));
  }
  function removeStealth(p){if(!p.rw?.jokerStealth)return;p.rw.jokerStealth=null;p.invisible=false;}
  function targetable(c,kind,opts,tick){const e=R.entity(c,kind,{...opts,maxHp:opts.hp,cancelOnStun:false},tick);Object.assign(e,{alive:true,isReworkTurret:true,owner:c.owner,team:c.owner.team,remoteId:e.id,lifeSeq:0});R.world(c.g).turretFrame=-1;return e;}
@@ -158,7 +161,24 @@ export const initializers=[[310,S=>{
  const cleanup=R.cleanup;R.cleanup=(p,g,reason)=>{removeStealth(p);return cleanup(p,g,reason);};
  const wirePlayer=R.wirePlayer;R.wirePlayer=(p,g)=>{const row=wirePlayer(p,g);if(['emoji-145','emoji-149'].includes(p.ability.id)&&R.state(p).buffs.some(b=>b.kind==='moveHaste'&&b.ctx.owner===p&&b.end>now(g)))row.roster10Move=true;return row;};
  const aimSpec=R.aimSpec;R.aimSpec=(ability,kind,radius,...args)=>{const spec=aimSpec(ability,kind,radius,...args);if(['emoji-141','emoji-143','emoji-144','emoji-147','emoji-150'].includes(ability.id)){spec.clipPath=true;spec.collisionRadius=ability.id==='emoji-144'?26:radius;spec.clipBodies=ability.id!=='emoji-144';spec.bodyPadding=ability.id==='emoji-141'?5:1;}if(ability.id==='emoji-142')spec.clipRope=true;return spec;};
+ register(152,{label:'스포트라이트',kind:'spotlight',shape:'circle',radius:550,windupFrames:36,stunFrames:180,stunCap:216,cooldownFrames:1440,
+  description:'0.6초 예고 후 자신 중심 반경 550 안의 모든 생존 적을 벽 너머에도 3초 기절시킵니다. 직접 피해 없음 · 제어 강화 상한 3.6초.',
+  capabilities:caps({area:true,cc:true})},(c,s)=>{
+  R.entity(c,'spotlight',{pos:c.owner.pos,radius:s.radius,duration:s.windupFrames,color:'#fde68a'},(ctx,e)=>{
+   e.pos.x=c.owner.pos.x;e.pos.y=c.owner.pos.y;
+   if(e.age!==s.windupFrames)return;
+   for(const target of c.g.getNearbyParticipants(c.owner.pos,s.radius)){
+    if(target.isClone||target.isReworkTurret||!R.hostile(c,target)||dist(c.owner.pos,target.pos)>s.radius)continue;
+    const before=target.stunned||0;
+    if(R.applyStun(c,target,s.stunFrames,s.stunCap)&&target.stunned>before)R.state(target).spotlightStart=c.g.frame;
+   }
+  });
+ });
+ register(153,{label:'반사',kind:'mirror',shape:'line',range:130,width:24,length:560,durationFrames:300,cooldownFrames:1320,
+  description:'전방 130에 길이 560의 일자 장막을 5초 설치합니다. 앞면에 닿는 적의 비행탄을 한 번 되돌리고 원 발사자를 약하게 추적합니다. 이동·근접·광선·장판은 통과합니다.',
+  capabilities:caps({})},(c,s)=>placeMirror(S,c,s));
  const movementUpdates = [
+  ['emoji-020',1.296,1.55],['emoji-006',1.33488,1.48],
   ['emoji-139',1.00,1.18], ['emoji-028',1.14,1.27],
   ['emoji-007',1.20,1.30], ['emoji-132',1.296,1.38]
  ];
@@ -167,5 +187,5 @@ export const initializers=[[310,S=>{
   ability.finalBaseSpeed=newSpeed;
   if(id!=='emoji-139')ability.walkFloorRatio=newSpeed/oldSpeed;
  }
- S.BR_ROSTER_VERSION='emoji84-v34';
+ S.BR_ROSTER_VERSION='emoji86-v35';
 }]];

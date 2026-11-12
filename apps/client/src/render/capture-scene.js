@@ -1,3 +1,4 @@
+import {mirrorMiniState,drawMiniMirrors} from './roster10-scene.js';
 // Original capture geometry; map/point state comes exclusively from WS snapshots.
 import {manifest} from '../../../../packages/content/src/manifest.js';
 export function captureScene(r,view,map,z){captureMini(r,view,map);const packet=view.capture,stale=!r.teacher&&performance.now()-(r.timeline.samples.at(-1)?.at||0)>1500,points=map.captureMap.points.map((p,i)=>({...p,enabled:!!(packet.am&(1<<i)),state:packet.z[i][0],team:packet.z[i][1],counts:[0,...packet.z[i][2]]})),data={map:map.captureMap,points,stale,openingLeft:Math.max(0,Math.ceil(manifest.capture.openingSeconds-packet.a))};
@@ -21,9 +22,9 @@ export function captureFrameCost(session,ms){const window={BRMP:session};functio
 function captureMini(r,view,map){
  if(r.teacher)return;
  if(!r.escapeMini){const c=document.createElement('canvas');c.width=c.height=112;c.className='br-escape-map br-capture-map';c.setAttribute('aria-label','X자 점령전 A B 거점 지도');r.canvas.parentElement.append(c);r.escapeMini=c;}
- const canvas=r.escapeMini,packet=view.capture,self=view.self,key=packet.q+':'+Math.round((self?.x||0)/30)+':'+Math.round((self?.y||0)/30);if(canvas.captureKey===key)return;canvas.captureKey=key;
+ const mirrors=mirrorMiniState(r),canvas=r.escapeMini,packet=view.capture,self=view.self,key=mirrors.key+packet.q+':'+Math.round((self?.x||0)/30)+':'+Math.round((self?.y||0)/30);if(canvas.captureKey===key)return;canvas.captureKey=key;
  const c=canvas.getContext('2d'),b=map.boundary,scale=100/(b.maxX-b.minX),x=v=>6+(v-b.minX)*scale,y=v=>6+(v-b.minY)*scale,colors=['#94a3b8','#3b82f6','#ef4444','#22c55e','#eab308'];c.fillStyle='#07101de8';c.fillRect(0,0,112,112);c.save();c.beginPath();c.rect(6,6,100,100);c.clip();
  c.fillStyle='#334155';for(const w of b.blocks){const co=Math.cos(w.angle),si=Math.sin(w.angle);c.beginPath();for(const [i,[lx,ly]]of [[-w.w/2,-w.h/2],[w.w/2,-w.h/2],[w.w/2,w.h/2],[-w.w/2,w.h/2]].entries()){const xx=x(w.x+lx*co-ly*si),yy=y(w.y+lx*si+ly*co);i?c.lineTo(xx,yy):c.moveTo(xx,yy);}c.closePath();c.fill();}
  c.font='bold 10px sans-serif';c.textAlign='center';for(const [i,p]of map.captureMap.points.entries()){const state=packet.z[i];c.strokeStyle=colors[state[1]];c.beginPath();c.arc(x(p.x),y(p.y),p.radius*scale,0,Math.PI*2);c.stroke();c.fillStyle='#fff';c.fillText(p.id,x(p.x),y(p.y)+3);}
- for(const base of map.captureMap.bases){c.fillStyle=colors[base.team];c.fillRect(x(base.x)-2,y(base.y)-2,4,4);}if(self){c.fillStyle='#fff';c.beginPath();c.arc(x(self.x),y(self.y),2,0,Math.PI*2);c.fill();}c.restore();
+ for(const base of map.captureMap.bases){c.fillStyle=colors[base.team];c.fillRect(x(base.x)-2,y(base.y)-2,4,4);}if(self){c.fillStyle='#fff';c.beginPath();c.arc(x(self.x),y(self.y),2,0,Math.PI*2);c.fill();}drawMiniMirrors(c,mirrors.rows,x,y);c.restore();
 }

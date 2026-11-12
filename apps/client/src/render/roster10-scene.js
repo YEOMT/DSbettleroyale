@@ -1,9 +1,22 @@
 import {Graphics} from 'pixi.js';
 import {hostDisplayRadius,hostInk} from './host-layout.js';
 
-export const roster10Kinds=new Set(['decoy','grapple','mushroom','poison','ring-wall','red-light-warning']);
+export const roster10Kinds=new Set(['decoy','grapple','mushroom','poison','ring-wall','red-light-warning','spotlight','mirror']);
 
+export function mirrorMiniState(r){
+ const shots=r.timeline.samples.at(-1)?.state.shots;
+ if(!r.miniMirrors||r.miniMirrors.shots!==shots){
+  const rows=shots?.filter(s=>s.kind==='mirror')||[];
+  r.miniMirrors={shots,rows,key:rows.map(s=>s.id).join('|')};
+ }
+ return r.miniMirrors;
+}
+export function drawMiniMirrors(c,rows,x,y){
+ c.strokeStyle='#e0f2fe';c.lineWidth=2;
+ for(const e of rows){const dx=-e.dy*e.length/2,dy=e.dx*e.length/2;c.beginPath();c.moveTo(x(e.x-dx),y(e.y-dy));c.lineTo(x(e.x+dx),y(e.y+dy));c.stroke();}
+}
 export function clearRoster10Scene(r){
+ r.miniMirrors=null;
  for(const entry of r.roster10Rings?.values()||[])if(entry.graphic&&!entry.graphic.destroyed)entry.graphic.destroy();
  r.roster10Rings?.clear();r.roster10Visible?.clear();
 }
@@ -40,7 +53,13 @@ export function drawRoster10Scene(r,p,view,zoom){
  for(const e of view.shots){
   if(!roster10Kinds.has(e.kind)||e.kind==='ring-wall'||(e.displayFrame??view.renderTick)>=e.end)continue;
   visible.add(e.id);
-  if(e.kind==='red-light-warning'){
+  if(e.kind==='spotlight'){
+   p.circle(e.x,e.y,e.radius,'#fde68a',.12);p.circle(e.x,e.y,e.radius,'#facc15',.95,3/z);
+  }else if(e.kind==='mirror'){
+   const tx=-e.dy*e.length/2,ty=e.dx*e.length/2,x1=e.x-tx,y1=e.y-ty,x2=e.x+tx,y2=e.y+ty;
+   p.line(x1,y1,x2,y2,'#cbd5e1',.32,e.width);
+   p.line(x1+e.dx*12,y1+e.dy*12,x2+e.dx*12,y2+e.dy*12,'#e0f2fe',.95,3/z);
+  }else if(e.kind==='red-light-warning'){
    const angle=Math.atan2(e.dy,e.dx),half=e.halfAngle,range=e.length;
    p.sector(e.x,e.y,range,angle,half,e.color,.15);
    p.arc(e.x,e.y,range,angle-half,angle+half,e.color,.95,2/z);

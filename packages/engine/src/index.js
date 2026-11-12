@@ -48,7 +48,8 @@ export function createWorld(content=manifest,config={},seed='1',initialPlayers=[
  const beginNative=room.brBeginProjectileVisual,endNative=room.brEndProjectileVisual;
  room.brBeginProjectileVisual=(g,p)=>{beginNative(g,p);if(!p._brNetId)p._brNetId='q'+(++g.visualShotSeq);if(!p._wsBorn){p._brBornFrame??=g.frame;p._wsBorn=true;emit(room,'SHOT_SPAWN',nativeShot(room,p));}};
  room.brEndProjectileVisual=(g,p)=>{endNative(g,p);if(p.life<=0&&!p._wsEnded){p._wsEnded=true;emit(room,'SHOT_END',{...nativeShot(room,p),reason:p._endReason||'expired'});}};
- room.entitySpawn=e=>{if(['projectile','hook','lob','bomb','beam','turret','zone','orbit','decoy','grapple','mushroom','poison','ring-wall'].includes(e.kind))emit(room,'SHOT_SPAWN',reworkShot(e));};
+ room.entitySpawn=e=>{if(['projectile','hook','lob','bomb','beam','turret','zone','orbit','decoy','grapple','mushroom','poison','ring-wall','spotlight','mirror'].includes(e.kind))emit(room,'SHOT_SPAWN',reworkShot(e));};
+ room.publishTurn=(shot,native)=>emit(room,'SHOT_TURN',native?nativeShot(room,shot):reworkShot(shot));
  room.entityEnd=(e,reason)=>emit(room,'SHOT_END',{...reworkShot(e),reason});
  const originalFx=room.game.emitStudentFx.bind(room.game);
  room.game.emitStudentFx=(type,pos,data={})=>{originalFx(type,pos,data);emit(room,'FX',{kind:type,x:pos.x,y:pos.y,...data});};
@@ -76,13 +77,13 @@ export function applyCommand(world,command){
  }
  return {accepted:false,reason:'UNKNOWN_COMMAND'};
 }
-function nativeShot(world,p){p._brNetId??="q"+(++world.game.visualShotSeq);p._brBornFrame??=p.farmBornFrame??world.game.frame;return {id:world.matchId+':'+p.ownerLife+':'+p.inputKind+':'+p.inputSeq+':'+p.shotOrdinal+':'+p._brNetId,
+function nativeShot(world,p){p._brNetId??="q"+(++world.game.visualShotSeq);p._brBornFrame??=p.farmBornFrame??world.game.frame;return {id:world.matchId+':'+(p.launchLife??p.ownerLife)+':'+p.inputKind+':'+p.inputSeq+':'+p.shotOrdinal+':'+p._brNetId,
  owner:p.owner?.remoteId,life:p.ownerLife,actionKind:p.inputKind,actionSeq:p.inputSeq,ordinal:p.shotOrdinal,
- kind:'projectile',type:p.type,x:p.pos.x,y:p.pos.y,dx:p.vel?.x||0,dy:p.vel?.y||0,radius:p.size||8,
- vfx:p.vfx,ownerWarp:p.owner?.warpSeq||0,orbitAngle:p.orbitAngle,faceDir:!!p.faceDir,emoji:p.emoji,color:p.color,style:p.weaponStyle,trailColor:p.trailColor,rotation:p.spinRate?p.spinAngle:p.faceDir?Math.atan2(p.vel.y,p.vel.x):0,spin:p.spinRate,phase:p.returning?'return':'out',trace:p._brTrace||[],remaining:p.life,rangeRemaining:p.rangeRemaining,turn:p._brTurn||0,curved:['BOOMERANG','ORBIT','missile'].includes(p.type)||!!p.wobble,start:p._brBornFrame??world.game.frame,team:p.owner?.team||0,path:p._brPath||[],native:true};}
+ kind:'projectile',...(p.reflectedOnce?{returned:true}:{}),...(p.sniper?{crit:p.sniper.critical}:{}),type:p.type,x:p.pos.x,y:p.pos.y,dx:p.vel?.x||0,dy:p.vel?.y||0,radius:p.size||8,
+ vfx:p.vfx,ownerWarp:p.owner?.warpSeq||0,orbitAngle:p.orbitAngle,faceDir:!!p.faceDir,emoji:p.emoji,color:p.color,style:p.weaponStyle,trailColor:p.trailColor,rotation:p.spinRate?p.spinAngle:p.faceDir?Math.atan2(p.vel.y,p.vel.x):0,spin:p.spinRate,phase:p.returning?'return':'out',trace:p._brTrace||[],remaining:p.life,rangeRemaining:p.rangeRemaining,turn:p._brTurn||0,curved:!!p.returnTarget||['BOOMERANG','ORBIT','missile'].includes(p.type)||!!p.wobble,start:p._brBornFrame??world.game.frame,team:p.owner?.team||0,path:p._brPath||[],native:true};}
 function reworkShot(e){return {id:e.id,owner:e.ctx?.ownerId,life:e.ctx?.ownerLifeSeq,actionKind:e.actionKind||e.ctx?.actionKind,actionSeq:e.ctx?.actionSeq,ordinal:e.ordinal??0,
- kind:e.kind,...(['decoy','grapple','mushroom','poison','ring-wall'].includes(e.kind)?{hp:e.hp??null,maxHp:e.maxHp??null,name:e.name||'',armAt:e.armFrames!=null?e.start+e.armFrames:null,fx:e.from?.x??null,fy:e.from?.y??null,tx:e.to?.x??null,ty:e.to?.y??null}:{}),x:e.pos?.x||0,y:e.pos?.y||0,dx:e.dir?.x||0,dy:e.dir?.y||0,speed:e.speed||0,radius:e.radius||8,range:e.range||0,
- path:e._brPath||[],curved:!!(e.homing||e.boomerang),turn:e.bounceCount||0,phase:e.phase||null,width:e.width||0,length:e.length??e.range??0,remaining:e.range!=null?Math.max(0,e.range-(e.distance||0)):0,style:'skill',start:e.start,end:e.end,team:e.ctx?.owner?.team||0,emoji:e.displayEmoji||e.emoji,color:e.color};}
+ kind:e.kind,...(e.reflectedOnce?{returned:true}:{}),...(e.ctx?.sniper?{crit:e.ctx.sniper.critical}:{}),...(['decoy','grapple','mushroom','poison','ring-wall'].includes(e.kind)?{hp:e.hp??null,maxHp:e.maxHp??null,name:e.name||'',armAt:e.armFrames!=null?e.start+e.armFrames:null,fx:e.from?.x??null,fy:e.from?.y??null,tx:e.to?.x??null,ty:e.to?.y??null}:{}),x:e.pos?.x||0,y:e.pos?.y||0,dx:e.dir?.x||0,dy:e.dir?.y||0,speed:e.speed||0,radius:e.radius||8,range:e.range||0,
+ path:e._brPath||[],curved:!!(e.returnTarget||e.homing||e.boomerang),turn:e.bounceCount||0,phase:e.phase||null,width:e.width||0,length:e.length??e.range??0,remaining:e.range!=null?Math.max(0,e.range-(e.distance||0)):0,style:'skill',start:e.start,end:e.end,team:e.ctx?.owner?.team||0,emoji:e.displayEmoji||e.emoji,color:e.color};}
 function projectileStates(world){
  const g=world.game;
  const native=g.projectiles.filter(p=>p.life>0).map(p=>nativeShot(world,p));

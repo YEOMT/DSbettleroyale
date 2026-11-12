@@ -1,6 +1,6 @@
 // A room publishes only public IDs and kinds. Names are resolved from the roster.
 const priorities = {
-    'first-blood': 3, streak: 2, 'supply-incoming': 2, 'supply-claimed': 1,
+    awakening: 3, 'first-blood': 3, streak: 2, 'supply-incoming': 2, 'supply-claimed': 1,
     'final-three': 4, compression: 4
 };
 
