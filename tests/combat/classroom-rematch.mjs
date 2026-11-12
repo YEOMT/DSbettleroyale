@@ -7,7 +7,7 @@ const label=process.argv[2]||'after',before=label==='before',start=performance.n
 const mixed=process.argv[3]==='mixed',backend=process.env.EVOLUTION_RENDERER||(mixed?'pixi':'canvas');
 const h=await auditHarness({players:20,renderer:backend,studentRenderer:process.env.EVOLUTION_RENDERER||'canvas',...(process.env.EVOLUTION_RENDERER?{viewport:{width:844,height:640}}:{}),initScript:lifetimeProbe,serverProcess:true,mode:process.env.CLASSROOM_MODE||'solo'});
 let inputTimer,measurement;
-const stats=a=>{const s=a.slice().sort((a,b)=>a-b);const q=p=>s[Math.floor((s.length-1)*p)]||0;return {n:s.length,p50:q(.5),p95:s[Math.floor(s.length*.95)]||0,p99:q(.99),max:s.at(-1)||0,over50:s.filter(n=>n>=50).length,over100:s.filter(n=>n>=100).length,over200:s.filter(n=>n>=200).length};};
+const stats=a=>{const s=a.slice().sort((a,b)=>a-b);const q=p=>s[Math.min(s.length-1,Math.floor(s.length*p))]||0;return {n:s.length,p50:q(.5),p95:q(.95),p99:q(.99),max:s.at(-1)||0,over50:s.filter(n=>n>=50).length,over100:s.filter(n=>n>=100).length,over200:s.filter(n=>n>=200).length};};
 try{
  for(const [i,c]of h.clients.entries()){
   c.ws.on('close',(code,reason)=>closes.push({synthetic:i,code,reason:String(reason)}));

@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';
+import {measureActions} from './input-milestones.mjs';
 const baseline=process.argv.includes('--baseline'),renderer=process.argv[2]||'canvas';
 const h=await auditHarness({players:2,mode:'team-elim',quality:'balanced',renderer,viewport:renderer==='pixi'?{width:800,height:520}:{width:1366,height:768}});
 const report={renderer,baseline},time=performance.now();
@@ -33,6 +34,7 @@ try{
    measure.samples.push({tick:v.renderTick,x:self.x,logical:t.predicted.x,look:r.cameraPose.x-self.x,err:v.self.x-t.predicted.x});
   };
  });
+ const actionMetrics=process.env.SMOOTHNESS_DIAGNOSTICS==='1'?await measureActions(page,first,w):null;
  // Real mouse motion targeted at the current game canvas, not a constructed browser event.
  await delay(350); // Let join/layout and first-paint work finish before measuring input edges.
  const sampleStart=performance.now(),bytesAtStart=h.app.metrics.sentBytes,applied=[],onApply=w.onInputApplied;
@@ -58,6 +60,10 @@ try{
  const m=await page.evaluate(()=>({...measure,holds:mod.timeline.metrics.holds,gaps:mod.timeline.metrics.arrivalGaps,corrections:mod.timeline.metrics.corrections,objects:[mod.renderer.textures.size,mod.renderer.sprites.size]}));
  peer.snapshot=snapshot;for(const t of timers)clearTimeout(t);report.jitterSamples=idx;
  report.errors=h.errors.slice();report.edges=m.edges.map(e=>({...e,applied:applied.find(i=>i.seq>=e.sentSeq&&i.x===e.x)}));report.casts=m.casts;report.applied=p.lastAppliedSeq;
+ if(actionMetrics){
+  report.actionMilestones=await actionMetrics();
+  assert.ok(['attack','skill'].every(kind=>report.actionMilestones.browser.some(r=>r.kind===kind&&Number.isFinite(r.downToAuthorityDrawMs)&&Number.isFinite(r.downToAcceptedAckMs))&&report.actionMilestones.server.some(r=>r.kind===kind&&Number.isFinite(r.appliedMs)&&Number.isFinite(r.firedMs))));
+ }
  report.fired={attack:p.firedAttackSeq,skill:p.firedSkillSeq};report.raf=[.5,.95,.99].map(q=>percentile(m.frameGaps,q));
  report.longFrameRate=[33.3,50].map(t=>m.frameGaps.filter(g=>g>t).length/Math.max(1,m.frameGaps.length));
  report.drawP95=percentile(m.draws,.95);report.receiveP95=percentile(m.gaps,.95);report.holds=m.holds;report.objects=m.objects;

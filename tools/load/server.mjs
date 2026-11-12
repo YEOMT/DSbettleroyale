@@ -26,7 +26,14 @@ process.on('message',async m=>{try{let value;const room=[...app.manager.rooms.va
   if(!g._loadUpdate){g._loadUpdate=g.update.bind(g);g.update=()=>{g.participants.forEach((p,i)=>{if(i<g._loadAlive&&p.alive)p.hp=p.maxHp;});return g._loadUpdate();};}
   value=true;
  }
- if(m.type==='fixture-growth'){for(const p of room.world.game.participants)room.world.brProgression.awardXP(p,20,0);value=true;}
+ if(m.type==='fixture-growth'){
+  const w=room.world;
+  for(const [i,p] of w.game.participants.entries()){
+   if(process.env.CLASSROOM_FIXED_SEED==='1')p.run.rng=w.brHashRandom(room.matchId+'|build|synthetic-'+i);
+   w.brProgression.awardXP(p,20,0);
+  }
+  value=true;
+ }
  if(m.type==='status')value={...app.metrics.report(app.manager),sourceHash:source,phase:room?.phase,connected:room?.students().filter(p=>p.connected).length,fault:room?.lastFault,paused:!!room?.safePaused,eventLedgerBytes:[...(room?.members.values()||[])].reduce((n,p)=>n+p.eventBytes,0),window:telemetry.sample()};
  if(m.type==='close'){telemetry.close();await app.close();value={rooms:app.manager.rooms.size,tokens:app.manager.tokens.size,peers:app.peers.size};process.send({id:m.id,value});process.disconnect();return;}
  process.send({id:m.id,value});

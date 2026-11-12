@@ -11,7 +11,16 @@ export class Timeline{
   if(s.snapshotSeq<=this.lastSeq){this.metrics.discarded++;return false;}this.lastSeq=s.snapshotSeq;this.metrics.accepted++;
   const prev=this.samples.at(-1);if(prev){this.metrics.arrivalGaps.push(now-prev.at);this.metrics.sourceGaps.push((s.serverTick-prev.state.serverTick)*1000/60);}
   for(const q of s.shots){const spawn=this.spawns.get(q.id);if(spawn)spawn.seenInSnapshot=true;}
-  this.samples.push({at:now,state:s});if(this.samples.length>40)this.samples.shift();
+  // A regular authority tick can arrive late, followed by a short gap on
+  // the same ordered socket. Re-anchoring playback to both arrival times
+  // alternately freezes and accelerates every remote actor and projectile.
+  let clockAt=now;
+  if(prev){
+   const ticks=s.serverTick-prev.state.serverTick;
+   const expected=prev.clockAt+ticks*(1000/60),error=now-expected;
+   if(ticks>0&&ticks<=4&&Math.abs(error)<75)clockAt=expected+error/8;
+  }
+  this.samples.push({at:now,clockAt,state:s});if(this.samples.length>40)this.samples.shift();
   if(this.dynamicRevision!==(s.dynamicWalls?.revision??0)){this.dynamicRevision=s.dynamicWalls?.revision??0;this.walls=this.staticWalls.concat((s.dynamicWalls?.walls||[]).filter(w=>w.end>s.serverTick).map(w=>({...w,pos:{x:w.x,y:w.y},width:w.w,height:w.h})));this.collisionCache=null;}
   for(const key of ['arrivalGaps','sourceGaps','corrections'])if(this.metrics[key].length>1200)this.metrics[key].splice(0,this.metrics[key].length-1200);
   for(const [index,angle]of s.movingWalls||[]){if(this.static?.walls[index])this.static.walls[index].angle=angle;if(this.walls?.[index])this.walls[index].angle=angle;}
@@ -36,7 +45,7 @@ export class Timeline{
  event(e,now=performance.now()){const d=e.data;if(e.type==='ESCAPE_STATE'){if(!this.escape||d.revision>this.escape.revision)this.escape=d;return;}if(e.type==='SHOT_SPAWN'||e.type==='SHOT_TURN'){this.spawns.set(d.id,{...d,tick:e.serverTick,seenInSnapshot:false});}else if(e.type==='SHOT_END')this.terminals.set(d.id,{...d,tick:e.serverTick});else if(e.type==='FX'){if(d.sourceId===this.predicted?.id&&d.geometry?.seq)this.effects=this.effects.filter(f=>!f.preview||f.actionKind!==d.geometry.kind||f.actionSeq!==d.geometry.seq);this.effects.push({...d,id:e.eventId,tick:e.serverTick,receivedAt:now});}if(this.effects.length>300)this.effects.splice(0,this.effects.length-300);for(const map of [this.terminals,this.spawns])while(map.size>2048)map.delete(map.keys().next().value);}
  frame(now=performance.now()){
   const last=this.samples.at(-1);if(!last)return null;
-  this.renderTick=Math.max(this.renderTick,last.state.serverTick+Math.min(150,now-last.at)*.06-4.5);
+  this.renderTick=Math.max(this.renderTick,last.state.serverTick+Math.min(150,now-last.clockAt)*.06-4.5);
   let left=this.samples[0],right=last;for(let i=1;i<this.samples.length;i++)if(this.samples[i].state.serverTick>=this.renderTick){left=this.samples[i-1];right=this.samples[i];break;}
   const span=right.state.serverTick-left.state.serverTick,alpha=span?Math.max(0,Math.min(1,(this.renderTick-left.state.serverTick)/span)):1;
   const priorActors=new Map(left.state.actors.map(a=>[a.id,a])),priorShots=new Map(left.state.shots.map(q=>[q.id,q]));

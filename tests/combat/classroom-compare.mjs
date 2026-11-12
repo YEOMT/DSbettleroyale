@@ -44,7 +44,7 @@ function checkout(version){
  for(const file of ['classroom-rematch.mjs','classroom-authority.mjs','classroom-meter.mjs']){
   fs.copyFileSync(path.join(root,'tests/combat',file),path.join(dir,'tests/combat',file));
  }
- if(stability)fs.copyFileSync(path.join(root,'tools/load/run.mjs'),path.join(dir,'tools/load/run.mjs'));
+ if(stability)for(const file of ['tools/load/run.mjs','tools/load/server.mjs'])fs.copyFileSync(path.join(root,file),path.join(dir,file));
  return dir;
 }
 const n=value=>Math.round(value*100)/100;
@@ -64,13 +64,13 @@ function summarize(run){
   unsentAfterRematch:rows.map(r=>r.lobby?.reduce((sum,s)=>sum+s.unsentInputs,0)??null),
   errors:run.errors,...(run.rows.at(-1)?.error?{failedAssertion:run.rows.at(-1).error}:{})};
 }
-function classroomCase(cwd,env,label){
+function classroomCase(cwd,env,label,timeout=240000){
  const file=path.join(cwd,'artifacts/classroom',label+'-rematch.json');
- const child=spawnSync(process.execPath,['tests/combat/classroom-rematch.mjs',label],{cwd,env:{...process.env,...env},stdio:'inherit',timeout:240000});
+ const child=spawnSync(process.execPath,['tests/combat/classroom-rematch.mjs',label],{cwd,env:{...process.env,...env},stdio:'inherit',timeout});
  const report=fs.existsSync(file)?JSON.parse(fs.readFileSync(file)):null;
  const status=child.error?.code==='ETIMEDOUT'?'TIMEOUT':child.error?'INFRA_FAILURE':child.status===0?'PASS':'FAIL';
  if(status!=='PASS')process.exitCode=1;
- return {status,...(report?summarize(report):{})};
+ return {status,failure:status==='PASS'?undefined:child.error?.code||'SCENARIO_FAILED',...(report?summarize(report):{})};
 }
 const results=[], machine={platform:process.platform,architecture:process.arch,node:process.version,
  logicalCpus:os.availableParallelism(),totalMemoryBytes:os.totalmem()};
@@ -95,17 +95,11 @@ try {
   }
   for(const scenario of (evolution?[mode]:['solo','team-capture'])){
    const label='compare-'+version.label+'-'+scenario;
-   let status='PASS',failure;
-   try{execFileSync(process.execPath,['tests/combat/classroom-rematch.mjs',label],{cwd,stdio:'inherit',
-    env:{...process.env,CLASSROOM_UPGRADE:'1',CLASSROOM_METER:'1',CLASSROOM_MODE:scenario,CLASSROOM_SMOOTH_STATS:stability?'1':'0',CLASSROOM_EXPECT_ARENA:stability&&version.label==='v35.1'?'1':'0',...(evolution?{EVOLUTION_RENDERER:backend}:{})},timeout:evolution?240000:135000});}
-   catch(e){
-    failure=e.code||'SCENARIO_FAILED';
-    status=e.code==='ETIMEDOUT'?'TIMEOUT':e.code?'INFRA_FAILURE':'FAIL';
-    process.exitCode=1;
-   }
-   const file=path.join(cwd,'artifacts/classroom',label+'-rematch.json');
-   const result=fs.existsSync(file)?summarize(JSON.parse(fs.readFileSync(file))):{};
-   results.push({...version,mode:scenario,renderer:evolution?backend:'canvas',status,failure,machine,...result});
+   const options={CLASSROOM_UPGRADE:'1',CLASSROOM_METER:'1',CLASSROOM_MODE:scenario,
+    CLASSROOM_SMOOTH_STATS:stability?'1':'0',CLASSROOM_EXPECT_ARENA:stability&&version.label==='v35.1'?'1':'0',
+    ...(evolution?{EVOLUTION_RENDERER:backend}:{})};
+   const result=classroomCase(cwd,options,label,evolution?240000:135000);
+   results.push({...version,mode:scenario,renderer:evolution?backend:'canvas',machine,...result});
    fs.writeFileSync(path.join(evidence,'comparison.json'),JSON.stringify(results,null,2)+'\n');
    console.log(JSON.stringify(results.at(-1)));
   }
