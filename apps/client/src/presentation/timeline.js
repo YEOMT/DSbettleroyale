@@ -85,8 +85,24 @@ export class Timeline{
     if(Math.max(this.renderTick,last.state.serverTick)-e.tick>45||now-e.receivedAt>3000)return false;
     e.firstVisibleAt=now;e.displayTick=this.renderTick;
    }
-   if(e.kind==='hit'&&e.geometry?.confirmed&&!e.geometry.periodic&&e.firstVisibleAt==null&&e.tick<=this.renderTick&&this.renderTick-e.tick<=45&&now-e.receivedAt<=240){
-    e.firstVisibleAt=now;e.displayTick=Math.max(e.tick,this.renderTick-2);
+   if(e.kind==='hit'&&e.geometry?.confirmed&&!e.geometry.periodic&&e.firstVisibleAt==null){
+    const freshUntil=e.receivedAt+240;
+    if(this.renderTick<e.tick){
+     if(now<=freshUntil){e.waitingTick=this.renderTick;e.waitingAt=now;}
+    }else{
+     let visibleAt=now;
+     if(now>freshUntil&&e.waitingAt!=null){
+      // A previous draw already saw this fresh event in the interpolation buffer.
+      // Charge the time since its tick crossed between draws to its display life.
+      // A respawning actor can be absent from the interpolated draw list.
+      if(last.state.actors.some(a=>(a.id===e.targetId&&e.geometry.targetLife!=null&&a.lifeSeq!==e.geometry.targetLife)||
+       (a.id===e.sourceId&&e.geometry.lifeSeq!=null&&a.lifeSeq!==e.geometry.lifeSeq)))return false;
+      const fraction=(e.tick-e.waitingTick)/(this.renderTick-e.waitingTick);
+      visibleAt=e.waitingAt+(now-e.waitingAt)*fraction;
+     }
+     if(visibleAt>freshUntil||Math.max(this.renderTick,last.state.serverTick)-e.tick>45||now-visibleAt>=effectLife(e))return false;
+     e.firstVisibleAt=visibleAt;e.displayTick=Math.max(e.tick,this.renderTick-Math.max(2,(now-visibleAt)*.06));
+    }
    }
    return this.renderTick-(e.displayTick??e.tick)<effectLife(e)*.06&&(e.firstVisibleAt==null||now-e.firstVisibleAt<effectLife(e));
   });return {...right.state,escape:this.escape,actors,shots,renderTick:this.renderTick,effects:this.effects.filter(e=>e.tick<=this.renderTick).concat(residuals)};

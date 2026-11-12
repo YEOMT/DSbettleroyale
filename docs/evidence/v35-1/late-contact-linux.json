@@ -1,0 +1,38 @@
+{
+  "run": 43240591465,
+  "job": 131261970192,
+  "test": "combat/live-feel.mjs pixi, opponent",
+  "ability": "emoji-013",
+  "kind": "attack",
+  "life": 1,
+  "seq": 1,
+  "authoritativeHitsReceived": 1,
+  "posePaint": [
+    "slash",
+    "hit"
+  ],
+  "observerSamples": [
+    {
+      "serverHitTick": 73,
+      "renderTick": 64.27707578182167,
+      "msAfterReceive": -17
+    },
+    {
+      "serverHitTick": 73,
+      "renderTick": 72.83463084602471,
+      "msAfterReceive": 116
+    },
+    {
+      "serverHitTick": 73,
+      "renderTick": 85.6959999999997,
+      "msAfterReceive": 249
+    },
+    {
+      "serverHitTick": 73,
+      "renderTick": 92.11862499999953,
+      "msAfterReceive": 366
+    }
+  ],
+  "missing": "confirmed nonperiodic contact paint",
+  "cause": "No eligible paint before the old 240ms first-display deadline."
+}

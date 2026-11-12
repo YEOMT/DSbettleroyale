@@ -4,7 +4,7 @@
 
 PR #22 compares v34, v35 and the candidate in the same Linux job for each scenario. Local fixed-jitter replay, actual Edge input, four simultaneous WS resumptions and private growth projection were verified. The fixed 20-player X arena probe isolated GPU submission from JS preparation; exact wire comparisons and room cleanup checks are separate. Hardware Android/iPhone and classroom testing are unavailable. [Baseline and final job evidence](performance/v35-1-baseline.md) · [Measured changes and rollback](performance/v35-1-changes.md).
 
-Runtime a047ace passed CI 43237643426 and all eight comparison jobs in 43237643482. The 600.023-second 30-student WebSocket run finished two rounds with zero overloads and clean final references. First→last minute median RSS grew 182.06→265.86MiB. Software Pixi solo student1 p95 worsened 566.6→666.7ms. Physical devices and deployment remain NOT_RUN.
+Runtime a047ace passed CI 43237643426 and all eight comparison jobs in 43237643482. The 600.023-second 30-student WebSocket run finished two rounds with zero overloads and clean final references. First→last minute median RSS grew 182.06→265.86MiB. Software Pixi solo student1 p95 worsened 566.6→666.7ms. Physical devices and deployment remain NOT_RUN. Docs-head CI 43240591465 subsequently caught an opponent Pixi contact whose effect tick crossed the first-paint deadline between frames. The bounded display repair, regression trace and final checks are recorded in PR22.
 
 ## v35 Evolution & Reflection
 
