@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createWorld,createRuleContext,stepWorld,destroyWorld,getTeacherState,getVisibleState} from '../../packages/engine/src/index.js';
-import {sniperCast,sniperChances} from '../../packages/engine/src/combat/reflection.js';
+import {ironActive,reflectedDirection,sniperCast,sniperChances,steerReturn} from '../../packages/engine/src/combat/reflection.js';
 import {manifest} from '../../packages/content/src/manifest.js';
 import {Timeline} from '../../apps/client/src/presentation/timeline.js';
 import {aimGuide} from '../../apps/client/src/render/aim-guide.js';
@@ -189,4 +189,25 @@ test('wide III guide matches actual eight-direction reach and normal melee impul
   w.brBasicAttack(p,g,v(1));const x=q.pos.x;f.tick(1);shifts.push(q.pos.x-x);
  }
  assert.ok(shifts[0]>0&&shifts[1]>2*shifts[0],JSON.stringify(shifts));
+});
+
+test('iron lasts through stun for precisely 300 frames and a mirror stops steering on loss of sight or life',t=>{
+ const f=setup(t,['emoji-114','emoji-028']),{w,g,players:[source,defender],v}=f;
+ assert.ok(f.cast(defender));defender.stunned=400;
+ f.tick(299);assert.equal(ironActive(defender,g.frame),true);
+ f.tick(1);assert.equal(ironActive(defender,g.frame),false);
+ const origin=v(100),incoming=v(1),shot={owner:source,pos:origin};
+ const reflected=reflectedDirection(w,g,shot,origin,incoming,defender,true);
+ assert.ok(reflected.x<-.99);shot.owner=defender;
+ f.place(source,100,400);
+ const steered=steerReturn(g,shot,reflected);
+ assert.ok(Math.abs(Math.acos(steered.x*reflected.x+steered.y*reflected.y)-.045)<1e-7);
+ g.walls=[new w.Wall(100,180,150,25,0)];g.rebuildSpatialGrid();
+ assert.equal(steerReturn(g,shot,steered),steered);assert.equal(shot.returnTarget,null);
+ g.walls=[];g.rebuildSpatialGrid();shot.owner=source;
+ reflectedDirection(w,g,shot,origin,incoming,defender,true);shot.owner=defender;source.lifeSeq++;
+ assert.equal(steerReturn(g,shot,steered),steered);assert.equal(shot.returnTarget,null);
+ source.alive=false;const deadShot={owner:source};
+ const back=reflectedDirection(w,g,deadShot,origin,incoming,defender,true);
+ assert.ok(Math.abs(back.x+1)<1e-9&&Math.abs(back.y)<1e-9);assert.equal(deadShot.returnTarget,undefined);
 });

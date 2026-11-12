@@ -50,6 +50,8 @@ jobs:
         with: {node-version-file: .nvmrc, cache: npm}
       - run: npm ci
       - run: node tests/combat/evolution-browser.mjs ${{ matrix.renderer }}
+      - if: matrix.renderer == 'pixi'
+        run: node tests/combat/evolution-farm.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -64,9 +64,11 @@ try {
    const status=run.error?.code==='ETIMEDOUT'?'TIMEOUT':run.error?'INFRA_FAILURE':run.status===0?'PASS':'FAIL';
    if(status!=='PASS')process.exitCode=1;
    const report=fs.existsSync(path.join(cwd,file))?JSON.parse(fs.readFileSync(path.join(cwd,file))):{};
+   const cpu=report.server?.window?.cpuUsageUs;
    const values=scissors?{scissors:report.scissors,host:report.hostCommands?.steps,phase:report.hostCommands?.client?.phase}:
     {players:report.players,snapshots:report.snapshots,bytes:report.receivedBytes,elapsedMs:report.elapsedMs,step:report.server?.stepCpu,snapshot:report.server?.snapshotCpu,
-     rss:report.samples?.map(s=>s.server?.memory?.rss).filter(Number.isFinite),errors:report.errors,overloads:report.server?.overloads,cleanup:report.cleanup};
+     cpuMs:cpu?(cpu.user+cpu.system)/1000:undefined,inputApply:report.server?.inputApply,ackP95Ms:report.ack?.p95,
+     wireKiBps:report.elapsedMs?n(report.receivedBytes*1000/report.elapsedMs/1024):undefined,rss:report.samples?.map(s=>s.server?.memory?.rss).filter(Number.isFinite),errors:report.errors,overloads:report.server?.overloads,cleanup:report.cleanup};
    results.push({...version,mode,machine,status,...values,failure:report.failure||report.error||run.error?.message});
    fs.writeFileSync(path.join(evidence,'comparison.json'),JSON.stringify(results,null,2)+'\n');
    continue;

@@ -64,3 +64,28 @@
 첫 비교의 20인 개인전·점령전은 두 렌더러 모두 3라운드를 완주했다. 별도 Pixi 화면 검사가 치명타 표시를 기다리다 실패했다. 추가 로컬 소프트웨어 WebGL 재현에서 세 화면 모두 37틱 반사와 40틱 치명타를 수신했으나 호스트만 글자를 그리기 전에 표시 시간이 끝났다. 최근 권위 틱의 첫 표시와 260ms 표시 수명을 구분했다. 초기 측정에서 Canvas 개인전 호스트 draw p95가 3.2→4.5ms로 늘어, 포탈 소용돌이와 연결선의 정적 도형을 캐시하고 화면 밖 도형은 생략했다. [첫 비교 실행](https://github.com/YEOMT/DSbettleroyale/actions/runs/43217058752) · [초기 Linux 수치](evidence/v35/initial-linux.json)
 
 Targeted는 원본 코드의 ID뿐 아니라 최종 manifest에서 실제 수치·기능이 달라진 캐릭터와 신규 2종도 포함한다. 4종을 넘으면 같은 balanced 공격·스킬·래스터 검사를 렌더러별 최대 4종씩 나눈다. 집계는 선택된 모든 ID의 결과가 있을 때만 성공한다.
+
+## 서버·브라우저 성능과 변경 파일
+
+동일 Linux 러너에서 각 렌더러·모드를 v34→v35 순서로 비교했다. 아래는 XP 상자 캐시 적용 직전 비교다. CPU는 3라운드 서버 프로세스 누적 ms, RSS는 관측 최고 MiB, 송신은 전체 연결 KiB/s다. 입력은 서버 수신 후 적용까지, 화면 간격은 호스트·학생1·학생2 순서이며 모두 p95 ms다.
+
+| 20인 3라운드 | CPU | step / snapshot | RSS | 송신 | 입력 | 화면 간격 |
+|---|---:|---|---:|---:|---:|---|
+| 개인 Canvas | 4525→4440 | 4.70→4.52 / 8.29→7.64 | 182.85→184.47 | 5450→5400 | 16.61→15.77 | 16.7/16.7/16.8→16.7/16.7/16.7 |
+| 개인 Pixi | 7289→7360 | 1.32→1.45 / 3.83→3.93 | 264.73→270.64 | 7125→6954 | 16.50→15.86 | 266.7/233.4/266.7→283.3/300.0/266.7 |
+| 점령 Canvas | 4188→4494 | 3.75→4.26 / 5.78→7.01 | 185.29→183.64 | 5699→5684 | 17.64→21.08 | 16.8/16.7/16.8→16.8/16.7/16.8 |
+| 점령 Pixi | 9528→7772 | 1.38→1.36 / 4.56→4.32 | 186.64→189.99 | 7597→7719 | 14.94→15.81 | 366.7/283.3/333.2→333.3/283.4/300 |
+
+20명과 실제 브라우저 3개를 한 러너에 두어 소프트웨어 GPU·브라우저 자원 경합이 포함된다. 과부하는 모든 칸에서 0회였다. 별도 서버 ABBA 270틱·21수신자의 A/B 평균 CPU는 574.45→562.65ms, 전송은 69,625,746→69,825,600바이트였다. 30명·40초 실제 소켓 시험은 24,831→24,800스냅샷, 614,773,089→581,784,876바이트, step p95 1.627→1.633ms, snapshot p95 4.536→4.658ms, 과부하 0→0회였다. 가위 20명 × 3회 × 8발은 양쪽 모두 480발, 동시 최대 120발과 전체 로비 복귀를 확인했다. 호스트 draw p95는 74.0→70.9ms, 프레임 간격 p95는 500.0→516.6ms였다. [Linux 실행 및 아티팩트](https://github.com/YEOMT/DSbettleroyale/actions/runs/43219652371) · [비교 원자료](evidence/v35/intermediate-linux.json)
+
+개인전 Pixi 학생 한 화면에서 p95 악화가 두 차례 관측됐다. 바뀌지 않은 XP 상자까지 도형을 다시 만들던 경로를 분리했다. 하나의 벡터 레이어에 기존 화풍과 HP를 보존하고, 서버에서 받은 상자 목록·좌표·체력·종류가 바뀔 때 다시 그린다. 실제 Edge 소프트웨어 WebGL의 같은 화면을 12회 측정한 결과, 호스트 38상자의 재구성은 456→0회, 학생 4상자는 48→0회였다. 호스트의 벡터 준비 중앙값 1.2~1.5ms→측정 분해능 이하, 전체 draw 중앙값 45.1~65.8→41.7~42.1ms, 학생 전체 draw 2.3~2.9→2.0~2.2ms였다. 실제 같은 방 재경기에서 레이어 명령·캐시·텍스처가 비었는지도 검사했다. 이 고정 화면 실험과 연속 플레이 p95는 독립 지표다. 최종 소스의 Linux 비교·필수 CI·남은 한계는 [PR #21의 최종 검증 기록](https://github.com/YEOMT/DSbettleroyale/pull/21)에서 확인할 수 있다. [Edge 측정 원자료](evidence/v35/crate-cost-windows.json)
+
+저격은 추가로 고정 시드 3개를 각각 4,000회 실행했다. 실제 발동은 헤드슈터 5,956/12,000(49.63%), BB 4,716/12,000(39.30%), 슬리퍼 3,551/12,000(29.59%)이었다. 보조 Linux 비교 8개 작업은 성공했고, 같은 시점의 필수 CI는 격리 v34 후보의 고장 주입 브라우저가 Results 조작에서 종료되어 실패했다. 실제 배포는 실행하지 않았다. [해당 필수 CI](https://github.com/YEOMT/DSbettleroyale/actions/runs/43219652361)
+
+| 변경 영역 | 주요 파일 |
+|---|---|
+| 서버 권위 전투·성장 | `packages/engine/src/combat/{reflection,projectile,participant}.js`, `abilities/{rework-core,s-rank,other-ranks,roster10,metadata}.js`, `progression/growth.js` |
+| 전장·보급·공지 | `packages/engine/src/world/{world,roster-text,classroom-announcements}.js`, `modes/ring.js`, `farm/resources.js` |
+| 조준·화면·버전 | `apps/client/src/presentation/{timeline,previews}.js`, `render/{renderer,escape-scene,roster10-scene,aim-guide,capture-scene}.js`, `ui/classroom-banner.js`, `release-info.js`, `apps/client/vite.config.js` |
+| 도감·생성물 | `tools/content/{generate,cards}.mjs`, `packages/content/src/{display,manifest}.js`, [86종 설명 대조표](roster86-text-audit.md) |
+| 검증 | `tests/{unit,integration}/evolution.test.mjs`, `tests/combat/evolution-{browser,farm,map}.mjs`, `classroom-{compare,rematch,server-crossover}.mjs`, `tools/ci/{plan,targeted,character-shards}.mjs`, `.github/workflows/{ci,evolution}.yml` |
