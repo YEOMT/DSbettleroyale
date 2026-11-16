@@ -47,6 +47,12 @@ try{
   const seq=await page.evaluate(()=>m.controls.actions.attack);await page.locator('#br-attack').tap();await page.waitForFunction(seq=>m.timeline.predicted.actions.firedAttack>seq,seq);
  }
  report.checks.latency=await page.evaluate(()=>inputTimes);assert.equal(report.checks.latency.length,8);assert.ok(report.checks.latency.every(r=>r.releaseToSend>=0));
+
+ await page.waitForFunction(()=>m.timeline.predicted.basicCooldown<=0&&!m.timeline.predicted.rw?.locks.attack&&performance.now()-(m.controls.lastFire.attack||0)>110);
+ const keySeq=await page.evaluate(()=>m.controls.actions.attack);await page.keyboard.down('Space');await page.keyboard.down('Space');await page.keyboard.up('Space');
+ await page.waitForFunction(seq=>m.timeline.predicted.actions.firedAttack>seq,keySeq);assert.equal(await page.evaluate(()=>m.controls.actions.attack),keySeq+1);report.checks.keyRepeat={requests:1,keyEvents:2};
+ const buttonsBefore=await page.evaluate(()=>{const b=document.createElement('button');b.id='test-key-focus';b.textContent='Test';b.onclick=()=>window.focusButtonClicks=(window.focusButtonClicks||0)+1;document.body.append(b);b.focus();return requests.length;});
+ await page.keyboard.press('Enter');report.checks.focusedButton=await page.evaluate(n=>{document.getElementById('test-key-focus').remove();return {commands:requests.length-n,clicks:window.focusButtonClicks||0};},buttonsBefore);if(!baseline){assert.equal(report.checks.focusedButton.commands,0);assert.equal(report.checks.focusedButton.clicks,1);}
  report.checks.fired={attack:p.firedAttackSeq,skill:p.firedSkillSeq};
  const original=await page.evaluate(()=>structuredClone(m.timeline.predicted));
  report.checks.focus=await page.evaluate(async()=>{

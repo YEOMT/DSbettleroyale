@@ -1,0 +1,233 @@
+{
+  "renderer": "canvas",
+  "cases": [
+    {
+      "skill": "mirror",
+      "turns": 1,
+      "screens": 3,
+      "defenderLoss": 0,
+      "shooterLoss": 209.45600000000002,
+      "observers": [
+        {
+          "turns": 1,
+          "reflectionDraws": 22,
+          "criticalText": true,
+          "frames": [
+            {
+              "wait": 6,
+              "serverTick": 40,
+              "renderTick": 40.103137635063284,
+              "shown": true
+            },
+            {
+              "wait": 23,
+              "serverTick": 40,
+              "renderTick": 41.10513763506322,
+              "shown": true
+            },
+            {
+              "wait": 39,
+              "serverTick": 40,
+              "renderTick": 42.10113763506324,
+              "shown": true
+            },
+            {
+              "wait": 56,
+              "serverTick": 40,
+              "renderTick": 43.103137635063284,
+              "shown": true
+            },
+            {
+              "wait": 73,
+              "serverTick": 40,
+              "renderTick": 43.723495430725016,
+              "shown": true
+            },
+            {
+              "wait": 90,
+              "serverTick": 40,
+              "renderTick": 44.72549543072506,
+              "shown": true
+            },
+            {
+              "wait": 106,
+              "serverTick": 40,
+              "renderTick": 45.72149543072508,
+              "shown": true
+            },
+            {
+              "wait": 123,
+              "serverTick": 40,
+              "renderTick": 46.72949543072504,
+              "shown": true
+            },
+            {
+              "wait": 140,
+              "serverTick": 40,
+              "renderTick": 47.2835585018844,
+              "shown": true
+            },
+            {
+              "wait": 156,
+              "serverTick": 40,
+              "renderTick": 48.27955850188442,
+              "shown": true
+            }
+          ]
+        },
+        {
+          "turns": 1,
+          "reflectionDraws": 22,
+          "criticalText": true,
+          "frames": [
+            {
+              "wait": 6,
+              "serverTick": 40,
+              "renderTick": 40.13230963571863,
+              "shown": true
+            },
+            {
+              "wait": 23,
+              "serverTick": 40,
+              "renderTick": 41.12830963571865,
+              "shown": true
+            },
+            {
+              "wait": 39,
+              "serverTick": 40,
+              "renderTick": 42.12430963571862,
+              "shown": true
+            },
+            {
+              "wait": 56,
+              "serverTick": 40,
+              "renderTick": 43.126309635718606,
+              "shown": true
+            },
+            {
+              "wait": 73,
+              "serverTick": 40,
+              "renderTick": 43.73777093120913,
+              "shown": true
+            },
+            {
+              "wait": 89,
+              "serverTick": 40,
+              "renderTick": 44.74577093120914,
+              "shown": true
+            },
+            {
+              "wait": 106,
+              "serverTick": 40,
+              "renderTick": 45.7417709312091,
+              "shown": true
+            },
+            {
+              "wait": 123,
+              "serverTick": 40,
+              "renderTick": 46.74977093120911,
+              "shown": true
+            },
+            {
+              "wait": 139,
+              "serverTick": 40,
+              "renderTick": 47.32079956480795,
+              "shown": true
+            },
+            {
+              "wait": 156,
+              "serverTick": 40,
+              "renderTick": 48.31079956480795,
+              "shown": true
+            }
+          ]
+        },
+        {
+          "turns": 1,
+          "reflectionDraws": 22,
+          "criticalText": true,
+          "frames": [
+            {
+              "wait": 6,
+              "serverTick": 40,
+              "renderTick": 40.13862394667067,
+              "shown": true
+            },
+            {
+              "wait": 23,
+              "serverTick": 40,
+              "renderTick": 41.12862394667067,
+              "shown": true
+            },
+            {
+              "wait": 39,
+              "serverTick": 40,
+              "renderTick": 42.13062394667071,
+              "shown": true
+            },
+            {
+              "wait": 56,
+              "serverTick": 40,
+              "renderTick": 43.132623946670755,
+              "shown": true
+            },
+            {
+              "wait": 73,
+              "serverTick": 40,
+              "renderTick": 43.74404595338157,
+              "shown": true
+            },
+            {
+              "wait": 89,
+              "serverTick": 40,
+              "renderTick": 44.75204595338164,
+              "shown": true
+            },
+            {
+              "wait": 106,
+              "serverTick": 40,
+              "renderTick": 45.74804595338166,
+              "shown": true
+            },
+            {
+              "wait": 123,
+              "serverTick": 40,
+              "renderTick": 46.750045953381594,
+              "shown": true
+            },
+            {
+              "wait": 139,
+              "serverTick": 40,
+              "renderTick": 47.321040209298374,
+              "shown": true
+            },
+            {
+              "wait": 156,
+              "serverTick": 40,
+              "renderTick": 48.31104020929837,
+              "shown": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "skill": "spotlight",
+      "screens": 3,
+      "behindCover": true,
+      "resumed": true
+    },
+    {
+      "skill": "pure-shield",
+      "fixtureShield": 1000,
+      "hpLoss": 0,
+      "screens": 3,
+      "draws": [
+        11,
+        11,
+        11
+      ]
+    }
+  ],
+  "status": "PASS"
+}

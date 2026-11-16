@@ -59,7 +59,7 @@ try {
    // identity checks. Keep only aggregate timing/resources and error strings.
    const data=report?{ms:report.ms,measurement:report.measurement,errors:report.errors,
     rounds:report.rows.filter(r=>r.round).map(({peers,actions,lastClose,...r})=>r),
-    failure:report.rows.find(r=>r.status==='FAIL')?.error}:null;
+    failure:report.rows.find(r=>r.status==='FAIL')?.error,failureTelemetry:report.rows.find(r=>r.status==='FAIL')?.telemetry}:null;
    row.results.push({...result,data});
   }else if(mode==='render-cost'){
    for(const role of ['host','student']){

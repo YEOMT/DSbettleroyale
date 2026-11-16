@@ -1,0 +1,28 @@
+{
+  "ms": 243875,
+  "results": [
+    {
+      "command": "--test tests/unit/releaseops.test.mjs",
+      "ms": 1189,
+      "status": "PASS"
+    },
+    {
+      "command": "tools/check-boundaries.mjs",
+      "ms": 1643,
+      "status": "PASS"
+    },
+    {
+      "command": "tools/content/generate.mjs --check",
+      "ms": 366,
+      "status": "PASS"
+    },
+    {
+      "command": "--test --test-concurrency=1 tests/unit/aim.test.mjs tests/unit/camera-feel.test.mjs tests/unit/capture-projectiles.test.mjs tests/unit/capture-x.test.mjs tests/unit/character-shards.test.mjs tests/unit/ci-partition.test.mjs tests/unit/classroom-balance-aim.test.mjs tests/unit/classroom-flow.test.mjs tests/unit/combat-recovery.test.mjs tests/unit/contact-clock.test.mjs tests/unit/controls-feel.test.mjs tests/unit/descriptions.test.mjs tests/unit/escape.test.mjs tests/unit/evolution.test.mjs tests/unit/fidelity-v33-2.test.mjs tests/unit/fidelity.test.mjs tests/unit/flight.test.mjs tests/unit/host-end-delivery.test.mjs tests/unit/host-layout.test.mjs tests/unit/isolated-release.test.mjs tests/unit/longrun-telemetry.test.mjs tests/unit/mobile-impact.test.mjs tests/unit/mode-lifecycle.test.mjs tests/unit/prediction.test.mjs tests/unit/profile-revision.test.mjs tests/unit/protocol.test.mjs tests/unit/render-circle.test.mjs tests/unit/resume-warning.test.mjs tests/unit/roster10-balance.test.mjs tests/unit/roster83-scope.test.mjs tests/unit/roster83-text.test.mjs tests/unit/rules.test.mjs tests/unit/smooth-clock.test.mjs tests/unit/smooth-snapshot.test.mjs tests/unit/snapshot-profile.test.mjs tests/unit/snapshot.test.mjs tests/unit/stability.test.mjs tests/unit/static-floor.test.mjs tests/unit/upgrade-roster.test.mjs tests/unit/v34-broadcast.test.mjs tests/unit/v34-roster.test.mjs tests/unit/v34-supply.test.mjs tests/unit/v34-terrain-index.test.mjs tests/parity/baseline.test.mjs tests/parity/engine.test.mjs tests/integration/battle.test.mjs tests/integration/classroom-flow.test.mjs tests/integration/classroom-group-resume.test.mjs tests/integration/combat-resume.test.mjs tests/integration/deployment.test.mjs tests/integration/evolution.test.mjs tests/integration/ordered-latency.test.mjs tests/integration/profile-revision.test.mjs tests/integration/recovery.test.mjs tests/integration/releaseops.test.mjs tests/integration/rooms.test.mjs tests/integration/roster10.test.mjs tests/integration/safe-pause.test.mjs tests/integration/slow-receiver.test.mjs tests/integration/snapshot-transport.test.mjs tests/roster10/engine.test.mjs tests/roster10/interaction.test.mjs tests/roster10/prediction.test.mjs",
+      "ms": 240673,
+      "status": "PASS"
+    }
+  ],
+  "build": "separate",
+  "deep": "NOT_RUN",
+  "note": "Runtime core at 9cf5cd1; focused 22 tests additionally passed after recast/safe-dash display fixes."
+}

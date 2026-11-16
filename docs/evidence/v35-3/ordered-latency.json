@@ -1,0 +1,147 @@
+{
+  "status": "PASS",
+  "scope": "real WS over an ordered loopback TCP delay relay; no physical Wi-Fi",
+  "samples": [
+    {
+      "profile": {
+        "name": "rtt-80",
+        "delays": [
+          40
+        ]
+      },
+      "rttMs": [
+        92.83010000000013,
+        94.0047999999997,
+        91.95160000000033,
+        93.0626999999995
+      ],
+      "input": [
+        {
+          "seq": 1,
+          "axis": 1,
+          "applied": 1
+        },
+        {
+          "seq": 2,
+          "axis": 0,
+          "applied": 2
+        },
+        {
+          "seq": 3,
+          "axis": -1,
+          "applied": 3
+        },
+        {
+          "seq": 4,
+          "axis": 0,
+          "applied": 4
+        }
+      ],
+      "attackExecutions": 1,
+      "skillExecutions": 1,
+      "duplicatesSuppressed": 1,
+      "oldEpochRejected": true,
+      "resumedMove": true,
+      "transport": {
+        "peakQueuedBytes": 23597,
+        "forwardedBytes": 358870,
+        "pendingChunks": 2
+      }
+    },
+    {
+      "profile": {
+        "name": "rtt-150",
+        "delays": [
+          75
+        ]
+      },
+      "rttMs": [
+        156.39910000000054,
+        154.26910000000044,
+        156.34289999999964,
+        156.0553
+      ],
+      "input": [
+        {
+          "seq": 1,
+          "axis": 1,
+          "applied": 1
+        },
+        {
+          "seq": 2,
+          "axis": 0,
+          "applied": 2
+        },
+        {
+          "seq": 3,
+          "axis": -1,
+          "applied": 3
+        },
+        {
+          "seq": 4,
+          "axis": 0,
+          "applied": 4
+        }
+      ],
+      "attackExecutions": 1,
+      "skillExecutions": 1,
+      "duplicatesSuppressed": 1,
+      "oldEpochRejected": true,
+      "resumedMove": true,
+      "transport": {
+        "peakQueuedBytes": 79551,
+        "forwardedBytes": 915606,
+        "pendingChunks": 3
+      }
+    },
+    {
+      "profile": {
+        "name": "ordered-jitter",
+        "delays": [
+          40,
+          75,
+          45,
+          60
+        ]
+      },
+      "rttMs": [
+        140.6237000000001,
+        107.46979999999985,
+        138.65279999999984,
+        109.90790000000015
+      ],
+      "input": [
+        {
+          "seq": 1,
+          "axis": 1,
+          "applied": 1
+        },
+        {
+          "seq": 2,
+          "axis": 0,
+          "applied": 2
+        },
+        {
+          "seq": 3,
+          "axis": -1,
+          "applied": 3
+        },
+        {
+          "seq": 4,
+          "axis": 0,
+          "applied": 4
+        }
+      ],
+      "attackExecutions": 1,
+      "skillExecutions": 1,
+      "duplicatesSuppressed": 1,
+      "oldEpochRejected": true,
+      "resumedMove": true,
+      "transport": {
+        "peakQueuedBytes": 65631,
+        "forwardedBytes": 552954,
+        "pendingChunks": 3
+      }
+    }
+  ]
+}

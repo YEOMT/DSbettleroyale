@@ -1,0 +1,31 @@
+[
+  {
+    "command": "tests/combat/controls353.mjs canvas",
+    "env": {},
+    "status": "PASS",
+    "ms": 17066.5877
+  },
+  {
+    "command": "tests/combat/evolution-browser.mjs canvas",
+    "env": {
+      "COMBAT_CONTROLS353": "1"
+    },
+    "status": "FAIL",
+    "ms": 32421.945700000004
+  },
+  {
+    "command": "tests/combat/guide353.mjs pixi",
+    "env": {},
+    "status": "PASS",
+    "ms": 17505.196399999993
+  },
+  {
+    "command": "tests/combat/live-feel.mjs pixi",
+    "env": {
+      "COMBAT_CONTROLS353": "1",
+      "COMBAT_FEEL_IDS": "emoji-025,emoji-006,emoji-131,emoji-147,emoji-153"
+    },
+    "status": "PASS",
+    "ms": 26246.242100000003
+  }
+]

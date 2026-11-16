@@ -37,6 +37,7 @@ try{
  }else{
   if(renderer==='canvas'){run(['tests/combat/classroom-rematch.mjs']);run(['tests/combat/classroom-ui.mjs']);}
   if(recoveryPart!=='roster'){
+   run(['tests/combat/guide353.mjs',renderer]);
    run(['tests/combat/classroom-aim.mjs',renderer]);
    run(['tests/combat/session.mjs',renderer]);
    run(['tests/combat/aim.mjs',renderer]);

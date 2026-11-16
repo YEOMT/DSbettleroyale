@@ -1,0 +1,75 @@
+{
+  "renderer": "pixi",
+  "cases": [
+    {
+      "scenario": "open",
+      "afterDash": {
+        "x": 260,
+        "y": 0
+      },
+      "guide": {
+        "x": 0,
+        "y": 0,
+        "blocked": false
+      },
+      "authoritative": {
+        "x": 0,
+        "y": 0
+      },
+      "reconnected": false
+    },
+    {
+      "scenario": "wall",
+      "afterDash": {
+        "x": 260,
+        "y": 0
+      },
+      "guide": {
+        "x": 260,
+        "y": 0,
+        "blocked": true
+      },
+      "authoritative": {
+        "x": 260,
+        "y": 0
+      },
+      "reconnected": false
+    },
+    {
+      "scenario": "resume",
+      "afterDash": {
+        "x": 260,
+        "y": 0
+      },
+      "guide": {
+        "x": 0,
+        "y": 0,
+        "blocked": false
+      },
+      "authoritative": {
+        "x": 0,
+        "y": 0
+      },
+      "reconnected": true
+    },
+    {
+      "scenario": "quiet",
+      "afterDash": {
+        "x": 260,
+        "y": 0
+      },
+      "guide": {
+        "x": 0,
+        "y": 0,
+        "blocked": false
+      },
+      "authoritative": {
+        "x": 0,
+        "y": 0
+      },
+      "reconnected": false
+    }
+  ],
+  "status": "PASS",
+  "ms": 15246.2332
+}
