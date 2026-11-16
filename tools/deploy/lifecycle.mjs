@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
 import {checkResume} from './resume-warning.mjs';
 import {record,authority,sent,browserInput,diagnostic} from './lifecycle-diagnostics.mjs';
+import {movementDirection} from './lifecycle-direction.mjs';
 function receive(o,m){
  const p=m.payload||{};if(m.type==='EVENT_BATCH'){for(const e of p.messages||[])receive(o,e);return;}
- const self=s=>{if(s)o.self={id:s.id,x:s.x,y:s.y,alive:s.alive,stunned:s.stunned,cooldown:s.cooldown,basicCooldown:s.basicCooldown,actions:s.actions};};
+ const self=s=>{if(s)o.self={id:s.id,x:s.x,y:s.y,radius:s.radius,alive:s.alive,stunned:s.stunned,cooldown:s.cooldown,basicCooldown:s.basicCooldown,actions:s.actions};};
  if(m.connectionEpoch)o.epoch=m.connectionEpoch;
- if(m.type==='SNAPSHOT'){self(p.self);o.actors=(p.actors||[]).map(a=>({id:a.id,x:a.x,y:a.y,alive:a.alive}));}
- if(m.type==='PRIVATE_STATE')self(p);if(m.type==='FULL_STATE'){o.full++;self(p.self);}
+ if(m.type==='STATIC_STATE')o.static=p;
+ if(m.type==='SNAPSHOT'){self(p.self);o.actors=(p.actors||[]).map(a=>({id:a.id,x:a.x,y:a.y,radius:a.radius,alive:a.alive}));o.movingWalls=p.movingWalls;o.dynamicWalls=p.dynamicWalls;o.farm=p.farm;}
+ if(m.type==='PRIVATE_STATE')self(p);if(m.type==='FULL_STATE'){o.full++;self(p.self);o.static=p.static;}
  if(['VERSION_MISMATCH','OVERLOAD'].includes(m.type))o.errors.push(m.type);
  if(['SNAPSHOT','PRIVATE_STATE','FULL_STATE'].includes(m.type)&&(m.type!=='SNAPSHOT'||Date.now()-(o.lastAuthorityRecord||0)>=250)){
   o.lastAuthorityRecord=Date.now();record(o,'authority',authority(o,m.type));
@@ -19,8 +21,8 @@ export async function lifecycle({browser,urls,secret,buildId,allowResumeWarning=
  async function act(page,resumed=false){
   check=resumed?'resumeMove':'move';stage='ready';
   const i=pages.indexOf(page);await wait(i,s=>s.self?.alive&&s.self.stunned<=0&&s.inputEpoch===s.epoch);
-  const before={...states[i].self};const key=Math.abs(before.x)>Math.abs(before.y)?(before.x>0?'a':'d'):(before.y>0?'w':'s');
-  stage='movement';record(states[i],'requested-input',{type:'keydown',key});
+  const before={...states[i].self},direction=movementDirection(before,states[i]),{key}=direction;
+  stage='movement';record(states[i],'requested-input',{type:'keydown',...direction});
   await page.keyboard.down(key);try{await wait(i,s=>s.self&&Math.hypot(s.self.x-before.x,s.self.y-before.y)>12,8000);}finally{await page.keyboard.up(key);}
   assert.equal(states[i].self.id,before.id);controls[resumed?'resumeMove':'move']=true;
   for(const [kind,field,cd]of [['attack','firedAttack','basicCooldown'],['skill','firedSkill','cooldown']]){

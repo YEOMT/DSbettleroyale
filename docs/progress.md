@@ -10,6 +10,8 @@ CI43861804510 at runtime3a4e2c5 passed15executed jobs,1scope skip. Final follow-
 
 PERFORMANCE UNRESOLVED: Canvas host/student gaps p95~16.7–16.8ms; software Pixi still~266–400ms and second-scale reload/delivery stalls. Capture Pixi CPU8477→9218ms; solo RSS218.41→235.41MiB. Local capture Pixi candidate overloaded once while baseline passed: retain FAIL, no cause/fix claim. Existing v35.2 RSS ownership and extreme-load uncertainty remain. No extra600/1200s matrix, physical devices, main merge or production deployment. See [full conditions, failures, metrics and rollback](controls/v35-3-report.md).
 
+Game runtime b1b4204 CI43863788988 passed Quick343+7(224.803s),Python31,paired build,Targeted and all combat/roster jobs. Gate FAIL was isolated-release executing old5cba0f9: epoch2 inputs present,10.577units moved then below>12assertion. Actual geometry absent; cause unconfirmed. A real-engine wall independently reproduces the blind inward path defect. Smoke observer now selects a short clear direction from public geometry, without changing the>12distance/8s deadline/identity or any later assertion and without enabling warnings. Focused7tests PASS0.256s. No game runtime change after b1b4204; final controller CI/SHA are on PR24.
+
 ## v35.2 Long-Run Stability & Smooth Rendering
 
 PR #23 starts from main/observed public pair `d6b4525bf22bfa000a09eb686dffc5736bc5a3b3`. Runtime `7b723ae2a31e9eb5687dc9bdbe6cea2af0ec959d` preserves all86 rules and v35.1 fixes; only host capture-point tessellation changes. Student geometry was restored exactly after the first A/B pixel failure. Required CI43834713956 passed13jobs,2scope-skipped; Quick333+7,Python31,all9Canvas/Pixi combat,Targeted and isolated-release. No assertions removed.
