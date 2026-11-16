@@ -27,3 +27,9 @@ body.br-capture-host #br-focus-toggle:disabled{display:inline-block;cursor:defau
 .br-capture-map{top:calc(var(--br-cap-bottom,143px) + 100px);width:72px;height:72px}
 .br-classroom-banner{position:fixed;z-index:145;height:32px;line-height:30px;box-sizing:border-box;padding:0 10px;pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;border:1px solid #8496ac;border-radius:8px;background:rgba(13,23,40,.91);color:#fff;font:700 14px/30px "Noto Sans KR",sans-serif}
 .br-classroom-banner[hidden]{display:none}
+
+/* One bounded, event-driven button edge; no animation loop or success on ACK. */
+#br-attack[data-feedback="sent"],#br-skill[data-feedback="sent"]{outline:2px dotted #cbd5e1;outline-offset:3px}
+#br-attack[data-feedback="queued"],#br-skill[data-feedback="queued"]{outline:2px solid #cbd5e1;outline-offset:3px}
+#br-attack[data-feedback="executed"],#br-skill[data-feedback="executed"]{outline:3px solid #a5f3fc;outline-offset:3px}
+#br-attack[data-feedback="rejected"],#br-skill[data-feedback="rejected"],#br-attack[data-feedback="cancelled"],#br-skill[data-feedback="cancelled"]{outline:2px dashed #fbbf24;outline-offset:3px}

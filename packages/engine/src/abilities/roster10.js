@@ -118,7 +118,7 @@ export const initializers=[[310,S=>{
  register(147,{kind:'safe-dash',shape:'dash',cooldownFrames:420,range:260,speed:26,damage:0,extraUses:1,recastWindow:180,
   description:'최대 260 대시 후 첫 시전부터 3초 안에 한 번 더 사용해 출발 위치로 귀환합니다. 귀환 경로 또는 도착점이 막히면 제자리에 머뭅니다. 귀환 시도 또는 시간 만료 후 대기 7초.',
   capabilities:caps({dash:true,signatureRange:true})},(c,s)=>{
-  const origin=copy(c.owner.pos);
+  const origin=copy(c.owner.pos);c.returnPoint={x:origin.x,y:origin.y}; // Private display metadata; the existing closure remains authoritative.
   travel(c,s);
   R.openRecast(c,{duration:s.recastWindow,cooldownFrames:s.cooldownFrames,handler:ctx=>{
    const {g,owner}=ctx,r=owner.radius,ring=g.ringGeometry;

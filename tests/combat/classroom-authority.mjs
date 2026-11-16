@@ -11,11 +11,11 @@ export function classroomFixture(app,m){
  if(m.type==='classroom-benchmark'){room.matchId='upgrade-fixed-'+m.round;room.round++;room.revision++;room.config.mapIndex=Number(process.env.CLASSROOM_MAP||0);app.manager.changed(room);return room.matchId;}
  if(m.type==='classroom-prepare'){
   app.simulation.suspend();
-  room.students().forEach((p,i)=>p.draft.abilityId=(process.env.CLASSROOM_UPGRADE?['emoji-003','emoji-034','emoji-070','emoji-141']:['emoji-003','emoji-141','emoji-149','emoji-144'])[i%4]);return true;
+  room.students().forEach((p,i)=>p.draft.abilityId=(process.env.CLASSROOM_CONTROLS353?['emoji-003','emoji-131','emoji-028','emoji-153']:process.env.CLASSROOM_UPGRADE?['emoji-003','emoji-034','emoji-070','emoji-141']:['emoji-003','emoji-141','emoji-149','emoji-144'])[i%4]);return true;
  }
  if(m.type==='classroom-place'){
   previousWorld=w;meter?.attach(w);if(!process.env.CLASSROOM_UPGRADE){w.game.walls=[];w.game.smokes=[];w.game.farmBoxes=[];}
-  [...w.byId.values()].forEach((p,i)=>{p.pos=new w.Vec2((i%5)*330-700,Math.floor(i/5)*330-700);p.vel=new w.Vec2(0,0);});w.game.rebuildSpatialGrid();
+  [...w.byId.values()].forEach((p,i)=>{const spacing=process.env.CLASSROOM_CONTROLS353&&m.round===3?130:330;p.pos=new w.Vec2((i%5)*spacing-2*spacing,Math.floor(i/5)*spacing-1.5*spacing);p.vel=new w.Vec2(0,0);});w.game.rebuildSpatialGrid();
   room.static=engine.getStaticState(w);const teacher=engine.getTeacherState(w),encode=snapshotEncoder(teacher,++room.snapshotSeq,performance.now());
   for(const p of room.members.values())if(p.peer){p.peer.send('STATIC_STATE',room.static);const view=p.role==='host'?(engine.getHostVisibleState?.(teacher)||teacher):engine.getVisibleState(w,p.id,undefined,teacher);p.peer.snapshot(encode(view.self?{...view,self:p.peer.selfState(view.self)}:view,p.peer.scope()));}return true;
  }
@@ -24,6 +24,7 @@ export function classroomFixture(app,m){
   return {map:g.mapIndex,radius:g.worldRadius,xp:g.farmBoxes.filter(b=>b.kind==='xp').length,
    portal:!!g.escapeMap?.portal,pads:g.escapeMap?.pads.length,startTick:w.BR_RING_RULES.startTick};
  }
+ if(m.type==='classroom-population'){if(![6,5,3].includes(m.alive))throw Error('INVALID_POPULATION');for(const p of [...w.byId.values()].slice(m.alive)){p.alive=false;p.hp=0;}return {alive:w.game.participants.filter(p=>p.alive).length,connected:room.students().filter(p=>p.connected).length};}
  if(m.type==='classroom-run'){app.simulation.resume();return true;}
  if(m.type==='classroom-disconnect'){room.students()[0].peer.socket.close(1012,'TEST_TRANSITION_RESUME');return true;}
  if(m.type==='classroom-finish'){for(const p of [...w.byId.values()].slice(1))p.takeDamage(100000,w.byId.values().next().value,false,new w.Vec2(1,0));return true;}

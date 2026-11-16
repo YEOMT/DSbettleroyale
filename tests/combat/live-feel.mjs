@@ -46,7 +46,8 @@ try{
  for(const [i,page] of pages.entries())assert.equal(await page.evaluate(()=>!!m.renderer.pixi),modeFor(roles[i])==='pixi','actual renderer for '+roles[i]);
  const toggle=h.host.locator('#br-focus-toggle');await toggle.click();assert.match(await toggle.textContent(),/전투 집중/);await toggle.click();assert.match(await toggle.textContent(),/전체 관전/);
  h.room.fixtureFrozen=false;await delay(500);
- for(const [abilityId,kind,family] of [['emoji-013','attack','slash'],['emoji-025','attack','heavy'],['emoji-023','skill','recoil'],['emoji-003','skill','burst'],['emoji-024','skill','orbit'],['emoji-010','skill','field']]){
+ for(const [abilityId,kind,family] of [['emoji-013','attack','slash'],['emoji-025','attack','heavy'],['emoji-023','skill','recoil'],['emoji-003','skill','burst'],['emoji-024','skill','orbit'],['emoji-010','skill','field'],...(process.env.COMBAT_CONTROLS353?[['emoji-025','skill','heavy'],['emoji-006','skill','travel'],['emoji-131','skill','burst'],['emoji-147','skill','travel'],['emoji-153','skill','field']]:[])]){
+  if(process.env.COMBAT_FEEL_IDS&&!process.env.COMBAT_FEEL_IDS.split(',').includes(abilityId))continue;
   w.BRRework.clearWorld(w.game,'next-case');w.game.projectiles.length=0;w.game.zones.length=0;
   for(const [i,p] of [a,b].entries()){
    const id=p.remoteId,life=p.lifeSeq+1,team=p.team,ability=w.EMOJI_DB.find(q=>q.id===(i?'emoji-001':abilityId));
@@ -56,20 +57,20 @@ try{
   }
   const life=a.lifeSeq,tick=w.game.frame;h.publish();
   for(const page of pages)await page.waitForFunction(({id,life})=>m.timeline.samples.at(-1)?.state.actors.some(p=>p.id===id&&p.lifeSeq===life),{id:a.remoteId,life});
-  const stepStart=steps.length,hp=b.hp;await h.student.locator('#br-'+kind).tap();
+  const stepStart=steps.length,hp=b.hp;const pendingTrace=[];const oldSpawn=w.entitySpawn;w.entitySpawn=e=>{if(pendingTrace.length<40)pendingTrace.push({kind:e.kind,start:e.start,actionSeq:e.ctx.actionSeq,ownerLife:e.ctx.ownerLifeSeq});oldSpawn?.(e);};const inputState=await h.student.evaluate(()=>({ability:m.timeline.predicted.abilityId,life:m.timeline.predicted.lifeSeq,recast:!!m.timeline.predicted.rw?.recast,profile:m.timeline.predicted.aimProfiles.skill.spec}));await h.student.locator('#br-'+kind).tap();
   const seq=await h.student.evaluate(k=>m.controls.actions[k],kind);
   for(const [role,page] of pages.entries()){
    try{
     await page.waitForFunction(({id,life,seq,family})=>bodyDraws.some(row=>row.id===id&&row.life===life&&row.seq===seq&&row.family===family),{id:a.remoteId,life,seq,family},{timeout:7000});
     if(kind==='attack'){await page.waitForFunction(({id,life})=>bodyDraws.some(row=>row.id===id&&row.life===life&&row.family==='hit'),{id:b.remoteId,life:b.lifeSeq},{timeout:3500});await page.waitForFunction(({life,targetLife})=>contactDraws.some(d=>d.life===life&&d.targetLife===targetLife),{life,targetLife:b.lifeSeq});}
    }catch(error){
-    throw Error(JSON.stringify({abilityId,kind,family,role,seq,life,step:w.game.frame-tick,fired:[a.firedAttackSeq,a.firedSkillSeq],draws:await page.evaluate(()=>({draws:bodyDraws.slice(-6),events:castEvents,samples:poseSamples})),events:w.game.studentFx.slice(-5).map(e=>[e.type,e.geometry?.kind,e.geometry?.seq]),fault:h.room.lastFault}),{cause:error});
+    throw Error(JSON.stringify({abilityId,kind,family,role,seq,life,inputState,spawn:pendingTrace,active:w.game.rw.entities.map(e=>({kind:e.kind,dead:e.dead,reason:e.reason})),lastCast:a.rw?.lastCast&&{id:a.rw.lastCast.abilityId,seq:a.rw.lastCast.actionSeq},position:{x:a.pos.x,y:a.pos.y},step:w.game.frame-tick,fired:[a.firedAttackSeq,a.firedSkillSeq],draws:await page.evaluate(()=>({draws:bodyDraws.slice(-6),events:castEvents,samples:poseSamples})),events:w.game.studentFx.slice(-5).map(e=>[e.type,e.geometry?.kind,e.geometry?.seq]),fault:h.room.lastFault}),{cause:error});
    }
   }
   assert.equal(a[kind==='attack'?'firedAttackSeq':'firedSkillSeq'],seq);
   if(family==='recoil')assert.ok(w.game.frame-tick>=24,'sniper recoil must wait for the projectile, past its windup');
   if(kind==='attack'){assert.ok(b.hp<hp,'confirmed damage');const distance=w.brBasicStepDistance(a.ability,a.run.mods,w.brCooldownRate(a,'attack'));assert.equal(steps.length,stepStart+1);assert.ok(Math.abs(steps.at(-1).actual-distance)<.1,JSON.stringify({distance,observed:steps.at(-1)}));}
-  await delay(180);
+  w.entitySpawn=oldSpawn;await delay(180);
   checks.push({abilityId,family,seq,step:steps.length>stepStart?steps.at(-1):null,advancedTicks:w.game.frame-tick,screens:3});
  }
  for(const [role,page] of pages.entries())metrics.push(await page.evaluate(role=>{const stats=a=>{const b=a.slice().sort((a,b)=>a-b);return {n:b.length,p50:b[Math.floor(b.length*.5)]||0,p95:b[Math.floor(b.length*.95)]||0,p99:b[Math.floor(b.length*.99)]||0,over33:b.filter(x=>x>33.3).length};};return {role,draw:stats(drawMs),raf:stats(m.renderer.frameTimes),bodyPeak,sfxCalls,contactDraws:contactDraws.length};},role));

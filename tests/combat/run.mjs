@@ -31,11 +31,13 @@ try{
    if(event.pull_request?.body?.includes('[classroom-compare]'))run(['tests/combat/classroom-compare.mjs']);
   }
  }else if(suite==='touch'){
+  run(['tests/combat/controls353.mjs',renderer]);
   run(['tests/combat/mobile-touch.mjs',renderer]);
   if(renderer==='canvas')run(['tests/combat/mobile-touch.mjs','canvas','webkit']);
  }else{
   if(renderer==='canvas'){run(['tests/combat/classroom-rematch.mjs']);run(['tests/combat/classroom-ui.mjs']);}
   if(recoveryPart!=='roster'){
+   run(['tests/combat/guide353.mjs',renderer]);
    run(['tests/combat/classroom-aim.mjs',renderer]);
    run(['tests/combat/session.mjs',renderer]);
    run(['tests/combat/aim.mjs',renderer]);

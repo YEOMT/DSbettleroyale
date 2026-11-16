@@ -1,0 +1,127 @@
+{
+  "baseline": true,
+  "renderer": "canvas",
+  "device": "automated desktop browser; physical devices NOT_RUN",
+  "checks": {
+    "threePointers": {
+      "commands": [
+        {
+          "kind": "attack",
+          "raw": {
+            "x": -1,
+            "y": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "raw": {
+            "x": 0,
+            "y": -1
+          }
+        }
+      ],
+      "pressed": {
+        "attack": {
+          "at": 7058.9000000059605,
+          "frame": 6,
+          "draw": {
+            "ms": 5.0999999940395355,
+            "frames": 1
+          }
+        },
+        "skill": {
+          "at": 7059.70000000298,
+          "frame": 6,
+          "draw": {
+            "ms": 4.299999997019768,
+            "frames": 1
+          }
+        }
+      },
+      "pointer": null,
+      "gestures": 0
+    },
+    "cancel": {
+      "commands": 0,
+      "gestures": 0
+    },
+    "latency": [
+      {
+        "kind": "attack",
+        "seq": 1,
+        "releaseToSend": 1.0999999940395355
+      },
+      {
+        "kind": "skill",
+        "seq": 1,
+        "releaseToSend": 0.4000000059604645
+      },
+      {
+        "kind": "attack",
+        "seq": 2,
+        "releaseToSend": 0.3999999910593033
+      },
+      {
+        "kind": "attack",
+        "seq": 3,
+        "releaseToSend": 0.3999999910593033
+      },
+      {
+        "kind": "attack",
+        "seq": 4,
+        "releaseToSend": 0.19999998807907104
+      },
+      {
+        "kind": "attack",
+        "seq": 5,
+        "releaseToSend": 0.19999998807907104
+      },
+      {
+        "kind": "attack",
+        "seq": 6,
+        "releaseToSend": 0.29999999701976776
+      },
+      {
+        "kind": "attack",
+        "seq": 7,
+        "releaseToSend": 0.09999999403953552
+      }
+    ],
+    "keyRepeat": {
+      "requests": 1,
+      "keyEvents": 2
+    },
+    "focusedButton": {
+      "commands": 1,
+      "clicks": 1
+    },
+    "focusedCombatButton": {
+      "requests": 1,
+      "keyEvents": 2
+    },
+    "fired": {
+      "attack": 10,
+      "skill": 1
+    },
+    "focus": {
+      "unexpectedCommands": 2
+    },
+    "pressed": {
+      "aiming": true,
+      "gestures": 1
+    },
+    "rotation": {
+      "gestures": 0,
+      "pointer": null
+    },
+    "recovery": {
+      "enabled": false,
+      "label": "0.5"
+    },
+    "aimPurity": {
+      "unchanged": false
+    }
+  },
+  "status": "BASELINE_OBSERVED",
+  "ms": 34969.6205
+}

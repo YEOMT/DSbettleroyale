@@ -1,0 +1,75 @@
+{
+  "runId": 43863788988,
+  "status": "FAIL",
+  "stage": "resumeMove",
+  "error": "AUTHORITATIVE_STATE_TIMEOUT",
+  "releaseId": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+  "toolsSha": "917f862f5651fe2b635ee54bbcbe1f95e860d8a3",
+  "ms": 41382,
+  "oomKilled": false,
+  "controls": {
+    "lobby": true,
+    "quiz": true,
+    "draft": true,
+    "move": true,
+    "attack": true,
+    "skill": true,
+    "resume": true
+  },
+  "epoch": 2,
+  "inputEpoch": 2,
+  "latestAuthority": {
+    "x": 1831.820646850212,
+    "y": -1823.9741092459112,
+    "alive": true,
+    "stunned": 0,
+    "cooldown": 0,
+    "basicCooldown": 0,
+    "actions": {
+      "attack": 1,
+      "skill": 1,
+      "firedAttack": 1,
+      "firedSkill": 1
+    }
+  },
+  "resumeInput": {
+    "ms": 19032,
+    "kind": "INPUT_BATCH",
+    "epoch": 2,
+    "batches": 14,
+    "commands": [
+      {
+        "seq": 25,
+        "clientTick": 25,
+        "move": {
+          "x": -1,
+          "y": 0
+        },
+        "aim": {
+          "x": -1,
+          "y": 0
+        }
+      }
+    ]
+  },
+  "before": {
+    "x": 1842.3974540176616,
+    "y": -1823.9741092459112,
+    "alive": true,
+    "stunned": 0,
+    "cooldown": 313,
+    "basicCooldown": 0,
+    "actions": {
+      "attack": 1,
+      "skill": 1,
+      "firedAttack": 1,
+      "firedSkill": 1
+    }
+  },
+  "interpretation": "Input and 10.577 units of authoritative displacement are observed; original geometry was not captured, so this run's blockage cause is unconfirmed. A deterministic real-engine wall fixture independently reproduces the blind inward-movement probe failure. The helper selects a public open path; distance >12, identity, 8-second wait, all action/result/rematch and strict failure assertions stay unchanged.",
+  "regression": {
+    "initialFixture": "6 PASS,1 FAIL (actor started overlapped; fallback correctly remained blocked)",
+    "correctedFixture": "7 PASS",
+    "ms": 255.8419
+  }
+}

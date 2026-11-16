@@ -1,5 +1,17 @@
 # Progress
 
+## v35.3 Combat Feel & Controls — PR24 review patch
+
+Baseline main `5cba0f9bd6eba793d91fa16efd833a582456ee09` includes merged PR #23. Input focus/rotation/recovery discrepancies were reproduced in the real browser; authoritative instant-skill identity and private alien return origin were missing from display data. Fixes reuse the existing controls, profiles, rendering and sound lifecycle. An actual minimum-range alien dash opens recast at five ticks: only an authority-confirmed recast can bypass the old 100ms local guard. Server rules and normal action guards remain unchanged.
+
+Executed Quick243.875s, paired build,86-kit authority comparison2.614s and existing Targeted. Final focused10units PASS0.797s; real Canvas3-pointer/repeat/focus/recovery PASS30.016s. Identical ready-state probes show editable/IME unintended requests2→0 and ordinary-button Enter1→0; focused combat Enter remains one action. Native release-handler→send n8 p50/max0.4/1.1→0.5/1.4ms: correctness gain, not a latency-speed claim. Canvas/Pixi return-after-resume and three-surface shield/reflection pass. A new recast HUD exception was reproduced with actual old/new engine states and fixed by consistent snapshot use; related browser PASS14.587s.
+
+CI43861804510 at runtime3a4e2c5 passed15executed jobs,1scope skip. Final follow-up Checks/SHA are tracked in [PR24](https://github.com/YEOMT/DSbettleroyale/pull/24). CI43860219994's WebKit native-page crash remains recorded as INFRA_FAILURE/cause unconfirmed. Comparison43860225486 passed Canvas solo/capture and same20identities/5rematches (60.736→60.016s,cleanup0). Fixed-delay Pixi population probes initially failed on both versions; after separating bounded receipt from the1.8s sampling window, only those two comparisons were run in43861846438: both versions/modes completed3rounds,20connected,0overloads. Existing assertions retained.
+
+PERFORMANCE UNRESOLVED: Canvas host/student gaps p95~16.7–16.8ms; software Pixi still~266–400ms and second-scale reload/delivery stalls. Capture Pixi CPU8477→9218ms; solo RSS218.41→235.41MiB. Local capture Pixi candidate overloaded once while baseline passed: retain FAIL, no cause/fix claim. Existing v35.2 RSS ownership and extreme-load uncertainty remain. No extra600/1200s matrix, physical devices, main merge or production deployment. See [full conditions, failures, metrics and rollback](controls/v35-3-report.md).
+
+Game runtime b1b4204 CI43863788988 passed Quick343+7(224.803s),Python31,paired build,Targeted and all combat/roster jobs. Gate FAIL was isolated-release executing old5cba0f9: epoch2 inputs present,10.577units moved then below>12assertion. Actual geometry absent; cause unconfirmed. A real-engine wall independently reproduces the blind inward path defect. Smoke observer now selects a short clear direction from public geometry, without changing the>12distance/8s deadline/identity or any later assertion and without enabling warnings. Focused7tests PASS0.256s. No game runtime change after b1b4204; final controller CI/SHA are on PR24.
+
 ## v35.2 Long-Run Stability & Smooth Rendering
 
 PR #23 starts from main/observed public pair `d6b4525bf22bfa000a09eb686dffc5736bc5a3b3`. Runtime `7b723ae2a31e9eb5687dc9bdbe6cea2af0ec959d` preserves all86 rules and v35.1 fixes; only host capture-point tessellation changes. Student geometry was restored exactly after the first A/B pixel failure. Required CI43834713956 passed13jobs,2scope-skipped; Quick333+7,Python31,all9Canvas/Pixi combat,Targeted and isolated-release. No assertions removed.

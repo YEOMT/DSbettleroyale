@@ -1,0 +1,4420 @@
+{
+  "machine": {
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.22.1",
+    "logicalCpus": 16,
+    "ram": 16718413824,
+    "sharedMachine": true
+  },
+  "mode": "solo",
+  "backend": "canvas",
+  "rows": [
+    {
+      "label": "v35.2",
+      "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+      "build": {
+        "status": "PASS",
+        "ms": 7759.766299999999,
+        "exit": 0
+      },
+      "results": [
+        {
+          "status": "PASS",
+          "ms": 55331.043399999995,
+          "exit": 0,
+          "data": {
+            "ms": 53368.368,
+            "measurement": {
+              "snapshots": {
+                "count": 8036,
+                "mean": 25829.524265803884,
+                "p95": 49398,
+                "p99": 57338,
+                "max": 63275
+              },
+              "resident": {
+                "count": 150,
+                "mean": 127814724.26666667,
+                "p95": 162627584,
+                "p99": 168165376,
+                "max": 172466176
+              },
+              "peakRssBytes": 173903872,
+              "gcCount": 126,
+              "gcMs": 256.6254000000001,
+              "estimatedHeapAllocationBytes": 722756976,
+              "costs": {
+                "grids": 7,
+                "gridBuckets": 780,
+                "unchangedClampCopies": 0,
+                "clamps": 0
+              }
+            },
+            "errors": [],
+            "rounds": [
+              {
+                "round": 1,
+                "arena": {
+                  "map": 0,
+                  "radius": 3860,
+                  "xp": 37,
+                  "portal": true,
+                  "pads": 4,
+                  "startTick": 1200
+                },
+                "late": [],
+                "inputApply": {
+                  "count": 949,
+                  "mean": 9.453263119072686,
+                  "p95": 19.84349999999904,
+                  "p99": 76.32070000000022,
+                  "max": 76.95200000000114
+                },
+                "snapshotGap": {
+                  "count": 83,
+                  "mean": 63.35763493975901,
+                  "p95": 65.10069999999905,
+                  "p99": 89.43579999999929,
+                  "max": 1145.0110999999997
+                },
+                "replaced": 0,
+                "serverMemory": {
+                  "rss": 130793472,
+                  "heapTotal": 65499136,
+                  "heapUsed": 37327136,
+                  "external": 14216378,
+                  "arrayBuffers": 7229105
+                },
+                "serverCpu": {
+                  "user": 2328000,
+                  "system": 671000
+                },
+                "sentBytes": 64659099,
+                "uptimeMs": 24267.0557,
+                "step": {
+                  "count": 247,
+                  "mean": 2.4307105263155995,
+                  "p95": 8.010999999998603,
+                  "p99": 12.582699999999022,
+                  "max": 18.85190000000148
+                },
+                "snapshot": {
+                  "count": 83,
+                  "mean": 6.779339759036187,
+                  "p95": 13.901699999998527,
+                  "p99": 17.980400000000373,
+                  "max": 19.126499999998487
+                },
+                "screens": [
+                  {
+                    "draw": {
+                      "n": 283,
+                      "p50": 2.4000000059604645,
+                      "p95": 3.800000011920929,
+                      "p99": 5.299999997019768,
+                      "max": 6.200000002980232,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 282,
+                      "p50": 16.69999999999891,
+                      "p95": 16.80000000000109,
+                      "p99": 16.900000000001455,
+                      "max": 16.900000000001455,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 283,
+                      "p50": 16.69999999999891,
+                      "p95": 16.80000000000109,
+                      "p99": 16.900000000001455,
+                      "max": 450,
+                      "over50": 1,
+                      "over100": 1,
+                      "over200": 1
+                    },
+                    "timeline": {
+                      "accepted": 84,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 0,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 0,
+                        "max": 0,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 83,
+                        "p50": 48.5,
+                        "p95": 76.90000000596046,
+                        "p99": 1067,
+                        "max": 1067,
+                        "over50": 38,
+                        "over100": 1,
+                        "over200": 1
+                      },
+                      "sourceGaps": {
+                        "n": 83,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 100,
+                        "max": 100,
+                        "over50": 57,
+                        "over100": 1,
+                        "over200": 0
+                      },
+                      "holds": 36,
+                      "interpolated": 248
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 29
+                    },
+                    "heapBytes": 9317544,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 0,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 10499,
+                      "windowEnd": 15214.79999999702,
+                      "sampleCount": 283,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 283,
+                      "p50": 3.017468496789661,
+                      "p95": 4.630092617010462,
+                      "p99": 5.202705802443596,
+                      "max": 5.403695909862279,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 280,
+                      "p50": 1.699999988079071,
+                      "p95": 3,
+                      "p99": 3.5999999940395355,
+                      "max": 4.9000000059604645,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 279,
+                      "p50": 16.69999999999891,
+                      "p95": 16.80000000000109,
+                      "p99": 16.899999999999636,
+                      "max": 16.900000000001455,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 280,
+                      "p50": 16.69999999999891,
+                      "p95": 16.80000000000109,
+                      "p99": 16.899999999999636,
+                      "max": 16.900000000001455,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 84,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 83,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 3.641825475724204,
+                        "max": 3.641825475724204,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 83,
+                        "p50": 48.900000005960464,
+                        "p95": 71.19999998807907,
+                        "p99": 1088.4000000059605,
+                        "max": 1088.4000000059605,
+                        "over50": 39,
+                        "over100": 1,
+                        "over200": 1
+                      },
+                      "sourceGaps": {
+                        "n": 83,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 100,
+                        "max": 100,
+                        "over50": 57,
+                        "over100": 1,
+                        "over200": 0
+                      },
+                      "holds": 49,
+                      "interpolated": 248
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 29
+                    },
+                    "heapBytes": 8376422,
+                    "unsentInputs": 1,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 8693.29999999702,
+                      "windowEnd": 13370.199999988079,
+                      "sampleCount": 280,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 280,
+                      "p50": 3.035296965531124,
+                      "p95": 4.775775599122767,
+                      "p99": 5.247617866655645,
+                      "max": 5.483306448493266,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 273,
+                      "p50": 1.6000000089406967,
+                      "p95": 3.1000000089406967,
+                      "p99": 4.100000008940697,
+                      "max": 4.5,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 272,
+                      "p50": 16.69999999999891,
+                      "p95": 16.80000000000109,
+                      "p99": 16.900000000000546,
+                      "max": 83.39999999999964,
+                      "over50": 1,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 273,
+                      "p50": 16.69999999999891,
+                      "p95": 16.80000000000109,
+                      "p99": 16.900000000000546,
+                      "max": 83.39999999999964,
+                      "over50": 1,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 84,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 83,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 3.3611760000000004,
+                        "max": 3.3611760000000004,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 83,
+                        "p50": 49.70000000298023,
+                        "p95": 82.20000000298023,
+                        "p99": 1068.2999999970198,
+                        "max": 1068.2999999970198,
+                        "over50": 40,
+                        "over100": 2,
+                        "over200": 1
+                      },
+                      "sourceGaps": {
+                        "n": 83,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 100,
+                        "max": 100,
+                        "over50": 57,
+                        "over100": 1,
+                        "over200": 0
+                      },
+                      "holds": 47,
+                      "interpolated": 242
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 29
+                    },
+                    "heapBytes": 10524716,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 7103.300000011921,
+                      "windowEnd": 11751.20000000298,
+                      "sampleCount": 273,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 273,
+                      "p50": 2.912401814489016,
+                      "p95": 4.993545711619305,
+                      "p99": 5.70889934689734,
+                      "max": 6.023402994700092,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  }
+                ],
+                "overloads": 0,
+                "connected": 20,
+                "lobby": [
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  }
+                ],
+                "lifetime": [
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 29
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 29
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 29
+                  }
+                ],
+                "disposed": {
+                  "disposed": true,
+                  "callbacks": false,
+                  "inputs": 0,
+                  "players": 0,
+                  "entities": 0
+                },
+                "cleanPeers": [
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  }
+                ]
+              },
+              {
+                "round": 2,
+                "arena": {
+                  "map": 0,
+                  "radius": 3860,
+                  "xp": 37,
+                  "portal": true,
+                  "pads": 4,
+                  "startTick": 1200
+                },
+                "late": [
+                  {
+                    "alive": 6,
+                    "connected": 20,
+                    "cpuMicros": {
+                      "user": 562000,
+                      "system": 125000
+                    },
+                    "sentBytes": 13537134,
+                    "server": {
+                      "uptimeMs": 36621.4892,
+                      "rooms": 1,
+                      "activeBattles": 1,
+                      "stepCpu": {
+                        "count": 601,
+                        "mean": 1.937379201330928,
+                        "p95": 7.004300000000512,
+                        "p99": 11.673299999994924,
+                        "max": 18.85190000000148
+                      },
+                      "snapshotCpu": {
+                        "count": 201,
+                        "mean": 5.976326865671328,
+                        "p95": 12.750200000002224,
+                        "p99": 17.980400000000373,
+                        "max": 26.048500000004424
+                      },
+                      "snapshotGap": {
+                        "count": 201,
+                        "mean": 59.77005671641789,
+                        "p95": 65.10069999999905,
+                        "p99": 89.43579999999929,
+                        "max": 1145.0110999999997
+                      },
+                      "inputApply": {
+                        "count": 1538,
+                        "mean": 18.451278998699543,
+                        "p95": 24.02339999999822,
+                        "p99": 791.4755999999979,
+                        "max": 792.2181000000019
+                      },
+                      "sendCpu": {
+                        "count": 653,
+                        "mean": 2.268841807044673,
+                        "p95": 9.793900000004214,
+                        "p99": 18.01919999999882,
+                        "max": 30.077000000004773
+                      },
+                      "pumpCpu": {
+                        "count": 653,
+                        "mean": 5.952047626339962,
+                        "p95": 26.571099999997386,
+                        "p99": 45.02629999999772,
+                        "max": 64.39100000000326
+                      },
+                      "debtMs": {
+                        "count": 653,
+                        "mean": 8.537506840224333,
+                        "p95": 15.776799999999518,
+                        "p99": 16.505266666669005,
+                        "max": 16.654900000001337
+                      },
+                      "sentBytes": 141691931,
+                      "rejected": 20,
+                      "duplicates": 0,
+                      "reconnects": 1,
+                      "closed": 1,
+                      "bufferHighWatermark": 0,
+                      "replacedSnapshots": 0,
+                      "overloads": 0,
+                      "memory": {
+                        "rss": 158363648,
+                        "heapTotal": 99315712,
+                        "heapUsed": 35444376,
+                        "external": 10680544,
+                        "arrayBuffers": 3698741
+                      }
+                    },
+                    "screens": [
+                      {
+                        "draw": {
+                          "n": 110,
+                          "p50": 1.7000000029802322,
+                          "p95": 2.5,
+                          "p99": 2.9000000059604645,
+                          "max": 4.0999999940395355,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 109,
+                          "p50": 16.69999999999709,
+                          "p95": 16.900000000001455,
+                          "p99": 17,
+                          "max": 17.19999999999709,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 6,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 110,
+                          "p50": 1,
+                          "p95": 1.3999999910593033,
+                          "p99": 1.7000000029802322,
+                          "max": 1.7999999970197678,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 109,
+                          "p50": 16.700000000000728,
+                          "p95": 16.899999999997817,
+                          "p99": 16.900000000001455,
+                          "max": 17.200000000000728,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 6,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 110,
+                          "p50": 0.7000000029802322,
+                          "p95": 1.5999999940395355,
+                          "p99": 2.3999999910593033,
+                          "max": 2.4000000059604645,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 109,
+                          "p50": 16.69999999999709,
+                          "p95": 16.900000000001455,
+                          "p99": 17,
+                          "max": 17.200000000000728,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 6,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "alive": 5,
+                    "connected": 20,
+                    "cpuMicros": {
+                      "user": 282000,
+                      "system": 171000
+                    },
+                    "sentBytes": 6646792,
+                    "server": {
+                      "uptimeMs": 38467.4592,
+                      "rooms": 1,
+                      "activeBattles": 1,
+                      "stepCpu": {
+                        "count": 712,
+                        "mean": 1.7195901685391168,
+                        "p95": 6.272300000004179,
+                        "p99": 11.03030000000581,
+                        "max": 18.85190000000148
+                      },
+                      "snapshotCpu": {
+                        "count": 238,
+                        "mean": 5.583184033613431,
+                        "p95": 11.873700000000099,
+                        "p99": 17.404599999998027,
+                        "max": 26.048500000004424
+                      },
+                      "snapshotGap": {
+                        "count": 238,
+                        "mean": 58.2385844537815,
+                        "p95": 64.3724000000002,
+                        "p99": 79.51239999999962,
+                        "max": 1145.0110999999997
+                      },
+                      "inputApply": {
+                        "count": 1978,
+                        "mean": 16.765335136501513,
+                        "p95": 24.132099999995262,
+                        "p99": 76.79369999999835,
+                        "max": 792.2181000000019
+                      },
+                      "sendCpu": {
+                        "count": 813,
+                        "mean": 1.9558747847480877,
+                        "p95": 8.845600000000559,
+                        "p99": 15.688800000003539,
+                        "max": 30.077000000004773
+                      },
+                      "pumpCpu": {
+                        "count": 813,
+                        "mean": 5.1491830258303,
+                        "p95": 23.10809999999765,
+                        "p99": 44.58520000000135,
+                        "max": 64.39100000000326
+                      },
+                      "debtMs": {
+                        "count": 813,
+                        "mean": 8.551102870028377,
+                        "p95": 15.732066666665663,
+                        "p99": 16.516266666667505,
+                        "max": 16.654900000001337
+                      },
+                      "sentBytes": 148338929,
+                      "rejected": 20,
+                      "duplicates": 0,
+                      "reconnects": 1,
+                      "closed": 1,
+                      "bufferHighWatermark": 0,
+                      "replacedSnapshots": 0,
+                      "overloads": 0,
+                      "memory": {
+                        "rss": 159600640,
+                        "heapTotal": 99315712,
+                        "heapUsed": 40299672,
+                        "external": 11681740,
+                        "arrayBuffers": 4699937
+                      }
+                    },
+                    "screens": [
+                      {
+                        "draw": {
+                          "n": 110,
+                          "p50": 1.4000000059604645,
+                          "p95": 2.2000000029802322,
+                          "p99": 2.4000000059604645,
+                          "max": 3,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 109,
+                          "p50": 16.69999999999709,
+                          "p95": 16.899999999997817,
+                          "p99": 16.900000000001455,
+                          "max": 17,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 5,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 110,
+                          "p50": 0.8999999910593033,
+                          "p95": 1.2000000029802322,
+                          "p99": 1.5999999940395355,
+                          "max": 1.6000000089406967,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 109,
+                          "p50": 16.69999999999709,
+                          "p95": 16.899999999997817,
+                          "p99": 16.900000000001455,
+                          "max": 16.900000000001455,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 5,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 0.5999999940395355,
+                          "p95": 0.8999999910593033,
+                          "p99": 1,
+                          "max": 1.199999988079071,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.700000000000728,
+                          "p95": 16.899999999997817,
+                          "p99": 16.900000000001455,
+                          "max": 17,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 5,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "alive": 3,
+                    "connected": 20,
+                    "cpuMicros": {
+                      "user": 265000,
+                      "system": 94000
+                    },
+                    "sentBytes": 5193562,
+                    "server": {
+                      "uptimeMs": 40301.2561,
+                      "rooms": 1,
+                      "activeBattles": 1,
+                      "stepCpu": {
+                        "count": 823,
+                        "mean": 1.558571688942675,
+                        "p95": 5.7862999999997555,
+                        "p99": 10.9658999999956,
+                        "max": 18.85190000000148
+                      },
+                      "snapshotCpu": {
+                        "count": 274,
+                        "mean": 5.291339051094931,
+                        "p95": 11.409400000004098,
+                        "p99": 17.404599999998027,
+                        "max": 26.048500000004424
+                      },
+                      "snapshotGap": {
+                        "count": 274,
+                        "mean": 57.14141678832116,
+                        "p95": 64.04729999999836,
+                        "p99": 79.51239999999962,
+                        "max": 1145.0110999999997
+                      },
+                      "inputApply": {
+                        "count": 2417,
+                        "mean": 15.376657302441098,
+                        "p95": 22.220800000002782,
+                        "p99": 76.53419999999824,
+                        "max": 792.2181000000019
+                      },
+                      "sendCpu": {
+                        "count": 971,
+                        "mean": 1.7589321318230728,
+                        "p95": 8.200700000001234,
+                        "p99": 14.66309999999794,
+                        "max": 30.077000000004773
+                      },
+                      "pumpCpu": {
+                        "count": 971,
+                        "mean": 4.623315242018619,
+                        "p95": 20.71070000000327,
+                        "p99": 41.82040000000052,
+                        "max": 64.39100000000326
+                      },
+                      "debtMs": {
+                        "count": 971,
+                        "mean": 8.495943082732213,
+                        "p95": 15.732066666665663,
+                        "p99": 16.516266666667505,
+                        "max": 16.654900000001337
+                      },
+                      "sentBytes": 153532491,
+                      "rejected": 20,
+                      "duplicates": 0,
+                      "reconnects": 1,
+                      "closed": 1,
+                      "bufferHighWatermark": 0,
+                      "replacedSnapshots": 0,
+                      "overloads": 0,
+                      "memory": {
+                        "rss": 160083968,
+                        "heapTotal": 99840000,
+                        "heapUsed": 44357152,
+                        "external": 12096214,
+                        "arrayBuffers": 5114411
+                      }
+                    },
+                    "screens": [
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 1.6000000089406967,
+                          "p95": 2.4000000059604645,
+                          "p99": 2.7000000029802322,
+                          "max": 4.5,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.700000000000728,
+                          "p95": 16.900000000001455,
+                          "p99": 17,
+                          "max": 17,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 3,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 0.800000011920929,
+                          "p95": 1.199999988079071,
+                          "p99": 1.5,
+                          "max": 1.7999999970197678,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.69999999999709,
+                          "p95": 16.900000000001455,
+                          "p99": 17,
+                          "max": 17,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 3,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 0.699999988079071,
+                          "p95": 0.8999999910593033,
+                          "p99": 0.9000000059604645,
+                          "max": 1.2999999970197678,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.700000000000728,
+                          "p95": 17,
+                          "p99": 17,
+                          "max": 17,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 3,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "inputApply": {
+                  "count": 2436,
+                  "mean": 15.297074014778381,
+                  "p95": 22.058900000003632,
+                  "p99": 76.53419999999824,
+                  "max": 792.2181000000019
+                },
+                "snapshotGap": {
+                  "count": 275,
+                  "mean": 57.110138545454525,
+                  "p95": 64.04729999999836,
+                  "p99": 79.51239999999962,
+                  "max": 1145.0110999999997
+                },
+                "replaced": 0,
+                "serverMemory": {
+                  "rss": 160268288,
+                  "heapTotal": 99840000,
+                  "heapUsed": 46797616,
+                  "external": 12363524,
+                  "arrayBuffers": 5381721
+                },
+                "serverCpu": {
+                  "user": 5140000,
+                  "system": 1390000
+                },
+                "sentBytes": 153650968,
+                "uptimeMs": 40320.3565,
+                "step": {
+                  "count": 824,
+                  "mean": 1.5572933252425014,
+                  "p95": 5.7862999999997555,
+                  "p99": 10.9658999999956,
+                  "max": 18.85190000000148
+                },
+                "snapshot": {
+                  "count": 275,
+                  "mean": 5.287690909090942,
+                  "p95": 11.409400000004098,
+                  "p99": 17.404599999998027,
+                  "max": 26.048500000004424
+                },
+                "screens": [
+                  {
+                    "draw": {
+                      "n": 110,
+                      "p50": 1.699999988079071,
+                      "p95": 2.4000000059604645,
+                      "p99": 2.7000000029802322,
+                      "max": 4.5,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 109,
+                      "p50": 16.700000000000728,
+                      "p95": 16.900000000001455,
+                      "p99": 17,
+                      "max": 17,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 110,
+                      "p50": 16.700000000000728,
+                      "p95": 16.900000000001455,
+                      "p99": 17,
+                      "max": 17,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 277,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 0,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 0,
+                        "max": 0,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 275,
+                        "p50": 49.5,
+                        "p95": 67.6000000089407,
+                        "p99": 100.3999999910593,
+                        "max": 1067,
+                        "over50": 132,
+                        "over100": 3,
+                        "over200": 2
+                      },
+                      "sourceGaps": {
+                        "n": 275,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 66.66666666666667,
+                        "max": 100,
+                        "over50": 216,
+                        "over100": 1,
+                        "over200": 0
+                      },
+                      "holds": 70,
+                      "interpolated": 826
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 29
+                    },
+                    "heapBytes": 8134200,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 0,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 21194.59999999404,
+                      "windowEnd": 31262.20000000298,
+                      "sampleCount": 110,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 110,
+                      "p50": 2.771677955180735,
+                      "p95": 4.728061598720956,
+                      "p99": 4.7412968907817685,
+                      "max": 4.753314704942511,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 110,
+                      "p50": 0.800000011920929,
+                      "p95": 1.199999988079071,
+                      "p99": 1.5,
+                      "max": 1.7999999970197678,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 109,
+                      "p50": 16.69999999999709,
+                      "p95": 16.900000000001455,
+                      "p99": 17,
+                      "max": 17,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 110,
+                      "p50": 16.69999999999709,
+                      "p95": 16.900000000001455,
+                      "p99": 17,
+                      "max": 17,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 277,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 275,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 3.6418253913869876,
+                        "max": 3.6418254766842892,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 275,
+                        "p50": 48.900000005960464,
+                        "p95": 65.8999999910593,
+                        "p99": 100.09999999403954,
+                        "max": 1088.4000000059605,
+                        "over50": 131,
+                        "over100": 3,
+                        "over200": 2
+                      },
+                      "sourceGaps": {
+                        "n": 275,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 66.66666666666667,
+                        "max": 100,
+                        "over50": 216,
+                        "over100": 1,
+                        "over200": 0
+                      },
+                      "holds": 91,
+                      "interpolated": 827
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 29
+                    },
+                    "heapBytes": 6531793,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 19361.09999999404,
+                      "windowEnd": 29418.39999999106,
+                      "sampleCount": 110,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 110,
+                      "p50": 2.746282545794429,
+                      "p95": 4.695951543917204,
+                      "p99": 4.720608623816474,
+                      "max": 4.756095953464694,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 110,
+                      "p50": 0.699999988079071,
+                      "p95": 0.8999999910593033,
+                      "p99": 0.9000000059604645,
+                      "max": 1.2999999970197678,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 109,
+                      "p50": 16.700000000000728,
+                      "p95": 17,
+                      "p99": 17,
+                      "max": 17,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 110,
+                      "p50": 16.700000000000728,
+                      "p95": 17,
+                      "p99": 17,
+                      "max": 17,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 277,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 274,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 0.0026461704684379583,
+                        "max": 3.3611760000000004,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 275,
+                        "p50": 49.29999999701977,
+                        "p95": 67.70000000298023,
+                        "p99": 107.59999999403954,
+                        "max": 1068.2999999970198,
+                        "over50": 131,
+                        "over100": 4,
+                        "over200": 2
+                      },
+                      "sourceGaps": {
+                        "n": 275,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 66.66666666666667,
+                        "max": 100,
+                        "over50": 216,
+                        "over100": 1,
+                        "over200": 0
+                      },
+                      "holds": 86,
+                      "interpolated": 822
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 29
+                    },
+                    "heapBytes": 11053362,
+                    "unsentInputs": 1,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 17748.5,
+                      "windowEnd": 27799.30000001192,
+                      "sampleCount": 110,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 110,
+                      "p50": 3.001377333014034,
+                      "p95": 4.046924248692221,
+                      "p99": 4.965419955701066,
+                      "max": 4.978279133928368,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  }
+                ],
+                "overloads": 0,
+                "connected": 20,
+                "lobby": [
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  }
+                ],
+                "lifetime": [
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 29
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 29
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 29
+                  }
+                ],
+                "disposed": {
+                  "disposed": true,
+                  "callbacks": false,
+                  "inputs": 0,
+                  "players": 0,
+                  "entities": 0
+                },
+                "cleanPeers": [
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  }
+                ]
+              },
+              {
+                "round": 3,
+                "arena": {
+                  "map": 0,
+                  "radius": 3860,
+                  "xp": 37,
+                  "portal": true,
+                  "pads": 4,
+                  "startTick": 1200
+                },
+                "late": [],
+                "inputApply": {
+                  "count": 3700,
+                  "mean": 13.041759621621708,
+                  "p95": 21.695999999996275,
+                  "p99": 40.73920000000362,
+                  "max": 792.2181000000019
+                },
+                "snapshotGap": {
+                  "count": 382,
+                  "mean": 58.02459345549737,
+                  "p95": 65.85570000000007,
+                  "p99": 99.39299999999639,
+                  "max": 1145.0110999999997
+                },
+                "replaced": 0,
+                "serverMemory": {
+                  "rss": 132132864,
+                  "heapTotal": 64974848,
+                  "heapUsed": 37860960,
+                  "external": 12791823,
+                  "arrayBuffers": 5810020
+                },
+                "serverCpu": {
+                  "user": 7406000,
+                  "system": 1781000
+                },
+                "sentBytes": 233701435,
+                "uptimeMs": 52617.731700000004,
+                "step": {
+                  "count": 1161,
+                  "mean": 1.835717915589935,
+                  "p95": 6.853399999999965,
+                  "p99": 12.496900000001915,
+                  "max": 22.376500000005763
+                },
+                "snapshot": {
+                  "count": 382,
+                  "mean": 5.688324607330011,
+                  "p95": 12.750200000002224,
+                  "p99": 21.553500000001804,
+                  "max": 31.072299999999814
+                },
+                "screens": [
+                  {
+                    "draw": {
+                      "n": 369,
+                      "p50": 1.9000000059604645,
+                      "p95": 3.0999999940395355,
+                      "p99": 4,
+                      "max": 5,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 368,
+                      "p50": 16.69999999999709,
+                      "p95": 16.900000000001455,
+                      "p99": 17.099999999998545,
+                      "max": 33.299999999995634,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 369,
+                      "p50": 16.69999999999709,
+                      "p95": 16.900000000001455,
+                      "p99": 17.099999999998545,
+                      "max": 33.299999999995634,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 385,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 0,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 0,
+                        "max": 0,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 382,
+                        "p50": 49.29999999701977,
+                        "p95": 71,
+                        "p99": 114.59999999403954,
+                        "max": 1067,
+                        "over50": 175,
+                        "over100": 7,
+                        "over200": 3
+                      },
+                      "sourceGaps": {
+                        "n": 382,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 83.33333333333333,
+                        "max": 100,
+                        "over50": 308,
+                        "over100": 1,
+                        "over200": 0
+                      },
+                      "holds": 104,
+                      "interpolated": 1166
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 29
+                    },
+                    "heapBytes": 13678327,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 0,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 37407.39999999106,
+                      "windowEnd": 43566.70000000298,
+                      "sampleCount": 369,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 369,
+                      "p50": 3.1799999996424617,
+                      "p95": 4.60191957373857,
+                      "p99": 5.376356374127937,
+                      "max": 5.902146484395644,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 158,
+                      "p50": 1.7000000029802322,
+                      "p95": 2.7999999970197678,
+                      "p99": 3.5,
+                      "max": 4.5999999940395355,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 157,
+                      "p50": 16.699999999999818,
+                      "p95": 16.90000000000009,
+                      "p99": 33.40000000000009,
+                      "max": 116.39999999999986,
+                      "over50": 1,
+                      "over100": 1,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 157,
+                      "p50": 16.699999999999818,
+                      "p95": 16.90000000000009,
+                      "p99": 33.40000000000009,
+                      "max": 116.39999999999986,
+                      "over50": 1,
+                      "over100": 1,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 61,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 60,
+                        "p50": 0,
+                        "p95": 5.536455491444915,
+                        "p99": 10.604402821114217,
+                        "max": 10.604402821114217,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 60,
+                        "p50": 47.30000001192093,
+                        "p95": 75.29999999701977,
+                        "p99": 214.3999999910593,
+                        "max": 214.3999999910593,
+                        "over50": 18,
+                        "over100": 2,
+                        "over200": 1
+                      },
+                      "sourceGaps": {
+                        "n": 60,
+                        "p50": 50,
+                        "p95": 83.33333333333333,
+                        "p99": 83.33333333333333,
+                        "max": 83.33333333333333,
+                        "over50": 52,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "holds": 1,
+                      "interpolated": 159
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 29
+                    },
+                    "heapBytes": 7550511,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 1014.7999999970198,
+                      "windowEnd": 3792,
+                      "sampleCount": 158,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 158,
+                      "p50": 3.4802794156874484,
+                      "p95": 5.734968749687084,
+                      "p99": 6.270897949062999,
+                      "max": 6.754968749687066,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 367,
+                      "p50": 1.7000000029802322,
+                      "p95": 3.300000011920929,
+                      "p99": 4,
+                      "max": 6.100000008940697,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 366,
+                      "p50": 16.69999999999709,
+                      "p95": 16.900000000001455,
+                      "p99": 17.10000000000582,
+                      "max": 33.39999999999418,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 367,
+                      "p50": 16.69999999999709,
+                      "p95": 16.900000000001455,
+                      "p99": 17.10000000000582,
+                      "max": 33.39999999999418,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 385,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 381,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 5.809567490912627,
+                        "max": 26.170200000000023,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 382,
+                        "p50": 49.3999999910593,
+                        "p95": 73.29999999701977,
+                        "p99": 161.1000000089407,
+                        "max": 1068.2999999970198,
+                        "over50": 182,
+                        "over100": 6,
+                        "over200": 3
+                      },
+                      "sourceGaps": {
+                        "n": 382,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 83.33333333333333,
+                        "max": 100,
+                        "over50": 308,
+                        "over100": 1,
+                        "over200": 0
+                      },
+                      "holds": 124,
+                      "interpolated": 1163
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 29
+                    },
+                    "heapBytes": 7633253,
+                    "unsentInputs": 1,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 33973.10000000894,
+                      "windowEnd": 40104.30000001192,
+                      "sampleCount": 367,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 367,
+                      "p50": 2.980130739195886,
+                      "p95": 5.280500000022158,
+                      "p99": 6.299223268647609,
+                      "max": 6.895189575292022,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  }
+                ],
+                "overloads": 0,
+                "connected": 20,
+                "lobby": [
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  }
+                ],
+                "lifetime": [
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 29
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 29
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 29
+                  }
+                ],
+                "disposed": {
+                  "disposed": true,
+                  "callbacks": false,
+                  "inputs": 0,
+                  "players": 0,
+                  "entities": 0
+                },
+                "cleanPeers": [
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "label": "v35.3",
+      "sha": "9cf5cd1d0e62fa36a9ad16afbe74f5b86fcccf4f",
+      "build": {
+        "status": "PASS",
+        "ms": 7463.882400000002,
+        "exit": 0
+      },
+      "results": [
+        {
+          "status": "PASS",
+          "ms": 55090.9038,
+          "exit": 0,
+          "data": {
+            "ms": 53178.4737,
+            "measurement": {
+              "snapshots": {
+                "count": 8098,
+                "mean": 25901.659545566807,
+                "p95": 50259,
+                "p99": 57513,
+                "max": 62737
+              },
+              "resident": {
+                "count": 150,
+                "mean": 137080395.09333333,
+                "p95": 170004480,
+                "p99": 174350336,
+                "max": 178716672
+              },
+              "peakRssBytes": 180903936,
+              "gcCount": 70,
+              "gcMs": 175.90619999999993,
+              "estimatedHeapAllocationBytes": 698370208,
+              "costs": {
+                "grids": 7,
+                "gridBuckets": 780,
+                "unchangedClampCopies": 0,
+                "clamps": 0
+              }
+            },
+            "errors": [],
+            "rounds": [
+              {
+                "round": 1,
+                "arena": {
+                  "map": 0,
+                  "radius": 3860,
+                  "xp": 37,
+                  "portal": true,
+                  "pads": 4,
+                  "startTick": 1200
+                },
+                "late": [],
+                "inputApply": {
+                  "count": 950,
+                  "mean": 8.815131684210508,
+                  "p95": 19.875899999999092,
+                  "p99": 36.20690000000104,
+                  "max": 37.986000000000786
+                },
+                "snapshotGap": {
+                  "count": 81,
+                  "mean": 65.62564074074076,
+                  "p95": 76.98430000000008,
+                  "p99": 98.17009999999937,
+                  "max": 1168.0948000000026
+                },
+                "replaced": 0,
+                "serverMemory": {
+                  "rss": 127660032,
+                  "heapTotal": 65499136,
+                  "heapUsed": 34670072,
+                  "external": 11302034,
+                  "arrayBuffers": 4314277
+                },
+                "serverCpu": {
+                  "user": 2171000,
+                  "system": 890000
+                },
+                "sentBytes": 62012383,
+                "uptimeMs": 24166.549899999998,
+                "step": {
+                  "count": 249,
+                  "mean": 2.4817156626503634,
+                  "p95": 7.969999999997526,
+                  "p99": 16.798800000000483,
+                  "max": 22.335800000000745
+                },
+                "snapshot": {
+                  "count": 81,
+                  "mean": 6.14980740740744,
+                  "p95": 13.181700000001001,
+                  "p99": 17.682600000000093,
+                  "max": 28.855400000000373
+                },
+                "screens": [
+                  {
+                    "draw": {
+                      "n": 286,
+                      "p50": 2.5999999940395355,
+                      "p95": 3.7000000029802322,
+                      "p99": 4.299999997019768,
+                      "max": 4.799999997019768,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 285,
+                      "p50": 16.69999999999891,
+                      "p95": 16.80000000000109,
+                      "p99": 17,
+                      "max": 66.5,
+                      "over50": 1,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 286,
+                      "p50": 16.69999999999891,
+                      "p95": 16.80000000000109,
+                      "p99": 17.299999999999272,
+                      "max": 66.5,
+                      "over50": 1,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 82,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 0,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 0,
+                        "max": 0,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 81,
+                        "p50": 50.1000000089407,
+                        "p95": 83.5,
+                        "p99": 1158.7999999970198,
+                        "max": 1158.7999999970198,
+                        "over50": 42,
+                        "over100": 2,
+                        "over200": 1
+                      },
+                      "sourceGaps": {
+                        "n": 81,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 83.33333333333333,
+                        "max": 83.33333333333333,
+                        "over50": 66,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "holds": 38,
+                      "interpolated": 250
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 30
+                    },
+                    "heapBytes": 9483065,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 0,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 10469.5,
+                      "windowEnd": 15279.29999999702,
+                      "sampleCount": 286,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 286,
+                      "p50": 2.8548124994887623,
+                      "p95": 4.740590819772951,
+                      "p99": 5.258749999508154,
+                      "max": 5.368780911502796,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 284,
+                      "p50": 1.7000000029802322,
+                      "p95": 2.7999999970197678,
+                      "p99": 4,
+                      "max": 5,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 283,
+                      "p50": 16.69999999999891,
+                      "p95": 16.80000000000109,
+                      "p99": 17,
+                      "max": 33.30000000000109,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 284,
+                      "p50": 16.69999999999891,
+                      "p95": 16.80000000000109,
+                      "p99": 17.30000000000109,
+                      "max": 66.69999999999891,
+                      "over50": 1,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 82,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 81,
+                        "p50": 0,
+                        "p95": 3.6415751064930646,
+                        "p99": 7.28364845675469,
+                        "max": 7.28364845675469,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 81,
+                        "p50": 50.80000001192093,
+                        "p95": 82.40000000596046,
+                        "p99": 1153.7000000029802,
+                        "max": 1153.7000000029802,
+                        "over50": 42,
+                        "over100": 2,
+                        "over200": 1
+                      },
+                      "sourceGaps": {
+                        "n": 81,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 83.33333333333333,
+                        "max": 83.33333333333333,
+                        "over50": 66,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "holds": 51,
+                      "interpolated": 249
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 30
+                    },
+                    "heapBytes": 9333956,
+                    "unsentInputs": 1,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 8812.09999999404,
+                      "windowEnd": 13594.29999999702,
+                      "sampleCount": 284,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 284,
+                      "p50": 2.853822152715793,
+                      "p95": 4.743829773024627,
+                      "p99": 5.174438520026229,
+                      "max": 5.472835341858257,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 279,
+                      "p50": 1.7000000029802322,
+                      "p95": 3.2000000029802322,
+                      "p99": 3.800000011920929,
+                      "max": 4.700000002980232,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 278,
+                      "p50": 16.69999999999891,
+                      "p95": 16.899999999999636,
+                      "p99": 17,
+                      "max": 116.70000000000073,
+                      "over50": 1,
+                      "over100": 1,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 279,
+                      "p50": 16.69999999999891,
+                      "p95": 16.899999999999636,
+                      "p99": 17.19999999999891,
+                      "max": 116.70000000000073,
+                      "over50": 2,
+                      "over100": 1,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 82,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 81,
+                        "p50": 0,
+                        "p95": 3.3611760000000004,
+                        "p99": 4.214112337411393,
+                        "max": 4.214112337411393,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 81,
+                        "p50": 49.79999999701977,
+                        "p95": 99.20000000298023,
+                        "p99": 1123.2000000029802,
+                        "max": 1123.2000000029802,
+                        "over50": 39,
+                        "over100": 4,
+                        "over200": 1
+                      },
+                      "sourceGaps": {
+                        "n": 81,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 83.33333333333333,
+                        "max": 83.33333333333333,
+                        "over50": 66,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "holds": 52,
+                      "interpolated": 243
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 30
+                    },
+                    "heapBytes": 12607398,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 7106.600000008941,
+                      "windowEnd": 11860.5,
+                      "sampleCount": 279,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 279,
+                      "p50": 3.185211542161028,
+                      "p95": 5.197250000066958,
+                      "p99": 5.82321243725292,
+                      "max": 6.664144531362695,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  }
+                ],
+                "overloads": 0,
+                "connected": 20,
+                "lobby": [
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  }
+                ],
+                "lifetime": [
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 30
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 30
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 30
+                  }
+                ],
+                "disposed": {
+                  "disposed": true,
+                  "callbacks": false,
+                  "inputs": 0,
+                  "players": 0,
+                  "entities": 0
+                },
+                "cleanPeers": [
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  }
+                ]
+              },
+              {
+                "round": 2,
+                "arena": {
+                  "map": 0,
+                  "radius": 3860,
+                  "xp": 37,
+                  "portal": true,
+                  "pads": 4,
+                  "startTick": 1200
+                },
+                "late": [
+                  {
+                    "alive": 6,
+                    "connected": 20,
+                    "cpuMicros": {
+                      "user": 391000,
+                      "system": 172000
+                    },
+                    "sentBytes": 13346218,
+                    "server": {
+                      "uptimeMs": 36508.0239,
+                      "rooms": 1,
+                      "activeBattles": 1,
+                      "stepCpu": {
+                        "count": 605,
+                        "mean": 1.874705619834643,
+                        "p95": 6.146600000000035,
+                        "p99": 10.992799999999988,
+                        "max": 22.335800000000745
+                      },
+                      "snapshotCpu": {
+                        "count": 201,
+                        "mean": 5.351690049751329,
+                        "p95": 10.193600000002334,
+                        "p99": 14.874199999998382,
+                        "max": 28.855400000000373
+                      },
+                      "snapshotGap": {
+                        "count": 201,
+                        "mean": 60.26927860696517,
+                        "p95": 63.40719999999783,
+                        "p99": 98.17009999999937,
+                        "max": 1168.0948000000026
+                      },
+                      "inputApply": {
+                        "count": 1567,
+                        "mean": 18.406545628589647,
+                        "p95": 22.917499999999563,
+                        "p99": 812.3770000000004,
+                        "max": 818.594299999997
+                      },
+                      "sendCpu": {
+                        "count": 690,
+                        "mean": 1.909550869565214,
+                        "p95": 7.448599999996077,
+                        "p99": 13.688499999996566,
+                        "max": 28.71610000000146
+                      },
+                      "pumpCpu": {
+                        "count": 690,
+                        "mean": 5.166199275362548,
+                        "p95": 18.45560000000114,
+                        "p99": 31.068999999999505,
+                        "max": 94.21289999999863
+                      },
+                      "debtMs": {
+                        "count": 690,
+                        "mean": 8.347609323670984,
+                        "p95": 15.893766666666462,
+                        "p99": 16.57893333333142,
+                        "max": 16.663633333331056
+                      },
+                      "sentBytes": 141144290,
+                      "rejected": 21,
+                      "duplicates": 0,
+                      "reconnects": 1,
+                      "closed": 1,
+                      "bufferHighWatermark": 0,
+                      "replacedSnapshots": 0,
+                      "overloads": 0,
+                      "memory": {
+                        "rss": 173666304,
+                        "heapTotal": 100364288,
+                        "heapUsed": 57238536,
+                        "external": 26260463,
+                        "arrayBuffers": 19278176
+                      }
+                    },
+                    "screens": [
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 1.7000000029802322,
+                          "p95": 2.8999999910593033,
+                          "p99": 3.0999999940395355,
+                          "max": 3.5,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.700000000000728,
+                          "p95": 16.80000000000291,
+                          "p99": 16.899999999997817,
+                          "max": 16.899999999997817,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 6,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 0.9000000059604645,
+                          "p95": 1.300000011920929,
+                          "p99": 1.5,
+                          "max": 2.2000000029802322,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.69999999999709,
+                          "p95": 16.80000000000291,
+                          "p99": 16.900000000001455,
+                          "max": 16.900000000001455,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 6,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 0.7000000029802322,
+                          "p95": 1.300000011920929,
+                          "p99": 2,
+                          "max": 3.4000000059604645,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.700000000000728,
+                          "p95": 16.799999999999272,
+                          "p99": 16.900000000001455,
+                          "max": 16.900000000001455,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 6,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "alive": 5,
+                    "connected": 20,
+                    "cpuMicros": {
+                      "user": 282000,
+                      "system": 47000
+                    },
+                    "sentBytes": 6665862,
+                    "server": {
+                      "uptimeMs": 38356.127100000005,
+                      "rooms": 1,
+                      "activeBattles": 1,
+                      "stepCpu": {
+                        "count": 716,
+                        "mean": 1.667718994413343,
+                        "p95": 5.772600000000239,
+                        "p99": 10.696499999998196,
+                        "max": 22.335800000000745
+                      },
+                      "snapshotCpu": {
+                        "count": 238,
+                        "mean": 5.008855462184948,
+                        "p95": 9.844899999996414,
+                        "p99": 13.665499999999156,
+                        "max": 28.855400000000373
+                      },
+                      "snapshotGap": {
+                        "count": 238,
+                        "mean": 58.664279831932795,
+                        "p95": 63.23879999999917,
+                        "p99": 82.3135000000002,
+                        "max": 1168.0948000000026
+                      },
+                      "inputApply": {
+                        "count": 2007,
+                        "mean": 16.85909706028896,
+                        "p95": 23.198499999998603,
+                        "p99": 36.79469999999856,
+                        "max": 818.594299999997
+                      },
+                      "sendCpu": {
+                        "count": 853,
+                        "mean": 1.6664168815943439,
+                        "p95": 7.168499999999767,
+                        "p99": 12.438700000006065,
+                        "max": 28.71610000000146
+                      },
+                      "pumpCpu": {
+                        "count": 853,
+                        "mean": 4.511967526377771,
+                        "p95": 17.251499999998487,
+                        "p99": 29.665399999998044,
+                        "max": 94.21289999999863
+                      },
+                      "debtMs": {
+                        "count": 853,
+                        "mean": 8.295657092613645,
+                        "p95": 15.867533333331458,
+                        "p99": 16.531133333334743,
+                        "max": 16.663633333331056
+                      },
+                      "sentBytes": 147810152,
+                      "rejected": 21,
+                      "duplicates": 0,
+                      "reconnects": 1,
+                      "closed": 1,
+                      "bufferHighWatermark": 0,
+                      "replacedSnapshots": 0,
+                      "overloads": 0,
+                      "memory": {
+                        "rss": 159940608,
+                        "heapTotal": 100364288,
+                        "heapUsed": 33855656,
+                        "external": 10429179,
+                        "arrayBuffers": 3446892
+                      }
+                    },
+                    "screens": [
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 1.5,
+                          "p95": 1.7999999970197678,
+                          "p99": 2,
+                          "max": 2.199999988079071,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.69999999999709,
+                          "p95": 16.799999999999272,
+                          "p99": 16.899999999997817,
+                          "max": 16.900000000001455,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 5,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 0.9000000059604645,
+                          "p95": 1.2000000029802322,
+                          "p99": 1.2999999970197678,
+                          "max": 1.7000000029802322,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.69999999999709,
+                          "p95": 16.799999999999272,
+                          "p99": 16.80000000000291,
+                          "max": 16.900000000001455,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 5,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 0.5,
+                          "p95": 0.7000000029802322,
+                          "p99": 1,
+                          "max": 1.1000000089406967,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.700000000000728,
+                          "p95": 16.799999999999272,
+                          "p99": 16.799999999999272,
+                          "max": 16.80000000000291,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 5,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "alive": 3,
+                    "connected": 20,
+                    "cpuMicros": {
+                      "user": 250000,
+                      "system": 125000
+                    },
+                    "sentBytes": 5396223,
+                    "server": {
+                      "uptimeMs": 40197.6978,
+                      "rooms": 1,
+                      "activeBattles": 1,
+                      "stepCpu": {
+                        "count": 827,
+                        "mean": 1.5094885126964162,
+                        "p95": 5.158899999998539,
+                        "p99": 10.170300000001589,
+                        "max": 22.335800000000745
+                      },
+                      "snapshotCpu": {
+                        "count": 275,
+                        "mean": 4.748249454545412,
+                        "p95": 9.649900000000343,
+                        "p99": 13.665499999999156,
+                        "max": 28.855400000000373
+                      },
+                      "snapshotGap": {
+                        "count": 275,
+                        "mean": 57.50129454545454,
+                        "p95": 63.01740000000427,
+                        "p99": 82.3135000000002,
+                        "max": 1168.0948000000026
+                      },
+                      "inputApply": {
+                        "count": 2445,
+                        "mean": 15.508322290388527,
+                        "p95": 22.824899999999616,
+                        "p99": 36.44550000000163,
+                        "max": 818.594299999997
+                      },
+                      "sendCpu": {
+                        "count": 1018,
+                        "mean": 1.5034474459724558,
+                        "p95": 6.8422000000027765,
+                        "p99": 11.585500000001048,
+                        "max": 28.71610000000146
+                      },
+                      "pumpCpu": {
+                        "count": 1018,
+                        "mean": 4.059261198428501,
+                        "p95": 15.87329999999929,
+                        "p99": 29.29729999999836,
+                        "max": 94.21289999999863
+                      },
+                      "debtMs": {
+                        "count": 1018,
+                        "mean": 8.251597740667206,
+                        "p95": 15.80203333333094,
+                        "p99": 16.5139333333329,
+                        "max": 16.663633333331056
+                      },
+                      "sentBytes": 153206569,
+                      "rejected": 21,
+                      "duplicates": 0,
+                      "reconnects": 1,
+                      "closed": 1,
+                      "bufferHighWatermark": 0,
+                      "replacedSnapshots": 0,
+                      "overloads": 0,
+                      "memory": {
+                        "rss": 161021952,
+                        "heapTotal": 100626432,
+                        "heapUsed": 38075984,
+                        "external": 11231343,
+                        "arrayBuffers": 4249056
+                      }
+                    },
+                    "screens": [
+                      {
+                        "draw": {
+                          "n": 108,
+                          "p50": 1.6000000089406967,
+                          "p95": 2.2999999970197678,
+                          "p99": 3.6000000089406967,
+                          "max": 4,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 107,
+                          "p50": 16.69999999999709,
+                          "p95": 16.80000000000291,
+                          "p99": 16.900000000001455,
+                          "max": 33.29999999999927,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 3,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 108,
+                          "p50": 0.7999999970197678,
+                          "p95": 1.199999988079071,
+                          "p99": 1.2000000029802322,
+                          "max": 1.2000000029802322,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 107,
+                          "p50": 16.69999999999709,
+                          "p95": 16.799999999999272,
+                          "p99": 16.900000000001455,
+                          "max": 33.400000000001455,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 3,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      },
+                      {
+                        "draw": {
+                          "n": 109,
+                          "p50": 0.699999988079071,
+                          "p95": 0.9000000059604645,
+                          "p99": 1.2999999970197678,
+                          "max": 1.3999999910593033,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "gap": {
+                          "n": 108,
+                          "p50": 16.700000000000728,
+                          "p95": 16.80000000000291,
+                          "p99": 16.899999999997817,
+                          "max": 16.899999999997817,
+                          "over50": 0,
+                          "over100": 0,
+                          "over200": 0
+                        },
+                        "alive": 3,
+                        "connected": true,
+                        "resources": {
+                          "sprites": 0,
+                          "textures": 0,
+                          "labels": 0
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "inputApply": {
+                  "count": 2446,
+                  "mean": 15.50203258381028,
+                  "p95": 22.824899999999616,
+                  "p99": 36.44550000000163,
+                  "max": 818.594299999997
+                },
+                "snapshotGap": {
+                  "count": 275,
+                  "mean": 57.50129454545454,
+                  "p95": 63.01740000000427,
+                  "p99": 82.3135000000002,
+                  "max": 1168.0948000000026
+                },
+                "replaced": 0,
+                "serverMemory": {
+                  "rss": 161026048,
+                  "heapTotal": 100626432,
+                  "heapUsed": 39918984,
+                  "external": 11297271,
+                  "arrayBuffers": 4314984
+                },
+                "serverCpu": {
+                  "user": 4453000,
+                  "system": 1562000
+                },
+                "sentBytes": 153206569,
+                "uptimeMs": 40212.6336,
+                "step": {
+                  "count": 828,
+                  "mean": 1.5081844202897785,
+                  "p95": 5.158899999998539,
+                  "p99": 10.170300000001589,
+                  "max": 22.335800000000745
+                },
+                "snapshot": {
+                  "count": 275,
+                  "mean": 4.748249454545412,
+                  "p95": 9.649900000000343,
+                  "p99": 13.665499999999156,
+                  "max": 28.855400000000373
+                },
+                "screens": [
+                  {
+                    "draw": {
+                      "n": 109,
+                      "p50": 1.6000000089406967,
+                      "p95": 2.2999999970197678,
+                      "p99": 3.6000000089406967,
+                      "max": 4,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 108,
+                      "p50": 16.69999999999709,
+                      "p95": 16.80000000000291,
+                      "p99": 16.900000000001455,
+                      "max": 33.29999999999927,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 109,
+                      "p50": 16.69999999999709,
+                      "p95": 16.80000000000291,
+                      "p99": 16.900000000001455,
+                      "max": 33.29999999999927,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 277,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 0,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 0,
+                        "max": 0,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 275,
+                        "p50": 49.29999999701977,
+                        "p95": 65.70000000298023,
+                        "p99": 105.29999999701977,
+                        "max": 1158.7999999970198,
+                        "over50": 125,
+                        "over100": 3,
+                        "over200": 2
+                      },
+                      "sourceGaps": {
+                        "n": 275,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 83.33333333333333,
+                        "max": 83.33333333333333,
+                        "over50": 220,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "holds": 72,
+                      "interpolated": 830
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 30
+                    },
+                    "heapBytes": 8532498,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 0,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 21223.89999999106,
+                      "windowEnd": 31314.5,
+                      "sampleCount": 109,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 109,
+                      "p50": 3.3017410970220453,
+                      "p95": 4.375701380422186,
+                      "p99": 4.418947036417649,
+                      "max": 4.4325660399570666,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 109,
+                      "p50": 0.7999999970197678,
+                      "p95": 1.199999988079071,
+                      "p99": 1.2000000029802322,
+                      "max": 1.2000000029802322,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 108,
+                      "p50": 16.69999999999709,
+                      "p95": 16.799999999999272,
+                      "p99": 16.900000000001455,
+                      "max": 33.400000000001455,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 109,
+                      "p50": 16.69999999999709,
+                      "p95": 16.799999999999272,
+                      "p99": 16.900000000001455,
+                      "max": 33.400000000001455,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 277,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 275,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 3.6418254764809035,
+                        "max": 7.28364845675469,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 275,
+                        "p50": 49.29999999701977,
+                        "p95": 66.40000000596046,
+                        "p99": 104.8999999910593,
+                        "max": 1153.7000000029802,
+                        "over50": 122,
+                        "over100": 3,
+                        "over200": 2
+                      },
+                      "sourceGaps": {
+                        "n": 275,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 83.33333333333333,
+                        "max": 83.33333333333333,
+                        "over50": 220,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "holds": 93,
+                      "interpolated": 831
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 30
+                    },
+                    "heapBytes": 8259715,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 19544.59999999404,
+                      "windowEnd": 29629.40000000596,
+                      "sampleCount": 109,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 109,
+                      "p50": 3.3146008177130852,
+                      "p95": 4.377709610571401,
+                      "p99": 4.420724104763337,
+                      "max": 4.4313619047377415,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 110,
+                      "p50": 0.699999988079071,
+                      "p95": 0.9000000059604645,
+                      "p99": 1.2999999970197678,
+                      "max": 1.3999999910593033,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 109,
+                      "p50": 16.700000000000728,
+                      "p95": 16.80000000000291,
+                      "p99": 16.899999999997817,
+                      "max": 16.899999999997817,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 110,
+                      "p50": 16.700000000000728,
+                      "p95": 16.80000000000291,
+                      "p99": 16.899999999997817,
+                      "max": 16.899999999997817,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 277,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 274,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 4.214112337004281,
+                        "max": 4.214112337411393,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 275,
+                        "p50": 49.400000005960464,
+                        "p95": 67.8999999910593,
+                        "p99": 171.90000000596046,
+                        "max": 1123.2000000029802,
+                        "over50": 123,
+                        "over100": 5,
+                        "over200": 2
+                      },
+                      "sourceGaps": {
+                        "n": 275,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 83.33333333333333,
+                        "max": 83.33333333333333,
+                        "over50": 220,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "holds": 92,
+                      "interpolated": 825
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 30
+                    },
+                    "heapBytes": 6894242,
+                    "unsentInputs": 1,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 17815.79999999702,
+                      "windowEnd": 27895.60000000894,
+                      "sampleCount": 110,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 110,
+                      "p50": 3.511556719423197,
+                      "p95": 4.637824789277715,
+                      "p99": 4.693743933216979,
+                      "max": 4.709039392785257,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  }
+                ],
+                "overloads": 0,
+                "connected": 20,
+                "lobby": [
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  }
+                ],
+                "lifetime": [
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 30
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 30
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 30
+                  }
+                ],
+                "disposed": {
+                  "disposed": true,
+                  "callbacks": false,
+                  "inputs": 0,
+                  "players": 0,
+                  "entities": 0
+                },
+                "cleanPeers": [
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  }
+                ]
+              },
+              {
+                "round": 3,
+                "arena": {
+                  "map": 0,
+                  "radius": 3860,
+                  "xp": 37,
+                  "portal": true,
+                  "pads": 4,
+                  "startTick": 1200
+                },
+                "late": [],
+                "inputApply": {
+                  "count": 2782,
+                  "mean": 20.192296333572983,
+                  "p95": 22.986799999998766,
+                  "p99": 812.6432999999997,
+                  "max": 858.5074000000022
+                },
+                "snapshotGap": {
+                  "count": 384,
+                  "mean": 57.978371354166676,
+                  "p95": 63.93990000000122,
+                  "p99": 97.94180000000051,
+                  "max": 1168.0948000000026
+                },
+                "replaced": 0,
+                "serverMemory": {
+                  "rss": 165044224,
+                  "heapTotal": 102199296,
+                  "heapUsed": 36817456,
+                  "external": 11728792,
+                  "arrayBuffers": 4746505
+                },
+                "serverCpu": {
+                  "user": 6890000,
+                  "system": 2078000
+                },
+                "sentBytes": 235294066,
+                "uptimeMs": 52401.5039,
+                "step": {
+                  "count": 1167,
+                  "mean": 1.6979180805483634,
+                  "p95": 5.905900000005204,
+                  "p99": 11.803199999994831,
+                  "max": 22.335800000000745
+                },
+                "snapshot": {
+                  "count": 384,
+                  "mean": 5.1443856770832594,
+                  "p95": 10.193600000002334,
+                  "p99": 17.682600000000093,
+                  "max": 28.855400000000373
+                },
+                "screens": [
+                  {
+                    "draw": {
+                      "n": 367,
+                      "p50": 2,
+                      "p95": 3,
+                      "p99": 3.5,
+                      "max": 4.5,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 366,
+                      "p50": 16.69999999999709,
+                      "p95": 16.80000000000291,
+                      "p99": 17,
+                      "max": 33.299999999995634,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 367,
+                      "p50": 16.69999999999709,
+                      "p95": 16.80000000000291,
+                      "p99": 17,
+                      "max": 33.299999999995634,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 387,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 0,
+                        "p50": 0,
+                        "p95": 0,
+                        "p99": 0,
+                        "max": 0,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 384,
+                        "p50": 49.400000005960464,
+                        "p95": 67.59999999403954,
+                        "p99": 105.29999999701977,
+                        "max": 1158.7999999970198,
+                        "over50": 179,
+                        "over100": 5,
+                        "over200": 3
+                      },
+                      "sourceGaps": {
+                        "n": 384,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 83.33333333333333,
+                        "max": 83.33333333333333,
+                        "over50": 310,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "holds": 106,
+                      "interpolated": 1168
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 30
+                    },
+                    "heapBytes": 9224248,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 0,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 37364.79999999702,
+                      "windowEnd": 43506.79999999702,
+                      "sampleCount": 367,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 367,
+                      "p50": 3.0070896993952942,
+                      "p95": 4.391135005517128,
+                      "p99": 4.995294829216874,
+                      "max": 5.553600941334736,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 155,
+                      "p50": 1.5,
+                      "p95": 2.1000000089406967,
+                      "p99": 2.9000000059604645,
+                      "max": 2.9000000059604645,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 154,
+                      "p50": 16.699999999999818,
+                      "p95": 16.899999999999636,
+                      "p99": 33.299999999999955,
+                      "max": 99.90000000000009,
+                      "over50": 1,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 154,
+                      "p50": 16.699999999999818,
+                      "p95": 16.899999999999636,
+                      "p99": 33.299999999999955,
+                      "max": 99.90000000000009,
+                      "over50": 1,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 59,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 58,
+                        "p50": 0,
+                        "p95": 4.149713028423712,
+                        "p99": 9.11316557717652,
+                        "max": 9.11316557717652,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 58,
+                        "p50": 48.400000005960464,
+                        "p95": 65.5,
+                        "p99": 173.79999999701977,
+                        "max": 173.79999999701977,
+                        "over50": 23,
+                        "over100": 2,
+                        "over200": 0
+                      },
+                      "sourceGaps": {
+                        "n": 58,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 66.66666666666667,
+                        "max": 66.66666666666667,
+                        "over50": 47,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "holds": 1,
+                      "interpolated": 156
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 30
+                    },
+                    "heapBytes": 8230595,
+                    "unsentInputs": 0,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 1043.9000000059605,
+                      "windowEnd": 3707.300000011921,
+                      "sampleCount": 155,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 155,
+                      "p50": 3.6267483327824834,
+                      "p95": 5.858219845137569,
+                      "p99": 6.82549434594759,
+                      "max": 7.22799353814915,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  },
+                  {
+                    "draw": {
+                      "n": 366,
+                      "p50": 1.7000000029802322,
+                      "p95": 3,
+                      "p99": 3.7000000029802322,
+                      "max": 5.5,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "gap": {
+                      "n": 365,
+                      "p50": 16.69999999999709,
+                      "p95": 16.80000000000291,
+                      "p99": 16.900000000001455,
+                      "max": 33.299999999995634,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 366,
+                      "p50": 16.69999999999709,
+                      "p95": 16.80000000000291,
+                      "p99": 16.900000000001455,
+                      "max": 33.299999999995634,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "timeline": {
+                      "accepted": 387,
+                      "discarded": 0,
+                      "corrections": {
+                        "n": 383,
+                        "p50": 0,
+                        "p95": 0.005531292785349251,
+                        "p99": 5.349557509917247,
+                        "max": 31.959564,
+                        "over50": 0,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "arrivalGaps": {
+                        "n": 384,
+                        "p50": 49.599999994039536,
+                        "p95": 70.29999999701977,
+                        "p99": 171.90000000596046,
+                        "max": 1123.2000000029802,
+                        "over50": 181,
+                        "over100": 8,
+                        "over200": 3
+                      },
+                      "sourceGaps": {
+                        "n": 384,
+                        "p50": 50,
+                        "p95": 66.66666666666667,
+                        "p99": 83.33333333333333,
+                        "max": 83.33333333333333,
+                        "over50": 310,
+                        "over100": 0,
+                        "over200": 0
+                      },
+                      "holds": 130,
+                      "interpolated": 1165
+                    },
+                    "close": [],
+                    "lifetime": {
+                      "intervals": 4,
+                      "timeouts": 0,
+                      "raf": 1,
+                      "listeners": 30
+                    },
+                    "heapBytes": 9806215,
+                    "unsentInputs": 1,
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0,
+                      "profiles": 1,
+                      "pending": 0
+                    },
+                    "renderer": "canvas",
+                    "sampleScope": {
+                      "windowStart": 33967.20000000298,
+                      "windowEnd": 40086.79999999702,
+                      "sampleCount": 366,
+                      "scope": "bounded last 4096 CPU submits and actual draw intervals; rAF separate",
+                      "active": true
+                    },
+                    "lagTicks": {
+                      "n": 366,
+                      "p50": 2.8146398916082376,
+                      "p95": 4.879082846658832,
+                      "p99": 5.8569594193564285,
+                      "max": 6.575339491958886,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    }
+                  }
+                ],
+                "overloads": 0,
+                "connected": 20,
+                "lobby": [
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  },
+                  {
+                    "feedback": 0,
+                    "sounds": 0,
+                    "gestures": 0,
+                    "unsentInputs": 0,
+                    "sprites": 0,
+                    "textures": 0,
+                    "labels": 0,
+                    "samples": 0,
+                    "pending": 0,
+                    "profiles": 0
+                  }
+                ],
+                "lifetime": [
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 30
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 30
+                  },
+                  {
+                    "intervals": 4,
+                    "timeouts": 0,
+                    "raf": 1,
+                    "listeners": 30
+                  }
+                ],
+                "disposed": {
+                  "disposed": true,
+                  "callbacks": false,
+                  "inputs": 0,
+                  "players": 0,
+                  "entities": 0
+                },
+                "cleanPeers": [
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  },
+                  {
+                    "queue": 0,
+                    "bytes": 0,
+                    "pending": false,
+                    "profile": false
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

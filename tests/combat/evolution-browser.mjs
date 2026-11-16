@@ -15,8 +15,10 @@ try{
  await rival.goto(h.url+'/?room='+h.room.code+'&renderer='+renderer);
  await rival.locator('#br-player-name').fill('Peer');await rival.locator('#br-join-btn').click();await rival.locator('#br-student-wait').waitFor();
  pages=[h.student,rival,h.host];
- for(const page of pages)await page.evaluate(async()=>{
-  const m=window.m=await import('/src/main.js');window.seen={kinds:{},turns:[],critical:false,criticalText:false,criticalEvents:[],criticalFrames:[],iron:false};
+ const instrument=page=>page.evaluate(async()=>{
+  const m=window.m=await import('/src/main.js');window.seen={reflectionDraws:0,shieldDraws:0,shieldHurt:false,kinds:{},turns:[],critical:false,criticalText:false,criticalEvents:[],criticalFrames:[],iron:false};
+  const paint=m.renderer.paint.brPaintAttack;m.renderer.paint.brPaintAttack=(p,row,...args)=>{const drawn=paint(p,row,...args);if(drawn&&row[10]==='mirror-contact')seen.reflectionDraws++;
+   if(drawn&&row[1]==='hit'&&row[8]===0&&row[13]?.absorbed>0){seen.shieldDraws++;const target=row[9];seen.shieldHurt||=!!m.renderer.session.hitStates?.get(String(target));}return drawn;};
   const text=m.renderer.text.bind(m.renderer);m.renderer.text=(...args)=>{if(args[0]==='CRITICAL!')seen.criticalText=true;return text(...args);};
   const frame=m.timeline.frame.bind(m.timeline);
   m.timeline.frame=now=>{
@@ -35,6 +37,7 @@ try{
    if(type==='SHOT_TURN')seen.turns.push({id:data.id,crit:data.crit,tick:serverTick});
    if(type==='FX'&&data.style==='sniper-critical')seen.criticalEvents.push({tick:serverTick,displayTick:m.timeline.renderTick});});
  });
+ for(const page of pages)await instrument(page);
  let w,g,p,q;
  async function battle(ids){
   await h.command('START_QUIZ');await h.command('BEGIN_DRAFT');
@@ -77,11 +80,11 @@ try{
  await ticks(45);
  assert.ok(p.hp<before);assert.equal(q.hp,defense);
  for(const page of pages){
-  await page.waitForFunction(()=>seen.turns.length===1&&seen.turns[0].crit===true&&seen.critical&&seen.criticalText);
+  await page.waitForFunction(()=>seen.turns.length===1&&seen.turns[0].crit===true&&seen.critical&&seen.criticalText&&seen.reflectionDraws>0);
   assert.equal(await page.evaluate(()=>m.renderer.pixi?'pixi':'canvas'),renderer);
  }
  report.cases.push({skill:'mirror',turns:1,screens:3,defenderLoss:defense-q.hp,shooterLoss:before-p.hp,
-  observers:await Promise.all(pages.map(page=>page.evaluate(()=>({turns:seen.turns.length,criticalText:seen.criticalText,frames:seen.criticalFrames}))))});
+  observers:await Promise.all(pages.map(page=>page.evaluate(()=>({turns:seen.turns.length,reflectionDraws:seen.reflectionDraws,criticalText:seen.criticalText,frames:seen.criticalFrames}))))});
  await finish();await battle(['emoji-152','emoji-028']);
  g.walls=[new w.Wall(215,0,25,220,0)];h.staticState();
  await skill(rival,q,-1);await skill(h.student,p,1);await ticks(15);
@@ -90,8 +93,19 @@ try{
  await h.student.screenshot({path:out+'/portal-spotlight-student.png'});
  await ticks(22);assert.ok(q.stunned>=178);
  await rival.reload();await rival.waitForFunction(async()=>{window.m=await import('/src/main.js');return !m.net.restoring&&m.timeline.predicted?.rw?.stunEnd>0;});
- await ticks(182);await rival.waitForFunction(()=>m.controls.enabled&&!m.timeline.predicted?.stunned);await finish();
+ await instrument(rival);await ticks(182);await rival.waitForFunction(()=>m.controls.enabled&&!m.timeline.predicted?.stunned);await finish();
  report.cases.push({skill:'spotlight',screens:3,behindCover:true,resumed:true});
+ if(process.env.COMBAT_CONTROLS353){
+  await battle(['emoji-144','emoji-148']);
+  // A real authoritative shield granted by the existing engine API isolates
+  // full absorption. Projectile damage/range/timing are unchanged.
+  w.BRRework.shield(w.BRRework.context(q,g,new w.Vec2(-1,0),1),q,1000,180);h.publish();
+  const hp=q.hp;await h.student.locator('#br-attack').click();for(let n=0;n<100&&!w.actionPending.get(p.remoteId)?.length;n++)await delay(10);assert.ok(w.actionPending.get(p.remoteId)?.length);await ticks(45);
+  assert.equal(q.hp,hp);assert.ok(w.BRRework.state(q).shields.reduce((n,s)=>n+s.amount,0)<1000);
+  for(const page of pages){await page.waitForFunction(()=>seen.shieldDraws>0);assert.equal(await page.evaluate(()=>seen.shieldHurt),false);}
+  report.cases.push({skill:'pure-shield',fixtureShield:1000,hpLoss:0,screens:3,draws:await Promise.all(pages.map(p=>p.evaluate(()=>seen.shieldDraws)))});await finish();
+ }
+
  assert.deepEqual(h.errors,[]);report.status='PASS';console.log('evolution browser',renderer,report);
 }catch(error){report.status='FAIL';report.error=error.stack;report.observers=await Promise.all(pages.map(page=>page.evaluate(()=>({seen:window.seen,phase:m.ui.room?.phase,renderTick:m.timeline.renderTick,lastSeq:m.timeline.lastSeq,renderer:m.renderer.pixi?'pixi':'canvas'})).catch(e=>({error:e.message}))));throw error;}
 finally{fs.writeFileSync(out+'/result.json',JSON.stringify(report,null,2));await h.close();}

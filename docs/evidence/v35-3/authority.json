@@ -1,0 +1,701 @@
+{
+  "status": "PASS",
+  "ms": 2613.5612,
+  "roster": 86,
+  "seed": "combat353-fixed",
+  "ticksPerKit": 120,
+  "exceptions": [
+    "self.recastTarget (owner-only return geometry)",
+    "confirmed rw FX geometry.kind/seq (existing action identity)"
+  ],
+  "rows": [
+    {
+      "id": "emoji-000",
+      "hash": "cd966d676d313516c51086c881dd29f3329703b7dd3365c23edcf1ac67b552f1",
+      "rawBytes": 405338,
+      "events": 27,
+      "shots": 3,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-001",
+      "hash": "d8e9fa9a79a7cd90a01d387e2f357ec4099998ee9275a13cfacd741e11f25c35",
+      "rawBytes": 295972,
+      "events": 16,
+      "shots": 0,
+      "metadataBytes": 69
+    },
+    {
+      "id": "emoji-002",
+      "hash": "4e7164749bd58e25f3f991669e091e6946e2c2ae7877c36a8fdb65f44f7a771d",
+      "rawBytes": 324178,
+      "events": 18,
+      "shots": 1,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-003",
+      "hash": "51a4198e99d471e3197a266b47c9a9f08e56852928f936570cc46b467dd3306e",
+      "rawBytes": 476602,
+      "events": 84,
+      "shots": 16,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-004",
+      "hash": "e7a6fd41ee311741fadf136f91029053be6fcc9d8af4feaf5ed2f4bcf29f74a4",
+      "rawBytes": 292993,
+      "events": 13,
+      "shots": 0,
+      "metadataBytes": 46
+    },
+    {
+      "id": "emoji-006",
+      "hash": "da52cd0b011b37e2892390978be66724fcabcfe9960e967dceb79eea7893040a",
+      "rawBytes": 351571,
+      "events": 22,
+      "shots": 1,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-007",
+      "hash": "1221efb10652227d76a1eab2301f079d54349f7afb84961d115b5d3a2733910c",
+      "rawBytes": 383725,
+      "events": 28,
+      "shots": 3,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-008",
+      "hash": "3c4d42b784b6e4fd56c9feb5a17dc844fa3cc8ec71d35786f84d392c2095804b",
+      "rawBytes": 340406,
+      "events": 19,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-010",
+      "hash": "2661bb3d5b897873aeac8d962e3cb26c2e94a6d45f002b08a686d25b731e4b39",
+      "rawBytes": 367717,
+      "events": 19,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-012",
+      "hash": "4957dfa4b0781a6a7282c2bb8aa33b0d8d43679d4bdab2df42a0163689a49c23",
+      "rawBytes": 385706,
+      "events": 28,
+      "shots": 6,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-013",
+      "hash": "afa14468070c18180a76fe422796439cc39a6caa02fa8e81a73a7ea0efe608c4",
+      "rawBytes": 336171,
+      "events": 18,
+      "shots": 0,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-014",
+      "hash": "12383e709077c64c3988a49a4ff9b0c6d606ebf5064a3dfe1102592dd1036f1e",
+      "rawBytes": 362866,
+      "events": 20,
+      "shots": 4,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-019",
+      "hash": "d134cf29643515da1137213b6af025054472f532592ca389c09760b0b967be50",
+      "rawBytes": 335609,
+      "events": 15,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-020",
+      "hash": "f1b9c7210095d327fdda86f273b5d960b5261220517b36817a358b958ad42c16",
+      "rawBytes": 526311,
+      "events": 48,
+      "shots": 15,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-022",
+      "hash": "77ebe5f374485c80a462c6e2e4c895d9c631f50a76de11799fff9094a12db537",
+      "rawBytes": 508127,
+      "events": 24,
+      "shots": 4,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-037",
+      "hash": "075a54835dc39151857d801cc2d6fc7db700fe602077764c9995ff56c6cc4e18",
+      "rawBytes": 306962,
+      "events": 13,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-085",
+      "hash": "f8e34634e51aacc2b76de03080a2b263d9be8b99659aace2a1283922db56be90",
+      "rawBytes": 402294,
+      "events": 35,
+      "shots": 7,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-098",
+      "hash": "b4d711a08d4f050fed7a1e0c2c0936626b1d5143c1d19215047ec509288f68d0",
+      "rawBytes": 342129,
+      "events": 20,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-110",
+      "hash": "e0d6eb2b73c4ee3c98313cb191cc5a1a3a672d0059ba2e9776becb48b034bff8",
+      "rawBytes": 328189,
+      "events": 16,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-131",
+      "hash": "4927cd18043315499c269bc79fdb227c1c22ac4eb305f4dabb45c00537a7e85b",
+      "rawBytes": 467728,
+      "events": 81,
+      "shots": 15,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-132",
+      "hash": "304fd1d1f1eb00c191cfffb9885ef721b6ce197d3069c62e2bf08d58e7587c7c",
+      "rawBytes": 362092,
+      "events": 40,
+      "shots": 2,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-023",
+      "hash": "1275e0477c815385a08d247c9345f476d1b992afc8eccd6cf57ffe5fefd987a3",
+      "rawBytes": 360335,
+      "events": 20,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-024",
+      "hash": "e25816690e33351525a9df7c3a80e93d354d43d5eab1305e3f3ea79ba433040f",
+      "rawBytes": 396291,
+      "events": 16,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-025",
+      "hash": "cc26efce494a2107b555e48b2d5fd22860305ad09af8bef640b733bd21e3f091",
+      "rawBytes": 315049,
+      "events": 13,
+      "shots": 0,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-026",
+      "hash": "134a2c67af6706dc918b5403769ec453712c3de58bf188de88c01b1bf94f4707",
+      "rawBytes": 316075,
+      "events": 14,
+      "shots": 0,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-027",
+      "hash": "4693360d76ae12d9fe91c4903f0ffbefd005abcc0812746a2cdf8fd9a0477cd7",
+      "rawBytes": 315583,
+      "events": 14,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-028",
+      "hash": "3875839e0c8dd413db972b2e0b3c2e6770baecd8dce4e237dd270a9eb91bc124",
+      "rawBytes": 307360,
+      "events": 9,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-029",
+      "hash": "687791c321239bf3bbf1e33e74bbc9feab77a144e6b938f63e9955537fc1cd85",
+      "rawBytes": 314020,
+      "events": 14,
+      "shots": 0,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-030",
+      "hash": "5ebda34f2216e941098e33b611814dacff14d9b22056e673ef168c61133fa5bf",
+      "rawBytes": 331390,
+      "events": 21,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-031",
+      "hash": "32bcf27c606172933bccd80006f980370f3c4948b40c9ff6fcd55eb7a186a370",
+      "rawBytes": 323105,
+      "events": 17,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-033",
+      "hash": "014c49f5306c29137d8a0b26cef5db86e86cfe3cf7da73b2df63b58738f3ce4a",
+      "rawBytes": 356991,
+      "events": 24,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-034",
+      "hash": "ada25bcf8a0f26653cf2f780b950036c8778225242524ac12d8ed4b9b179894b",
+      "rawBytes": 372582,
+      "events": 23,
+      "shots": 4,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-035",
+      "hash": "7a5b39ada0299dd7304f7c6ecd7cfdf7079ea3886ff5e5580203ff9b7e78d256",
+      "rawBytes": 332294,
+      "events": 18,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-036",
+      "hash": "c1e507e0252169ec7a62bf952b2b12740be73b33730e41fff4060fea2689f29b",
+      "rawBytes": 382656,
+      "events": 31,
+      "shots": 6,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-063",
+      "hash": "6b0b78d91795935af87a9939accf44913b7fcd7baee86ea6b4ffc735f6624fb9",
+      "rawBytes": 438746,
+      "events": 46,
+      "shots": 11,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-066",
+      "hash": "37b2818d6f401eaae1411bd27ea90a9c29c4cda2b3e12d10ebcbe974b4b99014",
+      "rawBytes": 553524,
+      "events": 30,
+      "shots": 5,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-087",
+      "hash": "3f4cc4043552bafaf316ef1c296a378d0be4491a8d265e4f95dadd8840585649",
+      "rawBytes": 361417,
+      "events": 23,
+      "shots": 4,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-099",
+      "hash": "18363c51b423dbced81d5546e8f2fedd797729847085ffc88a1f3ec4987bc253",
+      "rawBytes": 341927,
+      "events": 19,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-101",
+      "hash": "cb30237012fe610d390d8a0d5c4e955d32d4e7fb13b63d91c43ab408781e6647",
+      "rawBytes": 359714,
+      "events": 20,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-133",
+      "hash": "2de5bf1af231623068be4e649a0fe718a9e8cdb80ece3598463453e0dc0d88c5",
+      "rawBytes": 320103,
+      "events": 15,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-038",
+      "hash": "44167ff170401b5ebb2b6ed350b0c7e5425991240bad65a8a6426c13ccdc9cd6",
+      "rawBytes": 291514,
+      "events": 9,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-039",
+      "hash": "1075ec8cb0e6ac056bcc752c26d263b9b118636932099770ad13fd0d9baa8e19",
+      "rawBytes": 377988,
+      "events": 19,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-040",
+      "hash": "26f6e5953d75927f24872f4cb8337d36832ec5296dd1e49ca3ed62af55b43b54",
+      "rawBytes": 297574,
+      "events": 13,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-041",
+      "hash": "51fc4a12f0512e91e06f91517748a988ccaabff9d56c22902d79b1834c646f8b",
+      "rawBytes": 413633,
+      "events": 34,
+      "shots": 8,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-042",
+      "hash": "7e48a3fb2709940331ea72e66bdaf93235d57eeb0668020fa094c26a1cf46ca3",
+      "rawBytes": 327515,
+      "events": 14,
+      "shots": 0,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-043",
+      "hash": "f65e52d1437fa38f492b9538eb90e1f1bf12fe974bb70a1c5ccd20215679bb2f",
+      "rawBytes": 343233,
+      "events": 18,
+      "shots": 0,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-044",
+      "hash": "79eb09e69e901c5b38ae803f707f9e3db32114edb3d040201cf0f5e29561a23a",
+      "rawBytes": 431860,
+      "events": 50,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-045",
+      "hash": "1f7c31f1448e3da4f652608d7473d29828aabb2869192503aadf36b0faa49146",
+      "rawBytes": 351995,
+      "events": 17,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-047",
+      "hash": "905231bb1a560344ec71778958f7fa68d7189c8be09c272ab686dc2a7d308900",
+      "rawBytes": 356010,
+      "events": 17,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-070",
+      "hash": "3f09b322f7404b3e1dc21813c8ffb1f3871031517e9c0df8cf3d2caa6258b732",
+      "rawBytes": 403380,
+      "events": 20,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-072",
+      "hash": "bd0840fc3628573ec50b4d7a6e9acbd3149698b3d8fbf31f04d61906a37d86d3",
+      "rawBytes": 377754,
+      "events": 21,
+      "shots": 3,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-089",
+      "hash": "aec68bb3eefc84f2c24397b5aa3697e79a6fc3f429e770aef98670dcf404f5e0",
+      "rawBytes": 379575,
+      "events": 25,
+      "shots": 5,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-102",
+      "hash": "279f16822aade7b5a9d6faa99708a96a884adbe7f333c149d3ceb64df2a47540",
+      "rawBytes": 342119,
+      "events": 14,
+      "shots": 2,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-112",
+      "hash": "704d8a058a346a7b9f04d62df37d0166dd06a99c43485c78dcf705bccf9e98e5",
+      "rawBytes": 299123,
+      "events": 10,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-137",
+      "hash": "540861cbeeac8a3ce95165ea212da2043c16a3fc3dcd36459676b7a54b00ad48",
+      "rawBytes": 405021,
+      "events": 17,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-074",
+      "hash": "a028150a0399270b3a1f2726d8d89469b880fa32a1c13e00c8ca5e84695ae9c3",
+      "rawBytes": 381256,
+      "events": 23,
+      "shots": 5,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-075",
+      "hash": "bc7bf546fa751c8c14a0ee220e547f0bacf8bdc436ea38ed2651ee7e0b417ddd",
+      "rawBytes": 344332,
+      "events": 17,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-077",
+      "hash": "bb5141151ea616384cd3ea3df127be779a27af2375a6f21d4a3b89c592fab572",
+      "rawBytes": 480794,
+      "events": 19,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-092",
+      "hash": "90fc22b4b3f86fdbcee601cc6f0a37962e99f9f82084008d1c15cb6d584e75a4",
+      "rawBytes": 341541,
+      "events": 14,
+      "shots": 2,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-094",
+      "hash": "474deaedc7e6727588eada22580175721f287ecd5b2c7b443fc77c57e8bca96c",
+      "rawBytes": 385338,
+      "events": 27,
+      "shots": 7,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-105",
+      "hash": "0cc868c874a34f63c712aed398d55361c60e9dfe484b93d53dec21d5fc089e7b",
+      "rawBytes": 356366,
+      "events": 20,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-113",
+      "hash": "3ca071ff4a357985f18ed32cb565465f1cb6967f195609e8393ceb6ecb1090ac",
+      "rawBytes": 316118,
+      "events": 12,
+      "shots": 0,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-121",
+      "hash": "af1288ec7f90f5fef39bfa1980c0c3cd80fc0d04bbffe7741f3c8c3322ef7dd4",
+      "rawBytes": 306168,
+      "events": 13,
+      "shots": 0,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-122",
+      "hash": "ccd8112579d7bd7fcac1a4bba7f071b205cf11202eac6048a612026e28194819",
+      "rawBytes": 394938,
+      "events": 27,
+      "shots": 3,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-126",
+      "hash": "052c18fb22c0bc41707c0b1a10de63722595a3f18a678f653fe069abbe62a20c",
+      "rawBytes": 406754,
+      "events": 22,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-127",
+      "hash": "26c2f2b00e7ce56496f5b5c050e020929ac90b2757cf2019f8a4fff6994977d0",
+      "rawBytes": 314514,
+      "events": 11,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-128",
+      "hash": "d5961052fbc7975d5528c5a408811521ada0be8042480d3b6ec12c2e65528edc",
+      "rawBytes": 318505,
+      "events": 14,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-052",
+      "hash": "1aff4761e433881fb823dd879d9192e44c9ccb010890aaf4ce238113134a670b",
+      "rawBytes": 323572,
+      "events": 14,
+      "shots": 2,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-054",
+      "hash": "c5c19065cee8b69c13b0cd4171c6e3457caedce271f5d56a5efa5323f3b8f91e",
+      "rawBytes": 296538,
+      "events": 13,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-056",
+      "hash": "68d2f6b1ccea609603dc2502e01dd69a8e784121ec39e6d5708d8985c4a74fb3",
+      "rawBytes": 338552,
+      "events": 17,
+      "shots": 3,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-114",
+      "hash": "444ab3722e6685c1c62d69bf0f70a9faa2d16b1986d29be9486f41a9a380118c",
+      "rawBytes": 307734,
+      "events": 13,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-139",
+      "hash": "66396aee1f82af1196f51998cf18195f2b6e387d98cd50f63c3d86afa9fb8da8",
+      "rawBytes": 317624,
+      "events": 9,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-140",
+      "hash": "f973c1caf976035f2c3dee489dbb39765b0f55009dfb5dc5db17f35feffa9265",
+      "rawBytes": 494342,
+      "events": 51,
+      "shots": 12,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-141",
+      "hash": "9ca32f3210dcdfb65aae93cecdf21f540fa219ccfa5df0b3e9ffde2a7bed829d",
+      "rawBytes": 346805,
+      "events": 15,
+      "shots": 1,
+      "metadataBytes": 23
+    },
+    {
+      "id": "emoji-142",
+      "hash": "612847e68a7ab224d74e8d11a69d7ae74b98d5fe53463ac0ee20e68497fbbe61",
+      "rawBytes": 344745,
+      "events": 23,
+      "shots": 5,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-143",
+      "hash": "2a5a4872dae409f7ebaf2afa27d68f2f4b5954aaccaf51f03e83356acc1a3b57",
+      "rawBytes": 482329,
+      "events": 17,
+      "shots": 1,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-144",
+      "hash": "ab3f82bd008c897fbfc767c187b161520abd1428b09790510e52832c06d19e42",
+      "rawBytes": 375384,
+      "events": 20,
+      "shots": 4,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-145",
+      "hash": "d5e0d18bf7a6ce75b8fd65728823fcdb239c3068a6f3c272c72f45ae7492cac9",
+      "rawBytes": 322958,
+      "events": 13,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-146",
+      "hash": "c2262fa30118d2fb6997d5b4f03886cf06184557656d8d58aa41972821326eda",
+      "rawBytes": 315245,
+      "events": 13,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-147",
+      "hash": "2fa60e838575ae1368357e3d0c6407bee194095d8f505b35d0488b361425581b",
+      "rawBytes": 351502,
+      "events": 18,
+      "shots": 2,
+      "metadataBytes": 542
+    },
+    {
+      "id": "emoji-148",
+      "hash": "a27100d107f1692adeedfa5a87488ea4ca69a1760982f8a106fad6498cfc9417",
+      "rawBytes": 324878,
+      "events": 13,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-149",
+      "hash": "89a5cb744ec11043b2fdf467f3eb9fe6facaecd6b73715b84a72fe4f39c0c511",
+      "rawBytes": 304110,
+      "events": 9,
+      "shots": 0,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-150",
+      "hash": "ae6778ddd61589a24364eb3792ec6c9854030bb0a7e931bfdc3c7c79609d39f1",
+      "rawBytes": 337502,
+      "events": 14,
+      "shots": 2,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-151",
+      "hash": "885d1bcf79b110a8ee2d69863ed6cee409dfd93e9dae174a2a6a1cd4227e2b35",
+      "rawBytes": 349303,
+      "events": 15,
+      "shots": 2,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-152",
+      "hash": "acb952fd6e60181427d6e64915c161a3be98adf627662c65635b75fcd292ff98",
+      "rawBytes": 351256,
+      "events": 21,
+      "shots": 4,
+      "metadataBytes": 0
+    },
+    {
+      "id": "emoji-153",
+      "hash": "b1612e687d9ab1f72024346f3c37297371496944abcbb1438eda4d389f7a33ea",
+      "rawBytes": 367799,
+      "events": 20,
+      "shots": 4,
+      "metadataBytes": 0
+    }
+  ]
+}

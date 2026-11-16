@@ -6,12 +6,17 @@ on:
         description: Existing evolution suite or one explicit v35.2 comparison
         type: choice
         default: legacy
-        options: [legacy, solo, team-capture, rematch, solo-host, solo-student, render-cost, focused, load30, load30-extended]
+        options: [legacy, controls353, solo, team-capture, rematch, solo-host, solo-student, render-cost, focused, load30, load30-extended]
       renderer:
         description: Renderer for the selected v35.2 case
         type: choice
         default: pixi
         options: [canvas, pixi, sockets]
+      controls_scope:
+        description: v35.3 short matrix, or only the failed Pixi population comparisons
+        type: choice
+        default: all
+        options: [all, pixi-population]
   pull_request:
     paths:
       - 'apps/**'
@@ -103,7 +108,7 @@ jobs:
           retention-days: 14
 
   selected-longrun:
-    if: github.event_name == 'workflow_dispatch' && inputs.comparison_case != 'legacy' && inputs.comparison_case != ''
+    if: github.event_name == 'workflow_dispatch' && inputs.comparison_case != 'controls353' && inputs.comparison_case != 'legacy' && inputs.comparison_case != ''
     runs-on: ubuntu-24.04
     container: mcr.microsoft.com/playwright:v1.56.1-noble
     timeout-minutes: 28
@@ -122,4 +127,28 @@ jobs:
         with:
           name: v35-2-selected-${{ inputs.comparison_case }}-${{ inputs.renderer }}-${{ github.sha }}
           path: artifacts/v35-2-comparison/
+          retention-days: 14
+
+  controls353:
+    if: github.event_name == 'workflow_dispatch' && inputs.comparison_case == 'controls353'
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.controls_scope == 'pixi-population' && '[{"mode":"solo","renderer":"pixi"},{"mode":"team-capture","renderer":"pixi"}]' || '[{"mode":"solo","renderer":"canvas"},{"mode":"solo","renderer":"pixi"},{"mode":"team-capture","renderer":"canvas"},{"mode":"team-capture","renderer":"pixi"},{"mode":"rematch","renderer":"canvas"},{"mode":"controls","renderer":"canvas"},{"mode":"controls","renderer":"pixi"}]') }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: node tests/combat/longrun-compare.mjs "${{ matrix.mode }}" "${{ matrix.renderer }}"
+        env: {CONTROLS_COMPARE: '1'}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v35-3-${{ matrix.mode }}-${{ matrix.renderer }}-${{ github.sha }}
+          path: artifacts/v35-3-comparison/
           retention-days: 14

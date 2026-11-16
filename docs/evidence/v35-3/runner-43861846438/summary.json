@@ -1,0 +1,414 @@
+[
+  {
+    "mode": "team-capture",
+    "renderer": "pixi",
+    "versions": [
+      {
+        "version": "v35.2",
+        "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+        "status": "PASS",
+        "seconds": 109.282,
+        "rounds": 3,
+        "failure": null,
+        "peakRssMiB": 276.89,
+        "cpuMs": 8476.9,
+        "sentMiB": 764.02,
+        "stepP95Ms": 0.822,
+        "snapshotP95Ms": 3.337,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          18.9,
+          7.3,
+          15.3
+        ],
+        "hostGapP95Ms": [
+          416.8,
+          266.7,
+          399.9
+        ],
+        "studentGapP95Ms": [
+          [
+            400,
+            400
+          ],
+          [
+            266.7,
+            266.7
+          ],
+          [
+            1733.23,
+            399.9
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 30,
+            "autoBalanced": true,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 30,
+            "autoBalanced": true,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 30,
+            "autoBalanced": true,
+            "dpr": 1
+          }
+        ],
+        "late": [
+          {
+            "alive": 6,
+            "deliveryMs": [
+              1998.46,
+              1369.53,
+              2348.27
+            ],
+            "drawGapP95Ms": [
+              483.3,
+              383.4,
+              266.7
+            ]
+          },
+          {
+            "alive": 5,
+            "deliveryMs": [
+              508.44,
+              335.32,
+              455.37
+            ],
+            "drawGapP95Ms": [
+              266.8,
+              266.6,
+              266.7
+            ]
+          },
+          {
+            "alive": 3,
+            "deliveryMs": [
+              300.34,
+              386.17,
+              501.72
+            ],
+            "drawGapP95Ms": [
+              266.7,
+              266.7,
+              266.7
+            ]
+          }
+        ],
+        "cleanupZero": true
+      },
+      {
+        "version": "v35.3",
+        "sha": "3a4e2c5788907f1c5335cbf461bf407cbd6d1eea",
+        "status": "PASS",
+        "seconds": 107.167,
+        "rounds": 3,
+        "failure": null,
+        "peakRssMiB": 269.09,
+        "cpuMs": 9218.35,
+        "sentMiB": 733.54,
+        "stepP95Ms": 0.962,
+        "snapshotP95Ms": 3.608,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          16,
+          2.2,
+          13.5
+        ],
+        "hostGapP95Ms": [
+          333.3,
+          266.7,
+          383.4
+        ],
+        "studentGapP95Ms": [
+          [
+            349.9,
+            316.7
+          ],
+          [
+            266.7,
+            266.7
+          ],
+          [
+            1366.65,
+            383.4
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 30,
+            "autoBalanced": true,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 30,
+            "autoBalanced": true,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 30,
+            "autoBalanced": true,
+            "dpr": 1
+          }
+        ],
+        "late": [
+          {
+            "alive": 6,
+            "deliveryMs": [
+              3105.96,
+              1911.61,
+              2455.1
+            ],
+            "drawGapP95Ms": [
+              266.7,
+              266.7,
+              283.3
+            ]
+          },
+          {
+            "alive": 5,
+            "deliveryMs": [
+              517.22,
+              471.18,
+              381.37
+            ],
+            "drawGapP95Ms": [
+              283.3,
+              266.7,
+              283.3
+            ]
+          },
+          {
+            "alive": 3,
+            "deliveryMs": [
+              396.4,
+              347.23,
+              516.5
+            ],
+            "drawGapP95Ms": [
+              266.7,
+              266.7,
+              266.7
+            ]
+          }
+        ],
+        "cleanupZero": true
+      }
+    ]
+  },
+  {
+    "mode": "solo",
+    "renderer": "pixi",
+    "versions": [
+      {
+        "version": "v35.3",
+        "sha": "3a4e2c5788907f1c5335cbf461bf407cbd6d1eea",
+        "status": "PASS",
+        "seconds": 106.988,
+        "rounds": 3,
+        "failure": null,
+        "peakRssMiB": 235.41,
+        "cpuMs": 8786.76,
+        "sentMiB": 697.16,
+        "stepP95Ms": 0.847,
+        "snapshotP95Ms": 3.151,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          16.6,
+          12.4,
+          13.4
+        ],
+        "hostGapP95Ms": [
+          400,
+          316.7,
+          383.3
+        ],
+        "studentGapP95Ms": [
+          [
+            400,
+            400.1
+          ],
+          [
+            333.4,
+            433.2
+          ],
+          [
+            1166.6,
+            383.3
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          }
+        ],
+        "late": [
+          {
+            "alive": 6,
+            "deliveryMs": [
+              2749.5,
+              1128.42,
+              2268.86
+            ],
+            "drawGapP95Ms": [
+              350,
+              483.3,
+              383.3
+            ]
+          },
+          {
+            "alive": 5,
+            "deliveryMs": [
+              602.0,
+              483.41,
+              401.31
+            ],
+            "drawGapP95Ms": [
+              316.7,
+              316.6,
+              316.6
+            ]
+          },
+          {
+            "alive": 3,
+            "deliveryMs": [
+              558.66,
+              452.49,
+              655.48
+            ],
+            "drawGapP95Ms": [
+              316.7,
+              316.6,
+              433.2
+            ]
+          }
+        ],
+        "cleanupZero": true
+      },
+      {
+        "version": "v35.2",
+        "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+        "status": "PASS",
+        "seconds": 105.09,
+        "rounds": 3,
+        "failure": null,
+        "peakRssMiB": 218.41,
+        "cpuMs": 9036.77,
+        "sentMiB": 722.02,
+        "stepP95Ms": 0.884,
+        "snapshotP95Ms": 3.238,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          16.8,
+          11.4,
+          14.3
+        ],
+        "hostGapP95Ms": [
+          333.4,
+          316.7,
+          366.7
+        ],
+        "studentGapP95Ms": [
+          [
+            333.3,
+            333.3
+          ],
+          [
+            316.7,
+            316.7
+          ],
+          [
+            1399.99,
+            366.7
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          }
+        ],
+        "late": [
+          {
+            "alive": 6,
+            "deliveryMs": [
+              2176.83,
+              1102.09,
+              1646.86
+            ],
+            "drawGapP95Ms": [
+              383.2,
+              283.3,
+              350
+            ]
+          },
+          {
+            "alive": 5,
+            "deliveryMs": [
+              495.1,
+              388.3,
+              591.15
+            ],
+            "drawGapP95Ms": [
+              300.1,
+              316.7,
+              400
+            ]
+          },
+          {
+            "alive": 3,
+            "deliveryMs": [
+              578.89,
+              454.48,
+              656.76
+            ],
+            "drawGapP95Ms": [
+              316.7,
+              316.7,
+              316.6
+            ]
+          }
+        ],
+        "cleanupZero": true
+      }
+    ]
+  }
+]

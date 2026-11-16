@@ -140,6 +140,7 @@ export function getPrivateSelfState(world,id,preparedActor,restore=false){
  if(p.aimProfileKey!==aimKey){p.aimProfileKey=aimKey;p.visualProfiles=visualProfiles(world,p);p.aimProfiles={};for(const kind of ['attack','skill']){const full=world.brAimHelpProfile(p.ability,kind,p.radius,1,p.run?.mods||{}),short=world.brAimHelpProfile(p.ability,kind,p.radius,.18,p.run?.mods||{});p.aimProfiles[kind]={...full,rangeMin:short.range};}}
  return {...(preparedActor||actor(world,p)),capturePoints:world.game.capture?.records.get(String(p.remoteId||p.id))?.points??0,run:world.brRunSnapshot(p),respawn:world.session.respawnMode?world.brTeamKillSelf(p):null,
   aimProfiles:p.aimProfiles,visualProfiles:p.visualProfiles,
+  ...(p.ability.id==='emoji-147'&&p.rw?.recast?.ctx.returnPoint?{recastTarget:{...p.rw.recast.ctx.returnPoint}}:{}),
   ...(restore?{inputFloor:{move:Math.max(p.lastReceivedSeq||0,p.lastAppliedSeq||0),tick:Math.max(p.lastReceivedClientTick||0,p.lastAppliedClientTick||0),attack:Math.max(p.receivedAttackSeq||0,p.lastRemoteAttack||0,p.resolvedAttackSeq||0),skill:Math.max(p.receivedSkillSeq||0,p.lastRemoteSkill||0,p.resolvedSkillSeq||0)}}:{}),
   lastAppliedSeq:p.lastAppliedSeq||0,lastAppliedClientTick:p.lastAppliedClientTick||0,inputAppliedAt:p.inputAppliedAt||0,
   heldTicks:p.heldTicks||0,replacedInputSeq:p.replacedInputSeq||0,inputNeutral:!!p.inputNeutral,

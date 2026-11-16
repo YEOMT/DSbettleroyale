@@ -1,0 +1,124 @@
+{
+  "baseline": false,
+  "renderer": "pixi",
+  "device": "automated desktop browser; physical devices NOT_RUN",
+  "checks": {
+    "threePointers": {
+      "commands": [
+        {
+          "kind": "attack",
+          "raw": {
+            "x": -1,
+            "y": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "raw": {
+            "x": 0,
+            "y": -1
+          }
+        }
+      ],
+      "pressed": {
+        "attack": {
+          "at": 9918.599999999977,
+          "frame": 23,
+          "draw": {
+            "ms": 11.299999999988358,
+            "frames": 1
+          }
+        },
+        "skill": {
+          "at": 9919.799999999988,
+          "frame": 23,
+          "draw": {
+            "ms": 10.099999999976717,
+            "frames": 1
+          }
+        }
+      },
+      "pointer": null,
+      "gestures": 0
+    },
+    "cancel": {
+      "commands": 0,
+      "gestures": 0
+    },
+    "latency": [
+      {
+        "kind": "attack",
+        "seq": 1,
+        "releaseToSend": 4.600000000034925
+      },
+      {
+        "kind": "skill",
+        "seq": 1,
+        "releaseToSend": 0.5
+      },
+      {
+        "kind": "attack",
+        "seq": 2,
+        "releaseToSend": 4.400000000023283
+      },
+      {
+        "kind": "attack",
+        "seq": 3,
+        "releaseToSend": 0.3999999999650754
+      },
+      {
+        "kind": "attack",
+        "seq": 4,
+        "releaseToSend": 0.29999999998835847
+      },
+      {
+        "kind": "attack",
+        "seq": 5,
+        "releaseToSend": 0.40000000002328306
+      },
+      {
+        "kind": "attack",
+        "seq": 6,
+        "releaseToSend": 1.8999999999650754
+      },
+      {
+        "kind": "attack",
+        "seq": 7,
+        "releaseToSend": 0.29999999998835847
+      }
+    ],
+    "keyRepeat": {
+      "requests": 1,
+      "keyEvents": 2
+    },
+    "focusedButton": {
+      "commands": 0,
+      "clicks": 1
+    },
+    "fired": {
+      "attack": 8,
+      "skill": 1
+    },
+    "focus": {
+      "unexpectedCommands": 0
+    },
+    "pressed": {
+      "aiming": true,
+      "gestures": 1
+    },
+    "rotation": {
+      "gestures": 0,
+      "pointer": null
+    },
+    "recovery": {
+      "enabled": false,
+      "label": "연결",
+      "state": "RECOVERY"
+    },
+    "aimPurity": {
+      "unchanged": true
+    }
+  },
+  "status": "PASS",
+  "ms": 38119.438958000006
+}

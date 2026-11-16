@@ -6,9 +6,21 @@ function clampPoint(point,map,pad){
  const length=Math.hypot(point.x,point.y),limit=map?.worldRadius-pad;
  return length>limit?{x:point.x*limit/length,y:point.y*limit/length}:point;
 }
-export function aimGuide(actor,kind,gesture,map,kernel,walls,visible=[],objects=[]){
+export function aimGuide(actor,kind,gesture,map,kernel,walls,visible=[],objects=[],ring){
  const profile=actor.aimProfiles?.[kind],spec=profile?.spec;
  if(!spec)return null;
+ // Only the owner's private, current recast carries this point. Never infer a
+ // missed origin from interpolated movement or expose another player's return.
+ if(kind==='skill'&&actor.rw?.recast&&actor.recastTarget){
+  const to=actor.recastTarget,dx=to.x-actor.x,dy=to.y-actor.y,range=Math.hypot(dx,dy),r=actor.radius;
+  let blocked=false;
+  if(kernel){kernel.boundary=map?.boundary;blocked=!!kernel.combatTraceWalls(actor,to,r,walls||[],[]);
+   blocked ||= visible.some(a=>a.alive&&!a.clone&&a.id!==actor.id&&kernel.combatSegmentCircleTime(actor.x-a.x,actor.y-a.y,dx,dy,r+a.radius+1)!==null);
+  }
+  const clamped=clampPoint(to,map,r+4);blocked ||= Math.hypot(clamped.x-to.x,clamped.y-to.y)>.01;
+  if(ring)blocked ||= Math.hypot(to.x-ring.cx,to.y-ring.cy)+r>ring.radius;
+  return {...spec,shape:'target',dash:false,teleport:true,radius:r,width:0,returning:true,blocked,range,x:blocked?actor.x:to.x,y:blocked?actor.y:to.y,dx:range?dx/range:0,dy:range?dy/range:0};
+ }
  const fraction=Math.max(0,Math.min(1,(gesture.power-.18)/.82));
  const range=profile.rangeMin+(profile.range-profile.rangeMin)*fraction;
  const {x:dx,y:dy}=gesture.aim;
@@ -67,10 +79,12 @@ export function aimGuide(actor,kind,gesture,map,kernel,walls,visible=[],objects=
  return {...spec,range,x,y,dx,dy};
 }
 export function paintGuide(p,a,g,z){
- const col='#baf4ff',stroke=Math.max(1.3,2/z),r=g.impactRadius||g.radius;
+ const col=g.blocked?'#fbbf24':'#baf4ff',stroke=Math.max(1.3,2/z),r=g.impactRadius||g.radius;
  if(g.mirrorLength){
   const tx=-g.dy*g.mirrorLength/2,ty=g.dx*g.mirrorLength/2;
   p.line(g.x-tx,g.y-ty,g.x+tx,g.y+ty,'#dbeafe',.4,g.width);p.line(a.x,a.y,g.x,g.y,col,.55,stroke);
+  const front=g.width/2+12/z;p.line(g.x,g.y,g.x+g.dx*front,g.y+g.dy*front,col,.85,stroke);
+  for(const side of [-1,1])p.line(g.x+g.dx*front,g.y+g.dy*front,g.x+g.dx*(front-6/z)-side*g.dy*5/z,g.y+g.dy*(front-6/z)+side*g.dx*5/z,col,.85,stroke);
   return;
  }
  if(g.shape==='circle'||g.shape==='circleDir')p.dashedCircle(a.x,a.y,g.radius||g.range,col,.75,stroke);

@@ -3,6 +3,12 @@ import {installAim} from './original-aim.js';
 // target life, angle limits, cover and original manual-ray priority again at application.
 export class AimAssist{
  constructor(timeline){this.timeline=timeline;this.enabled=true;this.scope={...timeline.kernel,BRMP:{},BR_CRATE_HALF:48,BR_AIM_HELP:{tapMs:220},brRingKey:()=>'',brReworkClientState:self=>self.rw};installAim(this.scope);this.scope.brAimHelpContext=()=>this.context;this.scope.brAimHelpCandidates=()=>this.targets;this.scope.brAimHelpTarget=(c,t)=>t;}
+ // Query with the same assist policy, but never acquire/refresh a target lock.
+ preview(kind,raw,power=1,tap=false){
+  const held=this.scope.BRMP.aimHelpHeld,context=this.context,targets=this.targets;
+  this.scope.BRMP.aimHelpHeld=held?{...held}:undefined;
+  try{return this.resolve(kind,raw,power,tap);}finally{this.scope.BRMP.aimHelpHeld=held;this.context=context;this.targets=targets;}
+ }
  resolve(kind,raw,power=1,tap=false){const out={aim:raw,rawAim:raw},self=this.timeline.predicted,last=this.timeline.samples.at(-1);if(!this.enabled||!self||!last||performance.now()-last.at>450)return out;
   const spec=self.aimProfiles?.[kind];if(!spec)return out;const profile={...spec,range:spec.rangeMin+(spec.range-spec.rangeMin)*(power-.18)/.82};profile.spec={...spec.spec,range:profile.range};
   const view=last.state,now=performance.now(),aspect=globalThis.innerWidth/globalThis.innerHeight||1,bounds={hw:aspect>=1?900:900*aspect,hh:aspect>=1?900/aspect:900};this.context={self,host:false,origin:{x:self.x,y:self.y},team:self.team,profile,walls:this.timeline.walls||[],boxes:view.farm?.b||[],now};
