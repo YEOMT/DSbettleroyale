@@ -1,0 +1,642 @@
+[
+  {
+    "mode": "team-capture",
+    "renderer": "pixi",
+    "versions": [
+      {
+        "version": "v35.2",
+        "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+        "status": "FAIL",
+        "seconds": 73.389,
+        "rounds": 1,
+        "failure": "Expected values to be strictly equal:\n\n20 !== 6\n",
+        "peakRssMiB": 182.3,
+        "cpuMs": 3572.35,
+        "sentMiB": 226.09,
+        "stepP95Ms": 1.686,
+        "snapshotP95Ms": 5.717,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          21.2
+        ],
+        "hostGapP95Ms": [
+          533.3
+        ],
+        "studentGapP95Ms": [
+          [
+            483.4,
+            500
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 30,
+            "autoBalanced": true,
+            "dpr": 1
+          }
+        ],
+        "cleanupZero": true
+      },
+      {
+        "version": "v35.3",
+        "sha": "819aa47dc539720c1009f6e6f91ff17461c67f6f",
+        "status": "PASS",
+        "seconds": 128.994,
+        "rounds": 3,
+        "failure": null,
+        "peakRssMiB": 265.3,
+        "cpuMs": 12708.17,
+        "sentMiB": 871.47,
+        "stepP95Ms": 1.376,
+        "snapshotP95Ms": 5.689,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          26.9,
+          46.8,
+          16.3
+        ],
+        "hostGapP95Ms": [
+          549.9,
+          383.4,
+          516.7
+        ],
+        "studentGapP95Ms": [
+          [
+            433.3,
+            433.3
+          ],
+          [
+            383.3,
+            383.3
+          ],
+          [
+            3566.5,
+            500
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 30,
+            "autoBalanced": true,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 30,
+            "autoBalanced": true,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 30,
+            "autoBalanced": true,
+            "dpr": 1
+          }
+        ],
+        "cleanupZero": true
+      }
+    ]
+  },
+  {
+    "mode": "team-capture",
+    "renderer": "canvas",
+    "versions": [
+      {
+        "version": "v35.3",
+        "sha": "819aa47dc539720c1009f6e6f91ff17461c67f6f",
+        "status": "PASS",
+        "seconds": 40.652,
+        "rounds": 3,
+        "failure": null,
+        "peakRssMiB": 225.29,
+        "cpuMs": 3606.32,
+        "sentMiB": 230.09,
+        "stepP95Ms": 1.62,
+        "snapshotP95Ms": 2.426,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          2.4,
+          0.6,
+          1.1
+        ],
+        "hostGapP95Ms": [
+          16.7,
+          16.7,
+          16.8
+        ],
+        "studentGapP95Ms": [
+          [
+            16.7,
+            16.7
+          ],
+          [
+            16.7,
+            16.8
+          ],
+          [
+            16.8,
+            16.7
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          }
+        ],
+        "cleanupZero": true
+      },
+      {
+        "version": "v35.2",
+        "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+        "status": "PASS",
+        "seconds": 40.806,
+        "rounds": 3,
+        "failure": null,
+        "peakRssMiB": 234.58,
+        "cpuMs": 3897.08,
+        "sentMiB": 230.12,
+        "stepP95Ms": 1.945,
+        "snapshotP95Ms": 3.454,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          1.4,
+          0.6,
+          1.1
+        ],
+        "hostGapP95Ms": [
+          16.7,
+          16.8,
+          16.8
+        ],
+        "studentGapP95Ms": [
+          [
+            16.7,
+            16.8
+          ],
+          [
+            16.8,
+            16.8
+          ],
+          [
+            16.7,
+            16.7
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          }
+        ],
+        "cleanupZero": true
+      }
+    ]
+  },
+  {
+    "mode": "solo",
+    "renderer": "pixi",
+    "versions": [
+      {
+        "version": "v35.3",
+        "sha": "819aa47dc539720c1009f6e6f91ff17461c67f6f",
+        "status": "FAIL",
+        "seconds": 69.383,
+        "rounds": 1,
+        "failure": "Expected values to be strictly equal:\n\n20 !== 6\n",
+        "peakRssMiB": 192.88,
+        "cpuMs": 3302.97,
+        "sentMiB": 213.45,
+        "stepP95Ms": 1.36,
+        "snapshotP95Ms": 4.85,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          19.9
+        ],
+        "hostGapP95Ms": [
+          516.7
+        ],
+        "studentGapP95Ms": [
+          [
+            500,
+            499.9
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          }
+        ],
+        "cleanupZero": true
+      },
+      {
+        "version": "v35.2",
+        "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+        "status": "FAIL",
+        "seconds": 69.56,
+        "rounds": 1,
+        "failure": "Expected values to be strictly equal:\n\n20 !== 6\n",
+        "peakRssMiB": 190.13,
+        "cpuMs": 3670.36,
+        "sentMiB": 209.09,
+        "stepP95Ms": 1.521,
+        "snapshotP95Ms": 4.851,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          15.1
+        ],
+        "hostGapP95Ms": [
+          416.7
+        ],
+        "studentGapP95Ms": [
+          [
+            416.7,
+            416.7
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          }
+        ],
+        "cleanupZero": true
+      }
+    ]
+  },
+  {
+    "mode": "solo",
+    "renderer": "canvas",
+    "versions": [
+      {
+        "version": "v35.2",
+        "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+        "status": "PASS",
+        "seconds": 43.715,
+        "rounds": 3,
+        "failure": null,
+        "peakRssMiB": 214.0,
+        "cpuMs": 5101.34,
+        "sentMiB": 224.79,
+        "stepP95Ms": 2.841,
+        "snapshotP95Ms": 5.721,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          2.9,
+          2.4,
+          4.4
+        ],
+        "hostGapP95Ms": [
+          16.8,
+          16.8,
+          16.7
+        ],
+        "studentGapP95Ms": [
+          [
+            16.7,
+            16.8
+          ],
+          [
+            16.7,
+            16.7
+          ],
+          [
+            16.7,
+            16.8
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          }
+        ],
+        "cleanupZero": true
+      },
+      {
+        "version": "v35.3",
+        "sha": "819aa47dc539720c1009f6e6f91ff17461c67f6f",
+        "status": "PASS",
+        "seconds": 43.648,
+        "rounds": 3,
+        "failure": null,
+        "peakRssMiB": 224.34,
+        "cpuMs": 5038.39,
+        "sentMiB": 224.13,
+        "stepP95Ms": 2.671,
+        "snapshotP95Ms": 5.588,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          2.9,
+          3,
+          3.9
+        ],
+        "hostGapP95Ms": [
+          16.8,
+          16.8,
+          16.8
+        ],
+        "studentGapP95Ms": [
+          [
+            16.8,
+            16.8
+          ],
+          [
+            16.8,
+            16.8
+          ],
+          [
+            16.7,
+            16.7
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          }
+        ],
+        "cleanupZero": true
+      }
+    ]
+  },
+  {
+    "mode": "rematch",
+    "renderer": "canvas",
+    "versions": [
+      {
+        "version": "v35.2",
+        "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+        "status": "PASS",
+        "seconds": 60.736,
+        "rounds": 5,
+        "failure": null,
+        "peakRssMiB": 244.29,
+        "cpuMs": 7829.18,
+        "sentMiB": 317.83,
+        "stepP95Ms": 4.064,
+        "snapshotP95Ms": 6.527,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          4.8,
+          5.3,
+          3.6,
+          3.7,
+          2.2
+        ],
+        "hostGapP95Ms": [
+          16.8,
+          16.8,
+          16.8,
+          16.7,
+          16.8
+        ],
+        "studentGapP95Ms": [
+          [
+            16.8,
+            16.7
+          ],
+          [
+            16.7,
+            16.8
+          ],
+          [
+            16.8,
+            16.8
+          ],
+          [
+            16.7,
+            16.8
+          ],
+          [
+            16.7,
+            16.8
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          }
+        ],
+        "cleanupZero": true
+      },
+      {
+        "version": "v35.3",
+        "sha": "819aa47dc539720c1009f6e6f91ff17461c67f6f",
+        "status": "PASS",
+        "seconds": 60.016,
+        "rounds": 5,
+        "failure": null,
+        "peakRssMiB": 244.39,
+        "cpuMs": 7632.09,
+        "sentMiB": 316.76,
+        "stepP95Ms": 4.784,
+        "snapshotP95Ms": 6.753,
+        "overloads": 0,
+        "hostDrawP95Ms": [
+          6.1,
+          3.2,
+          3.5,
+          2.8,
+          2.9
+        ],
+        "hostGapP95Ms": [
+          16.7,
+          16.7,
+          16.7,
+          16.7,
+          16.8
+        ],
+        "studentGapP95Ms": [
+          [
+            16.7,
+            16.7
+          ],
+          [
+            16.8,
+            16.7
+          ],
+          [
+            16.7,
+            16.7
+          ],
+          [
+            16.8,
+            16.7
+          ],
+          [
+            16.8,
+            16.7
+          ]
+        ],
+        "policies": [
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          },
+          {
+            "preset": "balanced",
+            "captureFPS": 60,
+            "autoBalanced": false,
+            "dpr": 1
+          }
+        ],
+        "cleanupZero": true
+      }
+    ]
+  },
+  {
+    "mode": "controls",
+    "renderer": "pixi",
+    "versions": [
+      {
+        "version": "v35.2",
+        "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+        "status": "BASELINE_OBSERVED",
+        "seconds": 41.517,
+        "rounds": 0,
+        "failure": null
+      },
+      {
+        "version": "v35.3",
+        "sha": "819aa47dc539720c1009f6e6f91ff17461c67f6f",
+        "status": "PASS",
+        "seconds": 39.051,
+        "rounds": 0,
+        "failure": null
+      }
+    ]
+  },
+  {
+    "mode": "controls",
+    "renderer": "canvas",
+    "versions": [
+      {
+        "version": "v35.2",
+        "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+        "status": "BASELINE_OBSERVED",
+        "seconds": 16.794,
+        "rounds": 0,
+        "failure": null
+      },
+      {
+        "version": "v35.3",
+        "sha": "819aa47dc539720c1009f6e6f91ff17461c67f6f",
+        "status": "PASS",
+        "seconds": 16.749,
+        "rounds": 0,
+        "failure": null
+      }
+    ]
+  }
+]

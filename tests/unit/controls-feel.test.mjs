@@ -5,6 +5,7 @@ import {AimAssist} from '../../apps/client/src/input/aim.js';
 import {Timeline} from '../../apps/client/src/presentation/timeline.js';
 import {aimGuide} from '../../apps/client/src/render/aim-guide.js';
 import {AttackPoses,poseFamily} from '../../apps/client/src/render/attack-pose.js';
+import {actionHud} from '../../apps/client/src/ui/battle.js';
 import {manifest} from '../../packages/content/src/manifest.js';
 import {createWorld,createRuleContext,getPrivateSelfState,getVisibleState,getTeacherState,applyCommand,stepWorld,destroyWorld} from '../../packages/engine/src/index.js';
 const ready={id:'a',alive:true,lifeSeq:0,basicCooldown:0,cooldown:0,rw:{locks:{}}};
@@ -96,4 +97,17 @@ test('a dash created on the previous snapshot boundary is shown once, not lost o
  p.snapshot({serverTick:33,actors:[actor],shots:[shot]},30,100,e=>calls.push(e));const entry=p.active.get('a');assert.equal(entry.family,'travel');assert.equal(calls.length,1);
  p.snapshot({serverTick:36,actors:[actor],shots:[shot]},33,150,e=>calls.push(e));assert.equal(p.active.get('a'),entry);assert.equal(calls.length,1);
  p.clear();p.snapshot({serverTick:42,actors:[actor],shots:[shot]},39,250);assert.equal(p.active.size,0,'old interest re-entry cannot restart');
+});
+
+test('execution callback before UI self refresh uses one consistent recast state and cannot read the old null recast',()=>{
+ const f=fixture('emoji-147'),{w,p}=f,old=getPrivateSelfState(w,'a'),priorDocument=globalThis.document,elements=new Map();
+ const element=id=>{if(!elements.has(id)){const attributes=new Map(),styles=new Map();elements.set(id,{textContent:'',style:{getPropertyValue:k=>styles.get(k),setProperty:(k,v)=>styles.set(k,v)},getAttribute:k=>attributes.get(k),setAttribute:(k,v)=>attributes.set(k,v),classList:{toggle(){}}});}return elements.get(id);};
+ globalThis.document={getElementById:element};
+ try{
+  applyCommand(w,{type:'ACTION',playerId:'a',lifeSeq:0,kind:'skill',seq:1,aim:{x:1,y:0},aimPower:.18});for(let n=0;n<5;n++)stepWorld(w);
+  const current=getPrivateSelfState(w,'a');assert.equal(old.rw.recast,null);assert.ok(current.rw.recast);assert.equal(current.rw.locks.skill,false);
+  const controls={timeline:{predicted:current},state:(kind,s)=>actionState(s,kind),feedbackState:()=>''};
+  actionHud(old,controls);assert.equal(element('br-skill').getAttribute('data-action-state'),'RECAST');assert.equal(element('br-skill-count').textContent,'재사용 1/1');
+  assert.equal(element('br-skill-cd').textContent,(Math.max(0,current.rw.recast.end-current.rw.sourceTick)/60).toFixed(1));
+ }finally{if(priorDocument===undefined)delete globalThis.document;else globalThis.document=priorDocument;destroyWorld(w);}
 });

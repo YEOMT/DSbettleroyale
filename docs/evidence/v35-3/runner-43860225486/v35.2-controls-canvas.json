@@ -1,0 +1,123 @@
+{
+  "baseline": true,
+  "renderer": "canvas",
+  "device": "automated desktop browser; physical devices NOT_RUN",
+  "checks": {
+    "threePointers": {
+      "commands": [
+        {
+          "kind": "attack",
+          "raw": {
+            "x": -1,
+            "y": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "raw": {
+            "x": 0,
+            "y": -1
+          }
+        }
+      ],
+      "pressed": {
+        "attack": {
+          "at": 5964.799999999988,
+          "frame": 7,
+          "draw": {
+            "ms": 13.800000000017462,
+            "frames": 1
+          }
+        },
+        "skill": {
+          "at": 5965.600000000006,
+          "frame": 7,
+          "draw": {
+            "ms": 13.10000000000582,
+            "frames": 1
+          }
+        }
+      },
+      "pointer": null,
+      "gestures": 0
+    },
+    "cancel": {
+      "commands": 0,
+      "gestures": 0
+    },
+    "latency": [
+      {
+        "kind": "attack",
+        "seq": 1,
+        "releaseToSend": 1.2000000000116415
+      },
+      {
+        "kind": "skill",
+        "seq": 1,
+        "releaseToSend": 0.39999999999417923
+      },
+      {
+        "kind": "attack",
+        "seq": 2,
+        "releaseToSend": 0.29999999998835847
+      },
+      {
+        "kind": "attack",
+        "seq": 3,
+        "releaseToSend": 0.20000000001164153
+      },
+      {
+        "kind": "attack",
+        "seq": 4,
+        "releaseToSend": 0.3000000000174623
+      },
+      {
+        "kind": "attack",
+        "seq": 5,
+        "releaseToSend": 0.09999999997671694
+      },
+      {
+        "kind": "attack",
+        "seq": 6,
+        "releaseToSend": 0.20000000001164153
+      },
+      {
+        "kind": "attack",
+        "seq": 7,
+        "releaseToSend": 0.29999999998835847
+      }
+    ],
+    "keyRepeat": {
+      "requests": 1,
+      "keyEvents": 2
+    },
+    "focusedButton": {
+      "commands": 0,
+      "clicks": 1
+    },
+    "fired": {
+      "attack": 8,
+      "skill": 1
+    },
+    "focus": {
+      "unexpectedCommands": 0
+    },
+    "pressed": {
+      "aiming": true,
+      "gestures": 1
+    },
+    "rotation": {
+      "gestures": 1,
+      "pointer": null
+    },
+    "recovery": {
+      "enabled": false,
+      "label": "0.5"
+    },
+    "aimPurity": {
+      "unchanged": false
+    }
+  },
+  "status": "BASELINE_OBSERVED",
+  "ms": 16267.348736
+}

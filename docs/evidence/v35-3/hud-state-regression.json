@@ -1,0 +1,16 @@
+{
+  "case": "execution callback after new snapshot acceptance before old UI self is replaced",
+  "source": "actual alien engine before/after minimum dash tick5; no fabricated cooldown",
+  "before": {
+    "status": "FAIL",
+    "tests": 1,
+    "ms": 251.3515,
+    "error": "TypeError: Cannot read properties of null (reading end)"
+  },
+  "after": {
+    "status": "PASS",
+    "tests": 10,
+    "ms": 796.8457
+  },
+  "fix": "use the same matching id/life snapshot for button gate, recast count and timer"
+}

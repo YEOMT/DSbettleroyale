@@ -6,9 +6,12 @@ import {manifest} from '../../../../packages/content/src/manifest.js';
 const $=id=>document.getElementById(id),colors=['#3b82f6','#ef4444','#22c55e','#eab308'],names=['BLUE','RED','GREEN','YELLOW'],dots=['🔵','🔴','🟢','🟡'];
 const time=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(Math.floor(n%60)).padStart(2,'0');
 export function actionHud(s,controls){
+ // A confirmed-shot callback can run after Timeline accepts a snapshot but
+ // before AppUI.self stores it. Labels and gating must use the same life/state.
+ const current=controls?.timeline.predicted;if(current?.id===s.id&&current.lifeSeq===s.lifeSeq)s=current;
  const buff=s.supply && supplyTypes[s.supply], seconds=buff?Math.max(0,Math.ceil((s.supplyEnd-s.rw.sourceTick)/60)):0;
  writeText($('br-battle-status'),`HP ${Math.round(s.hp)} / ${Math.round(s.maxHp)} · KILL ${s.kills||0}`+(s.cover==='smoke'?(s.rw.smokeRevealEnd>s.rw.sourceTick?(s.rw.smokeRevealReason===1?' · 🌫️ 공격으로 노출':' · 🌫️ 피격으로 노출'):' · 🌫️ 은폐 중'):'')+(s.respawn?' · 🔄 ×'+s.respawn.tokens:'')+(s.respawn?.protectionFrames>0?' · 🛡 부활 보호':'')+(s.rw?.shield>0?' · 보호막 '+Math.ceil(s.rw.shield):'')+(seconds?' · '+buff.icon+' '+seconds+'초':''));
- for(const kind of ['attack','skill']){const displayed=controls?.timeline.predicted, state=controls?controls.state(kind,displayed?.id===s.id&&displayed.lifeSeq===s.lifeSeq?displayed:s):actionState(s,kind),{frames,max,canFire:ready,canAim,channel}=state,button=$('br-'+kind),label=$('br-'+kind+'-cd');
+ for(const kind of ['attack','skill']){const state=controls?controls.state(kind,s):actionState(s,kind),{frames,max,canFire:ready,canAim,channel}=state,button=$('br-'+kind),label=$('br-'+kind+'-cd');
   writeProperty(button,'--br-cd-angle',(Math.max(0,Math.min(1,1-frames/max))*360).toFixed(1)+'deg');button.classList.toggle('disabled',!ready&&!channel);button.classList.toggle('br-state-locked',!canAim);label.classList.toggle('ready',ready);
   const text=({RECOVERY:'연결',PAUSED:'중지',DEAD:'🔒',STUNNED:'🔒',CAPTURED:'🔒',LOCKED:'🔒',CHANNEL:'조준',REQUEST_GUARD:'·'})[state.state];
   writeText(label,text|| (state.state==='RECAST'?(Math.max(0,s.rw.recast.end-s.rw.sourceTick)/60).toFixed(1):ready?'✓':(frames/60).toFixed(1)));

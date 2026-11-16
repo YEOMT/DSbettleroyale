@@ -1,0 +1,128 @@
+{
+  "baseline": false,
+  "renderer": "canvas",
+  "device": "automated desktop browser; physical devices NOT_RUN",
+  "checks": {
+    "threePointers": {
+      "commands": [
+        {
+          "kind": "attack",
+          "raw": {
+            "x": -1,
+            "y": 0
+          }
+        },
+        {
+          "kind": "skill",
+          "raw": {
+            "x": 0,
+            "y": -1
+          }
+        }
+      ],
+      "pressed": {
+        "attack": {
+          "at": 7079.70000000298,
+          "frame": 9,
+          "draw": {
+            "ms": 17.099999994039536,
+            "frames": 1
+          }
+        },
+        "skill": {
+          "at": 7080.79999999702,
+          "frame": 9,
+          "draw": {
+            "ms": 16,
+            "frames": 1
+          }
+        }
+      },
+      "pointer": null,
+      "gestures": 0
+    },
+    "cancel": {
+      "commands": 0,
+      "gestures": 0
+    },
+    "latency": [
+      {
+        "kind": "attack",
+        "seq": 1,
+        "releaseToSend": 1.3999999910593033
+      },
+      {
+        "kind": "skill",
+        "seq": 1,
+        "releaseToSend": 0.7999999970197678
+      },
+      {
+        "kind": "attack",
+        "seq": 2,
+        "releaseToSend": 0.20000000298023224
+      },
+      {
+        "kind": "attack",
+        "seq": 3,
+        "releaseToSend": 0.5
+      },
+      {
+        "kind": "attack",
+        "seq": 4,
+        "releaseToSend": 0.29999999701976776
+      },
+      {
+        "kind": "attack",
+        "seq": 5,
+        "releaseToSend": 0.29999999701976776
+      },
+      {
+        "kind": "attack",
+        "seq": 6,
+        "releaseToSend": 0.6000000089406967
+      },
+      {
+        "kind": "attack",
+        "seq": 7,
+        "releaseToSend": 0.29999999701976776
+      }
+    ],
+    "keyRepeat": {
+      "requests": 1,
+      "keyEvents": 2
+    },
+    "focusedButton": {
+      "commands": 0,
+      "clicks": 1
+    },
+    "focusedCombatButton": {
+      "requests": 1,
+      "keyEvents": 2
+    },
+    "fired": {
+      "attack": 9,
+      "skill": 1
+    },
+    "focus": {
+      "unexpectedCommands": 0
+    },
+    "pressed": {
+      "aiming": true,
+      "gestures": 1
+    },
+    "rotation": {
+      "gestures": 0,
+      "pointer": null
+    },
+    "recovery": {
+      "enabled": false,
+      "label": "연결",
+      "state": "RECOVERY"
+    },
+    "aimPurity": {
+      "unchanged": true
+    }
+  },
+  "status": "PASS",
+  "ms": 30015.5581
+}

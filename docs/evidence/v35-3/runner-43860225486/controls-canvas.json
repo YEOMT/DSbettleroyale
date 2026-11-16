@@ -1,0 +1,46 @@
+{
+  "machine": {
+    "platform": "linux",
+    "arch": "x64",
+    "node": "v24.22.1",
+    "logicalCpus": 4,
+    "ram": 16760344576,
+    "sharedMachine": true
+  },
+  "mode": "controls",
+  "backend": "canvas",
+  "rows": [
+    {
+      "label": "v35.2",
+      "sha": "5cba0f9bd6eba793d91fa16efd833a582456ee09",
+      "build": {
+        "status": "PASS",
+        "ms": 4720.430762,
+        "exit": 0
+      },
+      "results": [
+        {
+          "status": "PASS",
+          "ms": 16793.501212,
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "label": "v35.3",
+      "sha": "819aa47dc539720c1009f6e6f91ff17461c67f6f",
+      "build": {
+        "status": "PASS",
+        "ms": 4355.263304,
+        "exit": 0
+      },
+      "results": [
+        {
+          "status": "PASS",
+          "ms": 16748.808586,
+          "exit": 0
+        }
+      ]
+    }
+  ]
+}
