@@ -23,6 +23,10 @@ export function poseFamily(abilityId,kind,style=''){
  const a=abilities.get(abilityId);
  if(!a)return 'quick';
  if(kind==='skill'){
+  const actual=manifest.reworkDefinitions[abilityId]?.skill?.kind;
+  if(['sequential-barrage','scissor-volley'].includes(actual))return 'burst';
+  if(['spotlight','red-light','mirror','iron-reflect'].includes(actual))return 'field';
+  if(actual==='safe-dash')return 'travel';
   if(['SNIPE','AIMED_SHOT','GIANT_FIREBALL'].includes(a.sub)||/^skill-(sniper|heavy|bomber)$/.test(style))return 'recoil';
   if(a.type==='ORBIT')return 'orbit';
   if(['ZONE','BUFF','TURRET','AREA','PULL'].includes(a.type))return 'field';
@@ -36,13 +40,14 @@ export function poseFamily(abilityId,kind,style=''){
 export class AttackPoses{
  constructor(){this.clear();}
  clear(){this.active=new Map();this.fired=new Map();this.contacts=new Map();}
- snapshot(s,previousTick,now){
+ snapshot(s,previousTick,now,onSpawn){
   // Some placed fields and travel skills exist only in the public snapshot.
-  // Never start a new animation just because an old entity re-enters interest.
+  // Include the boundary tick: commands resolve before the next frame advances.
+  // The life/action sequence guard prevents replay of an already seen entity.
   if(previousTick==null)return;
   for(const q of s.shots){
-   if(!['gravity','dash','leap','channel'].includes(q.kind)||q.start<=previousTick||q.start>s.serverTick||s.serverTick-q.start>8)continue;
-   this.accept({type:'SHOT_SPAWN',data:q,serverTick:q.start},s.actors,now);
+   if(!['gravity','dash','safe-dash','leap','channel'].includes(q.kind)||q.start<previousTick||q.start>s.serverTick||s.serverTick-q.start>8)continue;
+   const event={type:'SHOT_SPAWN',data:q,serverTick:q.start};this.accept(event,s.actors,now);onSpawn?.(event);
   }
  }
  accept(event,actors,now){
@@ -50,6 +55,7 @@ export class AttackPoses{
   const hit=fx&&d.kind==='hit'&&g?.confirmed;
   if(!shot&&!hit&&!(fx&&['attack','skill'].includes(g?.kind)&&g.seq))return;
   if(hit&&g.periodic)return;
+  if(!hit&&fx&&g?.windup)return; // Preparation is not an executed body strike.
   if(hit){
    const source=actors.find(p=>p.id===d.sourceId),old=this.contacts.get(d.sourceId);
    const family=source&&poseFamily(source.abilityId,'attack',d.style);
@@ -59,6 +65,7 @@ export class AttackPoses{
     if(this.contacts.size>96)this.contacts.delete(this.contacts.keys().next().value);
    }
   }
+  if(hit&&Number(d.amount||0)<=0&&g.absorbed>0)return; // Shield contact has a rim, not an HP hurt pose.
   const id=shot?d.owner:hit?d.targetId:d.sourceId,actor=actors.find(p=>p.id===id),life=shot?d.life:hit?g.targetLife:g.lifeSeq;
   if(!actor?.alive||actor.lifeSeq!==life)return;
   const dx=d.dx||0,dy=d.dy||0,length=Math.hypot(dx,dy);
@@ -70,7 +77,7 @@ export class AttackPoses{
    this.fired.set(key,{seq,life});
    if(this.fired.size>192)this.fired.delete(this.fired.keys().next().value);
   }
-  const family=hit?'hit':poseFamily(actor.abilityId,kind,d.style);
+  const family=hit?'hit':shot&&['dash','safe-dash','leap'].includes(d.kind)?'travel':poseFamily(actor.abilityId,kind,d.style);
   const entry={family,kind,seq,life,id,dx:length?dx/length:0,dy:length?dy/length:0,born:now,tick:event.serverTick,level:d.impactLevel||1};
   this.active.set(id,entry);
   if(this.active.size>96)this.active.delete(this.active.keys().next().value);

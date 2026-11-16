@@ -186,9 +186,19 @@ __visualScope.brPaintAttack = function brPaintAttack(p,r,alpha,zoom=1) {
             const type=r[1],geo=r[13]||{},x=Number(r[2]),y=Number(r[3]);
             const ax=Number(r[4])||0,ay=Number(r[5])||0,mag=Math.hypot(ax,ay),dx=mag>.0001?ax/mag:1,dy=mag>.0001?ay/mag:0,length=Math.max(0,Number(r[6])||0),color=r[7]||'#ffffff';
             const z=Math.max(.18,zoom),line=2/z,angle=Math.atan2(dy,dx),ex=x+dx*length,ey=y+dy*length;
+            if(type==='impact'&&r[10]==='mirror-contact'){
+                // Already-authoritative reflection, distinct from damage/contact rays.
+                const radius=Math.min(24,Math.max(8,length))/z,a=alpha*alpha;
+                p.arc(x,y,radius*(1.1-.25*alpha),-.8,2.3,'#a5f3fc',a,2/z);
+                p.arc(x,y,radius*(1.1-.25*alpha),2.35,5.45,'#ffffff',a*.8,1.5/z);
+                p.line(x-radius*.4,y,x,y-radius*.4,'#dbeafe',a,1.5/z);p.line(x,y-radius*.4,x+radius*.4,y,'#dbeafe',a,1.5/z);
+                return true;
+            }
             if(type==='hit'&&geo.shape==='contact'){
                 const level=geo.periodic?1:Math.max(1,Math.min(4,Math.round(Number(r[12])||1))),shield=Number(geo.absorbed||0)>0,col=shield?'#67e8f9':color;
                 const span=[0,10,18,28,38][level],a=alpha*alpha,px=-dy,py=dx,style=String(r[10]||'');
+                if(shield&&Number(r[8]||0)<=0){const guard=(7+level*2)/z;p.arc(x,y,guard,angle-1.1,angle+1.1,'#a5f3fc',a,2.5/z);p.arc(x,y,guard+4/z,angle-.8,angle+.8,'#e0f2fe',a*.7,1/z);return true;}
+
                 // Impact primitives show contact only; these rings never represent damage range.
                 if(level===1){p.circle(x,y,2.5/z,'#ffffff',a*.85);p.line(x-dx*span/z,y-dy*span/z,x,y,col,a*.8,1.8/z);if(shield)p.circle(x,y,6/z,col,a*.7,1/z);return true;}
                 // One silhouette per confirmed contact, shared by low/Canvas/Pixi.
@@ -456,11 +466,11 @@ __visualScope.brRegisterHitFeedback = function brRegisterHitFeedback(targetId,am
             if(gap&&now-last<gap)return;clocks.set(key,now);
             const profile=periodic?{duration:70,squash:.025,flash:.20}:__visualScope.BR_HIT_PROFILES[level],map=__visualScope.BRMP.hitStates||(__visualScope.BRMP.hitStates=new Map());let hit=map.get(key);
             // A tiny rapid hit must not erase a heavy impact that is still returning to neutral.
-            if(!hit||hit.until<=now||hit.level<=level){if(!hit){hit={};map.set(key,hit);}Object.assign(hit,{until:now+profile.duration,duration:profile.duration,level,squash:profile.squash,flash:profile.flash,dx:0,dy:0});}
+            if(damage>0&&(!hit||hit.until<=now||hit.level<=level)){if(!hit){hit={};map.set(key,hit);}Object.assign(hit,{until:now+profile.duration,duration:profile.duration,level,squash:profile.squash,flash:profile.flash,dx:0,dy:0});}
             const victim=key===String(__visualScope.BRMP.playerId),owner=String(sourceId)===String(__visualScope.BRMP.playerId);
             if(victim){__visualScope.brSelfDamageCue(damage,level,periodic,geometry,now);if(now-Number(__visualScope.BRMP.lastHurtSfxAt??-1000)>(level===1?110:70)){__visualScope.BRMP.lastHurtSfxAt=now;__visualScope.brPlaySfx(damage<=0&&Number(geometry.absorbed)>0?'shield':'hurt',level);}}
             if(owner){__visualScope.BRMP.hitConfirm={until:now+(periodic?90:100+level*15),duration:periodic?90:100+level*15,amount:damage,heavy:level>=3,level,confirmed:true};if(now-Number(__visualScope.BRMP.lastHitSfxAt??-1000)>(level===1?110:70)){__visualScope.BRMP.lastHitSfxAt=now;__visualScope.brPlaySfx(damage<=0&&Number(geometry.absorbed)>0?'shield':'hit',level);}}
-            if((victim||owner)&&level===4&&!periodic&&!__visualScope.BRMP.reducedMotion&&now-Number(__visualScope.BRMP.lastMajorImpulseAt??-1000)>180){
+            if(damage>0&&(victim||owner)&&level===4&&!periodic&&!__visualScope.BRMP.reducedMotion&&now-Number(__visualScope.BRMP.lastMajorImpulseAt??-1000)>180){
                 __visualScope.BRMP.lastMajorImpulseAt=now;__visualScope.BRMP.studentShake={until:now+85,duration:85,strength:victim?1.5:1.0,seed:now%997};
                 if(navigator.vibrate)try{navigator.vibrate(victim?12:8);}catch(_){}
             }

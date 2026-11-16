@@ -77,7 +77,7 @@ export const initializers=[
                 if(!c.g?.emitStudentFx||!validContext(c,true))return;
                 c.visualSeq=(c.visualSeq||0)+1;
                 c.g.emitStudentFx(type,pos,{dx:c.aim.x,dy:c.aim.y,size,color:color||defs[c.abilityId]?.skill?.color||'#c4b5fd',style:'rw:'+String(defs[c.abilityId]?.skill?.kind||'skill'),sourceId:c.ownerId,
-                    geometry:{...geometry,confirmed:true,castId:c.castId,effectId:c.castId+':visual:'+c.visualSeq,
+                    geometry:{...geometry,confirmed:true,kind:c.actionKind,seq:c.actionSeq,castId:c.castId,effectId:c.castId+':visual:'+c.visualSeq,
                         matchKey:__brScope.session?.roomCode+'|'+Number(__brScope.session?.roomMeta?.matchRound||0)+'|'+Number(__brScope.session?.roomMeta?.battleStartedAt||0),
                         lifeSeq:c.ownerLifeSeq,hostFrame:frame(c.g),displayMs:type==='explosion'?700:430}});
             }

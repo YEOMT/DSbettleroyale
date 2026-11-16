@@ -31,6 +31,7 @@ try{
    if(event.pull_request?.body?.includes('[classroom-compare]'))run(['tests/combat/classroom-compare.mjs']);
   }
  }else if(suite==='touch'){
+  run(['tests/combat/controls353.mjs',renderer]);
   run(['tests/combat/mobile-touch.mjs',renderer]);
   if(renderer==='canvas')run(['tests/combat/mobile-touch.mjs','canvas','webkit']);
  }else{

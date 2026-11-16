@@ -8,11 +8,13 @@ import {execFileSync,spawnSync} from 'node:child_process';
 import {summarizeLongRun} from './longrun-summary.mjs';
 const root=process.cwd(),git=['-c','safe.directory='+fs.realpathSync(root)];
 const [mode='solo',backend='canvas']=process.argv.slice(2);
-const base='d6b4525bf22bfa000a09eb686dffc5736bc5a3b3';
+const controls=process.env.CONTROLS_COMPARE==='1';
+if(controls&&!['solo','team-capture','rematch','controls'].includes(mode))throw Error('CONTROLS_COMPARISON_IS_SHORT_ONLY');
+const base=controls?'5cba0f9bd6eba793d91fa16efd833a582456ee09':'d6b4525bf22bfa000a09eb686dffc5736bc5a3b3';
 const head=execFileSync('git',[...git,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
-const versions=mode==='load30-extended'?[{label:'v35.2',sha:head}]:[{label:'v35.1',sha:base},{label:'v35.2',sha:head}];
+const versions=controls?[{label:'v35.2',sha:base},{label:'v35.3',sha:head}]:mode==='load30-extended'?[{label:'v35.2',sha:head}]:[{label:'v35.1',sha:base},{label:'v35.2',sha:head}];
 if(mode==='solo'&&backend==='pixi'||mode==='team-capture'&&backend==='canvas')versions.reverse();
-const output=path.resolve('artifacts/v35-2-comparison',mode+'-'+backend);fs.mkdirSync(output,{recursive:true});
+const output=path.resolve(controls?'artifacts/v35-3-comparison':'artifacts/v35-2-comparison',mode+'-'+backend);fs.mkdirSync(output,{recursive:true});
 const scratch=fs.mkdtempSync(path.resolve('artifacts','longrun-sources-'));
 const rows=[],machine={platform:process.platform,arch:process.arch,node:process.version,logicalCpus:os.availableParallelism(),ram:os.totalmem(),sharedMachine:true};
 function run(cwd,args,env,timeout=300000){
@@ -31,7 +33,12 @@ try {
   const env={BUILD_ID:version.sha,CLASSROOM_FIXED_SEED:'1',LOAD_BUILT:'1',CLASSROOM_BUNDLE:'1'};
   const build=run(cwd,['tools/build.mjs'],env);assert.equal(build.status,'PASS','paired deployment build');
   const row={...version,build,results:[]};rows.push(row);save();
-  if(mode==='load30'||mode==='load30-extended'){
+  if(controls&&mode==='controls'){
+   const result=run(cwd,['tests/combat/controls353.mjs',backend,...(version.label==='v35.2'?['--baseline']:[])],env,120000);
+   const dir=path.join(cwd,'artifacts/v35-3',(version.label==='v35.2'?'baseline':'candidate')+'-'+backend);
+   if(fs.existsSync(dir))fs.cpSync(dir,path.join(output,version.label),{recursive:true});
+   row.results.push(result);
+  }else if(mode==='load30'||mode==='load30-extended'){
    for(const diagnostic of (mode==='load30-extended'?[]:version.label==='v35.1'?['0','1']:['1','0'])){
     const file=path.join(cwd,'artifacts/diagnostics-'+diagnostic+'.json');
     const check=run(cwd,['tools/load/run.mjs','--players=30','--seconds=20','--out='+file],{...env,LOAD_DIAGNOSTICS:diagnostic},90000);
@@ -45,7 +52,7 @@ try {
    row.results.push({kind:mode==='load30-extended'?'1200-second':'600-second',...result,data});
   }else if(['solo','team-capture','rematch','solo-host','solo-student'].includes(mode)){
    const label=version.label+'-'+mode;
-   const result=run(cwd,['tests/combat/classroom-rematch.mjs',label],{...env,CLASSROOM_UPGRADE:'1',CLASSROOM_ROUNDS:mode==='rematch'?'5':'3',CLASSROOM_METER:'1',CLASSROOM_MODE:mode==='rematch'?'team-capture':mode.startsWith('solo-')?'solo':mode,CLASSROOM_ACTIVE_SCREEN:mode==='solo-host'?'host':mode==='solo-student'?'student':'all',CLASSROOM_SMOOTH_STATS:'1',CLASSROOM_EXPECT_ARENA:'1',EVOLUTION_RENDERER:backend},420000);
+   const result=run(cwd,['tests/combat/classroom-rematch.mjs',label],{...env,CLASSROOM_UPGRADE:'1',...(controls&&mode!=='rematch'?{CLASSROOM_CONTROLS353:'1'}:{}),CLASSROOM_ROUNDS:mode==='rematch'?'5':'3',CLASSROOM_METER:'1',CLASSROOM_MODE:mode==='rematch'?'team-capture':mode.startsWith('solo-')?'solo':mode,CLASSROOM_ACTIVE_SCREEN:mode==='solo-host'?'host':mode==='solo-student'?'student':'all',CLASSROOM_SMOOTH_STATS:'1',CLASSROOM_EXPECT_ARENA:'1',EVOLUTION_RENDERER:backend},420000);
    const raw=path.join(cwd,'artifacts/classroom',label+'-rematch.json');
    const report=fs.existsSync(raw)?JSON.parse(fs.readFileSync(raw)):null;
    // The private failure record contains participant credentials hashed for
@@ -70,7 +77,7 @@ try {
   }else throw Error('UNRECOGNIZED_CASE');
   if(row.results.some(r=>r.status!=='PASS'))process.exitCode=1;save();
  }
- if(['solo','team-capture'].includes(mode)&&backend==='canvas'){
+ if(!controls&&['solo','team-capture'].includes(mode)&&backend==='canvas'){
   const result=run(root,['--expose-gc','tests/combat/smooth-server.mjs',path.join(scratch,'v35.1'),path.join(scratch,'v35.2'),path.join(output,'server-stages.json'),mode],{LONGRUN_AB:'1'},120000);
   if(result.status!=='PASS')process.exitCode=1;
   fs.writeFileSync(path.join(output,'server-stage-status.json'),JSON.stringify(result,null,2));

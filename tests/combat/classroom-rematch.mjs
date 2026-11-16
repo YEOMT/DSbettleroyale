@@ -50,7 +50,7 @@ try{
   if(process.env.CLASSROOM_UPGRADE){const id=await h.rpc('classroom-benchmark',{round});await h.host.waitForFunction(id=>m.ui.room.matchId===id,id);}
   const initial=await h.rpc('classroom-state');assert.equal(initial.id,identity.id);assert.equal(initial.code,identity.code);assert.deepEqual(initial.identities,identity.identities);
   await h.command('START_QUIZ');await h.host.waitForFunction(()=>m.ui.room.phase==='QUIZ');await h.command('BEGIN_DRAFT');
-  await h.rpc('classroom-prepare');await h.command('START_BATTLE');await h.rpc('classroom-place');axes.clear();
+  await h.rpc('classroom-prepare');await h.command('START_BATTLE');await h.rpc('classroom-place',{round});axes.clear();
   let arena;
   if(process.env.CLASSROOM_EXPECT_ARENA==='1' && process.env.CLASSROOM_MODE==='solo'){
    arena=await h.rpc('classroom-arena');assert.equal(arena.map,Number(process.env.CLASSROOM_MAP||0));
@@ -65,10 +65,22 @@ try{
   await Promise.all(h.clients.map(async c=>{await c.next('SNAPSHOT',s=>s.self?.lifeSeq===0);assert.equal((await c.command('ACTION',{seq:1,kind:'attack',aim:{x:1,y:0},aimPower:1})).accepted,true);await delay(150);assert.equal((await c.command('ACTION',{seq:1,kind:'skill',aim:{x:1,y:0},aimPower:1})).accepted,true);}));
   if(round===3){await h.student.reload();await instrument(h.student,activeScreen!=='host');await h.student.waitForFunction(()=>m.controls.enabled&&m.timeline.predicted?.alive);await h.student.keyboard.down('d');await delay(250);await h.student.keyboard.up('d');}
   await delay(2200);
+  const late=[];
+  if(process.env.CLASSROOM_CONTROLS353&&round===2){
+   for(const alive of [6,5,3]){
+    const start=await h.rpc('classroom-state');assert.deepEqual(await h.rpc('classroom-population',{alive}),{alive,connected:20});
+    for(const page of pages)await page.evaluate(()=>{measure.draw=[];measure.gap=[];measure.raf=[];measure.lag=[];measure.last=0;});
+    await delay(1800);
+    const end=await h.rpc('classroom-state');assert.equal(end.phase,'BATTLE');assert.equal(end.metrics.overloads,0);
+    const screens=await Promise.all(pages.map(p=>p.evaluate(()=>({draw:measure.draw,gap:measure.gap,alive:m.timeline.samples.at(-1)?.state.aliveCount,connected:m.net.ws.readyState===1,resources:{sprites:m.renderer.sprites.size,textures:m.renderer.textures.size,labels:m.renderer.labels.size}}))));
+    for(const s of screens){assert.equal(s.alive,alive);assert.ok(s.connected);assert.ok(s.draw.length>0);}
+    late.push({alive,connected:20,cpuMicros:{user:end.cpu.user-start.cpu.user,system:end.cpu.system-start.cpu.system},sentBytes:end.metrics.sentBytes-start.metrics.sentBytes,server:end.metrics,screens:screens.map(s=>({...s,draw:stats(s.draw),gap:stats(s.gap)}))});
+   }
+  }
   const state=await h.rpc('classroom-state'),actions=state.actions;assert.ok(actions.every(p=>p.move>0&&p.attack>0&&p.skill>0),'every student actually moves/fires each round '+JSON.stringify(actions));
   const screens=await Promise.all(pages.map(p=>p.evaluate(()=>({draw:measure.draw,gap:measure.gap,raf:measure.raf,lag:measure.lag,timeline:m.timeline.metrics,close:measure.close,lifetime:window.lifetimeCounts?.(),heapBytes:performance.memory?.usedJSHeapSize??null,unsentInputs:m.controls.batch.length,resources:{sprites:m.renderer.sprites.size,textures:m.renderer.textures.size,labels:m.renderer.labels.size,profiles:m.net.profiles.values.size,pending:m.net.pending.size},renderer:m.renderer.pixi?'pixi':'canvas',sampleScope:{windowStart:measure.windowStart,windowEnd:performance.now(),sampleCount:measure.draw.length,scope:'bounded last 4096 CPU submits and actual draw intervals; rAF separate',active:measure.active}}))));
   const metrics=state.metrics,peers=state.peers;
-  rows.push({round,arena,inputApply:metrics.inputApply,snapshotGap:metrics.snapshotGap,replaced:metrics.replacedSnapshots,serverMemory:metrics.memory,serverCpu:state.cpu,sentBytes:metrics.sentBytes,uptimeMs:metrics.uptimeMs,step:metrics.stepCpu,snapshot:metrics.snapshotCpu,screens:screens.map(s=>({...s,draw:stats(s.draw),gap:stats(s.gap),raf:stats(s.raf),lagTicks:stats(s.lag),lag:undefined,timeline:{...s.timeline,arrivalGaps:stats(s.timeline.arrivalGaps),sourceGaps:stats(s.timeline.sourceGaps),corrections:stats(s.timeline.corrections)}})),peers,actions,overloads:metrics.overloads,connected:state.connected,lastClose:state.lastClose});
+  rows.push({round,arena,late,inputApply:metrics.inputApply,snapshotGap:metrics.snapshotGap,replaced:metrics.replacedSnapshots,serverMemory:metrics.memory,serverCpu:state.cpu,sentBytes:metrics.sentBytes,uptimeMs:metrics.uptimeMs,step:metrics.stepCpu,snapshot:metrics.snapshotCpu,screens:screens.map(s=>({...s,draw:stats(s.draw),gap:stats(s.gap),raf:stats(s.raf),lagTicks:stats(s.lag),lag:undefined,timeline:{...s.timeline,arrivalGaps:stats(s.timeline.arrivalGaps),sourceGaps:stats(s.timeline.sourceGaps),corrections:stats(s.timeline.corrections)}})),peers,actions,overloads:metrics.overloads,connected:state.connected,lastClose:state.lastClose});
   if(round===rounds&&(process.env.CLASSROOM_MODE||'solo')==='solo'){ // Exercise the normal engine finish rule, rather than END, once.
    await h.rpc('classroom-finish');
    await h.host.waitForFunction(()=>m.ui.room.phase==='RESULTS');
@@ -76,7 +88,7 @@ try{
   await h.student.locator('#br-results').waitFor();
   if(round===rounds-1)await h.rpc('classroom-disconnect');
   await h.command('REMATCH');for(const p of pages)await p.waitForFunction(()=>m.ui.room.phase==='LOBBY'&&m.net.ws.readyState===1&&!m.net.restoring);
-  const clean=await Promise.all(pages.map(p=>p.evaluate(()=>({unsentInputs:m.controls.batch.length,sprites:m.renderer.sprites.size,textures:m.renderer.textures.size,labels:m.renderer.labels.size,samples:m.timeline.samples.length,pending:m.net.pending.size,profiles:m.net.profiles.values.size}))));rows.at(-1).lobby=clean;rows.at(-1).lifetime=await Promise.all(pages.map(p=>p.evaluate(()=>window.lifetimeCounts?.())));
+  const clean=await Promise.all(pages.map(p=>p.evaluate(()=>({feedback:Object.keys(m.controls.feedback||{}).length,sounds:m.controls.sounds.size,gestures:m.controls.gestures.size,unsentInputs:m.controls.batch.length,sprites:m.renderer.sprites.size,textures:m.renderer.textures.size,labels:m.renderer.labels.size,samples:m.timeline.samples.length,pending:m.net.pending.size,profiles:m.net.profiles.values.size}))));rows.at(-1).lobby=clean;rows.at(-1).lifetime=await Promise.all(pages.map(p=>p.evaluate(()=>window.lifetimeCounts?.())));
   if(!before){for(const [i,c]of rows.at(-1).lifetime.entries()){assert.equal(c.intervals,rows[0].lifetime[i].intervals,'stable intervals');assert.equal(c.raf,rows[0].lifetime[i].raf,'single RAF chains');assert.equal(c.listeners,rows[0].lifetime[i].listeners,'stable window/document listeners');}for(const s of clean)assert.ok(Object.values(s).every(n=>n===0),'match resources released');const d=(await h.rpc('classroom-state')).disposed;assert.deepEqual(d,{disposed:true,callbacks:false,inputs:0,players:0,entities:0});}
   const cleanServer=await h.rpc('classroom-state');rows.at(-1).disposed=cleanServer.disposed;rows.at(-1).cleanPeers=cleanServer.peers;if(!before)for(const peer of cleanServer.peers)assert.deepEqual(peer,{queue:0,bytes:0,pending:false,profile:false});assert.equal(cleanServer.connected,20);assert.equal(cleanServer.metrics.overloads,0);console.log('round',round,'PASS');
  }

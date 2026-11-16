@@ -1,5 +1,11 @@
 # Progress
 
+## v35.3 Combat Feel & Controls — work in progress
+
+Baseline main `5cba0f9bd6eba793d91fa16efd833a582456ee09` includes merged PR #23. Input focus/rotation/recovery discrepancies were reproduced in the real browser; authoritative instant-skill identity and private alien return origin were missing from display data. Fixes reuse the existing controls, profiles, rendering and sound lifecycle. An actual minimum-range alien dash opens recast at five ticks: only an authority-confirmed recast can bypass the old 100ms local guard. Server rules and normal action guards remain unchanged.
+
+Executed: Quick (243.875s, PASS), paired build, 86-kit fixed-seed authority comparison (2.614s, equal after the two documented presentation fields), focused unit tests, Canvas native three-pointer and cancel/release/input-focus recovery test (14.324s, PASS; eight sends, release-handler-to-send 0.4–2.7ms, pressed on the next draw). The first expanded cancellation fixture ran during the legitimate archmage volley lock and failed; corrected to await that lock, with assertions retained. Full targeted checks, same-condition v35.2 A/B, representative scenes, report and PR are pending. Physical devices and production are NOT_RUN. Inherited v35.2 memory attribution and initial-overload failures are not claimed resolved.
+
 ## v35.2 Long-Run Stability & Smooth Rendering
 
 PR #23 starts from main/observed public pair `d6b4525bf22bfa000a09eb686dffc5736bc5a3b3`. Runtime `7b723ae2a31e9eb5687dc9bdbe6cea2af0ec959d` preserves all86 rules and v35.1 fixes; only host capture-point tessellation changes. Student geometry was restored exactly after the first A/B pixel failure. Required CI43834713956 passed13jobs,2scope-skipped; Quick333+7,Python31,all9Canvas/Pixi combat,Targeted and isolated-release. No assertions removed.
