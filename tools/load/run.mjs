@@ -8,14 +8,14 @@ import {connect} from '../../tests/integration/client.mjs';
 import {manifest} from '../../packages/content/src/manifest.js';
 import {Samples} from '../../apps/server/src/diagnostics/metrics.js';
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
-export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverOverload=false,browser=false,roster="original",out=`artifacts/load-${players}-${seconds}.json`}={}){
+export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverOverload=false,browser=false,roster="original",naturalRematch=false,idleSeconds=0,out=`artifacts/load-${players}-${seconds}.json`}={}){
  if(!Number.isInteger(players)||players<2||players>30||!Number.isFinite(seconds)||seconds<1)throw Error('INVALID_LOAD_OPTIONS');
  const profileDir=process.env.LOAD_CPU_PROFILE;if(profileDir)fs.mkdirSync(profileDir,{recursive:true});
  const child=fork(fileURLToPath(new URL('./server.mjs',import.meta.url)),[],{stdio:['ignore','inherit','inherit','ipc'],windowsHide:true,execArgv:profileDir?['--cpu-prof','--cpu-prof-interval=10000','--cpu-prof-dir='+path.resolve(profileDir)]:[]});
  const port=await new Promise((resolve,reject)=>{child.once('message',m=>resolve(m.port));child.once('error',reject);});let rpcSeq=0;const rpcs=new Map();
  child.on('message',m=>{const p=rpcs.get(m.id);if(p){rpcs.delete(m.id);clearTimeout(p.timer);m.error?p.reject(Error(m.error)):p.resolve(m.value);}});
  const rpc=(type,args={})=>new Promise((resolve,reject)=>{const id=++rpcSeq,timer=setTimeout(()=>{rpcs.delete(id);reject(Error('IPC_TIMEOUT'));},10000);rpcs.set(id,{resolve,reject,timer});child.send({id,type,...args});});
- const app={address:{port}},host=await(await connect(app)).host(),clients=[];
+ const app={address:{port},...(process.env.LOAD_BUILT==='1'?{fingerprint:JSON.parse(fs.readFileSync('dist/release.json','utf8'))}:{})},host=await(await connect(app)).host(),clients=[];
  const report={scenario:'real loopback WebSocket; teacher + synthetic clients; not physical devices',players,seconds,roster,started:new Date().toISOString(),fingerprint:host.session,fixture:'All roster characters rotate by round. Server fixture grants XP20; clients choose real offers. Respawn answers use fixture oracle. No invulnerability.',samples:[],rtt:new Samples(),ack:new Samples(),snapshots:0,receivedBytes:0,errors:[],expectedStale:0,rounds:0};
  delete report.fingerprint.token;delete report.fingerprint.playerId;
  report.fixtureHash=createHash('sha256').update(['run.mjs','server.mjs','telemetry.mjs','browser.mjs'].map(f=>fs.readFileSync(new URL(f,import.meta.url),'utf8').replaceAll('\r\n','\n')).join('\n')).digest('hex');
@@ -43,7 +43,7 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverO
   while(performance.now()<deadline){
    const now=performance.now();tick++;
    if(host.room.phase==='RESULTS'){await begin();}
-   if(now-roundStarted>rematchSeconds*1000){await host.command('END');await host.phase('RESULTS');await begin();}
+   if(!naturalRematch&&now-roundStarted>rematchSeconds*1000){await host.command('END');await host.phase('RESULTS');await begin();}
    for(const [i,c]of clients.entries()){
     const s=c.snapshot?.self;if(!s||c.ws.readyState!==1)continue;
     c.lifeSeq=s.lifeSeq;
@@ -63,11 +63,11 @@ export async function runLoad({players=26,seconds=600,rematchSeconds=90,recoverO
    await delay(1000/30);
   }
   stopping=true;report.elapsedMs=performance.now()-started;report.server=await rpc('status');report.rtt=report.rtt.report();report.ack=report.ack.report();report.receivedBytes=[host,...clients].reduce((n,c)=>n+(c.receivedBytes||0),0);report.browser=observer?await observer.sample():undefined;report.pass=(!observer||!report.browser.errors.length)&&report.errors.length===0&&report.snapshots>players*seconds*10&&report.server.overloads===0;
- }catch(error){report.pass=false;report.failure=error.stack;report.server=await rpc('status');report.hostPhase=host.room?.phase;report.clientPhases=clients.map(c=>({phase:c.room?.phase,open:c.ws.readyState}));}finally{stopping=true;await observer?.close();await host.close();for(const c of clients)await c.close();report.cleanup=await rpc('close');if(Object.values(report.cleanup).some(n=>n!==0)){report.pass=false;report.failure??='SERVER_REFERENCE_LEAK';}report.ended=new Date().toISOString();report.totalMs=Date.parse(report.ended)-Date.parse(report.started);fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');}
+ }catch(error){report.pass=false;report.failure=error.stack;report.server=await rpc('status');report.hostPhase=host.room?.phase;report.clientPhases=clients.map(c=>({phase:c.room?.phase,open:c.ws.readyState}));}finally{stopping=true;await observer?.close();await host.close();for(const c of clients)await c.close();if(idleSeconds>0){report.idle=[];for(let n=0;n<idleSeconds;n+=5){await delay(Math.min(5,idleSeconds-n)*1000);report.idle.push(await rpc('status'));}}report.cleanup=await rpc('close');if(Object.values(report.cleanup).some(n=>n!==0)){report.pass=false;report.failure??='SERVER_REFERENCE_LEAK';}report.ended=new Date().toISOString();report.totalMs=Date.parse(report.ended)-Date.parse(report.started);fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(report,null,2)+'\n');}
  console.log(JSON.stringify({file:out,players,seconds,pass:report.pass,rounds:report.rounds,snapshots:report.snapshots,failure:report.failure,errors:report.errors.slice(0,3),step:report.server?.stepCpu,gap:report.server?.snapshotGap}));return report;
 }
 if(path.resolve(process.argv[1]||'')===fileURLToPath(import.meta.url)){
- const opts=Object.fromEntries(process.argv.slice(2).map(x=>x.replace(/^--/,'').split('=')));for(const k of ['players','seconds','rematchSeconds'])if(opts[k])opts[k]=Number(opts[k]);const result=await runLoad(opts);process.exitCode=result.pass?0:1;
+ const opts=Object.fromEntries(process.argv.slice(2).map(x=>x.replace(/^--/,'').split('=')));for(const k of ['players','seconds','rematchSeconds','idleSeconds'])if(opts[k])opts[k]=Number(opts[k]);if(opts.naturalRematch)opts.naturalRematch=opts.naturalRematch==='true';const result=await runLoad(opts);process.exitCode=result.pass?0:1;
 }
 
 

@@ -3,9 +3,12 @@
 const {createGameServer}=await import(process.env.LOAD_BUILT==='1'?'../../dist/server/main.js':'../../apps/server/src/main.js');
 import {manifest} from '../../packages/content/src/manifest.js';
 import {sourceHash} from '../build-id.mjs';
-import {loadTelemetry} from './telemetry.mjs';
+import {getHeapSpaceStatistics,getHeapCodeStatistics} from 'node:v8';
+import {loadTelemetry,ownership} from './telemetry.mjs';
 const source=sourceHash();
 const app=await createGameServer({port:0,hostSecret:'test-host'});
+const memoryRefs=[];
+if(process.env.LOAD_MEMORY_DIAGNOSTIC==='1'){const start=app.manager.startBattle;app.manager.startBattle=room=>{start(room);memoryRefs.push({world:new WeakRef(room.world),game:new WeakRef(room.world.game),actors:room.world.game.participants.map(p=>new WeakRef(p))});if(memoryRefs.length>64)memoryRefs.shift();};}
 const telemetry=loadTelemetry(app,{onOverload:value=>process.send?.({type:'fixture-overload',value})});
 process.send({ready:true,port:app.address.port});
 process.on('message',async m=>{try{let value;const room=[...app.manager.rooms.values()][0];
@@ -33,6 +36,12 @@ process.on('message',async m=>{try{let value;const room=[...app.manager.rooms.va
    w.brProgression.awardXP(p,20,0);
   }
   value=true;
+ }
+ if(m.type==='fixture-memory-collect'){
+  if(process.env.LOAD_MEMORY_DIAGNOSTIC!=='1'||!global.gc)throw Error('MEMORY_DIAGNOSTIC_ONLY');
+  // Separate allocation/reference diagnostics, never used in performance samples.
+  await new Promise(resolve=>setImmediate(resolve));global.gc();await new Promise(resolve=>setImmediate(resolve));global.gc();
+  value={memory:process.memoryUsage(),heapSpaces:getHeapSpaceStatistics(),heapCode:getHeapCodeStatistics(),ownership:ownership(app),liveWorlds:memoryRefs.filter(r=>r.world.deref()).length,liveGames:memoryRefs.filter(r=>r.game.deref()).length,liveActors:memoryRefs.reduce((n,r)=>n+r.actors.filter(a=>a.deref()).length,0),observedWorlds:memoryRefs.length};
  }
  if(m.type==='status')value={...app.metrics.report(app.manager),sourceHash:source,phase:room?.phase,connected:room?.students().filter(p=>p.connected).length,fault:room?.lastFault,paused:!!room?.safePaused,eventLedgerBytes:[...(room?.members.values()||[])].reduce((n,p)=>n+p.eventBytes,0),window:telemetry.sample()};
  if(m.type==='close'){telemetry.close();await app.close();value={rooms:app.manager.rooms.size,tokens:app.manager.tokens.size,peers:app.peers.size};process.send({id:m.id,value});process.disconnect();return;}

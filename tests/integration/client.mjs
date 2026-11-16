@@ -16,5 +16,5 @@ export class TestClient{
  async phase(phase){if(this.room?.phase===phase)return this.room;return (await this.next('ROOM_STATE',r=>r.phase===phase,8000)).payload;}
  async close(){if(this.ws.readyState>=2)return;await new Promise(resolve=>{this.ws.once('close',resolve);this.ws.close();});}
 }
-export async function connect(app,options){return new TestClient(`ws://127.0.0.1:${app.address.port}/ws`,options).open();}
+export async function connect(app,options){return new TestClient(`ws://127.0.0.1:${app.address.port}/ws`,options).open(app.fingerprint?Object.fromEntries(Object.keys(fingerprint).map(k=>[k,app.fingerprint[k]])):fingerprint);}
 

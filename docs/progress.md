@@ -1,5 +1,9 @@
 # Progress
 
+## v35.2 Long-Run Stability & Smooth Rendering (in progress)
+
+Base/main and read-only public buildId: `d6b4525bf22bfa000a09eb686dffc5736bc5a3b3`. Preserving v35.1 runtime improvements and all86 gameplay values. Separate synthetic20-peer/five-rematch GC diagnostics collected previous worlds/actors; 600-second paired comparisons remain pending. Renderer display-sized geometry and scoped production-bundle comparison tools are under verification. [Baseline/executed status](performance/v35-2-baseline.md) · [Changes/rollback](performance/v35-2-changes.md). No production mutations or physical-device PASS.
+
 ## v35.1 Classroom Smoothness & Input Reliability
 
 PR #22 compares v34, v35 and the candidate in the same Linux job for each scenario. Local fixed-jitter replay, actual Edge input, four simultaneous WS resumptions and private growth projection were verified. The fixed 20-player X arena probe isolated GPU submission from JS preparation; exact wire comparisons and room cleanup checks are separate. Hardware Android/iPhone and classroom testing are unavailable. [Baseline and final job evidence](performance/v35-1-baseline.md) · [Measured changes and rollback](performance/v35-1-changes.md).

@@ -57,3 +57,36 @@ jobs:
         with:
           name: v35-screens-${{ matrix.renderer }}-${{ github.sha }}
           path: artifacts/v35/
+
+  longrun:
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.body, '[longrun-smoothness]')
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {mode: solo, renderer: canvas}
+          - {mode: solo, renderer: pixi}
+          - {mode: team-capture, renderer: canvas}
+          - {mode: team-capture, renderer: pixi}
+          - {mode: load30, renderer: sockets}
+          - {mode: rematch, renderer: canvas}
+          - {mode: focused, renderer: pixi}
+          - {mode: solo-host, renderer: pixi}
+          - {mode: solo-student, renderer: pixi}
+          - {mode: render-cost, renderer: pixi}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: node tests/combat/longrun-compare.mjs ${{ matrix.mode }} ${{ matrix.renderer }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v35-2-${{ matrix.mode }}-${{ matrix.renderer }}-${{ github.sha }}
+          path: artifacts/v35-2-comparison/
+          retention-days: 14
