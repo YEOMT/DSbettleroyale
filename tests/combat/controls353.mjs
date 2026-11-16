@@ -51,10 +51,16 @@ try{
  await page.waitForFunction(()=>m.timeline.predicted.basicCooldown<=0&&!m.timeline.predicted.rw?.locks.attack&&performance.now()-(m.controls.lastFire.attack||0)>110);
  const keySeq=await page.evaluate(()=>m.controls.actions.attack);await page.keyboard.down('Space');await page.keyboard.down('Space');await page.keyboard.up('Space');
  await page.waitForFunction(seq=>m.timeline.predicted.actions.firedAttack>seq,keySeq);assert.equal(await page.evaluate(()=>m.controls.actions.attack),keySeq+1);report.checks.keyRepeat={requests:1,keyEvents:2};
+ await page.waitForFunction(()=>m.timeline.predicted.basicCooldown<=0&&performance.now()-(m.controls.lastFire.attack||0)>110);
  const buttonsBefore=await page.evaluate(()=>{const b=document.createElement('button');b.id='test-key-focus';b.textContent='Test';b.onclick=()=>window.focusButtonClicks=(window.focusButtonClicks||0)+1;document.body.append(b);b.focus();return requests.length;});
  await page.keyboard.press('Enter');report.checks.focusedButton=await page.evaluate(n=>{document.getElementById('test-key-focus').remove();return {commands:requests.length-n,clicks:window.focusButtonClicks||0};},buttonsBefore);if(!baseline){assert.equal(report.checks.focusedButton.commands,0);assert.equal(report.checks.focusedButton.clicks,1);}
+
+ await page.waitForFunction(()=>m.timeline.predicted.basicCooldown<=0&&!m.timeline.predicted.rw?.locks.attack&&performance.now()-(m.controls.lastFire.attack||0)>110);
+ const focusedSeq=await page.evaluate(()=>m.controls.actions.attack);await page.locator('#br-attack').focus();await page.keyboard.down('Enter');await page.keyboard.down('Enter');await page.keyboard.up('Enter');
+ await page.waitForFunction(seq=>m.timeline.predicted.actions.firedAttack>seq,focusedSeq);assert.equal(await page.evaluate(()=>m.controls.actions.attack),focusedSeq+1);report.checks.focusedCombatButton={requests:1,keyEvents:2};await page.locator('#br-attack').evaluate(el=>el.blur());
  report.checks.fired={attack:p.firedAttackSeq,skill:p.firedSkillSeq};
  const original=await page.evaluate(()=>structuredClone(m.timeline.predicted));
+ await page.waitForFunction(()=>m.timeline.predicted.basicCooldown<=0&&m.timeline.predicted.cooldown<=0&&!m.timeline.predicted.stunned&&!m.timeline.predicted.rw?.locks.skill&&performance.now()-(m.controls.lastFire.attack||0)>110);
  report.checks.focus=await page.evaluate(async()=>{
   const e=document.createElement('div');e.contentEditable='true';document.body.append(e);e.focus();
   const before=requests.length;e.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',code:'Enter',bubbles:true}));e.remove();

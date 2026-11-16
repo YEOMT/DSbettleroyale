@@ -12,6 +12,11 @@ on:
         type: choice
         default: pixi
         options: [canvas, pixi, sockets]
+      controls_scope:
+        description: v35.3 short matrix, or only the failed Pixi population comparisons
+        type: choice
+        default: all
+        options: [all, pixi-population]
   pull_request:
     paths:
       - 'apps/**'
@@ -132,14 +137,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - {mode: solo, renderer: canvas}
-          - {mode: solo, renderer: pixi}
-          - {mode: team-capture, renderer: canvas}
-          - {mode: team-capture, renderer: pixi}
-          - {mode: rematch, renderer: canvas}
-          - {mode: controls, renderer: canvas}
-          - {mode: controls, renderer: pixi}
+        include: ${{ fromJSON(inputs.controls_scope == 'pixi-population' && '[{"mode":"solo","renderer":"pixi"},{"mode":"team-capture","renderer":"pixi"}]' || '[{"mode":"solo","renderer":"canvas"},{"mode":"solo","renderer":"pixi"},{"mode":"team-capture","renderer":"canvas"},{"mode":"team-capture","renderer":"pixi"},{"mode":"rematch","renderer":"canvas"},{"mode":"controls","renderer":"canvas"},{"mode":"controls","renderer":"pixi"}]') }}
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}

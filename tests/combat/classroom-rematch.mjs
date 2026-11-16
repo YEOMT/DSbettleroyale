@@ -68,13 +68,18 @@ try{
   const late=[];
   if(process.env.CLASSROOM_CONTROLS353&&round===2){
    for(const alive of [6,5,3]){
-    const start=await h.rpc('classroom-state');assert.deepEqual(await h.rpc('classroom-population',{alive}),{alive,connected:20});
+    const start=await h.rpc('classroom-state'),transitionAt=performance.now();assert.deepEqual(await h.rpc('classroom-population',{alive}),{alive,connected:20});
+    // A fixture IPC reply confirms authority, not delivery to three documents.
+    // Start the identical 1.8s observation window after each screen receives
+    // that population. Bound and report delivery separately; never accept stale
+    // state as a late-game rendering sample or extend a stalled screen forever.
+    const deliveryMs=await Promise.all(pages.map(async page=>{await page.waitForFunction(n=>m.timeline.samples.at(-1)?.state.aliveCount===n,alive,{timeout:10000});return performance.now()-transitionAt;}));
     for(const page of pages)await page.evaluate(()=>{measure.draw=[];measure.gap=[];measure.raf=[];measure.lag=[];measure.last=0;});
     await delay(1800);
     const end=await h.rpc('classroom-state');assert.equal(end.phase,'BATTLE');assert.equal(end.metrics.overloads,0);
     const screens=await Promise.all(pages.map(p=>p.evaluate(()=>({draw:measure.draw,gap:measure.gap,alive:m.timeline.samples.at(-1)?.state.aliveCount,connected:m.net.ws.readyState===1,resources:{sprites:m.renderer.sprites.size,textures:m.renderer.textures.size,labels:m.renderer.labels.size}}))));
     for(const s of screens){assert.equal(s.alive,alive);assert.ok(s.connected);assert.ok(s.draw.length>0);}
-    late.push({alive,connected:20,cpuMicros:{user:end.cpu.user-start.cpu.user,system:end.cpu.system-start.cpu.system},sentBytes:end.metrics.sentBytes-start.metrics.sentBytes,server:end.metrics,screens:screens.map(s=>({...s,draw:stats(s.draw),gap:stats(s.gap)}))});
+    late.push({alive,connected:20,deliveryMs,cpuMicros:{user:end.cpu.user-start.cpu.user,system:end.cpu.system-start.cpu.system},sentBytes:end.metrics.sentBytes-start.metrics.sentBytes,server:end.metrics,screens:screens.map(s=>({...s,draw:stats(s.draw),gap:stats(s.gap)}))});
    }
   }
   const state=await h.rpc('classroom-state'),actions=state.actions;assert.ok(actions.every(p=>p.move>0&&p.attack>0&&p.skill>0),'every student actually moves/fires each round '+JSON.stringify(actions));
