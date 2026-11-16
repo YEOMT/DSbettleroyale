@@ -32,6 +32,7 @@
 | 20인 A/B | PASS(기능) | 개인전/점령전 Canvas/Pixi, 각 3라운드; 성능은 아래 별도 |
 | 20인 같은 방5회 재경기 | PASS | 55.627→54.838초; 매회 20명 연결, 세 화면의 이전 경기 자원 0 |
 | 각 600초 30WS A/B | PASS | 43833594114; 두 버전 PASS. 아래 장시간 표 참조 |
+| 20연결 최후반 보완 | FAIL / NOT_COMPLETED | 두 버전 Canvas/Pixi 총98.463초; 초기20인 overload1씩,6→5→3 미도달 |
 | 실제 Android/iPhone/학교 Wi-Fi | NOT_RUN | 현재 접근 가능한 실기기 없음 |
 | 운영 배포/운영 부하 | NOT_RUN | 승인 범위 밖 |
 
@@ -108,9 +109,9 @@ Linux 4CPU / 약 16GiB, 소프트웨어 GPU, balanced / DPR1 / 844×640. 고정 
 | heapTotal | 174.93→186.93 | 176.93→185.18 |
 | external | 12.04→12.92 | 12.42→13.27 |
 | arrayBuffers | 5.45→6.34 | 5.83→6.68 |
-| 실행 중 최고 RSS | 287.65 | 292.75 |
+| 600초 구간 최고 RSS (유휴 제외) | 287.65 | 292.75 |
 
-신뢰 재생 이력의 UTF-8 JSON 길이는 8.05→12.90MB / 8.06→12.47MB였다. 이 값은 V8 retained heap 크기가 아니며, 공유 문자열·인코딩 차이 때문에 두 배로 환산할 수도 없다. 명령 이력은 현재 방의 15,365개 상한 안에, profile 상태는30개, 후반 spatial cell은약367개였다. 현재 월드의 공격 객체는0~10개로 변동했다. 확인한 소유자들은 유한하지만 RSS 증가 전체의 소유자는 입증하지 못했다.
+신뢰 재생 이력의 UTF-8 JSON 길이는 8.05→12.90MB / 8.06→12.47MB였다. 이 값은 V8 retained heap 크기가 아니며, 공유 문자열·인코딩 차이 때문에 두 배로 환산할 수도 없다. 명령 이력의 관측 최대치는15,365개이며 기존 상한은512개/member다. profile 상태는30개, 후반 spatial cell은약367개였다. 600초의 rework entity 표본 최대치는 기준23개/수정18개였다. 이는 native projectiles를 포함한 전체 공격 객체 수가 아니다. 확인한 소유자들은 유한하지만 RSS 증가 전체의 소유자는 입증하지 못했다.
 
 수정본 마지막1분 RSS는288.31~289.55MiB였지만, 2~3분 대비64.91MiB 상승과 더 긴 시간의 안정화가 미확정이므로 명세4.4를 적용했다. **수정본만 1200초로 연장**한 실행43837308258도 완료했다. baseline600초나 나머지 매트릭스는 반복하지 않았다. 아래 결과에 따라 MEMORY_UNRESOLVED로 종료한다.
 
@@ -139,10 +140,10 @@ Linux 4CPU / 약 16GiB, 소프트웨어 GPU, balanced / DPR1 / 844×640. 고정 
 | heapTotal | 175.30 | 185.30 | 179.93 | 177.80 |
 | external | 11.00 | 11.67 | 11.66 | 12.44 |
 
-10분 이후 살아 있는 JS heap의 지속 증가는 관측되지 않았다. RSS는같은구간5.31MiB 더높았으며,이 값의 native/allocator 보유 소유자를 확정하지 못했다. 짧은 별도 GC 진단에서 이전 월드/참가자 회수가 가능하다는 증거와 합쳐도 무기한 누수 부재나1GB 운영 여유를 입증하지는 않는다. **MEMORY_UNRESOLVED**이며 명세4.4의 종료 조건에 따라 이 이후 장시간 시험을 더 실행하지 않았다. [20분 창별 원자료](../evidence/v35-2/long-extended-linux.json)
+heapUsed 구간 중앙값은10분 이후 지속 증가하지 않았다. 강제GC 없는 표본이므로 retained/live heap 측정과는 다르다. RSS는 같은 구간5.31MiB 더 높았으며, 이 값의 native/allocator 보유 소유자를 확정하지 못했다. 짧은 별도 GC 진단에서 이전 월드/참가자 회수가 가능하다는 증거와 합쳐도 무기한 누수 부재나1GB 운영 여유를 입증하지는 않는다. **MEMORY_UNRESOLVED**이며 명세4.4의 종료 조건에 따라 이 이후 장시간 시험을 더 실행하지 않았다. [20분 창별 원자료](../evidence/v35-2/long-extended-linux.json)
 
 ```text
-FUNCTIONAL: PASS (명시한 자동화 시험 범위)
+FUNCTIONAL: PARTIAL (필수 CI·기존 회귀 PASS, 추가 20연결 최후반 시험 FAIL/미완료)
 PERFORMANCE: UNRESOLVED (호스트 고정 장면 개선, 장시간 RSS 귀속·연속 화면 긴 정지 미확정)
 DEVICE_VALIDATION: NOT_RUN
 RELEASE: NOT_DEPLOYED
@@ -151,3 +152,21 @@ RELEASE: NOT_DEPLOYED
 사용자 검토용 PR이며 전체 교실 렉 해결이나 정식 배포 준비 완료를 선언하지 않는다. 필요한 다음 조치는 반복적인 전수 부하가 아니라, 격리된 환경의 native allocation/retained-size 근거와 실제 학생 기기의 reload·draw 추적이다. 현재 운영에서 이를 무단 실행하지 않는다.
 
 일반 `check-plan.json`의 Deep Audit/600s NOT_RUN은 일반 CI의 기본 선택 범위다. 이 문서의 별도 opt-in workflow 실행 번호가 실제600/1200초 수행 근거다. 사용자 병합 전이므로 v35.2 main CI와 새 Paired candidate의 release_id/candidate_run_id는 아직 없다. 과거 후보 번호를 대신 쓰지 않는다.
+
+보고서 제출 SHA `942d098…`의 CI43841292911도13개 성공/범위 밖2개 생략으로 완료했다. Quick333+7(231.970초), Python31(0.061초), 빌드4.09초, Targeted 약401.7초가 통과했다. Targeted의26인30초 부하는16,200 snapshots/오류0이었다. E2E 도중 Vite `ECONNRESET` 로그2줄이 있었으며, 해당 모드와 전체 실행은 성공했다. 이 로그를 삭제하거나 전체 통신 로그가 무오류였다고 보고하지 않는다. 이후 최후반20인 보완 시험과 문서 범위 정정은 별도 제출 커밋이며 마지막 CI는 PR의 해당 SHA에서 확인한다.
+
+## 최후반 20연결 보완 검사 — 실패 보존
+
+기존 `live-late.mjs`의 기본6참가 검사는 유지하고, 명세5.1의20연결·15사망 관전 조건을 위한 선택 분기를 추가했다. 같은 Windows PC에서 두 버전의 배포 bundle을 고정해 Canvas/Pixi 각1회씩 실행했다. 20→6→5→3 생존자 전환, 사망한 실제 학생 화면의 권위 수신·draw,20연결 유지와 Results를 검사하도록 설계했다. 죽음은 fixture이며 자연 처치 시험이 아니다. 서버와 시험 드라이버는 같은 Node 프로세스, 두 브라우저도 같은 PC를 사용한다.
+
+첫 시도는 Windows `--import` 경로 처리 오류로 브라우저 시작 전 INFRA_FAILURE였다. 경로 의존성을 제거하고 성공한 같은 빌드를 재사용한 실제4개 실행은 모두 초기20인 구간에서 과부하1회가 기록됐다. Canvas는 과부하0 assertion, Pixi는 새 권위 tick 수신 assertion에서 FAIL했다. **6→5→3 및 Results는 NOT_COMPLETED**다. 이것을 원래6참가 CI의 성공이나30WS 장시간 성공으로 대신하지 않는다. 두 버전 모두 실패했고 solo 런타임은 동일하므로 v35.2 회귀나 서버 단독 병목으로 확정하지 않는다. 성공할 때까지 반복하거나 보호 기준·assertion을 완화하지 않았다.
+
+전체 기능 판정은 이 미완료 범위를 반영해 PARTIAL이다. 필수 CI와 앞선 재경기·조작·집중 교전의 PASS는 각각 유지하며, 전체 장시간·최후반 안정화 완료를 선언하지 않는다.
+
+실행 시간은 v35.1 Canvas22.087초/Pixi27.161초, v35.2 Canvas21.891초/Pixi27.287초, 실제4개 비교 전체98.463초다(성공한 기존 쌍 빌드 재사용 시간 제외). 최후반 개선 수치로 해석할 수 없다. [실제 실패 원자료](../evidence/v35-2/late20-windows.json) · [실행 전 인프라 실패](../evidence/v35-2/late20-infra-attempt1.json).
+
+```powershell
+$env:PLAYWRIGHT_CHANNEL='msedge'
+$env:LATE_SOFTWARE_GPU='1'
+node tests/combat/late20-compare.mjs
+```

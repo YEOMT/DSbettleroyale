@@ -628,5 +628,37 @@
     "status": "NOT_RUN",
     "reason": "No physical Android/iPhone/tablet/host classroom environment available"
   },
-  "interpretation": "CI functional PASS is not a classroom FPS, long-run memory or production certification. Long-run and corrected render comparisons have separate evidence."
+  "interpretation": "CI functional PASS is not a classroom FPS, long-run memory or production certification. Long-run and corrected render comparisons have separate evidence.",
+  "reportSubmissionCi": {
+    "headSha": "942d0980870e3410e0689caefed9cfd85794ac5c",
+    "testedPrMergeSha": "2f17c3865b8b9ba044d2ee6695ed114531da8baf",
+    "runId": 43841292911,
+    "attempt": 1,
+    "status": "PASS",
+    "url": "https://github.com/YEOMT/DSbettleroyale/actions/runs/43841292911",
+    "jobs": {
+      "success": 13,
+      "scopeSkipped": 2,
+      "failed": 0,
+      "cancelled": 0
+    },
+    "checks": {
+      "quickTests": 333,
+      "policyTests": 7,
+      "pythonTests": 31,
+      "quickSeconds": 231.97,
+      "pythonSeconds": 0.061,
+      "buildSeconds": 4.09,
+      "targetedApproxSeconds": 401.7,
+      "load": {
+        "players": 26,
+        "seconds": 30,
+        "snapshots": 16200,
+        "errors": 0,
+        "stepP95Ms": 1.592,
+        "snapshotGapP95Ms": 52.792
+      }
+    },
+    "logWarnings": "Two Vite ECONNRESET lines during passing E2E modes; not asserted as zero transport log errors. No rerun."
+  }
 }

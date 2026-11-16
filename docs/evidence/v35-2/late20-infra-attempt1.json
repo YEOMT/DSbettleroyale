@@ -1,0 +1,71 @@
+{
+  "startedAt": "2026-11-16T09:51:20.417Z",
+  "scope": "short late-population fixture, server+testdriver+two foreground browser surfaces share one physicalPC; not isolatedserver or hardwaremobileperformance",
+  "machine": {
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.22.1",
+    "cpu": "13th Gen Intel(R) Core(TM) i5-1340P",
+    "logicalCpus": 16,
+    "ram": 16718413824
+  },
+  "versions": [
+    {
+      "label": "v351",
+      "sha": "d6b4525bf22bfa000a09eb686dffc5736bc5a3b3",
+      "build": {
+        "status": "PASS",
+        "elapsedMs": 7566.2685,
+        "exitCode": 0
+      },
+      "cases": [
+        {
+          "renderer": "canvas",
+          "status": "INFRA_FAILURE",
+          "elapsedMs": 71.48559999999998,
+          "exitCode": 1,
+          "data": null,
+          "reason": "ERR_UNSUPPORTED_ESM_URL_SCHEME before test entrypoint"
+        },
+        {
+          "renderer": "pixi",
+          "status": "INFRA_FAILURE",
+          "elapsedMs": 60.848399999998946,
+          "exitCode": 1,
+          "data": null,
+          "reason": "ERR_UNSUPPORTED_ESM_URL_SCHEME before test entrypoint"
+        }
+      ]
+    },
+    {
+      "label": "v352",
+      "sha": "7b723ae2a31e9eb5687dc9bdbe6cea2af0ec959d",
+      "build": {
+        "status": "PASS",
+        "elapsedMs": 7435.0794000000005,
+        "exitCode": 0
+      },
+      "cases": [
+        {
+          "renderer": "canvas",
+          "status": "INFRA_FAILURE",
+          "elapsedMs": 70.54739999999947,
+          "exitCode": 1,
+          "data": null,
+          "reason": "ERR_UNSUPPORTED_ESM_URL_SCHEME before test entrypoint"
+        },
+        {
+          "renderer": "pixi",
+          "status": "INFRA_FAILURE",
+          "elapsedMs": 58.51440000000002,
+          "exitCode": 1,
+          "data": null,
+          "reason": "ERR_UNSUPPORTED_ESM_URL_SCHEME before test entrypoint"
+        }
+      ]
+    }
+  ],
+  "elapsedMs": 16536.7052,
+  "endedAt": "2026-11-16T09:51:36.954Z",
+  "classification": "INFRA_FAILURE: unsupported Windows absolute --import URL before tests/browser; corrected committed launchflags and reused exact successful builds"
+}
