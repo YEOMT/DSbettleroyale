@@ -10,7 +10,7 @@ const root=process.cwd(),git=['-c','safe.directory='+fs.realpathSync(root)];
 const [mode='solo',backend='canvas']=process.argv.slice(2);
 const base='d6b4525bf22bfa000a09eb686dffc5736bc5a3b3';
 const head=execFileSync('git',[...git,'rev-parse','HEAD'],{encoding:'utf8'}).trim();
-const versions=[{label:'v35.1',sha:base},{label:'v35.2',sha:head}];
+const versions=mode==='load30-extended'?[{label:'v35.2',sha:head}]:[{label:'v35.1',sha:base},{label:'v35.2',sha:head}];
 if(mode==='solo'&&backend==='pixi'||mode==='team-capture'&&backend==='canvas')versions.reverse();
 const output=path.resolve('artifacts/v35-2-comparison',mode+'-'+backend);fs.mkdirSync(output,{recursive:true});
 const scratch=fs.mkdtempSync(path.resolve('artifacts','longrun-sources-'));
@@ -31,16 +31,16 @@ try {
   const env={BUILD_ID:version.sha,CLASSROOM_FIXED_SEED:'1',LOAD_BUILT:'1',CLASSROOM_BUNDLE:'1'};
   const build=run(cwd,['tools/build.mjs'],env);assert.equal(build.status,'PASS','paired deployment build');
   const row={...version,build,results:[]};rows.push(row);save();
-  if(mode==='load30'){
-   for(const diagnostic of (version.label==='v35.1'?['0','1']:['1','0'])){
+  if(mode==='load30'||mode==='load30-extended'){
+   for(const diagnostic of (mode==='load30-extended'?[]:version.label==='v35.1'?['0','1']:['1','0'])){
     const file=path.join(cwd,'artifacts/diagnostics-'+diagnostic+'.json');
     const check=run(cwd,['tools/load/run.mjs','--players=30','--seconds=20','--out='+file],{...env,LOAD_DIAGNOSTICS:diagnostic},90000);
     row.results.push({kind:'diagnostic-overhead',enabled:diagnostic==='1',...check,data:fs.existsSync(file)?summarizeLongRun(JSON.parse(fs.readFileSync(file))):null});save();
    }
    const raw=path.join(cwd,'artifacts/long-private.json');
-   const result=run(cwd,['tools/load/run.mjs','--players=30','--seconds=600','--naturalRematch=true','--idleSeconds=30','--out='+raw],env,690000);
+   const result=run(cwd,['tools/load/run.mjs','--players=30','--seconds='+(mode==='load30-extended'?1200:600),'--naturalRematch=true','--idleSeconds=30','--out='+raw],env,mode==='load30-extended'?1290000:690000);
    const data=fs.existsSync(raw)?summarizeLongRun(JSON.parse(fs.readFileSync(raw))):null;
-   row.results.push({kind:'600-second',...result,data});
+   row.results.push({kind:mode==='load30-extended'?'1200-second':'600-second',...result,data});
   }else if(['solo','team-capture','rematch','solo-host','solo-student'].includes(mode)){
    const label=version.label+'-'+mode;
    const result=run(cwd,['tests/combat/classroom-rematch.mjs',label],{...env,CLASSROOM_UPGRADE:'1',CLASSROOM_ROUNDS:mode==='rematch'?'5':'3',CLASSROOM_METER:'1',CLASSROOM_MODE:mode==='rematch'?'team-capture':mode.startsWith('solo-')?'solo':mode,CLASSROOM_ACTIVE_SCREEN:mode==='solo-host'?'host':mode==='solo-student'?'student':'all',CLASSROOM_SMOOTH_STATS:'1',CLASSROOM_EXPECT_ARENA:'1',EVOLUTION_RENDERER:backend},420000);

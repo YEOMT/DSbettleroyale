@@ -73,6 +73,8 @@ try{
  },role);
  assert.equal(report.measurement.fallback,null);assert.deepEqual(report.measurement.start,report.measurement.end,'fixed scene resources stable');
  const parity=report.measurement.parity;assert.ok(parity.meanChannelDiff<.35&&parity.pixelsOver16<parity.totalPixels*.006,JSON.stringify(parity));
+ // Screenshots are outside timing; hide synthetic join codes before artifact storage.
+ await page.addStyleTag({content:'#br-live-room,#br-student-room-pill,#br-room-code{visibility:hidden!important}'});
  await page.screenshot({path:out+'/'+label+'-'+mode+'-'+role+'-'+scene+'.png'});
  await h.command('END');await h.command('REMATCH');
  await page.waitForFunction(()=>auditApp.ui.room.phase==='LOBBY'&&auditApp.renderer.sprites.size===0&&auditApp.renderer.labels.size===0&&auditApp.renderer.textures.size===0);

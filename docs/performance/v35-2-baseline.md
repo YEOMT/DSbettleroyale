@@ -25,7 +25,9 @@
 | 메모리 참조 진단 | PASS | 20학생,같은 방5회,별도 방 create/close,강제GC. 총시간 NOT_RECORDED |
 | RTT80/150·순서 보존 지터 | PASS | 실제 WS 프록시,10.19초. 재조작·중복·이전 epoch 포함 |
 | 장판/기절/반사 중첩 | PASS | 22학생,16.06초. 초기 실패 이력 별도 보존 |
-| 최종 Quick/Targeted/브라우저 CI | NOT_RUN | 최종 커밋 이후 결과로 갱신 |
+| 로컬 Quick | PASS | 333 공통 +7 ReleaseOps,238.617초 |
+| 로컬 필수 client/server build | PASS | Vite6.03초, 전체명령8.05초 |
+| 최종 Targeted/브라우저 CI | NOT_RUN | 실행43833594121 진행 중 |
 | 20인 A/B·각600초·5회 재경기 | NOT_RUN | 준비된 선택 비교 workflow에서 실행 |
 | 실제 Android/iPhone/학교 Wi-Fi | NOT_RUN | 현재 접근 가능한 실기기 없음 |
 | 운영 배포/운영 부하 | NOT_RUN | 승인 범위 밖 |
