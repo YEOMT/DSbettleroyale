@@ -1,0 +1,632 @@
+{
+  "schema": 1,
+  "finalCi": {
+    "headSha": "7b723ae2a31e9eb5687dc9bdbe6cea2af0ec959d",
+    "testedPrMergeSha": "1b0bb58cebeea1d6c1affed1b2008450c2ef1fa3",
+    "runId": 43834713956,
+    "attempt": 1,
+    "status": "PASS",
+    "url": "https://github.com/YEOMT/DSbettleroyale/actions/runs/43834713956",
+    "createdAtUtc": "2026-11-16T08:51:54Z",
+    "completedAtUtc": "2026-11-16T09:01:26Z",
+    "jobs": [
+      {
+        "name": "quick",
+        "status": "PASS"
+      },
+      {
+        "name": "combat (canvas, recovery)",
+        "status": "PASS"
+      },
+      {
+        "name": "combat (canvas, touch)",
+        "status": "PASS"
+      },
+      {
+        "name": "combat (canvas, continuous)",
+        "status": "PASS"
+      },
+      {
+        "name": "combat (pixi, recovery, controls)",
+        "status": "PASS"
+      },
+      {
+        "name": "combat (pixi, continuous, opponent)",
+        "status": "PASS"
+      },
+      {
+        "name": "combat (pixi, touch)",
+        "status": "PASS"
+      },
+      {
+        "name": "combat (pixi, continuous, attacker)",
+        "status": "PASS"
+      },
+      {
+        "name": "combat (pixi, recovery, roster)",
+        "status": "PASS"
+      },
+      {
+        "name": "isolated-release",
+        "status": "PASS"
+      },
+      {
+        "name": "combat (pixi, continuous, host)",
+        "status": "PASS"
+      },
+      {
+        "name": "targeted",
+        "status": "PASS"
+      },
+      {
+        "name": "required-checks",
+        "status": "PASS"
+      },
+      {
+        "name": "characters",
+        "status": "NOT_RUN",
+        "githubConclusion": "skipped",
+        "reason": "unchanged character scope"
+      },
+      {
+        "name": "roster10",
+        "status": "NOT_RUN",
+        "githubConclusion": "skipped",
+        "reason": "unchanged character scope"
+      }
+    ],
+    "jobCounts": {
+      "success": 13,
+      "failure": 0,
+      "cancelled": 0,
+      "scopeSkipped": 2
+    },
+    "quick": {
+      "wallMs": 225560,
+      "commonTests": 7,
+      "unitParityIntegrationTests": 333,
+      "failures": 0,
+      "testRunnerMs": 224974.031867,
+      "pythonReleaseOpsTests": 31,
+      "pythonReleaseOpsMs": 32,
+      "contentCheck": "PASS",
+      "boundaryCheck": "PASS"
+    },
+    "build": {
+      "status": "PASS",
+      "viteBuildMs": 2960,
+      "pairedBuildCompleted": true
+    },
+    "targeted": {
+      "ms": 238051,
+      "results": [
+        {
+          "command": "node_modules/@playwright/test/cli.js test",
+          "ms": 77593,
+          "status": "PASS"
+        },
+        {
+          "command": "tests/fidelity/visuals.mjs",
+          "ms": 15778,
+          "status": "PASS"
+        },
+        {
+          "command": "tests/fidelity/visuals.mjs",
+          "ms": 81179,
+          "status": "PASS"
+        },
+        {
+          "command": "tests/releaseops/layout.mjs",
+          "ms": 2459,
+          "status": "PASS"
+        },
+        {
+          "command": "tests/combat/resource-lifetime.mjs",
+          "ms": 25410,
+          "status": "PASS"
+        },
+        {
+          "command": "tools/load/run.mjs --players=26 --seconds=30",
+          "ms": 35630,
+          "status": "PASS"
+        }
+      ],
+      "notRun": [
+        "all77",
+        "full-camera",
+        "full-layout",
+        "real-time-quiz",
+        "600s-load",
+        "physical-classroom"
+      ]
+    },
+    "focusedChecksMs": {
+      "fourOfTwentyConcurrentResumeMoveBasicSkillRematch": 5477.808711,
+      "twentyTwoSocketReflectionSpotlightAndFields": 15700.793066,
+      "orderedTcpLatency80And150AndJitter": 9553.138476,
+      "realBlockedTcpReaderWithHealthyPeerAndResumedActions": 5782.538543
+    }
+  },
+  "previousRequiredCi": {
+    "headSha": "d8f2141295173d56c8f8dfd65c363b3699b7b8a9",
+    "testedPrMergeSha": "a83540a8007fde85800a02a1b5ac85a886f9e7ca",
+    "runId": 43833594121,
+    "attempt": 1,
+    "jobCounts": {
+      "success": 9,
+      "cancelled": 3,
+      "scopeSkipped": 2,
+      "failedAggregate": 1
+    },
+    "cancelledJobs": [
+      "targeted",
+      "combat (pixi, continuous, attacker)",
+      "combat (pixi, recovery, controls)"
+    ],
+    "requiredChecks": "FAIL",
+    "reason": "A new source push replaced the in-flight run via existing concurrency cancellation. The aggregate failed because three dependencies were cancelled, not because a game assertion failed in those jobs.",
+    "partialResultsAreNotPassForCancelledSuites": true,
+    "rerunRequested": false,
+    "completedCoverage": {
+      "quickTests": 333,
+      "quickPolicyTests": 7,
+      "pythonTests": 31,
+      "viteBuildMs": 2720
+    }
+  },
+  "comparisonProvenance": {
+    "runId": 43833594114,
+    "attempt": 1,
+    "baselineSha": "d6b4525bf22bfa000a09eb686dffc5736bc5a3b3",
+    "candidateHeadSha": "d8f2141295173d56c8f8dfd65c363b3699b7b8a9",
+    "testedCandidatePrMergeSha": "a83540a8007fde85800a02a1b5ac85a886f9e7ca",
+    "differenceFromFinalHead": "The later 7b723ae change restricts circle tessellation to the teacher renderer. These A/B observations belong to the earlier runtime. Canvas rematch and network/authority paths are unchanged; do not attribute these old Pixi timing samples to the final guarded student path.",
+    "machine": {
+      "platform": "linux",
+      "arch": "x64",
+      "node": "v24.22.1",
+      "logicalCpus": 4,
+      "ram": 16464306176,
+      "sharedMachine": true
+    },
+    "sharedHardwareContentionRemaining": true,
+    "rematch": [
+      {
+        "label": "v35.1",
+        "sha": "d6b4525bf22bfa000a09eb686dffc5736bc5a3b3",
+        "status": "PASS",
+        "wallMs": 55627.159197,
+        "rounds": 5,
+        "sameRoomAndParticipants": true,
+        "browserSurfaces": 3,
+        "renderer": "canvas",
+        "states": [
+          {
+            "round": 1,
+            "connected": 20,
+            "overloads": 0,
+            "maxLobbyResourceCount": 0,
+            "disposed": {
+              "disposed": true,
+              "callbacks": false,
+              "inputs": 0,
+              "players": 0,
+              "entities": 0
+            },
+            "lifetimeCounts": [
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              }
+            ]
+          },
+          {
+            "round": 3,
+            "connected": 20,
+            "overloads": 0,
+            "maxLobbyResourceCount": 0,
+            "disposed": {
+              "disposed": true,
+              "callbacks": false,
+              "inputs": 0,
+              "players": 0,
+              "entities": 0
+            },
+            "lifetimeCounts": [
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              }
+            ]
+          },
+          {
+            "round": 5,
+            "connected": 20,
+            "overloads": 0,
+            "maxLobbyResourceCount": 0,
+            "disposed": {
+              "disposed": true,
+              "callbacks": false,
+              "inputs": 0,
+              "players": 0,
+              "entities": 0
+            },
+            "lifetimeCounts": [
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              }
+            ]
+          }
+        ],
+        "allFiveRoundLobbiesEmpty": true
+      },
+      {
+        "label": "v35.2",
+        "sha": "a83540a8007fde85800a02a1b5ac85a886f9e7ca",
+        "status": "PASS",
+        "wallMs": 54838.00318299999,
+        "rounds": 5,
+        "sameRoomAndParticipants": true,
+        "browserSurfaces": 3,
+        "renderer": "canvas",
+        "states": [
+          {
+            "round": 1,
+            "connected": 20,
+            "overloads": 0,
+            "maxLobbyResourceCount": 0,
+            "disposed": {
+              "disposed": true,
+              "callbacks": false,
+              "inputs": 0,
+              "players": 0,
+              "entities": 0
+            },
+            "lifetimeCounts": [
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              }
+            ]
+          },
+          {
+            "round": 3,
+            "connected": 20,
+            "overloads": 0,
+            "maxLobbyResourceCount": 0,
+            "disposed": {
+              "disposed": true,
+              "callbacks": false,
+              "inputs": 0,
+              "players": 0,
+              "entities": 0
+            },
+            "lifetimeCounts": [
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              }
+            ]
+          },
+          {
+            "round": 5,
+            "connected": 20,
+            "overloads": 0,
+            "maxLobbyResourceCount": 0,
+            "disposed": {
+              "disposed": true,
+              "callbacks": false,
+              "inputs": 0,
+              "players": 0,
+              "entities": 0
+            },
+            "lifetimeCounts": [
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              },
+              {
+                "intervals": 4,
+                "timeouts": 0,
+                "raf": 1,
+                "listeners": 29
+              }
+            ]
+          }
+        ],
+        "allFiveRoundLobbiesEmpty": true
+      }
+    ],
+    "focused": [
+      {
+        "label": "v35.1",
+        "sha": "d6b4525bf22bfa000a09eb686dffc5736bc5a3b3",
+        "commands": [
+          {
+            "command": "tests/combat/v34-roster.mjs pixi",
+            "status": "PASS",
+            "ms": 49188.486459,
+            "exit": 0
+          },
+          {
+            "command": "tests/combat/evolution-browser.mjs pixi",
+            "status": "PASS",
+            "ms": 40064.474331000005,
+            "exit": 0
+          },
+          {
+            "command": "tests/combat/resource-lifetime.mjs v35-2",
+            "status": "PASS",
+            "ms": 22496.304003000012,
+            "exit": 0
+          }
+        ],
+        "scissors": {
+          "participants": 20,
+          "uses": 3,
+          "count": 8,
+          "shots": 480,
+          "peakShots": 120,
+          "elapsedMs": 7881.142526000003,
+          "cpuMs": 1303.363,
+          "sentBytes": 84779325,
+          "snapshots": 945,
+          "screens": [
+            {
+              "maxShots": 122,
+              "frames": 37,
+              "drawP95": 24.79999999998836,
+              "gapP95": 250,
+              "renderer": "pixi"
+            },
+            {
+              "maxShots": 109,
+              "frames": 37,
+              "drawP95": 35.09999999997672,
+              "gapP95": 266.70000000000437,
+              "renderer": "pixi"
+            },
+            {
+              "maxShots": 120,
+              "frames": 38,
+              "drawP95": 43.100000000034925,
+              "gapP95": 250,
+              "renderer": "pixi"
+            }
+          ]
+        },
+        "mirror": {
+          "turns": 1,
+          "screens": 3,
+          "defenderLoss": 0,
+          "shooterLoss": 209.45600000000002
+        },
+        "spotlight": {
+          "skill": "spotlight",
+          "screens": 3,
+          "behindCover": true,
+          "resumed": true
+        },
+        "resourceLifetime": {
+          "status": "PASS",
+          "ms": 5965.691941,
+          "resources": {
+            "before": {
+              "sprites": 7,
+              "labels": 10,
+              "textures": 4,
+              "tracks": 1,
+              "deaths": 0
+            },
+            "after": {
+              "sprites": 7,
+              "labels": 10,
+              "textures": 4,
+              "tracks": 1,
+              "deaths": 0
+            },
+            "retiredDrops": 0,
+            "reset": {
+              "sprites": 0,
+              "labels": 0,
+              "textures": 0,
+              "tracks": 0,
+              "deaths": 0
+            },
+            "unreleasedOwnedSources": 0,
+            "unreleasedLevelSources": 0
+          }
+        }
+      },
+      {
+        "label": "v35.2",
+        "sha": "a83540a8007fde85800a02a1b5ac85a886f9e7ca",
+        "commands": [
+          {
+            "command": "tests/combat/v34-roster.mjs pixi",
+            "status": "PASS",
+            "ms": 46164.06026700001,
+            "exit": 0
+          },
+          {
+            "command": "tests/combat/evolution-browser.mjs pixi",
+            "status": "PASS",
+            "ms": 39667.74635199999,
+            "exit": 0
+          },
+          {
+            "command": "tests/combat/resource-lifetime.mjs v35-2",
+            "status": "PASS",
+            "ms": 22743.04759099998,
+            "exit": 0
+          }
+        ],
+        "scissors": {
+          "participants": 20,
+          "uses": 3,
+          "count": 8,
+          "shots": 480,
+          "peakShots": 120,
+          "elapsedMs": 7394.874111999998,
+          "cpuMs": 1576.934,
+          "sentBytes": 84545661,
+          "snapshots": 945,
+          "screens": [
+            {
+              "maxShots": 122,
+              "frames": 35,
+              "drawP95": 38.29999999998836,
+              "gapP95": 283.2999999999993,
+              "renderer": "pixi"
+            },
+            {
+              "maxShots": 115,
+              "frames": 34,
+              "drawP95": 29.5,
+              "gapP95": 283.3000000000029,
+              "renderer": "pixi"
+            },
+            {
+              "maxShots": 120,
+              "frames": 33,
+              "drawP95": 41.5,
+              "gapP95": 266.70000000000437,
+              "renderer": "pixi"
+            }
+          ]
+        },
+        "mirror": {
+          "turns": 1,
+          "screens": 3,
+          "defenderLoss": 0,
+          "shooterLoss": 209.45600000000002
+        },
+        "spotlight": {
+          "skill": "spotlight",
+          "screens": 3,
+          "behindCover": true,
+          "resumed": true
+        },
+        "resourceLifetime": {
+          "status": "PASS",
+          "ms": 6074.24957,
+          "resources": {
+            "before": {
+              "sprites": 7,
+              "labels": 10,
+              "textures": 4,
+              "tracks": 1,
+              "deaths": 0
+            },
+            "after": {
+              "sprites": 7,
+              "labels": 10,
+              "textures": 4,
+              "tracks": 1,
+              "deaths": 0
+            },
+            "retiredDrops": 0,
+            "reset": {
+              "sprites": 0,
+              "labels": 0,
+              "textures": 0,
+              "tracks": 0,
+              "deaths": 0
+            },
+            "unreleasedOwnedSources": 0,
+            "unreleasedLevelSources": 0
+          }
+        }
+      }
+    ]
+  },
+  "release": {
+    "mainMerged": false,
+    "v35_2CandidateArtifactCreated": false,
+    "status": "NOT_DEPLOYED"
+  },
+  "deviceValidation": {
+    "status": "NOT_RUN",
+    "reason": "No physical Android/iPhone/tablet/host classroom environment available"
+  },
+  "interpretation": "CI functional PASS is not a classroom FPS, long-run memory or production certification. Long-run and corrected render comparisons have separate evidence."
+}

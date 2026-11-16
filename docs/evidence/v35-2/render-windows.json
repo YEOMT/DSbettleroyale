@@ -1064,7 +1064,8 @@
     "classification": "test fixture, before measurement",
     "reason": "direct BRRework.cast does not route native tornado; corrected to unchanged applyCommand ACTION then stepWorld; all20 skill uses asserted"
   },
-  "captureOnlyFinal": {
+  "measurementsPending": "Completed exact finalsource Linux productionpair is in render-linux.json correction.finalExactHeadCI. No device measurements.",
+  "preRoleGuardCaptureOnly": {
     "label": "v352",
     "mode": "team-capture",
     "role": "host",
@@ -1362,5 +1363,5 @@
     "status": "PASS",
     "elapsedMs": 20605.0423
   },
-  "measurementsPending": "Paired v35.1/final v35.2 production-bundle Linux fixedscene host/student timing and continuous20p results are recorded separately."
+  "stage": "Initial capture-only prototype before CI student role guard; only host optimization retained in finalsource7b723ae2a31e9eb5687dc9bdbe6cea2af0ec959d."
 }

@@ -40,6 +40,8 @@ try {
    const raw=path.join(cwd,'artifacts/long-private.json');
    const result=run(cwd,['tools/load/run.mjs','--players=30','--seconds='+(mode==='load30-extended'?1200:600),'--naturalRematch=true','--idleSeconds=30','--out='+raw],env,mode==='load30-extended'?1290000:690000);
    const data=fs.existsSync(raw)?summarizeLongRun(JSON.parse(fs.readFileSync(raw))):null;
+   // A timed socket run alone cannot certify the required natural lifecycle.
+   if(result.status==='PASS'&&(!data?.pass||data.rounds<2||data.rematches.length<1)){result.status='FAIL';result.error='NATURAL_RESULTS_REMATCH_NOT_VERIFIED';}
    row.results.push({kind:mode==='load30-extended'?'1200-second':'600-second',...result,data});
   }else if(['solo','team-capture','rematch','solo-host','solo-student'].includes(mode)){
    const label=version.label+'-'+mode;
@@ -63,7 +65,7 @@ try {
   }else if(mode==='focused'){
    for(const args of [['tests/combat/v34-roster.mjs','pixi'],['tests/combat/evolution-browser.mjs',backend],['tests/combat/resource-lifetime.mjs','v35-2']]){
     const result=run(cwd,args,{...env,CLASSROOM_BUNDLE:'0',LOAD_BUILT:'0'},300000);row.results.push({command:args.join(' '),...result});
-    for(const f of ['artifacts/v34/roster-pixi/result.json','artifacts/v35/screens-pixi/result.json','artifacts/tablet-stability/v35-2-resources.json']){if(fs.existsSync(path.join(cwd,f))){const data=JSON.parse(fs.readFileSync(path.join(cwd,f)));const clean={status:data.status,ms:data.ms,scissors:data.scissors,cases:data.cases,resources:data.resources};fs.writeFileSync(path.join(output,version.label+'-'+f.split('/').at(-2)+'.json'),JSON.stringify(clean,null,2));}}
+    for(const f of ['artifacts/v34/roster-pixi/result.json','artifacts/v35/screens-'+backend+'/result.json','artifacts/tablet-stability/v35-2-resources.json']){if(fs.existsSync(path.join(cwd,f))){const data=JSON.parse(fs.readFileSync(path.join(cwd,f)));const clean={status:data.status,ms:data.ms,scissors:data.scissors,cases:data.cases,resources:data.resources};fs.writeFileSync(path.join(output,version.label+'-'+f.split('/').at(-2)+'.json'),JSON.stringify(clean,null,2));}}
    }
   }else throw Error('UNRECOGNIZED_CASE');
   if(row.results.some(r=>r.status!=='PASS'))process.exitCode=1;save();

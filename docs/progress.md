@@ -1,8 +1,12 @@
 # Progress
 
-## v35.2 Long-Run Stability & Smooth Rendering (in progress)
+## v35.2 Long-Run Stability & Smooth Rendering
 
-Base/main and read-only public buildId: `d6b4525bf22bfa000a09eb686dffc5736bc5a3b3`. Preserving v35.1 runtime improvements and all86 gameplay values. Separate synthetic20-peer/five-rematch GC diagnostics collected previous worlds/actors; 600-second paired comparisons remain pending. Renderer display-sized geometry and scoped production-bundle comparison tools are under verification. [Baseline/executed status](performance/v35-2-baseline.md) · [Changes/rollback](performance/v35-2-changes.md). No production mutations or physical-device PASS.
+PR #23 starts from main/observed public pair `d6b4525bf22bfa000a09eb686dffc5736bc5a3b3`. Runtime `7b723ae2a31e9eb5687dc9bdbe6cea2af0ec959d` preserves all86 rules and v35.1 fixes; only host capture-point tessellation changes. Student geometry was restored exactly after the first A/B pixel failure. Required CI43834713956 passed13jobs,2scope-skipped; Quick333+7,Python31,all9Canvas/Pixi combat,Targeted and isolated-release. No assertions removed.
+
+Both30-peer600s runs passed2rounds/naturalRematch with0overloads/errors. Only candidate extended1200.003s passed4rounds/3naturalRematches. Separate20-peer5-rematch GC diagnostics collected prior worlds/actors. Live heap stabilized after10min in the extension, but RSS attribution remains MEMORY_UNRESOLVED. Host fixed-scene draw-gap window-p95 median191.1→146.1ms; shared-software-GPU studentreload still included a5183.1ms gap and uncertainty. FunctionalPASS is not overall performance/devicePASS. No morelong runs under this scope.
+
+[Conditions/status/source SHAs](performance/v35-2-baseline.md) · [Changes/rollback/risks](performance/v35-2-changes.md). Final report-only commit CI is linked from PR23. Physical devices NOT_RUN; main notmerged, newmainCI/candidate notcreated, production NOT_DEPLOYED. Existing Pages/AWS stayed onv35.1 andwereonlyreadthroughpublicversionendpoints.
 
 ## v35.1 Classroom Smoothness & Input Reliability
 
