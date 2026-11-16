@@ -1,0 +1,878 @@
+{
+  "startedAt": "2026-11-16T09:53:19.557Z",
+  "scope": "short late-population fixture, server+testdriver+two browser surfaces share one physicalPC; not isolatedserver or hardwaremobileperformance",
+  "machine": {
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.22.1",
+    "cpu": "13th Gen Intel(R) Core(TM) i5-1340P",
+    "logicalCpus": 16,
+    "ram": 16718413824
+  },
+  "versions": [
+    {
+      "label": "v351",
+      "sha": "d6b4525bf22bfa000a09eb686dffc5736bc5a3b3",
+      "build": {
+        "status": "PASS",
+        "reusedVerifiedBuild": true
+      },
+      "cases": [
+        {
+          "renderer": "canvas",
+          "status": "FAIL",
+          "elapsedMs": 22086.621,
+          "exitCode": 1,
+          "data": {
+            "label": "v351",
+            "renderer": "canvas",
+            "participants": 20,
+            "browserSurfaces": 2,
+            "drawSurfaces": 2,
+            "seed": "late-cohort-20",
+            "scope": "short 20-connected death-transition fixture; normal60Hz simulation and input; fixed authoritative deaths, not naturalelimination or longload",
+            "bundle": true,
+            "stages": [
+              {
+                "alive": 20,
+                "dead": 0,
+                "connectedStudents": 20,
+                "hostConnected": true,
+                "elapsedMs": 2513.6507999999994,
+                "authorityStart": 1,
+                "authorityEnd": 79,
+                "screens": [
+                  {
+                    "role": "host",
+                    "windowStart": 9408.59999999404,
+                    "windowEnd": 11873.89999999106,
+                    "observations": 38,
+                    "aliveValues": [
+                      20
+                    ],
+                    "selfAliveValues": [
+                      null
+                    ],
+                    "cameraModes": [
+                      "overview"
+                    ],
+                    "lod": [
+                      "performance"
+                    ],
+                    "firstAuthorityTick": 26,
+                    "lastAuthorityTick": 79,
+                    "drawGap": {
+                      "n": 38,
+                      "p50": 57.5,
+                      "p95": 94,
+                      "p99": 520.3999999910593,
+                      "max": 520.3999999910593,
+                      "over50": 21,
+                      "over100": 1,
+                      "over200": 1
+                    },
+                    "cpuDraw": {
+                      "n": 38,
+                      "p50": 23.600000008940697,
+                      "p95": 41.3999999910593,
+                      "p99": 45.099999994039536,
+                      "max": 45.099999994039536,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "prepare": {
+                      "n": 38,
+                      "p50": 23.600000008940697,
+                      "p95": 41.3999999910593,
+                      "p99": 45.099999994039536,
+                      "max": 45.099999994039536,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "submit": {
+                      "n": 0,
+                      "p50": null,
+                      "p95": null,
+                      "p99": null,
+                      "max": null,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 38,
+                      "p50": 50,
+                      "p95": 83.39999999999964,
+                      "p99": 516.6000000000004,
+                      "max": 516.6000000000004,
+                      "over50": 14,
+                      "over100": 1,
+                      "over200": 1
+                    },
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0
+                    }
+                  },
+                  {
+                    "role": "student-dead-after20",
+                    "windowStart": 7561.600000008941,
+                    "windowEnd": 10065.60000000894,
+                    "observations": 39,
+                    "aliveValues": [
+                      5
+                    ],
+                    "selfAliveValues": [
+                      true
+                    ],
+                    "cameraModes": [
+                      "student"
+                    ],
+                    "lod": [
+                      null
+                    ],
+                    "firstAuthorityTick": 17,
+                    "lastAuthorityTick": 79,
+                    "drawGap": {
+                      "n": 38,
+                      "p50": 46.599999994039536,
+                      "p95": 100.1000000089407,
+                      "p99": 172.19999998807907,
+                      "max": 172.19999998807907,
+                      "over50": 17,
+                      "over100": 2,
+                      "over200": 0
+                    },
+                    "cpuDraw": {
+                      "n": 39,
+                      "p50": 2.7000000029802322,
+                      "p95": 33.599999994039536,
+                      "p99": 37.20000000298023,
+                      "max": 37.20000000298023,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "prepare": {
+                      "n": 39,
+                      "p50": 2.7000000029802322,
+                      "p95": 33.599999994039536,
+                      "p99": 37.20000000298023,
+                      "max": 37.20000000298023,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "submit": {
+                      "n": 0,
+                      "p50": null,
+                      "p95": null,
+                      "p99": null,
+                      "max": null,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 38,
+                      "p50": 50,
+                      "p95": 116.70000000000073,
+                      "p99": 183.20000000000073,
+                      "max": 183.20000000000073,
+                      "over50": 15,
+                      "over100": 2,
+                      "over200": 0
+                    },
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0
+                    }
+                  }
+                ],
+                "server": {
+                  "step": {
+                    "count": 79,
+                    "mean": 7.925596202531836,
+                    "p95": 40.11449999999968,
+                    "p99": 47.06910000000062,
+                    "max": 49.305499999998574
+                  },
+                  "snapshot": {
+                    "count": 21,
+                    "mean": 16.16296190476212,
+                    "p95": 59.62119999999777,
+                    "p99": 59.62119999999777,
+                    "max": 90.18039999999746
+                  },
+                  "snapshotGap": {
+                    "count": 21,
+                    "mean": 110.21600952380963,
+                    "p95": 240.6590000000033,
+                    "p99": 240.6590000000033,
+                    "max": 477.4733000000015
+                  },
+                  "overloads": 1,
+                  "memory": {
+                    "rss": 194764800,
+                    "heapTotal": 88494080,
+                    "heapUsed": 54645624,
+                    "external": 16490962,
+                    "arrayBuffers": 2696474
+                  },
+                  "sentBytes": 10797293,
+                  "cpuSharedServerAndFixtureProcess": {
+                    "user": 10781000,
+                    "system": 1890000
+                  }
+                }
+              }
+            ],
+            "environment": {
+              "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+              "visibility": "visible",
+              "dpr": 1,
+              "viewport": [
+                844,
+                640
+              ],
+              "gpu": "Canvas"
+            },
+            "status": "FAIL",
+            "error": "AssertionError [ERR_ASSERTION]: no authority overload",
+            "failureState": {
+              "phase": "BATTLE",
+              "connectedStudents": 20,
+              "alive": 20,
+              "metrics": {
+                "uptimeMs": 20295.316199999997,
+                "rooms": 1,
+                "activeBattles": 1,
+                "stepCpu": {
+                  "count": 79,
+                  "mean": 7.925596202531836,
+                  "p95": 40.11449999999968,
+                  "p99": 47.06910000000062,
+                  "max": 49.305499999998574
+                },
+                "snapshotCpu": {
+                  "count": 21,
+                  "mean": 16.16296190476212,
+                  "p95": 59.62119999999777,
+                  "p99": 59.62119999999777,
+                  "max": 90.18039999999746
+                },
+                "snapshotGap": {
+                  "count": 21,
+                  "mean": 110.21600952380963,
+                  "p95": 240.6590000000033,
+                  "p99": 240.6590000000033,
+                  "max": 477.4733000000015
+                },
+                "inputApply": {
+                  "count": 19,
+                  "mean": 17.154410526316113,
+                  "p95": 37.901600000001054,
+                  "p99": 37.901600000001054,
+                  "max": 89.40030000000115
+                },
+                "sendCpu": {
+                  "count": 40,
+                  "mean": 4.92719249999991,
+                  "p95": 28.001899999999296,
+                  "p99": 34.8936999999969,
+                  "max": 36.973399999998946
+                },
+                "pumpCpu": {
+                  "count": 40,
+                  "mean": 29.17845999999963,
+                  "p95": 103.19770000000062,
+                  "p99": 147.9486999999972,
+                  "max": 149.8238999999994
+                },
+                "debtMs": {
+                  "count": 40,
+                  "mean": 59.65144250000161,
+                  "p95": 255.05030000000235,
+                  "p99": 367.1918666666664,
+                  "max": 524.5175333333365
+                },
+                "sentBytes": 10797293,
+                "rejected": 0,
+                "duplicates": 0,
+                "reconnects": 0,
+                "closed": 0,
+                "bufferHighWatermark": 0,
+                "replacedSnapshots": 0,
+                "overloads": 1,
+                "memory": {
+                  "rss": 194838528,
+                  "heapTotal": 88494080,
+                  "heapUsed": 54741520,
+                  "external": 15883627,
+                  "arrayBuffers": 2696490
+                }
+              }
+            },
+            "elapsedMs": 20296.3115
+          }
+        },
+        {
+          "renderer": "pixi",
+          "status": "FAIL",
+          "elapsedMs": 27161.478199999998,
+          "exitCode": 1,
+          "data": {
+            "label": "v351",
+            "renderer": "pixi",
+            "participants": 20,
+            "browserSurfaces": 2,
+            "drawSurfaces": 2,
+            "seed": "late-cohort-20",
+            "scope": "short 20-connected death-transition fixture; normal60Hz simulation and input; fixed authoritative deaths, not naturalelimination or longload",
+            "bundle": true,
+            "stages": [],
+            "environment": {
+              "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+              "visibility": "visible",
+              "dpr": 1,
+              "viewport": [
+                844,
+                640
+              ],
+              "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "status": "FAIL",
+            "error": "AssertionError [ERR_ASSERTION]: new authoritative data reaches host",
+            "failureState": {
+              "phase": "BATTLE",
+              "connectedStudents": 20,
+              "alive": 20,
+              "metrics": {
+                "uptimeMs": 24995.795899999997,
+                "rooms": 1,
+                "activeBattles": 1,
+                "stepCpu": {
+                  "count": 15,
+                  "mean": 45.93373999999967,
+                  "p95": 152.3078999999998,
+                  "p99": 152.3078999999998,
+                  "max": 216.66449999999895
+                },
+                "snapshotCpu": {
+                  "count": 4,
+                  "mean": 82.43044999999984,
+                  "p95": 89.04919999999765,
+                  "p99": 89.04919999999765,
+                  "max": 121.39919999999984
+                },
+                "snapshotGap": {
+                  "count": 4,
+                  "mean": 1247.8339999999998,
+                  "p95": 647.0031999999992,
+                  "p99": 647.0031999999992,
+                  "max": 3772.0278999999973
+                },
+                "inputApply": {
+                  "count": 3,
+                  "mean": 136.1384999999997,
+                  "p95": 44.585399999999936,
+                  "p99": 44.585399999999936,
+                  "max": 343.97009999999864
+                },
+                "sendCpu": {
+                  "count": 4,
+                  "mean": 37.232349999999315,
+                  "p95": 45.94839999999749,
+                  "p99": 45.94839999999749,
+                  "max": 76.76009999999951
+                },
+                "pumpCpu": {
+                  "count": 4,
+                  "mean": 308.93602499999906,
+                  "p95": 258.54309999999896,
+                  "p99": 258.54309999999896,
+                  "max": 596.5888999999988
+                },
+                "debtMs": {
+                  "count": 4,
+                  "mean": 408.6644249999998,
+                  "p95": 413.23563333333476,
+                  "p99": 413.23563333333476,
+                  "max": 976.9055000000006
+                },
+                "sentBytes": 3369974,
+                "rejected": 0,
+                "duplicates": 0,
+                "reconnects": 0,
+                "closed": 0,
+                "bufferHighWatermark": 0,
+                "replacedSnapshots": 0,
+                "overloads": 1,
+                "memory": {
+                  "rss": 172183552,
+                  "heapTotal": 69881856,
+                  "heapUsed": 50560096,
+                  "external": 15261844,
+                  "arrayBuffers": 2073371
+                }
+              }
+            },
+            "elapsedMs": 24997.0907
+          }
+        }
+      ]
+    },
+    {
+      "label": "v352",
+      "sha": "7b723ae2a31e9eb5687dc9bdbe6cea2af0ec959d",
+      "build": {
+        "status": "PASS",
+        "reusedVerifiedBuild": true
+      },
+      "cases": [
+        {
+          "renderer": "canvas",
+          "status": "FAIL",
+          "elapsedMs": 21890.779300000002,
+          "exitCode": 1,
+          "data": {
+            "label": "v352",
+            "renderer": "canvas",
+            "participants": 20,
+            "browserSurfaces": 2,
+            "drawSurfaces": 2,
+            "seed": "late-cohort-20",
+            "scope": "short 20-connected death-transition fixture; normal60Hz simulation and input; fixed authoritative deaths, not naturalelimination or longload",
+            "bundle": true,
+            "stages": [
+              {
+                "alive": 20,
+                "dead": 0,
+                "connectedStudents": 20,
+                "hostConnected": true,
+                "elapsedMs": 2419.444599999999,
+                "authorityStart": 1,
+                "authorityEnd": 91,
+                "screens": [
+                  {
+                    "role": "host",
+                    "windowStart": 9604.70000000298,
+                    "windowEnd": 11595.20000000298,
+                    "observations": 28,
+                    "aliveValues": [
+                      20
+                    ],
+                    "selfAliveValues": [
+                      null
+                    ],
+                    "cameraModes": [
+                      "overview"
+                    ],
+                    "lod": [
+                      "performance"
+                    ],
+                    "firstAuthorityTick": 27,
+                    "lastAuthorityTick": 81,
+                    "drawGap": {
+                      "n": 28,
+                      "p50": 59.20000000298023,
+                      "p95": 94.79999999701977,
+                      "p99": 532.5,
+                      "max": 532.5,
+                      "over50": 16,
+                      "over100": 1,
+                      "over200": 1
+                    },
+                    "cpuDraw": {
+                      "n": 28,
+                      "p50": 23.400000005960464,
+                      "p95": 49.1000000089407,
+                      "p99": 50.29999999701977,
+                      "max": 50.29999999701977,
+                      "over50": 1,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "prepare": {
+                      "n": 28,
+                      "p50": 23.400000005960464,
+                      "p95": 49.1000000089407,
+                      "p99": 50.29999999701977,
+                      "max": 50.29999999701977,
+                      "over50": 1,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "submit": {
+                      "n": 0,
+                      "p50": null,
+                      "p95": null,
+                      "p99": null,
+                      "max": null,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 28,
+                      "p50": 50,
+                      "p95": 83.39999999999964,
+                      "p99": 516.7000000000007,
+                      "max": 516.7000000000007,
+                      "over50": 13,
+                      "over100": 1,
+                      "over200": 1
+                    },
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0
+                    }
+                  },
+                  {
+                    "role": "student-dead-after20",
+                    "windowStart": 7661.300000011921,
+                    "windowEnd": 10052.40000000596,
+                    "observations": 35,
+                    "aliveValues": [
+                      5
+                    ],
+                    "selfAliveValues": [
+                      true
+                    ],
+                    "cameraModes": [
+                      "student"
+                    ],
+                    "lod": [
+                      null
+                    ],
+                    "firstAuthorityTick": 17,
+                    "lastAuthorityTick": 91,
+                    "drawGap": {
+                      "n": 34,
+                      "p50": 58.400000005960464,
+                      "p95": 100.29999999701977,
+                      "p99": 173.70000000298023,
+                      "max": 173.70000000298023,
+                      "over50": 20,
+                      "over100": 2,
+                      "over200": 0
+                    },
+                    "cpuDraw": {
+                      "n": 35,
+                      "p50": 2.2000000029802322,
+                      "p95": 20.400000005960464,
+                      "p99": 20.5,
+                      "max": 20.5,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "prepare": {
+                      "n": 35,
+                      "p50": 2.2000000029802322,
+                      "p95": 20.400000005960464,
+                      "p99": 20.5,
+                      "max": 20.5,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "submit": {
+                      "n": 0,
+                      "p50": null,
+                      "p95": null,
+                      "p99": null,
+                      "max": null,
+                      "over50": 0,
+                      "over100": 0,
+                      "over200": 0
+                    },
+                    "raf": {
+                      "n": 34,
+                      "p50": 50,
+                      "p95": 116.60000000000036,
+                      "p99": 166.69999999999982,
+                      "max": 166.69999999999982,
+                      "over50": 14,
+                      "over100": 2,
+                      "over200": 0
+                    },
+                    "resources": {
+                      "sprites": 0,
+                      "textures": 0,
+                      "labels": 0
+                    }
+                  }
+                ],
+                "server": {
+                  "step": {
+                    "count": 91,
+                    "mean": 6.905532967032811,
+                    "p95": 23.97559999999794,
+                    "p99": 45.02959999999803,
+                    "max": 46.017500000001746
+                  },
+                  "snapshot": {
+                    "count": 24,
+                    "mean": 16.9983000000005,
+                    "p95": 39.01360000000204,
+                    "p99": 47.1900999999998,
+                    "max": 49.97570000000269
+                  },
+                  "snapshotGap": {
+                    "count": 24,
+                    "mean": 104.67981249999987,
+                    "p95": 168.7998000000007,
+                    "p99": 221.24369999999908,
+                    "max": 524.9464999999982
+                  },
+                  "overloads": 1,
+                  "memory": {
+                    "rss": 196825088,
+                    "heapTotal": 87842816,
+                    "heapUsed": 61961848,
+                    "external": 15870452,
+                    "arrayBuffers": 2683355
+                  },
+                  "sentBytes": 12238236,
+                  "cpuSharedServerAndFixtureProcess": {
+                    "user": 11937000,
+                    "system": 2328000
+                  }
+                }
+              }
+            ],
+            "environment": {
+              "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+              "visibility": "visible",
+              "dpr": 1,
+              "viewport": [
+                844,
+                640
+              ],
+              "gpu": "Canvas"
+            },
+            "status": "FAIL",
+            "error": "AssertionError [ERR_ASSERTION]: no authority overload",
+            "failureState": {
+              "phase": "BATTLE",
+              "connectedStudents": 20,
+              "alive": 20,
+              "metrics": {
+                "uptimeMs": 20137.9276,
+                "rooms": 1,
+                "activeBattles": 1,
+                "stepCpu": {
+                  "count": 91,
+                  "mean": 6.905532967032811,
+                  "p95": 23.97559999999794,
+                  "p99": 45.02959999999803,
+                  "max": 46.017500000001746
+                },
+                "snapshotCpu": {
+                  "count": 24,
+                  "mean": 16.9983000000005,
+                  "p95": 39.01360000000204,
+                  "p99": 47.1900999999998,
+                  "max": 49.97570000000269
+                },
+                "snapshotGap": {
+                  "count": 24,
+                  "mean": 104.67981249999987,
+                  "p95": 168.7998000000007,
+                  "p99": 221.24369999999908,
+                  "max": 524.9464999999982
+                },
+                "inputApply": {
+                  "count": 24,
+                  "mean": 24.74120416666665,
+                  "p95": 66.36290000000008,
+                  "p99": 77.22190000000046,
+                  "max": 81.47509999999966
+                },
+                "sendCpu": {
+                  "count": 43,
+                  "mean": 3.5545209302327687,
+                  "p95": 13.157200000001467,
+                  "p99": 25.22060000000056,
+                  "max": 27.75829999999769
+                },
+                "pumpCpu": {
+                  "count": 43,
+                  "mean": 27.85089534883725,
+                  "p95": 98.79400000000169,
+                  "p99": 109.29240000000209,
+                  "max": 111.7380000000012
+                },
+                "debtMs": {
+                  "count": 43,
+                  "mean": 81.00396434108659,
+                  "p95": 359.6360333333331,
+                  "p99": 454.25816666666844,
+                  "max": 474.5290333333331
+                },
+                "sentBytes": 12238236,
+                "rejected": 0,
+                "duplicates": 0,
+                "reconnects": 0,
+                "closed": 0,
+                "bufferHighWatermark": 0,
+                "replacedSnapshots": 0,
+                "overloads": 1,
+                "memory": {
+                  "rss": 196870144,
+                  "heapTotal": 87842816,
+                  "heapUsed": 62066432,
+                  "external": 15870508,
+                  "arrayBuffers": 2683371
+                }
+              }
+            },
+            "elapsedMs": 20138.835600000002
+          }
+        },
+        {
+          "renderer": "pixi",
+          "status": "FAIL",
+          "elapsedMs": 27287.396500000003,
+          "exitCode": 1,
+          "data": {
+            "label": "v352",
+            "renderer": "pixi",
+            "participants": 20,
+            "browserSurfaces": 2,
+            "drawSurfaces": 2,
+            "seed": "late-cohort-20",
+            "scope": "short 20-connected death-transition fixture; normal60Hz simulation and input; fixed authoritative deaths, not naturalelimination or longload",
+            "bundle": true,
+            "stages": [],
+            "environment": {
+              "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+              "visibility": "visible",
+              "dpr": 1,
+              "viewport": [
+                844,
+                640
+              ],
+              "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+            },
+            "status": "FAIL",
+            "error": "AssertionError [ERR_ASSERTION]: new authoritative data reaches host",
+            "failureState": {
+              "phase": "BATTLE",
+              "connectedStudents": 20,
+              "alive": 20,
+              "metrics": {
+                "uptimeMs": 25333.9156,
+                "rooms": 1,
+                "activeBattles": 1,
+                "stepCpu": {
+                  "count": 20,
+                  "mean": 35.511510000000456,
+                  "p95": 157.05349999999817,
+                  "p99": 157.05349999999817,
+                  "max": 176.2885000000024
+                },
+                "snapshotCpu": {
+                  "count": 5,
+                  "mean": 76.59392000000007,
+                  "p95": 93.1239999999998,
+                  "p99": 93.1239999999998,
+                  "max": 94.86119999999937
+                },
+                "snapshotGap": {
+                  "count": 5,
+                  "mean": 1089.4938799999995,
+                  "p95": 608.9447999999975,
+                  "p99": 608.9447999999975,
+                  "max": 4213.3809
+                },
+                "inputApply": {
+                  "count": 4,
+                  "mean": 102.60992499999975,
+                  "p95": 88.91470000000118,
+                  "p99": 88.91470000000118,
+                  "max": 254.23769999999786
+                },
+                "sendCpu": {
+                  "count": 5,
+                  "mean": 30.637140000000365,
+                  "p95": 38.41710000000239,
+                  "p99": 38.41710000000239,
+                  "max": 84.80010000000038
+                },
+                "pumpCpu": {
+                  "count": 5,
+                  "mean": 249.94236000000018,
+                  "p95": 346.53440000000046,
+                  "p99": 346.53440000000046,
+                  "max": 483.6107000000011
+                },
+                "debtMs": {
+                  "count": 5,
+                  "mean": 343.8260533333346,
+                  "p95": 378.51860000000295,
+                  "p99": 378.51860000000295,
+                  "max": 904.1300666666673
+                },
+                "sentBytes": 3561833,
+                "rejected": 0,
+                "duplicates": 0,
+                "reconnects": 0,
+                "closed": 0,
+                "bufferHighWatermark": 0,
+                "replacedSnapshots": 0,
+                "overloads": 1,
+                "memory": {
+                  "rss": 168988672,
+                  "heapTotal": 59658240,
+                  "heapUsed": 49854456,
+                  "external": 15513593,
+                  "arrayBuffers": 2268441
+                }
+              }
+            },
+            "elapsedMs": 25335.058399999998
+          }
+        }
+      ]
+    }
+  ],
+  "elapsedMs": 98463.06970000001,
+  "endedAt": "2026-11-16T09:54:58.018Z",
+  "execution": "one real browser attempt per version/renderer after one pre-entrypoint Windows tool failure; no gameplay retry or threshold changes",
+  "coverage": {
+    "connections20": "CONFIRMED each case",
+    "initial20CanvasDraw": "CONFIRMED two versions",
+    "transition20to6to5to3": "NOT_COMPLETED: initial20 overload stopped authority",
+    "realDeadStudentSpectator": "NOT_RUN because death stages not reached",
+    "results": "NOT_RUN",
+    "hardwareMobile": "NOT_RUN",
+    "production": "NOT_DEPLOYED"
+  },
+  "launchFlags": [
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--enable-unsafe-swiftshader"
+  ],
+  "canvasExtraFlag": "--disable-accelerated-2d-canvas",
+  "endedAtKST": "2026-11-16T18:54:58.018000+09:00",
+  "startedAtKST": "2026-11-16T18:53:19.557000+09:00",
+  "processCleanup": "After all four cases exited, read-only Win32_Process query found no matching late20/live-late Node processes or Playwright remote-debugging-pipe browser processes. No unrelated process was stopped.",
+  "interpretation": "FAIL in all four initial 20-alive stages; no final-5 performance comparison was reached. Shared-process and shared-PC contention is not excluded. No gameplay rerun, CONTINUE bypass, overload-threshold change, or runtime change was made.",
+  "screenRoleNote": "The planned role label student-dead-after20 identifies the browser intended to become a spectator at the next stage. In these failed runs it remained alive (selfAliveValues true); no dead-student rendering claim is supported.",
+  "reproduceFresh": {
+    "shell": "PowerShell",
+    "commands": [
+      "$env:PLAYWRIGHT_CHANNEL='msedge'",
+      "$env:LATE_SOFTWARE_GPU='1'",
+      "node tests/combat/late20-compare.mjs"
+    ],
+    "notes": "Exports the pinned baseline and candidate, builds both and runs four optional short cases. No LATE_SOURCE_ROOT or ignored helper is required for a fresh run. This command was not rerun after the recorded failures."
+  }
+}

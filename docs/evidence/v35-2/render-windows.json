@@ -1,0 +1,1367 @@
+{
+  "baselineSha": "d6b4525bf22bfa000a09eb686dffc5736bc5a3b3",
+  "environment": "Windows Edge157 SwiftShader,844x640,DPR1, samePC server and browser, Vite development proxy. Not hardware-mobile or deployment throughput evidence.",
+  "runtimeFiles": {
+    "apps/client/src/render/capture-circle.js": "cc88ee1d6807194c2a0e6639a506f5843411f32b801fb4c3b490319a3e931f54",
+    "apps/client/src/render/capture-scene.js": "f39ccc4f9a6090cf3bf01c7a1644300d003d8618fcc390b3f1e8e6f9fe087a15"
+  },
+  "baselineNormal": {
+    "version": "v351",
+    "quality": "low",
+    "mode": "team-capture",
+    "rematch": true,
+    "framesPerBlock": 24,
+    "actors": 20,
+    "shots": 0,
+    "points": 2,
+    "profile": "균형",
+    "viewport": [
+      844,
+      640
+    ],
+    "dpr": 1,
+    "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+    "counts": {
+      "visibility": 114,
+      "emojiLookup": 217,
+      "levelLookup": 197,
+      "drawElements": 8,
+      "drawArrays": 0,
+      "bufferData": 0,
+      "bufferSubData": 4,
+      "texImage2D": 0,
+      "texSubImage2D": 0
+    },
+    "calls": [
+      {
+        "key": "bufferSubData",
+        "ms": 0.20000000298023224,
+        "bytes": 13728
+      },
+      {
+        "key": "bufferSubData",
+        "ms": 0,
+        "bytes": 1740
+      },
+      {
+        "key": "drawElements",
+        "ms": 0,
+        "vertices": 6
+      },
+      {
+        "key": "drawElements",
+        "ms": 0,
+        "vertices": 1062
+      },
+      {
+        "key": "drawElements",
+        "ms": 0,
+        "vertices": 576
+      },
+      {
+        "key": "drawElements",
+        "ms": 0,
+        "vertices": 14856
+      },
+      {
+        "key": "drawElements",
+        "ms": 0,
+        "vertices": 7020
+      },
+      {
+        "key": "bufferSubData",
+        "ms": 0.09999999403953552,
+        "bytes": 125568
+      },
+      {
+        "key": "bufferSubData",
+        "ms": 0.09999999403953552,
+        "bytes": 30960
+      },
+      {
+        "key": "drawElements",
+        "ms": 0,
+        "vertices": 15480
+      },
+      {
+        "key": "drawElements",
+        "ms": 0,
+        "vertices": 864
+      },
+      {
+        "key": "drawElements",
+        "ms": 0,
+        "vertices": 6
+      }
+    ],
+    "paths": {
+      "base": {
+        "indices": 1062,
+        "instructions": 9,
+        "largest": [
+          {
+            "indices": 258,
+            "shape": "polygon"
+          },
+          {
+            "indices": 258,
+            "shape": "polygon"
+          },
+          {
+            "indices": 258,
+            "shape": "polygon"
+          }
+        ]
+      },
+      "grid": {
+        "indices": 576,
+        "instructions": 96,
+        "largest": [
+          {
+            "indices": 6,
+            "shape": "polygon"
+          },
+          {
+            "indices": 6,
+            "shape": "polygon"
+          },
+          {
+            "indices": 6,
+            "shape": "polygon"
+          }
+        ]
+      },
+      "smoke": {
+        "indices": 14856,
+        "instructions": 16,
+        "largest": [
+          {
+            "indices": 2526,
+            "shape": "circle",
+            "radius": 160
+          },
+          {
+            "indices": 2526,
+            "shape": "circle",
+            "radius": 160
+          },
+          {
+            "indices": 2526,
+            "shape": "circle",
+            "radius": 160
+          }
+        ]
+      },
+      "danger": {
+        "indices": 0,
+        "instructions": 0,
+        "largest": []
+      },
+      "crateLayer": {
+        "indices": 7020,
+        "instructions": 330,
+        "largest": [
+          {
+            "indices": 174,
+            "shape": "rectangle"
+          },
+          {
+            "indices": 174,
+            "shape": "rectangle"
+          },
+          {
+            "indices": 174,
+            "shape": "rectangle"
+          }
+        ]
+      },
+      "g": {
+        "indices": 15480,
+        "instructions": 48,
+        "largest": [
+          {
+            "indices": 1590,
+            "shape": "circle",
+            "radius": 400
+          },
+          {
+            "indices": 1590,
+            "shape": "circle",
+            "radius": 400
+          },
+          {
+            "indices": 792,
+            "shape": "circle",
+            "radius": 400
+          }
+        ]
+      },
+      "fg": {
+        "indices": 240,
+        "instructions": 40,
+        "largest": [
+          {
+            "indices": 6,
+            "shape": "rectangle"
+          },
+          {
+            "indices": 6,
+            "shape": "rectangle"
+          },
+          {
+            "indices": 6,
+            "shape": "rectangle"
+          }
+        ]
+      },
+      "screen": {
+        "indices": 0,
+        "instructions": 0,
+        "largest": []
+      }
+    },
+    "parity": {
+      "meanChannelDiff": 0.008308032187993681,
+      "visiblePixels": 177,
+      "totalPixels": 540160,
+      "transformed": 40
+    },
+    "startPool": {
+      "sprites": 47,
+      "labels": 10,
+      "textures": 10,
+      "children": 65
+    },
+    "pools": [
+      {
+        "sprites": 47,
+        "labels": 10,
+        "textures": 10,
+        "children": 65
+      },
+      {
+        "sprites": 47,
+        "labels": 10,
+        "textures": 10,
+        "children": 65
+      },
+      {
+        "sprites": 47,
+        "labels": 10,
+        "textures": 10,
+        "children": 65
+      }
+    ],
+    "endPool": {
+      "sprites": 47,
+      "labels": 10,
+      "textures": 10,
+      "children": 65
+    },
+    "blocks": [
+      {
+        "gap": {
+          "p50": 50,
+          "p95": 66.6,
+          "p99": 83.4,
+          "over50": 5,
+          "over100": 0,
+          "over200": 0
+        },
+        "prepare": {
+          "p50": 1.9,
+          "p95": 41.8,
+          "p99": 42.5,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        },
+        "submit": {
+          "p50": 2.5,
+          "p95": 43.6,
+          "p99": 44.6,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        },
+        "finish": {
+          "p50": 0,
+          "p95": 0.1,
+          "p99": 0.1,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        },
+        "total": {
+          "p50": 4.6,
+          "p95": 48.1,
+          "p99": 48.3,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        }
+      },
+      {
+        "gap": {
+          "p50": 50,
+          "p95": 66.7,
+          "p99": 100,
+          "over50": 8,
+          "over100": 0,
+          "over200": 0
+        },
+        "prepare": {
+          "p50": 1.6,
+          "p95": 17.4,
+          "p99": 39.6,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        },
+        "submit": {
+          "p50": 1.8,
+          "p95": 41.1,
+          "p99": 43.2,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        },
+        "finish": {
+          "p50": 0.1,
+          "p95": 0.1,
+          "p99": 0.2,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        },
+        "total": {
+          "p50": 3.5,
+          "p95": 42.9,
+          "p99": 44.9,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        }
+      },
+      {
+        "gap": {
+          "p50": 50,
+          "p95": 59.1,
+          "p99": 66.7,
+          "over50": 5,
+          "over100": 0,
+          "over200": 0
+        },
+        "prepare": {
+          "p50": 1.5,
+          "p95": 1.7,
+          "p99": 1.8,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        },
+        "submit": {
+          "p50": 1.9,
+          "p95": 40.9,
+          "p99": 41.1,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        },
+        "finish": {
+          "p50": 0,
+          "p95": 0.2,
+          "p99": 0.2,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        },
+        "total": {
+          "p50": 3.4,
+          "p95": 42.3,
+          "p99": 42.8,
+          "over50": 0,
+          "over100": 0,
+          "over200": 0
+        }
+      }
+    ],
+    "fallback": null
+  },
+  "discardedGenericCirclePrototype": {
+    "reason": "Concentrated scene framebuffer parity failed; generic painter/renderer changes completely reverted. Normal-scene timing must not be attributed to final capture-only patch.",
+    "normal": {
+      "version": "v352-prototype",
+      "quality": "low",
+      "mode": "team-capture",
+      "rematch": true,
+      "framesPerBlock": 24,
+      "actors": 20,
+      "shots": 0,
+      "points": 2,
+      "profile": "균형",
+      "viewport": [
+        844,
+        640
+      ],
+      "dpr": 1,
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+      "counts": {
+        "visibility": 114,
+        "emojiLookup": 217,
+        "levelLookup": 197,
+        "drawElements": 8,
+        "drawArrays": 0,
+        "bufferData": 0,
+        "bufferSubData": 4,
+        "texImage2D": 0,
+        "texSubImage2D": 0
+      },
+      "calls": [
+        {
+          "key": "bufferSubData",
+          "ms": 0,
+          "bytes": 13728
+        },
+        {
+          "key": "bufferSubData",
+          "ms": 0,
+          "bytes": 1740
+        },
+        {
+          "key": "drawElements",
+          "ms": 0,
+          "vertices": 6
+        },
+        {
+          "key": "drawElements",
+          "ms": 0,
+          "vertices": 1062
+        },
+        {
+          "key": "drawElements",
+          "ms": 0,
+          "vertices": 576
+        },
+        {
+          "key": "drawElements",
+          "ms": 0,
+          "vertices": 8808
+        },
+        {
+          "key": "drawElements",
+          "ms": 0,
+          "vertices": 7020
+        },
+        {
+          "key": "bufferSubData",
+          "ms": 0.10000000894069672,
+          "bytes": 97344
+        },
+        {
+          "key": "bufferSubData",
+          "ms": 0,
+          "bytes": 23904
+        },
+        {
+          "key": "drawElements",
+          "ms": 0,
+          "vertices": 11952
+        },
+        {
+          "key": "drawElements",
+          "ms": 0,
+          "vertices": 864
+        },
+        {
+          "key": "drawElements",
+          "ms": 0,
+          "vertices": 6
+        }
+      ],
+      "paths": {
+        "base": {
+          "indices": 1062,
+          "instructions": 9,
+          "largest": [
+            {
+              "indices": 258,
+              "shape": "polygon"
+            },
+            {
+              "indices": 258,
+              "shape": "polygon"
+            },
+            {
+              "indices": 258,
+              "shape": "polygon"
+            }
+          ]
+        },
+        "grid": {
+          "indices": 576,
+          "instructions": 96,
+          "largest": [
+            {
+              "indices": 6,
+              "shape": "polygon"
+            },
+            {
+              "indices": 6,
+              "shape": "polygon"
+            },
+            {
+              "indices": 6,
+              "shape": "polygon"
+            }
+          ]
+        },
+        "smoke": {
+          "indices": 8808,
+          "instructions": 16,
+          "largest": [
+            {
+              "indices": 1014,
+              "shape": "circle",
+              "radius": 160
+            },
+            {
+              "indices": 1014,
+              "shape": "circle",
+              "radius": 160
+            },
+            {
+              "indices": 1014,
+              "shape": "circle",
+              "radius": 160
+            }
+          ]
+        },
+        "danger": {
+          "indices": 0,
+          "instructions": 0,
+          "largest": []
+        },
+        "crateLayer": {
+          "indices": 7020,
+          "instructions": 330,
+          "largest": [
+            {
+              "indices": 174,
+              "shape": "rectangle"
+            },
+            {
+              "indices": 174,
+              "shape": "rectangle"
+            },
+            {
+              "indices": 174,
+              "shape": "rectangle"
+            }
+          ]
+        },
+        "g": {
+          "indices": 11952,
+          "instructions": 48,
+          "largest": [
+            {
+              "indices": 654,
+              "shape": "roundedRectangle",
+              "radius": 60
+            },
+            {
+              "indices": 654,
+              "shape": "roundedRectangle",
+              "radius": 60
+            },
+            {
+              "indices": 414,
+              "shape": "circle",
+              "radius": 26.994791666666668
+            }
+          ]
+        },
+        "fg": {
+          "indices": 240,
+          "instructions": 40,
+          "largest": [
+            {
+              "indices": 6,
+              "shape": "rectangle"
+            },
+            {
+              "indices": 6,
+              "shape": "rectangle"
+            },
+            {
+              "indices": 6,
+              "shape": "rectangle"
+            }
+          ]
+        },
+        "screen": {
+          "indices": 0,
+          "instructions": 0,
+          "largest": []
+        }
+      },
+      "parity": {
+        "meanChannelDiff": 0.010090220181674565,
+        "visiblePixels": 212,
+        "totalPixels": 540160,
+        "transformed": 42
+      },
+      "startPool": {
+        "sprites": 47,
+        "labels": 10,
+        "textures": 10,
+        "children": 65
+      },
+      "pools": [
+        {
+          "sprites": 47,
+          "labels": 10,
+          "textures": 10,
+          "children": 65
+        },
+        {
+          "sprites": 47,
+          "labels": 10,
+          "textures": 10,
+          "children": 65
+        },
+        {
+          "sprites": 47,
+          "labels": 10,
+          "textures": 10,
+          "children": 65
+        }
+      ],
+      "endPool": {
+        "sprites": 47,
+        "labels": 10,
+        "textures": 10,
+        "children": 65
+      },
+      "blocks": [
+        {
+          "gap": {
+            "p50": 49.9,
+            "p95": 50.1,
+            "p99": 52.5,
+            "over50": 4,
+            "over100": 0,
+            "over200": 0
+          },
+          "prepare": {
+            "p50": 1.9,
+            "p95": 3,
+            "p99": 5.4,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          },
+          "submit": {
+            "p50": 1.8,
+            "p95": 34.6,
+            "p99": 36.6,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          },
+          "finish": {
+            "p50": 0,
+            "p95": 0.1,
+            "p99": 0.1,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          },
+          "total": {
+            "p50": 4,
+            "p95": 37.1,
+            "p99": 38.9,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          }
+        },
+        {
+          "gap": {
+            "p50": 49.9,
+            "p95": 66.6,
+            "p99": 83.3,
+            "over50": 5,
+            "over100": 0,
+            "over200": 0
+          },
+          "prepare": {
+            "p50": 1.5,
+            "p95": 6.2,
+            "p99": 31,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          },
+          "submit": {
+            "p50": 1.7,
+            "p95": 36.2,
+            "p99": 38.1,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          },
+          "finish": {
+            "p50": 0,
+            "p95": 0.1,
+            "p99": 0.1,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          },
+          "total": {
+            "p50": 3.5,
+            "p95": 37.7,
+            "p99": 39.3,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          }
+        },
+        {
+          "gap": {
+            "p50": 50,
+            "p95": 53,
+            "p99": 53,
+            "over50": 3,
+            "over100": 0,
+            "over200": 0
+          },
+          "prepare": {
+            "p50": 1.5,
+            "p95": 1.7,
+            "p99": 36.3,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          },
+          "submit": {
+            "p50": 1.5,
+            "p95": 1.8,
+            "p99": 5,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          },
+          "finish": {
+            "p50": 0,
+            "p95": 0.1,
+            "p99": 0.2,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          },
+          "total": {
+            "p50": 3,
+            "p95": 3.5,
+            "p99": 41.3,
+            "over50": 0,
+            "over100": 0,
+            "over200": 0
+          }
+        }
+      ],
+      "fallback": null
+    },
+    "concentrated": {
+      "status": "FAIL",
+      "elapsedMs": 24332.7804,
+      "measurement": {
+        "role": "host",
+        "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+        "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "dpr": 1,
+        "quality": "balanced",
+        "viewport": [
+          844,
+          640
+        ],
+        "visibility": "visible",
+        "actors": 20,
+        "shots": 24,
+        "shotKinds": {
+          "projectile": 12,
+          "spotlight": 4,
+          "mirror": 4,
+          "poison": 4
+        },
+        "zones": 0,
+        "counts": {
+          "drawElements": {
+            "count": 8,
+            "bytes": 0
+          },
+          "drawArrays": {
+            "count": 0,
+            "bytes": 0
+          },
+          "bufferSubData": {
+            "count": 4,
+            "bytes": 204320
+          },
+          "texImage2D": {
+            "count": 0,
+            "bytes": 0
+          },
+          "texSubImage2D": {
+            "count": 0,
+            "bytes": 0
+          }
+        },
+        "layers": {
+          "base": {
+            "indices": 1062,
+            "instructions": 9
+          },
+          "grid": {
+            "indices": 576,
+            "instructions": 96
+          },
+          "smoke": {
+            "indices": 8808,
+            "instructions": 16
+          },
+          "danger": {
+            "indices": 0,
+            "instructions": 0
+          },
+          "crateLayer": {
+            "indices": 7020,
+            "instructions": 330
+          },
+          "g": {
+            "indices": 17316,
+            "instructions": 92
+          },
+          "fg": {
+            "indices": 294,
+            "instructions": 42
+          },
+          "screen": {
+            "indices": 0,
+            "instructions": 0
+          }
+        },
+        "start": {
+          "sprites": 57,
+          "labels": 10,
+          "textures": 9,
+          "graphics": 8,
+          "children": 75,
+          "texturePixels": 268372,
+          "pose": 0
+        },
+        "end": {
+          "sprites": 57,
+          "labels": 10,
+          "textures": 9,
+          "graphics": 8,
+          "children": 75,
+          "texturePixels": 268372,
+          "pose": 0
+        },
+        "blocks": [
+          {
+            "scope": "one independent 36-paint window; CPU submit is not GPU completion",
+            "windowStart": 16377,
+            "windowEnd": 18139.29999999702,
+            "raf": {
+              "sampleCount": 36,
+              "p50": 50,
+              "p95": 66.70000000000073,
+              "p99": 66.80000000000291,
+              "over50": 5,
+              "over100": 0,
+              "over200": 0
+            },
+            "drawGap": {
+              "sampleCount": 35,
+              "p50": 48,
+              "p95": 57.20000000298023,
+              "p99": 57.70000000298023,
+              "over50": 9,
+              "over100": 0,
+              "over200": 0
+            },
+            "prepare": {
+              "sampleCount": 36,
+              "p50": 1.7999999970197678,
+              "p95": 2.5,
+              "p99": 32.29999999701977,
+              "over50": 0,
+              "over100": 0,
+              "over200": 0
+            },
+            "submit": {
+              "sampleCount": 36,
+              "p50": 2.4000000059604645,
+              "p95": 39.599999994039536,
+              "p99": 41.79999999701977,
+              "over50": 0,
+              "over100": 0,
+              "over200": 0
+            },
+            "total": {
+              "sampleCount": 36,
+              "p50": 4.299999997019768,
+              "p95": 41.70000000298023,
+              "p99": 43.79999999701977,
+              "over50": 0,
+              "over100": 0,
+              "over200": 0
+            },
+            "resources": {
+              "sprites": 57,
+              "labels": 10,
+              "textures": 9,
+              "graphics": 8,
+              "children": 75,
+              "texturePixels": 268372,
+              "pose": 0
+            }
+          },
+          {
+            "scope": "one independent 36-paint window; CPU submit is not GPU completion",
+            "windowStart": 18140.10000000894,
+            "windowEnd": 21542.20000000298,
+            "raf": {
+              "sampleCount": 36,
+              "p50": 58.30000000000291,
+              "p95": 241.79999999999927,
+              "p99": 250,
+              "over50": 23,
+              "over100": 14,
+              "over200": 2
+            },
+            "drawGap": {
+              "sampleCount": 35,
+              "p50": 56.8999999910593,
+              "p95": 245.09999999403954,
+              "p99": 247.29999999701977,
+              "over50": 22,
+              "over100": 14,
+              "over200": 5
+            },
+            "prepare": {
+              "sampleCount": 36,
+              "p50": 1.5,
+              "p95": 130.90000000596046,
+              "p99": 145,
+              "over50": 6,
+              "over100": 6,
+              "over200": 0
+            },
+            "submit": {
+              "sampleCount": 36,
+              "p50": 2.2000000029802322,
+              "p95": 135.5,
+              "p99": 226.19999998807907,
+              "over50": 9,
+              "over100": 8,
+              "over200": 1
+            },
+            "total": {
+              "sampleCount": 36,
+              "p50": 4.700000002980232,
+              "p95": 226.79999999701977,
+              "p99": 243.8999999910593,
+              "over50": 14,
+              "over100": 13,
+              "over200": 2
+            },
+            "resources": {
+              "sprites": 57,
+              "labels": 10,
+              "textures": 9,
+              "graphics": 8,
+              "children": 75,
+              "texturePixels": 268372,
+              "pose": 0
+            }
+          },
+          {
+            "scope": "one independent 36-paint window; CPU submit is not GPU completion",
+            "windowStart": 21542.20000000298,
+            "windowEnd": 23408.5,
+            "raf": {
+              "sampleCount": 36,
+              "p50": 50,
+              "p95": 91.70000000000073,
+              "p99": 149.89999999999782,
+              "over50": 7,
+              "over100": 1,
+              "over200": 0
+            },
+            "drawGap": {
+              "sampleCount": 35,
+              "p50": 49.400000005960464,
+              "p95": 61.20000000298023,
+              "p99": 97.90000000596046,
+              "over50": 12,
+              "over100": 0,
+              "over200": 0
+            },
+            "prepare": {
+              "sampleCount": 36,
+              "p50": 1.7000000029802322,
+              "p95": 41.1000000089407,
+              "p99": 91.40000000596046,
+              "over50": 1,
+              "over100": 0,
+              "over200": 0
+            },
+            "submit": {
+              "sampleCount": 36,
+              "p50": 2.2999999970197678,
+              "p95": 40.8999999910593,
+              "p99": 41.900000005960464,
+              "over50": 0,
+              "over100": 0,
+              "over200": 0
+            },
+            "total": {
+              "sampleCount": 36,
+              "p50": 4.5,
+              "p95": 48.1000000089407,
+              "p99": 97.30000001192093,
+              "over50": 1,
+              "over100": 0,
+              "over200": 0
+            },
+            "resources": {
+              "sprites": 57,
+              "labels": 10,
+              "textures": 9,
+              "graphics": 8,
+              "children": 75,
+              "texturePixels": 268372,
+              "pose": 0
+            }
+          }
+        ],
+        "parity": {
+          "scope": "full-world circle reference including unchanged v35.1 host body tessellation; readback outside timing",
+          "meanChannelDiff": 0.733043912914692,
+          "pixelsOver16": 4728,
+          "totalPixels": 540160
+        },
+        "fallback": null
+      }
+    }
+  },
+  "fixtureFailure": {
+    "status": "FAIL",
+    "classification": "test fixture, before measurement",
+    "reason": "direct BRRework.cast does not route native tornado; corrected to unchanged applyCommand ACTION then stepWorld; all20 skill uses asserted"
+  },
+  "measurementsPending": "Completed exact finalsource Linux productionpair is in render-linux.json correction.finalExactHeadCI. No device measurements.",
+  "preRoleGuardCaptureOnly": {
+    "label": "v352",
+    "mode": "team-capture",
+    "role": "host",
+    "scene": "concentrated",
+    "scope": "frozen actual authority snapshot; one foreground rendering surface; 20 real WS participants plus host; same physical PC; not continuous gameplay",
+    "bundle": false,
+    "cases": [],
+    "measurement": {
+      "role": "host",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "dpr": 1,
+      "quality": "balanced",
+      "viewport": [
+        844,
+        640
+      ],
+      "visibility": "visible",
+      "actors": 20,
+      "shots": 24,
+      "shotKinds": {
+        "projectile": 12,
+        "spotlight": 4,
+        "mirror": 4,
+        "poison": 4
+      },
+      "zones": 0,
+      "counts": {
+        "drawElements": {
+          "count": 10,
+          "bytes": 0
+        },
+        "drawArrays": {
+          "count": 0,
+          "bytes": 0
+        },
+        "bufferSubData": {
+          "count": 6,
+          "bytes": 1198260
+        },
+        "texImage2D": {
+          "count": 0,
+          "bytes": 0
+        },
+        "texSubImage2D": {
+          "count": 0,
+          "bytes": 0
+        }
+      },
+      "layers": {
+        "base": {
+          "indices": 1062,
+          "instructions": 9
+        },
+        "grid": {
+          "indices": 576,
+          "instructions": 96
+        },
+        "smoke": {
+          "indices": 14856,
+          "instructions": 16
+        },
+        "danger": {
+          "indices": 0,
+          "instructions": 0
+        },
+        "crateLayer": {
+          "indices": 7020,
+          "instructions": 330
+        },
+        "g": {
+          "indices": 45876,
+          "instructions": 92
+        },
+        "fg": {
+          "indices": 3000,
+          "instructions": 52
+        },
+        "screen": {
+          "indices": 0,
+          "instructions": 0
+        }
+      },
+      "start": {
+        "sprites": 57,
+        "labels": 10,
+        "textures": 9,
+        "graphics": 8,
+        "children": 75,
+        "texturePixels": 268372,
+        "pose": 0
+      },
+      "end": {
+        "sprites": 57,
+        "labels": 10,
+        "textures": 9,
+        "graphics": 8,
+        "children": 75,
+        "texturePixels": 268372,
+        "pose": 0
+      },
+      "blocks": [
+        {
+          "scope": "one independent 36-paint window; CPU submit is not GPU completion",
+          "windowStart": 11810.70000000298,
+          "windowEnd": 14136,
+          "raf": {
+            "sampleCount": 36,
+            "p50": 66.69999999999891,
+            "p95": 116.60000000000036,
+            "p99": 116.69999999999891,
+            "over50": 27,
+            "over100": 4,
+            "over200": 0
+          },
+          "drawGap": {
+            "sampleCount": 35,
+            "p50": 66.09999999403954,
+            "p95": 126.79999999701977,
+            "p99": 127.79999999701977,
+            "over50": 32,
+            "over100": 3,
+            "over200": 0
+          },
+          "prepare": {
+            "sampleCount": 36,
+            "p50": 1.8999999910593033,
+            "p95": 52.900000005960464,
+            "p99": 58.19999998807907,
+            "over50": 2,
+            "over100": 0,
+            "over200": 0
+          },
+          "submit": {
+            "sampleCount": 36,
+            "p50": 59.3999999910593,
+            "p95": 64.8999999910593,
+            "p99": 66.5,
+            "over50": 26,
+            "over100": 0,
+            "over200": 0
+          },
+          "total": {
+            "sampleCount": 36,
+            "p50": 61.79999999701977,
+            "p95": 67,
+            "p99": 68.40000000596046,
+            "over50": 28,
+            "over100": 0,
+            "over200": 0
+          },
+          "resources": {
+            "sprites": 57,
+            "labels": 10,
+            "textures": 9,
+            "graphics": 8,
+            "children": 75,
+            "texturePixels": 268372,
+            "pose": 0
+          }
+        },
+        {
+          "scope": "one independent 36-paint window; CPU submit is not GPU completion",
+          "windowStart": 14136.5,
+          "windowEnd": 16528.5,
+          "raf": {
+            "sampleCount": 36,
+            "p50": 66.69999999999891,
+            "p95": 83.19999999999891,
+            "p99": 83.29999999999927,
+            "over50": 32,
+            "over100": 0,
+            "over200": 0
+          },
+          "drawGap": {
+            "sampleCount": 35,
+            "p50": 66.79999999701977,
+            "p95": 69.90000000596046,
+            "p99": 70.20000000298023,
+            "over50": 34,
+            "over100": 0,
+            "over200": 0
+          },
+          "prepare": {
+            "sampleCount": 36,
+            "p50": 1.7999999970197678,
+            "p95": 57.79999999701977,
+            "p99": 59.70000000298023,
+            "over50": 6,
+            "over100": 0,
+            "over200": 0
+          },
+          "submit": {
+            "sampleCount": 36,
+            "p50": 59.599999994039536,
+            "p95": 66.29999999701977,
+            "p99": 67,
+            "over50": 23,
+            "over100": 0,
+            "over200": 0
+          },
+          "total": {
+            "sampleCount": 36,
+            "p50": 62.79999999701977,
+            "p95": 68.90000000596046,
+            "p99": 68.90000000596046,
+            "over50": 29,
+            "over100": 0,
+            "over200": 0
+          },
+          "resources": {
+            "sprites": 57,
+            "labels": 10,
+            "textures": 9,
+            "graphics": 8,
+            "children": 75,
+            "texturePixels": 268372,
+            "pose": 0
+          }
+        },
+        {
+          "scope": "one independent 36-paint window; CPU submit is not GPU completion",
+          "windowStart": 16528.70000000298,
+          "windowEnd": 18961.10000000894,
+          "raf": {
+            "sampleCount": 36,
+            "p50": 66.60000000000218,
+            "p95": 83.40000000000146,
+            "p99": 83.40000000000146,
+            "over50": 33,
+            "over100": 0,
+            "over200": 0
+          },
+          "drawGap": {
+            "sampleCount": 35,
+            "p50": 67.29999999701977,
+            "p95": 69.79999999701977,
+            "p99": 69.90000000596046,
+            "over50": 34,
+            "over100": 0,
+            "over200": 0
+          },
+          "prepare": {
+            "sampleCount": 36,
+            "p50": 1.699999988079071,
+            "p95": 5.700000002980232,
+            "p99": 59,
+            "over50": 1,
+            "over100": 0,
+            "over200": 0
+          },
+          "submit": {
+            "sampleCount": 36,
+            "p50": 60.8999999910593,
+            "p95": 65.59999999403954,
+            "p99": 65.70000000298023,
+            "over50": 27,
+            "over100": 0,
+            "over200": 0
+          },
+          "total": {
+            "sampleCount": 36,
+            "p50": 62.6000000089407,
+            "p95": 67.40000000596046,
+            "p99": 67.5,
+            "over50": 28,
+            "over100": 0,
+            "over200": 0
+          },
+          "resources": {
+            "sprites": 57,
+            "labels": 10,
+            "textures": 9,
+            "graphics": 8,
+            "children": 75,
+            "texturePixels": 268372,
+            "pose": 0
+          }
+        }
+      ],
+      "parity": {
+        "scope": "full-world circle reference including unchanged v35.1 host body tessellation; readback outside timing",
+        "meanChannelDiff": 0.18295381615323855,
+        "pixelsOver16": 1056,
+        "totalPixels": 540160
+      },
+      "fallback": null
+    },
+    "clean": {
+      "sprites": 0,
+      "labels": 0,
+      "textures": 0,
+      "poses": 0
+    },
+    "status": "PASS",
+    "elapsedMs": 20605.0423
+  },
+  "stage": "Initial capture-only prototype before CI student role guard; only host optimization retained in finalsource7b723ae2a31e9eb5687dc9bdbe6cea2af0ec959d."
+}

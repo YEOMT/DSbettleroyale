@@ -1,0 +1,239 @@
+{
+  "status": "PASS",
+  "scope": "real WS over an ordered loopback TCP delay relay; no physical Wi-Fi",
+  "samples": [
+    {
+      "profile": {
+        "name": "rtt-80",
+        "delays": [
+          40
+        ]
+      },
+      "rttMs": [
+        99.35309999999936,
+        94.30040000000008,
+        93.75630000000001,
+        95.20499999999993
+      ],
+      "input": [
+        {
+          "seq": 1,
+          "axis": 1,
+          "applied": 1
+        },
+        {
+          "seq": 2,
+          "axis": 0,
+          "applied": 2
+        },
+        {
+          "seq": 3,
+          "axis": -1,
+          "applied": 3
+        },
+        {
+          "seq": 4,
+          "axis": 0,
+          "applied": 4
+        }
+      ],
+      "attackExecutions": 1,
+      "skillExecutions": 1,
+      "duplicatesSuppressed": 1,
+      "oldEpochRejected": true,
+      "resumedMove": true,
+      "transport": {
+        "peakQueuedBytes": 36816,
+        "forwardedBytes": 373652,
+        "pendingChunks": 1
+      }
+    },
+    {
+      "profile": {
+        "name": "rtt-150",
+        "delays": [
+          75
+        ]
+      },
+      "rttMs": [
+        156.28790000000026,
+        157.4449999999997,
+        158.72640000000047,
+        153.34510000000046
+      ],
+      "input": [
+        {
+          "seq": 1,
+          "axis": 1,
+          "applied": 1
+        },
+        {
+          "seq": 2,
+          "axis": 0,
+          "applied": 2
+        },
+        {
+          "seq": 3,
+          "axis": -1,
+          "applied": 3
+        },
+        {
+          "seq": 4,
+          "axis": 0,
+          "applied": 4
+        }
+      ],
+      "attackExecutions": 1,
+      "skillExecutions": 1,
+      "duplicatesSuppressed": 1,
+      "oldEpochRejected": true,
+      "resumedMove": true,
+      "transport": {
+        "peakQueuedBytes": 75971,
+        "forwardedBytes": 893087,
+        "pendingChunks": 4
+      }
+    },
+    {
+      "profile": {
+        "name": "ordered-jitter",
+        "delays": [
+          40,
+          75,
+          45,
+          60
+        ]
+      },
+      "rttMs": [
+        133.52779999999984,
+        105.77889999999934,
+        142.5672999999997,
+        126.57769999999982
+      ],
+      "input": [
+        {
+          "seq": 1,
+          "axis": 1,
+          "applied": 1
+        },
+        {
+          "seq": 2,
+          "axis": 0,
+          "applied": 2
+        },
+        {
+          "seq": 3,
+          "axis": -1,
+          "applied": 3
+        },
+        {
+          "seq": 4,
+          "axis": 0,
+          "applied": 4
+        }
+      ],
+      "attackExecutions": 1,
+      "skillExecutions": 1,
+      "duplicatesSuppressed": 1,
+      "oldEpochRejected": true,
+      "resumedMove": true,
+      "transport": {
+        "peakQueuedBytes": 66198,
+        "forwardedBytes": 536129,
+        "pendingChunks": 1
+      }
+    }
+  ],
+  "sourceBase": "d6b4525bf22bfa000a09eb686dffc5736bc5a3b3",
+  "measuredCheckout": "v35.2 working tree, before final runtime commit",
+  "environment": {
+    "platform": "Windows",
+    "node": "24.22.1",
+    "browser": null,
+    "loopback": true,
+    "sharedMachine": true
+  },
+  "command": "node --test tests/integration/ordered-latency.test.mjs",
+  "wallMs": 10188.2937,
+  "notMeasured": [
+    "physical Wi-Fi",
+    "touch input latency",
+    "OS OOM",
+    "600-second stability"
+  ],
+  "developmentAttempts": [
+    {
+      "status": "INFRA_FAILURE",
+      "reason": "duplicate synthetic display name rejected by JOIN; SESSION waiter expired",
+      "runtimeChanged": false
+    },
+    {
+      "status": "FAIL",
+      "reason": "test demanded zero displacement immediately after neutral input, before existing velocity response settled",
+      "runtimeChanged": false
+    },
+    {
+      "status": "FAIL",
+      "reason": "non-contact placement alone did not remove existing short velocity response; same incorrect stop assertion",
+      "runtimeChanged": false
+    },
+    {
+      "status": "PASS",
+      "reason": "wait for authoritative vx/vy below .001, then retain the .01 maximum idle-displacement assertion; normal response unchanged"
+    }
+  ],
+  "focusedCombat": {
+    "command": "node --test tests/integration/evolution.test.mjs",
+    "status": "PASS",
+    "wallMs": 16064.3291,
+    "scope": "22 actual WS students, manually stepped high-HP geometry fixture, no browser performance verdict",
+    "rows": [
+      {
+        "scenario": "spotlight",
+        "casts": 20,
+        "peakWarnings": 20,
+        "stunned": 2
+      },
+      {
+        "scenario": "reflection",
+        "shooters": 20,
+        "turns": 80,
+        "reliableBytes": 6402015,
+        "cpuMs": 297
+      },
+      {
+        "scenario": "fields",
+        "casts": 20,
+        "peakFields": 10,
+        "peakWarnings": 10,
+        "damage": [
+          108.1499999999869,
+          108.1499999999869
+        ],
+        "stun": [
+          180,
+          180
+        ],
+        "remaining": 0,
+        "fixture": "geometry and high target HP; unchanged damage, duration, count and cooldown"
+      }
+    ],
+    "developmentAttempts": [
+      {
+        "status": "TIMEOUT",
+        "wallMs": 162483.029,
+        "reason": "ROOM_STATE deadline before final scenario report; not reproduced in following unchanged assertions; cause unresolved"
+      },
+      {
+        "status": "FAIL",
+        "wallMs": 20906.7815,
+        "reason": "new fixture incorrectly expected gravity SHOT_SPAWN; existing protocol carries this field in snapshot rows"
+      },
+      {
+        "status": "PASS",
+        "wallMs": 16064.3291,
+        "reason": "assert actual FULL_STATE contains ten gravity and ten spotlight rows, retain damage/stun/natural expiry"
+      }
+    ]
+  }
+}

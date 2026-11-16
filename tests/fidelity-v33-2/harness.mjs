@@ -1,9 +1,11 @@
+import fs from 'node:fs';
+import {bundledHarness} from '../combat/bundled-harness.mjs';
 import {freezeableFixture} from '../simulation-fixture.mjs';
 import {leaveGamePages} from '../leave-game-pages.mjs';
 import {createServer} from 'vite';
 import {fork} from 'node:child_process';
 import {chromium,webkit} from 'playwright';
-import {createGameServer} from '../../apps/server/src/main.js';
+const {createGameServer}=await import(process.env.LOAD_BUILT==='1'?'../../dist/server/main.js':'../../apps/server/src/main.js');
 import {connect} from '../integration/client.mjs';
 import {getTeacherState,getHostVisibleState,getVisibleState,getStaticState} from '../../packages/engine/src/index.js';
 import {snapshotEncoder} from '../../apps/server/src/ws/snapshot.js';
@@ -14,10 +16,10 @@ export async function auditHarness({players=20,mode='solo',renderer='canvas',hos
   child=fork('tools/load/server.mjs',[],{windowsHide:true});const port=await new Promise((resolve,reject)=>{child.once('message',m=>resolve(m.port));child.once('error',reject);});let seq=0;const pending=new Map();
   child.on('message',m=>{const p=pending.get(m.id);if(p){pending.delete(m.id);clearTimeout(p.timer);m.error?p.reject(Error(m.error)):p.resolve(m.value);}});
   rpc=(type,args={})=>new Promise((resolve,reject)=>{const id=++seq,timer=setTimeout(()=>{pending.delete(id);reject(Error('IPC_TIMEOUT '+type));},10000);pending.set(id,{resolve,reject,timer});child.send({id,type,...args});});
-  app={address:{port},close:()=>rpc('close')};
- }else app=await createGameServer({port:0,hostSecret:'test-host'});
+  app={address:{port},close:()=>rpc('close'),...(process.env.LOAD_BUILT==='1'?{fingerprint:JSON.parse(fs.readFileSync('dist/release.json','utf8'))}:{})};
+ }else {app=await createGameServer({port:0,hostSecret:'test-host'});if(process.env.LOAD_BUILT==='1')app.fingerprint=JSON.parse(fs.readFileSync('dist/release.json','utf8'));}
  const target='http://127.0.0.1:'+app.address.port;
- const vite=await createServer({configFile:'apps/client/vite.config.js',server:{watch:null,hmr:false,port:0,strictPort:false,proxy:{'/ws':{target:target.replace('http:','ws:'),ws:true},'/version':target,'/healthz':target}}});await vite.listen();const url='http://127.0.0.1:'+vite.httpServer.address().port;if(rpc)await rpc('fixture-origin',{origin:url});else app.config.origins.push(url);
+ const vite=process.env.CLASSROOM_BUNDLE==='1'?await bundledHarness(target):await createServer({configFile:'apps/client/vite.config.js',server:{watch:null,hmr:false,port:0,strictPort:false,proxy:{'/ws':{target:target.replace('http:','ws:'),ws:true},'/version':target,'/healthz':target}}});if(process.env.CLASSROOM_BUNDLE!=='1')await vite.listen();const url='http://127.0.0.1:'+vite.httpServer.address().port;if(rpc)await rpc('fixture-origin',{origin:url});else app.config.origins.push(url);
  const browser=await (browserEngine==='webkit'?webkit:chromium).launch({headless:true,args:browserArgs,...(browserEngine==='chromium'&&process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{})}),contexts=[],errors=[],clients=[];
  const video=process.env.COMBAT_VIDEO_DIR?{recordVideo:{dir:process.env.COMBAT_VIDEO_DIR,size:viewport}}:{};
  async function page(options={},record=false,mode=renderer){const context=await browser.newContext({viewport,deviceScaleFactor:1,...(record?video:{}),...options});if(initScript)await context.addInitScript(initScript);if(!audio)await context.route(/dropbox/,r=>r.abort());contexts.push(context);const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(url+'/?renderer='+mode);await p.evaluate(async()=>{window.auditApp=await import('/src/main.js');});return p;}

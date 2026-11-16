@@ -1,6 +1,17 @@
 name: Evolution comparison
 on:
   workflow_dispatch:
+    inputs:
+      comparison_case:
+        description: Existing evolution suite or one explicit v35.2 comparison
+        type: choice
+        default: legacy
+        options: [legacy, solo, team-capture, rematch, solo-host, solo-student, render-cost, focused, load30, load30-extended]
+      renderer:
+        description: Renderer for the selected v35.2 case
+        type: choice
+        default: pixi
+        options: [canvas, pixi, sockets]
   pull_request:
     paths:
       - 'apps/**'
@@ -11,7 +22,7 @@ permissions:
   contents: read
 jobs:
   compare:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.body, '[v35-evidence]')
+    if: (github.event_name == 'workflow_dispatch' && (inputs.comparison_case == 'legacy' || inputs.comparison_case == '')) || contains(github.event.pull_request.body, '[v35-evidence]')
     runs-on: ubuntu-24.04
     container: mcr.microsoft.com/playwright:v1.56.1-noble
     timeout-minutes: 14
@@ -36,7 +47,7 @@ jobs:
           name: v35-compare-${{ matrix.mode }}-${{ matrix.renderer }}-${{ github.sha }}
           path: artifacts/v35-comparison
   screens:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.body, '[v35-evidence]')
+    if: (github.event_name == 'workflow_dispatch' && (inputs.comparison_case == 'legacy' || inputs.comparison_case == '')) || contains(github.event.pull_request.body, '[v35-evidence]')
     runs-on: ubuntu-24.04
     container: mcr.microsoft.com/playwright:v1.56.1-noble
     timeout-minutes: 10
@@ -57,3 +68,58 @@ jobs:
         with:
           name: v35-screens-${{ matrix.renderer }}-${{ github.sha }}
           path: artifacts/v35/
+
+  longrun:
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.body, '[longrun-smoothness]')
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {mode: solo, renderer: canvas}
+          - {mode: solo, renderer: pixi}
+          - {mode: team-capture, renderer: canvas}
+          - {mode: team-capture, renderer: pixi}
+          - {mode: load30, renderer: sockets}
+          - {mode: rematch, renderer: canvas}
+          - {mode: focused, renderer: pixi}
+          - {mode: solo-host, renderer: pixi}
+          - {mode: solo-student, renderer: pixi}
+          - {mode: render-cost, renderer: pixi}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: node tests/combat/longrun-compare.mjs ${{ matrix.mode }} ${{ matrix.renderer }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v35-2-${{ matrix.mode }}-${{ matrix.renderer }}-${{ github.sha }}
+          path: artifacts/v35-2-comparison/
+          retention-days: 14
+
+  selected-longrun:
+    if: github.event_name == 'workflow_dispatch' && inputs.comparison_case != 'legacy' && inputs.comparison_case != ''
+    runs-on: ubuntu-24.04
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: node tests/combat/longrun-compare.mjs "$CASE" "$RENDERER"
+        env:
+          CASE: ${{ inputs.comparison_case }}
+          RENDERER: ${{ inputs.renderer }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v35-2-selected-${{ inputs.comparison_case }}-${{ inputs.renderer }}-${{ github.sha }}
+          path: artifacts/v35-2-comparison/
+          retention-days: 14
