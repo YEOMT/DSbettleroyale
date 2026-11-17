@@ -8,7 +8,7 @@
 - 기존 cf93779 작업 트리가 깨끗함을 확인하고, 병합된 main에서 `codex/v35-5-overdrive-identity`를 만들었다. 기존 브랜치/작업을 초기화하지 않았다. 구현 최종 commit은 PR head로 확인한다.
 - 406줄 상세 명세와 시작 지시문을 끝까지 읽었다. 명세 SHA256 `547787bd61da9bd79beff22b60bb7513aa92e35ff9639e13939f0f636bf68da1`.
 -86 ID/등급/추첨, v35.4 결과·탈락자 스트림 중단·F/S 특별전·승자3.5초·장판1.10배, 모드/입력/복구/재경기,60Hz/20Hz 보존. root index.html, apps/server, ReleaseOps, AWS/Pages/Firebase/Secrets/서버 설정 변경 없음.
-- Content hash `b9113f25bf2d75f91cbcf4762a760e8232a84cbcf5e4e011bf8a3492e5e8889c`; engine revision `v35.5-authority-1-overdrive`, package35.5.0. 최종 로컬 paired build `v33-dbd37c688e306987`, sourceHash `dbd37c688e30698722ca42cc7576415dbf1ec7ac1e4fe639a41773bccc1bc902`.
+- Content hash `b9113f25bf2d75f91cbcf4762a760e8232a84cbcf5e4e011bf8a3492e5e8889c`; engine revision `v35.5-authority-1-overdrive`, package35.5.0. 최종 로컬 paired build `v33-d9598796bd77eff3`, sourceHash `d9598796bd77eff37a9c64b83a8aefb2b470c10672fd66a820b4c20869ac9d92`.
 
 ## 실제 변경
 
@@ -114,4 +114,10 @@ runtime `69a311bfad49bde34458e9254255902cf6ac3d9d`, focused44080973118: **Canvas
 
 Pixi 개별 장면은 패링 PASS 후 사과 파편0/8 assertion **FAIL43.253s**. 추가한 실패 관측 자료에서는 세 화면 모두 같은 tick43의8파편을 이미 수신하고 있었다. 판정 당시55ms 고정 대기만 끝나고 WS 처리가 끝나지 않은 시험 경합이다. 테스트가 소유한 수동 시뮬레이션 시계에서 각 publish의 권위 tick 수신을 기다리도록 수정했다. 실시간 live 부하/프레임 기준은 변경하지 않았다. 첫 로컬 확인은 새로고침 뒤 테스트 모듈 `m` 참조 소실로 **FAIL28.063s**, observer 참조를 복원 경로와 함께 읽도록 보정했다. 최종 이 시험의 결과와 최종 필수 CI는 PR에 명시한다.
 
-최종 로컬 Pixi high9장면은 수신 동기화/새로고침 보정 후 **PASS27.931s**, pageerrors0. 최종 런타임 sourceHash는 위 dbd37c… 그대로다.
+최종 로컬 Pixi high9장면은 수신 동기화/새로고침 보정 후 **PASS27.931s**, pageerrors0. 그 시점 런타임 sourceHash는 dbd37c…였으며, 아래 원래 시계 정책 복원 후 최종 값은 문서 상단 d9598796…이다.
+
+### 최종 한계와 원래 시계 정책 보존
+
+02d9cdd의 v35.5 live20Canvas5/Pixi5 및30Pixi는 PASS했으나 기존 v35.4 Pixi5경기에서 **승자 화면 TIMEOUT152.036s**가 다시 발생했다(44082141356, overload0). [실패 수신/시계 기록](evidence/winner-timeout.json). 두 번째 경기 수신 시 서버 time과 기존 offset 추정의 차이는 약8.8초였다. 이는 이전 match offset만의 원인임을 증명하지 않으며, 지연 수신/메인 스레드 정체와 시계 오차를 분리하지 못했다. 앞의 원인 설명은 가설로 정정한다. **효과가 검증되지 않은 match clock 초기화는 제거하고 원래 v35.4 연결·결과 deadline을 그대로 복원했다.** 늦은 prior-match 패킷 거절과 clock estimate 보존을 검사한다. F05는 다시 PARTIAL, 최종 체크리스트 **47PASS/4PARTIAL**. 현재 원인 미확정 화면 timeout을 해결했다고 보고하지 않는다.
+
+동일 실행의 Pixi identity는 파편 확인 후 헤드슈터 확정음0/1로 FAIL했다. 각3틱 수신 대기가 실제400ms 준비를 인위적으로 늘려2200ms stale-sound 보호에 걸릴 수 있으므로, 수동 시계는 원래55ms cadence로 진행하고 **관측 전 마지막 snapshot 도착**만 기다리도록 수정했다. 확정 event의 관측 시간/대기음 만료값도 제한된 배열에 기록한다. 음향 보호 시간이나 assertion은 변경하지 않았다. 해당 수정 로컬 Pixi high9장면 **PASS28.198s**, pageerrors0. 최종 원래 clock 보존 후 관련64단위 **PASS1.365s**, client/server build **PASS7.02s(Vite)**. 최종 head CI의 실제 통과·실패는 PR26에 별도 표시한다.

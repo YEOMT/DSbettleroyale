@@ -52,10 +52,10 @@ PASS means only the stated automated scope. PARTIAL retains a missing subcase or
 | F02 | 20명 같은 방 5회 반복/학생 새로고침/부활 후 미송신 상태·이벤트·효과 잔존 0 | PASS | Same20 identities five rounds, eliminated refresh, capture quiz/respawn/new actions, resources cleared. Runtime69a311b CI44080973118: Canvas20×5 PASS84.019s / Pixi20×5 PASS200.142s; local follow-up overload FAIL retained. |
 | F03 | 저격 집중·사과 8파편·GIANT III·RAPID III 다수의 동시 최대 shot/event/RSS 수치 기록 | PARTIAL | 160shards isolated peak and live sampled objects/RSS/traffic;30Pixi high failed before measured window. |
 | F04 | 서버 step/snapshot/송수신·호스트/학생 FPS p95 비교, 악화/FAIL/NOT_RUN 숨김 금지 | PARTIAL | Same-PC A/B recorded honestly;20draw regression signal;30bothSAFE_PAUSED. No direct GPU timer or1GB target measurement. |
-| F05 | 기존 v35.4 탈락자 전투 수신/렌더 중단·승자 3.5초·특별전·장판 조정 회귀 통과 | PASS | Quick354contracts/ground/special rules +live winner/eliminated/respawn; 354 focused4jobs PASS at runtime69a311b. Runtime69a311b CI44080973118: Canvas20×5 PASS84.019s / Pixi20×5 PASS200.142s; local follow-up overload FAIL retained. |
+| F05 | 기존 v35.4 탈락자 전투 수신/렌더 중단·승자 3.5초·특별전·장판 조정 회귀 통과 | PARTIAL | Prior4job PASS, then44082141356 Pixi winner TIMEOUT152.036s; receipt/clock cause unresolved, original deadline retained. Other lifecycle/rules assertions PASS. |
 | F06 | commit/push·PR·변경 allowlist·전후 성능/밸런스 표·실패 포함 결과 문서 제출 | PASS | Work branch/PR with source, allowlist, balance, screenshots, failure records. CI result will be linked on PR. |
 | F07 | 운영 반영·main 병합 없이 실제 상태 `NOT_DEPLOYED` 표시 | PASS | NOT_DEPLOYED. No merge,AWS,Pages,Secrets,service orcapacity change. |
 
-Counts after runtime69a311b CI:48 PASS,3 PARTIAL; Windows30-player live load FAILS; isolated CI30Pixi PASS47.386s is separate evidence. Overall release acceptance is **PARTIAL / DRAFT**, not ALL_PASS. No item was removed.
+Counts after repeated winner timeout:47 PASS,4 PARTIAL; Windows30-player live load FAILS; isolated CI30Pixi PASS47.386s is separate evidence. Overall release acceptance is **PARTIAL / DRAFT**, not ALL_PASS. No item was removed.
 
 Evidence: [runtime/failure report](report.md), [balance](balance-before-after.md), [performance JSON](evidence/performance.json), [Canvas](evidence/identity-canvas-low.json), [Pixi low](evidence/identity-pixi-low.json), [Pixi high](evidence/identity-pixi-high.json).

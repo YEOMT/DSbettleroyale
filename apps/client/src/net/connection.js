@@ -44,9 +44,6 @@ export class Connection extends EventTarget{
    if(room&&this.scope.roomInstanceId===m.roomInstanceId&&(room.round<this.round||room.round===this.round&&room.revision<this.roomRevision))return;
    if(room&&this.scope.matchId&&this.scope.matchId!==m.matchId&&room.round<=this.round)return;
    if(this.scope.matchId!==m.matchId){
-    // A clock estimate belongs to one match. An old maximum can outlive a
-    // wall/monotonic clock adjustment and skip the next 3.5-second winner.
-    this.serverWallOffset=undefined;
     for(const [id,p]of this.pending)if(!rematchAck||id!==m.payload.requestId){clearTimeout(p.timer);this.pending.delete(id);p.reject(Error('MATCH_CHANGED'));}
     this.profiles.clear();this.profileRecoveryAt=-Infinity;this.lifeSeq=0;this.profileReady(this.session?.role==='host');this.emit('reset',{});
    }

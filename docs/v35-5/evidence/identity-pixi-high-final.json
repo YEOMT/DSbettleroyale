@@ -9,15 +9,15 @@
       "pages": [
         {
           "returns": 1,
-          "frames": 33
-        },
-        {
-          "returns": 1,
-          "frames": 33
-        },
-        {
-          "returns": 1,
           "frames": 32
+        },
+        {
+          "returns": 1,
+          "frames": 30
+        },
+        {
+          "returns": 1,
+          "frames": 30
         }
       ]
     },
@@ -71,15 +71,15 @@
       "pages": [
         {
           "shots": 1,
-          "terminalDraws": 13
+          "terminalDraws": 11
         },
         {
           "shots": 1,
-          "terminalDraws": 10
+          "terminalDraws": 11
         },
         {
           "shots": 1,
-          "terminalDraws": 10
+          "terminalDraws": 11
         }
       ]
     },
@@ -97,6 +97,6 @@
     }
   ],
   "scope": "real WS; fixture-driven exact authority contacts, not continuous-play evidence",
-  "ms": 27931.3236,
+  "ms": 28197.9559,
   "errors": []
 }

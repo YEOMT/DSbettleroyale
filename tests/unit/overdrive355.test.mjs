@@ -25,13 +25,13 @@ test('confirmed parry/goblin audio is independent of render scheduling, once per
  }finally{if(prior===undefined)delete globalThis.document;else globalThis.document=prior;}
 });
 
-test('a new match replaces previous wall-clock offset, while late prior-match packets stay rejected',t=>{
+test('rematch preserves v35.4 clock estimate and rejects late prior-match packets',t=>{
  const prior=globalThis.sessionStorage;globalThis.sessionStorage={getItem:()=>null};t.mock.method(performance,'now',()=>10000);
  try{
   const c=new Connection('ws://fixture');c.scope={roomInstanceId:'room',matchId:'old',connectionEpoch:1};c.round=1;c.roomRevision=4;c.serverWallOffset=105000;
   const room=(match,round,time)=>({type:'ROOM_STATE',roomInstanceId:'room',matchId:match,connectionEpoch:1,payload:{phase:'LOBBY',matchId:match,round,revision:1,serverTime:time}});
-  c.receive(room('new',2,110000));assert.equal(c.serverWallOffset,100000);assert.equal(c.scope.matchId,'new');
-  c.receive(room('old',1,120000));assert.equal(c.serverWallOffset,100000);assert.equal(c.scope.matchId,'new');
+  c.receive(room('new',2,110000));assert.equal(c.serverWallOffset,105000);assert.equal(c.scope.matchId,'new');
+  c.receive(room('old',1,120000));assert.equal(c.serverWallOffset,105000);assert.equal(c.scope.matchId,'new');
  }finally{if(prior===undefined)delete globalThis.sessionStorage;else globalThis.sessionStorage=prior;}
 });
 
