@@ -13,11 +13,11 @@
         },
         {
           "returns": 1,
-          "frames": 30
+          "frames": 33
         },
         {
           "returns": 1,
-          "frames": 28
+          "frames": 32
         }
       ]
     },
@@ -57,11 +57,11 @@
         },
         {
           "shots": 1,
-          "terminalDraws": 12
+          "terminalDraws": 10
         },
         {
           "shots": 1,
-          "terminalDraws": 12
+          "terminalDraws": 10
         }
       ]
     },
@@ -71,15 +71,15 @@
       "pages": [
         {
           "shots": 1,
-          "terminalDraws": 11
+          "terminalDraws": 13
         },
         {
           "shots": 1,
-          "terminalDraws": 9
+          "terminalDraws": 10
         },
         {
           "shots": 1,
-          "terminalDraws": 9
+          "terminalDraws": 10
         }
       ]
     },
@@ -97,6 +97,6 @@
     }
   ],
   "scope": "real WS; fixture-driven exact authority contacts, not continuous-play evidence",
-  "ms": 28258.8789,
+  "ms": 27931.3236,
   "errors": []
 }

@@ -107,3 +107,11 @@ node tests/combat/overdrive355-live.mjs candidate pixi high
 - 기존 Canvas/WebKit touch는 **FAIL(Target crashed)**; Chromium portion PASS80.046s, 브라우저 crash 원인은 미확정. 종료 뒤 ECONNRESET과 구분한다. isolated-release는 **INFRA_FAILURE**: 정확한 base a916726 후보 artifact 부재. 후보/검사를 다른 SHA로 우회하지 않는다. required-checks FAIL/targeted SKIPPED가 이에 따라 남았다.
 
 51항목의 현재 분류는 로컬 초기48PASS/3PARTIAL에서, 위5경기 재확인 미완료를 반영한 **46PASS/5PARTIAL**이다. 다음 commit의 remote 상태는 PR26에 별도로 갱신한다. 모든 필수 CI가 통과했다고 표시하지 않는다. 추가 검증 시도는 위 재현 실패 관련 경로에 한정했다.
+
+### 두 번째 CI에서의 실제 런타임 검증
+
+runtime `69a311bfad49bde34458e9254255902cf6ac3d9d`, focused44080973118: **Canvas20×5 PASS84.019s / Pixi20×5 PASS200.142s / Pixi30×1 PASS47.386s**. 같은 방/신원/3모드/탈락/부활/결과/재경기 검사를 전부 유지했다. v35.4 focused44080972466도4job PASS. 따라서 F02/F05를 이 실행 근거로 PASS로 갱신,51항목은 **48PASS/3PARTIAL**이다. 로컬20후속FAIL과 기존30양쪽FAIL은 그대로 남는다.
+
+Pixi 개별 장면은 패링 PASS 후 사과 파편0/8 assertion **FAIL43.253s**. 추가한 실패 관측 자료에서는 세 화면 모두 같은 tick43의8파편을 이미 수신하고 있었다. 판정 당시55ms 고정 대기만 끝나고 WS 처리가 끝나지 않은 시험 경합이다. 테스트가 소유한 수동 시뮬레이션 시계에서 각 publish의 권위 tick 수신을 기다리도록 수정했다. 실시간 live 부하/프레임 기준은 변경하지 않았다. 첫 로컬 확인은 새로고침 뒤 테스트 모듈 `m` 참조 소실로 **FAIL28.063s**, observer 참조를 복원 경로와 함께 읽도록 보정했다. 최종 이 시험의 결과와 최종 필수 CI는 PR에 명시한다.
+
+최종 로컬 Pixi high9장면은 수신 동기화/새로고침 보정 후 **PASS27.931s**, pageerrors0. 최종 런타임 sourceHash는 위 dbd37c… 그대로다.

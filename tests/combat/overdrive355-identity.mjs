@@ -14,7 +14,13 @@ try{
   const draw=m.renderer.draw.bind(m.renderer);m.renderer.draw=(view,t)=>{observed.frames.push({tick:view.renderTick,shots:view.shots.map(q=>({id:q.id,owner:q.owner,radius:q.radius,style:q.style,color:q.color,returned:q.returned,crit:q.crit,giant:q.giant})),fx:view.effects.map(f=>({style:f.style,kind:f.kind,terminal:f.terminal}))});if(observed.frames.length>160)observed.frames.shift();return draw(view,t);};
   const action=m.audio.action.bind(m.audio);m.audio.action=(...args)=>{observed.sounds.push(args[0]);return action(...args);};
  });
- async function ticks(n){for(let i=0;i<n;i++){stepWorld(w);if(i%3===2||i===n-1){h.publish();await delay(55);}}}
+ async function ticks(n){for(let i=0;i<n;i++){stepWorld(w);if(i%3===2||i===n-1){h.publish();await delay(55);
+  // This exact-contact fixture owns the simulation clock. Do not read an old
+  // browser observation merely because a fixed 55ms sleep elapsed; ordered WS
+  // receipt of this snapshot also proves receipt of its preceding shot events.
+  // Real-time load/latency assertions live in overdrive355-live, unchanged.
+  await Promise.all(pages.map(p=>p.waitForFunction(t=>(window.m||window.auditApp)?.timeline.samples.at(-1)?.state.serverTick>=t,g.frame)));
+ }}}
  async function reset(id,op='emoji-114'){
   R.clearWorld(g,'identity355');g.projectiles=[];g.zones=[];g.smokes=[];g.walls=[];w.brFarm.dispose(g);g.finalPhaseTriggered=true;w.actionPending.clear();w.inputPending.clear();
   for(const [i,p]of ps.entries()){
