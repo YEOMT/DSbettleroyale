@@ -37,4 +37,13 @@ export class GameAudio{
   osc.connect(gain);gain.connect(ac.destination);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(at);osc.stop(at+.15);
  }
  action(kind,weight=2){if(!this.effects)return;this.controller.ensure();this.controller.sfx(kind,weight);}
+ victory(){
+  if(!this.effects||this.session.soundMuted||document.hidden||this.volume<=0)return;
+  const ac=this.controller.ensure();if(!ac||ac.state!=='running')return;
+  for(const [i,hz]of [523.25,659.25,783.99,1046.5].entries()){
+   const osc=ac.createOscillator(),gain=ac.createGain(),at=ac.currentTime+i*.14;
+   osc.type='triangle';osc.frequency.setValueAtTime(hz,at);gain.gain.setValueAtTime(.13*this.volume,at);gain.gain.exponentialRampToValueAtTime(.001,at+.27);
+   osc.connect(gain);gain.connect(ac.destination);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(at);osc.stop(at+.28);
+  }
+ }
 }

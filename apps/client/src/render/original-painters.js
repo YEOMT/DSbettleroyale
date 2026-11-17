@@ -81,7 +81,9 @@ __visualScope.brLevelCanvasDraw = function brLevelCanvasDraw(ctx,track,level,lif
         };
 
 __visualScope.brPaintReworkStatus = function brPaintReworkStatus(p,x,y,r,zoom,state,frame,maxHp=1,hostCompact=false) {
-            if(!state)return;zoom=Math.max(.05,zoom);
+            if(!state)return;zoom=Math.max(.05,zoom);frame=Math.min(frame,state.sourceTick??frame);
+            const iron=state.buffs?.find(b=>b.kind==='ironReflect'&&b.end>frame);
+            if(iron){const left=Math.min(1,(iron.end-frame)/300);p.arc(x,y,r+6/zoom,-Math.PI/2,-Math.PI/2+Math.PI*2*left,'#93c5fd',.95,3/zoom);p.line(x+r+5/zoom,y-5/zoom,x+r+10/zoom,y,'#e0f2fe',1,2/zoom);p.line(x+r+10/zoom,y,x+r+5/zoom,y+5/zoom,'#e0f2fe',1,2/zoom);}
             if(state.stunEnd>frame){
                 const ry=3.6/zoom,rx=(hostCompact?6:12)/zoom,cx=hostCompact?x+r+10/zoom:x,cy=hostCompact?y-r*.5:y-r-6/zoom;
                 p.ellipse(cx,cy,rx,ry,'#fef08a',.78,1.2/zoom);
@@ -119,10 +121,10 @@ __visualScope.brBulletCanvas = function brBulletCanvas(style,color='#ffffff'){
 __visualScope.brPaintReworkEntities = function brPaintReworkEntities(p,entities,frame,zoom=1,glyph=null) {
             zoom=Math.max(.05,zoom);const stroke=Math.max(1,1.5/zoom);
             for(const e of entities||[]){
-                if(!e||(e.displayFrame??frame)>e.end+1)continue;
+                if(!e||frame>=e.end)continue;
                 const x=e.x,y=e.y,col=e.color||'#a5b4fc',kind=String(e.kind||''),dx=Number(e.dx||0),dy=Number(e.dy||0),length=Number(e.length||e.range||0),width=Number(e.width||0),r=Math.max(1,Number(e.radius||12));
                 const ex=Number.isFinite(e.endX)?e.endX:x+dx*length,ey=Number.isFinite(e.endY)?e.endY:y+dy*length;
-                const age=Math.max(0,(e.displayFrame??frame)-e.start),span=Math.max(1,e.end-e.start),progress=Math.min(1,age/span);
+                const age=Math.max(0,frame-e.start),span=Math.max(1,e.end-e.start),progress=Math.min(1,age/span);
                 if(kind==='transit'){const alpha=Math.max(0,1-progress);p.line(x,y,ex,ey,col,.72*alpha,Math.max(stroke,width));p.circle(ex,ey,Math.max(stroke*1.2,2/zoom),col,.50*alpha);
                 } else if(kind==='channel'||kind==='beam'){
                     const half=width*.5,nx=-dy*half,ny=dx*half,points=[[x+nx,y+ny],[ex+nx,ey+ny],[ex-nx,ey-ny],[x-nx,y-ny]];
@@ -179,6 +181,7 @@ __visualScope.brPaintGround = function brPaintGround(p,x,y,radius,color,type,zoo
             p.circle(x,y,radius,c,.14);
             if(friendly)p.dashedCircle(x,y,radius,c,.78,1.8/z);else p.circle(x,y,radius,c,.86,1.8/z);
             p.circle(x,y,Math.min(radius*.12,3/z),c,.8);
+            if(Number.isFinite(meta?.tick))p.arc(x,y,radius,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(0,Math.min(1,(meta.endFrame-meta.tick)/meta.span)),c,1,3/z);
             for(let i=0;i<4;i++){const a=i*Math.PI/2,dx=Math.cos(a),dy=Math.sin(a),inner=Math.max(0,radius-Math.min(8/z,radius*.12));p.line(x+dx*inner,y+dy*inner,x+dx*radius,y+dy*radius,c,.8,1.4/z);}
         };
 
@@ -194,11 +197,24 @@ __visualScope.brPaintAttack = function brPaintAttack(p,r,alpha,zoom=1) {
                 p.line(x-radius*.4,y,x,y-radius*.4,'#dbeafe',a,1.5/z);p.line(x,y-radius*.4,x+radius*.4,y,'#dbeafe',a,1.5/z);
                 return true;
             }
+            if(type==='impact'&&r[10]==='heavy-wall'&&geo.confirmed){
+                const a=alpha*alpha,span=22/z,px=-dy,py=dx;
+                p.line(x-px*span,y-py*span,x+px*span,y+py*span,'#e2e8f0',a,4/z);
+                for(const side of [-1,1])p.line(x+px*span*.7*side,y+py*span*.7*side,x+px*span*side-dx*span*.4,y+py*span*side-dy*span*.4,'#94a3b8',a,2/z);
+                return true;
+            }
             if(type==='hit'&&geo.shape==='contact'){
                 const level=geo.periodic?1:Math.max(1,Math.min(4,Math.round(Number(r[12])||1))),shield=Number(geo.absorbed||0)>0,col=shield?'#67e8f9':color;
                 const span=[0,10,18,28,38][level],a=alpha*alpha,px=-dy,py=dx,style=String(r[10]||'');
                 if(shield&&Number(r[8]||0)<=0){const guard=(7+level*2)/z;p.arc(x,y,guard,angle-1.1,angle+1.1,'#a5f3fc',a,2.5/z);p.arc(x,y,guard+4/z,angle-.8,angle+.8,'#e0f2fe',a*.7,1/z);return true;}
 
+                if(geo.heavy&&geo.confirmed&&!geo.periodic){
+                    const width=(geo.heavy==='bowling'||geo.heavy==='train'?14:23)/z;
+                    p.line(x-dx*26/z,y-dy*26/z,x+dx*9/z,y+dy*9/z,col,a,5/z,'round');
+                    p.arc(x-dx*8/z,y-dy*8/z,width,angle-1,angle+1,'#ffffff',a,3/z);
+                    for(const side of [-1,1])p.line(x+px*width*side,y+py*width*side,x+px*width*1.25*side+dx*10/z,y+py*width*1.25*side+dy*10/z,col,a*.8,2/z);
+                    return true;
+                }
                 // Impact primitives show contact only; these rings never represent damage range.
                 if(level===1){p.circle(x,y,2.5/z,'#ffffff',a*.85);p.line(x-dx*span/z,y-dy*span/z,x,y,col,a*.8,1.8/z);if(shield)p.circle(x,y,6/z,col,a*.7,1/z);return true;}
                 // One silhouette per confirmed contact, shared by low/Canvas/Pixi.
@@ -395,12 +411,12 @@ __visualScope.brCrateHalf = function brCrateHalf(box) {
 
 __visualScope.brPaintCrate = function brPaintCrate(p,b,flash=0) {
             const x=b[1],y=b[2],h=__visualScope.brCrateHalf(b),d=h*2,heal=b[4]==='heal',border=heal?'#22c55e':'#f5c96b';
-            p.rect(x-h,y-h,d,d,heal?'#ecfdf5':'#593b24',1);
+            p.rect(x-h,y-h,d,d,heal?'#ecfdf5':'#a56b18',1);
             p.rect(x-h+1.5,y-h+1.5,d-3,d-3,border,1,3);
             if(heal){p.rect(x-h*.16,y-h*.70,h*.32,h*1.40,'#16a34a',1);p.rect(x-h*.70,y-h*.16,h*1.40,h*.32,'#16a34a',1);}
             else {
-                p.line(x-h*.78,y-h*.78,x+h*.78,y+h*.78,'#a67638',1,5);
-                p.line(x+h*.78,y-h*.78,x-h*.78,y+h*.78,'#a67638',1,5);
+                p.rect(x-h,y-h,d,h*.46,'#f3b94e',1);p.line(x-h,y-h*.54,x+h,y-h*.54,'#5f3e12',1,3);
+                p.rect(x-h*.12,y-h*.68,h*.24,h*.28,'#fff0b3',1);
                 p.rect(x-h*.48,y-h*.25,h*.96,h*.50,'#382515',.94);
                 // Vector XP lettering stays crisp and identical in Canvas and Pixi.
                 const z=h/48,w=3*z,col='#fff0b3';

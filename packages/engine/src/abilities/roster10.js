@@ -101,7 +101,7 @@ export const initializers=[[310,S=>{
   // Only the greatest damage source for this owner/target/tick resolves, independent of entity order.
   for(const p of R.enemies(ctx,e.pos,90)){if(c.g.checkWallBetween(e.pos,p.pos))continue;const key=ctx.ownerId+':'+ctx.ownerLifeSeq+':'+R.pid(p)+':'+R.life(p);if(ledger.poisonHits.has(key))continue;
    let best=e;for(const other of ledger.entities)if(!other.dead&&other.kind==='poison'&&other.ctx.ownerId===ctx.ownerId&&other.ctx.ownerLifeSeq===ctx.ownerLifeSeq&&(now(c.g)-other.start)%30===0&&now(c.g)>other.start&&dist(other.pos,p.pos)<=other.radius+p.radius&&!c.g.checkWallBetween(other.pos,p.pos)&&other.ctx.damageMult*other.ctx.run.damage>best.ctx.damageMult*best.ctx.run.damage)best=other;
-   ledger.poisonHits.set(key,true);R.hit(best.ctx,p,4,{periodic:true,knockback:0,stun:0,direction:V()});
+   ledger.poisonHits.set(key,true);R.hit(best.ctx,p,s.poisonDamage,{periodic:true,knockback:0,stun:0,direction:V()});
   }
  });}
  register(144,{kind:'mushroom',shape:'target',cooldownFrames:540,range:320,radius:95,damage:20,poisonDamage:4,poisonRadius:90,durationFrames:180,intervalFrames:30,armFrames:30,waitFrames:1200,maxPerOwner:3,hp:20,description:'미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)',capabilities:caps({damage:true,expandable:true,area:true,trap:true,signatureRange:true})},(c,s)=>{

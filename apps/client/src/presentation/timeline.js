@@ -1,3 +1,4 @@
+import {effectTick} from './effect-status.js';
 import {effectLife} from './effect-life.js';
 import {shotKey,previewShots,previewCue,terminalPoints} from './previews.js';
 import {createMovementKernel,predictMovement} from '../../../../packages/engine/src/movement/prediction.js';
@@ -49,7 +50,7 @@ export class Timeline{
   let left=this.samples[0],right=last;for(let i=1;i<this.samples.length;i++)if(this.samples[i].state.serverTick>=this.renderTick){left=this.samples[i-1];right=this.samples[i];break;}
   const span=right.state.serverTick-left.state.serverTick,alpha=span?Math.max(0,Math.min(1,(this.renderTick-left.state.serverTick)/span)):1;
   const priorActors=new Map(left.state.actors.map(a=>[a.id,a])),priorShots=new Map(left.state.shots.map(q=>[q.id,q]));
-  const actors=right.state.actors.flatMap(a=>{const row=priorActors.get(a.id),old=row?.lifeSeq===a.lifeSeq&&row?.warpSeq===a.warpSeq?row:null,past=this.renderTick<right.state.serverTick,base=past?old:a;if(!base)return [];return [{...base,x:old?old.x+(a.x-old.x)*alpha:a.x,y:old?old.y+(a.y-old.y)*alpha:a.y,statusTick:this.renderTick}];});
+  const actors=right.state.actors.flatMap(a=>{const row=priorActors.get(a.id),old=row?.lifeSeq===a.lifeSeq&&row?.warpSeq===a.warpSeq?row:null,past=this.renderTick<right.state.serverTick,base=past?old:a;if(!base)return [];return [{...base,x:old?old.x+(a.x-old.x)*alpha:a.x,y:old?old.y+(a.y-old.y)*alpha:a.y,statusTick:effectTick(this.renderTick,last.state.serverTick)}];});
   if(now-last.at>150)this.metrics.holds++;else this.metrics.interpolated++;
   if(this.predicted){const index=actors.findIndex(a=>a.id===this.predicted.id);const offset=this.displayOffset(now);const self={...this.predicted,x:this.predicted.x+offset.x,y:this.predicted.y+offset.y,statusTick:last.state.serverTick};if(index>=0)actors[index]=self;else actors.push(self);}
   const selfId=this.predicted?.id,shots=[],residuals=[];
@@ -105,6 +106,6 @@ export class Timeline{
     }
    }
    return this.renderTick-(e.displayTick??e.tick)<effectLife(e)*.06&&(e.firstVisibleAt==null||now-e.firstVisibleAt<effectLife(e));
-  });return {...right.state,escape:this.escape,actors,shots,renderTick:this.renderTick,effects:this.effects.filter(e=>e.tick<=this.renderTick).concat(residuals)};
+  });return {...right.state,escape:this.escape,actors,shots,effectTick:effectTick(this.renderTick,last.state.serverTick),renderTick:this.renderTick,effects:this.effects.filter(e=>e.tick<=this.renderTick).concat(residuals)};
  }
 }

@@ -536,7 +536,7 @@ __brScope.GameWorld = class GameWorld {
                 // Collision feedback does not stun.
                 this.spawnImpact(p.pos,78,'#f8fafc',1.3);
                 this.addText(p.pos,'💥 WALL CRASH!','#f8fafc',24,29);
-                if(!attacker||Number(attacker.lifeSeq||0)===Number(p.launchedOwnerLife||0))p.takeDamage(dmg,attacker,false,null,{wangguiPower:p.launchedPower??1});
+                if(!attacker||Number(attacker.lifeSeq||0)===Number(p.launchedOwnerLife||0))p.takeDamage(dmg,attacker,false,null,{wangguiPower:p.launchedPower??1,attackKind:'wall'});
             }
 
             resolveParticipantCollisions() {

@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "renderer": "canvas",
+  "rows": [
+    {
+      "name": "iron/mirror authority expiry after wall-clock hold",
+      "status": "PASS",
+      "observed": {
+        "end": 300,
+        "tick": 299,
+        "render": 303.5,
+        "hud": "HP 10000 / 10000 · KILL 0 · ↪ 반사 1초"
+      }
+    },
+    {
+      "name": "attack supply expiry",
+      "status": "PASS"
+    },
+    {
+      "name": "haste supply expiry",
+      "status": "PASS"
+    },
+    {
+      "name": "guard supply expiry",
+      "status": "PASS"
+    },
+    {
+      "name": "stun HUD and input expiry",
+      "status": "PASS"
+    }
+  ],
+  "ms": 12377.6878
+}

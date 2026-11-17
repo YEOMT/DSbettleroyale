@@ -1,11 +1,15 @@
 // Display-only functions from the final v32.1 renderer.
+export function paintFixedCover(c,w,h){
+ c.fillStyle='#25384c';c.fillRect(-w/2,-h/2,w,h);c.strokeStyle='#7d94aa';c.lineWidth=4;c.strokeRect(-w/2+2,-h/2+2,w-4,h-4);
+ // Recessed face and bolted base: fixed terrain, never an XP/wooden crate.
+ c.fillStyle='#40566e';c.fillRect(-w*.38,-h*.38,w*.76,h*.66);c.fillStyle='#182b3e';c.fillRect(-w/2,h*.26,w,h*.24);
+ c.fillStyle='#b0bdca';for(const side of [-1,1])c.fillRect(side*w*.34-3,h*.33,6,6);
+}
 export function createScene(session){const BRMP=session,brEl=id=>document.getElementById(id),brSetText=(e,t)=>{if(e&&e.textContent!==t)e.textContent=t;},brCaptureMode=()=>BRMP.roomMeta?.mode==='team-capture';
 function brDrawStudentWall(cc,r) {
             var kind=r[5]||'wall';cc.save();cc.translate(r[0],r[1]);cc.rotate(r[4]||0);cc.lineWidth=3;
             if(kind==='crate') {
-                cc.fillStyle='#7c4a24';cc.strokeStyle='#d6a15f';cc.fillRect(-r[2]/2,-r[3]/2,r[2],r[3]);cc.strokeRect(-r[2]/2,-r[3]/2,r[2],r[3]);
-                cc.strokeStyle='rgba(255,224,170,.5)';cc.lineWidth=4;cc.beginPath();cc.moveTo(-r[2]*.35,-r[3]*.35);cc.lineTo(r[2]*.35,r[3]*.35);
-                cc.moveTo(r[2]*.35,-r[3]*.35);cc.lineTo(-r[2]*.35,r[3]*.35);cc.stroke();
+                paintFixedCover(cc,r[2],r[3]);
             } else if(kind==='rock') {
                 cc.fillStyle='#475569';cc.strokeStyle='#94a3b8';cc.beginPath();cc.roundRect(-r[2]/2,-r[3]/2,r[2],r[3],Math.min(20,r[3]*.4));cc.fill();cc.stroke();
             } else {
@@ -64,11 +68,7 @@ function brGraphicsResolution(w,h,limit){
 function hostWall(ctx,w){const draw=function(ctx){
                 ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
                 if(this.kind === 'crate') {
-                    ctx.fillStyle='#7c4a24'; ctx.strokeStyle='#d6a15f'; ctx.lineWidth=4;
-                    ctx.beginPath(); ctx.roundRect(-this.w/2,-this.h/2,this.w,this.h,8); ctx.fill(); ctx.stroke();
-                    ctx.strokeStyle='rgba(255,224,170,.48)'; ctx.lineWidth=5;
-                    ctx.beginPath(); ctx.moveTo(-this.w*.36,-this.h*.36); ctx.lineTo(this.w*.36,this.h*.36);
-                    ctx.moveTo(this.w*.36,-this.h*.36); ctx.lineTo(-this.w*.36,this.h*.36); ctx.stroke();
+                    paintFixedCover(ctx,this.w,this.h);
                 } else if(this.kind === 'rock') {
                     ctx.fillStyle='#475569'; ctx.strokeStyle='#94a3b8'; ctx.lineWidth=3;
                     ctx.beginPath(); ctx.roundRect(-this.w/2,-this.h/2,this.w,this.h,Math.min(24,this.h*.42)); ctx.fill(); ctx.stroke();

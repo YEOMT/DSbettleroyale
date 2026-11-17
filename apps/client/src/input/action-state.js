@@ -6,7 +6,7 @@ export function actionState(self,kind,{enabled=true,restoring=false,connected=tr
  let state='READY';
  if(!enabled||restoring||!connected||!profilesReady)state=paused?'PAUSED':'RECOVERY';
  else if(!self?.alive)state='DEAD';
- else if(self.stunned>0)state='STUNNED';
+ else if(self.stunned>0||rw?.stunEnd>rw?.sourceTick)state='STUNNED';
  else if(rw?.capture)state='CAPTURED';
  else if(channel)state='CHANNEL';
  else if(rw?.locks?.[kind])state='LOCKED';

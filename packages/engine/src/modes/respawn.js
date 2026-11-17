@@ -26,7 +26,7 @@ __brScope.brRespawnPlayer = function brRespawnPlayer(p,reroll) {
             for(var turret of __brScope.game.turrets||[])if(turret.owner===p)turret.life=0;
             if(reroll){
                 p.tkTokens--;p.tkStats.rerollCount++;
-                __brScope.brTeamKillResetBody(p,__brScope.brAbilityIndex(__brScope.session.roomMeta.mode,p.abilityIndex,null,__brScope.random),false);
+                __brScope.brTeamKillResetBody(p,__brScope.brAbilityIndex(__brScope.session.roomMeta.mode,p.abilityIndex,null,__brScope.random,__brScope.session.roomMeta.drawRule||'normal'),false);
                 __brScope.game.maxBodyRadius=Math.max(__brScope.game.maxBodyRadius,p.radius);
                 __brScope.session.wireParticipants=null;__brScope.session.wireRoster=null;__brScope.session.wireHumans=null;__brScope.session.staticSent={};
             }
@@ -61,6 +61,7 @@ __brScope.brTeamKillResetBody = function brTeamKillResetBody(p,index,dying){
             // Keep the Participant identity so projectile owners and renderer references
             // continue crediting the same match statistics after each short run.
             ['id','name','team','remoteId','sessionId','matchKey','rosterVersion','kills','deaths','damageDealt','damageTaken','abilityUses','survivalFrames','killTimes','rapidKillCount','lastKillFrame','placement','tkStats','tkTokens','tkQuiz','lifeSeq','warpSeq','lastInputSeq','lastRemoteAttack','lastRemoteSkill','resolvedAttackSeq','resolvedSkillSeq','firedAttackSeq','firedSkillSeq','_farmDropDeathSeq','deathFrame','deathVisualUntilFrame','deathVisualUntilAt','eliminationSeq','lastDeathCause'].forEach(function(k){if(Object.prototype.hasOwnProperty.call(p,k))keep[k]=p[k];});
+            keep.deathSummary=p.deathSummary||null;
             var fresh=new __brScope.Participant(p.id,p.name,__brScope.EMOJI_DB[index],new __brScope.Vec2(p.pos.x,p.pos.y),p.team);
             Object.keys(p).forEach(function(k){delete p[k];});Object.assign(p,fresh,keep);
             p.abilityIndex=index;p.abilityId=__brScope.EMOJI_DB[index].id;p.rosterVersion=__brScope.BR_ROSTER_VERSION;p.applyPlayerInput=__brScope.brApplyPlayerInput;

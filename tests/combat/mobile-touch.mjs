@@ -8,6 +8,7 @@ const renderer=process.argv[2]||'canvas',browserEngine=process.argv[3]||'chromiu
 // on software GPUs. Use the existing fixed capture arena, with real clocks and
 // cooldowns, so a normal ring elimination cannot masquerade as an input fault.
 const checks=[],h=await auditHarness({players:2,renderer,quality:'low',mode:'team-capture',browserEngine,
+ initScript:(process.env.TRACE_RESIZE==='1'||browserEngine==='webkit')?()=>{window.resizeTrace=[];const Base=window.ResizeObserver;window.ResizeObserver=class extends Base{constructor(callback){super((entries,observer)=>{const item={at:performance.now(),targets:entries.map(e=>({id:e.target.id,width:e.contentRect.width,height:e.contentRect.height})),bottom:document.body?.style.getPropertyValue('--br-cap-bottom')};window.resizeTrace.push(item);if(resizeTrace.length>40)resizeTrace.shift();callback(entries,observer);item.after=document.body?.style.getPropertyValue('--br-cap-bottom');});}};addEventListener('error',e=>{if(e.message?.includes('ResizeObserver'))window.resizeFailure={message:e.message,trace:resizeTrace.slice()};});}:undefined,
  viewport:{width:800,height:520},studentContext:{viewport:{width:390,height:844},hasTouch:true,isMobile:true,deviceScaleFactor:2}});
 const page=h.student;
 const metric=()=>page.evaluate(()=>({scale:visualViewport.scale,x:scrollX,y:scrollY,vx:visualViewport.offsetLeft,vy:visualViewport.offsetTop}));
@@ -93,6 +94,6 @@ try{
  const scrolling=await body.evaluate(el=>{el.scrollTop=150;return {top:el.scrollTop,touch:getComputedStyle(el).touchAction};});
  assert.ok(scrolling.top>0);assert.notEqual(scrolling.touch,'none');
  if(native){await touch('touchStart',[{id:1,x:360,y:400},{id:2,x:400,y:400}]);for(let n=1;n<=6;n++){await touch('touchMove',[{id:1,x:360-n*22,y:400},{id:2,x:400+n*22,y:400}]);await delay(50);}await touch('touchEnd',[]);await page.waitForFunction(()=>visualViewport.scale>1.1);scrolling.zoom=(await metric()).scale;}
- checks.push({rematch:restored,encyclopedia:scrolling});assert.deepEqual(h.errors,[]);
+ checks.push({rematch:restored,encyclopedia:scrolling});if(process.env.TRACE_RESIZE==='1'||browserEngine==='webkit')checks.push({resize:{student:await page.evaluate(()=>window.resizeFailure||{trace:window.resizeTrace}),host:await h.host.evaluate(()=>window.resizeFailure||{trace:window.resizeTrace})}});assert.deepEqual(h.errors,[]);
  console.log(JSON.stringify({browserEngine,renderer,status:'PASS',ms:Date.now()-start}));
 }catch(error){console.error(error.message,await page.evaluate(()=>({phase:m.ui.room?.phase,alive:m.timeline.predicted?.alive,renderError:m.renderer.lastRenderError,actions:m.timeline.predicted?.actions,request:m.controls.lastAction,gestures:m.controls.gestures.size,pointer:m.controls.pointer,sent:sentActions})).catch(()=>null));throw error;}finally{fs.mkdirSync('artifacts/combat',{recursive:true});fs.writeFileSync(`artifacts/combat/touch-${browserEngine}-${renderer}.json`,JSON.stringify({ms:Date.now()-start,checks,physicalDevices:'NOT_RUN',webkitNativePinch:browserEngine==='webkit'?'NOT_RUN':'N/A'},null,2));await h.close();}

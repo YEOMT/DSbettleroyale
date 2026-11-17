@@ -109,5 +109,9 @@ test('execution callback before UI self refresh uses one consistent recast state
   const controls={timeline:{predicted:current},state:(kind,s)=>actionState(s,kind),feedbackState:()=>''};
   actionHud(old,controls);assert.equal(element('br-skill').getAttribute('data-action-state'),'RECAST');assert.equal(element('br-skill-count').textContent,'재사용 1/1');
   assert.equal(element('br-skill-cd').textContent,(Math.max(0,current.rw.recast.end-current.rw.sourceTick)/60).toFixed(1));
+  // Prediction cannot unlock a confirmed stun before a fresh authority tick.
+  current.stunned=0;current.rw.stunEnd=current.rw.sourceTick+6;actionHud(current,controls);
+  assert.equal(element('br-skill').getAttribute('data-action-state'),'STUNNED');assert.equal(element('br-skill-label').textContent,'기절');
+  assert.equal(element('br-skill-cd').textContent,'🔒 0.1');
  }finally{if(priorDocument===undefined)delete globalThis.document;else globalThis.document=priorDocument;destroyWorld(w);}
 });

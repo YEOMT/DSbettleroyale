@@ -1,6 +1,7 @@
 import {createWorld,stepWorld,getTeacherState,getHostVisibleState,getVisibleState,getStaticState,FIXED_DT_MS} from '../../../../packages/engine/src/index.js';
 import {snapshotEncoder} from '../ws/snapshot.js';
 import {presentationState} from '../ws/presentation-state.js';
+import {combatRecipient,stopEliminatedCombat} from '../ws/participation.js';
 export function attachSimulation(manager,metrics){
  let stopped=false,suspended=false,timer,last=performance.now();
  manager.startBattle=room=>{
@@ -15,6 +16,7 @@ export function attachSimulation(manager,metrics){
   const payloadJson=JSON.stringify(event);
   for(const m of room.members.values()){
    if(!m.peer)continue;
+   if(!combatRecipient(room,m)){if(event.type==='DEATH'&&event.data.playerId===m.id)stopEliminatedCombat(room,m);continue;}
    if(event.data.kind==='mushroom'&&event.type==='SHOT_SPAWN'&&event.data.owner!==m.id)continue;
    if(event.data.kind==='mushroom'&&event.type==='SHOT_END'&&!['trigger','destroyed'].includes(event.data.reason)&&event.data.owner!==m.id)continue;
    if(m.role!=='host'){
@@ -42,7 +44,7 @@ export function attachSimulation(manager,metrics){
    while(room.debt+1e-8>=FIXED_DT_MS&&count<5){
     const start=performance.now();try{stepWorld(room.world);}catch(error){room.pause(error.message);break;}
     metrics.stepCpu.add(performance.now()-start);room.debt-=FIXED_DT_MS;count++;
-    if(room.world.finished){room.finish();manager.changed(room);break;}
+    if(room.world.finished){room.finish({natural:true});manager.changed(room);break;}
    }
    if(room.debt>=FIXED_DT_MS)more=true;
    if(now>=room.nextSnapshot&&room.phase==='BATTLE'){
@@ -50,12 +52,12 @@ export function attachSimulation(manager,metrics){
     metrics.snapshotGap.add(now-room.lastSnapshot);room.lastSnapshot=now;const start=performance.now(),teacher=getTeacherState(room.world);room.snapshotSeq++;
     const publicTeacher=presentationState(room.world,teacher),encode=snapshotEncoder(publicTeacher,room.snapshotSeq,now);
     for(const member of room.members.values()){
-     if(!member.connected)continue;
+     if(!member.connected||!combatRecipient(room,member))continue;
      const view=member.role==='host'?getHostVisibleState(publicTeacher):getVisibleState(room.world,member.id,undefined,publicTeacher);
      if(member.peer)member.peer.snapshot(encode(view.self?{...view,self:member.peer.selfState(view.self)}:view,member.peer.scope(),member.peer.deliveredAnnouncement),teacher.announcements?.seq);
     }
     metrics.snapshotCpu.add(performance.now()-start);
-    if(now-(room.lastBoard||0)>=500){room.lastBoard=now;const board=room.world.session.respawnMode?room.world.brTKBuildBoard(false):{players:teacher.actors.map(a=>({id:a.id,name:a.name,team:a.team,kills:a.kills,deaths:a.deaths,rank:0})),teams:[]};for(const m of room.members.values())m.peer?.send('LEADERBOARD',board);}
+    if(now-(room.lastBoard||0)>=500){room.lastBoard=now;const board=room.world.session.respawnMode?room.world.brTKBuildBoard(false):{players:teacher.actors.map(a=>({id:a.id,name:a.name,team:a.team,kills:a.kills,deaths:a.deaths,rank:0})),teams:[]};for(const m of room.members.values())if(combatRecipient(room,m))m.peer?.send('LEADERBOARD',board);}
    }
    }finally{const sendStart=performance.now();for(const peer of peers)peer.endBatch();metrics.sendCpu.add(performance.now()-sendStart);metrics.pumpCpu.add(performance.now()-pumpStart);metrics.debtMs.add(room.debt);}
   }

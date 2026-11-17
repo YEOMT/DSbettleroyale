@@ -78,7 +78,7 @@ export class AttackPoses{
    if(this.fired.size>192)this.fired.delete(this.fired.keys().next().value);
   }
   const family=hit?'hit':shot&&['dash','safe-dash','leap'].includes(d.kind)?'travel':poseFamily(actor.abilityId,kind,d.style);
-  const entry={family,kind,seq,life,id,dx:length?dx/length:0,dy:length?dy/length:0,born:now,tick:event.serverTick,level:d.impactLevel||1};
+  const entry={family,kind,seq,life,id,dx:length?dx/length:0,dy:length?dy/length:0,born:now,tick:event.serverTick,level:d.impactLevel||1,heavy:g?.heavy||''};
   this.active.set(id,entry);
   if(this.active.size>96)this.active.delete(this.active.keys().next().value);
  }
@@ -106,6 +106,6 @@ export class AttackPoses{
   if(u>=1){this.active.delete(actor.id);return null;}
   const wave=poseEnvelope(s.family,u),size=Math.min(Math.abs(px),actor.radius*zoom*.30)*Math.sign(px);
   // Low quality keeps the same readable body/contact signal, without adding objects.
-  return {x:s.dx*size*wave.shift/zoom,y:s.dy*size*wave.shift/zoom,rotation:tilt*(s.dx||1)*wave.shift,squash:squash*wave.squash+compression};
+  return {x:s.dx*size*wave.shift/zoom,y:s.dy*size*wave.shift/zoom,rotation:tilt*(s.dx||1)*wave.shift+(s.heavy&&actor.rw?.impulseEnd>actor.rw.sourceTick?Math.max(-.14,Math.min(.14,(actor.rw.impulseX||0)*.005)):0),squash:squash*wave.squash+compression};
  }
 }

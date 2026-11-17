@@ -3,6 +3,7 @@ import {decodeClient,fingerprint,matchesFingerprint} from '../../../../packages/
 import {applyCommand,getStaticState,getPrivateSelfState,getTeacherState,getHostVisibleState,getVisibleState} from '../../../../packages/engine/src/index.js';
 import {Peer} from './peer.js';
 import {presentationState} from './presentation-state.js';
+import {combatRecipient} from './participation.js';
 const digest=s=>createHash('sha256').update(s).digest();
 export const secretMatches=(a,b)=>typeof a==='string'&&timingSafeEqual(digest(a),digest(b));
 const fail=code=>{throw Error(code);};
@@ -12,15 +13,15 @@ export function attachConnection(socket,manager,config,metrics,transport){
  socket.on('pong',()=>peer.alive=true);
  socket.on('error',()=>{});
  function restore(room,member,eventGap){
-  const world=room.world,self=world?peer.selfState(getPrivateSelfState(world,member.id,undefined,true),{force:true}):null;
+  const world=room.world,combat=world&&room.phase==='BATTLE'&&combatRecipient(room,member),self=combat?peer.selfState(getPrivateSelfState(world,member.id,undefined,true),{force:true}):null;
   let snapshot=null;
-  if(world&&room.phase==='BATTLE'){
+  if(combat){
    const teacher=presentationState(world,getTeacherState(world));
    const view=member.role==='host'?getHostVisibleState(teacher):getVisibleState(world,member.id,undefined,teacher);
    const {self:privateRow,...publicView}=view;
    snapshot={...publicView,snapshotSeq:++room.snapshotSeq,serverNow:performance.now()};
   }
-  peer.send('FULL_STATE',{room:room.publicState(member),static:world?getStaticState(world):null,self,snapshot,cursor:member.cursor,eventGap});
+  peer.send('FULL_STATE',{room:room.publicState(member),static:combat?getStaticState(world):null,self,snapshot,cursor:member.cursor,eventGap});
  }
  function bind(room,member,resume=false,cursor=0){
   if(member.revoked)fail('SESSION_REVOKED');if(peer.member)fail('ALREADY_BOUND');
@@ -48,7 +49,7 @@ export function attachConnection(socket,manager,config,metrics,transport){
    if(member.peer!==peer||peer.epoch!==member.epoch)fail('SUPERSEDED');
    if(message.roomInstanceId!==room.id||message.matchId!==room.matchId||message.connectionEpoch!==member.epoch)fail('SCOPE_MISMATCH');
    if(['INPUT_BATCH','ACTION','AUGMENT_CHOOSE','RESPAWN'].includes(message.type)){
-    const actor=room.world?.byId.get(member.id);if(room.phase!=='BATTLE'||member.role!=='student'||!actor)fail('BATTLE_REQUIRED');if(message.lifeSeq!==actor.lifeSeq)fail('LIFE_MISMATCH');
+    const actor=room.world?.byId.get(member.id);if(room.phase!=='BATTLE'||member.role!=='student'||!actor)fail('BATTLE_REQUIRED');if(message.lifeSeq!==actor.lifeSeq)fail('LIFE_MISMATCH');if(!combatRecipient(room,member))fail('PLAYER_ELIMINATED');
    }
    if(message.type==='INPUT_BATCH'){
     if(room.safePaused)return;
@@ -65,7 +66,7 @@ export function attachConnection(socket,manager,config,metrics,transport){
    result={...result,requestId:message.requestId,command:message.type};member.ledger.set(key,{signature,result});while(member.ledger.size>512)member.ledger.delete(member.ledger.keys().next().value);
    peer.send('COMMAND_RESULT',result,{reliable:true});
    if(!['ACTION','AUGMENT_CHOOSE','RESPAWN'].includes(message.type))manager.changed(room);else if(result.reason!=='SAFE_PAUSED')peer.send('PRIVATE_STATE',peer.selfState(getPrivateSelfState(room.world,member.id)));
-  }catch(error){metrics.rejected++;if(message?.requestId)peer.send('COMMAND_RESULT',{requestId:message.requestId,accepted:false,reason:error.message});else peer.send('ERROR',{code:error.message});if(['ROOM_EXPIRED','SESSION_REVOKED'].includes(error.message))peer.close(4004,error.message);else if(!['LIFE_MISMATCH','SCOPE_MISMATCH','BATTLE_REQUIRED'].includes(error.message)&&++peer.errors>=8)peer.close(4007,'INVALID_MESSAGES');}
+  }catch(error){metrics.rejected++;if(message?.requestId)peer.send('COMMAND_RESULT',{requestId:message.requestId,accepted:false,reason:error.message});else peer.send('ERROR',{code:error.message});if(['ROOM_EXPIRED','SESSION_REVOKED'].includes(error.message))peer.close(4004,error.message);else if(!['LIFE_MISMATCH','SCOPE_MISMATCH','BATTLE_REQUIRED','PLAYER_ELIMINATED'].includes(error.message)&&++peer.errors>=8)peer.close(4007,'INVALID_MESSAGES');}
  });
  socket.on('close',(code,reason)=>{metrics.lastClose={code,reason:String(reason).slice(0,80)};clearTimeout(authTimer);metrics.closed++;const p=peer.member;if(p?.peer===peer){p.connected=false;p.disconnectedAt=Date.now();p.peer=null;if(peer.room.world?.session.players[p.id])peer.room.world.session.players[p.id].connected=false;manager.changed(peer.room);}peer.queue=[];peer.queueBytes=0;peer.pendingSnapshot=null;peer.profileState=null;peer.restore=null;});
  return peer;

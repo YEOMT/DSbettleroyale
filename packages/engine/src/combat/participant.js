@@ -1,3 +1,4 @@
+import {heavySkill} from './heavy-feedback.js';
 import {sniperCast} from './reflection.js';
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
 import {activeSupply, supplyDirectHit} from '../farm/combat-supplies.js';
@@ -994,6 +995,7 @@ __brScope.Participant = class Participant {
                     const hitDir=contactDirection&&contactDirection.mag()>.001?contactDirection.norm():this.pos.sub(attacker.pos||this.pos).norm();
                     const ctx=damageContext?.ctx||damageContext?.basicSnapshot?.ctx,entity=damageContext?.entity;
                     const periodic=!!(damageContext?.periodic||damageContext?.visualPeriodic);
+                    const heavy=!periodic&&ctx?.actionKind==='skill'?heavySkill(attacker.ability?.id):'';
                     const feel=periodic?'sustain':impactLevel>=3?'heavy':closeImpact?'melee':'ranged';
                     const point=damageContext?.contact||{x:this.pos.x-hitDir.x*this.radius*.72,y:this.pos.y-hitDir.y*this.radius*.72};
                     __brScope.game.emitStudentFx('hit',point,{
@@ -1005,7 +1007,7 @@ __brScope.Participant = class Participant {
                         sourceId:attacker.remoteId||('player-'+attacker.id),impactLevel,
                         geometry:{shape:'contact',confirmed:true,matchKey:__brScope.brRingKey(),lifeSeq:Number(ctx?.ownerLifeSeq??attacker.lifeSeq??0),targetLife:Number(this.lifeSeq||0),hostFrame:__brScope.game.frame,
                             castId:ctx?.castId||damageContext?.attackId||'',projectileId:entity?.id||damageContext?.projectileId||'',ordinal:Number(entity?.ordinal??damageContext?.ordinal??0),
-                            absorbed:Math.round(absorbed*100)/100,periodic,feel,displayMs:periodic?110:impactLevel>=3?210:170}
+                            absorbed:Math.round(absorbed*100)/100,periodic,feel,...(heavy?{heavy,stage:'contact'}:{}),displayMs:heavy?160:periodic?110:impactLevel>=3?210:170}
                     });
                     this.lastStudentHitFxFrame=__brScope.game.frame;this.lastDamageImpactLevel=impactLevel;this.lastDamageVisualFrame=__brScope.game.frame;
                 }

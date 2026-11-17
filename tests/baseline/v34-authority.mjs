@@ -33,6 +33,9 @@ export function currentExpected(row, definition){
  for(const skill of [result.skill,result.definition?.skill]){
   if(!skill)continue;
   if(changes[id])Object.assign(skill,changes[id]);
+  // v35.4 explicit residual-ground-only deltas; all other fields remain frozen.
+  const ground={'emoji-000':['zoneDamage',13.86],'emoji-007':['zoneDamage',11.55],'emoji-010':['damage',11.8965],'emoji-014':['damage',15.862],'emoji-122':['thornDamage',4.389],'emoji-144':['poisonDamage',4.4]}[id];
+  if(ground)skill[ground[0]]=ground[1];
   if(id==='emoji-028'){
    Object.assign(skill,{kind:'iron-reflect',shape:'self',duration:300,durationFrames:300,radius:0,strength:'적 비행탄 반사',success:'탄이 몸에 닿을 때 방어',failure:'다른 피해에는 방어 효과 없음',counterplay:'근접·광선·장판으로 공격'});
    for(const k of ['damageReduction','reflectRatio','reflectRange'])delete skill[k];

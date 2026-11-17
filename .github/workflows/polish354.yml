@@ -1,0 +1,62 @@
+name: v35.4 focused regression
+on:
+  pull_request:
+    paths:
+      - 'tests/combat/polish354*.mjs'
+      - 'tests/unit/polish354.test.mjs'
+      - 'tests/integration/polish354.test.mjs'
+      - '.github/workflows/polish354.yml'
+  workflow_dispatch: null
+permissions:
+  contents: read
+concurrency:
+  group: polish354-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {renderer: canvas, quality: low, mode: solo, rounds: 5}
+          - {renderer: pixi, quality: balanced, mode: solo, rounds: 5}
+          - {renderer: canvas, quality: balanced, mode: team-capture, rounds: 1}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: npm run build
+      - run: node tests/combat/polish354-feedback.mjs ${{ matrix.renderer }}
+        if: matrix.mode == 'solo'
+      - run: node tests/combat/polish354.mjs ci ${{ matrix.renderer }} ${{ matrix.quality }}
+        env:
+          CLASSROOM_BUNDLE: '1'
+          LOAD_BUILT: '1'
+          POLISH_PLAYERS: '20'
+          POLISH_MODE: ${{ matrix.mode }}
+          POLISH_ROUNDS: ${{ matrix.rounds }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: polish354-${{ matrix.renderer }}-${{ matrix.mode }}-${{ github.sha }}
+          path: artifacts/v35-4/
+          retention-days: 30
+  transport:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: node tests/combat/polish354-server.mjs ci 30 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: polish354-transport-${{ github.sha }}
+          path: artifacts/v35-4/
+          retention-days: 30

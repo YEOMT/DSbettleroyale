@@ -1,0 +1,85 @@
+{
+  "status": "PASS",
+  "renderer": "pixi",
+  "delayMs": 250,
+  "rows": [
+    {
+      "name": "iron/mirror authority expiry after wall-clock hold",
+      "status": "PASS",
+      "observed": {
+        "end": 300,
+        "tick": 299,
+        "render": 303.5,
+        "hud": "HP 10000 / 10000 · KILL 0 · ↪ 반사 1초"
+      }
+    },
+    {
+      "name": "attack supply expiry",
+      "status": "PASS"
+    },
+    {
+      "name": "haste supply expiry",
+      "status": "PASS"
+    },
+    {
+      "name": "guard supply expiry",
+      "status": "PASS"
+    },
+    {
+      "name": "stun HUD and input expiry",
+      "status": "PASS"
+    }
+  ],
+  "receipts": [
+    {
+      "expected": 299,
+      "received": 299
+    },
+    {
+      "expected": 301,
+      "before": 299,
+      "received": 301
+    },
+    {
+      "expected": 302,
+      "before": 301,
+      "received": 302
+    },
+    {
+      "expected": 304,
+      "before": 302,
+      "received": 304
+    },
+    {
+      "expected": 305,
+      "before": 304,
+      "received": 305
+    },
+    {
+      "expected": 307,
+      "before": 305,
+      "received": 307
+    },
+    {
+      "expected": 308,
+      "before": 307,
+      "received": 308
+    },
+    {
+      "expected": 310,
+      "before": 308,
+      "received": 310
+    },
+    {
+      "expected": 311,
+      "before": 310,
+      "received": 311
+    },
+    {
+      "expected": 314,
+      "before": 311,
+      "received": 314
+    }
+  ],
+  "ms": 14875.5486
+}

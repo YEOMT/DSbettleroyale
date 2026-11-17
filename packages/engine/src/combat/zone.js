@@ -1,4 +1,5 @@
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
+import {nativeGroundMultiplier} from './ground-damage.js';
 export function install(__brScope){
 __brScope.Zone = class Zone {
             constructor(owner, pos, radius, damage, duration, color, type, opts={}) {
@@ -31,9 +32,10 @@ __brScope.Zone = class Zone {
                     this.radius = Math.min(this.targetRadius, this.radius + 0.16*this.runSkill.size);
                 }
                 const tickRate = this.owner?.ability?.type === __brScope.ABILITY_TYPES.ZONE ? 12 : 15;
+                const groundMult=nativeGroundMultiplier(this.ownerAbilityId,this.type);
                 if(this.duration % tickRate === 0) {
                     if((this.damage>0&&this.type!=='pull')||this.owner?.ability?.sub==='GRAVITY_WELL')__brScope.brFarm.area(game,this.owner,this.pos,this.radius,tickRate/90,'zone:'+game.frame);
-                    __brScope.BRRework?.nativeAreaTurrets(game,this.owner,this.pos,this.radius,this.damage*(this.owner?.ability?.type===__brScope.ABILITY_TYPES.ZONE?(this.owner.ability.t==='S'?1.30:1.10):(this.owner?.ability?.t==='S'?1.24:1)),{scaled:true,wangguiPower:this.runSkill.wangguiPower,periodic:true});
+                    __brScope.BRRework?.nativeAreaTurrets(game,this.owner,this.pos,this.radius,this.damage*groundMult*(this.owner?.ability?.type===__brScope.ABILITY_TYPES.ZONE?(this.owner.ability.t==='S'?1.30:1.10):(this.owner?.ability?.t==='S'?1.24:1)),{scaled:true,wangguiPower:this.runSkill.wangguiPower,periodic:true});
                     const geometry=__brScope.brZoneGeometry(this.radius,this.type,this.owner?.ability?.sub);
                     const scanRadius = Math.max(geometry.core,geometry.pull) + 80;
                     for(const p of game.getNearbyParticipants(this.pos, scanRadius)) {
@@ -55,7 +57,7 @@ __brScope.Zone = class Zone {
                                 const dedicated = this.owner?.ability?.type === __brScope.ABILITY_TYPES.ZONE;
                                 const tier = this.owner?.ability?.t;
                                 const zonePowerMult = dedicated ? (tier === 'S' ? 1.30 : 1.10) : (tier === 'S' ? 1.24 : 1.0);
-                                p.takeDamage(this.damage*zonePowerMult,this.owner,false,null,{scaled:true,wangguiPower:this.runSkill.wangguiPower,periodic:true,style:'dot:zone'});
+                                p.takeDamage(this.damage*zonePowerMult*groundMult,this.owner,false,null,{scaled:true,wangguiPower:this.runSkill.wangguiPower,periodic:true,style:'dot:zone'});
                             }
                             if(this.type === 'web') {
                                 const freeze = this.pattern === 'ice' ? 16 : 10;

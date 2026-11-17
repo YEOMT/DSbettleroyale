@@ -1,0 +1,333 @@
+{
+  "ms": 15553,
+  "checks": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "policy": {
+        "bad": [],
+        "canceled": {
+          "gesturestart": true,
+          "gesturechange": true,
+          "gestureend": true,
+          "touchmove": true
+        },
+        "outside": false
+      },
+      "scale": {
+        "scale": 1,
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0
+      },
+      "nativeMultiTouch": false,
+      "motion": null
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "policy": {
+        "bad": [],
+        "canceled": {
+          "gesturestart": true,
+          "gesturechange": true,
+          "gestureend": true,
+          "touchmove": true
+        },
+        "outside": false
+      },
+      "scale": {
+        "scale": 1,
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0
+      },
+      "nativeMultiTouch": false,
+      "motion": null
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "policy": {
+        "bad": [],
+        "canceled": {
+          "gesturestart": true,
+          "gesturechange": true,
+          "gestureend": true,
+          "touchmove": true
+        },
+        "outside": false
+      },
+      "scale": {
+        "scale": 1,
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0
+      },
+      "nativeMultiTouch": false,
+      "motion": null
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "policy": {
+        "bad": [],
+        "canceled": {
+          "gesturestart": true,
+          "gesturechange": true,
+          "gestureend": true,
+          "touchmove": true
+        },
+        "outside": false
+      },
+      "scale": {
+        "scale": 1,
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0
+      },
+      "nativeMultiTouch": false,
+      "motion": null
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 930
+      },
+      "policy": {
+        "bad": [],
+        "canceled": {
+          "gesturestart": true,
+          "gesturechange": true,
+          "gestureend": true,
+          "touchmove": true
+        },
+        "outside": false
+      },
+      "scale": {
+        "scale": 1,
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0
+      },
+      "nativeMultiTouch": false,
+      "motion": null
+    },
+    {
+      "rematch": {
+        "blocked": false,
+        "body": "auto",
+        "touch": "auto"
+      },
+      "encyclopedia": {
+        "top": 150,
+        "touch": "auto"
+      }
+    },
+    {
+      "resize": {
+        "trace": [
+          {
+            "at": 550,
+            "targets": [
+              {
+                "id": "",
+                "width": 374,
+                "height": 21
+              },
+              {
+                "id": "",
+                "width": 374,
+                "height": 24
+              },
+              {
+                "id": "br-tk-host-bar",
+                "width": 374,
+                "height": 24
+              },
+              {
+                "id": "br-host-live",
+                "width": 374,
+                "height": 24
+              },
+              {
+                "id": "br-music-controls",
+                "width": 374,
+                "height": 30
+              }
+            ],
+            "bottom": "",
+            "after": ""
+          },
+          {
+            "at": 855,
+            "targets": [
+              {
+                "id": "",
+                "width": 0,
+                "height": 0
+              },
+              {
+                "id": "",
+                "width": 0,
+                "height": 0
+              },
+              {
+                "id": "br-tk-host-bar",
+                "width": 0,
+                "height": 0
+              },
+              {
+                "id": "br-host-live",
+                "width": 0,
+                "height": 0
+              },
+              {
+                "id": "br-music-controls",
+                "width": 0,
+                "height": 0
+              }
+            ],
+            "bottom": "",
+            "after": ""
+          },
+          {
+            "at": 1357,
+            "targets": [
+              {
+                "id": "br-music-controls",
+                "width": 155.0625,
+                "height": 40
+              }
+            ],
+            "bottom": "",
+            "after": ""
+          },
+          {
+            "at": 6548,
+            "targets": [
+              {
+                "id": "br-music-controls",
+                "width": 0,
+                "height": 0
+              }
+            ],
+            "bottom": "",
+            "after": ""
+          },
+          {
+            "at": 6938,
+            "targets": [
+              {
+                "id": "br-capture-scoreboard",
+                "width": 370,
+                "height": 109
+              }
+            ],
+            "bottom": "",
+            "after": ""
+          },
+          {
+            "at": 7178,
+            "targets": [
+              {
+                "id": "br-capture-scoreboard",
+                "width": 370,
+                "height": 124
+              }
+            ],
+            "bottom": "117px",
+            "after": "117px"
+          },
+          {
+            "at": 8067,
+            "targets": [
+              {
+                "id": "br-capture-scoreboard",
+                "width": 564,
+                "height": 90
+              }
+            ],
+            "bottom": "132px",
+            "after": "132px"
+          },
+          {
+            "at": 9151,
+            "targets": [
+              {
+                "id": "br-capture-scoreboard",
+                "width": 850,
+                "height": 121
+              }
+            ],
+            "bottom": "94px",
+            "after": "94px"
+          },
+          {
+            "at": 9292,
+            "targets": [
+              {
+                "id": "br-capture-scoreboard",
+                "width": 850,
+                "height": 148
+              }
+            ],
+            "bottom": "156px",
+            "after": "156px"
+          },
+          {
+            "at": 10294,
+            "targets": [
+              {
+                "id": "br-capture-scoreboard",
+                "width": 748,
+                "height": 148
+              }
+            ],
+            "bottom": "156px",
+            "after": "156px"
+          },
+          {
+            "at": 13013,
+            "targets": [
+              {
+                "id": "br-capture-scoreboard",
+                "width": 0,
+                "height": 0
+              }
+            ],
+            "bottom": "156px",
+            "after": "156px"
+          },
+          {
+            "at": 13445,
+            "targets": [
+              {
+                "id": "br-music-controls",
+                "width": 155.0625,
+                "height": 40
+              }
+            ],
+            "bottom": "156px",
+            "after": "156px"
+          }
+        ]
+      }
+    }
+  ],
+  "physicalDevices": "NOT_RUN",
+  "webkitNativePinch": "NOT_RUN"
+}

@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import {createRuleContext} from '../../packages/engine/src/index.js';
 import {currentCard} from './cards.mjs';
 import {rosterAudit} from './audit-report.mjs';
+import {GROUND_DAMAGE} from '../../packages/engine/src/combat/ground-damage.js';
 // Keep baseline serialization for IEEE-754 roundoff (Node/browser), never for
 // changed numbers. This avoids changing old content for a one-ULP expression.
 function canonicalRoundoff(value,reference){
@@ -15,7 +16,7 @@ function canonicalRoundoff(value,reference){
 export function effectiveContent(){
  const r=createRuleContext(),legacy=JSON.parse(fs.readFileSync('tests/baseline/content.json','utf8'));
  const content={roster:r.EMOJI_DB.map(a=>{const p=new r.Participant(a.id,a.n,a,new r.Vec2(0,0));return {id:a.id,name:a.n,tier:a.t,emoji:a.e,ability:a,maxHp:p.maxHp,radius:p.radius,speed:p.speed,damageMult:p.damageMult,basic:r.brProgressionCombat.basicProfile(a),skill:r.BRRework.defs[a.id]?.skill||r.brGetPlayableSkillInfo(a),timing:p.abilityTiming};}),retired:legacy.retired,history:legacy.history,reworkDefinitions:r.BRRework.defs,augments:r.brProgression.catalog,wanggui:r.BR_WANGGUI,xp:r.BR_RUN_XP,maxLevel:r.BR_RUN_MAX_LEVEL,maxChoices:r.BR_RUN_MAX_CHOICES,pathMaxTier:r.BR_RUN_PATH_MAX_TIER,deathXpCap:r.BR_DEATH_XP_CAP,ring:r.BR_RING_RULES,capture:r.BR_CAPTURE_RULES,respawn:r.BR_TEAM_KILL_RULES,tierChances:r.BR_TIER_CHANCES,questions:r.BR_DEFAULT_QUESTIONS,rosterVersion:r.BR_ROSTER_VERSION,
- balancePolicy:{bcBaseHp:1.06,rangedOutwardPush:.88,initialXp:1.10,soloInitialMultiplier:1.27,xpWave:1.10,healWave:1.15,genieHp:56,genieLifeTicks:1440}};
+ balancePolicy:{bcBaseHp:1.06,rangedOutwardPush:.88,initialXp:1.10,soloInitialMultiplier:1.27,xpWave:1.10,healWave:1.15,genieHp:56,genieLifeTicks:1440,residualGround:GROUND_DAMAGE}};
  // Legacy prose remains an immutable audit reference, never current card input.
  const cards=Object.fromEntries(r.EMOJI_DB.map(a=>[a.id,currentCard(r,a)]));
  const display={rosterVersion:r.BR_ROSTER_VERSION,odds:r.BR_TIER_CHANCES.map(([rank,p])=>rank+' '+Math.round(p*100)+'%').join(' · '),cards};
