@@ -9,7 +9,7 @@ PASS는 아래 기재한 실행 범위만 뜻한다. NOT_RUN/UNRESOLVED를 포�
 | B03 | 일반전 동등성 | 28 실제 시전 전후 비교의 비대상 직격/강타/가위/대마법사 및 기존 parity. |
 | N01 | 개인전 영구 탈락 | 20연결 실제 사망, 학생 bytes/views/RAF=0, 살아 있는 학생·호스트 계속 수신. |
 | N02 | 팀 생존전 탈락 | team-elim 권위 단위검사; 팀 진행·개인 순위 null. 해당 모드 브라우저는 NOT_RUN. |
-| N03 | 부활 모드 사망 | 6인 점령전 실제 퀴즈·재추첨·부활 후 이동/평타/스킬 PASS. 20인 브라우저는 CI 확인 대기. |
+| N03 | 부활 모드 사망 | 6인 점령전 실제 퀴즈·재추첨·부활 후 이동/평타/스킬 PASS. 20인 CI도 PASS19.211s. |
 | N04 | 탈락자 새로고침 | 실제 학생 새로고침 제한 FULL_STATE, 0 RAF. 살아 있는 참가자 연결 유지. |
 | N05 | 전송 필터 | 20 WS+역할별 송신계측: FX/이벤트/개인 뷰 생성 중단, 이미 전송된 분은 제외. |
 | N06 | 신뢰 cursor/큐 | cursor 증가 중단·PONG/늦은 ACTION 거절·RESULTS/REMATCH·스코프 검사. |
@@ -18,7 +18,7 @@ PASS는 아래 기재한 실행 범위만 뜻한다. NOT_RUN/UNRESOLVED를 포�
 | E01 | 반사 상태 만료 | 기존 실제 반사/300tick 단위검사, Canvas/Pixi 서버 상태 표시 직전/직후 검사. |
 | E02 | 보급 버프 종료 | 세 보급 상태의 서버 tick 종료와 Canvas/Pixi HUD 검사. |
 | E03 | 기절/포획 | 권위 stunEnd, 공통 action-state와 HUD 동일; 실제 Canvas/Pixi 잠금 해소. |
-| E04 | 가위 재사용 | 기존 v35.3 가위 3회/재사용·쿨타임 회귀 유지. 최종 CI에서 재확인. |
+| E04 | 가위 재사용 | 기존 v35.3 가위 3회/재사용·쿨타임 회귀 유지. 최초 CI Quick363개 및 기존 전투 회귀에서 재확인. |
 | E05 | 외계인 귀환 | 기존 외계인 private 원점·조기 귀환·기존 입력/UI 회귀 PASS. |
 | E06 | pause/연장/중첩 | 벽시계가 진행해도 tick299/end300 표시 유지; tick301 종료. effect별 timer 없음. 모든 연장 조합 브라우저는 NOT_RUN. |
 | E07 | 숨김/시야 재진입 | 기존 visibility/old-life/interest 재진입 회귀 유지. 이번 모든 장판 시야 재진입 시각 행렬은 NOT_RUN. |
@@ -56,7 +56,7 @@ PASS는 아래 기재한 실행 범위만 뜻한다. NOT_RUN/UNRESOLVED를 포�
 | D05 | 실드/반올림/귀속 | 기존 실드/피해/귀속 단위검사 및 실제 takeDamage 경로. 모든 신규1.10 반올림 경계값은 NOT_RUN. |
 | D06 | 비플레이어 경로 | 28시전 farm count/radius/damage 동일; 기존 native turret 정책 보존. |
 | D07 | 문구/콘텐츠 | 8경로 문구/manifest/display/hash 생성·check, 전체86 mechanics 검사. |
-| L01 | 같은 방 5회 | 20 서버5회 및6 Canvas5회 자원/연결; 20 Canvas/Pixi5회는 CI 확인 대기. |
+| L01 | 같은 방 5회 | 20 서버5회 및6 Canvas5회 자원/연결; 20 Canvas5회 CI PASS85.730s, Pixi5회는 수신 경계 검사 수정 후 CI 확인 대기. |
 | L02 | 지연/단절/숨김/resize | 기존 controls/recovery/continuous/touch CI 유지, 이번 winner/dead reload 실제 검사. 모바일 실물 NOT_RUN. |
 | P01 | 역할별 전후 비교 | 역할별 A/B 실측 완료. 탈락 개선 확정, 전원 생존 CPU/draw/p95 악화 표본은 UNRESOLVED. |
 | P02 | 30연결 단기 집중 | 동일30 S급10초 실측창 PASS, CPU/byte/queue 비교; 렌더 없음. |

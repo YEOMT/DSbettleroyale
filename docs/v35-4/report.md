@@ -33,7 +33,7 @@
 | Canvas/Pixi 종료 시점 화면 | PASS | 12.378s/11.991s; 실제 서버 상태, 반사·세 보급·기절. 정지 장면 검사는 성능 증거로 사용하지 않음 |
 | 서버만 20인/5회 | PASS | 후보47.333s; 기준1회16.569s, 동일 첫 라운드만 전후 비교 |
 | 서버만 30인 S급 집중 | PASS | 후보16.633s/기준16.737s, 10s 실측창; 렌더/실기기 시험 아님 |
-| 최종 Quick/Targeted/집중 CI | NOT_RUN | PR 제출 후 결과 갱신 |
+| 최초 PR Quick/Targeted/집중 CI | Quick PASS / Targeted FAIL / 집중 일부 FAIL | Quick363/363; 아래 CI checkpoint와 수정 내용 참조. 최종 재검사 상태는 PR25 Actions |
 | 실제 Android/iPhone/iPad·교실 Wi-Fi·600/1200s | NOT_RUN | 이번 실행으로 이전 미검증/장기 RSS 문제를 해결했다고 주장하지 않음 |
 
 최초 개발 실행과 준비 프레임을 둔 개발 실행의 20인 다중 화면은 기준본·후보 모두 초기 SAFE_PAUSED가 발생했다. 배포용 빌드 가설을 한 번씩 비교했고 후보는 통과했다. 이전 실패를 삭제하지 않았으며 개발 실행 전체 원인이 확정된 것은 아니다. 첫 6인 시험의 disposed `rw.entities` 조회는 테스트 fixture 오류였고, 안전 접근으로 수정한 뒤 5회 시나리오를 수행했다.
@@ -79,3 +79,13 @@ node tests/combat/polish354-feedback.mjs pixi
 Windows 로컬에는 `PLAYWRIGHT_CHANNEL=msedge`를 사용했다. 마지막 feedback 명령은 source fixture 사용을 위해 LOAD_BUILT를 해제한다. CI는 기존 Quick/Targeted를 유지하고, 신규 집중 검사만 별도 작업으로 실행한다. baseline archive는 정확한 dd331fd 소스이며 계측 fixture만 복사했다. 원시 실패 결과는 최종 성공 결과와 별도 기록한다.
 
 운영 배포/병합은 NOT_RUN 및 승인 범위 밖이다. PR의 필수 CI와 별도 집중 검사를 확인한 뒤 검토한다. 성능 조사 신호와 실기기/장기 위험은 다음 판단에서 그대로 고려해야 한다.
+
+### PR CI checkpoint (implementation commit 2a938fa)
+
+CI 44057010769: Quick PASS363/363 in236.279s, paired build PASS, Python ReleaseOps31/31 PASS. Focused run44057010913:20Canvas same-room5rounds PASS85.730s,20capture real quiz/respawn/action PASS19.211s,30S transport PASS. Pixi visual expiry test FAIL because a fixed150ms read observed the preceding supply snapshot; its20player scenario had not run. The test now waits for the exact published authority tick, retaining the same expiry assertions. A deliberate250ms receive delay passed locally14.876s and records before/received tick receipts. No game code, thresholds or timeout was changed for this test correction. Final CI status is reported on PR25; earlier failure remains in Actions.
+
+### CI 실패별 후속 수정
+
+- Targeted 두 E2E 결과 검사는 이전 `.br-rank` 목록 선택자를 사용했다. 승인된 새 상세표의 `tbody tr`로 바꾸고 참가자2명 assertion 및 실제 Results/Rematch를 유지했다. 기존 수동 Deep 화면 fixture도 시상/우승/팀 DOM의 원본 동일 검사를 보존하고, 의도적으로 바뀐 순위 표는 실제 서버 참가자 기록으로 검사하게 갱신했다. 이 수동 Deep suite는 NOT_RUN이다.
+- Canvas WebKit touch는5개 회전 크기·조작·결과까지 통과했지만 누적 pageerror에 ResizeObserver loop1건이 남아 FAIL했다. 로컬 WebKit의 수정 전 실행은 PASS15.703s여서 빈도/정확한 발화 시점은 미확정이다. 관찰 trace에서 점령전 scoreboard callback이 body layout 값을 동기 쓰는 경로를 확인했다. `capture-layout.js`는 그 쓰기를1개 예약 프레임으로 합치고 화면 종료 시 취소한다. 콜백 중 쓰기0/중복 예약1/취소 후0 단위 PASS0.075s, 기존 WebKit 회전·입력·Results/Rematch PASS15.552s. pageerror 검사를 유지하고 실패 시 학생·호스트 observer trace를 남긴다. 실물 Safari PASS로 해석하지 않는다.
+- 최초 CI의13개 선택 캐릭터 Canvas/Pixi, 기존 recovery/continuous, Pixi touch, roster10, 격리 ReleaseOps는 PASS다. 새 head의 필수 CI 재확인이 남아 있다.
