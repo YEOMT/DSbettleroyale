@@ -8,7 +8,7 @@
 - 기존 cf93779 작업 트리가 깨끗함을 확인하고, 병합된 main에서 `codex/v35-5-overdrive-identity`를 만들었다. 기존 브랜치/작업을 초기화하지 않았다. 구현 최종 commit은 PR head로 확인한다.
 - 406줄 상세 명세와 시작 지시문을 끝까지 읽었다. 명세 SHA256 `547787bd61da9bd79beff22b60bb7513aa92e35ff9639e13939f0f636bf68da1`.
 -86 ID/등급/추첨, v35.4 결과·탈락자 스트림 중단·F/S 특별전·승자3.5초·장판1.10배, 모드/입력/복구/재경기,60Hz/20Hz 보존. root index.html, apps/server, ReleaseOps, AWS/Pages/Firebase/Secrets/서버 설정 변경 없음.
-- Content hash `b9113f25bf2d75f91cbcf4762a760e8232a84cbcf5e4e011bf8a3492e5e8889c`; engine revision `v35.5-authority-1-overdrive`, package35.5.0. 최종 로컬 paired build `v33-4891c6e9c3078bff`, sourceHash `4891c6e9c3078bff9b9ac7339a5c2b788bda1b9617ab45da3d5c20f2f93d0bf7`.
+- Content hash `b9113f25bf2d75f91cbcf4762a760e8232a84cbcf5e4e011bf8a3492e5e8889c`; engine revision `v35.5-authority-1-overdrive`, package35.5.0. 최종 로컬 paired build `v33-dbd37c688e306987`, sourceHash `dbd37c688e30698722ca42cc7576415dbf1ec7ac1e4fe639a41773bccc1bc902`.
 
 ## 실제 변경
 
@@ -66,7 +66,7 @@ Windows/Node24.22.1/Edge headless, 같은PC의 별도 서버 process + 호스트
 - 추가 Sweep fixture FAIL2회: 넓은 전방 경로를 벽이 막는 기존 정책과11f 준비 잠금을 무시했다. 첫 대상은 벽 앞에 두고, 별도 두 번째 시전은 잠금 종료 뒤에 수행했다. 실제 사거리335/폭300/벽 방어 그대로.
 - 물리 dash fixture FAIL: 넓은 모아이의 몸보다 좁은50폭을 주어 기존 몸충돌이 먼저 막았다. 실제 몸폭을 사용해 같은 접촉 assertion 통과. cap fixture FAIL은 기존 profile cache를 바꾼 뒤 재사용한 시험 오류; 새 프로필 객체로 상한 확인.
 - 개발 실행의 reload observer TIMEOUT, 추가장면의 reload 후 `m is not defined`는 테스트 문맥 복원 오류였다. 모듈을 다시 읽고 장면 관찰을 reload 전에 배치했다. 최종 배포 빌드 Canvas/Pixi 검사에 모든 원래 assertions와 새 III/발사준비 검사를 유지해 PASS. 브라우저 오류를 숨기지 않았다.
--30인 고화질 FAIL은 미해결이다. 재시도로 덮지 않았다. 기준 main CI44064002326의 기존 WebKit Target crashed와 isolated warning-fixture 실패도 이 변경이 해결했다고 주장하지 않는다. main candidate44066196876는 성공했었다.
+-30인 고화질 FAIL은 미해결이다. 재시도로 덮지 않았다. 기준 main CI44064002326의 기존 WebKit Target crashed와 isolated warning-fixture 실패도 이 변경이 해결했다고 주장하지 않는다. main candidate44066196876는 status job만 성공했고 candidate/staging은 SKIPPED였다(실제 jobs 재조회로 정정).
 - [51항목](acceptance.md)은48 PASS/3 PARTIAL 범위를 구체적으로 기록한다. 실제 모바일,학교 네트워크,1GB 운영,장기 RSS 및 정밀 GPU 원인 분리는 미검증이다. 전체 완료/출시 가능 판정은 하지 않는다.
 
 ## 재현 명령과 PR
@@ -92,3 +92,18 @@ node tests/combat/overdrive355-live.mjs candidate pixi high
 후속 최소 조치: 격리 runner의 동일30인 결과와 런타임 렌더 구간 계측으로 공유 기기 경합과 실제 패치 비용을 분리한다. 사용자 승인 없이 운영 부하/메모리 덤프/재시작/배포를 실행하지 않는다.
 
 화면 근거: [패링](evidence/pan-contact.png), [4색](evidence/crayon-colors.png), [GIANT III](evidence/giant-iii.png), [RAPID III](evidence/rapid-iii.png), [WIDE III](evidence/wide-iii.png). 정지 화면은 연속 플레이/성능 개선의 증거로 사용하지 않는다.
+
+## PR26 첫 CI와 좁은 보정
+
+첫 head `a8e69ac` / CI44078183046 / focused44078183240, v35.4 regression44078183048. [첫 실행 원자료와 후속 로컬 실패](evidence/ci-first.json). 첫 v35.5 CI30Pixi high는 **PASS47.573s**였고, 이전 Windows30양쪽FAIL을 대체하지 않는다. v35.4 focused4job/Quick/roster10/복구/continuous/대부분 캐릭터/Pixi touch도 PASS.
+
+- Canvas20×5 **FAIL55.403s MATCH_CHANGED**: 테스트 IPC가 matchId를 바꾼 직후 ROOM_STATE를 기다리지 않고 START_QUIZ를 전송했다. 실제 host/두 학생의 scope와 UI match 수신을 기다린다. 검증/명령 epoch 기준 그대로.
+- Pixi20×5 **FAIL218.358s winner timeout**: 4번째 경기 결과 수신에 이전 최대 wall offset이 남아 실제 serverTime보다 약5265ms 앞선 계산으로3500ms 화면을 건너뛰었다. 같은 증상을 단위로 재현하고 match 변경 때만 clock estimate를 재설정한다. 같은 승자 deadline의 단조 감소/늦은 패킷 차단은 유지. OS/브라우저 시계 차이 발생 자체의 원인은 미확정.
+- Pixi identity **FAIL16.758s parry sound0**: 새 소리가 렌더 첫 프레임에 종속됐다. 기존 GameAudio의 확정 EVENT 중복 제거 경로에 현재 생명/복원/숨김 검사를 추가해 옮겼다. 단위에서 렌더 호출 없이 실패 재현→PASS. 표시 대기/그림 assertion을 삭제하지 않았다.
+- 반사 사과 파편의 원 발사자 seq90이 수비자 seq2 모션을 막는 실제 오류를 재현했다. 2차 파편은 기존 summon metadata로 식별해 새로운 입력인 것처럼 재확정하지 않는다. 탄속/피해/수/반사 판정은 불변.
+- Canvas/Pixi emoji092 raster FAIL은 승인된 원형→240° 패링 변경이었다. 그 단일 guard에 독립240° 원호/방향선 기대 그림을 적용하며, 실제 각도와 전체 PNG 동일성 및 다른 모든 원본 상태/엔티티 검사를 유지한다. Canvas 단일종 local PASS; Pixi 단일종 local PASS11.700s.
+- 좁은 보정 관련64개 단위 **PASS1.378s**, content/hash86 불변, paired build PASS. 최종 Pixi high 3화면9장면 **PASS28.259s**([원자료](evidence/identity-pixi-high-final.json)).
+- 관련20Pixi 재경기 로컬 재검사 **FAIL52.277s**, 전투0.700s SAFE_PAUSED로 첫 조작부터 차단되어 새 match-clock의5경기 브라우저 검증은 미완료. step p95/max29.28/110.84ms, snapshot p9535.99ms, event-loop max456.92ms, 송신 queue/buffer0. 이 실행도 보존하고 추가 반복하지 않았다.
+- 기존 Canvas/WebKit touch는 **FAIL(Target crashed)**; Chromium portion PASS80.046s, 브라우저 crash 원인은 미확정. 종료 뒤 ECONNRESET과 구분한다. isolated-release는 **INFRA_FAILURE**: 정확한 base a916726 후보 artifact 부재. 후보/검사를 다른 SHA로 우회하지 않는다. required-checks FAIL/targeted SKIPPED가 이에 따라 남았다.
+
+51항목의 현재 분류는 로컬 초기48PASS/3PARTIAL에서, 위5경기 재확인 미완료를 반영한 **46PASS/5PARTIAL**이다. 다음 commit의 remote 상태는 PR26에 별도로 갱신한다. 모든 필수 CI가 통과했다고 표시하지 않는다. 추가 검증 시도는 위 재현 실패 관련 경로에 한정했다.

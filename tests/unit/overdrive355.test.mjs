@@ -7,7 +7,45 @@ import {manifest} from '../../packages/content/src/manifest.js';
 import {rosterMechanics,sameMechanics} from '../../tools/ci/roster-scope.mjs';
 import {approved355,expected355} from '../v35-5/approved.mjs';
 import {giantOutline,overdriveEffect,overdriveShot} from '../../apps/client/src/render/overdrive-feedback.js';
+import {GameAudio} from '../../apps/client/src/audio/audio.js';
+import {AttackPoses} from '../../apps/client/src/render/attack-pose.js';
+import {Connection} from '../../apps/client/src/net/connection.js';
 const base=JSON.parse(fs.readFileSync(new URL('../v35-5/baseline.json',import.meta.url)));
+
+test('confirmed parry/goblin audio is independent of render scheduling, once per current life',()=>{
+ const prior=globalThis.document;globalThis.document={hidden:false};
+ try{
+  const sounds=[],audio=Object.assign(Object.create(GameAudio.prototype),{effects:true,seen:new Set(),session:{},controller:{sfx(){}},action:(...args)=>sounds.push(args)});
+  const event=(id,style='pan-contact',life=2)=>({eventId:id,type:'FX',data:{kind:'impact',sourceId:'self',style,geometry:{confirmed:true,lifeSeq:life}}});
+  audio.effect(event('pan'),'self',2);audio.effect(event('pan'),'self',2);assert.equal(sounds.length,1);
+  audio.effect(event('goblin','goblin-first'),'self',2);assert.equal(sounds.length,2);
+  audio.effect(event('old','pan-contact',1),'self',2);audio.effect(event('other'),'someone',2);audio.effect(event('restore'),'self',null);
+  const preview=event('preview');preview.data.geometry.confirmed=false;audio.effect(preview,'self',2);assert.equal(sounds.length,2);
+  document.hidden=true;audio.effect(event('hidden'),'self',2);document.hidden=false;audio.effect(event('hidden'),'self',2);assert.equal(sounds.length,2);
+ }finally{if(prior===undefined)delete globalThis.document;else globalThis.document=prior;}
+});
+
+test('a new match replaces previous wall-clock offset, while late prior-match packets stay rejected',t=>{
+ const prior=globalThis.sessionStorage;globalThis.sessionStorage={getItem:()=>null};t.mock.method(performance,'now',()=>10000);
+ try{
+  const c=new Connection('ws://fixture');c.scope={roomInstanceId:'room',matchId:'old',connectionEpoch:1};c.round=1;c.roomRevision=4;c.serverWallOffset=105000;
+  const room=(match,round,time)=>({type:'ROOM_STATE',roomInstanceId:'room',matchId:match,connectionEpoch:1,payload:{phase:'LOBBY',matchId:match,round,revision:1,serverTime:time}});
+  c.receive(room('new',2,110000));assert.equal(c.serverWallOffset,100000);assert.equal(c.scope.matchId,'new');
+  c.receive(room('old',1,120000));assert.equal(c.serverWallOffset,100000);assert.equal(c.scope.matchId,'new');
+ }finally{if(prior===undefined)delete globalThis.sessionStorage;else globalThis.sessionStorage=prior;}
+});
+
+test('reflected apple fragments cannot advance the defender input-pose sequence',t=>{
+ const f=setup(t,['emoji-075','emoji-092']),{w,g,R,v,ps:[source,defender]}=f;
+ f.place(defender,220);g.rebuildSpatialGrid();defender.activeInputCommand={kind:'skill',seq:1};f.cast(defender,v(-1));defender.activeInputCommand=null;
+ source.activeInputCommand={kind:'skill',seq:90};f.cast(source);source.activeInputCommand=null;
+ const root=R.world(g).entities.find(e=>e.kind==='projectile');f.tick(12);assert.ok(root.reflectedOnce);R.end(root,'range');
+ const shots=getTeacherState(w).shots.filter(q=>q.style==='apple-fragment');assert.equal(shots.length,8);
+ const poses=new AttackPoses(),actors=getTeacherState(w).actors;for(const q of shots)poses.accept({type:'SHOT_SPAWN',serverTick:g.frame,data:q},actors,0);
+ assert.equal(poses.fired.has(defender.remoteId+'/skill'),false);
+ poses.accept({type:'FX',serverTick:g.frame+1,data:{kind:'swing',sourceId:defender.remoteId,geometry:{confirmed:true,kind:'skill',seq:2,lifeSeq:defender.lifeSeq}}},actors,1);
+ assert.equal(poses.active.get(defender.remoteId).seq,2);
+});
 function setup(t,ids=['emoji-092','emoji-114','emoji-137'],mode='solo'){
  const w=createWorld(undefined,{mode,mapIndex:0},'overdrive355',ids.map((abilityId,i)=>({id:'p'+i,name:'Test '+i,abilityId,team:mode==='solo'?0:i?2:1})));t.after(()=>destroyWorld(w));
  const g=w.game,R=w.BRRework,v=(x,y=0)=>new w.Vec2(x,y),ps=ids.map((_,i)=>w.byId.get('p'+i));

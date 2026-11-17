@@ -42,7 +42,7 @@ export function applyOverdrive(S){
   if(e.splitDone||!['hit','wall','range'].includes(reason)||!R.validContext(ctx))return;e.splitDone=true;
   const hits=new Map(),rotation=(S.rand()-.5)*Math.PI/8;
   ctx.g.emitStudentFx?.('impact',e.pos,{size:36,color:apple.color,style:'apple-split',sourceId:ctx.ownerId,geometry:{confirmed:true,castId:ctx.castId,effectId:e.id+':split',displayMs:240}});
-  for(let i=0;i<8;i++)R.projectile(ctx,{pos:R.copy(e.pos),dir:new S.Vec2(Math.cos(rotation+i*Math.PI/4),Math.sin(rotation+i*Math.PI/4)),speed:apple.fragmentSpeed,range:apple.fragmentRange,radius:apple.fragmentRadius,damage:apple.fragmentDamage,knockback:apple.knockback,bounces:0,color:apple.color,displayEmoji:'',emoji:null,style:'apple-fragment',
+  for(let i=0;i<8;i++)R.projectile(ctx,{actionKind:'summon',pos:R.copy(e.pos),dir:new S.Vec2(Math.cos(rotation+i*Math.PI/4),Math.sin(rotation+i*Math.PI/4)),speed:apple.fragmentSpeed,range:apple.fragmentRange,radius:apple.fragmentRadius,damage:apple.fragmentDamage,knockback:apple.knockback,bounces:0,color:apple.color,displayEmoji:'',emoji:null,style:'apple-fragment',
    beforeHit:(_c,p)=>(hits.get(R.pid(p)+':'+R.life(p))||0)<2,
    onHit:(_c,p,result)=>{if(result.valid){const key=R.pid(p)+':'+R.life(p);hits.set(key,(hits.get(key)||0)+1);}}
   });
