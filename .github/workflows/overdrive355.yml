@@ -1,0 +1,73 @@
+name: v35.5 focused regression
+on:
+  pull_request:
+    paths:
+      - 'apps/client/**'
+      - 'packages/**'
+      - 'tests/combat/overdrive355*.mjs'
+      - 'tests/combat/polish354-authority.mjs'
+      - 'tests/unit/overdrive355.test.mjs'
+      - 'tests/v35-5/**'
+      - '.github/workflows/overdrive355.yml'
+  workflow_dispatch: null
+permissions:
+  contents: read
+concurrency:
+  group: overdrive355-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  identity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {renderer: canvas, quality: low}
+          - {renderer: pixi, quality: high}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: npm run build
+      - run: node tests/combat/overdrive355-balance.mjs candidate
+        if: matrix.renderer == 'canvas'
+      - run: node tests/combat/overdrive355-identity.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
+        env: {CLASSROOM_BUNDLE: '1', LOAD_BUILT: '1'}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: overdrive355-identity-${{ matrix.renderer }}-${{ github.sha }}
+          path: artifacts/v35-5/
+          retention-days: 30
+  continuous:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {renderer: canvas, quality: low, players: 20, rounds: 5}
+          - {renderer: pixi, quality: balanced, players: 20, rounds: 5}
+          - {renderer: pixi, quality: high, players: 30, rounds: 1}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: npm run build
+      - run: node tests/combat/overdrive355-live.mjs candidate ${{ matrix.renderer }} ${{ matrix.quality }}
+        env:
+          CLASSROOM_BUNDLE: '1'
+          LOAD_BUILT: '1'
+          POLISH_PLAYERS: ${{ matrix.players }}
+          POLISH_ROUNDS: ${{ matrix.rounds }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: overdrive355-live-${{ matrix.renderer }}-${{ matrix.players }}-${{ github.sha }}
+          path: artifacts/v35-5/
+          retention-days: 30

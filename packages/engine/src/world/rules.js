@@ -1,3 +1,4 @@
+import {CRAYON} from '../abilities/overdrive.js';
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
 export function install(__brScope){
 __brScope.getRangedWeaponStyle = function getRangedWeaponStyle(ability={}) {
@@ -67,7 +68,7 @@ __brScope.getPlayerSignatureProjectileProfile = function getPlayerSignatureProje
             else if(sub==='BOOMERANG')p.type='BOOMERANG';
             // Four low-rank skills keep their damage budget and gain a readable
             // signature. These changes apply only to the skill, never the basic.
-            if(ability.id==='emoji-094')Object.assign(p,{status:'stun',statusPower:10});
+            if(ability.id==='emoji-094')Object.assign(p,{status:null,statusPower:0});
             else if(ability.id==='emoji-096')Object.assign(p,{status:'stun',statusPower:12});
             else if(ability.id==='emoji-056')Object.assign(p,{status:'stun',statusPower:24});
             else if(ability.id==='emoji-126')p.spread=.055;
@@ -76,6 +77,8 @@ __brScope.getPlayerSignatureProjectileProfile = function getPlayerSignatureProje
             else if(!['NOVA','ICE_SHARD','RAPID_BOW','TOXIC_INJECTION'].includes(sub))p.speed=base.speed;
             if(['bomber','heavy','sniper'].includes(base.style))p.push=Math.max(p.push,base.knockback);
             if(__brScope.BR_V32_NATIVE_SKILLS.has(ability.id))Object.assign(p,__brScope.BR_V32_SKILL_FIELDS[ability.id]);
+            if(ability.id==='emoji-137')p.speed=65;
+            if(ability.id==='emoji-094')Object.assign(p,{...CRAYON,status:null,statusPower:0});
             return p;
         };
 

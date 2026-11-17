@@ -68,7 +68,7 @@ export class Timeline{
    if(target-born.tick>120&&!end||end&&target-end.tick>30){this.spawns.delete(id);if(end)this.terminals.delete(id);continue;}
    if(visibleIds.has(id)||born.tick>target)continue;
    if(!end||target<end.tick){if(!end&&born.seenInSnapshot||born.type==='ORBIT'||born.kind==='orbit'||!end&&target-born.tick>4.5)continue;const source=end?{...born,...end,path:end.path}:born;if(end&&!end.path?.length&&(end.curved||end.turn))continue;shots.push(sampleFlight(source,born,end?.tick??born.tick,target,born.tick));}
-   else if(born.type!=='ORBIT'&&target-end.tick<12&&['projectile','hook','lob','bomb',undefined].includes(born.kind)){const points=terminalPoints(end,born);if(points.length>=4)residuals.push({kind:'transit',tick:end.tick,x:end.x,y:end.y,color:end.color,geometry:{points,width:Math.min(5,end.radius*.4),displayMs:200},terminal:id});}
+   else if(born.type!=='ORBIT'&&target-end.tick<(born.crit!==undefined?9:12)&&['projectile','hook','lob','bomb',undefined].includes(born.kind)){const points=terminalPoints(end,born);if(points.length>=4)residuals.push({kind:'transit',tick:end.tick,x:end.x,y:end.y,color:end.color,geometry:{points,width:born.crit!==undefined?2:Math.min(5,end.radius*.4),displayMs:born.crit!==undefined?150:200},terminal:id});}
   }
   for(const [id,end] of this.terminals)if(this.renderTick-end.tick>30)this.terminals.delete(id);
   const handed=new Set(shots.filter(q=>['projectile','hook','lob','bomb'].includes(q.kind)).map(shotKey));

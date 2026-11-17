@@ -36,7 +36,16 @@ export class GameAudio{
   osc.type='sine';osc.frequency.setValueAtTime(number===5?880:660,at);gain.gain.setValueAtTime(.15*this.volume,at);gain.gain.exponentialRampToValueAtTime(.001,at+.14);
   osc.connect(gain);gain.connect(ac.destination);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(at);osc.stop(at+.15);
  }
- action(kind,weight=2){if(!this.effects)return;this.controller.ensure();this.controller.sfx(kind,weight);}
+ action(kind,weight=2){if(!this.effects)return;
+  if(kind==='sniper'||kind==='parry'){
+   if(document.hidden||this.volume<=0)return;
+   const ac=this.controller.ensure();if(!ac||ac.state!=='running')return;
+   const osc=ac.createOscillator(),gain=ac.createGain(),at=ac.currentTime;
+   osc.type=kind==='parry'?'triangle':'sawtooth';osc.frequency.setValueAtTime(kind==='parry'?1650:240,at);osc.frequency.exponentialRampToValueAtTime(kind==='parry'?670:65,at+.08);
+   gain.gain.setValueAtTime(.15*this.volume,at);gain.gain.exponentialRampToValueAtTime(.001,at+.13);osc.connect(gain);gain.connect(ac.destination);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(at);osc.stop(at+.14);return;
+  }
+  this.controller.ensure();this.controller.sfx(kind,weight);
+ }
  victory(){
   if(!this.effects||this.session.soundMuted||document.hidden||this.volume<=0)return;
   const ac=this.controller.ensure();if(!ac||ac.state!=='running')return;

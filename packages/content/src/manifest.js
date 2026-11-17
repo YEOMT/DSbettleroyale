@@ -1,5 +1,5 @@
 // Generated from current authority runtime by npm run content:generate; legacy baseline remains immutable.
-export const contentHash="a7b6405df41d8dc241c96b25a9bf4a77661a668053e7d593eeb8a4e6d8122e46";
+export const contentHash="b9113f25bf2d75f91cbcf4762a760e8232a84cbcf5e4e011bf8a3492e5e8889c";
 export const manifest={
   "roster": [
     {
@@ -2481,9 +2481,9 @@ export const manifest={
         "category": "원거리형",
         "concept": "멀리서 정확한 한 발을 노리는 저격수",
         "basicSummary": "단발 저격탄",
-        "skillSummary": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배.",
+        "skillSummary": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배. · 실제 탄속 105/틱",
         "skillLabel": "헤드슈터",
-        "skillDesc": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배."
+        "skillDesc": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배. · 실제 탄속 105/틱"
       },
       "maxHp": 349.2801,
       "radius": 45.6,
@@ -2536,7 +2536,7 @@ export const manifest={
         "ownerDeath": "cancel",
         "wallPolicy": "blocked",
         "targetBudget": 1,
-        "speed": 90,
+        "speed": 105,
         "color": "#fbbf24",
         "emoji": "•",
         "caps": {
@@ -2554,7 +2554,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배.",
+        "description": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배. · 실제 탄속 105/틱",
         "strength": "긴 사거리의 단발 화력",
         "success": "예고 뒤에도 탄도에 남은 적 적중",
         "failure": "방향 고정과 긴 재사용 대기",
@@ -4582,9 +4582,9 @@ export const manifest={
         "category": "원거리형",
         "concept": "착지 지점을 예고한 폭탄으로 중앙 명중을 노린다",
         "basicSummary": "작은 폭탄",
-        "skillSummary": "목표 지점을 표시한 뒤 0.8초 포물선 비행 후 한 번 폭발합니다. 중심부 피해가 더 크며 폭발 지점과 적 사이의 벽은 피해를 막습니다.",
+        "skillSummary": "42틱 비행 후 반경 245 폭발 30.45 · 중심 105 피해 49.35 · 벽 차단",
         "skillLabel": "다이너마이트",
-        "skillDesc": "목표 지점을 표시한 뒤 0.8초 포물선 비행 후 한 번 폭발합니다. 중심부 피해가 더 크며 폭발 지점과 적 사이의 벽은 피해를 막습니다."
+        "skillDesc": "42틱 비행 후 반경 245 폭발 30.45 · 중심 105 피해 49.35 · 벽 차단"
       },
       "maxHp": 353.51,
       "radius": 34.2,
@@ -4622,7 +4622,7 @@ export const manifest={
         "kind": "lob",
         "shape": "target",
         "windup": 0,
-        "duration": 48,
+        "duration": 42,
         "interval": 0,
         "count": 1,
         "countCap": 1,
@@ -4632,14 +4632,14 @@ export const manifest={
         "stunCap": 0,
         "range": 777,
         "width": 0,
-        "radius": 205,
+        "radius": 245,
         "cancelOnStun": true,
         "ownerDeath": "cancel",
         "wallPolicy": "blocked",
         "targetBudget": 1,
-        "innerRadius": 92,
+        "innerRadius": 105,
         "centerDamage": 49.35,
-        "flightFrames": 48,
+        "flightFrames": 42,
         "color": "#f97316",
         "emoji": "🧨",
         "caps": {
@@ -4658,7 +4658,7 @@ export const manifest={
           "utility": false,
           "signatureRange": true
         },
-        "description": "목표 지점을 표시한 뒤 0.8초 포물선 비행 후 한 번 폭발합니다. 중심부 피해가 더 크며 폭발 지점과 적 사이의 벽은 피해를 막습니다.",
+        "description": "42틱 비행 후 반경 245 폭발 30.45 · 중심 105 피해 49.35 · 벽 차단",
         "strength": "넓은 지점 폭격",
         "success": "느린 착탄을 예측해 조준",
         "failure": "피할 수 있는 긴 비행 시간",
@@ -4681,7 +4681,7 @@ export const manifest={
         },
         "cooldownFrames": 660,
         "windupFrames": 0,
-        "durationFrames": 48,
+        "durationFrames": 42,
         "intervalFrames": 0,
         "stunFrames": 0
       },
@@ -5537,7 +5537,7 @@ export const manifest={
         "category": "원거리형",
         "concept": "넓은 탄산 폭발로 적을 밀어내 거리를 확보한다",
         "basicSummary": "탄산컵",
-        "skillSummary": "한 개의 탄산 폭탄이 터지며 넓은 범위의 적을 바깥쪽으로 크게 밀어냅니다. 살상력보다 거리 확보에 집중합니다.",
+        "skillSummary": "탄산탄 1발 · 접촉/종점 반경 255 폭발 피해 계수 22 · 넉백 25 · 기절 없음",
         "projEmoji": "🥤",
         "pCount": 3,
         "pSize": 17,
@@ -5549,7 +5549,7 @@ export const manifest={
         "pTrail": "#38bdf8",
         "pImpact": "#e0f2fe",
         "skillLabel": "탄산 폭탄",
-        "skillDesc": "한 개의 탄산 폭탄이 터지며 넓은 범위의 적을 바깥쪽으로 크게 밀어냅니다. 살상력보다 거리 확보에 집중합니다."
+        "skillDesc": "탄산탄 1발 · 접촉/종점 반경 255 폭발 피해 계수 22 · 넉백 25 · 기절 없음"
       },
       "maxHp": 274.27500000000003,
       "radius": 38,
@@ -5591,7 +5591,7 @@ export const manifest={
         "interval": 0,
         "count": 1,
         "countCap": 1,
-        "damage": 19.95,
+        "damage": 22,
         "knockback": 25,
         "stun": 0,
         "stunCap": 0,
@@ -5603,7 +5603,7 @@ export const manifest={
         "wallPolicy": "blocked",
         "targetBudget": 1,
         "speed": 16.2,
-        "blastRadius": 220,
+        "blastRadius": 255,
         "color": "#67e8f9",
         "emoji": "🥤",
         "caps": {
@@ -5621,7 +5621,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "한 개의 탄산 폭탄이 터지며 넓은 범위의 적을 바깥쪽으로 크게 밀어냅니다. 살상력보다 거리 확보에 집중합니다.",
+        "description": "탄산탄 1발 · 접촉/종점 반경 255 폭발 피해 계수 22 · 넉백 25 · 기절 없음",
         "strength": "넓은 범위의 거리 확보",
         "success": "적이 가까이 모인 곳에 폭발",
         "failure": "낮은 폭발 피해",
@@ -6001,7 +6001,26 @@ export const manifest={
         "label": "정조준 관통 사격",
         "cooldown": 1080,
         "key": "native",
-        "desc": "빠른 관통탄 한 발로 일렬의 적을 타격합니다. 시전당 40% 확률로 직접 피해 2배. 자동 유도나 폭발은 없습니다."
+        "desc": "빠른 관통탄 한 발로 일렬의 적을 타격합니다. 시전당 40% 확률로 직접 피해 2배. 자동 유도나 폭발은 없습니다.",
+        "projectile": {
+          "count": 1,
+          "speed": 65,
+          "damage": 36.04,
+          "size": 9.36,
+          "type": "bullet",
+          "spread": 0,
+          "explode": 0,
+          "emoji": "•",
+          "range": 1070,
+          "pierce": true,
+          "bounces": 0,
+          "spin": 0,
+          "face": true,
+          "status": null,
+          "statusPower": 0,
+          "push": 14,
+          "style": "sniper"
+        }
       },
       "timing": {
         "cooldown": 273
@@ -6025,7 +6044,7 @@ export const manifest={
         "category": "원거리형",
         "concept": "긴 직선의 빠른 슬리퍼를 맞힌다",
         "basicSummary": "슬리퍼",
-        "skillSummary": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.",
+        "skillSummary": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다. · 실제 탄속 55/틱",
         "projEmoji": "🥿",
         "pCount": 2,
         "pSize": 14,
@@ -6035,7 +6054,7 @@ export const manifest={
         "pTrail": "#fb7185",
         "pImpact": "#ffe4e6",
         "skillLabel": "슬리퍼 스나이퍼",
-        "skillDesc": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다."
+        "skillDesc": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다. · 실제 탄속 55/틱"
       },
       "maxHp": 243.1905,
       "radius": 36.1,
@@ -6088,7 +6107,7 @@ export const manifest={
         "ownerDeath": "cancel",
         "wallPolicy": "blocked",
         "targetBudget": 1,
-        "speed": 38,
+        "speed": 55,
         "color": "#fda4af",
         "emoji": "🥿",
         "caps": {
@@ -6106,7 +6125,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.",
+        "description": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다. · 실제 탄속 55/틱",
         "strength": "빠른 정밀 단발",
         "success": "긴 직선 조준 적중",
         "failure": "추적과 폭발 없음",
@@ -6146,7 +6165,7 @@ export const manifest={
         "e": "🍎",
         "n": "사과 투척",
         "type": "PROJ",
-        "desc": "벽에 닿으면 두 조각으로 갈라지는 사과를 던진다",
+        "desc": "첫 접촉 또는 사거리 끝에서 8방향 파편으로 갈라지는 사과 수류탄",
         "projEmoji": "🍎",
         "pSize": 14,
         "pSpeed": 14,
@@ -6158,14 +6177,14 @@ export const manifest={
         "legacyIndex": 75,
         "timingSeed": "사과 투척",
         "category": "원거리형",
-        "concept": "벽에 닿으면 두 조각으로 갈라지는 사과를 던진다",
+        "concept": "첫 접촉 또는 사거리 끝에서 8방향 파편으로 갈라지는 사과 수류탄",
         "basicSummary": "사과",
-        "skillSummary": "사과 한 발이 첫 벽 반사 뒤 조각 2개로 나뉩니다. 원본은 사라지고 조각은 다시 분열하지 않습니다. 적에게 바로 맞으면 원본 피해만 줍니다.",
+        "skillSummary": "사과 1발의 첫 적/벽/상자 접촉 또는 사거리 끝에서 8방향 파편 · 파편 피해 8, 같은 폭발은 대상당 최대 2개 · 파편 재분열 없음",
         "pCount": 2,
         "pBounce": 3,
         "spinRate": 0.25,
         "skillLabel": "사과 투척",
-        "skillDesc": "사과 한 발이 첫 벽 반사 뒤 조각 2개로 나뉩니다. 원본은 사라지고 조각은 다시 분열하지 않습니다. 적에게 바로 맞으면 원본 피해만 줍니다."
+        "skillDesc": "사과 1발의 첫 적/벽/상자 접촉 또는 사거리 끝에서 8방향 파편 · 파편 피해 8, 같은 폭발은 대상당 최대 2개 · 파편 재분열 없음"
       },
       "maxHp": 329.13,
       "radius": 38,
@@ -6200,7 +6219,7 @@ export const manifest={
       "skill": {
         "label": "사과 투척",
         "cooldown": 480,
-        "kind": "split-bounce",
+        "kind": "apple-fragments",
         "shape": "line",
         "windup": 0,
         "duration": 0,
@@ -6219,13 +6238,13 @@ export const manifest={
         "wallPolicy": "blocked",
         "targetBudget": 1,
         "speed": 19,
-        "bounces": 1,
-        "fragmentCount": 2,
-        "fragmentDamage": 13.65,
-        "fragmentRadius": 11.44,
-        "fragmentRange": 400,
-        "fragmentSpeed": 23,
-        "fragmentDuration": 30,
+        "bounces": 0,
+        "fragmentCount": 8,
+        "fragmentDamage": 8,
+        "fragmentRadius": 10.5,
+        "fragmentRange": 250,
+        "fragmentSpeed": 24,
+        "fragmentDuration": 12,
         "splitAngle": 0.28,
         "color": "#f87171",
         "emoji": "🍎",
@@ -6244,11 +6263,11 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "사과 한 발이 첫 벽 반사 뒤 조각 2개로 나뉩니다. 원본은 사라지고 조각은 다시 분열하지 않습니다. 적에게 바로 맞으면 원본 피해만 줍니다.",
-        "strength": "벽 뒤 반사 각도에서 분열",
-        "success": "벽을 이용해 두 조각 적중",
-        "failure": "분열 조건과 짧은 조각 사거리",
-        "counterplay": "벽에서 떨어져 싸우기",
+        "description": "사과 1발의 첫 적/벽/상자 접촉 또는 사거리 끝에서 8방향 파편 · 파편 피해 8, 같은 폭발은 대상당 최대 2개 · 파편 재분열 없음",
+        "strength": "벽 없이도 첫 접촉에서 파편 생성",
+        "success": "직접 명중과 최대 두 파편 접촉",
+        "failure": "파편 짧은 사거리·벽 차단",
+        "counterplay": "분열 위치에서 거리 벌리기",
         "capabilities": {
           "damage": true,
           "projectile": true,
@@ -6268,7 +6287,8 @@ export const manifest={
         "windupFrames": 0,
         "durationFrames": 0,
         "intervalFrames": 0,
-        "stunFrames": 0
+        "stunFrames": 0,
+        "fragmentTargetCap": 2
       },
       "timing": {
         "cooldown": 480
@@ -6416,8 +6436,8 @@ export const manifest={
         "t": "C",
         "e": "🍳",
         "n": "팬테옹",
-        "type": "PROJ",
-        "desc": "프라이팬으로 거리를 두다 공격 순간 반격한다",
+        "type": "MELEE",
+        "desc": "프라이팬 근접 타격과 첫 접촉 패링으로 받아친다",
         "projEmoji": "🍳",
         "pSize": 19,
         "pSpeed": 12,
@@ -6428,56 +6448,41 @@ export const manifest={
         "id": "emoji-092",
         "legacyIndex": 92,
         "timingSeed": "프라이팬 투척",
-        "category": "원거리형",
-        "concept": "프라이팬으로 거리를 두다 공격 순간 반격한다",
-        "basicSummary": "프라이팬",
-        "skillSummary": "0.8초 패리 중 피해가 28% 줄고, 실제 잃은 HP를 공격자별로 기록했다가 종료 시 각 공격자에게 50%씩 한 번 반환합니다. 중단 시 반환하지 않습니다.",
+        "category": "근접형",
+        "concept": "프라이팬 근접 타격과 첫 접촉 패링으로 받아친다",
+        "basicSummary": "근접 프라이팬 후려치기",
+        "skillSummary": "전방 240°를 1.2초간 패링 · 받는 피해 28% 감소 · 첫 비행탄은 실제 반사, 첫 근접 접촉은 즉시 반격 · 성공/기절/강제 이동 시 종료",
         "knockback": 19,
         "spinRate": 0.3,
         "customCooldown": 145,
         "combat": {
           "skill": "counter"
         },
-        "skillLabel": "팬테옹",
-        "skillDesc": "0.8초 패리 중 피해가 28% 줄고, 실제 잃은 HP를 공격자별로 기록했다가 종료 시 각 공격자에게 50%씩 한 번 반환합니다. 중단 시 반환하지 않습니다."
+        "skillLabel": "깡! 받아치기",
+        "skillDesc": "전방 240°를 1.2초간 패링 · 받는 피해 28% 감소 · 첫 비행탄은 실제 반사, 첫 근접 접촉은 즉시 반격 · 성공/기절/강제 이동 시 종료"
       },
       "maxHp": 268.7895,
       "radius": 39.9,
       "speed": 1.5,
       "damageMult": 2.5,
       "basic": {
-        "close": false,
-        "rangeBonus": 86,
-        "halfAngle": 1.5207754699891265,
-        "cooldownScale": 1.14,
-        "damageScale": 1.16,
-        "pushScale": 1,
+        "close": true,
+        "rangeBonus": 100,
+        "halfAngle": 1.1,
+        "cooldownScale": 1,
+        "damageScale": 1.1772000000000002,
+        "pushScale": 0.3,
         "stun": 0,
         "reward": "",
-        "style": "heavy",
-        "range": 642,
-        "speed": 9.72,
-        "count": 1,
-        "knockback": 8.96,
-        "explodeRadius": 0,
-        "emoji": "🍳",
-        "type": "bullet",
-        "spread": 0,
-        "pierce": false,
-        "bounces": 0,
-        "explode": 0,
-        "status": null,
-        "statusPower": 0,
-        "spin": 0.3,
-        "face": false
+        "style": "slash"
       },
       "skill": {
-        "label": "팬테옹",
-        "kind": "counter-deferred",
-        "shape": "circle",
+        "label": "깡! 받아치기",
+        "kind": "pan-parry",
+        "shape": "cone",
         "cooldown": 480,
         "windup": 0,
-        "duration": 48,
+        "duration": 72,
         "interval": 0,
         "count": 1,
         "countCap": 1,
@@ -6485,7 +6490,7 @@ export const manifest={
         "knockback": 0,
         "stun": 0,
         "stunCap": 0,
-        "range": 0,
+        "range": 90,
         "width": 0,
         "radius": 90,
         "cancelOnStun": true,
@@ -6508,11 +6513,11 @@ export const manifest={
           "duration": true,
           "utility": true
         },
-        "description": "0.8초 패리 중 피해가 28% 줄고, 실제 잃은 HP를 공격자별로 기록했다가 종료 시 각 공격자에게 50%씩 한 번 반환합니다. 중단 시 반환하지 않습니다.",
-        "strength": "짧은 타이밍의 되받아치기",
-        "success": "직접 공격 순간 패리",
-        "failure": "무피해·중단 시 반환 없음",
-        "counterplay": "패리 종료 뒤 공격",
+        "description": "전방 240°를 1.2초간 패링 · 받는 피해 28% 감소 · 첫 비행탄은 실제 반사, 첫 근접 접촉은 즉시 반격 · 성공/기절/강제 이동 시 종료",
+        "strength": "첫 정면 접촉의 실제 반사/즉시 반격",
+        "success": "1.2초 안의 정면 유효 접촉",
+        "failure": "뒤쪽·장판·폭발·기절에는 패링 불가",
+        "counterplay": "뒷면이나 패링 종료 뒤 공격",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -6530,12 +6535,13 @@ export const manifest={
         },
         "cooldownFrames": 480,
         "windupFrames": 0,
-        "durationFrames": 48,
+        "durationFrames": 72,
         "intervalFrames": 0,
         "stunFrames": 0,
         "damageReduction": 0.28,
-        "reflectRatio": 0.5,
-        "reflectRange": 1400
+        "reflectRatio": 0,
+        "reflectRange": 0,
+        "halfAngle": 2.0943951023931953
       },
       "timing": {
         "cooldown": 480
@@ -6551,7 +6557,7 @@ export const manifest={
         "e": "🖍️",
         "n": "크레파스 난사",
         "type": "PROJ",
-        "desc": "퍼지는 색연필로 정면을 채운다",
+        "desc": "빨강 직격·파랑 감속·노랑 기절·초록 지속 피해의 네 색 난사",
         "projEmoji": "🖍️",
         "pCount": 4,
         "pSize": 10,
@@ -6565,12 +6571,12 @@ export const manifest={
         "legacyIndex": 94,
         "timingSeed": "크레파스 난사",
         "category": "원거리형",
-        "concept": "퍼지는 색연필로 정면을 채운다",
+        "concept": "빨강 직격·파랑 감속·노랑 기절·초록 지속 피해의 네 색 난사",
         "basicSummary": "크레파스",
-        "skillSummary": "크레파스 4발을 부채꼴로 발사합니다. 적중한 탄은 짧은 기절을 줍니다.",
+        "skillSummary": "좌→우 빨강 1.60배 직격 / 파랑 0.85배·25% 감속 1.5초 / 노랑 0.80배·기절 0.35초(시전당 한 번) / 초록 0.80배·0.5초마다 4 피해×4틱. 추가 탄도 같은 색 순서, 평타에는 미적용.",
         "customCooldown": 115,
         "skillLabel": "크레파스 산탄",
-        "skillDesc": "크레파스 4발을 부채꼴로 발사합니다. 적중한 탄은 짧은 기절을 줍니다."
+        "skillDesc": "좌→우 빨강 1.60배 직격 / 파랑 0.85배·25% 감속 1.5초 / 노랑 0.80배·기절 0.35초(시전당 한 번) / 초록 0.80배·0.5초마다 4 피해×4틱. 추가 탄도 같은 색 순서, 평타에는 미적용."
       },
       "maxHp": 243.1905,
       "radius": 36.1,
@@ -6606,7 +6612,44 @@ export const manifest={
         "label": "크레파스 산탄",
         "cooldown": 1035,
         "key": "native",
-        "desc": "크레파스 4발을 부채꼴로 발사합니다. 적중한 탄은 짧은 기절을 줍니다."
+        "desc": "좌→우 빨강 1.60배 직격 / 파랑 0.85배·25% 감속 1.5초 / 노랑 0.80배·기절 0.35초(시전당 한 번) / 초록 0.80배·0.5초마다 4 피해×4틱. 추가 탄도 같은 색 순서, 평타에는 미적용.",
+        "projectile": {
+          "count": 4,
+          "speed": 16.8,
+          "damage": 3.15,
+          "size": 10,
+          "type": "bullet",
+          "spread": 0.2,
+          "explode": 0,
+          "emoji": "🖍️",
+          "range": 830,
+          "pierce": false,
+          "bounces": 0,
+          "spin": 0.45,
+          "face": false,
+          "status": null,
+          "statusPower": 0,
+          "push": 3,
+          "style": "machine",
+          "colors": [
+            "#ef4444",
+            "#38bdf8",
+            "#fde047",
+            "#4ade80"
+          ],
+          "colorDamage": [
+            1.6,
+            0.85,
+            0.8,
+            0.8
+          ],
+          "slowMultiplier": 0.75,
+          "slowFrames": 90,
+          "stunFrames": 21,
+          "dotDamage": 4,
+          "dotFrames": 120,
+          "dotInterval": 30
+        }
       },
       "timing": {
         "cooldown": 160
@@ -6868,12 +6911,12 @@ export const manifest={
         "category": "원거리형",
         "concept": "빗자루로 전방의 적을 조준 방향으로 쓸어낸다",
         "basicSummary": "근접 빗자루 쓸기",
-        "skillSummary": "전방 직사각형을 쓸어 맞은 적 모두를 조준 방향으로 밀어냅니다. 옆·뒤·벽 너머의 적은 맞지 않습니다.",
+        "skillSummary": "전방 335×300 직사각형 쓸기 · 피해 14 · 조준 방향 넉백 42 · 준비 10틱 · 벽 너머/뒤쪽 제외 · 기절 없음",
         "pCount": 2,
         "pierce": true,
         "faceDir": true,
         "skillLabel": "청소반장",
-        "skillDesc": "전방 직사각형을 쓸어 맞은 적 모두를 조준 방향으로 밀어냅니다. 옆·뒤·벽 너머의 적은 맞지 않습니다."
+        "skillDesc": "전방 335×300 직사각형 쓸기 · 피해 14 · 조준 방향 넉백 42 · 준비 10틱 · 벽 너머/뒤쪽 제외 · 기절 없음"
       },
       "maxHp": 474.9913649250001,
       "radius": 43.092,
@@ -6901,11 +6944,11 @@ export const manifest={
         "count": 1,
         "countCap": 1,
         "damage": 14,
-        "knockback": 27,
+        "knockback": 42,
         "stun": 0,
         "stunCap": 0,
-        "range": 235,
-        "width": 210,
+        "range": 335,
+        "width": 300,
         "radius": 0,
         "cancelOnStun": true,
         "ownerDeath": "cancel",
@@ -6927,7 +6970,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "전방 직사각형을 쓸어 맞은 적 모두를 조준 방향으로 밀어냅니다. 옆·뒤·벽 너머의 적은 맞지 않습니다.",
+        "description": "전방 335×300 직사각형 쓸기 · 피해 14 · 조준 방향 넉백 42 · 준비 10틱 · 벽 너머/뒤쪽 제외 · 기절 없음",
         "strength": "전방 다수의 방향성 밀침",
         "success": "보호할 아군 앞에서 쓸기",
         "failure": "옆과 뒤는 무방비",
@@ -6984,11 +7027,11 @@ export const manifest={
         "category": "원거리형",
         "concept": "통조림 폭발과 짧은 가시 지대로 길을 막는다",
         "basicSummary": "통조림",
-        "skillSummary": "통조림 충돌 폭발 11.55 · 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음",
+        "skillSummary": "반경 100 통조림 충돌 폭발 11.55 · 반경 145의 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음",
         "pExplode": 48,
         "knockback": 8,
         "skillLabel": "통조림 투척",
-        "skillDesc": "통조림 충돌 폭발 11.55 · 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음"
+        "skillDesc": "반경 100 통조림 충돌 폭발 11.55 · 반경 145의 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음"
       },
       "maxHp": 292.56,
       "radius": 38,
@@ -7042,8 +7085,8 @@ export const manifest={
         "wallPolicy": "blocked",
         "targetBudget": 1,
         "speed": 16.2,
-        "blastRadius": 78,
-        "thornRadius": 122,
+        "blastRadius": 100,
+        "thornRadius": 145,
         "thornDamage": 4.389,
         "thornInterval": 30,
         "zoneCap": 1,
@@ -7064,7 +7107,7 @@ export const manifest={
           "duration": true,
           "utility": false
         },
-        "description": "통조림 충돌 폭발 11.55 · 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음",
+        "description": "반경 100 통조림 충돌 폭발 11.55 · 반경 145의 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음",
         "strength": "짧은 길목 압박",
         "success": "좁은 이동 경로에 통조림 깨기",
         "failure": "낮은 즉시 피해",
@@ -8651,14 +8694,14 @@ export const manifest={
         "sub": "ROSTER10_148",
         "sizeMult": 1,
         "category": "근접형",
-        "desc": "짧은 보호막과 평타 가속으로 교전을 버틴다",
-        "concept": "짧은 보호막과 평타 가속으로 교전을 버틴다",
+        "desc": "짧은 보호막과 평타 가속 중 첫 유효 평타로 한 명을 기절시킨다",
+        "concept": "짧은 보호막과 평타 가속 중 첫 유효 평타로 한 명을 기절시킨다",
         "basicSummary": "방망이 타격",
-        "skillSummary": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신)",
+        "skillSummary": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신) · 활성 중 첫 유효 평타 한 명에게 0.45초 기절",
         "pTrail": "#fb7185",
         "projEmoji": "👹",
         "skillLabel": "도깨비",
-        "skillDesc": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신)"
+        "skillDesc": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신) · 활성 중 첫 유효 평타 한 명에게 0.45초 기절"
       },
       "maxHp": 332.27502,
       "radius": 38,
@@ -8683,7 +8726,7 @@ export const manifest={
         "durationFrames": 180,
         "shieldRatio": 0.15,
         "attackRate": 1.2,
-        "description": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신)",
+        "description": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신) · 활성 중 첫 유효 평타 한 명에게 0.45초 기절",
         "capabilities": {
           "damage": false,
           "projectile": false,
@@ -8732,7 +8775,8 @@ export const manifest={
           "signatureRange": false,
           "signatureDuration": false
         },
-        "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement"
+        "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement",
+        "firstBasicStun": 27
       },
       "timing": {
         "cooldown": 600
@@ -12490,7 +12534,7 @@ export const manifest={
         "ownerDeath": "cancel",
         "wallPolicy": "blocked",
         "targetBudget": 1,
-        "speed": 90,
+        "speed": 105,
         "color": "#fbbf24",
         "emoji": "•",
         "caps": {
@@ -12508,7 +12552,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배.",
+        "description": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배. · 실제 탄속 105/틱",
         "strength": "긴 사거리의 단발 화력",
         "success": "예고 뒤에도 탄도에 남은 적 적중",
         "failure": "방향 고정과 긴 재사용 대기",
@@ -13751,7 +13795,7 @@ export const manifest={
         "shape": "target",
         "cooldown": 660,
         "windup": 0,
-        "duration": 48,
+        "duration": 42,
         "interval": 0,
         "count": 1,
         "countCap": 1,
@@ -13761,14 +13805,14 @@ export const manifest={
         "stunCap": 0,
         "range": 777,
         "width": 0,
-        "radius": 205,
+        "radius": 245,
         "cancelOnStun": true,
         "ownerDeath": "cancel",
         "wallPolicy": "blocked",
         "targetBudget": 1,
-        "innerRadius": 92,
+        "innerRadius": 105,
         "centerDamage": 49.35,
-        "flightFrames": 48,
+        "flightFrames": 42,
         "color": "#f97316",
         "emoji": "🧨",
         "caps": {
@@ -13787,7 +13831,7 @@ export const manifest={
           "utility": false,
           "signatureRange": true
         },
-        "description": "목표 지점을 표시한 뒤 0.8초 포물선 비행 후 한 번 폭발합니다. 중심부 피해가 더 크며 폭발 지점과 적 사이의 벽은 피해를 막습니다.",
+        "description": "42틱 비행 후 반경 245 폭발 30.45 · 중심 105 피해 49.35 · 벽 차단",
         "strength": "넓은 지점 폭격",
         "success": "느린 착탄을 예측해 조준",
         "failure": "피할 수 있는 긴 비행 시간",
@@ -13810,7 +13854,7 @@ export const manifest={
         },
         "cooldownFrames": 660,
         "windupFrames": 0,
-        "durationFrames": 48,
+        "durationFrames": 42,
         "intervalFrames": 0,
         "stunFrames": 0
       },
@@ -14254,7 +14298,7 @@ export const manifest={
         "interval": 0,
         "count": 1,
         "countCap": 1,
-        "damage": 19.95,
+        "damage": 22,
         "knockback": 25,
         "stun": 0,
         "stunCap": 0,
@@ -14266,7 +14310,7 @@ export const manifest={
         "wallPolicy": "blocked",
         "targetBudget": 1,
         "speed": 16.2,
-        "blastRadius": 220,
+        "blastRadius": 255,
         "color": "#67e8f9",
         "emoji": "🥤",
         "caps": {
@@ -14284,7 +14328,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "한 개의 탄산 폭탄이 터지며 넓은 범위의 적을 바깥쪽으로 크게 밀어냅니다. 살상력보다 거리 확보에 집중합니다.",
+        "description": "탄산탄 1발 · 접촉/종점 반경 255 폭발 피해 계수 22 · 넉백 25 · 기절 없음",
         "strength": "넓은 범위의 거리 확보",
         "success": "적이 가까이 모인 곳에 폭발",
         "failure": "낮은 폭발 피해",
@@ -14421,7 +14465,7 @@ export const manifest={
         "ownerDeath": "cancel",
         "wallPolicy": "blocked",
         "targetBudget": 1,
-        "speed": 38,
+        "speed": 55,
         "color": "#fda4af",
         "emoji": "🥿",
         "caps": {
@@ -14439,7 +14483,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다.",
+        "description": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다. · 실제 탄속 55/틱",
         "strength": "빠른 정밀 단발",
         "success": "긴 직선 조준 적중",
         "failure": "추적과 폭발 없음",
@@ -14479,7 +14523,7 @@ export const manifest={
       },
       "skill": {
         "label": "사과 투척",
-        "kind": "split-bounce",
+        "kind": "apple-fragments",
         "shape": "line",
         "cooldown": 480,
         "windup": 0,
@@ -14499,13 +14543,13 @@ export const manifest={
         "wallPolicy": "blocked",
         "targetBudget": 1,
         "speed": 19,
-        "bounces": 1,
-        "fragmentCount": 2,
-        "fragmentDamage": 13.65,
-        "fragmentRadius": 11.44,
-        "fragmentRange": 400,
-        "fragmentSpeed": 23,
-        "fragmentDuration": 30,
+        "bounces": 0,
+        "fragmentCount": 8,
+        "fragmentDamage": 8,
+        "fragmentRadius": 10.5,
+        "fragmentRange": 250,
+        "fragmentSpeed": 24,
+        "fragmentDuration": 12,
         "splitAngle": 0.28,
         "color": "#f87171",
         "emoji": "🍎",
@@ -14524,11 +14568,11 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "사과 한 발이 첫 벽 반사 뒤 조각 2개로 나뉩니다. 원본은 사라지고 조각은 다시 분열하지 않습니다. 적에게 바로 맞으면 원본 피해만 줍니다.",
-        "strength": "벽 뒤 반사 각도에서 분열",
-        "success": "벽을 이용해 두 조각 적중",
-        "failure": "분열 조건과 짧은 조각 사거리",
-        "counterplay": "벽에서 떨어져 싸우기",
+        "description": "사과 1발의 첫 적/벽/상자 접촉 또는 사거리 끝에서 8방향 파편 · 파편 피해 8, 같은 폭발은 대상당 최대 2개 · 파편 재분열 없음",
+        "strength": "벽 없이도 첫 접촉에서 파편 생성",
+        "success": "직접 명중과 최대 두 파편 접촉",
+        "failure": "파편 짧은 사거리·벽 차단",
+        "counterplay": "분열 위치에서 거리 벌리기",
         "capabilities": {
           "damage": true,
           "projectile": true,
@@ -14548,11 +14592,12 @@ export const manifest={
         "windupFrames": 0,
         "durationFrames": 0,
         "intervalFrames": 0,
-        "stunFrames": 0
+        "stunFrames": 0,
+        "fragmentTargetCap": 2
       },
       "stats": {},
       "basicSummary": "사과",
-      "concept": "벽에 닿으면 두 조각으로 갈라지는 사과를 던진다"
+      "concept": "첫 접촉 또는 사거리 끝에서 8방향 파편으로 갈라지는 사과 수류탄"
     },
     "emoji-077": {
       "name": "크루아상 부메랑",
@@ -14638,18 +14683,26 @@ export const manifest={
     "emoji-092": {
       "name": "팬테옹",
       "rank": "C",
-      "role": "원거리형",
-      "category": "원거리형",
+      "role": "근접형",
+      "category": "근접형",
       "basic": {
-        "stun": 0
+        "stun": 0,
+        "close": true,
+        "rangeBonus": 100,
+        "halfAngle": 1.1,
+        "cooldownScale": 1,
+        "damageScale": 1,
+        "pushScale": 0.25,
+        "reward": "",
+        "style": "slash"
       },
       "skill": {
-        "label": "팬테옹",
-        "kind": "counter-deferred",
-        "shape": "circle",
+        "label": "깡! 받아치기",
+        "kind": "pan-parry",
+        "shape": "cone",
         "cooldown": 480,
         "windup": 0,
-        "duration": 48,
+        "duration": 72,
         "interval": 0,
         "count": 1,
         "countCap": 1,
@@ -14657,7 +14710,7 @@ export const manifest={
         "knockback": 0,
         "stun": 0,
         "stunCap": 0,
-        "range": 0,
+        "range": 90,
         "width": 0,
         "radius": 90,
         "cancelOnStun": true,
@@ -14665,8 +14718,8 @@ export const manifest={
         "wallPolicy": "blocked",
         "targetBudget": 1,
         "damageReduction": 0.28,
-        "reflectRatio": 0.5,
-        "reflectRange": 1400,
+        "reflectRatio": 0,
+        "reflectRange": 0,
         "color": "#cbd5e1",
         "caps": {
           "damage": true,
@@ -14683,11 +14736,11 @@ export const manifest={
           "duration": true,
           "utility": true
         },
-        "description": "0.8초 패리 중 피해가 28% 줄고, 실제 잃은 HP를 공격자별로 기록했다가 종료 시 각 공격자에게 50%씩 한 번 반환합니다. 중단 시 반환하지 않습니다.",
-        "strength": "짧은 타이밍의 되받아치기",
-        "success": "직접 공격 순간 패리",
-        "failure": "무피해·중단 시 반환 없음",
-        "counterplay": "패리 종료 뒤 공격",
+        "description": "전방 240°를 1.2초간 패링 · 받는 피해 28% 감소 · 첫 비행탄은 실제 반사, 첫 근접 접촉은 즉시 반격 · 성공/기절/강제 이동 시 종료",
+        "strength": "첫 정면 접촉의 실제 반사/즉시 반격",
+        "success": "1.2초 안의 정면 유효 접촉",
+        "failure": "뒤쪽·장판·폭발·기절에는 패링 불가",
+        "counterplay": "뒷면이나 패링 종료 뒤 공격",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -14705,13 +14758,20 @@ export const manifest={
         },
         "cooldownFrames": 480,
         "windupFrames": 0,
-        "durationFrames": 48,
+        "durationFrames": 72,
         "intervalFrames": 0,
-        "stunFrames": 0
+        "stunFrames": 0,
+        "halfAngle": 2.0943951023931953
       },
-      "stats": {},
-      "basicSummary": "프라이팬",
-      "concept": "프라이팬으로 거리를 두다 공격 순간 반격한다"
+      "stats": {
+        "finalBaseHp": 253.57499999999996,
+        "speed": 1.5,
+        "radius": 39.9,
+        "rangedMovement": true
+      },
+      "basicSummary": "근접 프라이팬 후려치기",
+      "statType": "PROJ",
+      "concept": "프라이팬 근접 타격과 첫 접촉 패링으로 받아친다"
     },
     "emoji-105": {
       "name": "응원단장",
@@ -14902,11 +14962,11 @@ export const manifest={
         "count": 1,
         "countCap": 1,
         "damage": 14,
-        "knockback": 27,
+        "knockback": 42,
         "stun": 0,
         "stunCap": 0,
-        "range": 235,
-        "width": 210,
+        "range": 335,
+        "width": 300,
         "radius": 0,
         "cancelOnStun": true,
         "ownerDeath": "cancel",
@@ -14928,7 +14988,7 @@ export const manifest={
           "duration": false,
           "utility": false
         },
-        "description": "전방 직사각형을 쓸어 맞은 적 모두를 조준 방향으로 밀어냅니다. 옆·뒤·벽 너머의 적은 맞지 않습니다.",
+        "description": "전방 335×300 직사각형 쓸기 · 피해 14 · 조준 방향 넉백 42 · 준비 10틱 · 벽 너머/뒤쪽 제외 · 기절 없음",
         "strength": "전방 다수의 방향성 밀침",
         "success": "보호할 아군 앞에서 쓸기",
         "failure": "옆과 뒤는 무방비",
@@ -14991,8 +15051,8 @@ export const manifest={
         "wallPolicy": "blocked",
         "targetBudget": 1,
         "speed": 16.2,
-        "blastRadius": 78,
-        "thornRadius": 122,
+        "blastRadius": 100,
+        "thornRadius": 145,
         "thornDamage": 4.389,
         "thornInterval": 30,
         "zoneCap": 1,
@@ -15013,7 +15073,7 @@ export const manifest={
           "duration": true,
           "utility": false
         },
-        "description": "통조림 충돌 폭발 11.55 · 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음",
+        "description": "반경 100 통조림 충돌 폭발 11.55 · 반경 145의 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음",
         "strength": "짧은 길목 압박",
         "success": "좁은 이동 경로에 통조림 깨기",
         "failure": "낮은 즉시 피해",
@@ -16290,7 +16350,7 @@ export const manifest={
         "durationFrames": 180,
         "shieldRatio": 0.15,
         "attackRate": 1.2,
-        "description": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신)",
+        "description": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신) · 활성 중 첫 유효 평타 한 명에게 0.45초 기절",
         "capabilities": {
           "damage": false,
           "projectile": false,
@@ -16339,14 +16399,15 @@ export const manifest={
           "signatureRange": false,
           "signatureDuration": false
         },
-        "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement"
+        "cancelPolicy": "owner death/life change/match reset remove; movement cancels on stun or forced movement",
+        "firstBasicStun": 27
       },
       "stats": {
         "finalBaseHp": 313.467,
         "speed": 2.2,
         "radius": 38
       },
-      "concept": "짧은 보호막과 평타 가속으로 교전을 버틴다",
+      "concept": "짧은 보호막과 평타 가속 중 첫 유효 평타로 한 명을 기절시킨다",
       "basicSummary": "방망이 타격"
     },
     "emoji-149": {
@@ -16806,34 +16867,34 @@ export const manifest={
       "family": "BASIC",
       "tiers": [
         {
-          "basicSpeed": 1.44,
+          "basicSpeed": 1.6,
           "basicDamage": 0.9
         },
         {
-          "basicSpeed": 1.825,
+          "basicSpeed": 2.15,
           "basicDamage": 0.95
         },
         {
-          "basicSpeed": 2.43,
+          "basicSpeed": 2.75,
           "basicDamage": 1.055
         }
       ],
       "text": [
-        "공격속도 +44% (×1.44) · 일반 피해 10% 감소 (×0.9)",
-        "공격속도 +82.5% (×1.83) · 일반 피해 5% 감소 (×0.95)",
-        "공격속도 +143% (×2.43) · 일반 피해 +5.5% (×1.06)"
+        "공격속도 +60% (×1.6) · 일반 피해 10% 감소 (×0.9)",
+        "공격속도 +115% (×2.15) · 일반 피해 5% 감소 (×0.95)",
+        "공격속도 +175% (×2.75) · 일반 피해 +5.5% (×1.06)"
       ],
       "meleeTiers": [
         {
-          "basicSpeed": 1.55,
+          "basicSpeed": 1.7,
           "basicDamage": 0.9
         },
         {
-          "basicSpeed": 2,
+          "basicSpeed": 2.3,
           "basicDamage": 0.95
         },
         {
-          "basicSpeed": 2.5,
+          "basicSpeed": 3,
           "basicDamage": 1.055
         }
       ]
@@ -16906,22 +16967,22 @@ export const manifest={
       "family": "BASIC",
       "tiers": [
         {
-          "basicSize": 1.385,
+          "basicSize": 1.8,
           "basicVelocity": 0.95
         },
         {
-          "basicSize": 1.715,
+          "basicSize": 2.6,
           "basicVelocity": 1
         },
         {
-          "basicSize": 2.1,
+          "basicSize": 3.4,
           "basicVelocity": 1.055
         }
       ],
       "text": [
-        "일반 탄환 크기 +38.5% (×1.39) · 탄속 5% 감소 (×0.95)",
-        "일반 탄환 크기 +71.5% (×1.72) · 탄속 기본 유지",
-        "일반 탄환 크기 +110% (×2.1) · 탄속 +5.5% (×1.06)"
+        "일반 탄환 크기 +80% (×1.8) · 탄속 5% 감소 (×0.95)",
+        "일반 탄환 크기 +160% (×2.6) · 탄속 기본 유지",
+        "일반 탄환 크기 +240% (×3.4) · 탄속 +5.5% (×1.06)"
       ]
     },
     "impact": {
@@ -16968,22 +17029,25 @@ export const manifest={
       "family": "BASIC",
       "tiers": [
         {
-          "basicRange": 1.35,
-          "basicSpeed": 0.95
+          "basicRange": 1.6,
+          "basicSpeed": 0.95,
+          "basicArcDegrees": 6
         },
         {
-          "basicRange": 1.75,
-          "basicSpeed": 1
+          "basicRange": 2.25,
+          "basicSpeed": 1,
+          "basicArcDegrees": 12
         },
         {
-          "basicRange": 2.2,
-          "basicSpeed": 1.055
+          "basicRange": 3,
+          "basicSpeed": 1.055,
+          "basicArcDegrees": 20
         }
       ],
       "text": [
-        "근접 범위 +35% (×1.35) · 공격속도 5% 감소 (×0.95)",
-        "근접 범위 +75% (×1.75) · 공격속도 기본 유지",
-        "근접 범위 +120% (×2.2) · 공격속도 +5.5% (×1.06)"
+        "근접 범위 +60% (×1.6) · 부채꼴 반각 +6° (최대110°) · 공격속도 5% 감소 (×0.95)",
+        "근접 범위 +125% (×2.25) · 부채꼴 반각 +12° (최대110°) · 공격속도 기본 유지",
+        "근접 범위 +200% (×3) · 부채꼴 반각 +20° (최대110°) · 공격속도 +5.5% (×1.06)"
       ]
     },
     "quick": {

@@ -1,4 +1,6 @@
 import {addMirrorContacts,contactOrder,criticalContact,ironActive,launchSupply,reflectedDirection,steerReturn} from './reflection.js';
+import {parryProjectile} from './parry.js';
+import {crayonContact} from '../abilities/overdrive.js';
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
 export function install(__brScope){
 __brScope.Projectile = class Projectile {
@@ -8,7 +10,7 @@ __brScope.Projectile = class Projectile {
                 this.dotDamageMult=this.runSkill?.damage||Number(opts.basicDamageMultiplier||1);
                 if(this.runSkill){damage*=this.runSkill.damage;size*=this.runSkill.size;explodeRadius*=this.runSkill.size;}
                 this.owner = owner;this.ownerLife=Number(owner?.lifeSeq||0);this.sourceAbilityId=this.ownerAbilityId=owner?.ability?.id;this.homingTurnRate=Number(opts.homingTurnRate??.032);this.homingCone=Number(opts.homingCone??1.22);this.wangguiPower=Number(opts.basicSnapshot?.ctx?.run?.wangguiPower??this.runSkill?.wangguiPower??__brScope.brRunMod(owner,'wangguiPower'));this.basicSnapshot=opts.basicSnapshot||null;this.basicAttackId=opts.basicAttackId||null; this.pos = pos; this.vel = dir.mult(speed);
-                this.sniper=opts.sniper;
+                this.giantScale=opts.giantScale||1;this.sniper=opts.sniper;this.crayon=opts.crayon;
                 this.launchSupply=launchSupply(owner,__brScope.game?.frame||0);
                 this.farmBornFrame=__brScope.game?.frame||0;
                 const action=owner?.activeInputCommand;
@@ -168,11 +170,12 @@ __brScope.Projectile = class Projectile {
                 if(contacts.length>1)contacts.sort(contactOrder);
                 for(const {p,t,farm,rwTurret,mirror} of contacts) {
                     if(wallContact&&t>=wallContact.t)break;
-                    if(canReflect&&(mirror||ironActive(p,game.frame))){
+                    if(canReflect&&(mirror||ironActive(p,game.frame)||parryProjectile(__brScope,game,this,p,this.vel,shotStart.add(travel.mult(t))))){
                         const defender=mirror||p,point=shotStart.add(travel.mult(t)),speed=this.vel.mag();
                         const dir=reflectedDirection(__brScope,game,this,point,this.vel,defender,!!mirror);
                         this.pos=point;this.vel=dir.mult(speed);this.owner=defender;
                         this.ownerLife=this.visualLife=defender.lifeSeq;this.ownerAbilityId=defender.ability.id;
+                        if(this.crayon)this.crayon={...this.crayon,ctx:{...this.crayon.ctx,owner:defender,ownerId:String(defender.remoteId),ownerLifeSeq:defender.lifeSeq,ownerAbilityId:defender.ability.id}};
                         this.hitMemory=Object.create(null);this._brTurn=(this._brTurn||0)+1;
                         if(this.rangeRemaining!==null)this.rangeRemaining+=travel.mag()*(1-t);
                         __brScope.brRecordFlightPath(this,game.frame-1,shotStart.x,shotStart.y,this._brTurn-1,true);
@@ -276,7 +279,7 @@ __brScope.Projectile = class Projectile {
                     }
                     if(this.owner?.ability?.sub==='SODA_BOMB') game.addText(this.pos,'🥤 POP!','#e0f2fe',18,18);
                 } else {
-                    const dealt=dealDamage(target);criticalContact(this.sniper,game,target,this.owner);if(!target.alive||!target._lastDamageResult?.valid)return;
+                    const dealt=dealDamage(target);criticalContact(this.sniper,game,target,this.owner);if(this.crayon)crayonContact(__brScope,this,target);if(!target.alive||!target._lastDamageResult?.valid)return;
                     if(this.type === 'ICE_SHARD'&&this.impactStyle!=='ranged-basic')__brScope.brApplyStun(target,20,this.owner,this.runSkill);
                     if(this.status === 'stun'&&this.impactStyle!=='ranged-basic')__brScope.brApplyStun(target,this.statusPower??24,this.owner,this.runSkill);
                     if(this.status === 'poison' && this.owner && this.owner.alive) {

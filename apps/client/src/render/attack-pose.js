@@ -27,7 +27,7 @@ export function poseFamily(abilityId,kind,style=''){
   if(['sequential-barrage','scissor-volley'].includes(actual))return 'burst';
   if(['spotlight','red-light','mirror','iron-reflect'].includes(actual))return 'field';
   if(actual==='safe-dash')return 'travel';
-  if(['SNIPE','AIMED_SHOT','GIANT_FIREBALL'].includes(a.sub)||/^skill-(sniper|heavy|bomber)$/.test(style))return 'recoil';
+  if(['emoji-023','emoji-074','emoji-137'].includes(abilityId)||['SNIPE','AIMED_SHOT','GIANT_FIREBALL'].includes(a.sub)||/^skill-(sniper|heavy|bomber)$/.test(style))return 'recoil';
   if(a.type==='ORBIT')return 'orbit';
   if(['ZONE','BUFF','TURRET','AREA','PULL'].includes(a.type))return 'field';
   if(['TELEPORT','DASH'].includes(a.type))return 'travel';

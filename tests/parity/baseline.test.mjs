@@ -23,12 +23,13 @@ test('current content retains every approved permanent ID and only approved base
  assert.deepEqual(manifest.tierChances,reference.tierChances);
  const r=createRuleContext(),paths=reference.augments;
  const set=(id,key,values)=>paths[id].tiers.forEach((t,i)=>t[key]=values[i]);
- for(const [id,key,values] of [['swift','moveSpeed',[1.25,1.43,1.65]],['titan','maxHp',[1.5,1.85,2.25]],['regen','regenRate',[.028,.045,.065]],['regen','regenDelay',[240,180,120]],['wide','basicRange',[1.35,1.75,2.2]]]){
+ for(const [id,key,values] of [['swift','moveSpeed',[1.25,1.43,1.65]],['titan','maxHp',[1.5,1.85,2.25]],['regen','regenRate',[.028,.045,.065]],['regen','regenDelay',[240,180,120]],['wide','basicRange',[1.6,2.25,3]],['wide','basicArcDegrees',[6,12,20]],['giant','basicSize',[1.8,2.6,3.4]],['rapid','basicSpeed',[1.6,2.15,2.75]]]){
   set(id,key,values);paths[id].text=paths[id].tiers.map(t=>r.brRunTierText(id,t));
  }
- for(const [id,key,values] of [['rapid','basicSpeed',[1.55,2,2.5]],['impact','basicKnockback',[1.75,2.4,3.1]],['heavy','basicDamage',[1.6,2.05,2.65]]]){
+ for(const [id,key,values] of [['rapid','basicSpeed',[1.7,2.3,3]],['impact','basicKnockback',[1.75,2.4,3.1]],['heavy','basicDamage',[1.6,2.05,2.65]]]){
   paths[id].meleeTiers=paths[id].tiers.map((t,i)=>({...t,[key]:values[i]}));
  }
+ paths.wide.tiers=paths.wide.tiers.map(({basicRange,basicSpeed,basicArcDegrees})=>({basicRange,basicArcDegrees,basicSpeed}));paths.wide.text=paths.wide.tiers.map(t=>r.brRunTierText('wide',t));
  reference.ring.soloMultiplier=1.95;
  for(const key of ['retired','augments','xp','maxLevel','maxChoices','pathMaxTier','deathXpCap','ring','respawn','questions'])assert.deepEqual(manifest[key],reference[key],key);
  assert.deepEqual(manifest.wanggui,{...reference.wanggui,F:[[2.2,2.6],[3.35,4.4],[4.8,7.2]]});

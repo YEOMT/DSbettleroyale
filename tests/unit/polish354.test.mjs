@@ -1,3 +1,4 @@
+import {expected355} from '../v35-5/approved.mjs';
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
 import {createWorld,createRuleContext,stepWorld,destroyWorld,getParticipation} from '../../packages/engine/src/index.js';
 import {RoomManager} from '../../apps/server/src/rooms/room.js';
@@ -22,7 +23,7 @@ function roomFixture(t){let now=1000;const m=new RoomManager({maxRooms:4,maxPlay
 test('B02/D01: final 86 authority definitions differ only at six approved ground coefficients',()=>{
  const before=JSON.parse(fs.readFileSync(new URL('../v35-4/baseline.json',import.meta.url))).mechanics,after=rosterMechanics(manifest);assert.equal(Object.keys(after).length,86);
  for(const [id,[,field]]of Object.entries(GROUND_DAMAGE.rework)){before[id].definition.skill[field]*=1.1;before[id].skill[field]*=1.1;}
- for(const id of Object.keys(before))assert.ok(sameMechanics(before[id],after[id]),id+' unapproved mechanics delta');
+ for(const id of Object.keys(before))assert.ok(sameMechanics(expected355({...before[id],id}),after[id]),id+' unapproved mechanics delta');
 });
 test('S01/S07/S09: rank-first normal RNG unchanged; special draws honor tier and teamOnly',()=>{
  const s=createRuleContext();for(const mode of ['solo','team-elim','team-capture','team-respawn'])for(const rule of ['normal','f-only','s-only']){

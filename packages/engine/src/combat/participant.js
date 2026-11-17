@@ -1,3 +1,5 @@
+import {parryMelee} from './parry.js';
+import {crayonColors,crayonDamage} from '../abilities/overdrive.js';
 import {heavySkill} from './heavy-feedback.js';
 import {sniperCast} from './reflection.js';
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
@@ -443,7 +445,7 @@ __brScope.Participant = class Participant {
                 game.addSwingEffect(this,this.pos,dir,dist,style,.18,__brScope.brFxCommand(this,'target-strike',{targetX:target.pos.x,targetY:target.pos.y,targetRadius:target.radius,part:'combo'}));
                 game.spawnImpact(target.pos, size*0.62, color, finalHit ? 1.35 : 0.9);
                 const beforeHp = target.hp;
-                target.takeDamage(dmg, this);
+                target.takeDamage(dmg,this,false,dir,{meleeContact:true});
                 const dealt = Math.max(0, beforeHp - target.hp);
                 if(dealt>0&&target.alive){
                     target.vel=target.vel.add(dir.mult(push));
@@ -519,11 +521,13 @@ __brScope.Participant = class Participant {
                     if(sub==='ICE_SHARD')opts.vfx='ice';
                     if(sub==='AIMED_SHOT')opts.sniper=sniperCast(__brScope,this.ability);
                     // AIMED_SHOT is a real projectile; its normal shot event supplies the direction cue.
+                    const crayon=this.ability.id==='emoji-094'?__brScope.BRRework.context(this,game,aimDir):null;
                     const startAngle=sub==='NOVA'?0:-spread*(pCount-1)/2;
                     for(let i=0;i<pCount;i++) {
                         const shotDir=aimDir.rotate(startAngle+i*spread);
-                        const shot=new __brScope.Projectile(this,this.pos,shotDir,signature.speed,signature.damage*this.damageMult*(opts.sniper?.critical?2:1),
-                            signature.size,signature.type,this.ability.pImpact||'#ff0',signature.explode,signature.emoji,opts);
+                        const shotOpts=crayon?{...opts,status:null,statusPower:0,crayon:{ctx:crayon,color:i%4},trailColor:crayonColors[i%4],impactColor:crayonColors[i%4],weaponStyle:'crayon-'+i%4}:opts;
+                        const shot=new __brScope.Projectile(this,this.pos,shotDir,signature.speed,signature.damage*this.damageMult*(opts.sniper?.critical?2:1)*(crayon?crayonDamage[i%4]:1),
+                            signature.size,signature.type,crayon?crayonColors[i%4]:(this.ability.pImpact||'#ff0'),signature.explode,signature.emoji,shotOpts);
                         if(signature.type!=='BOOMERANG')shot.life=Math.max(8,Math.ceil((manualRange||signature.range)/Math.max(1,signature.speed)));
                         else shot.returnAfterLife=Math.max(1,shot.life-Math.ceil((manualRange||31*signature.speed)/Math.max(1,signature.speed))+1);
                         game.projectiles.push(shot);
@@ -756,7 +760,7 @@ __brScope.Participant = class Participant {
                                 if(dist < 285) {
                                     game.addSwingEffect(this,this.pos,rushDir,dist,'slash',.18,__brScope.brFxCommand(this,'target-strike',{targetX:target.pos.x,targetY:target.pos.y,targetRadius:target.radius,part:'orbit-strike'}));
                                     game.spawnImpact(target.pos, 95, '#ff334f', 1.4);
-                                    const dealt=target.takeDamage(20,this);
+                                    const dealt=target.takeDamage(20,this,false,rushDir,{meleeContact:true});
                                     if(dealt>0&&target.alive){
                                         target.vel=target.vel.add(rushDir.mult(17));__brScope.brApplyStun(target,5,this);
                                         if(this.alive){this.comboHitsRemaining=2;this.comboTimer=5;this.comboTargetId=target.id;this.comboKind='blade';this.comboCast=this._runSkillCast;this.comboTargetLife=Number(target.lifeSeq||0);game.addText(this.pos,'COMBO!','#ff9aa9',24,30);}
@@ -767,7 +771,7 @@ __brScope.Participant = class Participant {
                                 this.vel = this.vel.add(rushDir.mult(15));
                                 if(dist < 260) {
                                     game.spawnImpact(target.pos, 105, '#fbbf24', 1.4);
-                                    target.takeDamage(25, this);
+                                    target.takeDamage(25,this,false,rushDir,{meleeContact:true});
                                     target.vel = target.vel.add(rushDir.mult(32));
                                     __brScope.brApplyStun(target,14,this);
                                     game.addText(target.pos, '⚙️ RAM!', '#fde68a', 22, 28);
@@ -786,7 +790,7 @@ __brScope.Participant = class Participant {
                                 this.vel = this.vel.add(rushDir.mult(14));
                                 if(dist < 285) {
                                     game.addSwingEffect(this,this.pos,rushDir,dist,'slash',.18,__brScope.brFxCommand(this,'target-strike',{targetX:target.pos.x,targetY:target.pos.y,targetRadius:target.radius,part:'orbit-strike'}));
-                                    target.takeDamage(22*this.damageMult,this);
+                                    target.takeDamage(22*this.damageMult,this,false,rushDir,{meleeContact:true});
                                     target.vel = target.vel.add(rushDir.mult(24));
                                     __brScope.brApplyStun(target,8,this);
                                     game.addText(target.pos,'🛞 ROLLING BLADE!','#f9a8d4',22,24);
@@ -987,6 +991,7 @@ __brScope.Participant = class Participant {
                 if(this.hp===0&&actualDamage>0&&this.alive)__brScope.brRecordDeathCause(this,attacker,damageContext,contactDirection,reflected,actualDamage,absorbed,impactLevel,closeImpact);
                 __brScope.BRCapture.damage(__brScope.game,attacker,this,actualDamage);
                 if(__brScope.BRRework)__brScope.BRRework.onHpDamage(this,attacker,actualDamage,{...(damageContext||{}),reflected});
+                parryMelee(__brScope,__brScope.game,this,attacker,actualDamage,absorbed,damageContext,reflected);
 
                 // v23: 참고 파일처럼 피격 자체를 하나의 짧은 이벤트로 보낸다.
                 // 독/다단히트가 몰려도 3프레임에 한 번만 보내 네트워크와 렌더 부하를 제한한다.
