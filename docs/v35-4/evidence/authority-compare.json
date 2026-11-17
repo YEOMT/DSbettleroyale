@@ -1,0 +1,230 @@
+{
+  "status": "PASS",
+  "ms": 1978.2221,
+  "rows": [
+    {
+      "id": "emoji-000",
+      "boost": false,
+      "hits": 7,
+      "groundTicks": 5,
+      "inputFirst": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-000",
+      "boost": true,
+      "hits": 7,
+      "groundTicks": 5,
+      "inputFirst": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-007",
+      "boost": false,
+      "hits": 6,
+      "groundTicks": 5,
+      "inputFirst": 86.1,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-007",
+      "boost": true,
+      "hits": 6,
+      "groundTicks": 5,
+      "inputFirst": 86.1,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-010",
+      "boost": false,
+      "hits": 8,
+      "groundTicks": 7,
+      "inputFirst": 11.8965,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-010",
+      "boost": true,
+      "hits": 8,
+      "groundTicks": 7,
+      "inputFirst": 11.8965,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-014",
+      "boost": false,
+      "hits": 10,
+      "groundTicks": 10,
+      "inputFirst": 15.862000000000002,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-014",
+      "boost": true,
+      "hits": 10,
+      "groundTicks": 10,
+      "inputFirst": 15.862000000000002,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-122",
+      "boost": false,
+      "hits": 6,
+      "groundTicks": 4,
+      "inputFirst": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-122",
+      "boost": true,
+      "hits": 6,
+      "groundTicks": 4,
+      "inputFirst": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-144",
+      "boost": false,
+      "hits": 7,
+      "groundTicks": 6,
+      "inputFirst": 26,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-144",
+      "boost": true,
+      "hits": 7,
+      "groundTicks": 6,
+      "inputFirst": 26,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-031",
+      "boost": false,
+      "hits": 17,
+      "groundTicks": 16,
+      "inputFirst": 30,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-031",
+      "boost": true,
+      "hits": 17,
+      "groundTicks": 16,
+      "inputFirst": 30,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-128",
+      "boost": false,
+      "hits": 32,
+      "groundTicks": 31,
+      "inputFirst": 22,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-128",
+      "boost": true,
+      "hits": 32,
+      "groundTicks": 31,
+      "inputFirst": 22,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-025",
+      "boost": false,
+      "hits": 1,
+      "groundTicks": 0,
+      "inputFirst": 150.15,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-025",
+      "boost": true,
+      "hits": 1,
+      "groundTicks": 0,
+      "inputFirst": 150.15,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-042",
+      "boost": false,
+      "hits": 1,
+      "groundTicks": 0,
+      "inputFirst": 61.446,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-042",
+      "boost": true,
+      "hits": 1,
+      "groundTicks": 0,
+      "inputFirst": 61.446,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-034",
+      "boost": false,
+      "hits": 1,
+      "groundTicks": 0,
+      "inputFirst": 27.3,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-034",
+      "boost": true,
+      "hits": 1,
+      "groundTicks": 0,
+      "inputFirst": 27.3,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-019",
+      "boost": false,
+      "hits": 1,
+      "groundTicks": 0,
+      "inputFirst": 92,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-019",
+      "boost": true,
+      "hits": 1,
+      "groundTicks": 0,
+      "inputFirst": 92,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-003",
+      "boost": false,
+      "hits": 14,
+      "groundTicks": 0,
+      "inputFirst": 11.55,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-003",
+      "boost": true,
+      "hits": 14,
+      "groundTicks": 0,
+      "inputFirst": 11.55,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-131",
+      "boost": false,
+      "hits": 5,
+      "groundTicks": 0,
+      "inputFirst": 26,
+      "status": "PASS"
+    },
+    {
+      "id": "emoji-131",
+      "boost": true,
+      "hits": 5,
+      "groundTicks": 0,
+      "inputFirst": 26,
+      "status": "PASS"
+    }
+  ]
+}

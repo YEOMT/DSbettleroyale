@@ -10,17 +10,17 @@ export function actionHud(s,controls){
  // before AppUI.self stores it. Labels and gating must use the same life/state.
  const current=controls?.timeline.predicted;if(current?.id===s.id&&current.lifeSeq===s.lifeSeq)s=current;
  const buff=s.supply && supplyTypes[s.supply], seconds=buff?Math.max(0,Math.ceil((s.supplyEnd-s.rw.sourceTick)/60)):0;
- writeText($('br-battle-status'),`HP ${Math.round(s.hp)} / ${Math.round(s.maxHp)} · KILL ${s.kills||0}`+(s.cover==='smoke'?(s.rw.smokeRevealEnd>s.rw.sourceTick?(s.rw.smokeRevealReason===1?' · 🌫️ 공격으로 노출':' · 🌫️ 피격으로 노출'):' · 🌫️ 은폐 중'):'')+(s.respawn?' · 🔄 ×'+s.respawn.tokens:'')+(s.respawn?.protectionFrames>0?' · 🛡 부활 보호':'')+(s.rw?.shield>0?' · 보호막 '+Math.ceil(s.rw.shield):'')+(seconds?' · '+buff.icon+' '+seconds+'초':''));
+ writeText($('br-battle-status'),`HP ${Math.round(s.hp)} / ${Math.round(s.maxHp)} · KILL ${s.kills||0}`+(s.cover==='smoke'?(s.rw.smokeRevealEnd>s.rw.sourceTick?(s.rw.smokeRevealReason===1?' · 🌫️ 공격으로 노출':' · 🌫️ 피격으로 노출'):' · 🌫️ 은폐 중'):'')+(s.respawn?' · 🔄 ×'+s.respawn.tokens:'')+(s.respawn?.protectionFrames>0?' · 🛡 부활 보호':'')+(s.rw?.shield>0?' · 보호막 '+Math.ceil(s.rw.shield):'')+(seconds?' · '+buff.icon+' '+seconds+'초':'')+(s.rw?.buffs?.find(b=>b.kind==='ironReflect'&&b.end>s.rw.sourceTick)?' · ↪ 반사 '+Math.ceil((s.rw.buffs.find(b=>b.kind==='ironReflect').end-s.rw.sourceTick)/60)+'초':''));
  for(const kind of ['attack','skill']){const state=controls?controls.state(kind,s):actionState(s,kind),{frames,max,canFire:ready,canAim,channel}=state,button=$('br-'+kind),label=$('br-'+kind+'-cd');
   writeProperty(button,'--br-cd-angle',(Math.max(0,Math.min(1,1-frames/max))*360).toFixed(1)+'deg');button.classList.toggle('disabled',!ready&&!channel);button.classList.toggle('br-state-locked',!canAim);label.classList.toggle('ready',ready);
-  const text=({RECOVERY:'연결',PAUSED:'중지',DEAD:'🔒',STUNNED:'🔒',CAPTURED:'🔒',LOCKED:'🔒',CHANNEL:'조준',REQUEST_GUARD:'·'})[state.state];
+  const text=({RECOVERY:'연결',PAUSED:'중지',DEAD:'🔒',STUNNED:'🔒 '+(Math.max(s.stunned||0,(s.rw?.stunEnd||0)-(s.rw?.sourceTick||0))/60).toFixed(1),CAPTURED:'🔒 '+(Math.max(0,(s.rw?.capture?.end||0)-(s.rw?.sourceTick||0))/60).toFixed(1),LOCKED:'🔒',CHANNEL:'조준',REQUEST_GUARD:'·'})[state.state];
   writeText(label,text|| (state.state==='RECAST'?(Math.max(0,s.rw.recast.end-s.rw.sourceTick)/60).toFixed(1):ready?'✓':(frames/60).toFixed(1)));
   writeAttribute(button,'aria-disabled',String(!ready&&!channel));writeAttribute(button,'data-action-state',state.state);writeAttribute(button,'data-feedback',controls?.feedbackState(kind)||'');
  }
  const recast=s.rw?.recast,maxRecasts=manifest.reworkDefinitions[s.abilityId]?.skill?.extraUses;
  writeText($('br-skill-count'),recast?'재사용 '+recast.left+'/'+recast.total:maxRecasts&&s.cooldown>0?'재사용 0/'+maxRecasts:s.skillUsesLeft<0?'∞':s.skillUsesLeft+'회');
- const hardLock=!!(s.stunned||s.rw?.capture),channel=!!s.rw?.channel&&!hardLock;
- $('br-joystick').classList.toggle('br-state-locked',!!s.rw?.locks?.move);$('br-skill').classList.toggle('br-channel-aim',channel);writeText($('br-skill-label'),hardLock?(s.stunned?'기절':'포획'):channel?'광선 조준':s.visualProfiles?.skillLabel||'스킬');
+ const stunned=s.stunned>0||s.rw?.stunEnd>s.rw?.sourceTick,hardLock=!!(stunned||s.rw?.capture),channel=!!s.rw?.channel&&!hardLock;
+ $('br-joystick').classList.toggle('br-state-locked',!!s.rw?.locks?.move);$('br-skill').classList.toggle('br-channel-aim',channel);writeText($('br-skill-label'),hardLock?(stunned?'기절':'포획'):channel?'광선 조준':s.visualProfiles?.skillLabel||'스킬');
  $('br-skill-count').classList.toggle('br-recast-count',!!s.rw?.recast);
 
 }

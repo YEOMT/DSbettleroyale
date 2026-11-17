@@ -1,4 +1,5 @@
 // Extracted from v32.1. Room-scoped bindings; see docs/source-map.json.
+import {drawTier,validDrawRule} from '../../../content/src/battle-rules.js';
 export function install(__brScope){
 __brScope.brNow = function brNow(){return __brScope.now();};
 
@@ -89,10 +90,11 @@ __brScope.brRollTier = function brRollTier(rnd) {
             }
         };
 
-__brScope.brAbilityIndex = function brAbilityIndex(mode, excludeIndex, unusedEmojiSet, rnd) {
+__brScope.brAbilityIndex = function brAbilityIndex(mode, excludeIndex, unusedEmojiSet, rnd, rule='normal') {
             rnd=rnd||__brScope.random;
+            if(!validDrawRule(rule))throw Error('INVALID_DRAW_RULE');
             // Select the rank before a character. Exclusion never changes that rank's odds.
-            var tier=__brScope.brRollTier(rnd),pool=[];
+            var tier=drawTier(rule)||__brScope.brRollTier(rnd),pool=[];
             for(var i=0;i<__brScope.EMOJI_DB.length;i++){
                 var a=__brScope.EMOJI_DB[i];
                 if(a.t!==tier||(mode==='solo'&&a.teamOnly))continue;

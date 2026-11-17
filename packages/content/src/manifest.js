@@ -1,5 +1,5 @@
 // Generated from current authority runtime by npm run content:generate; legacy baseline remains immutable.
-export const contentHash="8f4cf38107b74bfd8c37e32f80016c48d8265bc5b883cdf4914b08d427f77bdb";
+export const contentHash="a7b6405df41d8dc241c96b25a9bf4a77661a668053e7d593eeb8a4e6d8122e46";
 export const manifest={
   "roster": [
     {
@@ -21,9 +21,9 @@ export const manifest={
         "category": "원거리형",
         "concept": "큰 불덩이로 진입로를 막는 용 포격수",
         "basicSummary": "작은 화염구",
-        "skillSummary": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 12.6, 최대 2곳) · 기절 없음",
+        "skillSummary": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 13.86, 최대 2곳) · 기절 없음",
         "skillLabel": "용의 분노",
-        "skillDesc": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 12.6, 최대 2곳) · 기절 없음"
+        "skillDesc": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 13.86, 최대 2곳) · 기절 없음"
       },
       "maxHp": 540,
       "radius": 106.39999999999999,
@@ -67,12 +67,12 @@ export const manifest={
         "count": 1,
         "countCap": 1,
         "knockback": 18,
-        "zoneDamage": 12.6,
+        "zoneDamage": 13.860000000000001,
         "zoneRadius": 150,
         "durationFrames": 150,
         "intervalFrames": 30,
         "maxPerOwner": 2,
-        "description": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 12.6, 최대 2곳) · 기절 없음",
+        "description": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 13.86, 최대 2곳) · 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": true,
@@ -696,11 +696,11 @@ export const manifest={
         "category": "원거리형",
         "concept": "자신을 중심으로 위험 구역을 만드는 방사능 투사",
         "basicSummary": "방사능 탄",
-        "skillSummary": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 10.5) · 사망 폭발은 30, 생명당 1회",
+        "skillSummary": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 11.55) · 사망 폭발은 30, 생명당 1회",
         "finalBaseSpeed": 1.3,
         "walkFloorRatio": 1.0833333333333335,
         "skillLabel": "폴아웃",
-        "skillDesc": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 10.5) · 사망 폭발은 30, 생명당 1회"
+        "skillDesc": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 11.55) · 사망 폭발은 30, 생명당 1회"
       },
       "maxHp": 459,
       "radius": 68.4,
@@ -742,12 +742,12 @@ export const manifest={
         "windupFrames": 36,
         "knockback": 17,
         "zoneRadius": 245,
-        "zoneDamage": 10.5,
+        "zoneDamage": 11.55,
         "durationFrames": 150,
         "intervalFrames": 30,
         "deathDamage": 30,
         "deathRadius": 180,
-        "description": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 10.5) · 사망 폭발은 30, 생명당 1회",
+        "description": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 11.55) · 사망 폭발은 30, 생명당 1회",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -938,9 +938,9 @@ export const manifest={
         "category": "설치형",
         "concept": "중력장을 놓아 적의 동선을 끌어 모은다",
         "basicSummary": "행성 탄",
-        "skillSummary": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 10.815 · 자연 종료 때 반경 225 붕괴 63.86",
+        "skillSummary": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 11.8965 · 자연 종료 때 반경 225 붕괴 63.86",
         "skillLabel": "블랙홀",
-        "skillDesc": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 10.815 · 자연 종료 때 반경 225 붕괴 63.86"
+        "skillDesc": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 11.8965 · 자연 종료 때 반경 225 붕괴 63.86"
       },
       "maxHp": 500,
       "radius": 98.8,
@@ -980,13 +980,13 @@ export const manifest={
         "radius": 170,
         "pullRadius": 330,
         "collapseRadius": 225,
-        "damage": 10.815,
+        "damage": 11.8965,
         "collapseDamage": 63.86,
         "pull": 1.1,
         "durationFrames": 210,
         "intervalFrames": 30,
         "maxPerOwner": 1,
-        "description": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 10.815 · 자연 종료 때 반경 225 붕괴 63.86",
+        "description": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 11.8965 · 자연 종료 때 반경 225 붕괴 63.86",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -1291,9 +1291,9 @@ export const manifest={
         "category": "설치형",
         "concept": "퍼지는 독구름으로 공간을 빼앗는다",
         "basicSummary": "독성 구체",
-        "skillSummary": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 14.42 · 기절 없음",
+        "skillSummary": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 15.862 · 기절 없음",
         "skillLabel": "역병군주",
-        "skillDesc": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 14.42 · 기절 없음"
+        "skillDesc": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 15.862 · 기절 없음"
       },
       "maxHp": 460,
       "radius": 68.4,
@@ -1333,11 +1333,11 @@ export const manifest={
         "radius": 110,
         "maxRadius": 310,
         "growFrames": 150,
-        "damage": 14.42,
+        "damage": 15.862000000000002,
         "durationFrames": 300,
         "intervalFrames": 30,
         "maxPerOwner": 1,
-        "description": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 14.42 · 기절 없음",
+        "description": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 15.862 · 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -3305,9 +3305,9 @@ export const manifest={
         "category": "기동형",
         "concept": "적 옆을 스쳐 독길로 추격을 막는다",
         "basicSummary": "꼬리 근접 타격",
-        "skillSummary": "조준 방향으로 돌진하며 독 흔적을 남깁니다. 접촉한 적에게 피해와 짧은 밀침·기절을 줍니다.",
+        "skillSummary": "조준 방향으로 돌진하며 독 흔적을 남깁니다. 접촉한 적에게 피해와 짧은 밀침·기절을 줍니다. 지면 흔적의 반복 피해 계수는 기존 대비 10% 증가하며 접촉 피해·시간·제어는 같습니다.",
         "skillLabel": "독길 돌진",
-        "skillDesc": "조준 방향으로 돌진하며 독 흔적을 남깁니다. 접촉한 적에게 피해와 짧은 밀침·기절을 줍니다."
+        "skillDesc": "조준 방향으로 돌진하며 독 흔적을 남깁니다. 접촉한 적에게 피해와 짧은 밀침·기절을 줍니다. 지면 흔적의 반복 피해 계수는 기존 대비 10% 증가하며 접촉 피해·시간·제어는 같습니다."
       },
       "maxHp": 328.10400000000004,
       "radius": 45.6,
@@ -6984,11 +6984,11 @@ export const manifest={
         "category": "원거리형",
         "concept": "통조림 폭발과 짧은 가시 지대로 길을 막는다",
         "basicSummary": "통조림",
-        "skillSummary": "통조림이 깨지며 작은 폭발과 2초 가시 지대 하나를 남깁니다. 가시 지대는 소유자당 1개이며 기절시키지 않습니다.",
+        "skillSummary": "통조림 충돌 폭발 11.55 · 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음",
         "pExplode": 48,
         "knockback": 8,
         "skillLabel": "통조림 투척",
-        "skillDesc": "통조림이 깨지며 작은 폭발과 2초 가시 지대 하나를 남깁니다. 가시 지대는 소유자당 1개이며 기절시키지 않습니다."
+        "skillDesc": "통조림 충돌 폭발 11.55 · 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음"
       },
       "maxHp": 292.56,
       "radius": 38,
@@ -7044,7 +7044,7 @@ export const manifest={
         "speed": 16.2,
         "blastRadius": 78,
         "thornRadius": 122,
-        "thornDamage": 3.99,
+        "thornDamage": 4.389,
         "thornInterval": 30,
         "zoneCap": 1,
         "color": "#86efac",
@@ -7064,7 +7064,7 @@ export const manifest={
           "duration": true,
           "utility": false
         },
-        "description": "통조림이 깨지며 작은 폭발과 2초 가시 지대 하나를 남깁니다. 가시 지대는 소유자당 1개이며 기절시키지 않습니다.",
+        "description": "통조림 충돌 폭발 11.55 · 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음",
         "strength": "짧은 길목 압박",
         "success": "좁은 이동 경로에 통조림 깨기",
         "failure": "낮은 즉시 피해",
@@ -7357,12 +7357,12 @@ export const manifest={
         "category": "기동형",
         "concept": "먹물길로 적에게 지속 피해와 짧은 감속을 준다",
         "basicSummary": "촉수 근접 타격",
-        "skillSummary": "조준 방향으로 돌진하며 먹물 흔적을 남깁니다. 경로의 적에게 지속 피해와 짧은 감속을 주고 첫 접촉 적의 시야를 잠시 가립니다.",
+        "skillSummary": "조준 방향으로 돌진하며 먹물 흔적을 남깁니다. 경로의 적에게 지속 피해와 짧은 감속을 주고 첫 접촉 적의 시야를 잠시 가립니다. 지면 흔적의 반복 피해 계수는 기존 대비 10% 증가하며 접촉 피해·시간·제어는 같습니다.",
         "sub": "INK_TRAIL",
         "dashSpeed": 30,
         "dashDuration": 25,
         "skillLabel": "먹물길 돌진",
-        "skillDesc": "조준 방향으로 돌진하며 먹물 흔적을 남깁니다. 경로의 적에게 지속 피해와 짧은 감속을 주고 첫 접촉 적의 시야를 잠시 가립니다."
+        "skillDesc": "조준 방향으로 돌진하며 먹물 흔적을 남깁니다. 경로의 적에게 지속 피해와 짧은 감속을 주고 첫 접촉 적의 시야를 잠시 가립니다. 지면 흔적의 반복 피해 계수는 기존 대비 10% 증가하며 접촉 피해·시간·제어는 같습니다."
       },
       "maxHp": 332.27502,
       "radius": 38,
@@ -8200,13 +8200,13 @@ export const manifest={
         "timingSeed": "roster10-144",
         "desc": "남에게 보이지 않는 버섯 함정으로 진입로를 지킨다",
         "basicSummary": "포자 단발",
-        "skillSummary": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
+        "skillSummary": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4.4×6회(최대 2개)",
         "legacyIndex": 144,
         "concept": "남에게 보이지 않는 버섯 함정으로 진입로를 지킨다",
         "pTrail": "#86efac",
         "projEmoji": "🍄",
         "skillLabel": "버섯돌보미",
-        "skillDesc": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)"
+        "skillDesc": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4.4×6회(최대 2개)"
       },
       "maxHp": 320.173425,
       "radius": 41.800000000000004,
@@ -8264,7 +8264,7 @@ export const manifest={
           "signatureRange": true,
           "signatureDuration": false
         },
-        "description": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
+        "description": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4.4×6회(최대 2개)",
         "key": "rework-emoji-144",
         "cooldown": 540,
         "capabilities": {
@@ -8284,7 +8284,7 @@ export const manifest={
           "signatureRange": true,
           "signatureDuration": false
         },
-        "poisonDamage": 4,
+        "poisonDamage": 4.4,
         "poisonRadius": 90,
         "durationFrames": 180,
         "intervalFrames": 30,
@@ -10799,12 +10799,12 @@ export const manifest={
         "count": 1,
         "countCap": 1,
         "knockback": 18,
-        "zoneDamage": 12.6,
+        "zoneDamage": 13.860000000000001,
         "zoneRadius": 150,
         "durationFrames": 150,
         "intervalFrames": 30,
         "maxPerOwner": 2,
-        "description": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 12.6, 최대 2곳) · 기절 없음",
+        "description": "느린 거대 화염구 1발 · 충돌/종점 폭발 79.8 · 2.5초 화염(0.5초마다 13.86, 최대 2곳) · 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": true,
@@ -11286,12 +11286,12 @@ export const manifest={
         "windupFrames": 36,
         "knockback": 17,
         "zoneRadius": 245,
-        "zoneDamage": 10.5,
+        "zoneDamage": 11.55,
         "durationFrames": 150,
         "intervalFrames": 30,
         "deathDamage": 30,
         "deathRadius": 180,
-        "description": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 10.5) · 사망 폭발은 30, 생명당 1회",
+        "description": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 11.55) · 사망 폭발은 30, 생명당 1회",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -11428,13 +11428,13 @@ export const manifest={
         "radius": 170,
         "pullRadius": 330,
         "collapseRadius": 225,
-        "damage": 10.815,
+        "damage": 11.8965,
         "collapseDamage": 63.86,
         "pull": 1.1,
         "durationFrames": 210,
         "intervalFrames": 30,
         "maxPerOwner": 1,
-        "description": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 10.815 · 자연 종료 때 반경 225 붕괴 63.86",
+        "description": "3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 11.8965 · 자연 종료 때 반경 225 붕괴 63.86",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -11666,11 +11666,11 @@ export const manifest={
         "radius": 110,
         "maxRadius": 310,
         "growFrames": 150,
-        "damage": 14.42,
+        "damage": 15.862000000000002,
         "durationFrames": 300,
         "intervalFrames": 30,
         "maxPerOwner": 1,
-        "description": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 14.42 · 기절 없음",
+        "description": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 15.862 · 기절 없음",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -14993,7 +14993,7 @@ export const manifest={
         "speed": 16.2,
         "blastRadius": 78,
         "thornRadius": 122,
-        "thornDamage": 3.99,
+        "thornDamage": 4.389,
         "thornInterval": 30,
         "zoneCap": 1,
         "color": "#86efac",
@@ -15013,7 +15013,7 @@ export const manifest={
           "duration": true,
           "utility": false
         },
-        "description": "통조림이 깨지며 작은 폭발과 2초 가시 지대 하나를 남깁니다. 가시 지대는 소유자당 1개이며 기절시키지 않습니다.",
+        "description": "통조림 충돌 폭발 11.55 · 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음",
         "strength": "짧은 길목 압박",
         "success": "좁은 이동 경로에 통조림 깨기",
         "failure": "낮은 즉시 피해",
@@ -15939,7 +15939,7 @@ export const manifest={
         "range": 320,
         "radius": 95,
         "damage": 20,
-        "poisonDamage": 4,
+        "poisonDamage": 4.4,
         "poisonRadius": 90,
         "durationFrames": 180,
         "intervalFrames": 30,
@@ -15947,7 +15947,7 @@ export const manifest={
         "waitFrames": 1200,
         "maxPerOwner": 3,
         "hp": 20,
-        "description": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4×6회(최대 2개)",
+        "description": "미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 4.4×6회(최대 2개)",
         "capabilities": {
           "damage": true,
           "projectile": false,
@@ -17789,6 +17789,39 @@ export const manifest={
     "xpWave": 1.1,
     "healWave": 1.15,
     "genieHp": 56,
-    "genieLifeTicks": 1440
+    "genieLifeTicks": 1440,
+    "residualGround": {
+      "multiplier": 1.1,
+      "rework": {
+        "emoji-000": [
+          "fire",
+          "zoneDamage"
+        ],
+        "emoji-007": [
+          "radiation",
+          "zoneDamage"
+        ],
+        "emoji-010": [
+          "gravity",
+          "damage"
+        ],
+        "emoji-014": [
+          "poison",
+          "damage"
+        ],
+        "emoji-122": [
+          "thorns",
+          "thornDamage"
+        ],
+        "emoji-144": [
+          "poison",
+          "poisonDamage"
+        ]
+      },
+      "native": [
+        "emoji-031",
+        "emoji-128"
+      ]
+    }
   }
 };

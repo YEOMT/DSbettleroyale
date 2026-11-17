@@ -22,6 +22,8 @@ import {aimGuide,paintGuide} from './aim-guide.js';
 import {Application,Container,Graphics,Sprite,Texture,Text} from 'pixi.js';
 import {createPainters} from './original-painters.js';
 export class Renderer{
+ get enabled(){return !!this._enabled;}
+ set enabled(value){this._enabled=!!value;if(!value){if(this.raf!=null)cancelAnimationFrame(this.raf);this.raf=null;}else if(this.renderReady&&this.raf==null){this.last=performance.now();this.raf=requestAnimationFrame(t=>this.frame(t));}}
  constructor(canvas,timeline,session){this.staticFloor=new StaticFloor();this.camera=new HostCamera();this.studentCamera=new StudentCamera();this.poses=new AttackPoses();this.objectives=new ObjectiveArrows();this.canvas=canvas;this.timeline=timeline;this.session=session;this.paint=createPainters(session);this.scene=createScene(session);this.hostTracks=new Map();this.hostCanvas=createHostCanvas(this);this.canvasFx=createFx(session);this.wallImages=new Map();this.deaths=new Map();this.textures=new Map();this.sprites=new Map();this.labels=new Map();this.tracks=new Map();this.frameTimes=[];this.enabled=false;this.teacher=false;this.cam={x:0,y:0};this.last=performance.now();this.ready=this.init();}
  async init(){
   await hostAssetsReady;
@@ -33,7 +35,7 @@ export class Renderer{
   window.visualViewport?.addEventListener('scroll',()=>{this.hudInsets=null;});
   if(new URLSearchParams(location.search).get('renderer')!=='canvas')try{this.app=new Application();await this.app.init({canvas:this.canvas,width:innerWidth,height:innerHeight,background:'#07101d',antialias:this.paint.brGraphicsProfile().antialias,resolution:this.scene.resolution(innerWidth,innerHeight,this.paint.brGraphicsProfile().dpr),autoDensity:true,autoStart:false});this.world=new Container();this.base=new Graphics();this.grid=new Graphics();this.smoke=new Graphics();this.danger=new Graphics();this.crateLayer=new Graphics();this.g=new Graphics();this.world.addChild(this.base,this.grid,this.smoke,this.danger,this.crateLayer,this.g);this.fg=new Graphics();this.mapOutline=new Graphics();this.fg.addChild(this.mapOutline);this.world.addChild(this.fg);this.app.stage.addChild(this.world);this.screen=new Graphics();this.app.stage.addChild(this.screen);this.pixi=true;}catch(error){console.warn('Canvas fallback:',error.message);this.useCanvas(error);}
   if(this.pixi)this.canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();this.useCanvas(new Error('WEBGL_CONTEXT_LOST'));this.resize();},{once:true});
-  if(!this.pixi)this.ctx=this.canvas.getContext('2d');this.resize();addEventListener('resize',()=>this.resize());visualViewport?.addEventListener('resize',()=>this.resize());requestAnimationFrame(t=>this.frame(t));
+  if(!this.pixi)this.ctx=this.canvas.getContext('2d');this.resize();addEventListener('resize',()=>this.resize());visualViewport?.addEventListener('resize',()=>this.resize());this.renderReady=true;this.enabled=this.enabled;
  }
  useCanvas(error){
   this.crateRows=null;clearPortalArt(this);clearRoster10Scene(this);this.staticFloor.reset();const old=this.canvas,fresh=old.cloneNode(false);old.replaceWith(fresh);this.canvas=fresh;this.pixi=false;
@@ -76,6 +78,7 @@ export class Renderer{
   if(label.style.fill!==color)label.style.fill=color;label.visible=true;label.position.set(x,y);}else{const c=this.ctx;c.font=`bold ${size}px sans-serif`;c.textAlign='center';c.textBaseline='middle';c.lineWidth=3;c.strokeStyle='#06101e';c.strokeText(text,x,y);c.fillStyle=color;c.fillText(text,x,y);}}
  level(a,x,y,zoom,now){let track=this.tracks.get(a.id);if(!track){track={};this.tracks.set(a.id,track);}if(!this.pixi){this.paint.brLevelCanvasDraw(this.ctx,track,a.level,a.lifeSeq,x,y,zoom,this.teacher);return;}const pose=this.paint.brLevelPose(track,a.level,a.lifeSeq,now,true),source=this.paint.brLevelCanvas(a.level);if(!pose||!source)return;const key='level-'+a.id,texture=this.texture(source);let s=this.sprites.get(key);if(!s){s=new Sprite(texture);s.anchor.set(.5);this.sprites.set(key,s);this.world.addChild(s);}s.texture=texture;s.position.set(x,y);const k=(this.teacher?.8:1)*pose.scale/zoom;s.width=source._levelW*k;s.height=source._levelH*k;s.alpha=pose.alpha;s.visible=true;}
  frame(now){
+  this.raf=null;if(!this.enabled)return;
   const gap=now-this.last;this.last=now;
   const captureHost=this.teacher&&this.session.roomMeta?.mode==='team-capture';
   const fps=this.session.captureHostFPS||(this.session.captureHostQuality==='balanced'?30:60);
@@ -92,7 +95,7 @@ export class Renderer{
     else this.reportFault(error);
    }
   }
-  requestAnimationFrame(t=>this.frame(t));
+  if(this.enabled)this.raf=requestAnimationFrame(t=>this.frame(t));
  }
  reportFault(error){
   this.renderBlocked=true;this.lastRenderError=error?.name||'RENDER_ERROR';
@@ -137,12 +140,12 @@ export class Renderer{
   if(view.capture&&map.captureMap)captureScene(this,view,map,zoom);
   escapeScene(this,p,view,map,zoom);
 
-  for(const z of view.zones||[])this.paint.brPaintGround(p,z.x,z.y,z.radius,z.color,z.type,zoom,false,z.meta);
+  for(const z of view.zones||[])if(z.meta.endFrame>view.effectTick)this.paint.brPaintGround(p,z.x,z.y,z.radius,z.color,z.type,zoom,false,{...z.meta,tick:view.effectTick});
   for(const [i,t]of (view.turrets||[]).entries()){if(this.pixi&&this.teacher){p.circle(t.x,t.y,23,t.golden?'#fbbf24':'#64748b',1);p.circle(t.x,t.y,24,'#fff',1,2);}else{const radius=Math.max(15,5/zoom);p.rect(t.x-radius*.8,t.y+radius*.45,radius*1.6,radius*.38,t.golden?'#fbbf24':'#94a3b8',1);this.glyph(t.emoji||'🗼',t.x,t.y,radius,'turret-'+i);}}
   if(this.teacher&&!this.pixi&&pose.lod!=='performance'&&!view.capture)hostEffects(this.ctx,view.hostEffects,'ground');
   drawRoster10Scene(this,p,view,zoom);
   const rw=view.shots.filter(s=>!s.native&&!roster10Kinds.has(s.kind));
-  this.paint.brPaintReworkEntities(p,rw,view.renderTick,zoom,(emoji,x,y,diameter,id)=>this.glyph(emoji,x,y,diameter/2,'rw-'+id));
+  this.paint.brPaintReworkEntities(p,rw,view.effectTick,zoom,(emoji,x,y,diameter,id)=>this.glyph(emoji,x,y,diameter/2,'rw-'+id));
   for(const shot of view.shots.filter(s=>s.native))drawProjectile(this,p,shot,zoom);
   this.aimGuide=null;
   if(!this.teacher&&self?.alive&&this.controls?.enabled){
@@ -171,7 +174,6 @@ export class Renderer{
    if(!a.alive)continue;if(hitRatio)foreground.circle(a.x,a.y,rad*1.08,'#fff',hitRatio*hit.flash);
    const hpw=Math.max(a.radius*1.65,64/zoom),hpKey=a.id+':'+a.lifeSeq;this.hpTrails??=new Map();let hp=this.hpTrails.get(hpKey);if(!hp)hp={value:a.hp,at:now,hold:now};if(hp.current>a.hp)hp.hold=now+250;if(now>hp.hold)hp.value+=(a.hp-hp.value)*(1-Math.exp(-(now-hp.at)/430));hp.current=a.hp;hp.at=now;hp.value=Math.max(a.hp,hp.value);this.hpTrails.set(hpKey,hp);p.rect(a.x-hpw/2,a.y+a.radius+15/zoom,hpw,8/zoom,'#1f2937',1);p.rect(a.x-hpw/2,a.y+a.radius+15/zoom,hpw*hp.value/a.maxHp,8/zoom,'#ef4444',1);p.rect(a.x-hpw/2,a.y+a.radius+15/zoom,hpw*a.hp/a.maxHp,8/zoom,a.hp/a.maxHp>.35?'#34d399':'#fb4b63',1);
    this.name(a,a.x,a.y-a.radius-26/zoom,zoom,a.id===self?.id);this.level(a,a.x,a.y-a.radius-(a.stunned||a.rw?.capture?70:52)/zoom,zoom,now);
-   if(a.rw?.buffs?.some(b=>b.kind==='ironReflect'&&b.end>(a.statusTick??view.renderTick)))p.circle(a.x,a.y,a.radius+6,'#93c5fd',.9,3/zoom);
    this.paint.brPaintReworkStatus(p,a.x,a.y,a.radius,zoom,a.rw,a.statusTick??view.renderTick,a.maxHp);
   }
   for(const fx of view.effects){const age=view.renderTick-(fx.displayTick??fx.tick),alpha=Math.max(0,1-age/Math.max(6,effectLife(fx)*.06));if(fx.style==='sniper-critical'&&age>=0&&age<=16)this.text('CRITICAL!',fx.x,fx.y-35,20,'#fde047','sniper-critical',true);const row=['',fx.kind,fx.x,fx.y,fx.dx,fx.dy,fx.size,fx.color,fx.amount,0,fx.style,0,fx.impactLevel,fx.geometry];if(!this.paint.brPaintAttack(foreground,row,alpha,zoom)){if(this.pixi)drawFallback(this,foreground,fx,alpha,zoom);else this.canvasFx(this.ctx,row,age/0.06,effectLife(fx),zoom);}}
@@ -181,9 +183,10 @@ export class Renderer{
   const ids=this.actorIds??=new Set();ids.clear();
   for(const a of view.actors){
    ids.add(a.id);
-   if(a.alive && a.supply && a.supplyEnd>view.renderTick) {
+   if(a.alive && a.supply && a.supplyEnd>view.effectTick) {
     const size=Math.max(8/zoom, a.radius*.34);
     this.glyph(supplyTypes[a.supply].icon,a.x+a.radius+size*.5,a.y,size,'supply-buff-'+a.id);
+    p.arc(a.x+a.radius+size*.5,a.y,size+3/zoom,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.min(1,(a.supplyEnd-view.effectTick)/600),supplyTypes[a.supply].color,1,2/zoom);
    }
   }
   for(const map of [this.tracks,this.deaths,this.hostTracks])for(const id of map.keys())if(!ids.has(id))map.delete(id);

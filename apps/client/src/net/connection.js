@@ -2,6 +2,7 @@ import {fingerprint,envelope} from '../../../../packages/protocol/src/index.js';
 import {requestId} from './request-id.js';
 import {eventBatchMessages} from '../../../../packages/protocol/src/server-events.js';
 import {ProfileCache} from './profile-cache.js';
+import {validParticipation,validResultPresentation} from '../../../../packages/protocol/src/participation.js';
 const CONNECTION_TIMEOUT_MS=8000;
 export class Connection extends EventTarget{
  constructor(url){super();this.url=url;this.scope={};this.pending=new Map();this.profiles=new ProfileCache();this.profilesReady=true;this.profileRecoveryAt=-Infinity;this.lifeSeq=0;this.cursor=0;this.token=sessionStorage.getItem('dsbr-resume');this.retry=0;this.stopped=false;this.clock={rtt:0,offset:0,uncertainty:0};}
@@ -50,6 +51,14 @@ export class Connection extends EventTarget{
    this.scope={roomInstanceId:m.roomInstanceId,matchId:m.matchId,connectionEpoch:m.connectionEpoch};}
   if(m.eventSeq){if(m.eventSeq<=this.cursor)return;this.cursor=m.eventSeq;}
   if(m.type==='SESSION'){this.profiles.clear();this.profileRecoveryAt=-Infinity;this.profileReady(m.payload.role==='host');this.token=m.payload.token;this.session=m.payload;sessionStorage.setItem('dsbr-resume',this.token);}
+  const roomState=m.type==='ROOM_STATE'?m.payload:m.type==='FULL_STATE'?m.payload.room:null;
+  if(roomState){this.phase=roomState.phase;if(Number.isFinite(roomState.serverTime))this.serverWallOffset=Math.max(this.serverWallOffset??-Infinity,roomState.serverTime-performance.now());}
+  if(m.type==='PARTICIPATION_STATE'&&(this.phase!=='BATTLE'||m.payload.lifeSeq<this.lifeSeq))return;
+  const participation=m.type==='PARTICIPATION_STATE'?m.payload:roomState?.self?.participation;
+  if(participation&&!validParticipation(participation)||roomState?.resultPresentation&&!validResultPresentation(roomState.resultPresentation,m.matchId)){this.ws?.close(4007,'INVALID_PARTICIPATION_STATE');return;}
+  if(participation||roomState){this.combatSuspended=roomState?.phase!=='BATTLE'&&roomState?false:participation?.state==='eliminated';if(participation)this.lifeSeq=participation.lifeSeq;}
+  if(this.combatSuspended)for(const [id,p]of this.pending)if(p.type==='ACTION'){clearTimeout(p.timer);this.pending.delete(id);p.reject(Error('PLAYER_ELIMINATED'));}
+  if(this.combatSuspended&&['SNAPSHOT','PRIVATE_STATE'].includes(m.type))return;
   if(m.type==='OVERLOAD'&&m.payload.paused)this.combatPause(true);
   if(m.type==='ERROR'&&m.payload.code==='SIMULATION_PAUSED')this.combatPause(true);
   if(m.type==='ROOM_STATE'&&(m.payload.safePaused||m.payload.simulationFault||m.payload.phase!=='BATTLE'))this.combatPause(m.payload.safePaused||m.payload.simulationFault);
@@ -62,10 +71,11 @@ export class Connection extends EventTarget{
   }
   if(m.type==='SNAPSHOT'||m.type==='PRIVATE_STATE')this.lifeSeq=(m.payload.self||m.payload)?.lifeSeq??this.lifeSeq;
   if(m.type==='FULL_STATE'){const full=m.payload;
-   if(!full.room?.self||full.room.self.id!==this.session?.playerId||full.room.phase==='BATTLE'&&(!full.static||!full.snapshot||full.room.self.role==='student'&&(!full.self?.inputFloor||full.self.id!==this.session.playerId))){
+   const eliminated=full.room?.self?.role==='student'&&full.room.self.participation?.state==='eliminated'&&validParticipation(full.room.self.participation);
+   if(!full.room?.self||full.room.self.id!==this.session?.playerId||full.room.phase==='BATTLE'&&!eliminated&&(!full.static||!full.snapshot||full.room.self.role==='student'&&(!full.self?.inputFloor||full.self.id!==this.session.playerId))||eliminated&&(full.snapshot!==null||full.self!==null||full.static!==null)){
     this.restoring=true;this.ws?.close(4007,'INCOMPLETE_RECOVERY_STATE');return;
    }
-   this.cursor=m.payload.cursor;this.lifeSeq=m.payload.self?.lifeSeq||0;this.emit('reset',{});}
+   this.cursor=m.payload.cursor;this.lifeSeq=m.payload.self?.lifeSeq??full.room.self.participation?.lifeSeq??0;this.emit('reset',{});}
   if(m.type==='PONG'){
    const now=performance.now(),rtt=now-m.payload.clientTime,offset=m.payload.serverNow-(now-rtt/2);
    this.clock={rtt,offset:this.clock.rtt?this.clock.offset*.85+offset*.15:offset,uncertainty:rtt/2};
@@ -77,8 +87,9 @@ export class Connection extends EventTarget{
   if(m.type==='AUTH_OK'){this.emit('auth',{});return;}
   this.emit(m.type.toLowerCase(),m.payload);if(m.type==='FULL_STATE'){this.restoring=false;this.retry=0;this.retryStart=null;this.emit('status',{connected:true});}
  }
- send(type,payload={},scoped=true,requestId){if((this.paused||this.profilesReady===false)&&['INPUT_BATCH','ACTION'].includes(type))return false;if(this.ws?.readyState!==WebSocket.OPEN)return false;this.ws.send(JSON.stringify(envelope(type,payload,{...(scoped?{...this.scope,lifeSeq:this.lifeSeq}:{}),...(requestId?{requestId}:{})})));return true;}
+ send(type,payload={},scoped=true,requestId){if((this.paused||this.combatSuspended||this.profilesReady===false)&&['INPUT_BATCH','ACTION'].includes(type))return false;if(this.ws?.readyState!==WebSocket.OPEN)return false;this.ws.send(JSON.stringify(envelope(type,payload,{...(scoped?{...this.scope,lifeSeq:this.lifeSeq}:{}),...(requestId?{requestId}:{})})));return true;}
  command(type,payload={}){
+  if(type==='ACTION'&&this.combatSuspended)return Promise.reject(Error('PLAYER_ELIMINATED'));
   if(type==='ACTION'&&this.paused)return Promise.reject(Error('SAFE_PAUSED'));
   if(type==='ACTION'&&this.profilesReady===false)return Promise.reject(Error('PROFILE_RECOVERY'));
   if(this.restoring)return Promise.reject(Error('경기 상태를 복원하는 중입니다.'));

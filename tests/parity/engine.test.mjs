@@ -32,7 +32,7 @@ for(const expected of fixtures)test(`${retired.has(expected.id)?'approved retire
  r.BRRework.defs['emoji-036'].skill.turnRate=.055;
  // Compare the historical trajectory at historical coefficients. The v35
  // authority tests separately exercise the live projectiles, impulse and HP.
- for(const [id,fields] of Object.entries({'emoji-000':{zoneDamage:8.4},'emoji-007':{zoneDamage:7.35},'emoji-010':{damage:8.24},'emoji-014':{damage:10.3},'emoji-025':{damage:58,knockback:30,wallDamage:14}}))Object.assign(r.BRRework.defs[id].skill,fields);
+ for(const [id,fields] of Object.entries({'emoji-000':{zoneDamage:8.4},'emoji-007':{zoneDamage:7.35},'emoji-010':{damage:8.24},'emoji-014':{damage:10.3},'emoji-025':{damage:58,knockback:30,wallDamage:14},'emoji-122':{thornDamage:3.99}}))Object.assign(r.BRRework.defs[id].skill,fields);
  r.seedRandom('parity|'+expected.id);r.teamMode=0;
  const a=r.EMOJI_DB.find(a=>a.id===expected.id),target=r.EMOJI_DB.find(a=>a.id==='emoji-114');
  const p=new r.Participant(1,'actor',a,new r.Vec2(0,0)),q=new r.Participant(2,'target',target,new r.Vec2(180,0));

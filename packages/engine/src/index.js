@@ -3,16 +3,20 @@ import {activeSupply} from './farm/combat-supplies.js';
 import {visualProfiles} from './presentation.js';
 import {installRules} from './registry.js';
 import {manifest,contentHash} from '../../content/src/manifest.js';
+import {abilityAllowed,validDrawRule} from '../../content/src/battle-rules.js';
+import {captureDeathSummary,getParticipation} from './world/participation.js';
+export {getParticipation,isPermanentlyEliminated} from './world/participation.js';
 export {contentHash};
 export const FIXED_DT_MS=1000/60;
-export const ENGINE_REVISION='v33-authority-1';
+export const ENGINE_REVISION='v35.4-authority-3-participation-results';
 
-export function createRuleContext({mode='solo',teamCount=2,matchSeconds=360,mapIndex=-1,seed='1',matchId='local:1',eventSink=()=>{},quizBank=manifest.questions}={}){
+export function createRuleContext({mode='solo',teamCount=2,matchSeconds=360,mapIndex=-1,drawRule='normal',seed='1',matchId='local:1',eventSink=()=>{},quizBank=manifest.questions}={}){
+ if(!validDrawRule(drawRule))throw Error('INVALID_DRAW_RULE');
  const room={matchId,timeMs:0,idSequence:0,events:[],disposed:false,now(){return this.timeMs;},random:null,
   trace(type,data){eventSink({type:'TRACE',name:type,serverTick:this.game?.frame||0,data});},
   finish(winner,options){this.finished=true;this.finishOptions=options;},
   session:{active:true,role:'host',backend:'authority',inputs:{},players:{},roomCode:matchId,
-   roomMeta:{mode:mode==='team'?'team-elim':mode,teamCount,matchSeconds,mapIndex,seed,matchRound:1,battleStartedAt:0,quizBank},
+   roomMeta:{mode:mode==='team'?'team-elim':mode,teamCount,matchSeconds,mapIndex,drawRule,seed,matchRound:1,battleStartedAt:0,quizBank},
    isRespawnMode(){return ['team-capture','team-respawn'].includes(this.roomMeta.mode);},
    playerConnected:p=>p?.connected!==false}};
  installRules(room);
@@ -30,6 +34,7 @@ export function createWorld(content=manifest,config={},seed='1',initialPlayers=[
  const room=createRuleContext({...config,seed,eventSink});
  const players=initialPlayers.map((entry,i)=>{
   const index=room.EMOJI_DB.findIndex(a=>a.id===entry.abilityId);if(index<0)throw Error('INVALID_ABILITY');
+  if(config.drawRule&&config.drawRule!=='normal'&&!abilityAllowed(room.EMOJI_DB[index],room.session.roomMeta.mode,config.drawRule))throw Error('INVALID_DRAW_ASSIGNMENT');
   const p=new room.Participant(i+1,entry.name,room.EMOJI_DB[index],new room.Vec2(0,0),entry.team||0);
   Object.assign(p,{remoteId:entry.id,sessionId:entry.id,abilityIndex:index,abilityId:entry.abilityId,rosterVersion:room.BR_ROSTER_VERSION,
    connected:true,lastAimDir:new room.Vec2(1,0),basicCooldown:0,skillUsesLeft:-1,maxSkillUses:-1,
@@ -115,7 +120,7 @@ export function stepWorld(world,dt=FIXED_DT_MS){
  if(world.game.escape)updateEscape(world,world.publishEscape);
  if(world.game.participants.some(p=>p.runtimeFaults))throw Error('COMBAT_RUNTIME_FAULT');
  for(const p of world.game.participants){
-  if(!p.alive&&!p.deathHandled){p.deathHandled=true;p.deaths=(p.deaths||0)+1;emit(world,'DEATH',{playerId:p.remoteId,lifeSeq:p.lifeSeq,cause:p.lastDeathCause});if(world.session.respawnMode){world.brTeamKillDeath(p);p.deathHandled=true;world.session.inputs[p.remoteId]={};world.inputPending.delete(p.remoteId);world.actionPending.delete(p.remoteId);}}
+  if(!p.alive&&!p.deathHandled){p.deathHandled=true;p.deaths=(p.deaths||0)+1;captureDeathSummary(world,p);emit(world,'DEATH',{playerId:p.remoteId,lifeSeq:p.lifeSeq,cause:p.lastDeathCause});if(world.session.respawnMode){world.brTeamKillDeath(p);p.deathHandled=true;}world.session.inputs[p.remoteId]={};world.inputPending.delete(p.remoteId);world.actionPending.delete(p.remoteId);}
   if(p.alive)p.deathHandled=false;
  }
  if(world.game.capture?.finalized)world.finished=true;
@@ -138,7 +143,7 @@ export function getPrivateSelfState(world,id,preparedActor,restore=false){
  const p=world.byId.get(id);if(!p)return null;
  const aimKey=p.ability.id+':'+p.radius+':'+p.run?.revision;
  if(p.aimProfileKey!==aimKey){p.aimProfileKey=aimKey;p.visualProfiles=visualProfiles(world,p);p.aimProfiles={};for(const kind of ['attack','skill']){const full=world.brAimHelpProfile(p.ability,kind,p.radius,1,p.run?.mods||{}),short=world.brAimHelpProfile(p.ability,kind,p.radius,.18,p.run?.mods||{});p.aimProfiles[kind]={...full,rangeMin:short.range};}}
- return {...(preparedActor||actor(world,p)),capturePoints:world.game.capture?.records.get(String(p.remoteId||p.id))?.points??0,run:world.brRunSnapshot(p),respawn:world.session.respawnMode?world.brTeamKillSelf(p):null,
+ return {...(preparedActor||actor(world,p)),participation:getParticipation(world,id),capturePoints:world.game.capture?.records.get(String(p.remoteId||p.id))?.points??0,run:world.brRunSnapshot(p),respawn:world.session.respawnMode?world.brTeamKillSelf(p):null,
   aimProfiles:p.aimProfiles,visualProfiles:p.visualProfiles,
   ...(p.ability.id==='emoji-147'&&p.rw?.recast?.ctx.returnPoint?{recastTarget:{...p.rw.recast.ctx.returnPoint}}:{}),
   ...(restore?{inputFloor:{move:Math.max(p.lastReceivedSeq||0,p.lastAppliedSeq||0),tick:Math.max(p.lastReceivedClientTick||0,p.lastAppliedClientTick||0),attack:Math.max(p.receivedAttackSeq||0,p.lastRemoteAttack||0,p.resolvedAttackSeq||0),skill:Math.max(p.receivedSkillSeq||0,p.lastRemoteSkill||0,p.resolvedSkillSeq||0)}}:{}),

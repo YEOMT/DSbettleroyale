@@ -25,7 +25,7 @@ function rings(r,view){
  const cache=r.roster10Rings??=new Map(),visible=r.roster10Visible;
  for(const entry of cache.values())entry.used=false;
  for(const ring of view.dynamicWalls?.rings||[]){
-  if(view.renderTick>=ring.end)continue;let entry=cache.get(ring.id);
+  if((view.effectTick??view.renderTick)>=ring.end)continue;let entry=cache.get(ring.id);
   // Ring geometry is immutable for its scoped ID. Camera/DPR changes scale it.
   if(!entry){
    entry={used:true};
@@ -51,14 +51,15 @@ function decoy(r,p,e,z){
 export function drawRoster10Scene(r,p,view,zoom){
  const z=Math.max(.01,zoom),visible=r.roster10Visible??=new Set();visible.clear();rings(r,view);
  for(const e of view.shots){
-  if(!roster10Kinds.has(e.kind)||e.kind==='ring-wall'||(e.displayFrame??view.renderTick)>=e.end)continue;
+  if(!roster10Kinds.has(e.kind)||e.kind==='ring-wall'||(view.effectTick??view.renderTick)>=e.end)continue;
   visible.add(e.id);
   if(e.kind==='spotlight'){
    p.circle(e.x,e.y,e.radius,'#fde68a',.12);p.circle(e.x,e.y,e.radius,'#facc15',.95,3/z);
   }else if(e.kind==='mirror'){
    const tx=-e.dy*e.length/2,ty=e.dx*e.length/2,x1=e.x-tx,y1=e.y-ty,x2=e.x+tx,y2=e.y+ty;
    p.line(x1,y1,x2,y2,'#cbd5e1',.32,e.width);
-   p.line(x1+e.dx*12,y1+e.dy*12,x2+e.dx*12,y2+e.dy*12,'#e0f2fe',.95,3/z);
+   const left=Math.max(0,Math.min(1,(e.end-(view.effectTick??view.renderTick))/Math.max(1,e.end-e.start)));
+   p.line(x1+e.dx*12,y1+e.dy*12,x1+(x2-x1)*left+e.dx*12,y1+(y2-y1)*left+e.dy*12,'#e0f2fe',.95,3/z);
   }else if(e.kind==='red-light-warning'){
    const angle=Math.atan2(e.dy,e.dx),half=e.halfAngle,range=e.length;
    p.sector(e.x,e.y,range,angle,half,e.color,.15);
@@ -71,11 +72,11 @@ export function drawRoster10Scene(r,p,view,zoom){
    if(Number.isFinite(e.fx)&&Number.isFinite(e.fy))p.line(e.fx,e.fy,x,y,'#e7bd84',.95,Math.max(2/z,4),'round');
    p.arc(x,y,Math.max(5,4/z),-.6,Math.PI*1.45,'#fde68a',1,2/z);
   }else if(e.kind==='mushroom'){
-   const armed=(e.displayFrame??view.renderTick)>=e.armAt;
+   const armed=(view.effectTick??view.renderTick)>=e.armAt;
    p.circle(e.x,e.y,e.radius,'#86efac',armed?.14:.06);p.circle(e.x,e.y,e.radius,armed?'#86efac':'#d1d5db',armed?.85:.5,1.5/z);r.glyph(e.emoji||'🍄',e.x,e.y,e.radius,'rw-mushroom-'+e.id,0,armed?1:.65);
    if(e.hp<e.maxHp){p.rect(e.x-e.radius,e.y+e.radius+4/z,e.radius*2,3/z,'#4b1620',1);p.rect(e.x-e.radius,e.y+e.radius+4/z,e.radius*2*Math.max(0,e.hp/e.maxHp),3/z,'#86efac',1);}
   }else if(e.kind==='poison'){
-   p.circle(e.x,e.y,e.radius,'#4d7c0f',.18);p.circle(e.x,e.y,e.radius,'#a3e635',.9,2/z);p.circle(e.x,e.y,Math.min(9,e.radius*.12),'#a3e635',.65);
+   p.circle(e.x,e.y,e.radius,'#4d7c0f',.18);p.circle(e.x,e.y,e.radius,'#a3e635',.9,2/z);p.circle(e.x,e.y,Math.min(9,e.radius*.12),'#a3e635',.65);p.arc(e.x,e.y,e.radius,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(0,(e.end-(view.effectTick??view.renderTick))/Math.max(1,e.end-e.start)),'#ecfccb',1,2/z);
   }
  }
 }

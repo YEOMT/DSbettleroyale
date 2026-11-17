@@ -74,10 +74,17 @@ export function applyRosterText(r){
    if(key==='003')s.description=`짧은 집중 후 같은 방향으로 ${s.count}발 순차 연사 · 일반 탄 반경 ${s.width/2}, 피해 계수 ${s.damage} · 마지막 탄 반경 ${s.finalRadius}, 피해 계수 ${s.finalDamage} · 발사 중 자동 재조준 없음`;
    if(key==='089')s.description=`직선 공 1발 · 피해 계수 ${s.damage}. 적의 HP/보호막에 피해를 주면 무피해 반환 공이 돌아오고, 도착 시 남은 스킬 쿨타임이 한 번 50% 감소합니다.`;
    if(key==='132')s.description=`${s.durationFrames/60}초 지속 광선 · ${s.intervalFrames/60}초마다 피해 계수 ${s.damage} · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음`;
+   const f=n=>String(Number(n.toFixed(4)));
+   if(key==='000')s.description=`느린 거대 화염구 1발 · 충돌/종점 폭발 ${s.damage} · 2.5초 화염(0.5초마다 ${f(s.zoneDamage)}, 최대 2곳) · 기절 없음`;
+   if(key==='007')s.description=`0.6초 고정 원형 경고 후 방사능 폭발 ${s.damage} · 2.5초 오염(0.5초마다 ${f(s.zoneDamage)}) · 사망 폭발은 30, 생명당 1회`;
+   if(key==='010')s.description=`3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 ${f(s.damage)} · 자연 종료 때 반경 225 붕괴 ${s.collapseDamage}`;
+   if(key==='014')s.description=`5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 ${f(s.damage)} · 기절 없음`;
+   if(key==='122')s.description=`통조림 충돌 폭발 ${s.damage} · 2초 가시 지대 하나(0.5초마다 ${f(s.thornDamage)}) · 소유자당 1개 · 기절 없음`;
+   if(key==='144')s.description=`미발동 버섯은 설치자만 표시 · 최대 320 버섯 설치(HP 20, 0.5초 준비/20초 대기, 최대 3개) · 적 접촉 반경 95 피해 20 · 반경 90 독 3초간 ${f(s.poisonDamage)}×6회(최대 2개)`;
    a.skillSummary=s.description;a.skillLabel=s.label||a.n;a.skillDesc=s.description;
   }else{
    const row=native[key];if(!row)throw Error('UNREVIEWED_NATIVE_TEXT '+a.id);
-   [a.skillLabel,a.skillSummary]=row;a.skillDesc=a.skillSummary;
+   [a.skillLabel,a.skillSummary]=row;if(['031','128'].includes(key))a.skillSummary+=' 지면 흔적의 반복 피해 계수는 기존 대비 10% 증가하며 접촉 피해·시간·제어는 같습니다.';a.skillDesc=a.skillSummary;
   }
  }
 }
