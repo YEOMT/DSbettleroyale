@@ -24,11 +24,11 @@ try{
   for(let n=0;n<100&&!w.actionPending.get(p.remoteId)?.length;n++)await delay(10);assert.ok(w.actionPending.get(p.remoteId)?.length,'real action queued '+JSON.stringify(await h.student.evaluate(()=>({last:m.controls.lastAction,enabled:m.controls.enabled,life:m.net.lifeSeq,cooldown:m.timeline.predicted?.cooldown,stunned:m.timeline.predicted?.stunned}))));return guide;
  }
  for(const touch of [false,true]){await reset('emoji-141');const guide=await press(touch);stepWorld(w);assert.ok(Math.abs(guide.x+400)<.01);assert.ok(Math.hypot(p.pos.x-guide.x,p.pos.y-guide.y)<1);assert.equal(p.cooldown,720);report.push({joker:touch?'CDP touch':'PC drag',guideRange:guide.range,actualX:p.pos.x});h.publish();}
- await reset('emoji-003');const guide=await press(false);assert.equal(guide.width,48);
- const preview=await h.student.evaluate(()=>[...m.timeline.previews.values()].filter(s=>s.actionKind==='skill').map(s=>s.radius));assert.deepEqual(preview,[...Array(13).fill(24),32]);
+ await reset('emoji-003');const guide=await press(false);assert.equal(guide.width,54);
+ const preview=await h.student.evaluate(()=>[...m.timeline.previews.values()].filter(s=>s.actionKind==='skill').map(s=>s.radius));assert.deepEqual(preview,[...Array(13).fill(27),35]);
  for(let i=0;i<70;i++){stepWorld(w);if(i%2===0||i===69){h.publish();await delay(35);}}
  for(const [role,page]of pages.entries()){
-  await page.waitForFunction(()=>drawnRadii.includes(24)&&drawnRadii.includes(32));const geometry=await page.evaluate(()=>({radii:drawnRadii,shots:spawned.filter(s=>s.kind==='projectile'&&s.actionKind==='skill').map(s=>s.radius),pixi:!!m.renderer.pixi}));assert.equal(geometry.pixi,renderer==='pixi');assert.deepEqual(geometry.shots,[...Array(13).fill(24),32]);report.push({role,...geometry});
+  await page.waitForFunction(()=>drawnRadii.includes(27)&&drawnRadii.includes(35));const geometry=await page.evaluate(()=>({radii:drawnRadii,shots:spawned.filter(s=>s.kind==='projectile'&&s.actionKind==='skill').map(s=>s.radius),pixi:!!m.renderer.pixi}));assert.equal(geometry.pixi,renderer==='pixi');assert.deepEqual(geometry.shots,[...Array(13).fill(27),35]);report.push({role,...geometry});
   await page.screenshot({path:'artifacts/classroom/archmage-'+renderer+'-'+role+'.png'});
  }
  await h.command('END');await h.command('REMATCH');for(const page of pages)await page.waitForFunction(()=>m.ui.room.phase==='LOBBY'&&m.timeline.previews.size===0&&m.renderer.textures.size===0);assert.deepEqual(h.errors,[]);console.log('classroom aim',renderer,'PASS');

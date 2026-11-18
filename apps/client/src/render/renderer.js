@@ -45,13 +45,29 @@ export class Renderer{
  }
  resize(){this.hudInsets=null;if(!this.ctx&&!this.pixi)return;const dpr=this.scene.resolution(innerWidth,innerHeight,this.paint.brGraphicsProfile().dpr);if(this.app)this.app.renderer.resize(innerWidth,innerHeight,dpr);else{this.canvas.width=innerWidth*dpr;this.canvas.height=innerHeight*dpr;this.dpr=dpr;}}
  texture(source){let texture=this.textures.get(source);if(!texture){texture=Texture.from(source);this.textures.set(source,texture);}return texture;}
- image(source,x,y,r,key,rotation=0,alpha=1,squash=0){if(this.pixi){const texture=this.texture(source);let sprite=this.sprites.get(key);if(!sprite){sprite=new Sprite(texture);sprite.anchor.set(.5);this.sprites.set(key,sprite);this.world.addChild(sprite);}sprite.texture=texture;sprite.visible=true;sprite.position.set(x,y);sprite.width=r*2*(1+squash*.55);sprite.height=r*2*(1-squash);sprite.rotation=rotation;sprite.alpha=alpha;}else{const c=this.ctx;c.save();c.globalAlpha=alpha;c.translate(x,y);c.rotate(rotation);c.drawImage(source,-r*(1+squash*.65),-r*(1-squash),r*2*(1+squash*.65),r*2*(1-squash));c.restore();}}
+ image(source,x,y,r,key,rotation=0,alpha=1,squash=0,axis=null){
+  // One axial affine transform of the cached bitmap. Identical coefficients
+  // for Canvas and Pixi; no Matrix/filter/sprite allocation for each pose.
+  let a=1,b=0,d=1;
+  if(squash){const nx=axis?.axisX||0,ny=axis?.axisY??1,parallel=1-squash,side=1+squash*.55;a=parallel*nx*nx+side*ny*ny;b=(parallel-side)*nx*ny;d=parallel*ny*ny+side*nx*nx;}
+  if(this.pixi){
+   const texture=this.texture(source);let sprite=this.sprites.get(key);if(!sprite){sprite=new Sprite(texture);sprite.anchor.set(.5);this.sprites.set(key,sprite);this.world.addChild(sprite);}
+   sprite.texture=texture;sprite.visible=true;sprite.position.set(x,y);
+   sprite.width=r*2*(b?Math.hypot(a,b):a);sprite.height=r*2*(b?Math.hypot(b,d):d);
+   if(b)sprite.skew.set(Math.atan2(b,d),Math.atan2(b,a));else sprite.skew.set(0,0);
+   sprite.rotation=rotation;sprite.alpha=alpha;
+  // A diagonal scale is identical in drawImage's destination rectangle. Avoid
+  // submitting an extra Canvas transform for neutral/axis-aligned glyphs.
+  }else{const c=this.ctx;c.save();c.globalAlpha=alpha;c.translate(x,y);c.rotate(rotation);if(b){c.transform(a,b,b,d,0,0);c.drawImage(source,-r,-r,r*2,r*2);}else c.drawImage(source,-r*a,-r*d,r*2*a,r*2*d);c.restore();}
+ }
  glyph(emoji,x,y,r,key,squash=0,alpha=1){this.image(this.paint.brGetEmojiSprite(emoji),x,y,r,key,0,alpha,squash);}
  actorBody(source,a,x,y,rad,key,zoom,now,alpha=1,hit=0){
-  const pose=this.poses.sample(a,zoom,this.poseTick,now,this.session.reducedMotion,this.session.roomMeta?.graphicsPreset==='low');
-  const squash=this.session.reducedMotion?0:hit>0?Math.max(hit,pose?.squash||0):pose?.squash||0;
+  const pose=this.poses.sample(a,zoom,this.poseTick,now,this.session.reducedMotion,this.session.roomMeta?.graphicsPreset==='low',this.teacher);
+  // hitStates still owns the existing rim/flash. Body reaction is exclusively
+  // the confirmed life-scoped pose, avoiding a second vertical/DOT squash.
+  const squash=pose?.squash||0;
   if(!this.pixi&&!pose&&!squash&&alpha===1){this.ctx.drawImage(source,x-rad,y-rad,2*rad,2*rad);return;}
-  this.image(source,x+(pose?.x||0),y+(pose?.y||0),rad,key,pose?.rotation||0,alpha,squash);
+  this.image(source,x+(pose?.x||0),y+(pose?.y||0),rad,key,pose?.rotation||0,alpha,squash,pose);
  }
  hostInsets(){
   if(this.hudInsets)return this.hudInsets;

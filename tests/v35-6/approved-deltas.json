@@ -1,0 +1,368 @@
+[
+  {
+    "path": "emoji-003.definition.skill.cooldown",
+    "before": 1200,
+    "after": 990
+  },
+  {
+    "path": "emoji-003.definition.skill.cooldownFrames",
+    "before": 1200,
+    "after": 990
+  },
+  {
+    "path": "emoji-003.definition.skill.finalRadius",
+    "before": 32,
+    "after": 35
+  },
+  {
+    "path": "emoji-003.definition.skill.width",
+    "before": 48,
+    "after": 54
+  },
+  {
+    "path": "emoji-003.skill.cooldown",
+    "before": 1200,
+    "after": 990
+  },
+  {
+    "path": "emoji-003.skill.cooldownFrames",
+    "before": 1200,
+    "after": 990
+  },
+  {
+    "path": "emoji-003.skill.finalRadius",
+    "before": 32,
+    "after": 35
+  },
+  {
+    "path": "emoji-003.skill.width",
+    "before": 48,
+    "after": 54
+  },
+  {
+    "path": "emoji-003.timing.cooldown",
+    "before": 1200,
+    "after": 990
+  },
+  {
+    "path": "emoji-007.ability.finalBaseSpeed",
+    "before": 1.3,
+    "after": 1.4
+  },
+  {
+    "path": "emoji-007.ability.walkFloorRatio",
+    "before": 1.0833333333333335,
+    "after": 1.1666666666666667
+  },
+  {
+    "path": "emoji-007.definition.skill.zoneRadius",
+    "before": 245,
+    "after": 290
+  },
+  {
+    "path": "emoji-007.definition.stats",
+    "after": {
+      "finalBaseHp": 500
+    }
+  },
+  {
+    "path": "emoji-007.maxHp",
+    "before": 459,
+    "after": 500
+  },
+  {
+    "path": "emoji-007.skill.zoneRadius",
+    "before": 245,
+    "after": 290
+  },
+  {
+    "path": "emoji-007.speed",
+    "before": 1.3,
+    "after": 1.4
+  },
+  {
+    "path": "emoji-014.definition.skill.growFrames",
+    "before": 150,
+    "after": 90
+  },
+  {
+    "path": "emoji-014.definition.skill.maxRadius",
+    "before": 310,
+    "after": 380
+  },
+  {
+    "path": "emoji-014.definition.skill.radius",
+    "before": 110,
+    "after": 160
+  },
+  {
+    "path": "emoji-014.skill.growFrames",
+    "before": 150,
+    "after": 90
+  },
+  {
+    "path": "emoji-014.skill.maxRadius",
+    "before": 310,
+    "after": 380
+  },
+  {
+    "path": "emoji-014.skill.radius",
+    "before": 110,
+    "after": 160
+  },
+  {
+    "path": "emoji-034.definition.skill.cooldown",
+    "before": 945,
+    "after": 720
+  },
+  {
+    "path": "emoji-034.definition.skill.cooldownFrames",
+    "before": 945,
+    "after": 720
+  },
+  {
+    "path": "emoji-034.definition.stats.finalBaseHp",
+    "after": 360
+  },
+  {
+    "path": "emoji-034.maxHp",
+    "before": 320.173425,
+    "after": 360
+  },
+  {
+    "path": "emoji-034.skill.cooldown",
+    "before": 945,
+    "after": 720
+  },
+  {
+    "path": "emoji-034.skill.cooldownFrames",
+    "before": 945,
+    "after": 720
+  },
+  {
+    "path": "emoji-034.timing.cooldown",
+    "before": 945,
+    "after": 720
+  },
+  {
+    "path": "emoji-056.ability.finalBaseSpeed",
+    "after": 1.7
+  },
+  {
+    "path": "emoji-056.definition.skill.radius",
+    "before": 30,
+    "after": 34
+  },
+  {
+    "path": "emoji-056.definition.skill.speed",
+    "before": 7,
+    "after": 10
+  },
+  {
+    "path": "emoji-056.definition.skill.turnRate",
+    "after": 0.035
+  },
+  {
+    "path": "emoji-056.definition.stats.finalBaseHp",
+    "after": 240
+  },
+  {
+    "path": "emoji-056.maxHp",
+    "before": 187.5,
+    "after": 240
+  },
+  {
+    "path": "emoji-056.skill.radius",
+    "before": 30,
+    "after": 34
+  },
+  {
+    "path": "emoji-056.skill.speed",
+    "before": 7,
+    "after": 10
+  },
+  {
+    "path": "emoji-056.skill.turnRate",
+    "after": 0.035
+  },
+  {
+    "path": "emoji-056.speed",
+    "before": 1.5,
+    "after": 1.7
+  },
+  {
+    "path": "emoji-063.definition.skill.range",
+    "before": 650,
+    "after": 720
+  },
+  {
+    "path": "emoji-063.definition.skill.spread",
+    "before": 0.145,
+    "after": 0.125
+  },
+  {
+    "path": "emoji-063.definition.stats.finalBaseHp",
+    "after": 360
+  },
+  {
+    "path": "emoji-063.maxHp",
+    "before": 334.7267625,
+    "after": 360
+  },
+  {
+    "path": "emoji-063.skill.range",
+    "before": 650,
+    "after": 720
+  },
+  {
+    "path": "emoji-063.skill.spread",
+    "before": 0.145,
+    "after": 0.125
+  },
+  {
+    "path": "emoji-087.definition.skill.cooldown",
+    "before": 600,
+    "after": 570
+  },
+  {
+    "path": "emoji-087.definition.skill.cooldownFrames",
+    "before": 600,
+    "after": 570
+  },
+  {
+    "path": "emoji-087.definition.skill.counterplay",
+    "before": "4초 동안 엄폐하거나 거리 이탈",
+    "after": "5초 동안 엄폐하거나 거리 이탈"
+  },
+  {
+    "path": "emoji-087.definition.skill.markDuration",
+    "before": 240,
+    "after": 300
+  },
+  {
+    "path": "emoji-087.definition.skill.radius",
+    "before": 10.4,
+    "after": 12
+  },
+  {
+    "path": "emoji-087.definition.skill.speed",
+    "before": 36,
+    "after": 42
+  },
+  {
+    "path": "emoji-087.definition.stats.finalBaseHp",
+    "after": 340
+  },
+  {
+    "path": "emoji-087.maxHp",
+    "before": 305.6200875,
+    "after": 340
+  },
+  {
+    "path": "emoji-087.skill.cooldown",
+    "before": 600,
+    "after": 570
+  },
+  {
+    "path": "emoji-087.skill.cooldownFrames",
+    "before": 600,
+    "after": 570
+  },
+  {
+    "path": "emoji-087.skill.counterplay",
+    "before": "4초 동안 엄폐하거나 거리 이탈",
+    "after": "5초 동안 엄폐하거나 거리 이탈"
+  },
+  {
+    "path": "emoji-087.skill.markDuration",
+    "before": 240,
+    "after": 300
+  },
+  {
+    "path": "emoji-087.skill.radius",
+    "before": 10.4,
+    "after": 12
+  },
+  {
+    "path": "emoji-087.skill.speed",
+    "before": 36,
+    "after": 42
+  },
+  {
+    "path": "emoji-087.timing.cooldown",
+    "before": 600,
+    "after": 570
+  },
+  {
+    "path": "emoji-139.ability.finalBaseSpeed",
+    "before": 1.18,
+    "after": 1.37
+  },
+  {
+    "path": "emoji-139.ability.walkDriveScale",
+    "after": 1.0225641025641026
+  },
+  {
+    "path": "emoji-139.speed",
+    "before": 1.18,
+    "after": 1.37
+  },
+  {
+    "path": "emoji-142.ability.finalBaseSpeed",
+    "after": 1.48
+  },
+  {
+    "path": "emoji-142.ability.walkFloorRatio",
+    "after": 1.1419753086419753
+  },
+  {
+    "path": "emoji-142.definition.skill.cooldown",
+    "before": 600,
+    "after": 450
+  },
+  {
+    "path": "emoji-142.definition.skill.cooldownFrames",
+    "before": 600,
+    "after": 450
+  },
+  {
+    "path": "emoji-142.definition.skill.pullSpeed",
+    "before": 32,
+    "after": 38
+  },
+  {
+    "path": "emoji-142.definition.stats.finalBaseHp",
+    "before": 436.242,
+    "after": 475
+  },
+  {
+    "path": "emoji-142.maxHp",
+    "before": 436.242,
+    "after": 475
+  },
+  {
+    "path": "emoji-142.skill.cooldown",
+    "before": 600,
+    "after": 450
+  },
+  {
+    "path": "emoji-142.skill.cooldownFrames",
+    "before": 600,
+    "after": 450
+  },
+  {
+    "path": "emoji-142.skill.pullSpeed",
+    "before": 32,
+    "after": 38
+  },
+  {
+    "path": "emoji-142.speed",
+    "before": 1.296,
+    "after": 1.48
+  },
+  {
+    "path": "emoji-142.timing.cooldown",
+    "before": 600,
+    "after": 450
+  }
+]

@@ -1,0 +1,131 @@
+{
+  "scope": "isolated actual Renderer.image Canvas submission microbenchmark, cached bitmap, same Edge page, five alternating batches; not a gameplay/GPU completion/frame benchmark",
+  "beforeHash": "ba8e00ff64290a7982dc2e2e504bd584214e3292ae8c2b89ad1403c93c98d0c2",
+  "afterHash": "f2c32039eff9033898d81911cc107afe559cd5abe2b57653c9a0e729c193c9c8",
+  "browser": "157.0.4341.60",
+  "rows": [
+    {
+      "name": "neutral",
+      "drawsPerBatch": 20000,
+      "batches": [
+        {
+          "batch": 1,
+          "before": 46.89999997615814,
+          "after": 44
+        },
+        {
+          "batch": 2,
+          "after": 45.299999952316284,
+          "before": 49.60000002384186
+        },
+        {
+          "batch": 3,
+          "before": 43.10000002384186,
+          "after": 50.30000001192093
+        },
+        {
+          "batch": 4,
+          "after": 47.60000002384186,
+          "before": 43.89999997615814
+        },
+        {
+          "batch": 5,
+          "before": 47,
+          "after": 44.5
+        }
+      ],
+      "medianBeforeMs": 46.89999997615814,
+      "medianAfterMs": 45.299999952316284,
+      "ratio": 0.9658848608815517
+    },
+    {
+      "name": "axis-aligned",
+      "drawsPerBatch": 20000,
+      "batches": [
+        {
+          "batch": 1,
+          "before": 52.30000001192093,
+          "after": 47.60000002384186
+        },
+        {
+          "batch": 2,
+          "after": 42.19999998807907,
+          "before": 45.5
+        },
+        {
+          "batch": 3,
+          "before": 54.19999998807907,
+          "after": 45.5
+        },
+        {
+          "batch": 4,
+          "after": 44.299999952316284,
+          "before": 50.5
+        },
+        {
+          "batch": 5,
+          "before": 47.09999996423721,
+          "after": 48.89999997615814
+        }
+      ],
+      "medianBeforeMs": 50.5,
+      "medianAfterMs": 45.5,
+      "ratio": 0.900990099009901
+    },
+    {
+      "name": "oblique",
+      "drawsPerBatch": 20000,
+      "batches": [
+        {
+          "batch": 1,
+          "before": 44.60000002384186,
+          "after": 50.5
+        },
+        {
+          "batch": 2,
+          "after": 54.5,
+          "before": 60
+        },
+        {
+          "batch": 3,
+          "before": 47.30000001192093,
+          "after": 47.30000001192093
+        },
+        {
+          "batch": 4,
+          "after": 51.19999998807907,
+          "before": 49.89999997615814
+        },
+        {
+          "batch": 5,
+          "before": 49.200000047683716,
+          "after": 52.39999997615814
+        }
+      ],
+      "medianBeforeMs": 49.200000047683716,
+      "medianAfterMs": 51.19999998807907,
+      "ratio": 1.0406504052531909
+    }
+  ],
+  "pixels": [
+    {
+      "name": "neutral",
+      "changedChannels": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "axis-aligned",
+      "changedChannels": 0,
+      "maxDelta": 0
+    },
+    {
+      "name": "oblique",
+      "changedChannels": 0,
+      "maxDelta": 0
+    }
+  ],
+  "setupFailure": {
+    "status": "INFRA_FAILURE",
+    "cause": "First local microbench setup instantiated the generated class incorrectly (fn.image missing); failed before any measurements. Corrected before one completed 5-batch comparison."
+  }
+}

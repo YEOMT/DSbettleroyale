@@ -268,7 +268,7 @@ __brScope.brBaseWalkingSpeed = function brBaseWalkingSpeed(p) {
         };
 
 __brScope.brHumanMoveSpeed = function brHumanMoveSpeed(p) {
-            const base = __brScope.brBaseWalkingSpeed(p), tick = Number(__brScope.game?.frame || 0);
+            const base = __brScope.brBaseWalkingSpeed(p)*(p.ability.walkDriveScale||1), tick = Number(__brScope.game?.frame || 0);
             const speed = base*(p.escapeBoostUntil>tick?1.30:1)*(p.teamHasteFrames>0?1.12:1)*(p.playerChaseFrames>0?1.12:1)*(p.playerMoveBoostFrames>0?1.48:1)*__brScope.brRunMod(p,'moveSpeed')*(__brScope.BRRework?.moveRate(p)??1);
             if (!p.combatBuff || activeSupply(p, tick)?.kind !== 'haste') return speed;
             // The supply can add walking speed up to 2x base; existing stronger

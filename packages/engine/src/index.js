@@ -8,7 +8,7 @@ import {captureDeathSummary,getParticipation} from './world/participation.js';
 export {getParticipation,isPermanentlyEliminated} from './world/participation.js';
 export {contentHash};
 export const FIXED_DT_MS=1000/60;
-export const ENGINE_REVISION='v35.5-authority-1-overdrive';
+export const ENGINE_REVISION='v35.6-authority-1-combat-recovery';
 
 export function createRuleContext({mode='solo',teamCount=2,matchSeconds=360,mapIndex=-1,drawRule='normal',seed='1',matchId='local:1',eventSink=()=>{},quizBank=manifest.questions}={}){
  if(!validDrawRule(drawRule))throw Error('INVALID_DRAW_RULE');

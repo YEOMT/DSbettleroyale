@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
 import {createHash} from 'node:crypto';
 import {currentExpected} from '../baseline/v34-authority.mjs';
+import {prior356} from '../v35-6/approved.mjs';
 import {manifest} from '../../packages/content/src/manifest.js';
 import {rosterMechanics,sameMechanics,reviewedMigrationScope,parseManifest} from '../../tools/ci/roster-scope.mjs';
 const baseline=JSON.parse(fs.readFileSync(new URL('../baseline/main-790fb11-roster.json',import.meta.url),'utf8'));
@@ -12,7 +13,7 @@ test('83 inherited kits retain their mechanical projection except the explicitly
   'emoji-034':'b36b9a448c7e5c3acb2788cfe176ea03fe45d820e572e3b1fcfb12a0a3b48110',
   'emoji-070':'efc3882f5dbafa3f26fd7965f9824ddf5e4edfa8379aa354a662fb454910d463'
  };
- for(const [id,digest] of Object.entries(pr18))assert.equal(createHash('sha256').update(JSON.stringify(actual[id])).digest('hex'),digest,id+' d28b2d8 mechanics');
+ for(const [id,digest] of Object.entries(pr18))assert.equal(createHash('sha256').update(JSON.stringify(prior356(actual[id]))).digest('hex'),digest,id+' d28b2d8 mechanics (only approved356 leaves normalized)');
  for(const [id,expected]of Object.entries(baseline.entries))assert.ok(sameMechanics(actual[id],currentExpected(expected)),id+' authority projection differs from approved main');
 });
 test('migration scope narrows only approved 87 to 83 changes and retains explicit code references',()=>{

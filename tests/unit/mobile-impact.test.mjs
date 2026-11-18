@@ -38,7 +38,7 @@ test('heavy stroke has thrust, compression and return; quick attacks keep a shor
 test('short orbit and hit wait for one busy eligible paint, then expire by wall time; old events never revive',()=>{
  const a=actor('a','emoji-024'),b=actor('b','emoji-001');
  const shot={type:'SHOT_SPAWN',serverTick:10,data:{owner:'a',life:2,actionKind:'skill',actionSeq:1,dx:1,dy:0}};
- const hit={type:'FX',serverTick:10,data:{kind:'hit',targetId:'b',impactLevel:2,geometry:{confirmed:true,targetLife:2}}};
+ const hit={type:'FX',serverTick:10,data:{kind:'hit',targetId:'b',amount:12,impactLevel:2,geometry:{confirmed:true,targetLife:2}}};
  for(const [event,target] of [[shot,a],[hit,b]]){
   const p=new AttackPoses();p.accept(event,[a,b],1000);assert.equal(p.sample(target,1,9,1000,false,true),null);
   assert.ok(p.sample(target,1,34,1350,false,true));assert.equal(p.sample(target,1,40,1500,false,true),null);
@@ -60,11 +60,11 @@ test('low quality retains bounded recoil, ordinals cannot stack it, and actor co
 });
 test('only confirmed non-periodic contact compresses the melee source, bounded by life and expiry',()=>{
  const poses=new AttackPoses(),a=actor('a','emoji-025'),b=actor('b','emoji-001');
- const hit={type:'FX',serverTick:10,data:{kind:'hit',sourceId:'a',targetId:'b',style:'basic-hammer',dx:1,dy:0,impactLevel:4,geometry:{confirmed:true,shape:'contact',lifeSeq:2,targetLife:2}}};
+ const hit={type:'FX',serverTick:10,data:{kind:'hit',sourceId:'a',targetId:'b',amount:60,style:'basic-hammer',dx:1,dy:0,impactLevel:4,geometry:{confirmed:true,shape:'contact',lifeSeq:2,targetLife:2}}};
  poses.accept({...hit,data:{...hit.data,geometry:{...hit.data.geometry,confirmed:false}}},[a,b],100);assert.equal(poses.contacts.size,0);
  poses.accept(hit,[a,b],100);assert.ok(poses.sample(a,1,11,140,false,true).squash>.1);
  assert.equal(poses.sample(a,1,11,140,true,true),null);
  assert.equal(poses.sample({...a,lifeSeq:3},1,11,140,false,true),null);assert.equal(poses.contacts.size,0);
  poses.accept({...hit,data:{...hit.data,geometry:{...hit.data.geometry,periodic:true}}},[a,b],150);assert.equal(poses.contacts.size,0);
- poses.accept(hit,[a,b],200);poses.sample(a,1,20,301,false,true);assert.equal(poses.contacts.size,0);poses.clear();assert.equal(poses.active.size,0);
+ poses.accept({...hit,serverTick:20},[a,b],200);poses.sample(a,1,20,301,false,true);assert.equal(poses.contacts.size,0);poses.clear();assert.equal(poses.active.size,0);
 });

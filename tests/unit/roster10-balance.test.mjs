@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createRuleContext} from '../../packages/engine/src/index.js';
+import {expected356} from '../v35-6/approved.mjs';
 
 const began=performance.now(),baseline=JSON.parse(fs.readFileSync('tests/baseline/content.json','utf8'));
 const evidence={baseline:'tests/baseline/content.json (immutable v32.1 effective content)',hp:[],initialCrates:[],waves:{},displacement:[],genie:{},tests:{}};
@@ -34,7 +35,7 @@ test('all active B/C actors receive exactly one final pre-mode +6%; other stats/
   const a=new r.Participant(1,'after',ability,new r.Vec2(0,0));
   const b=new old.Participant(1,'before',old.EMOJI_DB.find(x=>x.id===ability.id),new old.Vec2(0,0));
   close(a.maxHp,b.maxHp*(['B','C'].includes(ability.t)?1.06:1),ability.id);assert.equal(a.hp,a.maxHp);
-  const frozen=baseline.roster.find(x=>x.id===ability.id);if(frozen)close(b.maxHp,frozen.maxHp,ability.id+' immutable baseline');
+  const frozen=baseline.roster.find(x=>x.id===ability.id);if(frozen)close(b.maxHp,expected356(frozen).maxHp,ability.id+' immutable baseline plus approved v35.6 delta');
   evidence.hp.push({id:ability.id,name:ability.n,tier:ability.t,before:b.maxHp,after:a.maxHp,factor:['B','C'].includes(ability.t)?1.06:1,source:frozen?'immutable legacy':'frozen new-roster role median'});
   for(const key of ['radius','speed','damageMult','knockbackResist'])assert.equal(a[key],b[key],ability.id+' '+key);
   const again=new r.Participant(1,'new life',ability,new r.Vec2(0,0));assert.equal(again.maxHp,a.maxHp);

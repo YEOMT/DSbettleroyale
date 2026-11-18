@@ -15,7 +15,7 @@ test('86 active stable IDs, deleted skills cannot instantiate, rank chances stay
 test('Bowling is one straight 36-radius ball, unchanged basic, once-per-target direction and cooldown',()=>{
  const f=fixture(),{w,p,q,z}=f;try{
   const before=w.brProgressionCombat.basicProfile(p.ability);assert.equal(before.bounces,2);assert.equal(before.pierce,false);assert.equal(before.speed,14.976);assert.equal(before.range,792);
-  assert.ok(w.BRRework.cast(p,w.game,new w.Vec2(1,0)));assert.equal(p.cooldown,945);const shots=w.game.rw.entities.filter(e=>e.kind==='projectile');assert.equal(shots.length,1);const s=shots[0];assert.deepEqual([s.radius,s.speed,s.range,s.damage,s.bounces,s.pierce],[36,22,900,21,0,true]);
+  assert.ok(w.BRRework.cast(p,w.game,new w.Vec2(1,0)));assert.equal(p.cooldown,720);const shots=w.game.rw.entities.filter(e=>e.kind==='projectile');assert.equal(shots.length,1);const s=shots[0];assert.deepEqual([s.radius,s.speed,s.range,s.damage,s.bounces,s.pierce],[36,22,900,21,0,true]);
   f.tick(30);assert.ok(q.hp<q.maxHp&&z.hp<z.maxHp);assert.equal(s.hits.size,2);const hp=[q.hp,z.hp];assert.ok(q.rw.impulse.x>0);assert.equal(q.rw.impulse.y,0);assert.equal(q.stunned,0);assert.equal(p.hp,p.maxHp);
   f.tick(20);assert.deepEqual([q.hp,z.hp],hp);assert.ok(s.dead);assert.equal(w.game.projectiles.length,0);
  }finally{destroyWorld(w);}

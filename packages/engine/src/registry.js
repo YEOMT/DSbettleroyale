@@ -26,6 +26,7 @@ import {install as install24,initializers as init24} from './combat/player-input
 import {install as install25,initializers as init25} from './events/wire.js';
 import {install as install26,initializers as init26} from './abilities/roster10.js';
 import {applyOverdrive} from './abilities/overdrive.js';
+import {applyRecovery356} from './abilities/recovery356.js';
 import {applyRosterText} from './world/roster-text.js';
 import {applyGroundDamage} from './combat/ground-damage.js';
 export function installRules(room){install0(room);
@@ -55,4 +56,4 @@ install23(room);
 install24(room);
 install25(room);
 install26(room);
-for(const [,init] of [...init0,...init1,...init2,...init3,...init4,...init5,...init6,...init7,...init8,...init9,...init10,...init11,...init12,...init13,...init14,...init15,...init16,...init17,...init18,...init19,...init20,...init21,...init22,...init23,...init24,...init25,...init26].sort((a,b)=>a[0]-b[0]))init(room);applyGroundDamage(room);applyOverdrive(room);applyRosterText(room);return room;}
+for(const [,init] of [...init0,...init1,...init2,...init3,...init4,...init5,...init6,...init7,...init8,...init9,...init10,...init11,...init12,...init13,...init14,...init15,...init16,...init17,...init18,...init19,...init20,...init21,...init22,...init23,...init24,...init25,...init26].sort((a,b)=>a[0]-b[0]))init(room);applyGroundDamage(room);applyOverdrive(room);applyRecovery356(room);applyRosterText(room);return room;}

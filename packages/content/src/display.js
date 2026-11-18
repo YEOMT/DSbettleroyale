@@ -131,9 +131,9 @@ export const display={
     },
     "emoji-003": {
       "basic": "빠른 마력탄 · 1발",
-      "skill": "짧은 집중 후 같은 방향으로 14발 순차 연사 · 일반 탄 반경 24, 피해 계수 11.55 · 마지막 탄 반경 32, 피해 계수 17.85 · 발사 중 자동 재조준 없음 · 최대 조준 거리 1110 · 대기 20초",
+      "skill": "짧은 집중 후 같은 방향으로 14발 순차 연사 · 일반 탄 반경 27, 피해 계수 11.55 · 마지막 탄 반경 35, 피해 계수 17.85 · 발사 중 자동 재조준 없음 · 최대 조준 거리 1110 · 대기 16.5초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 개수 · 제어",
-      "cooldown": "20초",
+      "cooldown": "16.5초",
       "label": "대마법사",
       "category": "원거리형",
       "concept": "같은 방향으로 순차 마력탄을 쏘아 길을 봉쇄한다",
@@ -150,11 +150,18 @@ export const display={
         "skill": {
           "kind": "sequential-barrage",
           "aimRange": 1110,
-          "cooldownFrames": 1200,
+          "cooldownFrames": 990,
           "cooldownJitter": false,
           "durationFrames": 0,
           "damageCoefficient": 11.55,
-          "finalDamageCoefficient": 17.85
+          "finalDamageCoefficient": 17.85,
+          "width": 54,
+          "speed": 31.5,
+          "count": 14,
+          "countCap": 22,
+          "intervalFrames": 4,
+          "windupFrames": 10,
+          "finalRadius": 35
         },
         "eligibleAugments": [
           "rapid",
@@ -170,7 +177,13 @@ export const display={
           "swift",
           "titan",
           "regen"
-        ]
+        ],
+        "body": {
+          "maxHp": 514.2075,
+          "baseSpeed": 1.296,
+          "baseWalkingSpeed": 3.7239999999999993,
+          "humanMoveSpeed": 3.7239999999999993
+        }
       }
     },
     "emoji-004": {
@@ -259,7 +272,7 @@ export const display={
     },
     "emoji-007": {
       "basic": "방사능 탄 · 1발",
-      "skill": "0.6초 고정 원형 경고 후 방사능 폭발 86.1 · 2.5초 오염(0.5초마다 11.55) · 사망 폭발은 30, 생명당 1회 · 자기 중심 · 대기 19초",
+      "skill": "0.6초 고정 원형 경고 후 반경 290 방사능 폭발 86.1 · 반경 290 오염 2.5초(0.5초마다 11.55) · 사망 폭발은 30, 생명당 1회 · 자기 중심 · 대기 19초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
       "cooldown": "19초",
       "label": "폴아웃",
@@ -281,7 +294,12 @@ export const display={
           "cooldownFrames": 1140,
           "cooldownJitter": false,
           "durationFrames": 150,
-          "damageCoefficient": 86.1
+          "damageCoefficient": 86.1,
+          "radius": 290,
+          "intervalFrames": 30,
+          "windupFrames": 36,
+          "zoneRadius": 290,
+          "zoneDamage": 11.55
         },
         "eligibleAugments": [
           "rapid",
@@ -296,7 +314,13 @@ export const display={
           "swift",
           "titan",
           "regen"
-        ]
+        ],
+        "body": {
+          "maxHp": 500,
+          "baseSpeed": 1.4,
+          "baseWalkingSpeed": 4.344666666666666,
+          "humanMoveSpeed": 4.344666666666666
+        }
       }
     },
     "emoji-008": {
@@ -468,7 +492,7 @@ export const display={
     },
     "emoji-014": {
       "basic": "독성 구체 · 1발",
-      "skill": "5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 15.862 · 기절 없음 · 최대 조준 거리 690 · 대기 17초",
+      "skill": "5초 독구름 1개 · 1.5초간 반경 160→380 확장 · 현재 범위에서 0.5초마다 피해 15.862 · 기절 없음 · 최대 조준 거리 690 · 대기 17초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 고유 지속",
       "cooldown": "17초",
       "label": "역병군주",
@@ -490,7 +514,11 @@ export const display={
           "cooldownFrames": 1020,
           "cooldownJitter": false,
           "durationFrames": 300,
-          "damageCoefficient": 15.862000000000002
+          "damageCoefficient": 15.862000000000002,
+          "radius": 160,
+          "intervalFrames": 30,
+          "maxRadius": 380,
+          "growFrames": 90
         },
         "eligibleAugments": [
           "rapid",
@@ -505,7 +533,13 @@ export const display={
           "titan",
           "regen",
           "signature_duration"
-        ]
+        ],
+        "body": {
+          "maxHp": 460,
+          "baseSpeed": 1.296,
+          "baseWalkingSpeed": 3.7239999999999993,
+          "humanMoveSpeed": 3.7239999999999993
+        }
       }
     },
     "emoji-019": {
@@ -1314,9 +1348,9 @@ export const display={
     },
     "emoji-034": {
       "basic": "볼링공 · 1발 · 벽 반사 2회",
-      "skill": "반경 36의 큰 볼링공 한 개가 900 거리까지 직진하며 적마다 한 번 타격하고 진행 방향으로 밀어냅니다. 벽에 닿으면 사라지며 반사·기절은 없습니다. · 최대 조준 거리 900 · 대기 15.75초",
+      "skill": "반경 36의 큰 볼링공 한 개가 900 거리까지 직진하며 적마다 한 번 타격하고 진행 방향으로 밀어냅니다. 벽에 닿으면 사라지며 반사·기절은 없습니다. · 최대 조준 거리 900 · 대기 12초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
-      "cooldown": "15.75초",
+      "cooldown": "12초",
       "label": "스트라이크",
       "category": "원거리형",
       "concept": "직선으로 굴린 큰 공으로 일렬의 적을 밀어낸다",
@@ -1333,10 +1367,18 @@ export const display={
         "skill": {
           "kind": "bowling-strike",
           "aimRange": 900,
-          "cooldownFrames": 945,
+          "cooldownFrames": 720,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 21
+          "damageCoefficient": 21,
+          "width": 72,
+          "radius": 36,
+          "speed": 22,
+          "count": 1,
+          "countCap": 1,
+          "intervalFrames": 0,
+          "windupFrames": 0,
+          "stunFrames": 0
         },
         "eligibleAugments": [
           "wanggui",
@@ -1352,7 +1394,13 @@ export const display={
           "swift",
           "titan",
           "regen"
-        ]
+        ],
+        "body": {
+          "maxHp": 360,
+          "baseSpeed": 1.7967,
+          "baseWalkingSpeed": 4.838962275,
+          "humanMoveSpeed": 4.838962275
+        }
       }
     },
     "emoji-035": {
@@ -1441,7 +1489,7 @@ export const display={
     },
     "emoji-063": {
       "basic": "작은 버거 산탄 · 3발",
-      "skill": "굵은 산탄 5발을 한 번에 발사합니다. 가까울수록 여러 탄을 맞힐 수 있으며 같은 일제사격의 밀침은 대상당 한 번만 적용됩니다. · 최대 조준 거리 650 · 대기 9초",
+      "skill": "굵은 산탄 5발을 사거리 720, 탄간각 0.125rad로 한 번에 발사합니다. 가까울수록 여러 탄을 맞힐 수 있으며 같은 일제사격의 밀침은 대상당 한 번만 적용됩니다. · 최대 조준 거리 720 · 대기 9초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 개수 · 제어",
       "cooldown": "9초",
       "label": "버거 캐논",
@@ -1459,11 +1507,20 @@ export const display={
         },
         "skill": {
           "kind": "shotgun",
-          "aimRange": 650,
+          "aimRange": 720,
           "cooldownFrames": 540,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 18.9
+          "damageCoefficient": 18.9,
+          "width": 0,
+          "radius": 24,
+          "speed": 19.95,
+          "count": 5,
+          "countCap": 9,
+          "intervalFrames": 0,
+          "windupFrames": 0,
+          "spread": 0.125,
+          "stunFrames": 0
         },
         "eligibleAugments": [
           "wanggui",
@@ -1480,7 +1537,13 @@ export const display={
           "swift",
           "titan",
           "regen"
-        ]
+        ],
+        "body": {
+          "maxHp": 360,
+          "baseSpeed": 1.7967,
+          "baseWalkingSpeed": 4.838962275,
+          "humanMoveSpeed": 4.838962275
+        }
       }
     },
     "emoji-066": {
@@ -1529,9 +1592,9 @@ export const display={
     },
     "emoji-087": {
       "basic": "화살 · 1발",
-      "skill": "빠른 화살 한 발로 4초 표식을 남깁니다. 그 적에게 성공한 다음 일반 공격 3회가 강화되며 여러 탄도 한 공격당 한 번만 소비합니다. · 최대 조준 거리 1030 · 대기 10초",
+      "skill": "반경 12, 속도 42의 화살 한 발로 5초 표식을 남깁니다. 그 적에게 성공한 다음 일반 공격 3회가 강화되며 여러 탄도 한 공격당 한 번만 소비합니다. · 최대 조준 거리 1030 · 대기 9.5초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위",
-      "cooldown": "10초",
+      "cooldown": "9.5초",
       "label": "사냥꾼",
       "category": "원거리형",
       "concept": "표식 화살 후 같은 적에게 일반 공격을 집중한다",
@@ -1548,10 +1611,21 @@ export const display={
         "skill": {
           "kind": "hunter-mark",
           "aimRange": 1030,
-          "cooldownFrames": 600,
+          "cooldownFrames": 570,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 23.32
+          "damageCoefficient": 23.32,
+          "width": 0,
+          "radius": 12,
+          "speed": 42,
+          "count": 1,
+          "countCap": 1,
+          "intervalFrames": 0,
+          "windupFrames": 0,
+          "markDuration": 300,
+          "markCharges": 3,
+          "markBonus": 17,
+          "stunFrames": 0
         },
         "eligibleAugments": [
           "wanggui",
@@ -1566,7 +1640,13 @@ export const display={
           "swift",
           "titan",
           "regen"
-        ]
+        ],
+        "body": {
+          "maxHp": 340,
+          "baseSpeed": 1.7967,
+          "baseWalkingSpeed": 4.838962275,
+          "humanMoveSpeed": 4.838962275
+        }
       }
     },
     "emoji-099": {
@@ -2924,7 +3004,7 @@ export const display={
     },
     "emoji-056": {
       "basic": "비눗방울 · 1발 · 유도",
-      "skill": "느리고 약하게 유도되는 큰 방울 · 피해 10.3 · 0.5초 기절. 평타도 약한 유도이며 기절 없음. · 최대 조준 거리 590 · 대기 7초",
+      "skill": "반경 34, 속도 10의 유도 방울 · 피해 10.3 · 0.5초 기절. 평타는 기존 약한 유도를 유지하며 기절 없음. · 최대 조준 거리 590 · 대기 7초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
       "cooldown": "7초",
       "label": "비눗방울 놀이",
@@ -2946,7 +3026,16 @@ export const display={
           "cooldownFrames": 420,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 10.3
+          "damageCoefficient": 10.3,
+          "width": 0,
+          "radius": 34,
+          "speed": 10,
+          "count": 1,
+          "countCap": 1,
+          "intervalFrames": 0,
+          "windupFrames": 0,
+          "turnRate": 0.035,
+          "stunFrames": 30
         },
         "eligibleAugments": [
           "wanggui",
@@ -2962,7 +3051,13 @@ export const display={
           "swift",
           "titan",
           "regen"
-        ]
+        ],
+        "body": {
+          "maxHp": 240,
+          "baseSpeed": 1.7,
+          "baseWalkingSpeed": 4.578524999999999,
+          "humanMoveSpeed": 4.578524999999999
+        }
       }
     },
     "emoji-114": {
@@ -3033,7 +3128,8 @@ export const display={
           "cooldownFrames": 1080,
           "cooldownJitter": false,
           "durationFrames": 240,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "intervalFrames": 30
         },
         "eligibleAugments": [
           "wanggui",
@@ -3047,7 +3143,13 @@ export const display={
           "titan",
           "regen",
           "signature_duration"
-        ]
+        ],
+        "body": {
+          "maxHp": 450,
+          "baseSpeed": 1.37,
+          "baseWalkingSpeed": 3.2,
+          "humanMoveSpeed": 3.2722051282051283
+        }
       }
     },
     "emoji-140": {
@@ -3131,9 +3233,9 @@ export const display={
     },
     "emoji-142": {
       "basic": "단발 탄 · 1발",
-      "skill": "밧줄 800 · 첫 플레이어/벽/상자/포탑 표면까지 자신만 이동 · 피해·기절·넉백 없음 · 최대 조준 거리 800 · 대기 10초",
+      "skill": "밧줄 800 · 첫 플레이어/벽/상자/포탑 표면까지 자신만 38/틱으로 이동 · 피해·기절·넉백 없음 · 최대 조준 거리 800 · 대기 7.5초",
       "passive": "스킬 증강: 대기 단축 · 고유 사거리",
-      "cooldown": "10초",
+      "cooldown": "7.5초",
       "label": "마운틴 팀",
       "category": "원거리형",
       "concept": "밧줄이 닿은 표면까지 자신이 이동해 거리를 바꾼다",
@@ -3150,10 +3252,13 @@ export const display={
         "skill": {
           "kind": "self-grapple",
           "aimRange": 800,
-          "cooldownFrames": 600,
+          "cooldownFrames": 450,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 0
+          "damageCoefficient": 0,
+          "width": 10,
+          "speed": 36,
+          "pullSpeed": 38
         },
         "eligibleAugments": [
           "rapid",
@@ -3166,7 +3271,13 @@ export const display={
           "titan",
           "regen",
           "signature_range"
-        ]
+        ],
+        "body": {
+          "maxHp": 475,
+          "baseSpeed": 1.48,
+          "baseWalkingSpeed": 4.252716049382715,
+          "humanMoveSpeed": 4.252716049382715
+        }
       }
     },
     "emoji-143": {

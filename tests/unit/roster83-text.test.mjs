@@ -30,7 +30,7 @@ test('known stale concepts, duplicate basic tags and two reworks match the curre
  assert.doesNotMatch(display.cards['emoji-089'].concept,/원반/);assert.match(display.cards['emoji-089'].concept,/농구/);
  assert.doesNotMatch(display.cards['emoji-122'].concept,/화분/);assert.match(display.cards['emoji-122'].concept,/통조림/);
  assert.doesNotMatch(display.cards['emoji-127'].concept,/폭탄/);assert.match(display.cards['emoji-127'].skill,/넉백이 45% 증가/);
- assert.match(display.cards['emoji-034'].skill,/반사|직선/);assert.equal(display.cards['emoji-034'].facts.skill.cooldownFrames,945);
+ assert.match(display.cards['emoji-034'].skill,/반사|직선/);assert.equal(display.cards['emoji-034'].facts.skill.cooldownFrames,720);
  assert.match(display.cards['emoji-070'].basic,/×1.5/);assert.match(display.cards['emoji-070'].skill,/5초/);assert.equal(display.cards['emoji-070'].facts.skill.durationFrames,300);
  assert.equal((display.cards['emoji-013'].basic.match(/흡혈/g)||[]).length,1);
  assert.equal((display.cards['emoji-063'].basic.match(/3발/g)||[]).length,1);
