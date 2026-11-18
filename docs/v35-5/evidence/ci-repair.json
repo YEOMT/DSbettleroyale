@@ -1,0 +1,434 @@
+{
+  "scope": "PR26 failure-focused repair; no gameplay or production changes",
+  "baseSha": "a9167266146646f2717b055aceb7b3fad833ae99",
+  "initialHead": "89a721bf93fc36a1a196b888c27954bb62251182",
+  "diagnosticHead": "9302121313cf5ffd238b7aea488db972adb83362",
+  "runs": {
+    "focused355": 44281129506,
+    "focused354": 44281129299,
+    "baseCi": 44064002326
+  },
+  "results": [
+    {
+      "source": "artifacts\\v35-5\\ci-diagnosis\\overdrive355-live-pixi-30-2766fc74682992e65e2ec360e5378d191a31d611\\live-candidate-pixi-high-solo-30-prepared-r1\\report.json",
+      "status": "PASS",
+      "ms": 74699.043401,
+      "connected": 30,
+      "connectionEvents": [
+        {
+          "at": 1794996048927,
+          "kind": "close",
+          "code": 4009,
+          "reason": "SUPERSEDED",
+          "connection": 31,
+          "role": "student",
+          "epoch": 1,
+          "match": "8aeb1ec1-2642-454c-aca4-a6fc4ceefdc0",
+          "phase": "LOBBY",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true
+        },
+        {
+          "at": 1794996048942,
+          "kind": "close",
+          "code": 4009,
+          "reason": "SUPERSEDED",
+          "connection": 31,
+          "role": "student",
+          "epoch": 2,
+          "match": "8aeb1ec1-2642-454c-aca4-a6fc4ceefdc0",
+          "phase": "LOBBY",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true
+        },
+        {
+          "at": 1794996048944,
+          "kind": "closed",
+          "code": 4009,
+          "reason": "SUPERSEDED",
+          "connection": 31,
+          "role": "student",
+          "epoch": 2,
+          "match": "8aeb1ec1-2642-454c-aca4-a6fc4ceefdc0",
+          "phase": "LOBBY",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true
+        }
+      ],
+      "browserCloses": [
+        [],
+        [],
+        []
+      ],
+      "rematchConnected": 30
+    },
+    {
+      "source": "artifacts\\v35-5\\ci-diagnosis\\overdrive355-identity-pixi-2766fc74682992e65e2ec360e5378d191a31d611\\identity-pixi-high\\report.json",
+      "status": "PASS",
+      "ms": 89325.56061,
+      "rows": [
+        {
+          "name": "parry original projectile / attacker-defender-host",
+          "status": "PASS",
+          "pages": [
+            {
+              "returns": 1,
+              "frames": 22
+            },
+            {
+              "returns": 1,
+              "frames": 21
+            },
+            {
+              "returns": 1,
+              "frames": 21
+            }
+          ]
+        },
+        {
+          "name": "eight authoritative apple fragments / three screens",
+          "status": "PASS"
+        },
+        {
+          "name": "four colors / Canvas-Pixi shared shapes / three screens",
+          "status": "PASS"
+        },
+        {
+          "name": "emoji-137 confirmed shot/terminal",
+          "soundCheck": "PASS",
+          "status": "PASS",
+          "pages": [
+            {
+              "shots": 1,
+              "terminalDraws": 0
+            },
+            {
+              "shots": 1,
+              "terminalDraws": 0
+            },
+            {
+              "shots": 1,
+              "terminalDraws": 2
+            }
+          ]
+        },
+        {
+          "name": "emoji-023 confirmed shot/terminal",
+          "soundCheck": "EXCLUDED_BY_USER",
+          "status": "PASS",
+          "pages": [
+            {
+              "shots": 1,
+              "terminalDraws": 0
+            },
+            {
+              "shots": 1,
+              "terminalDraws": 1
+            },
+            {
+              "shots": 1,
+              "terminalDraws": 2
+            }
+          ]
+        },
+        {
+          "name": "emoji-074 confirmed shot/terminal",
+          "soundCheck": "PASS",
+          "status": "PASS",
+          "pages": [
+            {
+              "shots": 1,
+              "terminalDraws": 0
+            },
+            {
+              "shots": 1,
+              "terminalDraws": 1
+            },
+            {
+              "shots": 1,
+              "terminalDraws": 0
+            }
+          ]
+        },
+        {
+          "name": "rapid III confirmed once / three screens",
+          "status": "PASS"
+        },
+        {
+          "name": "wide III confirmed once / three screens",
+          "status": "PASS"
+        },
+        {
+          "name": "GIANT III actual body/outline and one choice effect; resume no replay",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "source": "artifacts\\v35-5\\ci-diagnosis-354\\polish354-pixi-solo-2766fc74682992e65e2ec360e5378d191a31d611\\ci-pixi-balanced-solo-20-prepared-r5\\report.json",
+      "status": "PASS",
+      "ms": 152902.069916,
+      "rounds": [
+        {
+          "round": 1,
+          "serverWindowMs": 3500,
+          "serverTime": 1794996111028,
+          "acceptWall": 1794996111031,
+          "acceptLagMs": 3,
+          "remainingMs": 2836.199951171875,
+          "visible": true,
+          "receipt": {
+            "wall": 1794996111030,
+            "at": 45140.19999999995,
+            "kind": "receive-room",
+            "connection": 1,
+            "eventAt": 45140.09999999998,
+            "epoch": 1,
+            "match": "upgrade-fixed-1",
+            "phase": "RESULTS",
+            "serverTime": 1794996111028,
+            "startedAt": 1794996110367,
+            "showResultsAt": 1794996113867
+          },
+          "recoveredRemainingMs": 2785.39990234375
+        },
+        {
+          "round": 2,
+          "serverWindowMs": 3500,
+          "serverTime": 1794996135565,
+          "acceptWall": 1794996136724,
+          "acceptLagMs": 1159,
+          "remainingMs": 2340.79999999993,
+          "visible": true,
+          "receipt": {
+            "wall": 1794996136723,
+            "at": 70832.59999999998,
+            "kind": "receive-room",
+            "connection": 1,
+            "eventAt": 70832.3999999999,
+            "epoch": 1,
+            "match": "upgrade-fixed-2",
+            "phase": "RESULTS",
+            "serverTime": 1794996135565,
+            "startedAt": 1794996135565,
+            "showResultsAt": 1794996139065
+          },
+          "recoveredRemainingMs": null
+        },
+        {
+          "round": 3,
+          "serverWindowMs": 3500,
+          "serverTime": 1794996159064,
+          "acceptWall": 1794996159736,
+          "acceptLagMs": 672,
+          "remainingMs": 2827.3999511718284,
+          "visible": true,
+          "receipt": {
+            "wall": 1794996159734,
+            "at": 93843.69999999995,
+            "kind": "receive-room",
+            "connection": 1,
+            "eventAt": 93843.59999999998,
+            "epoch": 1,
+            "match": "upgrade-fixed-3",
+            "phase": "RESULTS",
+            "serverTime": 1794996159064,
+            "startedAt": 1794996159063,
+            "showResultsAt": 1794996162563
+          },
+          "recoveredRemainingMs": null
+        },
+        {
+          "round": 4,
+          "serverWindowMs": 3500,
+          "serverTime": 1794996185277,
+          "acceptWall": 1794996185864,
+          "acceptLagMs": 587,
+          "remainingMs": 2912.6999999999534,
+          "visible": true,
+          "receipt": {
+            "wall": 1794996185863,
+            "at": 119972.69999999995,
+            "kind": "receive-room",
+            "connection": 1,
+            "eventAt": 119972.59999999998,
+            "epoch": 1,
+            "match": "upgrade-fixed-4",
+            "phase": "RESULTS",
+            "serverTime": 1794996185277,
+            "startedAt": 1794996185277,
+            "showResultsAt": 1794996188777
+          },
+          "recoveredRemainingMs": null
+        },
+        {
+          "round": 5,
+          "serverWindowMs": 3500,
+          "serverTime": 1794996212002,
+          "acceptWall": 1794996212439,
+          "acceptLagMs": 437,
+          "remainingMs": 3061.2000976562267,
+          "visible": true,
+          "receipt": {
+            "wall": 1794996212436,
+            "at": 146545.79999999993,
+            "kind": "receive-room",
+            "connection": 1,
+            "eventAt": 146545.59999999998,
+            "epoch": 1,
+            "match": "upgrade-fixed-5",
+            "phase": "RESULTS",
+            "serverTime": 1794996212002,
+            "startedAt": 1794996212000,
+            "showResultsAt": 1794996215500
+          },
+          "recoveredRemainingMs": null
+        }
+      ]
+    }
+  ],
+  "local": {
+    "status": "FAIL",
+    "ms": 74852.43890000001,
+    "error": "locator.click: Timeout 30000ms exceeded.",
+    "phase": "BATTLE",
+    "paused": true,
+    "overloads": 1,
+    "note": "Did not reach winner; same-PC Windows load remains unresolved."
+  },
+  "localQuick": {
+    "ms": 292958,
+    "results": [
+      {
+        "command": "--test tests/unit/releaseops.test.mjs",
+        "ms": 2140,
+        "status": "PASS"
+      },
+      {
+        "command": "tools/check-boundaries.mjs",
+        "ms": 2007,
+        "status": "PASS"
+      },
+      {
+        "command": "tools/content/generate.mjs --check",
+        "ms": 683,
+        "status": "PASS"
+      },
+      {
+        "command": "--test --test-concurrency=1 tests/unit/aim.test.mjs tests/unit/camera-feel.test.mjs tests/unit/capture-layout.test.mjs tests/unit/capture-projectiles.test.mjs tests/unit/capture-x.test.mjs tests/unit/character-shards.test.mjs tests/unit/ci-partition.test.mjs tests/unit/classroom-balance-aim.test.mjs tests/unit/classroom-flow.test.mjs tests/unit/combat-recovery.test.mjs tests/unit/contact-clock.test.mjs tests/unit/controls-feel.test.mjs tests/unit/descriptions.test.mjs tests/unit/escape.test.mjs tests/unit/evolution.test.mjs tests/unit/fidelity-v33-2.test.mjs tests/unit/fidelity.test.mjs tests/unit/flight.test.mjs tests/unit/host-end-delivery.test.mjs tests/unit/host-layout.test.mjs tests/unit/isolated-release.test.mjs tests/unit/lifecycle-direction.test.mjs tests/unit/longrun-telemetry.test.mjs tests/unit/mobile-impact.test.mjs tests/unit/mode-lifecycle.test.mjs tests/unit/overdrive355.test.mjs tests/unit/polish354.test.mjs tests/unit/prediction.test.mjs tests/unit/profile-revision.test.mjs tests/unit/protocol.test.mjs tests/unit/render-circle.test.mjs tests/unit/resume-warning.test.mjs tests/unit/roster10-balance.test.mjs tests/unit/roster83-scope.test.mjs tests/unit/roster83-text.test.mjs tests/unit/rules.test.mjs tests/unit/smooth-clock.test.mjs tests/unit/smooth-snapshot.test.mjs tests/unit/snapshot-profile.test.mjs tests/unit/snapshot.test.mjs tests/unit/stability.test.mjs tests/unit/static-floor.test.mjs tests/unit/upgrade-roster.test.mjs tests/unit/v34-broadcast.test.mjs tests/unit/v34-roster.test.mjs tests/unit/v34-supply.test.mjs tests/unit/v34-terrain-index.test.mjs tests/parity/baseline.test.mjs tests/parity/engine.test.mjs tests/integration/battle.test.mjs tests/integration/classroom-flow.test.mjs tests/integration/classroom-group-resume.test.mjs tests/integration/combat-resume.test.mjs tests/integration/deployment.test.mjs tests/integration/evolution.test.mjs tests/integration/ordered-latency.test.mjs tests/integration/polish354.test.mjs tests/integration/profile-revision.test.mjs tests/integration/recovery.test.mjs tests/integration/releaseops.test.mjs tests/integration/rooms.test.mjs tests/integration/roster10.test.mjs tests/integration/safe-pause.test.mjs tests/integration/slow-receiver.test.mjs tests/integration/snapshot-transport.test.mjs tests/roster10/engine.test.mjs tests/roster10/interaction.test.mjs tests/roster10/prediction.test.mjs",
+        "ms": 288120,
+        "status": "PASS"
+      }
+    ],
+    "build": "separate",
+    "deep": "NOT_RUN"
+  },
+  "localIdentity": {
+    "status": "PASS",
+    "renderer": "pixi",
+    "quality": "high",
+    "rows": [
+      {
+        "name": "parry original projectile / attacker-defender-host",
+        "status": "PASS",
+        "pages": [
+          {
+            "returns": 1,
+            "frames": 62
+          },
+          {
+            "returns": 1,
+            "frames": 62
+          },
+          {
+            "returns": 1,
+            "frames": 61
+          }
+        ]
+      },
+      {
+        "name": "eight authoritative apple fragments / three screens",
+        "status": "PASS"
+      },
+      {
+        "name": "four colors / Canvas-Pixi shared shapes / three screens",
+        "status": "PASS"
+      },
+      {
+        "name": "emoji-137 confirmed shot/terminal",
+        "soundCheck": "PASS",
+        "status": "PASS",
+        "pages": [
+          {
+            "shots": 1,
+            "terminalDraws": 17
+          },
+          {
+            "shots": 1,
+            "terminalDraws": 17
+          },
+          {
+            "shots": 1,
+            "terminalDraws": 18
+          }
+        ]
+      },
+      {
+        "name": "emoji-023 confirmed shot/terminal",
+        "soundCheck": "EXCLUDED_BY_USER",
+        "status": "PASS",
+        "pages": [
+          {
+            "shots": 1,
+            "terminalDraws": 16
+          },
+          {
+            "shots": 1,
+            "terminalDraws": 12
+          },
+          {
+            "shots": 1,
+            "terminalDraws": 15
+          }
+        ]
+      },
+      {
+        "name": "emoji-074 confirmed shot/terminal",
+        "soundCheck": "PASS",
+        "status": "PASS",
+        "pages": [
+          {
+            "shots": 1,
+            "terminalDraws": 25
+          },
+          {
+            "shots": 1,
+            "terminalDraws": 29
+          },
+          {
+            "shots": 1,
+            "terminalDraws": 24
+          }
+        ]
+      },
+      {
+        "name": "rapid III confirmed once / three screens",
+        "status": "PASS"
+      },
+      {
+        "name": "wide III confirmed once / three screens",
+        "status": "PASS"
+      },
+      {
+        "name": "GIANT III actual body/outline and one choice effect; resume no replay",
+        "status": "PASS"
+      }
+    ],
+    "scope": "real WS; fixture-driven exact authority contacts, not continuous-play evidence",
+    "ms": 45130.5293,
+    "errors": []
+  }
+}

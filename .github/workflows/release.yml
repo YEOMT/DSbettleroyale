@@ -144,7 +144,22 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - env:
+          CANDIDATE_RESULT: ${{ needs.candidate.result }}
+          CANDIDATE_READY: ${{ needs.candidate.outputs.ready }}
           ENABLED: ${{ vars.STAGING_ENABLED }}
           RESULT: ${{ needs.staging.result }}
           VALIDATION_MODE: ${{ vars.RELEASE_VALIDATION_MODE }}
-        run: 'if [ "$VALIDATION_MODE" = github-actions ]; then echo "ARTIFACT_READY: isolated image/control validation runs on a separate Actions runner during explicit promotion; no AWS staging." >> "$GITHUB_STEP_SUMMARY"; elif [ "$ENABLED" != true ]; then echo "BLOCKED_CONFIGURATION: staging bootstrap/Secrets not enabled; no server changed." >> "$GITHUB_STEP_SUMMARY"; else echo "staging job: $RESULT" >> "$GITHUB_STEP_SUMMARY"; fi'
+        run: |
+          if [ "$CANDIDATE_RESULT" != success ]; then
+            echo "ARTIFACT_NOT_CREATED: candidate job $CANDIDATE_RESULT. The exact main CI must succeed before a paired candidate can be built; no substitute SHA or deployment." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          if [ "$CANDIDATE_READY" != true ]; then
+            echo "NO_EXECUTABLE_CHANGE: no candidate artifact produced for this documentation-only change." >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$VALIDATION_MODE" = github-actions ]; then
+            echo "ARTIFACT_READY: isolated image/control validation runs on a separate Actions runner during explicit promotion; no AWS staging." >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$ENABLED" != true ]; then
+            echo "BLOCKED_CONFIGURATION: staging bootstrap/Secrets not enabled; no server changed." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "staging job: $RESULT" >> "$GITHUB_STEP_SUMMARY"
+          fi

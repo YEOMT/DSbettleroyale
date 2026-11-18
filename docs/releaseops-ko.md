@@ -14,6 +14,8 @@ privileged job은 GitHub API로 **동일 main workflow_dispatch/run/attempt의 i
 
 ReleaseOps PR의 `isolated-release` CI는 정확한 PR base SHA의 보존된 후보로 Docker 경로를 검사한다. 해당 artifact가 없거나 만료되면 `INFRA_FAILURE`로 차단하며 임의의 latest를 대신 사용하지 않는다. 최초 Firebase→v33 전환 중 실패/중단은 **중단된 배포 복구**에 실패한 전환 SHA를 지정한다. 아직 정식 검증 기록이 없는 구 AWS SHA로 일반 롤백을 요청하지 않는다.
 
+정확한 base 후보가 없으면 먼저 해당 main CI의 실제 실패 작업을 조사한다. 통과한 작업이나 다른 SHA를 다시 빌드해 대체하지 않는다. 원인이 해결된 실패 작업만 재실행하여 main CI가 성공하면 기존 `workflow_run`이 같은 SHA의 후보를 생성한다. `release-SHA` 파일 존재와 신뢰된 실행 출처까지 확인한 뒤 PR의 격리 검사를 재개한다. 후보 작업이 생략/실패한 실행은 `ARTIFACT_NOT_CREATED`로 실패하며, status 작업만으로 `ARTIFACT_READY`라고 표시하지 않는다. 문서 전용 변경은 `NO_EXECUTABLE_CHANGE`로 구분한다.
+
 ## 일상 흐름
 
 ### 승인된 최초 전환의 재접속 조작 WARNING

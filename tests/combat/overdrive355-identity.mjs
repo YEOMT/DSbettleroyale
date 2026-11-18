@@ -11,15 +11,22 @@ try{
  for(const page of pages)await page.evaluate(async()=>{
   window.m=await import('/src/main.js');window.observed={events:[],frames:[],sounds:[]};
   m.net.addEventListener('event',e=>{observed.events.push({...e.detail,observedAt:performance.now(),pendingSound:m.controls.sounds.get('skill')||null});if(observed.events.length>800)observed.events.shift();});
-  const draw=m.renderer.draw.bind(m.renderer);m.renderer.draw=(view,t)=>{observed.frames.push({tick:view.renderTick,shots:view.shots.map(q=>({id:q.id,owner:q.owner,radius:q.radius,style:q.style,color:q.color,returned:q.returned,crit:q.crit,giant:q.giant})),fx:view.effects.map(f=>({style:f.style,kind:f.kind,terminal:f.terminal}))});if(observed.frames.length>160)observed.frames.shift();return draw(view,t);};
+  const draw=m.renderer.draw.bind(m.renderer);m.renderer.draw=(view,t)=>{observed.frames.push({tick:view.renderTick,sourceTick:m.timeline.samples.at(-1)?.state.serverTick,shots:view.shots.map(q=>({id:q.id,owner:q.owner,radius:q.radius,style:q.style,color:q.color,returned:q.returned,crit:q.crit,giant:q.giant})),fx:view.effects.map(f=>({style:f.style,kind:f.kind,terminal:f.terminal}))});if(observed.frames.length>160)observed.frames.shift();return draw(view,t);};
   const action=m.audio.action.bind(m.audio);m.audio.action=(...args)=>{observed.sounds.push(args[0]);return action(...args);};
  });
- async function ticks(n){for(let i=0;i<n;i++){stepWorld(w);if(i%3===2||i===n-1){h.publish();await delay(55);}}
-  // Await the last ordered snapshot before reading observations. Waiting after
-  // every three ticks would stretch a 400ms windup past the client's unchanged
-  // 2200ms stale-sound deadline on software WebGL. Do not change that deadline.
-  // Real-time load/latency assertions live in overdrive355-live, unchanged.
-  await Promise.all(pages.map(p=>p.waitForFunction(t=>(window.m||window.auditApp)?.timeline.samples.at(-1)?.state.serverTick>=t,g.frame)));
+ async function ticks(n){
+  for(let i=0;i<n;i++){
+   stepWorld(w);if(i%3!==2&&i!==n-1)continue;
+   h.publish();await delay(55);
+   // This is a manually stepped contact fixture, not a real-time benchmark.
+   // Do not advance its authority clock beyond an unobserved browser frame.
+   // Otherwise software WebGL can receive a shot only after the fixture has
+   // already stepped past its whole 150ms trail. Continuous tests stay live.
+   await Promise.all(pages.map(p=>p.waitForFunction(t=>{
+    const app=window.m||window.auditApp;
+    return app?.timeline.samples.at(-1)?.state.serverTick>=t&&(!window.observed||observed.frames.some(f=>f.sourceTick>=t));
+   },g.frame)));
+  }
  }
  async function reset(id,op='emoji-114'){
   R.clearWorld(g,'identity355');g.projectiles=[];g.zones=[];g.smokes=[];g.walls=[];w.brFarm.dispose(g);g.finalPhaseTriggered=true;w.actionPending.clear();w.inputPending.clear();
@@ -42,7 +49,8 @@ try{
  await reset('emoji-094');await fire();await ticks(9);rows=await records();for(const r of rows){const colors=r.events.filter(e=>e.type==='SHOT_SPAWN').sort((a,b)=>a.data.ordinal-b.data.ordinal).map(e=>e.data.style);assert.deepEqual(colors,['crayon-0','crayon-1','crayon-2','crayon-3']);assert.ok(r.frames.some(f=>f.shots.some(q=>q.style?.startsWith('crayon-'))));}await h.host.screenshot({path:dir+'/crayon-colors.png'});report.rows.push({name:'four colors / Canvas-Pixi shared shapes / three screens',status:'PASS'});
  for(const id of ['emoji-137','emoji-023','emoji-074']){
   await reset(id);await fire();if(id==='emoji-023'){const pending=await records();assert.ok(pending.every(r=>!r.events.some(e=>e.type==='SHOT_SPAWN')));}await ticks(42);rows=await records();if(id!=='emoji-023')assert.equal(rows[0].sounds.filter(s=>s==='sniper').length,1,id+' confirmed launch sound once');
-  for(const r of rows)assert.ok(r.events.some(e=>e.type==='SHOT_SPAWN'&&e.data.crit!==undefined),id+' original projectile received');
+  assert.ok(ps[1].hp<10000,id+' authoritative target damage');
+  for(const r of rows){assert.ok(r.events.some(e=>e.type==='SHOT_SPAWN'&&e.data.crit!==undefined),id+' original projectile received');assert.ok(r.events.some(e=>e.type==='SHOT_END'),id+' authoritative projectile terminal received');assert.ok(r.frames.some(f=>f.fx.some(e=>e.kind==='transit')),id+' short terminal trail actually rendered');}
   report.rows.push({name:id+' confirmed shot/terminal',soundCheck:id==='emoji-023'?'EXCLUDED_BY_USER':'PASS',status:'PASS',pages:rows.map(r=>({shots:r.events.filter(e=>e.type==='SHOT_SPAWN').length,terminalDraws:r.frames.filter(f=>f.fx.some(e=>e.kind==='transit')).length}))});
  }
  for(const path of ['rapid','wide']){

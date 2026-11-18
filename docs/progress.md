@@ -338,3 +338,7 @@ Base a5e0568 includes PR #5/#6. Battle-scoped native/Safari gesture policy, diff
 - Added bounded synthetic transport/result observations (send/receive wall+monotonic times, close reason, epoch, queues, renderer reset and visibility). Local Pixi20 diagnostic did not reach winner: attack button timeout with SAFE_PAUSED; retained artifacts/v35-4/ci-diagnosis-pixi-balanced-solo-20-prepared-r5-ci-diagnosis/report.json. This is not a winner PASS.
 - User explicitly excludes emoji-023 special launch-sound exactly-once acceptance. BB/Slipper sound, Head windup/no early shot, actual shots/trails/damage remain. Historical failures remain in v35-5/report.md.
 - Paired build PASS; focused CI diagnosis pending. No timeout/quality/participant/protection changes.
+
+- 후속: 같은 base CI 격리 기능은 통과했으나 apt 다운로드 지연으로 job10분 TIMEOUT/CANCELLED. 해당 job만 재실행 후 base main/required-checks PASS → 기존 후보44282808145 생성 시작. status-only 성공이 ARTIFACT_READY로 오표시되는 workflow 수정 +실제 shell8검사 PASS.
+- Quick PASS292.958s(396/396 +8 ReleaseOps); runtime sourceHash 변경 없음. Pixi high exact-contact PASS45.131s: Head special sound EXCLUDED_BY_USER, 세 저격 실제 명중/SHOT/SHOT_END/모든 화면 잔상은 명시 assertion으로 유지·강화. 수동 fixture clock이 관측을 추월하지 않게 수신/draw 동기화; 실시간 부하시험은 변경 없음.
+- CI 진단9302121: v35.4 Pixi20×5 PASS152.902s, v35.5 Pixi30 high PASS74.699s; 과거 8.8초 결과지연/29연결 당시 종료 사유는 미확정. [집중 수정 및 실패 보존](v35-5/ci-repair.md). 최종 GitHub 검사는 PR26에 기록한다.

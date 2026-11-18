@@ -4,7 +4,7 @@ export function serverTransportProbe(app){
  const record=value=>{events.push({at:Date.now(),...value});if(events.length>400)events.shift();};
  app.wss.on('connection',ws=>{
   const peer=[...app.peers].find(p=>p.socket===ws),connection=++serial;
-  const state=()=>({connection,role:peer?.member?.role,epoch:peer?.member?.epoch,match:peer?.room?.matchId,phase:peer?.room?.phase,buffered:ws.bufferedAmount,queue:peer?.queueBytes,alive:peer?.alive});
+  const state=()=>({connection,role:peer?.member?.role,epoch:peer?.epoch,match:peer?.room?.matchId,phase:peer?.room?.phase,buffered:ws.bufferedAmount,queue:peer?.queueBytes,alive:peer?.alive});
   record({kind:'open',...state()});
   for(const method of ['close','terminate']){const original=ws[method].bind(ws);ws[method]=(...args)=>{record({kind:method,code:args[0],reason:String(args[1]||''),...state()});return original(...args);};}
   ws.on('close',(code,reason)=>record({kind:'closed',code,reason:String(reason),...state()}));

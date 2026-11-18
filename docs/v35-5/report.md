@@ -121,3 +121,8 @@ Pixi 개별 장면은 패링 PASS 후 사과 파편0/8 assertion **FAIL43.253s**
 02d9cdd의 v35.5 live20Canvas5/Pixi5 및30Pixi는 PASS했으나 기존 v35.4 Pixi5경기에서 **승자 화면 TIMEOUT152.036s**가 다시 발생했다(44082141356, overload0). [실패 수신/시계 기록](evidence/winner-timeout.json). 두 번째 경기 수신 시 서버 time과 기존 offset 추정의 차이는 약8.8초였다. 이는 이전 match offset만의 원인임을 증명하지 않으며, 지연 수신/메인 스레드 정체와 시계 오차를 분리하지 못했다. 앞의 원인 설명은 가설로 정정한다. **효과가 검증되지 않은 match clock 초기화는 제거하고 원래 v35.4 연결·결과 deadline을 그대로 복원했다.** 늦은 prior-match 패킷 거절과 clock estimate 보존을 검사한다. F05는 다시 PARTIAL, 최종 체크리스트 **47PASS/4PARTIAL**. 현재 원인 미확정 화면 timeout을 해결했다고 보고하지 않는다.
 
 동일 실행의 Pixi identity는 파편 확인 후 헤드슈터 확정음0/1로 FAIL했다. 각3틱 수신 대기가 실제400ms 준비를 인위적으로 늘려2200ms stale-sound 보호에 걸릴 수 있으므로, 수동 시계는 원래55ms cadence로 진행하고 **관측 전 마지막 snapshot 도착**만 기다리도록 수정했다. 확정 event의 관측 시간/대기음 만료값도 제한된 배열에 기록한다. 음향 보호 시간이나 assertion은 변경하지 않았다. 해당 수정 로컬 Pixi high9장면 **PASS28.198s**, pageerrors0. 최종 원래 clock 보존 후 관련64단위 **PASS1.365s**, client/server build **PASS7.02s(Vite)**. 최종 head CI의 실제 통과·실패는 PR26에 별도 표시한다.
+
+
+## 2026-11-18 사용자 요청: 실패 CI 집중 보완
+
+[후속 기록과 원자료](ci-repair.md). 이전 실패·로컬 과부하·성능 위험은 그대로 유지한다. 헤드슈터 전용음 1회만 사용자 지시로 제외하며 실제 발사·명중·잔상 검사는 보존/강화한다. v35.5 게임 코드와3.5초·86종 수치에는 변경 없음. 최종 CI 결과는 PR26의 최신 HEAD를 확인한다.
