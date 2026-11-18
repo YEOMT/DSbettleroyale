@@ -346,3 +346,5 @@ Base a5e0568 includes PR #5/#6. Battle-scoped native/Safari gesture policy, diff
 -104b471 CI30 재발 FAIL55.286s: heartbeat terminate(호스트/학생)→1006, queue/buffer0,overload0. 직전 rAF400~450ms. 이전PASS로 덮지 않음. same30/세화면/화질/입력을 유지한 브라우저 프로세스 분리 비교를 추가. Windows 비교는 SAFE_PAUSED FAIL75.972s, 연결30 유지; Linux 비교 pending. cleanup 오류가 원래 assertion을 가리지 않게 별도 보존.
 
 - 정확한 a916726 후보44282808145/artifact14417843912 생성 및 선택 복구. PR CI44283797222 isolated-release134733561547 PASS(실제 격리 +warning fault-injection/Results/Rematch). 운영 배포 아님.
+
+- ab5456e Linux 분리도 FAIL49.462s(30 연결/live는 통과, END 뒤 host heartbeat1006). SwiftShader/수신tick지연 확인; 공유GPU 단독원인 가설 기각, 브라우저 분리 철회. 실제 배포 설정과 같이 built fixture의 WSS를 authority endpoint로 직접 연결하고 endpoint검증을 추가. 동일3화면/30부하/보호유지. 로컬identity PASS47.279s; 새Linux결과는 PR26에 기록.

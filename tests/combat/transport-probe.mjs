@@ -3,9 +3,11 @@ export function serverTransportProbe(app){
  const events=[];let serial=0;
  const record=value=>{events.push({at:Date.now(),...value});if(events.length>400)events.shift();};
  app.wss.on('connection',ws=>{
-  const peer=[...app.peers].find(p=>p.socket===ws),connection=++serial;
-  const state=()=>({connection,role:peer?.member?.role,epoch:peer?.epoch,match:peer?.room?.matchId,phase:peer?.room?.phase,buffered:ws.bufferedAmount,queue:peer?.queueBytes,alive:peer?.alive});
+  const peer=[...app.peers].find(p=>p.socket===ws),connection=++serial;let lastInboundAt=0,lastInboundType='';
+  const state=()=>({connection,role:peer?.member?.role,epoch:peer?.epoch,match:peer?.room?.matchId,phase:peer?.room?.phase,buffered:ws.bufferedAmount,queue:peer?.queueBytes,alive:peer?.alive,lastInboundAt,lastInboundType});
   record({kind:'open',...state()});
+  ws.on('message',raw=>{lastInboundAt=Date.now();lastInboundType=/^\{"type":"([A-Z_]+)"/.exec(raw.subarray(0,80).toString())?.[1]||'OTHER';});
+  const ping=ws.ping.bind(ws);ws.ping=(...args)=>{record({kind:'ping',...state()});return ping(...args);};
   for(const method of ['close','terminate']){const original=ws[method].bind(ws);ws[method]=(...args)=>{record({kind:method,code:args[0],reason:String(args[1]||''),...state()});return original(...args);};}
   ws.on('close',(code,reason)=>record({kind:'closed',code,reason:String(reason),...state()}));
   ws.on('pong',()=>record({kind:'pong',...state()}));
@@ -25,7 +27,7 @@ export function browserTransportProbe(){
  window.transportObserved={events:[],messages:0,chars:0,lastAt:0};
  const record=value=>{const a=transportObserved.events;a.push({wall:Date.now(),at:performance.now(),...value});if(a.length>200)a.shift();};
  window.WebSocket=class extends Native{
-  constructor(...args){super(...args);const connection=++serial;record({kind:'connecting',connection});
+  constructor(...args){super(...args);const connection=++serial;record({kind:'connecting',connection,endpoint:new URL(args[0]).host});
    this.addEventListener('open',()=>record({kind:'open',connection}));
    this.addEventListener('close',e=>record({kind:'close',connection,code:e.code,reason:e.reason}));
    this.addEventListener('message',e=>{

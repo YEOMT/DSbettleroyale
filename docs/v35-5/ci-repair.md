@@ -49,3 +49,10 @@
 공유 Chromium 프로세스에서 세 화면이 software WebGL을 경쟁하는 시험 조건을 조사한다. 같은 runner에서 화면별 Chromium 프로세스로 분리한다. 같은30연결, 실제 세화면, 같은 입력/공격/모드/화질/해상도/FPS정책/8초 live 측정/서버 보호를 유지한다. 이 비교로 실제 교실 기기의 문제가 해결됐다고 주장하지 않는다. Windows 동일PC의 분리 실행은 **FAIL75.972s / SAFE_PAUSED1**로 측정 전 중단되었으며 숨기지 않는다. Linux 비교는 다음 CI에 기록한다.
 
 후처리 WebSocket1006이 원래29/30 assertion을 로그에서 가리지 않게 정리 오류를 별도 기록한다. 후처리만 실패한 실행도 여전히 FAIL이다. 후보의 정확한 SHA/artifact 생성은 복구됐으며 artifact14417843912(digest438f2abb…)가 실제 존재한다.
+
+
+## 분리 비교 후 확인 사항
+
+`ab5456e / 44285752003`: 30명 연결·live 측정은 유지했지만 END 이후 host heartbeat1006으로 **FAIL49.462s**. SwiftShader가 실제 renderer였고, 화면별 프로세스로 나눠도 rAF p95417/367/317ms, host 수신tick798 대 학생1056/1143으로 지연이 쌓였다. 서버 snapshot 평균50ms, queue/buffer0, overload0. 따라서 공유 GPU 프로세스 하나만의 문제라는 가설은 확정하지 못했고 프로세스 분리 코드는 철회했다.
+
+다음 비교는 운영 Pages 빌드가 사용하는 `VITE_PUBLIC_WSS_URL` 설정을 통해 브라우저를 격리 authority endpoint에 직접 연결한다. 기존 테스트는 production build를 쓰면서도 모든 WS를 Vite preview 프록시(같은 테스트 프로세스에서28가상 학생과 Playwright 제어 실행)에 통과시켰다. 정적 파일/관측 bridge는 유지하며 추가 WS 프록시만 제거한다. 정확한 buildId/Origin/인증 검증은 유지하고 fixture는 endpoint 일치도 확인한다. 추가적으로 ping 송신/마지막 inbound 시각을 bounded 진단에 기록한다. 이 변경 로컬3화면 Pixi high identity는 PASS47.279s, 30명 Linux 결과는 PR에 기록한다.
