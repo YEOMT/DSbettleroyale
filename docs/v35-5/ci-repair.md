@@ -56,3 +56,12 @@
 `ab5456e / 44285752003`: 30명 연결·live 측정은 유지했지만 END 이후 host heartbeat1006으로 **FAIL49.462s**. SwiftShader가 실제 renderer였고, 화면별 프로세스로 나눠도 rAF p95417/367/317ms, host 수신tick798 대 학생1056/1143으로 지연이 쌓였다. 서버 snapshot 평균50ms, queue/buffer0, overload0. 따라서 공유 GPU 프로세스 하나만의 문제라는 가설은 확정하지 못했고 프로세스 분리 코드는 철회했다.
 
 다음 비교는 운영 Pages 빌드가 사용하는 `VITE_PUBLIC_WSS_URL` 설정을 통해 브라우저를 격리 authority endpoint에 직접 연결한다. 기존 테스트는 production build를 쓰면서도 모든 WS를 Vite preview 프록시(같은 테스트 프로세스에서28가상 학생과 Playwright 제어 실행)에 통과시켰다. 정적 파일/관측 bridge는 유지하며 추가 WS 프록시만 제거한다. 정확한 buildId/Origin/인증 검증은 유지하고 fixture는 endpoint 일치도 확인한다. 추가적으로 ping 송신/마지막 inbound 시각을 bounded 진단에 기록한다. 이 변경 로컬3화면 Pixi high identity는 PASS47.279s, 30명 Linux 결과는 PR에 기록한다.
+
+
+## 직접 WS 비교와 부활 퀴즈 수신 순서
+
+`6a6982a / 44286998175`: Pixi high30 **PASS48.513s**,30/30 연결·live·Results·재경기30 유지,예상치 못한 close0,overload0. 서버 step p951.817ms/snapshot p956.772ms/평균 gap50.003ms. 그러나 SwiftShader rAF p95300~317ms와 오래된 snapshot 수신이 남는다. 직접 WS 연결만으로 실제 렉의 근본 원인이 해결됐다고 주장하지 않는다.
+
+같은 실행의 Pixi20×5는 **FAIL184.002s**,3경기 점령전 부활 퀴즈에서 서버는 다음 문제를 제공했지만 학생은 이전 문제를 표시하고 있었다. 고정350ms 대기 후 서로 다른 문제의 정답 ID를 조회한 시험 오류다. 정확한 보기 수신 및 정답 수1→2→3 반영을 기다리도록 수정했다. 기존3문제·리롤·부활 후 이동/평타/스킬 검사는 보존한다. v35.4 동일 경로도 같은 수정. 354집중 CI44286998274는4/4 PASS였다.
+
+동일 HEAD의 공통 CI44286998325는 **FAIL**: 정확한 a916726 후보/이미지/버전/Origin은 통과했으나 격리 재접속 이동에서 AUTHORITATIVE_STATE_TIMEOUT(41.089s), Canvas touch WebKit에서는 두 번째 화면비의 tap 중 Target crashed(INFRA_FAILURE)가 발생했다. 재접속 epoch2, 초기 INPUT_BATCH1회 이후 이동 전송 미관측,OOM=false. 원인 미확정이며 경고로 치환하거나 통과로 기록하지 않는다. 최종 CI에서 동일 검증을 그대로 유지한다.

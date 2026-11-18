@@ -348,3 +348,5 @@ Base a5e0568 includes PR #5/#6. Battle-scoped native/Safari gesture policy, diff
 - 정확한 a916726 후보44282808145/artifact14417843912 생성 및 선택 복구. PR CI44283797222 isolated-release134733561547 PASS(실제 격리 +warning fault-injection/Results/Rematch). 운영 배포 아님.
 
 - ab5456e Linux 분리도 FAIL49.462s(30 연결/live는 통과, END 뒤 host heartbeat1006). SwiftShader/수신tick지연 확인; 공유GPU 단독원인 가설 기각, 브라우저 분리 철회. 실제 배포 설정과 같이 built fixture의 WSS를 authority endpoint로 직접 연결하고 endpoint검증을 추가. 동일3화면/30부하/보호유지. 로컬identity PASS47.279s; 새Linux결과는 PR26에 기록.
+
+-6a6982a direct WS: Pixi30 PASS48.513s(30연결/재경기,close0,overload0),354 4/4PASS. Pixi20 FAIL184.002s는3경기 부활 퀴즈 고정350ms 관측 race; 정확한 보기/정답수 수신으로 수정,검사항목 유지. 공통CI44286998325 격리 resumeMove FAIL41.089s와 WebKit Target crashed(INFRA_FAILURE) 보존. 후보는 exact a916726 정상선택; 원인미확정 실패는 경고/PASS로 변경하지 않음. 런타임 변경없음.

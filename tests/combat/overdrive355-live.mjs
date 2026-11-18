@@ -37,7 +37,17 @@ try{
   }
   if(!baseline&&mode==='team-capture'){
    const life=await h.student.evaluate(()=>m.net.lifeSeq);await h.rpc('polish-kill-student');await h.student.waitForFunction(()=>m.timeline.predicted?.respawn?.question);assert.equal(await h.student.evaluate(()=>m.net.combatSuspended),false);
-   for(let i=0;i<3;i++){const answer=await h.rpc('polish-quiz-answer');const text=await h.student.evaluate(id=>m.timeline.predicted.respawn.question.answers.find(a=>a.id===id).text,answer);await h.student.locator('#br-tk-options button').filter({hasText:text}).click();await delay(350);}
+   row.respawnQuestions=[];
+   for(let i=0;i<3;i++){
+    const answer=await h.rpc('polish-quiz-answer');
+    // A fixed 350ms sleep can observe the previous question while the server
+    // has already advanced it. Wait for this exact authoritative option.
+    await h.student.waitForFunction(id=>m.timeline.predicted?.respawn?.question?.answers.some(a=>a.id===id)&&!m.ui.respawnPending,answer);
+    const text=await h.student.evaluate(id=>m.timeline.predicted.respawn.question.answers.find(a=>a.id===id).text,answer);
+    await h.student.locator('#br-tk-options button').filter({hasText:text}).click();
+    await h.student.waitForFunction(n=>m.timeline.predicted?.respawn?.correct===n&&!m.ui.respawnPending,i+1);
+    row.respawnQuestions.push(await h.student.evaluate(()=>({correct:m.timeline.predicted.respawn.correct,question:m.timeline.predicted.respawn.question?.id,at:performance.now()})));
+   }
    await h.student.locator('#br-tk-reroll').click();await h.student.waitForFunction(l=>m.timeline.predicted?.alive&&m.net.lifeSeq>l,life);await h.student.keyboard.down('d');await delay(200);await h.student.keyboard.up('d');await h.student.locator('#br-attack').click();await h.student.locator('#br-skill').click();await delay(300);const revived=(await h.rpc('polish-state')).actions[0];assert.ok(revived.attack>act.actions[0].attack&&revived.skill>act.actions[0].skill,'revived life actually fires');row.respawn='PASS';
   }
   if(mode==='solo'&&players<=20){

@@ -916,5 +916,64 @@
     "scope": "real WS; fixture-driven exact authority contacts, not continuous-play evidence",
     "ms": 47278.50810000001,
     "errors": []
+  },
+  "directWs6a6982a": {
+    "run": 44286998175,
+    "pixi30": {
+      "job": 134742111041,
+      "status": "PASS",
+      "ms": 48512.708,
+      "connected": 30,
+      "rematchConnected": 30,
+      "overload": 0,
+      "stepP95Ms": 1.817,
+      "snapshotP95Ms": 6.772,
+      "snapshotGapMeanMs": 50.0027,
+      "rafP95Ms": [
+        316.6,
+        300,
+        316.7
+      ],
+      "unexpectedClose": 0,
+      "note": "Direct authority endpoint. SwiftShader frame/receipt lag remains; not a physical-device or performance PASS."
+    },
+    "pixi20": {
+      "job": 134742111228,
+      "status": "FAIL",
+      "ms": 184001.5,
+      "round": 3,
+      "stage": "respawn quiz",
+      "error": "TypeError reading text of undefined answer",
+      "cause": "Fixed 350ms wait read previous browser question with the next server answer. Replaced with exact-option receipt and correct-count assertions."
+    },
+    "polish354": {
+      "run": 44286998274,
+      "status": "PASS",
+      "jobs": 4
+    },
+    "requiredCI": {
+      "run": 44286998325,
+      "status": "FAIL",
+      "isolated": {
+        "job": 134744684116,
+        "status": "FAIL",
+        "candidateRun": 44282808145,
+        "releaseId": "a9167266146646f2717b055aceb7b3fad833ae99",
+        "ms": 41089,
+        "error": "AUTHORITATIVE_STATE_TIMEOUT",
+        "check": "resumeMove",
+        "stage": "movement",
+        "epoch": 2,
+        "inputBatchesAfterReload": 1,
+        "moveInputRecordedAfterReload": false,
+        "oomKilled": false,
+        "note": "Artifact/image/version/origin checks passed. Resume movement failure kept; no warning exemption."
+      },
+      "canvasTouch": {
+        "job": 134744684365,
+        "status": "INFRA_FAILURE",
+        "error": "WebKit Target crashed during second viewport tap; teardown also reported Target crashed. Native Chromium five viewports passed. No evidence of game exception."
+      }
+    }
   }
 }
