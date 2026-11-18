@@ -1,5 +1,7 @@
 # v35.6 Combat Feel & Balance Recovery
 
+검토용 [Draft PR #27](https://github.com/YEOMT/DSbettleroyale/pull/27). 구현 커밋: `4f259416c2ebc82976f7f15d35cb4fa8719eef33`.
+
 ## 기준과 범위
 
 기준 main은 `e328aad252e243428123e3d576ea8ffefcdb8604`다. 시작 시 PR #26은 MERGED였으며 main CI `44298847350`과 Paired candidate `44300657766`은 SUCCESS였다. 기존 작업 브랜치를 보존하고 `codex/v35-6-combat-recovery`에서 구현했다. 사용자 검토용 Draft PR이며 main 병합, AWS/Pages/Firebase 배포, Secrets와 서버 설정 변경은 하지 않는다.
@@ -66,3 +68,7 @@ POLISH_PLAYERS=30 POLISH_ROUNDS=1 node tools/ci/recovery356-pair.mjs pixi high
 ```
 
 Windows에서는 동일 환경변수를 PowerShell `$env:NAME='value'`로 지정하고 설치된 Edge를 사용하려면 `PLAYWRIGHT_CHANNEL=msedge`를 지정한다. CI는 Chromium/SwiftShader를 사용한다. 별도 workflow는 여섯 renderer/quality 표시 조합과 네 개 성능 비교를 격리해 실행한다. 운영 배포 권한은 사용하지 않는다.
+
+## GitHub 실행 제출 기록
+
+최초 PR 생성 뒤 Actions 실행과 PR merge ref가 생성되지 않았다. Actions enabled/기존 workflows active, base 대비 ahead1/behind0을 읽기 전용 확인했고 Draft 유지 상태로 reopen 이벤트를 한 번 제출했다. 아직 실행되지 않은 GitHub 검사는 NOT_RUN이며, 이후 결과는 PR 본문에 갱신한다. 게임 코드/배포 설정 변경으로 이 상태를 우회하지 않는다.
