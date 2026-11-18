@@ -72,3 +72,5 @@ Windows에서는 동일 환경변수를 PowerShell `$env:NAME='value'`로 지정
 ## GitHub 실행 제출 기록
 
 최초 PR 생성 뒤 Actions 실행과 PR merge ref가 생성되지 않았다. Actions enabled/기존 workflows active, base 대비 ahead1/behind0을 읽기 전용 확인했고 Draft 유지 상태로 reopen 이벤트를 한 번 제출했다. 아직 실행되지 않은 GitHub 검사는 NOT_RUN이며, 이후 결과는 PR 본문에 갱신한다. 게임 코드/배포 설정 변경으로 이 상태를 우회하지 않는다.
+
+- CI44382736051 paired4개는 전투 전 git archive의 Playwright HOME/소유권 차이로 INFRA_FAILURE. 현재 checkout만 명령별 safe.directory로 지정하고 기준SHA marker·준비실패 보고를 추가했다. 다른SHA/검사생략/전역safe.directory=* 없음. 로컬 동일 exact-SHA archive 및 syntax PASS. 초기실패 Job135079173989 로그를 보존한다. 지연된 PR 이벤트가 뒤늦게 생성되어 중복 수동44382828139는 취소했다.

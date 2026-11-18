@@ -7,13 +7,7 @@ const renderer=process.argv[2]||'canvas',quality=process.argv[3]||'low';
 const players=Number(process.env.POLISH_PLAYERS||20),rounds=Number(process.env.POLISH_ROUNDS||5);
 const out=path.resolve('artifacts/v35-6'),base=path.join(out,'baseline-source');
 fs.mkdirSync(out,{recursive:true});
-if(!fs.existsSync(base)){
- fs.mkdirSync(base);const tar=path.join(out,'baseline.tar');
- execFileSync('git',['archive','--format=tar','--output='+tar,baseSha],{windowsHide:true});
- execFileSync('tar',['-xf',tar,'-C',base],{windowsHide:true});
-}
-fs.copyFileSync('tests/combat/recovery356-live.mjs',base+'/tests/combat/recovery356-live.mjs');
-const report={baseSha,renderer,quality,players,rounds,attempts:[],comparison:[],scope:'same runner, sequential production builds; synthetic peers + three real browsers; physical devices NOT_RUN'};
+const report={baseSha,renderer,quality,players,rounds,attempts:[],comparison:[],performanceStatus:'NOT_RUN',scope:'same runner, sequential production builds; synthetic peers + three real browsers; physical devices NOT_RUN'};
 const name=label=>`live-${label}-${renderer}-${quality}-solo-${players}-prepared-r${rounds}`;
 function run(label,cwd,args,env={}){
  const started=performance.now(),r=spawnSync(process.execPath,args,{cwd,env:{...process.env,...env},windowsHide:true,encoding:'utf8',maxBuffer:16e6,timeout:600000});
@@ -21,6 +15,17 @@ function run(label,cwd,args,env={}){
  const row={label,command:args.join(' '),ms:performance.now()-started,exit:r.status,status:r.error?.code==='ETIMEDOUT'?'TIMEOUT':r.error?'INFRA_FAILURE':r.status===0?'PASS':'FAIL'};report.attempts.push(row);console.log(JSON.stringify(row));return row;
 }
 try{
+ // checkout's temporary HOME can differ from the Playwright container's HOME.
+ // Trust only this checkout for this read-only archive command, never '*'.
+ const marker=path.join(base,'.baseline-sha');
+ if(fs.existsSync(marker)&&fs.readFileSync(marker,'utf8').trim()!==baseSha)throw Error('BASELINE_SHA_MISMATCH');
+ if(!fs.existsSync(marker)){
+  fs.mkdirSync(base,{recursive:true});const tar=path.join(out,'baseline.tar');
+  execFileSync('git',['-c','safe.directory='+root,'archive','--format=tar','--output='+tar,baseSha],{windowsHide:true});
+  execFileSync('tar',['-xf',tar,'-C',base],{windowsHide:true});
+  fs.writeFileSync(marker,baseSha+'\n');
+ }
+ fs.copyFileSync('tests/combat/recovery356-live.mjs',base+'/tests/combat/recovery356-live.mjs');
  const built=run('baseline-build',base,['tools/build.mjs']);
  if(built.status!=='PASS')throw Error('BASELINE_BUILD_FAILED');
  for(const [label,cwd]of [['baseline',base],['candidate',root]]){
@@ -42,7 +47,7 @@ try{
  report.expectedComparisons=rounds+(players===20?4:0);
  report.performanceStatus=!report.comparison.length?'NOT_RUN':report.comparison.length!==report.expectedComparisons||report.comparison.some(r=>!Object.values(r.before).every(Number.isFinite)||!Object.values(r.after).every(Number.isFinite)||r.before.windowMs<=0||r.after.windowMs<=0||['bytesPerSecond','stepP95','snapshotP95','cpuMsPerSecond','rss','hostDrawP95','studentDrawP95','studentGapP95','hostGapP95'].some(k=>r.ratios[k]>1.20))?'PARTIAL':'PASS';
  if(report.functionStatus!=='PASS')process.exitCode=1;
-}catch(error){report.error=error.stack;report.functionStatus='FAIL';process.exitCode=1;}
+}catch(error){report.error=error.stack;report.functionStatus=report.attempts.length?'FAIL':'INFRA_FAILURE';process.exitCode=1;}
 finally{
  // Raw per-surface/transport traces live in adjacent reports; avoid duplicating MBs.
  for(const row of report.attempts)if(row.live){row.report=name(row.label)+'/report.json';row.liveStatus=row.live.status;row.liveMs=row.live.ms;delete row.live;}
