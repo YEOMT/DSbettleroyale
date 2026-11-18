@@ -1,6 +1,7 @@
 // Fault-injected controller test only. Real sealed client/server; do not use against AWS.
 import fs from 'node:fs';import path from 'node:path';import http from 'node:http';import assert from 'node:assert/strict';import {createRequire} from 'node:module';import {pathToFileURL} from 'node:url';import {randomBytes} from 'node:crypto';import {execFileSync} from 'node:child_process';
 import {lifecycle} from '../../tools/deploy/lifecycle.mjs';import {validatePublicSmoke} from '../../tools/deploy/resume-warning.mjs';import {inspectBundle} from '../../tools/deploy/validation.mjs';
+import {launchIsolatedBrowser} from '../../tools/deploy/isolated-browser.mjs';
 const dir=path.resolve(process.env.CANDIDATE_DIR||'artifacts/candidate'),{manifest:m}=inspectBundle(dir),req=createRequire(dir+'/ops/package.json'),{chromium}=req('playwright'),WebSocket=req('ws');
 const secret=randomBytes(24).toString('hex'),admin=randomBytes(24).toString('hex'),origin=new URL(m.targets.pages.http).origin;
 const docker=(...args)=>execFileSync('docker',args,{encoding:'utf8',timeout:120000,env:{...process.env,HOST_AUTH_SECRET:secret,ADMIN_SECRET:admin,ALLOWED_ORIGINS:origin}}).trim();
@@ -22,7 +23,7 @@ web=http.createServer((request,response)=>{
  response.setHeader('Content-Type',file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':file.endsWith('.json')?'application/json':'text/html');fs.createReadStream(file).pipe(response);
 });
 await new Promise(r=>web.listen(0,'127.0.0.1',r));const url='http://127.0.0.1:'+web.address().port+prefix;
-browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{})});
+browser=await launchIsolatedBrowser(chromium);
  report=await lifecycle({browser,urls:[url,url,url],secret,buildId:m.releaseId,allowResumeWarning:true,configureContext:async(ctx,role,wire)=>{
   let connections=0;
   await ctx.routeWebSocket('**',route=>{

@@ -132,13 +132,17 @@ jobs:
           run-id: ${{ steps.fixture.outputs.run }}
           github-token: ${{ github.token }}
           path: artifacts/candidate
-      - run: node artifacts/candidate/ops/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Start preinstalled Chromium on the isolated runner
+        run: node tools/ci/isolated-browser.mjs start
       - run: node tools/deploy/isolated.mjs
         env:
           RELEASE_SHA: ${{ steps.fixture.outputs.sha }}
           CANDIDATE_RUN_ID: ${{ steps.fixture.outputs.run }}
       - name: Inject observer loss and require Results and Rematch after the warning
         run: node tests/releaseops/resume-warning-browser.mjs
+      - name: Stop isolated browser service
+        if: always()
+        run: node tools/ci/isolated-browser.mjs stop
       - uses: actions/upload-artifact@v4
         if: always()
         with:

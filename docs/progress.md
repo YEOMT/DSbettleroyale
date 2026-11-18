@@ -367,3 +367,9 @@ Base a5e0568 includes PR #5/#6. Battle-scoped native/Safari gesture policy, diff
 
 - CI44382736051 paired4개는 전투 전 git archive의 Playwright HOME/소유권 차이로 INFRA_FAILURE. 현재 checkout만 명령별 safe.directory로 지정하고 기준SHA marker·준비실패 보고를 추가했다. 다른SHA/검사생략/전역safe.directory=* 없음. 로컬 동일 exact-SHA archive 및 syntax PASS. 초기실패 Job135079173989 로그를 보존한다. 지연된 PR 이벤트가 뒤늦게 생성되어 중복 수동44382828139는 취소했다.
 - Final runtimeCI44384120024 10/10 jobsPASS, all4pairedfunctionsPASS but3performancePARTIAL; 20Pixi CPU124.34→242.78ms/s and30PixiRSS305.88→372.52MiB remainunresolved. Quick8+422/Python31PASS; v354+3559jobsPASS. FourcommoncontinuousFAIL fromoldactive-onlyhurtobserver; test-onlyfix forwardsaxis/host+observes3renderedchannels, local11cases×3views/two-rematchesPASS30.801s. No runtimechanges.
+
+### v35.6 후속 CI / 원인 분리
+- Starting from exact5a0fccbe; preserve all runtime files. Isolated CI apt32.1MB downloads6m56s/9m11s caused10m TIMEOUT; gate remains FAIL. Reuse pinned preinstalled Playwright image via runner-loopback service, exact candidate/version and observer-loss assertions unchanged. Local endpoint/profile3unitPASS197.5ms, real browser two sequential remote sessionsPASS.
+- Predeclared20balanced×5/30high×1 A B C C B A comparison: A=e328aad v35.5, B=5a0fccbe, C=B authority/content+A body render files only. Private CPU/allocation profiling and per-browser body timings; post-run-only forced-GC diagnostic. No retries/best-result selection.
+- Local profile startup30Pixi FAIL58.690s before profiler: overload1/PAUSED,30connected,step p9538.921ms. Preserve this failure; no threshold adjustment. Full evidence and final CI state tracked in docs/v35-6/ci-performance-followup.md and PR27.
+- Follow-up local Quick8+425PASS (general254.233s), paired buildPASS9.356s. Runtime sourceHash ea84952 unchanged from5a0fccbe. Full CI and predeclared cause-separation samples pending GitHub execution; never inferred PASS.
