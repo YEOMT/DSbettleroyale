@@ -33,9 +33,9 @@
 | G08 | 표시 오프셋이 위치·판정·넉백·피해에 무관 | PASS | E1 actor deep equality, 실제 impulse life/end guard, 회전≤0.10rad·이동 그림 오프셋≤2CSS px·벽≤4CSS px, low 오프셋0 검증. E6 벽 충돌 HP 불변. 실제 피해/좌표를 고치는 연출 코드는 추가하지 않음. |
 | G09 | 방향 이동·보간·벽·거점·카메라 스케일과의 일관성 | PARTIAL | 방향축·zoom·LOD·동일 affine 단위검사와 로컬20인5경기(점령 포함)/30인 연속 플레이 통과. 주관적 명료성·실물 터치/카메라 조작감은 미검증. 정지 캡처만으로 개선을 주장하지 않는다. |
 | G10 | 생명 변경·탈락/부활·리롤·재경기·재접속 pose 정리 | PASS | 생명/사망/부재 actor 단위검사, 실제 갈고리 비행 중 동일 학생 재접속, 20인5경기의 탈락·부활 퀴즈·리롤·복귀 입력·결과/재경기 통과. 최종 pose9맵·렌더 자원·서버 월드/큐 정리 확인. |
-| G11 | Canvas/Pixi × host/student × low/balanced/high | PARTIAL | 로컬 Canvas low/Edge12행22.315초, Pixi high/Chrome12행22.819초 PASS. 모든 화면별3품질 조합은 새 CI6개 Job 결과 대기. 다른 품질을 실행 전 PASS로 분류하지 않는다. |
+| G11 | Canvas/Pixi × host/student × low/balanced/high | PASS | 최종 런타임(sourceHash ea84952) Linux CI44384120024에서 Canvas/Pixi×low/balanced/high 6Job 모두 PASS. 실제 WS 공격자·상대·호스트의12행 및 Canvaslow 갈고리 재접속5행 통과. 실물 기기는C08 별도. |
 | G12 | reduced-motion 존중, 새 고비용 필터·파티클 없음 | PARTIAL | E1 reduced-motion 반환 중립 및 모든 채널 정리, 기존 텍스처/스프라이트 재사용 검증. 필터·셰이더·새 파티클 시스템 추가 없음. 브라우저 reduced-motion 행은 E6 앞선 FAIL 뒤 미도달했으므로 최종 실관측 대기. |
-| G13 | 학생/교사 render·draw·RAF·자원·server event bytes A/B | PARTIAL | 로컬20Canvas5경기/30Pixi 단기의 함수 검사는 PASS. Canvas 일부 draw p95 +0.3~1.5ms, rAF p95는16.8~16.9ms. 개선/악화 원인을 단일 표본으로 확정하지 않는다. 전체 원자료 요약 local-performance.json 및 최종 CI A/B를 별도 기록. |
+| G13 | 학생/교사 render·draw·RAF·자원·server event bytes A/B | PARTIAL | 최종 Linux4개 A/B 함수 검사는 모두PASS. Canvas20/Pixi20/Pixi30 성능PARTIAL, Canvas30은PASS. 20Pixi team-elim CPU124.34→242.78ms/s, snapshot2.77→4.97ms;30PixiRSS305.88→372.52MiB. 다른개선/악화도 ci-performance.json 전20구간에보존. 단일실행으로패치인과/전체성능개선을확정하지않음. |
 | G14 | 헤드슈터 실제 발사·잔상·명중 유지, 전용음 검사 제외 | PASS | E6 Canvas low 세 화면의 `emoji-023`: 실제 SHOT_END, transit 잔상, 상대 HP 감소와 recoil 관측. E4 v35.5 기존 전투 수치 유지. 전용 발사음1회는 사용자 제외 사항이며 기존 사운드를 맞추기 위해 변경하지 않음. Pixi 전체 가시성은 G11에서 별도 추적. |
 
 ## 전투 밸런스 — 18개
@@ -67,9 +67,9 @@
 |---|---|---|---|
 | C01 | 일반/개인전·팀 생존·점령·F전·S전 | PASS | Quick 기존 실제 WS solo/team-elim/team-capture 및 같은방5회 회귀 통과. 후속polish35417개에서 normal/F/S 전환·팀 점령/부활 특별전 통과. E7 실제20인 연속5경기 일반모드 완주. |
 | C02 | 20WS+실제 화면, 6→5→3→2→1·결과/재경기/부활 퀴즈 | PASS | 최종 Canvas low20명·호스트+학생2 화면5경기 PASS89.036초. 20→6→5→3→2→1,3.5초 승리창·결과,탈락 렌더중단·부활퀴즈/리롤·복귀조작·동일방재경기와연결20/자원정리 확인. |
-| C03 | 30 Pixi high 단기·20 Pixi balanced5·Canvas low5 | PARTIAL | 로컬 최종 Canvas low20×5 PASS89.036초, Pixi high30 PASS28.324초(연결30/과부하0/결과·재경기). 기준103.206초/37.775초. Pixi balanced20×5와Canvas low30은 CI 독립 A/B 결과 대기. |
+| C03 | 30 Pixi high 단기·20 Pixi balanced5·Canvas low5 | PASS | CI44384120024 최종4개 A/B 모두함수PASS:20Canvaslow5경기,20Pixibalanced5경기,30Canvaslow단기,30Pixihigh단기. 모든연결/과부하0/측정끝점buffer0/결과/재경기·자원정리 확인. 기준30Pixi의일시buffer104224B/queue73290B는별도보존하며지속0을뜻하지않음. 성능개선은G13/C05별도PARTIAL. |
 | C04 | 60Hz/20Hz와 짧은 snapshot 재생 보존 | PASS | 60Hz/목표20Hz·보호값 변경없음. 최종 로컬20/30명의 실제서버 step/snapshot/bytes 및 화면재생·버전·입력·연결 검사 통과. 20Hz 목표를 항상 달성하거나 지터가없다는 보장은 아니며 성능은G13/C05별도. |
-| C05 | 저사양 학생 p95·교사 draw 악화 분리 | PARTIAL | 로컬Intel Iris Xe/Edge 같은PC 경합 조건. 20인Canvas 일부draw악화는PASS로 숨기지 않음. 30인Pixi host12.9→10.0ms/student12.1→10.9ms, rAF16.9ms 유지. 실물저사양태블릿과LinuxCI는 별도 결과. |
+| C05 | 저사양 학생 p95·교사 draw 악화 분리 | PARTIAL | 최종CI4개중3개는상대지표20%초과신호가있어performancePARTIAL.20Pixi CPU/snapshot·30PixiRSS 악화값을보존하며원인미확정. 로컬Intel IrisXe/Edge 및 LinuxSwiftShader 수치와실물저사양태블릿을구분. 그래픽/FPS/보호를낮추지않음. |
 | C06 | 86종·6레벨/증강·Overdrive III·왕귀·F/S 추첨 | PASS | 86종/기존77종·전역golden 및왕귀/6레벨/증강, GIANT/RAPID/WIDE III단위회귀, 고정270조건, 최종20인5경기의 실제Lv6/III획득 사건·부활·리롤 통과. 전체86종 화면전수는 수행하지 않음. |
 | C07 | 기존3.5초 승리 사건 늦은 도착 위험 보존 | PARTIAL | **알려진 위험 유지, 해결 주장 없음.** 기존 사건의 `startedAt→showResultsAt=3500ms`를 바꾸지 않는다. 늦게 수신되어 창이 이미 끝난 경우 `KNOWN_LATE_RESULT_C07`의 FAIL/PARTIAL과 수신/서버 시계 기록을 보존한다. timeout 연장·승리창 재생으로 숨기지 않는다. 기준 이번 일부 시험이 PASS여도 기존 실패 기록은 유효하다. |
 | C08 | 실기기·학교 Wi-Fi·AWS1GB·600/1200초 Deep 구분 | NOT_RUN | 실물 iOS/Android, 학교 Wi-Fi, AWS1GB 실부하, 600/1200초 Deep 모두 이번 작업에서 실행하지 않음. 운영 서버 접근·덤프·재시작·배포도 하지 않음. 짧은 합성/로컬 브라우저 시험을 실제20~30명 수업 검증으로 표현하지 않는다. |
@@ -88,3 +88,5 @@
 - 최종 GitHub Quick/Targeted/required-checks와6개 표시조합·4개연속A/B Job 결과는 PR에 기록한다. 로컬 Quick 최초421/422 및 해당 실패 경로17/17 후속 통과를 전체 Quick 성공으로 덮지 않는다.
 - local-performance.json은 sourceHash37d530c5의 전후10장면 원자료 요약이다. 불필요한 Canvas 변환 검토 결과와 최종 CI 계측을 구분한다.
 - 기존 C07, 실기기/학교Wi-Fi/AWS1GB/600·1200초 미검증, 고정 봇 피해 감소와 초기 fixture 실패는 그대로 유지한다.
+
+- 최종게임코드의QuickCI:8+422 전부PASS(일반236.663초),Python31PASS,buildPASS. 변경9종 Canvas/Pixi6샤드·터치·Canvas복구·Pixi로스터복구·Roster10·격리배포 시험도 통과. Pixi controls복구와 Targeted의 완료 상태는 아직 확인 중이다. 기존live-feel observer4Job은독립hurt채널을못찾아FAIL; 실제image/sample인수를그대로전달하고렌더된3채널을관측하도록수정,로컬11가족×3화면+재경기2회PASS30.801초. HIT/contact/타임아웃은유지하며최종필수CI는PR에기록한다.

@@ -74,3 +74,11 @@ Windows에서는 동일 환경변수를 PowerShell `$env:NAME='value'`로 지정
 최초 PR 생성 뒤 Actions 실행과 PR merge ref가 생성되지 않았다. Actions enabled/기존 workflows active, base 대비 ahead1/behind0을 읽기 전용 확인했고 Draft 유지 상태로 reopen 이벤트를 한 번 제출했다. 아직 실행되지 않은 GitHub 검사는 NOT_RUN이며, 이후 결과는 PR 본문에 갱신한다. 게임 코드/배포 설정 변경으로 이 상태를 우회하지 않는다.
 
 - CI44382736051 paired4개는 전투 전 git archive의 Playwright HOME/소유권 차이로 INFRA_FAILURE. 현재 checkout만 명령별 safe.directory로 지정하고 기준SHA marker·준비실패 보고를 추가했다. 다른SHA/검사생략/전역safe.directory=* 없음. 로컬 동일 exact-SHA archive 및 syntax PASS. 초기실패 Job135079173989 로그를 보존한다. 지연된 PR 이벤트가 뒤늦게 생성되어 중복 수동44382828139는 취소했다.
+
+## 최종 게임 소스의 GitHub 검증
+
+[CI 비교44384120024](https://github.com/YEOMT/DSbettleroyale/actions/runs/44384120024)는10/10 Job 성공이다. 6개 표시 조합과4개 전후 플레이를 실제 실행했다. 그러나 함수 성공을 성능 성공으로 요약하지 않는다: **20Canvas·20Pixi·30Pixi performanceStatus=PARTIAL**,30Canvas만PASS. [전20장면/23개악화신호](evidence/ci-performance.json)에 전체값과측정단위를기록했다. 예를들어20Pixi팀생존구간 CPU124.34→242.78ms/s, snapshot p952.77→4.97ms,30PixiRSS305.88→372.52MiB다. 원인미확정이며추가유리한결과를얻기위한반복실행은하지않았다.
+
+동일게임소스Quick8+422PASS(일반236.663초),Python31PASS,pairedbuildPASS. v35.4/v35.5의9개회귀Job도PASS. 필수CI의기존live-feel4개Job은분리된hurt채널대신옛active목록만관측하고axis/host인수를누락한시험observer로FAIL했다. 이를관측코드에서만교정해11개공격/스킬×3화면·재경기2회를30.801초에통과했다. 기존HIT/contact/HP/발사/전진거리/타임아웃검사는유지했다. 이후의최종CI상태는PR본문에기록한다. 게임sourceHash ea84952는그대로다.
+
+20인 Pixi의 큰 CPU 증가 구간은 같은 151step/50snapshot이며 활성 투사체·replay 크기 증가가 없었다. GC2→11회와 관측 GC합5.26→30.76ms가 동반됐지만 CPU 증가 전체를 설명할 프로파일이 없어 원인은 미확정이다. 30인 Pixi는 GC25→13회, heap78.24→181.52MiB이고 활성 투사체·replay는 감소했다. 수거 시점 차이와 누수 가능성을 이 단기 표본으로 결론내리지 않는다. 해당 CI는 SwiftShader와 높은 CPU 경합에서 학생 rAF p95가 약367ms인 조건이며, 로컬 Iris Xe의16.9ms와 혼용하지 않는다. 전송 버퍼0은 측정 끝점 값이다. 기준30Pixi stall에는 일시104224B buffer/73290B queue가 있어 지속0으로 주장하지 않는다.
