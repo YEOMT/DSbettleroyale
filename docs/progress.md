@@ -342,3 +342,7 @@ Base a5e0568 includes PR #5/#6. Battle-scoped native/Safari gesture policy, diff
 - 후속: 같은 base CI 격리 기능은 통과했으나 apt 다운로드 지연으로 job10분 TIMEOUT/CANCELLED. 해당 job만 재실행 후 base main/required-checks PASS → 기존 후보44282808145 생성 시작. status-only 성공이 ARTIFACT_READY로 오표시되는 workflow 수정 +실제 shell8검사 PASS.
 - Quick PASS292.958s(396/396 +8 ReleaseOps); runtime sourceHash 변경 없음. Pixi high exact-contact PASS45.131s: Head special sound EXCLUDED_BY_USER, 세 저격 실제 명중/SHOT/SHOT_END/모든 화면 잔상은 명시 assertion으로 유지·강화. 수동 fixture clock이 관측을 추월하지 않게 수신/draw 동기화; 실시간 부하시험은 변경 없음.
 - CI 진단9302121: v35.4 Pixi20×5 PASS152.902s, v35.5 Pixi30 high PASS74.699s; 과거 8.8초 결과지연/29연결 당시 종료 사유는 미확정. [집중 수정 및 실패 보존](v35-5/ci-repair.md). 최종 GitHub 검사는 PR26에 기록한다.
+
+-104b471 CI30 재발 FAIL55.286s: heartbeat terminate(호스트/학생)→1006, queue/buffer0,overload0. 직전 rAF400~450ms. 이전PASS로 덮지 않음. same30/세화면/화질/입력을 유지한 브라우저 프로세스 분리 비교를 추가. Windows 비교는 SAFE_PAUSED FAIL75.972s, 연결30 유지; Linux 비교 pending. cleanup 오류가 원래 assertion을 가리지 않게 별도 보존.
+
+- 정확한 a916726 후보44282808145/artifact14417843912 생성 및 선택 복구. PR CI44283797222 isolated-release134733561547 PASS(실제 격리 +warning fault-injection/Results/Rematch). 운영 배포 아님.

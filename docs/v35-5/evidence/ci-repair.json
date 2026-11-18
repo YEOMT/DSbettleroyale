@@ -430,5 +430,257 @@
     "scope": "real WS; fixture-driven exact authority contacts, not continuous-play evidence",
     "ms": 45130.5293,
     "errors": []
+  },
+  "recurrence104b471": {
+    "run": 44283797040,
+    "job": 134731078303,
+    "status": "FAIL",
+    "ms": 55286.013206999996,
+    "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n29 !== 30\n\n    at file:///__w/DSbettleroyale/DSbettleroyale/tests/combat/overdrive355-live.mjs:31:140",
+    "server": {
+      "connected": 29,
+      "closed": 3,
+      "reconnects": 1,
+      "overloads": 0,
+      "paused": false,
+      "bufferHighWatermark": 111450
+    },
+    "events": [
+      {
+        "at": 1794997042857,
+        "kind": "close",
+        "code": 4009,
+        "reason": "SUPERSEDED",
+        "connection": 31,
+        "role": "student",
+        "epoch": 1,
+        "match": "3e850760-c575-4e75-98fa-76df93733f49",
+        "phase": "LOBBY",
+        "buffered": 0,
+        "queue": 0,
+        "alive": true
+      },
+      {
+        "at": 1794997042866,
+        "kind": "close",
+        "code": 4009,
+        "reason": "SUPERSEDED",
+        "connection": 31,
+        "role": "student",
+        "epoch": 1,
+        "match": "3e850760-c575-4e75-98fa-76df93733f49",
+        "phase": "LOBBY",
+        "buffered": 0,
+        "queue": 0,
+        "alive": true
+      },
+      {
+        "at": 1794997042868,
+        "kind": "closed",
+        "code": 4009,
+        "reason": "SUPERSEDED",
+        "connection": 31,
+        "role": "student",
+        "epoch": 1,
+        "match": "3e850760-c575-4e75-98fa-76df93733f49",
+        "phase": "LOBBY",
+        "buffered": 0,
+        "queue": 0,
+        "alive": true
+      },
+      {
+        "at": 1794997052807,
+        "kind": "pong",
+        "connection": 2,
+        "role": "student",
+        "epoch": 1,
+        "match": "upgrade-fixed-1",
+        "phase": "BATTLE",
+        "buffered": 0,
+        "queue": 0,
+        "alive": true
+      },
+      {
+        "at": 1794997053767,
+        "kind": "pong",
+        "connection": 32,
+        "role": "student",
+        "epoch": 2,
+        "match": "upgrade-fixed-1",
+        "phase": "BATTLE",
+        "buffered": 0,
+        "queue": 0,
+        "alive": true
+      },
+      {
+        "at": 1794997057672,
+        "kind": "pong",
+        "connection": 1,
+        "role": "host",
+        "epoch": 1,
+        "match": "upgrade-fixed-1",
+        "phase": "BATTLE",
+        "buffered": 0,
+        "queue": 0,
+        "alive": true
+      },
+      {
+        "at": 1794997077538,
+        "kind": "pong",
+        "connection": 2,
+        "role": "student",
+        "epoch": 1,
+        "match": "upgrade-fixed-1",
+        "phase": "BATTLE",
+        "buffered": 0,
+        "queue": 0,
+        "alive": true
+      },
+      {
+        "at": 1794997082094,
+        "kind": "terminate",
+        "reason": "",
+        "connection": 1,
+        "role": "host",
+        "epoch": 1,
+        "match": "upgrade-fixed-1",
+        "phase": "BATTLE",
+        "buffered": 0,
+        "queue": 0,
+        "alive": false
+      },
+      {
+        "at": 1794997082098,
+        "kind": "terminate",
+        "reason": "",
+        "connection": 32,
+        "role": "student",
+        "epoch": 2,
+        "match": "upgrade-fixed-1",
+        "phase": "BATTLE",
+        "buffered": 0,
+        "queue": 0,
+        "alive": false
+      },
+      {
+        "at": 1794997082113,
+        "kind": "closed",
+        "code": 1006,
+        "reason": "",
+        "connection": 32,
+        "role": "student",
+        "epoch": 2,
+        "match": "upgrade-fixed-1",
+        "phase": "BATTLE",
+        "buffered": 0,
+        "queue": 0,
+        "alive": false
+      },
+      {
+        "at": 1794997082116,
+        "kind": "closed",
+        "code": 1006,
+        "reason": "",
+        "connection": 1,
+        "role": "host",
+        "epoch": 1,
+        "match": "upgrade-fixed-1",
+        "phase": "BATTLE",
+        "buffered": 0,
+        "queue": 0,
+        "alive": false
+      }
+    ],
+    "growthScreens": [
+      {
+        "draw": {
+          "n": 4,
+          "p50": 12,
+          "p95": 21.5,
+          "max": 24.60000000000582,
+          "over100": 0,
+          "over200": 0
+        },
+        "gap": {
+          "n": 3,
+          "p50": 450,
+          "p95": 450,
+          "max": 450,
+          "over100": 3,
+          "over200": 3
+        }
+      },
+      {
+        "draw": {
+          "n": 4,
+          "p50": 11.5,
+          "p95": 12.400000000008731,
+          "max": 13.69999999999709,
+          "over100": 0,
+          "over200": 0
+        },
+        "gap": {
+          "n": 3,
+          "p50": 416.59999999999854,
+          "p95": 416.59999999999854,
+          "max": 450,
+          "over100": 3,
+          "over200": 3
+        }
+      },
+      {
+        "draw": {
+          "n": 3,
+          "p50": 20.69999999999709,
+          "p95": 20.69999999999709,
+          "max": 26.70000000001164,
+          "over100": 0,
+          "over200": 0
+        },
+        "gap": {
+          "n": 2,
+          "p50": 400,
+          "p95": 400,
+          "max": 416.6999999999971,
+          "over100": 2,
+          "over200": 2
+        }
+      }
+    ],
+    "browserReceipts": [
+      {
+        "messages": 860,
+        "chars": 21215759,
+        "lastAt": 1794997087687
+      },
+      {
+        "messages": 917,
+        "chars": 16273984,
+        "lastAt": 1794997087468
+      },
+      {
+        "messages": 811,
+        "chars": 14886209,
+        "lastAt": 1794997087572
+      }
+    ]
+  },
+  "localSeparateBrowsers": {
+    "status": "FAIL",
+    "ms": 75972.0051,
+    "error": "locator.click: Timeout 30000ms exceeded.",
+    "connected": 30,
+    "overloads": 1,
+    "paused": true,
+    "note": "Same Windows PC SAFE_PAUSED before measurement; not a Linux CI isolation comparison PASS."
+  },
+  "baseCandidate": {
+    "sha": "a9167266146646f2717b055aceb7b3fad833ae99",
+    "run": 44282808145,
+    "artifactId": 14417843912,
+    "artifactName": "release-a9167266146646f2717b055aceb7b3fad833ae99",
+    "expired": false,
+    "digest": "sha256:438f2abbd1b8cdc41b024a1b367f862aec535e2b3911f690d70c475e4132d75f",
+    "size": 171227868
   }
 }

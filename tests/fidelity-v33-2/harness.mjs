@@ -11,7 +11,7 @@ import {connect} from '../integration/client.mjs';
 import {getTeacherState,getHostVisibleState,getVisibleState,getStaticState} from '../../packages/engine/src/index.js';
 import {snapshotEncoder} from '../../apps/server/src/ws/snapshot.js';
 export const delay=ms=>new Promise(r=>setTimeout(r,ms));
-export async function auditHarness({players=20,mode='solo',renderer='canvas',hostRenderer=renderer,studentRenderer=renderer,quality='balanced',viewport={width:1366,height:768},audio=false,browserArgs=[],studentContext={},browserEngine='chromium',initScript,serverProcess=false}={}){
+export async function auditHarness({players=20,mode='solo',renderer='canvas',hostRenderer=renderer,studentRenderer=renderer,quality='balanced',viewport={width:1366,height:768},audio=false,browserArgs=[],studentContext={},browserEngine='chromium',initScript,serverProcess=false,isolateBrowsers=false}={}){
  let app,rpc,child;
  if(serverProcess){
   child=fork('tools/load/server.mjs',[],{windowsHide:true});const port=await new Promise((resolve,reject)=>{child.once('message',m=>resolve(m.port));child.once('error',reject);});let seq=0;const pending=new Map();
@@ -21,7 +21,16 @@ export async function auditHarness({players=20,mode='solo',renderer='canvas',hos
  }else {app=await createGameServer({port:0,hostSecret:'test-host'});if(process.env.LOAD_BUILT==='1')app.fingerprint=JSON.parse(fs.readFileSync('dist/release.json','utf8'));}
  const target='http://127.0.0.1:'+app.address.port;
  const vite=process.env.CLASSROOM_BUNDLE==='1'?await bundledHarness(target):await createServer({configFile:'apps/client/vite.config.js',server:{watch:null,hmr:false,port:0,strictPort:false,proxy:{'/ws':{target:target.replace('http:','ws:'),ws:true},'/version':target,'/healthz':target}}});if(process.env.CLASSROOM_BUNDLE!=='1')await vite.listen();const url='http://127.0.0.1:'+vite.httpServer.address().port;if(rpc)await rpc('fixture-origin',{origin:url});else app.config.origins.push(url);
- const browser=await (browserEngine==='webkit'?webkit:chromium).launch({headless:true,args:browserArgs,...(browserEngine==='chromium'&&process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{})}),contexts=[],errors=[],clients=[];
+ const launch=()=>(browserEngine==='webkit'?webkit:chromium).launch({headless:true,args:browserArgs,...(browserEngine==='chromium'&&process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{})});
+ // Independent classroom screens must not all queue software WebGL work in
+ // one Chromium GPU process. Same surfaces, quality, input and WS clients;
+ // this only isolates the test browsers on the same CI runner.
+ const browsers=[];
+ const browser=isolateBrowsers?{
+  async newContext(options){const b=await launch();browsers.push(b);return b.newContext(options);},
+  contexts:()=>browsers.flatMap(b=>b.contexts()),
+  close:()=>Promise.all(browsers.map(b=>b.close()))
+ }:await launch(),contexts=[],errors=[],clients=[];
  const video=process.env.COMBAT_VIDEO_DIR?{recordVideo:{dir:process.env.COMBAT_VIDEO_DIR,size:viewport}}:{};
  async function page(options={},record=false,mode=renderer){const context=await browser.newContext({viewport,deviceScaleFactor:1,...(record?video:{}),...options});if(initScript)await context.addInitScript(initScript);if(process.env.POLISH_DIAGNOSTICS==='1')await context.addInitScript(browserTransportProbe);if(!audio)await context.route(/dropbox/,r=>r.abort());contexts.push(context);const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(url+'/?renderer='+mode);await p.evaluate(async()=>{window.auditApp=await import('/src/main.js');});return p;}
  const host=await page({},false,hostRenderer);await host.locator('#ws-host-secret').fill('test-host');await host.locator('#br-create-btn').click();await host.locator('#br-host-room').waitFor();const code=(await host.locator('#br-room-code').textContent()).trim(),room=rpc?{code}:freezeableFixture(app,app.manager.rooms.get(code));

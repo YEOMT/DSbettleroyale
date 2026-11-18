@@ -6,7 +6,7 @@
 
 - 원인 확인: main CI `44064002326`의 Canvas WebKit Target crashed 및 격리 warning fixture의 Results UI 실패 때문에 `44066196876`의 candidate job이 **SKIPPED**였다. status job만 성공하면서 `ARTIFACT_READY`를 표시했다. 아티팩트 만료나 SHA 검색 오류가 아니었다.
 - 통과한 main job은 재실행하지 않았다. 실패 두 job의 재실행에서 Canvas touch가 통과했다. 격리 검사는 apt 다운로드 약 7분 소요 후 기능 검사 자체는 PASS했지만 **기존 10분 job 제한에서 취소**됐다. 이 실행은 PASS로 계산하지 않는다.
-- 다운로드 지연으로 취소된 격리 job만 다시 실행한 뒤 main `required-checks`까지 PASS. 정상 `workflow_run`이 정확한 a916726 후보 `44282808145`를 생성 중이다. 후보 존재/선택/격리 최종 결과는 완료 후 아래에 기록한다.
+- 다운로드 지연으로 취소된 격리 job만 다시 실행한 뒤 main `required-checks`까지 PASS. 정상 `workflow_run`이 정확한 a916726 후보 `44282808145`를 생성했다. artifact14417843912의 exact SHA/name/digest를 확인했고, PR CI44283797222의 isolated-release134733561547이 이 후보를 선택하여 PASS했다. warning fault-injection도 Results/Rematch/방 종료까지 PASS했으며 이는 실제 운영 WARNING이나 배포 결과가 아니다.
 - workflow status를 최소 수정하여 candidate가 실패/생략됐을 때 `ARTIFACT_NOT_CREATED`와 실패 종료를 반환한다. 문서 전용 변경은 `NO_EXECUTABLE_CHANGE`; 실제 후보가 있을 때만 READY. 신뢰 검사·동일 SHA·아티팩트 검사는 유지한다.
 - 저장소 설정 읽기 확인: `STAGING_ENABLED=false`, `RELEASE_VALIDATION_MODE=github-actions`. AWS 실행/Secrets 변경 없음.
 
@@ -40,3 +40,12 @@
 최종 SHA, 후보 artifact, 집중 CI와 required-checks 결과는 PR에 완료 후 기록한다. 기능 PASS와 원인 미확정/실기기 NOT_RUN을 구분한다.
 
 [진단 원자료 요약](evidence/ci-repair.json). 운영 배포·main 병합·Pages·Firebase·Secrets·서버 설정 변경 없음.
+
+
+## 104b471에서의 재발 — 과거 PASS로 덮지 않음
+
+`44283797040 / 134731078303`: Pixi high30 **FAIL55.286s, 29/30**. 이번 기록에서는 서버 heartbeat가 호스트(connection1)와 학생(connection32)에 대해 `alive=false`로 `terminate()`했고, 둘 다1006으로 종료한 것이 확인됐다. 종료 시 queue=0/buffered=0, overload=0, paused=false. 직전 성장 구간의 draw p95는12~22ms이지만 rAF gap은400~450ms였다. 브라우저는 당시에도 예전 stream을 계속 읽었고, 종료된 host가 아직 새 ROOM_STATE/close를 관측하지 못했다. 서버 과부하 또는 송신 queue 초과4008이라는 추정은 이 실행에 맞지 않는다.
+
+공유 Chromium 프로세스에서 세 화면이 software WebGL을 경쟁하는 시험 조건을 조사한다. 같은 runner에서 화면별 Chromium 프로세스로 분리한다. 같은30연결, 실제 세화면, 같은 입력/공격/모드/화질/해상도/FPS정책/8초 live 측정/서버 보호를 유지한다. 이 비교로 실제 교실 기기의 문제가 해결됐다고 주장하지 않는다. Windows 동일PC의 분리 실행은 **FAIL75.972s / SAFE_PAUSED1**로 측정 전 중단되었으며 숨기지 않는다. Linux 비교는 다음 CI에 기록한다.
+
+후처리 WebSocket1006이 원래29/30 assertion을 로그에서 가리지 않게 정리 오류를 별도 기록한다. 후처리만 실패한 실행도 여전히 FAIL이다. 후보의 정확한 SHA/artifact 생성은 복구됐으며 artifact14417843912(digest438f2abb…)가 실제 존재한다.
