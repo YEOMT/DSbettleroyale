@@ -329,3 +329,12 @@ Base a5e0568 includes PR #5/#6. Battle-scoped native/Safari gesture policy, diff
 - Final receipt-synchronized Pixi high identity9scenes PASS27.931s,errors0. Runtime unchanged from69a311b; only fixture and evidence updated. Final head CI tracked in PR26.
 
 - Final correction:02d9cdd v355live20Canvas/Pixi5 and30Pixi PASS, but original354Pixi winner TIMEOUT152.036s,overload0. New trace8.8s receipt/offset gap cannot distinguish delivery/main-thread lag vsclock. Removed speculative match offset reset, preserved original354 clock; focused64PASS1.365s,buildPASS7.02s,d9598796 source. F05PARTIAL→47PASS/4PARTIAL. Identity per3tick receipt waits stretched head windup/sound deadline; final-snapshot wait only, unchanged2200ms guard/assertions, localPixihigh9PASS28.198s. FinalCI tracked inPR26, no broad retry/merge/deploy.
+
+
+## PR26 failed CI focused repair — 2026-11-18 (in progress)
+
+- Exact base remains a9167266146646f2717b055aceb7b3fad833ae99; PR26 Draft HEAD89a721bf. No game/deploy changes.
+- Missing artifact: base CI44064002326 isolated warning fixture (Results UI) and Canvas WebKit crash failed; candidate44066196876 skipped build. Rerunning only those failed jobs with original exact SHA, existing STAGING_ENABLED=false and github-actions validation.
+- Added bounded synthetic transport/result observations (send/receive wall+monotonic times, close reason, epoch, queues, renderer reset and visibility). Local Pixi20 diagnostic did not reach winner: attack button timeout with SAFE_PAUSED; retained artifacts/v35-4/ci-diagnosis-pixi-balanced-solo-20-prepared-r5-ci-diagnosis/report.json. This is not a winner PASS.
+- User explicitly excludes emoji-023 special launch-sound exactly-once acceptance. BB/Slipper sound, Head windup/no early shot, actual shots/trails/damage remain. Historical failures remain in v35-5/report.md.
+- Paired build PASS; focused CI diagnosis pending. No timeout/quality/participant/protection changes.

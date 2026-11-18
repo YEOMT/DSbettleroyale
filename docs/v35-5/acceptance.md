@@ -41,7 +41,7 @@ PASS means only the stated automated scope. PARTIAL retains a missing subcase or
 | D10 | EXPANSION/왕귀/HEAVY 등 비대상 기존 값·자격 unchanged | PASS | All other paths pinned byte-for-byte mechanics; original eligibility preserved. |
 | E01 | BB 스킬 속도65, A 헤드슈터105, C 슬리퍼55 실제 권위 이동·관통/충돌 통과 | PASS | 65/105/55 final real shot paths; legacy swept/piercing, real3screen casts. |
 | E02 | 저격 기존 피해·치명타40/50/30%·사거리·CD·조준 준비 불변 | PASS | Pinned cooldown/damage/windup; existing actual crit RNG/damage tests retained. |
-| E03 | 실 SHOT_SPAWN에서만 발사음/섬광; ACK·준비 중 가짜 발사 없음 | PASS | Head windup no sound/SHOT; each confirmed sniper shot exactly1 sound. |
+| E03 | 실 SHOT_SPAWN에서만 발사음/섬광; ACK·준비 중 가짜 발사 없음 | PASS | Head windup no SHOT; BB/Slipper confirmed shot exactly1 sound. 2026-11-18 사용자 지시: emoji-023 전용 발사음 1회는 인수 범위에서 제외. Head 실제 발사·투사체·잔상·명중 검사는 유지. |
 | E04 | 비행 잔상 실제 서버 궤적·충돌 위치, 20Hz 간격 사이 노출·종료 정확 | PASS | Server turn/end segments;9f/150ms thin residual; three-screen terminal frames recorded. |
 | E05 | 저격 3종 공격자·상대·호스트 Pixi/Canvas/저화질에서 시각 차별화 | PASS | Canvas/Pixi low/high, attacker/opponent/host. Source glyph identity retained. |
 | E06 | 다이너마이트 245/105/42f, 피해·벽 차폐/쿨타임 보존 | PASS | 245/105/42f in actual definition/golden cast; other values pinned. |
