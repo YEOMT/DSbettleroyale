@@ -98,7 +98,7 @@ __brScope.brRunBasicProfile = function brRunBasicProfile(ability,mods){
             var cached=__brScope.brRunBasicCache.get(mods);if(cached&&cached.ability===ability&&cached.definition===__brScope.brReworkDefinition(ability))return cached.profile;
             var p=Object.assign({},base);
             p.damageScale*=Number(mods.basicDamage||1);
-            if(p.close)p.pushScale*=Number(mods.basicKnockback||1);
+            if(p.close){p.pushScale*=Number(mods.basicKnockback||1);p.halfAngle=Math.min(110*Math.PI/180,p.halfAngle+Number(mods.basicArcDegrees||0)*Math.PI/180);}
             else{
                 p.count=__brScope.brRunCount(p.count,mods.basicCount,6);
                 if(p.count>base.count&&!p.spread)p.spread=.10;
@@ -178,6 +178,7 @@ __brScope.brAimSpec = function brAimSpec(ability,kind,playerRadius,power,mods) {
             var spec=__brScope.brBaseAimSpec(ability,kind,playerRadius,power),caps=__brScope.brRunCapabilities(ability);
             if(kind==='attack'){
                 if(caps.basic.melee){
+                    spec.halfAngle=__brScope.brRunBasicProfile(ability,mods).halfAngle;
                     spec.step=__brScope.brBasicStepDistance(ability,mods,false);
                     spec.range=Math.max(playerRadius,(spec.range*Number(mods.basicRange||1))-spec.step);
                 }

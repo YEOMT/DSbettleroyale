@@ -1,3 +1,4 @@
+import {overdriveEffect} from './overdrive-feedback.js';
 // Original v32.1 Canvas/Pixi painter implementation; no combat execution.
 export function createPainters(session){const __visualScope={BRMP:session,game:null,brPlaySfx:()=>{}};
 __visualScope.brTeamKillColor = function brTeamKillColor(team){return __visualScope.BR_TEAM_KILL_COLORS[Number(team)]||__visualScope.BR_TEAM_KILL_COLORS[0];};
@@ -135,6 +136,10 @@ __visualScope.brPaintReworkEntities = function brPaintReworkEntities(p,entities,
                         p.polygon(points,col,.10);p.polygon(points,col,.85,stroke);
                         p.line(x,y,ex,ey,col,.30,stroke);
                     }else {p.circle(x,y,r,col,.08);p.dashedCircle(x,y,r,col,.90,stroke);p.arc(x,y,r*.92,-Math.PI/2,-Math.PI/2+Math.PI*2*progress,col,.70,stroke);}
+                } else if(kind==='guard'&&e.shape==='cone'){
+                    const angle=Math.atan2(dy,dx),half=e.halfAngle||Math.PI*2/3;
+                    p.arc(x,y,r,angle-half,angle+half,col,.85,stroke*1.5);
+                    p.line(x+dx*r*.5,y+dy*r*.5,x+dx*r*.78,y+dy*r*.78,'#fff',.95,stroke*3);
                 } else if(kind==='turret'){
                     const team=e.team>0?__visualScope.brTeamKillColor(e.team):col;
                     p.circle(x,y,r,'#172033',1);p.circle(x,y,r,team,1,stroke*1.4);
@@ -186,6 +191,7 @@ __visualScope.brPaintGround = function brPaintGround(p,x,y,radius,color,type,zoo
         };
 
 __visualScope.brPaintAttack = function brPaintAttack(p,r,alpha,zoom=1) {
+            if(overdriveEffect(p,r,alpha,zoom))return true;
             const type=r[1],geo=r[13]||{},x=Number(r[2]),y=Number(r[3]);
             const ax=Number(r[4])||0,ay=Number(r[5])||0,mag=Math.hypot(ax,ay),dx=mag>.0001?ax/mag:1,dy=mag>.0001?ay/mag:0,length=Math.max(0,Number(r[6])||0),color=r[7]||'#ffffff';
             const z=Math.max(.18,zoom),line=2/z,angle=Math.atan2(dy,dx),ex=x+dx*length,ey=y+dy*length;

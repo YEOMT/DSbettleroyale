@@ -312,3 +312,41 @@ Base a5e0568 includes PR #5/#6. Battle-scoped native/Safari gesture policy, diff
 - Result-table E2E targeted rerun: all3 public modes PASS (about60s), participant count2 and Results/Rematch retained. Vite teardown ECONNRESET remains logged; no application page errors in that run.
 
 - Head446cf13 required CI44059333557 reached all job PASS (final aggregator pending at observation). Focused Pixi20 five-round run44059333541: expiry display PASS41.866s; second/F-only round reached authoritative RESULTS with one survivor, no overload/pageerrors, but winner-screen wait TIMEOUT145.227s. Added bounded receipt/deadline/visible trace to distinguish late receipt from test observer scheduling; no duration/assertion change. Local20Pixi diagnostic launch first INFRA_FAILURE (sandbox Edge launch), then FAIL before measurement on SAFE_PAUSED; that environment cannot establish the CI winner cause. No retry-until-pass, protection or gameplay change.
+
+## v35.5 Overdrive & Combat Identity (2026-11-17)
+- Full package read; latest main a916726 includes merged PR25. Clean starting tree; codex/v35-5-overdrive-identity. Baseline86 profiles/caps/runtime recorded before edits. Main CI44064002326 has pre-existing WebKit crash and isolated warning-fixture failure; candidate44066196876 status job passed but candidate/staging SKIPPED (corrected after fetching job details). Production version only read; no changes.
+- Contract/allowlist and baseline: docs/v35-5/. Runtime implementation and all51 acceptance checks initially NOT_RUN; preserve failures and prior performance risks.
+
+- v35.5 runtime implemented:11ID allowlist, real one-contact Pan reflection/melee,8Apple shards/2target cap,4Crayon statuses,Goblin first-basic27f,Sweep335×300/42,GIANT/RAPID/WIDE tiers and650ms III,65/105/55 snipers,245/255/100+145 blasts.86roster/hash generated,60/20 and v35.4 preserved.
+- Local Quick381 PASS251.064s; final focused29 PASS0.503s; paired final build6.68s Vite PASS. Canvas low identity25.946s/Pixi low25.651s/high initial25.935s PASS, three real screens and confirmed input/events.165mechanics probes per version PASS2.470/2.572s. Failed fixture/runtime attempts retained in docs/v35-5/report.md.
+- Same20Pixi five-match A/B PASS103.733/104.600s, three modes, capture respawn/action, Results/Rematch and resource disposal;20Canvas earlier artificialMAX five-match PASS94.341s. Normal Pixi comparison respects5choice budget and observes20III effects once.
+-30Pixi high baseline FAIL52.901s at combat0.867s, candidate FAIL54.041s at0.400s: SAFE_PAUSED, then disabled action timeout. No retry-until-pass, protection/quality/FPS reduction.20host draw p95 increase6.4–8.3→9.4–11.5ms UNRESOLVED. SamePC contention,physical devices,1GB AWS and longRSS unverified.48acceptance PASS/3PARTIAL, overall Draft/PARTIAL/NOT_DEPLOYED. Final PR CI follows; no merge/deploy.
+
+- PR26 firstCI: Quick/roster10/recovery/continuous and354focused4jobs PASS; new30Pixi high PASS47.573s, Windows30FAIL retained. v355Canvas20 FAIL MATCH_CHANGED IPC fixture receipt race; Pixi20 round4 winner FAIL stale previous-match wall offset; Pixi identity FAIL render-dependent parry sound. Reproduced3unit failures including reflected Apple child sequence; minimal runtime lifetime/metadata/audio fixes,64relatedunit PASS1.378s, finalidentityPixihigh PASS28.259s. Pan raster expected240° approved shape corrected independently while exact equality remains. Base candidate missing→isolated INFRA_FAILURE, Canvas WebKit crash FAIL unresolved. Followup local20 FAIL52.277s at0.700sSAFE_PAUSED (no retry),5round newclock still pendingCI.46PASS/5PARTIAL/Draft; see docs/v35-5/report.md and evidence/ci-first.json. No merge/deploy.
+
+- runtime69a311b focused44080973118:20Canvas5match PASS84.019s,20Pixi5match PASS200.142s,30Pixihigh PASS47.386s;354focused44080972466 all4PASS. F02/F05 restoredPASS→48PASS/3PARTIAL, existing Windows20/30 failures retained. Identity Pixi FAIL43.253s on stale observation0shards but failure evidence shows8received on all3pages. Test-only controlled-clock snapshot receipt sync; first local FAIL28.063s on reloaded observer m, corrected to restored auditApp. No live timing/assertion/runtime change in this followup.
+
+- Final receipt-synchronized Pixi high identity9scenes PASS27.931s,errors0. Runtime unchanged from69a311b; only fixture and evidence updated. Final head CI tracked in PR26.
+
+- Final correction:02d9cdd v355live20Canvas/Pixi5 and30Pixi PASS, but original354Pixi winner TIMEOUT152.036s,overload0. New trace8.8s receipt/offset gap cannot distinguish delivery/main-thread lag vsclock. Removed speculative match offset reset, preserved original354 clock; focused64PASS1.365s,buildPASS7.02s,d9598796 source. F05PARTIAL→47PASS/4PARTIAL. Identity per3tick receipt waits stretched head windup/sound deadline; final-snapshot wait only, unchanged2200ms guard/assertions, localPixihigh9PASS28.198s. FinalCI tracked inPR26, no broad retry/merge/deploy.
+
+
+## PR26 failed CI focused repair — 2026-11-18 (in progress)
+
+- Exact base remains a9167266146646f2717b055aceb7b3fad833ae99; PR26 Draft HEAD89a721bf. No game/deploy changes.
+- Missing artifact: base CI44064002326 isolated warning fixture (Results UI) and Canvas WebKit crash failed; candidate44066196876 skipped build. Rerunning only those failed jobs with original exact SHA, existing STAGING_ENABLED=false and github-actions validation.
+- Added bounded synthetic transport/result observations (send/receive wall+monotonic times, close reason, epoch, queues, renderer reset and visibility). Local Pixi20 diagnostic did not reach winner: attack button timeout with SAFE_PAUSED; retained artifacts/v35-4/ci-diagnosis-pixi-balanced-solo-20-prepared-r5-ci-diagnosis/report.json. This is not a winner PASS.
+- User explicitly excludes emoji-023 special launch-sound exactly-once acceptance. BB/Slipper sound, Head windup/no early shot, actual shots/trails/damage remain. Historical failures remain in v35-5/report.md.
+- Paired build PASS; focused CI diagnosis pending. No timeout/quality/participant/protection changes.
+
+- 후속: 같은 base CI 격리 기능은 통과했으나 apt 다운로드 지연으로 job10분 TIMEOUT/CANCELLED. 해당 job만 재실행 후 base main/required-checks PASS → 기존 후보44282808145 생성 시작. status-only 성공이 ARTIFACT_READY로 오표시되는 workflow 수정 +실제 shell8검사 PASS.
+- Quick PASS292.958s(396/396 +8 ReleaseOps); runtime sourceHash 변경 없음. Pixi high exact-contact PASS45.131s: Head special sound EXCLUDED_BY_USER, 세 저격 실제 명중/SHOT/SHOT_END/모든 화면 잔상은 명시 assertion으로 유지·강화. 수동 fixture clock이 관측을 추월하지 않게 수신/draw 동기화; 실시간 부하시험은 변경 없음.
+- CI 진단9302121: v35.4 Pixi20×5 PASS152.902s, v35.5 Pixi30 high PASS74.699s; 과거 8.8초 결과지연/29연결 당시 종료 사유는 미확정. [집중 수정 및 실패 보존](v35-5/ci-repair.md). 최종 GitHub 검사는 PR26에 기록한다.
+
+-104b471 CI30 재발 FAIL55.286s: heartbeat terminate(호스트/학생)→1006, queue/buffer0,overload0. 직전 rAF400~450ms. 이전PASS로 덮지 않음. same30/세화면/화질/입력을 유지한 브라우저 프로세스 분리 비교를 추가. Windows 비교는 SAFE_PAUSED FAIL75.972s, 연결30 유지; Linux 비교 pending. cleanup 오류가 원래 assertion을 가리지 않게 별도 보존.
+
+- 정확한 a916726 후보44282808145/artifact14417843912 생성 및 선택 복구. PR CI44283797222 isolated-release134733561547 PASS(실제 격리 +warning fault-injection/Results/Rematch). 운영 배포 아님.
+
+- ab5456e Linux 분리도 FAIL49.462s(30 연결/live는 통과, END 뒤 host heartbeat1006). SwiftShader/수신tick지연 확인; 공유GPU 단독원인 가설 기각, 브라우저 분리 철회. 실제 배포 설정과 같이 built fixture의 WSS를 authority endpoint로 직접 연결하고 endpoint검증을 추가. 동일3화면/30부하/보호유지. 로컬identity PASS47.279s; 새Linux결과는 PR26에 기록.
+
+-6a6982a direct WS: Pixi30 PASS48.513s(30연결/재경기,close0,overload0),354 4/4PASS. Pixi20 FAIL184.002s는3경기 부활 퀴즈 고정350ms 관측 race; 정확한 보기/정답수 수신으로 수정,검사항목 유지. 공통CI44286998325 격리 resumeMove FAIL41.089s와 WebKit Target crashed(INFRA_FAILURE) 보존. 후보는 exact a916726 정상선택; 원인미확정 실패는 경고/PASS로 변경하지 않음. 런타임 변경없음.

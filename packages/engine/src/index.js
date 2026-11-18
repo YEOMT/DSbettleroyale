@@ -8,7 +8,7 @@ import {captureDeathSummary,getParticipation} from './world/participation.js';
 export {getParticipation,isPermanentlyEliminated} from './world/participation.js';
 export {contentHash};
 export const FIXED_DT_MS=1000/60;
-export const ENGINE_REVISION='v35.4-authority-3-participation-results';
+export const ENGINE_REVISION='v35.5-authority-1-overdrive';
 
 export function createRuleContext({mode='solo',teamCount=2,matchSeconds=360,mapIndex=-1,drawRule='normal',seed='1',matchId='local:1',eventSink=()=>{},quizBank=manifest.questions}={}){
  if(!validDrawRule(drawRule))throw Error('INVALID_DRAW_RULE');
@@ -84,11 +84,11 @@ export function applyCommand(world,command){
 }
 function nativeShot(world,p){p._brNetId??="q"+(++world.game.visualShotSeq);p._brBornFrame??=p.farmBornFrame??world.game.frame;return {id:world.matchId+':'+(p.launchLife??p.ownerLife)+':'+p.inputKind+':'+p.inputSeq+':'+p.shotOrdinal+':'+p._brNetId,
  owner:p.owner?.remoteId,life:p.ownerLife,actionKind:p.inputKind,actionSeq:p.inputSeq,ordinal:p.shotOrdinal,
- kind:'projectile',...(p.reflectedOnce?{returned:true}:{}),...(p.sniper?{crit:p.sniper.critical}:{}),type:p.type,x:p.pos.x,y:p.pos.y,dx:p.vel?.x||0,dy:p.vel?.y||0,radius:p.size||8,
+ kind:'projectile',...(p.giantScale>1?{giant:p.giantScale}:{}),...(p.reflectedOnce?{returned:true}:{}),...(p.sniper?{crit:p.sniper.critical}:{}),type:p.type,x:p.pos.x,y:p.pos.y,dx:p.vel?.x||0,dy:p.vel?.y||0,radius:p.size||8,
  vfx:p.vfx,ownerWarp:p.owner?.warpSeq||0,orbitAngle:p.orbitAngle,faceDir:!!p.faceDir,emoji:p.emoji,color:p.color,style:p.weaponStyle,trailColor:p.trailColor,rotation:p.spinRate?p.spinAngle:p.faceDir?Math.atan2(p.vel.y,p.vel.x):0,spin:p.spinRate,phase:p.returning?'return':'out',trace:p._brTrace||[],remaining:p.life,rangeRemaining:p.rangeRemaining,turn:p._brTurn||0,curved:!!p.returnTarget||['BOOMERANG','ORBIT','missile'].includes(p.type)||!!p.wobble,start:p._brBornFrame??world.game.frame,team:p.owner?.team||0,path:p._brPath||[],native:true};}
 function reworkShot(e){return {id:e.id,owner:e.ctx?.ownerId,life:e.ctx?.ownerLifeSeq,actionKind:e.actionKind||e.ctx?.actionKind,actionSeq:e.ctx?.actionSeq,ordinal:e.ordinal??0,
  kind:e.kind,...(e.reflectedOnce?{returned:true}:{}),...(e.ctx?.sniper?{crit:e.ctx.sniper.critical}:{}),...(['decoy','grapple','mushroom','poison','ring-wall'].includes(e.kind)?{hp:e.hp??null,maxHp:e.maxHp??null,name:e.name||'',armAt:e.armFrames!=null?e.start+e.armFrames:null,fx:e.from?.x??null,fy:e.from?.y??null,tx:e.to?.x??null,ty:e.to?.y??null}:{}),x:e.pos?.x||0,y:e.pos?.y||0,dx:e.dir?.x||0,dy:e.dir?.y||0,speed:e.speed||0,radius:e.radius||8,range:e.range||0,
- path:e._brPath||[],curved:!!(e.returnTarget||e.homing||e.boomerang),turn:e.bounceCount||0,phase:e.phase||null,width:e.width||0,length:e.length??e.range??0,remaining:e.range!=null?Math.max(0,e.range-(e.distance||0)):0,style:'skill',start:e.start,end:e.end,team:e.ctx?.owner?.team||0,emoji:e.displayEmoji||e.emoji,color:e.color};}
+ path:e._brPath||[],curved:!!(e.returnTarget||e.homing||e.boomerang),turn:e.bounceCount||0,phase:e.phase||null,width:e.width||0,length:e.length??e.range??0,remaining:e.range!=null?Math.max(0,e.range-(e.distance||0)):0,style:e.style||'skill',start:e.start,end:e.end,team:e.ctx?.owner?.team||0,emoji:e.displayEmoji??e.emoji,color:e.color};}
 function projectileStates(world){
  const g=world.game;
  const native=g.projectiles.filter(p=>p.life>0).map(p=>nativeShot(world,p));

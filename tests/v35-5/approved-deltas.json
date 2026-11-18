@@ -1,0 +1,625 @@
+[
+  {
+    "path": "emoji-023.skill.speed",
+    "before": 90,
+    "after": 105
+  },
+  {
+    "path": "emoji-023.definition.skill.speed",
+    "before": 90,
+    "after": 105
+  },
+  {
+    "path": "emoji-039.skill.duration",
+    "before": 48,
+    "after": 42
+  },
+  {
+    "path": "emoji-039.skill.radius",
+    "before": 205,
+    "after": 245
+  },
+  {
+    "path": "emoji-039.skill.innerRadius",
+    "before": 92,
+    "after": 105
+  },
+  {
+    "path": "emoji-039.skill.flightFrames",
+    "before": 48,
+    "after": 42
+  },
+  {
+    "path": "emoji-039.skill.durationFrames",
+    "before": 48,
+    "after": 42
+  },
+  {
+    "path": "emoji-039.definition.skill.duration",
+    "before": 48,
+    "after": 42
+  },
+  {
+    "path": "emoji-039.definition.skill.radius",
+    "before": 205,
+    "after": 245
+  },
+  {
+    "path": "emoji-039.definition.skill.innerRadius",
+    "before": 92,
+    "after": 105
+  },
+  {
+    "path": "emoji-039.definition.skill.flightFrames",
+    "before": 48,
+    "after": 42
+  },
+  {
+    "path": "emoji-039.definition.skill.durationFrames",
+    "before": 48,
+    "after": 42
+  },
+  {
+    "path": "emoji-072.skill.damage",
+    "before": 19.95,
+    "after": 22
+  },
+  {
+    "path": "emoji-072.skill.blastRadius",
+    "before": 220,
+    "after": 255
+  },
+  {
+    "path": "emoji-072.definition.skill.damage",
+    "before": 19.95,
+    "after": 22
+  },
+  {
+    "path": "emoji-072.definition.skill.blastRadius",
+    "before": 220,
+    "after": 255
+  },
+  {
+    "path": "emoji-137.skill.projectile",
+    "after": {
+      "count": 1,
+      "speed": 65,
+      "damage": 36.04,
+      "size": 9.36,
+      "type": "bullet",
+      "spread": 0,
+      "explode": 0,
+      "emoji": "•",
+      "range": 1070,
+      "pierce": true,
+      "bounces": 0,
+      "spin": 0,
+      "face": true,
+      "status": null,
+      "statusPower": 0,
+      "push": 14,
+      "style": "sniper"
+    }
+  },
+  {
+    "path": "emoji-074.skill.speed",
+    "before": 38,
+    "after": 55
+  },
+  {
+    "path": "emoji-074.definition.skill.speed",
+    "before": 38,
+    "after": 55
+  },
+  {
+    "path": "emoji-075.skill.kind",
+    "before": "split-bounce",
+    "after": "apple-fragments"
+  },
+  {
+    "path": "emoji-075.skill.bounces",
+    "before": 1,
+    "after": 0
+  },
+  {
+    "path": "emoji-075.skill.fragmentCount",
+    "before": 2,
+    "after": 8
+  },
+  {
+    "path": "emoji-075.skill.fragmentDamage",
+    "before": 13.65,
+    "after": 8
+  },
+  {
+    "path": "emoji-075.skill.fragmentRadius",
+    "before": 11.44,
+    "after": 10.5
+  },
+  {
+    "path": "emoji-075.skill.fragmentRange",
+    "before": 400,
+    "after": 250
+  },
+  {
+    "path": "emoji-075.skill.fragmentSpeed",
+    "before": 23,
+    "after": 24
+  },
+  {
+    "path": "emoji-075.skill.fragmentDuration",
+    "before": 30,
+    "after": 12
+  },
+  {
+    "path": "emoji-075.skill.strength",
+    "before": "벽 뒤 반사 각도에서 분열",
+    "after": "벽 없이도 첫 접촉에서 파편 생성"
+  },
+  {
+    "path": "emoji-075.skill.success",
+    "before": "벽을 이용해 두 조각 적중",
+    "after": "직접 명중과 최대 두 파편 접촉"
+  },
+  {
+    "path": "emoji-075.skill.failure",
+    "before": "분열 조건과 짧은 조각 사거리",
+    "after": "파편 짧은 사거리·벽 차단"
+  },
+  {
+    "path": "emoji-075.skill.counterplay",
+    "before": "벽에서 떨어져 싸우기",
+    "after": "분열 위치에서 거리 벌리기"
+  },
+  {
+    "path": "emoji-075.skill.fragmentTargetCap",
+    "after": 2
+  },
+  {
+    "path": "emoji-075.definition.skill.kind",
+    "before": "split-bounce",
+    "after": "apple-fragments"
+  },
+  {
+    "path": "emoji-075.definition.skill.bounces",
+    "before": 1,
+    "after": 0
+  },
+  {
+    "path": "emoji-075.definition.skill.fragmentCount",
+    "before": 2,
+    "after": 8
+  },
+  {
+    "path": "emoji-075.definition.skill.fragmentDamage",
+    "before": 13.65,
+    "after": 8
+  },
+  {
+    "path": "emoji-075.definition.skill.fragmentRadius",
+    "before": 11.44,
+    "after": 10.5
+  },
+  {
+    "path": "emoji-075.definition.skill.fragmentRange",
+    "before": 400,
+    "after": 250
+  },
+  {
+    "path": "emoji-075.definition.skill.fragmentSpeed",
+    "before": 23,
+    "after": 24
+  },
+  {
+    "path": "emoji-075.definition.skill.fragmentDuration",
+    "before": 30,
+    "after": 12
+  },
+  {
+    "path": "emoji-075.definition.skill.strength",
+    "before": "벽 뒤 반사 각도에서 분열",
+    "after": "벽 없이도 첫 접촉에서 파편 생성"
+  },
+  {
+    "path": "emoji-075.definition.skill.success",
+    "before": "벽을 이용해 두 조각 적중",
+    "after": "직접 명중과 최대 두 파편 접촉"
+  },
+  {
+    "path": "emoji-075.definition.skill.failure",
+    "before": "분열 조건과 짧은 조각 사거리",
+    "after": "파편 짧은 사거리·벽 차단"
+  },
+  {
+    "path": "emoji-075.definition.skill.counterplay",
+    "before": "벽에서 떨어져 싸우기",
+    "after": "분열 위치에서 거리 벌리기"
+  },
+  {
+    "path": "emoji-075.definition.skill.fragmentTargetCap",
+    "after": 2
+  },
+  {
+    "path": "emoji-092.ability.type",
+    "before": "PROJ",
+    "after": "MELEE"
+  },
+  {
+    "path": "emoji-092.ability.category",
+    "before": "원거리형",
+    "after": "근접형"
+  },
+  {
+    "path": "emoji-092.basic.close",
+    "before": false,
+    "after": true
+  },
+  {
+    "path": "emoji-092.basic.rangeBonus",
+    "before": 86,
+    "after": 100
+  },
+  {
+    "path": "emoji-092.basic.halfAngle",
+    "before": 1.5207754699891265,
+    "after": 1.1
+  },
+  {
+    "path": "emoji-092.basic.cooldownScale",
+    "before": 1.14,
+    "after": 1
+  },
+  {
+    "path": "emoji-092.basic.damageScale",
+    "before": 1.16,
+    "after": 1.1772000000000002
+  },
+  {
+    "path": "emoji-092.basic.pushScale",
+    "before": 1,
+    "after": 0.3
+  },
+  {
+    "path": "emoji-092.basic.style",
+    "before": "heavy",
+    "after": "slash"
+  },
+  {
+    "path": "emoji-092.basic.range",
+    "before": 642
+  },
+  {
+    "path": "emoji-092.basic.speed",
+    "before": 9.72
+  },
+  {
+    "path": "emoji-092.basic.count",
+    "before": 1
+  },
+  {
+    "path": "emoji-092.basic.knockback",
+    "before": 8.96
+  },
+  {
+    "path": "emoji-092.basic.explodeRadius",
+    "before": 0
+  },
+  {
+    "path": "emoji-092.basic.emoji",
+    "before": "🍳"
+  },
+  {
+    "path": "emoji-092.basic.type",
+    "before": "bullet"
+  },
+  {
+    "path": "emoji-092.basic.spread",
+    "before": 0
+  },
+  {
+    "path": "emoji-092.basic.pierce",
+    "before": false
+  },
+  {
+    "path": "emoji-092.basic.bounces",
+    "before": 0
+  },
+  {
+    "path": "emoji-092.basic.explode",
+    "before": 0
+  },
+  {
+    "path": "emoji-092.basic.status",
+    "before": null
+  },
+  {
+    "path": "emoji-092.basic.statusPower",
+    "before": 0
+  },
+  {
+    "path": "emoji-092.basic.spin",
+    "before": 0.3
+  },
+  {
+    "path": "emoji-092.basic.face",
+    "before": false
+  },
+  {
+    "path": "emoji-092.skill.kind",
+    "before": "counter-deferred",
+    "after": "pan-parry"
+  },
+  {
+    "path": "emoji-092.skill.shape",
+    "before": "circle",
+    "after": "cone"
+  },
+  {
+    "path": "emoji-092.skill.duration",
+    "before": 48,
+    "after": 72
+  },
+  {
+    "path": "emoji-092.skill.range",
+    "before": 0,
+    "after": 90
+  },
+  {
+    "path": "emoji-092.skill.strength",
+    "before": "짧은 타이밍의 되받아치기",
+    "after": "첫 정면 접촉의 실제 반사/즉시 반격"
+  },
+  {
+    "path": "emoji-092.skill.success",
+    "before": "직접 공격 순간 패리",
+    "after": "1.2초 안의 정면 유효 접촉"
+  },
+  {
+    "path": "emoji-092.skill.failure",
+    "before": "무피해·중단 시 반환 없음",
+    "after": "뒤쪽·장판·폭발·기절에는 패링 불가"
+  },
+  {
+    "path": "emoji-092.skill.counterplay",
+    "before": "패리 종료 뒤 공격",
+    "after": "뒷면이나 패링 종료 뒤 공격"
+  },
+  {
+    "path": "emoji-092.skill.durationFrames",
+    "before": 48,
+    "after": 72
+  },
+  {
+    "path": "emoji-092.skill.reflectRatio",
+    "before": 0.5,
+    "after": 0
+  },
+  {
+    "path": "emoji-092.skill.reflectRange",
+    "before": 1400,
+    "after": 0
+  },
+  {
+    "path": "emoji-092.skill.halfAngle",
+    "after": 2.0943951023931953
+  },
+  {
+    "path": "emoji-092.definition.role",
+    "before": "원거리형",
+    "after": "근접형"
+  },
+  {
+    "path": "emoji-092.definition.category",
+    "before": "원거리형",
+    "after": "근접형"
+  },
+  {
+    "path": "emoji-092.definition.basic.close",
+    "after": true
+  },
+  {
+    "path": "emoji-092.definition.basic.rangeBonus",
+    "after": 100
+  },
+  {
+    "path": "emoji-092.definition.basic.halfAngle",
+    "after": 1.1
+  },
+  {
+    "path": "emoji-092.definition.basic.cooldownScale",
+    "after": 1
+  },
+  {
+    "path": "emoji-092.definition.basic.damageScale",
+    "after": 1
+  },
+  {
+    "path": "emoji-092.definition.basic.pushScale",
+    "after": 0.25
+  },
+  {
+    "path": "emoji-092.definition.basic.reward",
+    "after": ""
+  },
+  {
+    "path": "emoji-092.definition.basic.style",
+    "after": "slash"
+  },
+  {
+    "path": "emoji-092.definition.skill.kind",
+    "before": "counter-deferred",
+    "after": "pan-parry"
+  },
+  {
+    "path": "emoji-092.definition.skill.shape",
+    "before": "circle",
+    "after": "cone"
+  },
+  {
+    "path": "emoji-092.definition.skill.duration",
+    "before": 48,
+    "after": 72
+  },
+  {
+    "path": "emoji-092.definition.skill.range",
+    "before": 0,
+    "after": 90
+  },
+  {
+    "path": "emoji-092.definition.skill.reflectRatio",
+    "before": 0.5,
+    "after": 0
+  },
+  {
+    "path": "emoji-092.definition.skill.reflectRange",
+    "before": 1400,
+    "after": 0
+  },
+  {
+    "path": "emoji-092.definition.skill.strength",
+    "before": "짧은 타이밍의 되받아치기",
+    "after": "첫 정면 접촉의 실제 반사/즉시 반격"
+  },
+  {
+    "path": "emoji-092.definition.skill.success",
+    "before": "직접 공격 순간 패리",
+    "after": "1.2초 안의 정면 유효 접촉"
+  },
+  {
+    "path": "emoji-092.definition.skill.failure",
+    "before": "무피해·중단 시 반환 없음",
+    "after": "뒤쪽·장판·폭발·기절에는 패링 불가"
+  },
+  {
+    "path": "emoji-092.definition.skill.counterplay",
+    "before": "패리 종료 뒤 공격",
+    "after": "뒷면이나 패링 종료 뒤 공격"
+  },
+  {
+    "path": "emoji-092.definition.skill.durationFrames",
+    "before": 48,
+    "after": 72
+  },
+  {
+    "path": "emoji-092.definition.skill.halfAngle",
+    "after": 2.0943951023931953
+  },
+  {
+    "path": "emoji-092.definition.stats.finalBaseHp",
+    "after": 253.57499999999996
+  },
+  {
+    "path": "emoji-092.definition.stats.speed",
+    "after": 1.5
+  },
+  {
+    "path": "emoji-092.definition.stats.radius",
+    "after": 39.9
+  },
+  {
+    "path": "emoji-092.definition.stats.rangedMovement",
+    "after": true
+  },
+  {
+    "path": "emoji-092.definition.statType",
+    "after": "PROJ"
+  },
+  {
+    "path": "emoji-094.skill.projectile",
+    "after": {
+      "count": 4,
+      "speed": 16.8,
+      "damage": 3.15,
+      "size": 10,
+      "type": "bullet",
+      "spread": 0.2,
+      "explode": 0,
+      "emoji": "🖍️",
+      "range": 830,
+      "pierce": false,
+      "bounces": 0,
+      "spin": 0.45,
+      "face": false,
+      "status": null,
+      "statusPower": 0,
+      "push": 3,
+      "style": "machine",
+      "colors": [
+        "#ef4444",
+        "#38bdf8",
+        "#fde047",
+        "#4ade80"
+      ],
+      "colorDamage": [
+        1.6,
+        0.85,
+        0.8,
+        0.8
+      ],
+      "slowMultiplier": 0.75,
+      "slowFrames": 90,
+      "stunFrames": 21,
+      "dotDamage": 4,
+      "dotFrames": 120,
+      "dotInterval": 30
+    }
+  },
+  {
+    "path": "emoji-121.skill.knockback",
+    "before": 27,
+    "after": 42
+  },
+  {
+    "path": "emoji-121.skill.range",
+    "before": 235,
+    "after": 335
+  },
+  {
+    "path": "emoji-121.skill.width",
+    "before": 210,
+    "after": 300
+  },
+  {
+    "path": "emoji-121.definition.skill.knockback",
+    "before": 27,
+    "after": 42
+  },
+  {
+    "path": "emoji-121.definition.skill.range",
+    "before": 235,
+    "after": 335
+  },
+  {
+    "path": "emoji-121.definition.skill.width",
+    "before": 210,
+    "after": 300
+  },
+  {
+    "path": "emoji-122.skill.blastRadius",
+    "before": 78,
+    "after": 100
+  },
+  {
+    "path": "emoji-122.skill.thornRadius",
+    "before": 122,
+    "after": 145
+  },
+  {
+    "path": "emoji-122.definition.skill.blastRadius",
+    "before": 78,
+    "after": 100
+  },
+  {
+    "path": "emoji-122.definition.skill.thornRadius",
+    "before": 122,
+    "after": 145
+  },
+  {
+    "path": "emoji-148.skill.firstBasicStun",
+    "after": 27
+  },
+  {
+    "path": "emoji-148.definition.skill.firstBasicStun",
+    "after": 27
+  }
+]

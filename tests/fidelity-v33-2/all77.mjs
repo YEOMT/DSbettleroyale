@@ -21,10 +21,24 @@ for(const renderer of renderers)for(const quality of qualities){
   const data=await h.pages[0].evaluate(()=>({frames:fidelity.matrix,events:fidelity.castEvents}));assert.ok(data.frames.length>=12);assert.ok(data.frames.every(f=>f.pixi===(renderer==='pixi')));assert.ok(data.frames.every(f=>f.view.actors.every(a=>Number.isFinite(a.x)&&Number.isFinite(a.y))));
   // Compare the exact RW/status painter raster on sampled authoritative data, separately from full scene appearance.
   const sample=data.frames.findLast(f=>f.view.shots.length||f.view.effects.length)||data.frames[0];const source=sample.view;
-  const reference=await ref.page.evaluate(({v,quality})=>{const b=__baseline;b.BRMP.roomMeta={graphicsPreset:quality};const c=document.createElement('canvas');c.width=1000;c.height=700;const ctx=c.getContext('2d');ctx.translate(300,350);const p=brCombatPainter(ctx,false);brPaintReworkEntities(p,v.shots.filter(s=>!s.native),v.renderTick,1,(emoji,x,y,d)=>ctx.drawImage(b.brGetEmojiSprite(emoji),x-d/2,y-d/2,d,d));for(const a of v.actors)brPaintReworkStatus(p,a.x,a.y,a.radius,1,a.rw,a.statusTick??v.renderTick,a.maxHp);return c.toDataURL();},{v:source,quality});
+  // v35.5 explicitly replaces Pan's circular guard with a 240-degree parry.
+  // Keep strict raster equality, with an independent approved reference for
+  // that one shape. Every other entity/status still uses the offline original.
+  if(ability.id==='emoji-092')for(const f of data.frames)for(const e of f.view.shots.filter(e=>e.kind==='guard')){assert.equal(e.shape,'cone');assert.equal(e.halfAngle,2*Math.PI/3);}
+  const reference=await ref.page.evaluate(({v,quality,id})=>{
+   const b=__baseline;b.BRMP.roomMeta={graphicsPreset:quality};const c=document.createElement('canvas');c.width=1000;c.height=700;const ctx=c.getContext('2d');ctx.translate(300,350);const p=brCombatPainter(ctx,false),glyph=(emoji,x,y,d)=>ctx.drawImage(b.brGetEmojiSprite(emoji),x-d/2,y-d/2,d,d);
+   for(const e of v.shots.filter(s=>!s.native)){
+    if(id==='emoji-092'&&e.kind==='guard'){
+     if(v.renderTick>=e.end)continue;const r=Math.max(1,e.radius||12),a=Math.atan2(e.dy||0,e.dx||0),half=2*Math.PI/3;
+     p.arc(e.x,e.y,r,a-half,a+half,e.color||'#a5b4fc',.85,2.25);
+     p.line(e.x+e.dx*r*.5,e.y+e.dy*r*.5,e.x+e.dx*r*.78,e.y+e.dy*r*.78,'#fff',.95,4.5);
+    }else brPaintReworkEntities(p,[e],v.renderTick,1,glyph);
+   }
+   for(const a of v.actors)brPaintReworkStatus(p,a.x,a.y,a.radius,1,a.rw,a.statusTick??v.renderTick,a.maxHp);return c.toDataURL();
+  },{v:source,quality,id:ability.id});
   const current=await h.pages[0].evaluate(v=>{const r=fidelity.app.renderer,c=document.createElement('canvas');c.width=1000;c.height=700;const ctx=c.getContext('2d');ctx.translate(300,350);const p=r.paint.brCombatPainter(ctx,false);r.paint.brPaintReworkEntities(p,v.shots.filter(s=>!s.native),v.renderTick,1,(emoji,x,y,d)=>ctx.drawImage(r.paint.brGetEmojiSprite(emoji),x-d/2,y-d/2,d,d));for(const a of v.actors)r.paint.brPaintReworkStatus(p,a.x,a.y,a.radius,1,a.rw,a.statusTick??v.renderTick,a.maxHp);return c.toDataURL();},source);assert.equal(current,reference,ability.id+' original RW/status raster');
   if(quality==='balanced'&&['emoji-000','emoji-001','emoji-023','emoji-039','emoji-132','emoji-140'].includes(ability.id))await h.pages[0].screenshot({path:`artifacts/fidelity-v33-2/matrix-${renderer}-${ability.id}.png`});
-  report.push({renderer,quality,id:ability.id,frames:data.frames.length,actions:['attack','skill'],effectKinds:[...new Set(data.frames.flatMap(f=>f.view.effects.map(e=>e.kind)))],shotKinds:[...new Set(data.frames.flatMap(f=>f.view.shots.map(e=>e.kind)))],serverEvents:data.events.length,rwStatusRaster:'PASS',finitePositions:true,status:'PASS'});
+  report.push({renderer,quality,id:ability.id,frames:data.frames.length,actions:['attack','skill'],effectKinds:[...new Set(data.frames.flatMap(f=>f.view.effects.map(e=>e.kind)))],shotKinds:[...new Set(data.frames.flatMap(f=>f.view.shots.map(e=>e.kind)))],serverEvents:data.events.length,rwStatusRaster:'PASS',...(ability.id==='emoji-092'?{approvedRasterDelta:'v35.5 Pan 240-degree guard; all other entities/status use original'}:{}),finitePositions:true,status:'PASS'});
  }
  assert.deepEqual(h.errors,[]);console.log('all77',renderer,quality,'PASS');
  }finally{fs.writeFileSync('artifacts/fidelity-v33-2/all77.json',JSON.stringify({ms:Date.now()-started,scope:roster.length+' characters x '+qualities.length+' qualities x '+renderers.length+' backend(s). Actual WS actions and renderer frames; accelerated 180 physics ticks per character, not real-time combat or pixel equality of full scenes.',renderers,qualities,characters:roster.map(a=>a.id),expectedCases:roster.length*renderers.length*qualities.length,cases:report},null,2));await h.close();await ref.browser.close();}}

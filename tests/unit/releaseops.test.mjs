@@ -3,6 +3,17 @@ import {classify} from '../../tools/ci/plan.mjs';import {trustedRun} from '../..
 import {parse} from 'acorn';
 import {selectCharacters} from '../../tools/ci/characters.mjs';
 import {verifyPages} from '../../tools/deploy/verify-pages.mjs';
+import {spawnSync} from 'node:child_process';
+test('candidate status cannot advertise an artifact after skipped or failed exact-main CI',t=>{
+ const bash=process.platform==='win32'?path.join(process.env.ProgramFiles||'C:/Program Files','Git/bin/bash.exe'):'bash';
+ if(process.platform==='win32'&&!fs.existsSync(bash)){t.skip('Git Bash unavailable; shell status exercised on Linux CI');return;}
+ const script=YAML.parse(fs.readFileSync('.github/workflows/release.yml','utf8')).jobs.status.steps[0].run;
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dsbr-candidate-status-')),summary=path.join(dir,'summary');
+ try{for(const [result,ready,status,text]of [['skipped','','1','ARTIFACT_NOT_CREATED'],['failure','','1','ARTIFACT_NOT_CREATED'],['success','false','0','NO_EXECUTABLE_CHANGE'],['success','true','0','ARTIFACT_READY']]){
+  fs.writeFileSync(summary,'');const r=spawnSync(bash,['-c',script],{encoding:'utf8',windowsHide:true,env:{...process.env,CANDIDATE_RESULT:result,CANDIDATE_READY:ready,VALIDATION_MODE:'github-actions',GITHUB_STEP_SUMMARY:summary.replaceAll('\\','/')}});
+  assert.equal(r.status,Number(status),r.stderr);const output=fs.readFileSync(summary,'utf8');assert.ok(output.startsWith(text),output);if(result!=='success')assert.ok(!output.includes('ARTIFACT_READY'));
+ }}finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
 test('initial legacy restore verifies archived HTML/CDN and blocks a wrong published page',async()=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'dsbr-pages-')),html='<script src="https://cdn.example/pinned.js"></script>',prior=globalThis.fetch;
  try{fs.writeFileSync(dir+'/index.html',html);globalThis.fetch=async url=>new Response(String(url).startsWith('https://cdn.example')?'external library':html);await verifyPages('https://pages.example/repo/',dir);globalThis.fetch=async()=>new Response('wrong release');await assert.rejects(verifyPages('https://pages.example/repo/',dir),/PAGES_INDEX_MISMATCH/);}finally{globalThis.fetch=prior;fs.rmSync(dir,{recursive:true});}

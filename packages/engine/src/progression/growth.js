@@ -6,9 +6,9 @@ __brScope.brWangguiValues = function brWangguiValues(a,tier){return __brScope.BR
 __brScope.brWangguiAllowed = function brWangguiAllowed(a,paths){return !!__brScope.BR_WANGGUI[a?.t]&&!['titan','heavy','amplify'].some(id=>Number(paths?.[id])>0);};
 
 __brScope.brRunTierText = function brRunTierText(id,d){const labels={basicSpeed:'공격속도',basicDamage:'일반 피해',basicCount:'일반 탄환',basicSize:'일반 탄환 크기',basicVelocity:'탄속',basicKnockback:'일반 넉백',basicRange:'근접 범위',skillCooldown:'스킬 쿨타임',skillDamage:'스킬 피해',skillSize:'스킬 범위·크기',skillCount:'스킬 탄환',skillControl:'제어 효과',skillRestore:'회복·보호량',moveSpeed:'이동속도',maxHp:'최대 HP',signatureRange:'고유 이동 거리',signatureDuration:'고유 지속 시간'};
-            const out=[];for(const [k,v] of Object.entries(d)){if(k==='regenDelay')continue;if(k==='regenRate'){out.push(__brScope.brStatNumber(d.regenDelay/60)+'초 무피격 후 초당 HP '+__brScope.brStatNumber(v*100)+'%');continue;}if(k.endsWith('Count')){out.push(labels[k]+' +'+v);continue;}const pct=(v-1)*100;out.push(labels[k]+' '+(k==='skillCooldown'&&v<1?__brScope.brStatNumber((1-v)*100)+'% 감소':pct>0?'+'+__brScope.brStatNumber(pct)+'%':pct<0?__brScope.brStatNumber(-pct)+'% 감소':'기본 유지')+(v!==1?' (×'+__brScope.brStatNumber(v)+')':''));}return out.join(' · ');};
+            const out=[];for(const [k,v] of Object.entries(d)){if(k==='basicArcDegrees'){out.push('부채꼴 반각 +'+v+'° (최대110°)');continue;}if(k==='regenDelay')continue;if(k==='regenRate'){out.push(__brScope.brStatNumber(d.regenDelay/60)+'초 무피격 후 초당 HP '+__brScope.brStatNumber(v*100)+'%');continue;}if(k.endsWith('Count')){out.push(labels[k]+' +'+v);continue;}const pct=(v-1)*100;out.push(labels[k]+' '+(k==='skillCooldown'&&v<1?__brScope.brStatNumber((1-v)*100)+'% 감소':pct>0?'+'+__brScope.brStatNumber(pct)+'%':pct<0?__brScope.brStatNumber(-pct)+'% 감소':'기본 유지')+(v!==1?' (×'+__brScope.brStatNumber(v)+')':''));}return out.join(' · ');};
 
-__brScope.brRunDefaultMods = function brRunDefaultMods(){return {wangguiHp:1,wangguiPower:1,basicSpeed:1,basicDamage:1,basicCount:0,basicSize:1,basicVelocity:1,basicKnockback:1,basicRange:1,skillCooldown:1,skillDamage:1,skillCount:0,skillSize:1,skillControl:1,skillRestore:1,skillDuration:1,moveSpeed:1,maxHp:1,regenRate:0,regenDelay:300,signatureRange:1,signatureDuration:1};};
+__brScope.brRunDefaultMods = function brRunDefaultMods(){return {wangguiHp:1,wangguiPower:1,basicSpeed:1,basicDamage:1,basicCount:0,basicSize:1,basicVelocity:1,basicKnockback:1,basicRange:1,basicArcDegrees:0,skillCooldown:1,skillDamage:1,skillCount:0,skillSize:1,skillControl:1,skillRestore:1,skillDuration:1,moveSpeed:1,maxHp:1,regenRate:0,regenDelay:300,signatureRange:1,signatureDuration:1};};
 
 __brScope.brRunMatchKey = function brRunMatchKey(){return __brScope.matchId;};
 
@@ -29,11 +29,11 @@ __brScope.brRunModsForPaths = function brRunModsForPaths(paths,capabilities,abil
             var m=__brScope.brRunDefaultMods();
             Object.keys(paths||{}).forEach(function(id){var tier=Number(paths[id]||0),path=__brScope.BR_RUN_PATHS[id],d=path&&__brScope.brRunTier(id,tier,ability);if(!d)return;Object.keys(d).forEach(function(k){
                 if(k==='regenDelay'){m[k]=d[k];return;}
-                if(k==='regenRate'||k==='basicCount'||k==='skillCount'){m[k]+=d[k];return;}
+                if(k==='basicArcDegrees'||k==='regenRate'||k==='basicCount'||k==='skillCount'){m[k]+=d[k];return;}
                 if(id==='quick'&&k==='skillDamage'&&!capabilities.skill?.damage){if(capabilities.skill?.duration)m.skillDuration+=d[k]-1;else if(capabilities.skill?.heal||capabilities.skill?.shield)m.skillRestore+=d[k]-1;return;}
                 m[k]+=d[k]-1;
             });});
-            var caps={"basicSpeed":[0.5,2.5],"basicDamage":[0.25,2.75],"basicSize":[1,2.1],"basicVelocity":[0.75,1.25],"basicKnockback":[1,3.10],"basicRange":[1,2.20],"skillCooldown":[0.428,1.6],"skillDamage":[0.25,2.75],"skillSize":[1,2.045],"skillControl":[1,1.715],"skillRestore":[0.75,1.935],"skillDuration":[0.75,1],"moveSpeed":[0.75,1.65],"maxHp":[0.7,2.25],"signatureRange":[1,1.462],"signatureDuration":[1,1.55]};
+            var caps={"basicSpeed":[0.5,3],"basicDamage":[0.25,2.75],"basicSize":[1,3.4],"basicVelocity":[0.75,1.25],"basicKnockback":[1,3.10],"basicRange":[1,3],"basicArcDegrees":[0,20],"skillCooldown":[0.428,1.6],"skillDamage":[0.25,2.75],"skillSize":[1,2.045],"skillControl":[1,1.715],"skillRestore":[0.75,1.935],"skillDuration":[0.75,1],"moveSpeed":[0.75,1.65],"maxHp":[0.7,2.25],"signatureRange":[1,1.462],"signatureDuration":[1,1.55]};
             Object.keys(caps).forEach(function(k){m[k]=__brScope.brClamp(m[k],caps[k][0],caps[k][1]);});m.basicCount=__brScope.brClamp(m.basicCount,0,3);m.skillCount=__brScope.brClamp(m.skillCount,0,3);
             if(__brScope.brWangguiAllowed(ability,paths)){const v=__brScope.brWangguiValues(ability,paths?.wanggui);m.wangguiHp=v[0];m.wangguiPower=v[1];}
             return m;
@@ -66,6 +66,7 @@ __brScope.brRunEffectiveNext = function brRunEffectiveNext(p,id){const run=p.run
 
 __brScope.brRunCard = function brRunCard(p,id,tier){
             var d=__brScope.BR_RUN_PATHS[id],effect=d.meleeTiers?__brScope.brRunTierText(id,__brScope.brRunTier(id,tier,p.ability)):d.text[tier-1],capNote='';
+            if(id==='rapid')capNote='공격 간격 최소6틱 · 피해 보정은 기존 유지 · ';
             if(id==='control'||id==='multicast'){const oldMods=__brScope.brRunModsForPaths(p.run.paths,p.run.capabilities,p.ability),newMods=__brScope.brRunModsForPaths({...p.run.paths,[id]:tier},p.run.capabilities,p.ability),oldActual=__brScope.brRunEffectiveValues(p,oldMods),newActual=__brScope.brRunEffectiveValues(p,newMods);
             if(id==='control'&&newActual.stunFrames>0&&newActual.stunFrames===oldActual.stunFrames)capNote='기절시간 상한 유지 · ';
             if(id==='multicast'&&newActual.skillCount===oldActual.skillCount)capNote='탄수 상한 유지 · ';}
@@ -110,6 +111,7 @@ __brScope.brChooseRun = function brChooseRun(p,offerId,id){
             var run=p&&p.run;if(!p||!p.alive||!run||run.matchKey!==__brScope.brRunMatchKey()||run.pending<=0||run.choices>=__brScope.BR_RUN_MAX_CHOICES||run.choices>=run.level-1||!run.offer||run.offer.id!==offerId)return false;
             var card=run.offer.cards.find(function(c){return c.id===id;});if(!card||card.tier!==Number(run.paths[id]||0)+1||!__brScope.brRunEffectiveNext(p,id)||Number(run.lifeSeq)!==Number(p.lifeSeq||0))return false;
             run.paths[id]=card.tier;
+            if(card.tier===3&&['giant','rapid','wide'].includes(id))__brScope.game?.emitStudentFx('impact',p.pos,{dx:p.lastAimDir?.x||1,dy:p.lastAimDir?.y||0,style:'overdrive-'+id,size:id==='giant'?70:id==='wide'?110:48,color:id==='giant'?'#93c5fd':id==='wide'?'#fef3c7':'#fde047',sourceId:p.remoteId,geometry:{confirmed:true,effectId:offerId+':'+id,kind:'augment',lifeSeq:p.lifeSeq,path:id,tier:3,displayMs:650}});
             if(id==='wanggui'&&card.tier===3&&p.ability.t==='F'&&p.remoteId&&__brScope.game){
                 const announced=__brScope.game.awakenedPlayers??=new Set();
                 if(!announced.has(p.remoteId)){announced.add(p.remoteId);recordClassroomEvent(__brScope.game,'awakening',{playerId:p.remoteId});}
@@ -198,12 +200,12 @@ export const initializers=[
 [1138,__brScope=>{ __brScope.BR_WANGGUI=Object.freeze({"A":[[1.165,1.165],[1.33,1.33],[1.495,1.495]],"B":[[1.275,1.275],[1.55,1.55],[1.77,1.77]],"C":[[1.385,1.44],[1.77,1.88],[2.1,2.32]],"F":[[2.2,2.6],[3.35,4.4],[4.8,7.2]]});;}],
 [1141,__brScope=>{ __brScope.BR_RUN_PATHS={
             wanggui:{name:'왕귀',icon:'👑',family:'BODY',tiers:[{},{},{}],text:['왕귀 I','왕귀 II','왕귀 III']},
-            rapid:{"name":"RAPID","icon":"⚡","family":"BASIC","tiers":[{"basicSpeed":1.44,"basicDamage":0.9},{"basicSpeed":1.825,"basicDamage":0.95},{"basicSpeed":2.43,"basicDamage":1.055}],"meleeTiers":[{"basicSpeed":1.55,"basicDamage":0.9},{"basicSpeed":2,"basicDamage":0.95},{"basicSpeed":2.5,"basicDamage":1.055}]},
+            rapid:{"name":"RAPID","icon":"⚡","family":"BASIC","tiers":[{"basicSpeed":1.60,"basicDamage":0.9},{"basicSpeed":2.15,"basicDamage":0.95},{"basicSpeed":2.75,"basicDamage":1.055}],"meleeTiers":[{"basicSpeed":1.70,"basicDamage":0.9},{"basicSpeed":2.30,"basicDamage":0.95},{"basicSpeed":3,"basicDamage":1.055}]},
             heavy:{"name":"HEAVY","icon":"💥","family":"BASIC","tiers":[{"basicDamage":1.44,"basicSpeed":0.9},{"basicDamage":1.825,"basicSpeed":0.95},{"basicDamage":2.32,"basicSpeed":1}],"meleeTiers":[{"basicDamage":1.6,"basicSpeed":0.9},{"basicDamage":2.05,"basicSpeed":0.95},{"basicDamage":2.65,"basicSpeed":1}]},
             multi:{"name":"MULTI","icon":"🔱","family":"BASIC","tiers":[{"basicCount":1,"basicDamage":0.95},{"basicCount":2,"basicDamage":0.95},{"basicCount":3,"basicDamage":0.95}]},
-            giant:{"name":"GIANT","icon":"🔵","family":"BASIC","tiers":[{"basicSize":1.385,"basicVelocity":0.95},{"basicSize":1.715,"basicVelocity":1},{"basicSize":2.1,"basicVelocity":1.055}]},
+            giant:{"name":"GIANT","icon":"🔵","family":"BASIC","tiers":[{"basicSize":1.80,"basicVelocity":0.95},{"basicSize":2.60,"basicVelocity":1},{"basicSize":3.40,"basicVelocity":1.055}]},
             impact:{"name":"IMPACT","icon":"🥊","family":"BASIC","tiers":[{"basicKnockback":1.44,"basicDamage":0.95},{"basicKnockback":1.88,"basicDamage":1},{"basicKnockback":2.43,"basicDamage":1.055}],"meleeTiers":[{"basicKnockback":1.75,"basicDamage":0.95},{"basicKnockback":2.4,"basicDamage":1},{"basicKnockback":3.1,"basicDamage":1.055}]},
-            wide:{"name":"WIDE STRIKE","icon":"⚔️","family":"BASIC","tiers":[{"basicRange":1.35,"basicSpeed":0.95},{"basicRange":1.75,"basicSpeed":1},{"basicRange":2.20,"basicSpeed":1.055}]},
+            wide:{"name":"WIDE STRIKE","icon":"⚔️","family":"BASIC","tiers":[{"basicRange":1.60,"basicArcDegrees":6,"basicSpeed":0.95},{"basicRange":2.25,"basicArcDegrees":12,"basicSpeed":1},{"basicRange":3,"basicArcDegrees":20,"basicSpeed":1.055}]},
             quick:{"name":"QUICK CAST","icon":"⏱️","family":"SKILL","tiers":[{"skillCooldown":0.725,"skillDamage":0.92},{"skillCooldown":0.582,"skillDamage":0.97},{"skillCooldown":0.428,"skillDamage":1}]},
             amplify:{"name":"AMPLIFY","icon":"🔥","family":"SKILL","tiers":[{"skillDamage":1.44,"skillCooldown":1.1},{"skillDamage":1.825,"skillCooldown":1.05},{"skillDamage":2.32,"skillCooldown":1}]},
             expansion:{"name":"EXPANSION","icon":"🌀","family":"SKILL","tiers":[{"skillSize":1.33,"skillDamage":0.95},{"skillSize":1.66,"skillDamage":1},{"skillSize":2.045,"skillDamage":1.055}]},

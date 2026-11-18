@@ -1,0 +1,102 @@
+{
+  "status": "PASS",
+  "renderer": "canvas",
+  "quality": "low",
+  "rows": [
+    {
+      "name": "parry original projectile / attacker-defender-host",
+      "status": "PASS",
+      "pages": [
+        {
+          "returns": 1,
+          "frames": 26
+        },
+        {
+          "returns": 1,
+          "frames": 26
+        },
+        {
+          "returns": 1,
+          "frames": 21
+        }
+      ]
+    },
+    {
+      "name": "eight authoritative apple fragments / three screens",
+      "status": "PASS"
+    },
+    {
+      "name": "four colors / Canvas-Pixi shared shapes / three screens",
+      "status": "PASS"
+    },
+    {
+      "name": "emoji-137 confirmed shot/sound/terminal",
+      "status": "PASS",
+      "pages": [
+        {
+          "shots": 1,
+          "terminalDraws": 10
+        },
+        {
+          "shots": 1,
+          "terminalDraws": 10
+        },
+        {
+          "shots": 1,
+          "terminalDraws": 10
+        }
+      ]
+    },
+    {
+      "name": "emoji-023 confirmed shot/sound/terminal",
+      "status": "PASS",
+      "pages": [
+        {
+          "shots": 1,
+          "terminalDraws": 11
+        },
+        {
+          "shots": 1,
+          "terminalDraws": 12
+        },
+        {
+          "shots": 1,
+          "terminalDraws": 12
+        }
+      ]
+    },
+    {
+      "name": "emoji-074 confirmed shot/sound/terminal",
+      "status": "PASS",
+      "pages": [
+        {
+          "shots": 1,
+          "terminalDraws": 11
+        },
+        {
+          "shots": 1,
+          "terminalDraws": 10
+        },
+        {
+          "shots": 1,
+          "terminalDraws": 10
+        }
+      ]
+    },
+    {
+      "name": "rapid III confirmed once / three screens",
+      "status": "PASS"
+    },
+    {
+      "name": "wide III confirmed once / three screens",
+      "status": "PASS"
+    },
+    {
+      "name": "GIANT III actual body/outline and one choice effect; resume no replay",
+      "status": "PASS"
+    }
+  ],
+  "scope": "real WS; fixture-driven exact authority contacts, not continuous-play evidence",
+  "ms": 25945.7091,
+  "errors": []
+}

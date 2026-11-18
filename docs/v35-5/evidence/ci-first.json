@@ -1,0 +1,2144 @@
+{
+  "head": "a8e69acb56e156c38ab53fb83f09a79c5773dc16",
+  "run": 44078183240,
+  "rows": [
+    {
+      "file": "overdrive355-identity-canvas-971407eaa190ec40ddf3bb9bf9e1a7115e1d6e34\\identity-canvas-low\\report.json",
+      "status": "PASS",
+      "ms": 16164.495564,
+      "error": null,
+      "roundsCompleted": 0,
+      "scenes": [
+        "parry original projectile / attacker-defender-host",
+        "eight authoritative apple fragments / three screens",
+        "four colors / Canvas-Pixi shared shapes / three screens",
+        "emoji-137 confirmed shot/sound/terminal",
+        "emoji-023 confirmed shot/sound/terminal",
+        "emoji-074 confirmed shot/sound/terminal",
+        "rapid III confirmed once / three screens",
+        "wide III confirmed once / three screens",
+        "GIANT III actual body/outline and one choice effect; resume no replay"
+      ],
+      "stages": []
+    },
+    {
+      "file": "overdrive355-identity-pixi-971407eaa190ec40ddf3bb9bf9e1a7115e1d6e34\\identity-pixi-high\\report.json",
+      "status": "FAIL",
+      "ms": 16757.729761,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at file:///__w/DSbettleroyale/DSbettleroyale/tests/combat/overdrive355-identity.mjs:33:34",
+      "roundsCompleted": 0,
+      "scenes": [],
+      "stages": []
+    },
+    {
+      "file": "overdrive355-live-canvas-20-971407eaa190ec40ddf3bb9bf9e1a7115e1d6e34\\live-candidate-canvas-low-solo-20-prepared-r5\\report.json",
+      "status": "FAIL",
+      "ms": 55402.754677000004,
+      "error": "page.evaluate: Error: MATCH_CHANGED\n    at Bc.receive (http://127.0.0.1:33263/assets/index-BQMQFdR_.js:2:243755)\n    at e.onmessage (http://127.0.0.1:33263/assets/index-BQMQFdR_.js:2:240933)\n    at Object.command (/__w/DSbettleroyale/DSbettleroyale/tests/fidelity-v33-2/harness.mjs:29:65)\n    at /__w/DSbettleroyale/DSbettleroyale/tests/combat/overdrive355-live.mjs:16:246",
+      "roundsCompleted": 3,
+      "scenes": [],
+      "winnerTrace": {
+        "match": "upgrade-fixed-3",
+        "serverTime": 1794916555084,
+        "offset": 1794916502850.4,
+        "at": 52238.399999999994,
+        "presentation": null,
+        "remaining": 0,
+        "visible": false
+      },
+      "stages": [
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 20,
+          "resources": {
+            "shots": 6,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 180346880,
+            "heap": 47122560
+          },
+          "step": {
+            "count": 150,
+            "mean": 0.7213905866666755,
+            "p95": 1.1858630000006087,
+            "p99": 2.304716999999073,
+            "max": 4.77772300000106,
+            "p50": 0.6067569999995612,
+            "sampleCount": 150,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 50,
+            "mean": 1.688116119999977,
+            "p95": 2.1655119999995804,
+            "p99": 3.7436849999994593,
+            "max": 4.0785110000015266,
+            "p50": 1.545074999999997,
+            "sampleCount": 50,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 12.107775,
+            "p99": 13.623295,
+            "max": 13.950975
+          },
+          "cpuPercent": 14.761613770636961,
+          "screens": [
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 1.1999999999825377,
+                "p95": 1.5,
+                "max": 3.6000000000058208,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999891,
+                "p95": 16.700000000000728,
+                "max": 16.80000000000109,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 8,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.8000000000029104,
+                "p95": 1.2000000000116415,
+                "max": 3.400000000008731,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999891,
+                "p95": 16.700000000000728,
+                "max": 16.799999999999272,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 6,
+                "inputs": 2,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.8000000000029104,
+                "p95": 1.2999999999883585,
+                "max": 2.1999999999970896,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999891,
+                "p95": 16.799999999999272,
+                "max": 16.80000000000109,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 8,
+                "inputs": 1,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 6,
+          "resources": {
+            "shots": 5,
+            "entities": 1,
+            "fragments": 0,
+            "contexts": 2,
+            "rss": 188342272,
+            "heap": 59231240
+          },
+          "step": {
+            "count": 150,
+            "mean": 0.36732961333341035,
+            "p95": 0.5990459999993618,
+            "p99": 0.8188609999997425,
+            "max": 1.2861210000010033,
+            "p50": 0.33780900000056135,
+            "sampleCount": 150,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 50,
+            "mean": 0.8373800199998732,
+            "p95": 1.0429320000002917,
+            "p99": 1.1660140000003594,
+            "max": 2.273912000000564,
+            "p50": 0.8195719999985158,
+            "sampleCount": 50,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 10.862591,
+            "p99": 12.058623,
+            "max": 12.746751
+          },
+          "cpuPercent": 9.43447058522155,
+          "screens": [
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.8999999999941792,
+                "p95": 2.6000000000058208,
+                "max": 4.7999999999883585,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999891,
+                "p95": 16.700000000000728,
+                "max": 16.80000000000109,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 1,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.6000000000058208,
+                "p95": 0.8000000000174623,
+                "max": 1,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999891,
+                "p95": 16.700000000000728,
+                "max": 16.80000000000109,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 1,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 0,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 5,
+          "resources": {
+            "shots": 3,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 190177280,
+            "heap": 52600664
+          },
+          "step": {
+            "count": 150,
+            "mean": 0.30884062666676376,
+            "p95": 0.5272100000001956,
+            "p99": 0.8240889999979117,
+            "max": 1.0476789999993343,
+            "p50": 0.2707700000028126,
+            "sampleCount": 150,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 50,
+            "mean": 0.6738680799997383,
+            "p95": 0.8789190000024973,
+            "p99": 0.9423329999990528,
+            "max": 0.9689629999993485,
+            "p50": 0.6650829999998678,
+            "sampleCount": 50,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 10.829823,
+            "p99": 11.313151,
+            "max": 12.541951
+          },
+          "cpuPercent": 6.731169856040136,
+          "screens": [
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.8000000000174623,
+                "p95": 1.7000000000116415,
+                "max": 3.599999999976717,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999891,
+                "p95": 16.799999999999272,
+                "max": 16.80000000000109,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 5,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.5,
+                "p95": 0.6999999999825377,
+                "max": 1.7000000000116415,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999891,
+                "p95": 16.700000000000728,
+                "max": 16.80000000000109,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 4,
+                "inputs": 1,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 0,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 3,
+          "resources": {
+            "shots": 0,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 190701568,
+            "heap": 61213688
+          },
+          "step": {
+            "count": 150,
+            "mean": 0.2595389800000703,
+            "p95": 0.3289660000009462,
+            "p99": 0.5635030000012193,
+            "max": 0.7398140000004787,
+            "p50": 0.24118599999928847,
+            "sampleCount": 150,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 50,
+            "mean": 0.5615579199999047,
+            "p95": 0.7003460000014456,
+            "p99": 0.7150879999971949,
+            "max": 0.8324910000010277,
+            "p50": 0.5558920000003127,
+            "sampleCount": 50,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 10.797055,
+            "p99": 11.223039,
+            "max": 12.255231
+          },
+          "cpuPercent": 5.8711301425690765,
+          "screens": [
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 149,
+                "p50": 0.7999999999883585,
+                "p95": 1.599999999976717,
+                "max": 2.900000000023283,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 148,
+                "p50": 16.69999999999709,
+                "p95": 16.799999999999272,
+                "max": 50,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 1,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 149,
+                "p50": 0.5,
+                "p95": 0.6000000000058208,
+                "max": 0.6999999999825377,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 148,
+                "p50": 16.700000000000728,
+                "p95": 16.799999999999272,
+                "max": 50,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 1,
+                "inputs": 2,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 0,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 2,
+          "resources": {
+            "shots": 1,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 191356928,
+            "heap": 41185352
+          },
+          "step": {
+            "count": 151,
+            "mean": 0.22227636423861663,
+            "p95": 0.29179199999998673,
+            "p99": 0.4174569999995583,
+            "max": 0.4769049999995332,
+            "p50": 0.214668000000529,
+            "sampleCount": 151,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 51,
+            "mean": 0.5245062352942649,
+            "p95": 0.6230810000015481,
+            "p99": 0.6467259999990347,
+            "max": 0.6476070000026084,
+            "p50": 0.5407190000005357,
+            "sampleCount": 51,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 10.862591,
+            "p99": 11.067391,
+            "max": 11.616255
+          },
+          "cpuPercent": 5.410580110672058,
+          "screens": [
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.7000000000116415,
+                "p95": 2,
+                "max": 3.7000000000116415,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.700000000000728,
+                "p95": 16.799999999999272,
+                "max": 16.80000000000291,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.40000000002328306,
+                "p95": 0.5999999999767169,
+                "max": 3.099999999976717,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.700000000000728,
+                "p95": 16.700000000000728,
+                "max": 16.80000000000291,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 0,
+                "inputs": 1,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 0,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "mode": "team-elim",
+          "alive": 20,
+          "resources": {
+            "shots": 4,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 210538496,
+            "heap": 37327288
+          },
+          "step": {
+            "count": 150,
+            "mean": 0.6634444133332484,
+            "p95": 1.0656549999985145,
+            "p99": 1.8296659999978147,
+            "max": 4.34158899999602,
+            "p50": 0.5923960000000079,
+            "sampleCount": 150,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 50,
+            "mean": 1.2044869399988967,
+            "p95": 1.670829999995476,
+            "p99": 1.7274639999959618,
+            "max": 2.372268000006443,
+            "p50": 1.101197999996657,
+            "sampleCount": 50,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 11.526143,
+            "p99": 13.385727,
+            "max": 14.647295
+          },
+          "cpuPercent": 16.667340002266677,
+          "screens": [
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 1,
+                "p95": 1.3000000000174623,
+                "max": 4.099999999976717,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999709,
+                "p95": 16.700000000004366,
+                "max": 16.80000000000291,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 5,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.7000000000116415,
+                "p95": 1,
+                "max": 1.3000000000174623,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999709,
+                "p95": 16.700000000004366,
+                "max": 16.80000000000291,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 5,
+                "inputs": 4,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.7999999999883585,
+                "p95": 1.1999999999825377,
+                "max": 3.3000000000174623,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999891,
+                "p95": 16.799999999999272,
+                "max": 16.80000000000109,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 5,
+                "inputs": 4,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "mode": "team-capture",
+          "alive": 20,
+          "resources": {
+            "shots": 7,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 272740352,
+            "heap": 48492864
+          },
+          "step": {
+            "count": 151,
+            "mean": 0.6224405033110979,
+            "p95": 0.9333100000003469,
+            "p99": 1.1400549999962095,
+            "max": 3.22060199999396,
+            "p50": 0.5425819999945816,
+            "sampleCount": 151,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 50,
+            "mean": 1.7525157599996601,
+            "p95": 2.0386340000040946,
+            "p99": 2.1263440000038827,
+            "max": 2.739499999996042,
+            "p50": 1.7664819999990868,
+            "sampleCount": 50,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 12.279807,
+            "p99": 13.189119,
+            "max": 14.147583
+          },
+          "cpuPercent": 14.126327978214192,
+          "screens": [
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.8999999999941792,
+                "p95": 1.2000000000116415,
+                "max": 3,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999709,
+                "p95": 16.700000000004366,
+                "max": 16.80000000000291,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 4,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.7000000000116415,
+                "p95": 1,
+                "max": 2.8000000000174623,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999709,
+                "p95": 16.700000000004366,
+                "max": 16.80000000000291,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 4,
+                "inputs": 2,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "canvas",
+              "draw": {
+                "n": 151,
+                "p50": 0.7000000000116415,
+                "p95": 1.1000000000058208,
+                "max": 1.3999999999941792,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 150,
+                "p50": 16.69999999999709,
+                "p95": 16.799999999999272,
+                "max": 16.799999999999272,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 40,
+                "effects": 4,
+                "inputs": 2,
+                "pending": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "overdrive355-live-pixi-20-971407eaa190ec40ddf3bb9bf9e1a7115e1d6e34\\live-candidate-pixi-balanced-solo-20-prepared-r5\\report.json",
+      "status": "FAIL",
+      "ms": 218357.982808,
+      "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('#br-victory') to be visible\n    65 × locator resolved to hidden <section id=\"br-victory\" class=\"br-screen br-post-battle br-hidden\"></section>\n\n    at /__w/DSbettleroyale/DSbettleroyale/tests/combat/overdrive355-live.mjs:44:54",
+      "roundsCompleted": 3,
+      "scenes": [],
+      "winnerTrace": {
+        "match": "upgrade-fixed-4",
+        "serverTime": 1794916687303,
+        "offset": 1794916508125,
+        "at": 184442.80000000002,
+        "presentation": {
+          "id": "upgrade-fixed-4:result",
+          "matchId": "upgrade-fixed-4",
+          "kind": "last-survivor",
+          "winnerId": "e70b04e6-1fc1-4d3f-b216-373d7ec7edba",
+          "winnerName": "Audit Studen",
+          "abilityId": "emoji-075",
+          "emoji": "🍎",
+          "finalizedTick": 1518,
+          "startedAt": 1794916687303,
+          "showResultsAt": 1794916690803,
+          "durationMs": 3500
+        },
+        "remaining": 0,
+        "visible": false
+      },
+      "stages": [
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 20,
+          "resources": {
+            "shots": 11,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 2,
+            "rss": 262283264,
+            "heap": 72108632
+          },
+          "step": {
+            "count": 152,
+            "mean": 1.0413124736841335,
+            "p95": 2.4579819999999017,
+            "p99": 4.549071000001277,
+            "max": 14.228943999998592,
+            "p50": 0.7331860000012966,
+            "sampleCount": 152,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 51,
+            "mean": 3.056165176470791,
+            "p95": 5.252012000000832,
+            "p99": 7.673590999998851,
+            "max": 8.15244999999777,
+            "p50": 2.3953500000025088,
+            "sampleCount": 51,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 14.467071,
+            "p99": 22.085631,
+            "max": 28.262399
+          },
+          "cpuPercent": 19.43447050683699,
+          "screens": [
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 10,
+                "p50": 11.700000000011642,
+                "p95": 25.39999999999418,
+                "max": 26.69999999999709,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 9,
+                "p50": 300,
+                "p95": 333.3000000000029,
+                "max": 350,
+                "over100": 9,
+                "over200": 9
+              },
+              "resources": {
+                "sprites": 98,
+                "textures": 69,
+                "labels": 7,
+                "samples": 40,
+                "effects": 8,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 9,
+                "p50": 7.19999999999709,
+                "p95": 15.80000000000291,
+                "max": 16.40000000000873,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 8,
+                "p50": 316.6000000000022,
+                "p95": 333.40000000000146,
+                "max": 416.7000000000007,
+                "over100": 8,
+                "over200": 7
+              },
+              "resources": {
+                "sprites": 73,
+                "textures": 78,
+                "labels": 2,
+                "samples": 40,
+                "effects": 11,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 9,
+                "p50": 12.80000000000291,
+                "p95": 19.30000000000291,
+                "max": 23.30000000000291,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 8,
+                "p50": 300,
+                "p95": 333.2999999999993,
+                "max": 350,
+                "over100": 8,
+                "over200": 8
+              },
+              "resources": {
+                "sprites": 79,
+                "textures": 78,
+                "labels": 3,
+                "samples": 40,
+                "effects": 23,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 6,
+          "resources": {
+            "shots": 3,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 265842688,
+            "heap": 64451176
+          },
+          "step": {
+            "count": 151,
+            "mean": 0.4008406821192826,
+            "p95": 0.5753130000011879,
+            "p99": 2.2566640000004554,
+            "max": 3.3255280000012135,
+            "p50": 0.30973899999662535,
+            "sampleCount": 151,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 51,
+            "mean": 1.0456941568633078,
+            "p95": 1.3424990000057733,
+            "p99": 1.956530000003113,
+            "max": 2.0111699999979464,
+            "p50": 0.9894659999990836,
+            "sampleCount": 51,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 11.173887,
+            "p99": 14.401535,
+            "max": 15.384575
+          },
+          "cpuPercent": 9.510772289719373,
+          "screens": [
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 11,
+                "p50": 13.80000000000291,
+                "p95": 25.20000000001164,
+                "max": 25.90000000000873,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 10,
+                "p50": 250,
+                "p95": 266.6999999999971,
+                "max": 266.70000000000437,
+                "over100": 10,
+                "over200": 10
+              },
+              "resources": {
+                "sprites": 68,
+                "textures": 74,
+                "labels": 7,
+                "samples": 40,
+                "effects": 5,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 11,
+                "p50": 8,
+                "p95": 10.89999999999418,
+                "max": 12.400000000008731,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 10,
+                "p50": 250,
+                "p95": 266.6999999999971,
+                "max": 266.70000000000437,
+                "over100": 10,
+                "over200": 10
+              },
+              "resources": {
+                "sprites": 63,
+                "textures": 80,
+                "labels": 9,
+                "samples": 40,
+                "effects": 0,
+                "inputs": 1,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 0,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 5,
+          "resources": {
+            "shots": 3,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 266366976,
+            "heap": 68654128
+          },
+          "step": {
+            "count": 152,
+            "mean": 0.2859323552631012,
+            "p95": 0.4494360000026063,
+            "p99": 0.8100300000005518,
+            "max": 0.867404999997234,
+            "p50": 0.25446699999884004,
+            "sampleCount": 152,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 50,
+            "mean": 0.9761947599999258,
+            "p95": 1.2182949999987613,
+            "p99": 1.9847410000002128,
+            "max": 3.8440259999988484,
+            "p50": 0.8955969999951776,
+            "sampleCount": 50,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 11.927551,
+            "p99": 13.737983,
+            "max": 14.999551
+          },
+          "cpuPercent": 7.888758493477637,
+          "screens": [
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 10,
+                "p50": 10.10000000000582,
+                "p95": 17.59999999999127,
+                "max": 23.90000000000873,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 9,
+                "p50": 266.59999999999854,
+                "p95": 283.3000000000029,
+                "max": 300.09999999999854,
+                "over100": 9,
+                "over200": 9
+              },
+              "resources": {
+                "sprites": 70,
+                "textures": 77,
+                "labels": 7,
+                "samples": 40,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 10,
+                "p50": 4.399999999994179,
+                "p95": 16.29999999998836,
+                "max": 20.80000000000291,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 9,
+                "p50": 266.70000000000437,
+                "p95": 283.3000000000029,
+                "max": 283.40000000000146,
+                "over100": 9,
+                "over200": 9
+              },
+              "resources": {
+                "sprites": 58,
+                "textures": 80,
+                "labels": 10,
+                "samples": 40,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 0,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 3,
+          "resources": {
+            "shots": 1,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 266498048,
+            "heap": 59749272
+          },
+          "step": {
+            "count": 152,
+            "mean": 0.23215050657898628,
+            "p95": 0.36415000000124564,
+            "p99": 0.45463399999425747,
+            "max": 1.0253490000031888,
+            "p50": 0.19809299999906216,
+            "sampleCount": 152,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 51,
+            "mean": 0.7535505882354782,
+            "p95": 0.9134630000044126,
+            "p99": 1.6271809999961988,
+            "max": 2.734721000000718,
+            "p50": 0.693477000000712,
+            "sampleCount": 51,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 11.001855,
+            "p99": 12.902399,
+            "max": 15.564799
+          },
+          "cpuPercent": 6.91279473125715,
+          "screens": [
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 11,
+                "p50": 7.30000000000291,
+                "p95": 17.69999999999709,
+                "max": 29,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 10,
+                "p50": 266.59999999999854,
+                "p95": 266.70000000000437,
+                "max": 316.70000000000437,
+                "over100": 10,
+                "over200": 10
+              },
+              "resources": {
+                "sprites": 62,
+                "textures": 76,
+                "labels": 7,
+                "samples": 40,
+                "effects": 2,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 10,
+                "p50": 4,
+                "p95": 14.200000000011642,
+                "max": 16.30000000000291,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 9,
+                "p50": 266.6999999999971,
+                "p95": 266.70000000000437,
+                "max": 316.70000000000437,
+                "over100": 9,
+                "over200": 9
+              },
+              "resources": {
+                "sprites": 55,
+                "textures": 80,
+                "labels": 11,
+                "samples": 40,
+                "effects": 1,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 0,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 2,
+          "resources": {
+            "shots": 1,
+            "entities": 0,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 267554816,
+            "heap": 75464944
+          },
+          "step": {
+            "count": 151,
+            "mean": 0.2159143245037601,
+            "p95": 0.3431390000041574,
+            "p99": 0.47497399999701884,
+            "max": 0.5956630000000587,
+            "p50": 0.1909830000004149,
+            "sampleCount": 151,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 50,
+            "mean": 0.7268737000002875,
+            "p95": 0.7168719999972382,
+            "p99": 1.9707999999955064,
+            "max": 3.770325999998022,
+            "p50": 0.6470279999994091,
+            "sampleCount": 50,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 11.714559,
+            "p99": 12.935167,
+            "max": 18.382847
+          },
+          "cpuPercent": 6.216516836271256,
+          "screens": [
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 11,
+                "p50": 6.80000000000291,
+                "p95": 10.30000000000291,
+                "max": 19.5,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 10,
+                "p50": 250,
+                "p95": 266.79999999999563,
+                "max": 299.90000000000146,
+                "over100": 10,
+                "over200": 10
+              },
+              "resources": {
+                "sprites": 58,
+                "textures": 75,
+                "labels": 26,
+                "samples": 40,
+                "effects": 1,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 10,
+                "p50": 4.80000000000291,
+                "p95": 9,
+                "max": 17.39999999999418,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 9,
+                "p50": 266.59999999999854,
+                "p95": 266.70000000000437,
+                "max": 283.40000000000146,
+                "over100": 9,
+                "over200": 9
+              },
+              "resources": {
+                "sprites": 55,
+                "textures": 80,
+                "labels": 11,
+                "samples": 40,
+                "effects": 1,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 0,
+                "p50": 0,
+                "p95": 0,
+                "max": 0,
+                "over100": 0,
+                "over200": 0
+              },
+              "resources": {
+                "sprites": 0,
+                "textures": 0,
+                "labels": 0,
+                "samples": 0,
+                "effects": 0,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "mode": "team-elim",
+          "alive": 20,
+          "resources": {
+            "shots": 13,
+            "entities": 1,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 278704128,
+            "heap": 42100120
+          },
+          "step": {
+            "count": 152,
+            "mean": 0.998613368421502,
+            "p95": 1.4507790000061505,
+            "p99": 5.107698000007076,
+            "max": 15.200628999999026,
+            "p50": 0.7674770000012359,
+            "sampleCount": 152,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 51,
+            "mean": 3.7617450980389693,
+            "p95": 6.696890999999596,
+            "p99": 8.864160999990418,
+            "max": 10.085712000000058,
+            "p50": 2.998511999991024,
+            "sampleCount": 51,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 15.409151,
+            "p99": 31.277055,
+            "max": 49.446911
+          },
+          "cpuPercent": 23.682505436703707,
+          "screens": [
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 9,
+                "p50": 9.099999999976717,
+                "p95": 11.799999999988358,
+                "max": 13.799999999988358,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 8,
+                "p50": 300,
+                "p95": 316.6000000000058,
+                "max": 333.40000000000873,
+                "over100": 8,
+                "over200": 8
+              },
+              "resources": {
+                "sprites": 89,
+                "textures": 69,
+                "labels": 1,
+                "samples": 40,
+                "effects": 33,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 9,
+                "p50": 10.39999999999418,
+                "p95": 16.5,
+                "max": 18.60000000000582,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 8,
+                "p50": 300.1000000000058,
+                "p95": 333.3000000000029,
+                "max": 416.6000000000058,
+                "over100": 8,
+                "over200": 8
+              },
+              "resources": {
+                "sprites": 78,
+                "textures": 78,
+                "labels": 3,
+                "samples": 40,
+                "effects": 17,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 9,
+                "p50": 12.299999999988358,
+                "p95": 19.39999999999418,
+                "max": 27.39999999999418,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 8,
+                "p50": 316.59999999999854,
+                "p95": 333.40000000000146,
+                "max": 349.8999999999978,
+                "over100": 8,
+                "over200": 8
+              },
+              "resources": {
+                "sprites": 96,
+                "textures": 78,
+                "labels": 1,
+                "samples": 40,
+                "effects": 32,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "mode": "team-capture",
+          "alive": 20,
+          "resources": {
+            "shots": 13,
+            "entities": 1,
+            "fragments": 0,
+            "contexts": 0,
+            "rss": 291545088,
+            "heap": 83855032
+          },
+          "step": {
+            "count": 152,
+            "mean": 1.149207493420315,
+            "p95": 2.1149830000067595,
+            "p99": 7.572357999990345,
+            "max": 12.14964799999143,
+            "p50": 0.8142260000022361,
+            "sampleCount": 152,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 51,
+            "mean": 3.5177958431381473,
+            "p95": 6.043752999990829,
+            "p99": 7.320915000003879,
+            "max": 9.602233999990858,
+            "p50": 2.8821089999983087,
+            "sampleCount": 51,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 17.203199,
+            "p99": 22.970367,
+            "max": 50.954239
+          },
+          "cpuPercent": 17.950704864738487,
+          "screens": [
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 9,
+                "p50": 7.7999999999883585,
+                "p95": 19.20000000001164,
+                "max": 34,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 8,
+                "p50": 316.6000000000058,
+                "p95": 349.90000000000873,
+                "max": 350,
+                "over100": 8,
+                "over200": 8
+              },
+              "resources": {
+                "sprites": 48,
+                "textures": 33,
+                "labels": 11,
+                "samples": 40,
+                "effects": 35,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 9,
+                "p50": 8.5,
+                "p95": 13.300000000017462,
+                "max": 17.5,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 8,
+                "p50": 316.6999999999971,
+                "p95": 350,
+                "max": 366.59999999999127,
+                "over100": 8,
+                "over200": 8
+              },
+              "resources": {
+                "sprites": 45,
+                "textures": 44,
+                "labels": 11,
+                "samples": 40,
+                "effects": 18,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 8,
+                "p50": 9.60000000000582,
+                "p95": 22.699999999982538,
+                "max": 37.10000000000582,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 7,
+                "p50": 333.40000000000146,
+                "p95": 350,
+                "max": 433.3999999999942,
+                "over100": 7,
+                "over200": 7
+              },
+              "resources": {
+                "sprites": 40,
+                "textures": 44,
+                "labels": 11,
+                "samples": 40,
+                "effects": 3,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        },
+        {
+          "round": 4,
+          "mode": "solo",
+          "alive": 20,
+          "resources": {
+            "shots": 9,
+            "entities": 3,
+            "fragments": 0,
+            "contexts": 5,
+            "rss": 322977792,
+            "heap": 94866496
+          },
+          "step": {
+            "count": 151,
+            "mean": 1.1489841059611228,
+            "p95": 1.8620609999925364,
+            "p99": 4.875339999998687,
+            "max": 8.671918999985792,
+            "p50": 0.9563879999914207,
+            "sampleCount": 151,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 50,
+            "mean": 2.8953382000006966,
+            "p95": 5.566824000008637,
+            "p99": 8.494535999983782,
+            "max": 8.639259999996284,
+            "p50": 2.415913000004366,
+            "sampleCount": 50,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 14.196735,
+            "p99": 20.479999,
+            "max": 37.879807
+          },
+          "cpuPercent": 21.092000118334486,
+          "screens": [
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 8,
+                "p50": 9.299999999988358,
+                "p95": 18.60000000000582,
+                "max": 25.20000000001164,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 7,
+                "p50": 366.70000000001164,
+                "p95": 383.30000000001746,
+                "max": 400,
+                "over100": 7,
+                "over200": 7
+              },
+              "resources": {
+                "sprites": 101,
+                "textures": 68,
+                "labels": 7,
+                "samples": 40,
+                "effects": 8,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 8,
+                "p50": 10.89999999999418,
+                "p95": 14.599999999976717,
+                "max": 31.900000000023283,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 7,
+                "p50": 366.70000000001164,
+                "p95": 383.4000000000233,
+                "max": 400,
+                "over100": 7,
+                "over200": 7
+              },
+              "resources": {
+                "sprites": 73,
+                "textures": 80,
+                "labels": 3,
+                "samples": 40,
+                "effects": 4,
+                "inputs": 1,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 7,
+                "p50": 13.5,
+                "p95": 20.199999999982538,
+                "max": 24.20000000001164,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 6,
+                "p50": 366.6999999999971,
+                "p95": 383.3999999999942,
+                "max": 400,
+                "over100": 6,
+                "over200": 6
+              },
+              "resources": {
+                "sprites": 82,
+                "textures": 79,
+                "labels": 4,
+                "samples": 40,
+                "effects": 24,
+                "inputs": 0,
+                "pending": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "overdrive355-live-pixi-30-971407eaa190ec40ddf3bb9bf9e1a7115e1d6e34\\live-candidate-pixi-high-solo-30-prepared-r1\\report.json",
+      "status": "PASS",
+      "ms": 47572.877313,
+      "error": null,
+      "roundsCompleted": 1,
+      "scenes": [],
+      "stages": [
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 30,
+          "resources": {
+            "shots": 9,
+            "entities": 2,
+            "fragments": 0,
+            "contexts": 2,
+            "rss": 332247040,
+            "heap": 142665200
+          },
+          "step": {
+            "count": 481,
+            "mean": 1.1584306216216782,
+            "p95": 2.629962000002706,
+            "p99": 8.622706000001926,
+            "max": 13.232120000000577,
+            "p50": 0.8223479999978736,
+            "sampleCount": 481,
+            "scope": "entire-window"
+          },
+          "snapshot": {
+            "count": 160,
+            "mean": 3.7850797374997227,
+            "p95": 6.883821999996144,
+            "p99": 8.353477999997267,
+            "max": 8.875448000006145,
+            "p50": 2.8892589999995835,
+            "sampleCount": 160,
+            "scope": "entire-window"
+          },
+          "eventLoop": {
+            "p95": 15.335423,
+            "p99": 19.628031,
+            "max": 40.239103
+          },
+          "cpuPercent": 22.107732644149024,
+          "screens": [
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 27,
+                "p50": 13.89999999999418,
+                "p95": 23.29999999998836,
+                "max": 53.89999999999418,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 26,
+                "p50": 283.3000000000029,
+                "p95": 383.2000000000007,
+                "max": 416.6000000000022,
+                "over100": 26,
+                "over200": 25
+              },
+              "resources": {
+                "sprites": 123,
+                "textures": 69,
+                "labels": 7,
+                "samples": 40,
+                "effects": 42,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 28,
+                "p50": 10,
+                "p95": 20.10000000000582,
+                "max": 29.89999999999418,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 27,
+                "p50": 283.40000000000146,
+                "p95": 366.7000000000007,
+                "max": 383.3999999999978,
+                "over100": 27,
+                "over200": 27
+              },
+              "resources": {
+                "sprites": 82,
+                "textures": 89,
+                "labels": 2,
+                "samples": 40,
+                "effects": 4,
+                "inputs": 0,
+                "pending": 0
+              }
+            },
+            {
+              "backend": "pixi",
+              "draw": {
+                "n": 27,
+                "p50": 14.099999999976717,
+                "p95": 28.5,
+                "max": 44.30000000001746,
+                "over100": 0,
+                "over200": 0
+              },
+              "gap": {
+                "n": 26,
+                "p50": 299.90000000000146,
+                "p95": 350,
+                "max": 400.1000000000022,
+                "over100": 26,
+                "over200": 26
+              },
+              "resources": {
+                "sprites": 113,
+                "textures": 89,
+                "labels": 4,
+                "samples": 40,
+                "effects": 17,
+                "inputs": 1,
+                "pending": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "postFixLocal20": {
+    "status": "FAIL",
+    "ms": 52277.3725,
+    "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#br-attack')\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" id=\"br-attack\" data-feedback=\"\" aria-label=\"공격 조준\" aria-disabled=\"true\" data-action-state=\"PAUSED\" class=\"br-control disabled br-state-locked\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    54 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at C:\\Users\\jarsc\\OneDrive\\바탕 화면\\코딩게임\\이모지배틀로얄\\tests\\combat\\overdrive355-live.mjs:21:156",
+    "rounds": 0,
+    "simTime": 699.9999999999998,
+    "overloads": 1,
+    "step": {
+      "count": 42,
+      "mean": 14.033800000000113,
+      "p95": 29.28359999999884,
+      "p99": 53.931000000000495,
+      "max": 110.84460000000036,
+      "p50": 8.30290000000241,
+      "sampleCount": 42,
+      "scope": "entire-window"
+    },
+    "snapshot": {
+      "count": 9,
+      "mean": 24.63333333333382,
+      "p95": 35.985499999998865,
+      "p99": 35.985499999998865,
+      "max": 43.49430000000211,
+      "p50": 23.619200000001,
+      "sampleCount": 9,
+      "scope": "entire-window"
+    },
+    "eventLoop": {
+      "p95": 16.441343,
+      "p99": 20.774911,
+      "max": 456.916991
+    },
+    "queueBytes": 0,
+    "bufferBytes": 0,
+    "memory": {
+      "rss": 78848000,
+      "heapTotal": 21467136,
+      "heapUsed": 19593976,
+      "external": 8367931,
+      "arrayBuffers": 1329606
+    },
+    "resources": {
+      "shots": 17,
+      "entities": 3,
+      "fragments": 0,
+      "contexts": 4,
+      "rss": 78839808,
+      "heap": 19417288
+    }
+  }
+}

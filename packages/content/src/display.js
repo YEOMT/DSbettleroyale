@@ -888,7 +888,7 @@ export const display={
     },
     "emoji-023": {
       "basic": "단발 저격탄 · 1발",
-      "skill": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배. · 최대 조준 거리 1380 · 대기 12초",
+      "skill": "0.4초 조준 후 가늘고 긴 저격탄으로 탄도상 첫 적을 타격합니다. 벽에서 멈추며 기절시키지 않습니다. 시전당 50% 확률로 직접 피해 2배. · 실제 탄속 105/틱 · 최대 조준 거리 1380 · 대기 12초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위",
       "cooldown": "12초",
       "label": "헤드슈터",
@@ -1740,7 +1740,7 @@ export const display={
     },
     "emoji-039": {
       "basic": "작은 폭탄 · 1발 · 작은 폭발",
-      "skill": "목표 지점을 표시한 뒤 0.8초 포물선 비행 후 한 번 폭발합니다. 중심부 피해가 더 크며 폭발 지점과 적 사이의 벽은 피해를 막습니다. · 최대 조준 거리 777 · 대기 11초",
+      "skill": "42틱 비행 후 반경 245 폭발 30.45 · 중심 105 피해 49.35 · 벽 차단 · 최대 조준 거리 777 · 대기 11초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
       "cooldown": "11초",
       "label": "다이너마이트",
@@ -1761,7 +1761,7 @@ export const display={
           "aimRange": 777,
           "cooldownFrames": 660,
           "cooldownJitter": false,
-          "durationFrames": 48,
+          "durationFrames": 42,
           "damageCoefficient": 30.45
         },
         "eligibleAugments": [
@@ -2121,7 +2121,7 @@ export const display={
     },
     "emoji-072": {
       "basic": "탄산컵 · 1발 · 작은 폭발",
-      "skill": "한 개의 탄산 폭탄이 터지며 넓은 범위의 적을 바깥쪽으로 크게 밀어냅니다. 살상력보다 거리 확보에 집중합니다. · 최대 조준 거리 720 · 대기 9초",
+      "skill": "탄산탄 1발 · 접촉/종점 반경 255 폭발 피해 계수 22 · 넉백 25 · 기절 없음 · 최대 조준 거리 720 · 대기 9초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
       "cooldown": "9초",
       "label": "탄산 폭탄",
@@ -2143,7 +2143,7 @@ export const display={
           "cooldownFrames": 540,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 19.95
+          "damageCoefficient": 22
         },
         "eligibleAugments": [
           "wanggui",
@@ -2338,7 +2338,7 @@ export const display={
     },
     "emoji-074": {
       "basic": "슬리퍼 · 2발",
-      "skill": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다. · 최대 조준 거리 1100 · 대기 7초",
+      "skill": "시전당 30% 확률로 직접 피해 2배. 빠르고 곧게 날아가는 슬리퍼 한 발을 발사합니다. 자동 추적·폭발·기절 없이 정확한 조준으로 승부합니다. · 실제 탄속 55/틱 · 최대 조준 거리 1100 · 대기 7초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위",
       "cooldown": "7초",
       "label": "슬리퍼 스나이퍼",
@@ -2382,12 +2382,12 @@ export const display={
     },
     "emoji-075": {
       "basic": "사과 · 1발 · 벽 반사 2회",
-      "skill": "사과 한 발이 첫 벽 반사 뒤 조각 2개로 나뉩니다. 원본은 사라지고 조각은 다시 분열하지 않습니다. 적에게 바로 맞으면 원본 피해만 줍니다. · 최대 조준 거리 790 · 대기 8초",
+      "skill": "사과 1발의 첫 적/벽/상자 접촉 또는 사거리 끝에서 8방향 파편 · 파편 피해 8, 같은 폭발은 대상당 최대 2개 · 파편 재분열 없음 · 최대 조준 거리 790 · 대기 8초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위",
       "cooldown": "8초",
       "label": "사과 투척",
       "category": "원거리형",
-      "concept": "벽에 닿으면 두 조각으로 갈라지는 사과를 던진다",
+      "concept": "첫 접촉 또는 사거리 끝에서 8방향 파편으로 갈라지는 사과 수류탄",
       "facts": {
         "level": 1,
         "damageUnits": "base coefficient before rank/run/defence modifiers",
@@ -2399,7 +2399,7 @@ export const display={
           "coefficient": 12
         },
         "skill": {
-          "kind": "split-bounce",
+          "kind": "apple-fragments",
           "aimRange": 790,
           "cooldownFrames": 480,
           "cooldownJitter": false,
@@ -2465,38 +2465,37 @@ export const display={
       }
     },
     "emoji-092": {
-      "basic": "프라이팬 · 1발",
-      "skill": "0.8초 패리 중 피해가 28% 줄고, 실제 잃은 HP를 공격자별로 기록했다가 종료 시 각 공격자에게 50%씩 한 번 반환합니다. 중단 시 반환하지 않습니다. · 자기 중심 · 대기 8초",
+      "basic": "근접 프라이팬 후려치기",
+      "skill": "전방 240°를 1.2초간 패링 · 받는 피해 28% 감소 · 첫 비행탄은 실제 반사, 첫 근접 접촉은 즉시 반격 · 성공/기절/강제 이동 시 종료 · 최대 조준 거리 90 · 대기 8초",
       "passive": "스킬 증강: 대기 단축 · 위력",
       "cooldown": "8초",
-      "label": "팬테옹",
-      "category": "원거리형",
-      "concept": "프라이팬으로 거리를 두다 공격 순간 반격한다",
+      "label": "깡! 받아치기",
+      "category": "근접형",
+      "concept": "프라이팬 근접 타격과 첫 접촉 패링으로 받아친다",
       "facts": {
         "level": 1,
         "damageUnits": "base coefficient before rank/run/defence modifiers",
         "basic": {
-          "close": false,
+          "close": true,
           "count": 1,
-          "range": 642,
-          "intervalFrames": 59,
-          "coefficient": 13.919999999999998
+          "range": 139.9,
+          "intervalFrames": 52,
+          "coefficient": 22.249080000000006
         },
         "skill": {
-          "kind": "counter-deferred",
-          "aimRange": 0,
+          "kind": "pan-parry",
+          "aimRange": 90,
           "cooldownFrames": 480,
           "cooldownJitter": false,
-          "durationFrames": 48,
+          "durationFrames": 72,
           "damageCoefficient": 0
         },
         "eligibleAugments": [
           "wanggui",
           "rapid",
           "heavy",
-          "multi",
-          "giant",
           "impact",
+          "wide",
           "quick",
           "amplify",
           "swift",
@@ -2507,12 +2506,12 @@ export const display={
     },
     "emoji-094": {
       "basic": "크레파스 · 1발",
-      "skill": "크레파스 4발을 부채꼴로 발사합니다. 적중한 탄은 짧은 기절을 줍니다. · 최대 조준 거리 830 · 대기 17.25초",
+      "skill": "좌→우 빨강 1.60배 직격 / 파랑 0.85배·25% 감속 1.5초 / 노랑 0.80배·기절 0.35초(시전당 한 번) / 초록 0.80배·0.5초마다 4 피해×4틱. 추가 탄도 같은 색 순서, 평타에는 미적용. · 최대 조준 거리 830 · 대기 17.25초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 개수 · 제어",
       "cooldown": "17.25초",
       "label": "크레파스 산탄",
       "category": "원거리형",
-      "concept": "퍼지는 색연필로 정면을 채운다",
+      "concept": "빨강 직격·파랑 감속·노랑 기절·초록 지속 피해의 네 색 난사",
       "facts": {
         "level": 1,
         "damageUnits": "base coefficient before rank/run/defence modifiers",
@@ -2635,7 +2634,7 @@ export const display={
     },
     "emoji-121": {
       "basic": "근접 빗자루 쓸기",
-      "skill": "전방 직사각형을 쓸어 맞은 적 모두를 조준 방향으로 밀어냅니다. 옆·뒤·벽 너머의 적은 맞지 않습니다. · 최대 조준 거리 235 · 대기 8초",
+      "skill": "전방 335×300 직사각형 쓸기 · 피해 14 · 조준 방향 넉백 42 · 준비 10틱 · 벽 너머/뒤쪽 제외 · 기절 없음 · 최대 조준 거리 335 · 대기 8초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
       "cooldown": "8초",
       "label": "청소반장",
@@ -2653,7 +2652,7 @@ export const display={
         },
         "skill": {
           "kind": "directional-sweep",
-          "aimRange": 235,
+          "aimRange": 335,
           "cooldownFrames": 480,
           "cooldownJitter": false,
           "durationFrames": 0,
@@ -2677,7 +2676,7 @@ export const display={
     },
     "emoji-122": {
       "basic": "통조림 · 1발 · 작은 폭발",
-      "skill": "통조림 충돌 폭발 11.55 · 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음 · 최대 조준 거리 975 · 대기 9초",
+      "skill": "반경 100 통조림 충돌 폭발 11.55 · 반경 145의 2초 가시 지대 하나(0.5초마다 4.389) · 소유자당 1개 · 기절 없음 · 최대 조준 거리 975 · 대기 9초",
       "passive": "스킬 증강: 대기 단축 · 위력 · 범위",
       "cooldown": "9초",
       "label": "통조림 투척",
@@ -3374,12 +3373,12 @@ export const display={
     },
     "emoji-148": {
       "basic": "방망이 타격",
-      "skill": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신) · 자기 중심 · 대기 10초",
+      "skill": "정확히 3초 최대 HP 15% 실드 · 평타 공격빈도 ×1.20(같은 출처 갱신) · 활성 중 첫 유효 평타 한 명에게 0.45초 기절 · 자기 중심 · 대기 10초",
       "passive": "스킬 증강: 대기 단축 · 회복·보호",
       "cooldown": "10초",
       "label": "도깨비",
       "category": "근접형",
-      "concept": "짧은 보호막과 평타 가속으로 교전을 버틴다",
+      "concept": "짧은 보호막과 평타 가속 중 첫 유효 평타로 한 명을 기절시킨다",
       "facts": {
         "level": 1,
         "damageUnits": "base coefficient before rank/run/defence modifiers",

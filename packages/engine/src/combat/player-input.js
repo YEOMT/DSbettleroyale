@@ -263,6 +263,7 @@ __brScope.brBaseWalkingSpeed = function brBaseWalkingSpeed(p) {
             if(p.ability.id==='emoji-139')return __brScope.BR_V29_ZOMBIE_WALK;
             // Preserve each affected kit's existing speed floor proportion when raising its base stat.
             const speedFloor=5.6*(p.ability.walkFloorRatio||1);
+            if(__brScope.brReworkDefinition(p.ability)?.stats?.rangedMovement)return .7*Math.max(speedFloor,p.speed*4.05)*.95;
             return .7*Math.max(speedFloor,p.speed*4.05)*(p.ability.sub==='STONE'?.48:1)*(__brScope.brClosePolish(p.ability)?1.04:1)*(__brScope.brBasicCombatProfile(p.ability).close?1:.95);
         };
 
@@ -290,7 +291,7 @@ __brScope.brApplyPlayerInput = function brApplyPlayerInput(p,g) {
                 const ad=new __brScope.Vec2(Number(input.ax),Number(input.ay));if(ad.mag()>.05){p.lastAimDir=ad.norm();receivedAim=true;}
             }
             if(!receivedAim&&move.mag()>.05&&!locks.steerAllowed)p.lastAimDir=move.norm();
-            if(p.basicCooldown>0)p.basicCooldown=Math.max(0,p.basicCooldown-__brScope.brCooldownRate(p,'attack'));
+            if(p.basicCooldown>0){const rate=__brScope.brCooldownRate(p,'attack');p.basicCooldown=Math.max(0,p.basicCooldown-rate,(p.basicFloorLife===life?p.basicFloorEnd-g.frame:0)*rate);}
             if(p.cooldown>0)p.cooldown=Math.max(0,p.cooldown-__brScope.brCooldownRate(p,'skill'));
             const steering=input.steer,steerSeq=Number(input.steerSeq||0),steerWireSeq=Number(input.seq||0);
             if(steerWireSeq>Number(p.lastRemoteSteerWire||0)){
@@ -387,13 +388,14 @@ __brScope.brBasicAttack = function brBasicAttack(p,g,aim) {
                 var damage=__brScope.brTierValue(tier,{S:21,A:18,B:15,C:12,F:8})*profile.damageScale*p.damageMult*.72*__brScope.brCombatPower(p),size=__brScope.brBasicShotSize(p.ability,false,mods)*Number(mods.basicSize||1);
                 for(var i=0;i<profile.count;i++) {
                     var dir=aim.rotate((i-(profile.count-1)/2)*profile.spread),shot=new __brScope.Projectile(p,p.pos.add(dir.mult(p.radius*.7)),dir,profile.speed,damage,size,profile.type,color,profile.explode,profile.emoji,
-                        {basicSnapshot:rwBasic,basicAttackId:rwAttackId,homingTurnRate:profile.homingTurnRate,knockback:profile.knockback,trailColor:color,impactColor:color,weaponStyle:profile.style,impactStyle:'ranged-basic',basicDamageMultiplier:Number(mods.basicDamage||1)*__brScope.brCombatPower(p),pierce:profile.pierce,bounces:profile.bounces,status:profile.status,statusPower:profile.statusPower,spinRate:profile.spin,faceDir:profile.face,hitOncePerPass:true});
+                        {giantScale:Number(mods.basicSize||1),basicSnapshot:rwBasic,basicAttackId:rwAttackId,homingTurnRate:profile.homingTurnRate,knockback:profile.knockback,trailColor:color,impactColor:color,weaponStyle:profile.style,impactStyle:'ranged-basic',basicDamageMultiplier:Number(mods.basicDamage||1)*__brScope.brCombatPower(p),pierce:profile.pierce,bounces:profile.bounces,status:profile.status,statusPower:profile.statusPower,spinRate:profile.spin,faceDir:profile.face,hitOncePerPass:true});
                     var outward=Math.max(8,Math.ceil(profile.range/profile.speed));shot.life=profile.type==='BOOMERANG'?outward+60:outward;shot.returnAfterLife=60;
                     shot.farmDamage=farmUnits;shot.farmToken=farmToken;
                     g.projectiles.push(shot);
                 }
             }
-            p.basicCooldown=cd;p.basicCooldownMax=cd;
+            p.basicFloorLife=Number(p.lifeSeq||0);p.basicFloorEnd=g.frame+6;
+            p.basicCooldown=Math.max(cd,6*__brScope.brCooldownRate(p,'attack'));p.basicCooldownMax=p.basicCooldown;
             __brScope.brCombatTrace('basic-executed',{frame:g.frame,life:p.lifeSeq,seq:p.activeInputCommand?.seq,id:p.ability.id,profile:profile.close?'melee':'ranged',x:p.pos.x,y:p.pos.y,dx:aim.x,dy:aim.y});return true;
         };
 

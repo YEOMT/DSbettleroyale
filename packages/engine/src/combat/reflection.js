@@ -73,7 +73,7 @@ export function reflectedDirection(S,g,shot,pos,velocity,defender,mirror){
     if(mirror&&visible)shot.returnTarget={source,life};
     shot.returnSupply=shot.launchSupply??1;
     // Keep a bounded contact cue even when a whole classroom hits one surface.
-    if(g.frame>=(defender.nextReflectionFx??0)){
+    if(defender.ability.id!=='emoji-092'&&g.frame>=(defender.nextReflectionFx??0)){
         defender.nextReflectionFx=g.frame+5;
         g.emitStudentFx?.('impact',pos,{size:24,color:'#a5f3fc',style:'mirror-contact',sourceId:defender.remoteId});
     }

@@ -21,11 +21,13 @@ export class GameAudio{
  record(type,detail={}){this.history.push({at:performance.now(),type,stage:this.state.stage,...detail});if(this.history.length>160)this.history.shift();}
  observe(){const a=this.audio;if(!a)return;if(!this.watched.has(a)){this.watched.add(a);for(const type of ['loadstart','loadedmetadata','canplay','playing','pause','ended','error','stalled'])a.addEventListener(type,()=>this.record(type,{readyState:a.readyState,networkState:a.networkState,time:a.currentTime,error:a.error?{code:a.error.code,message:a.error.message}:null}));this.record('source',{url:a.currentSrc||a.src});}const signature=this.state.stage+'|'+this.state.blocked+'|'+this.state.status;if(signature!==this.lastStatus){this.lastStatus=signature;this.record('state',{blocked:this.state.blocked,status:this.state.status});}}
  diagnostics(){const a=this.audio;return {role:this.state.role,enabled:this.enabled,volume:this.volume,stage:this.state.stage,blocked:this.state.blocked,status:this.state.status,lastPlayError:this.state.lastPlayError||null,paused:a?.paused,currentTime:a?.currentTime,duration:a&&Number.isFinite(a.duration)?a.duration:null,readyState:a?.readyState,networkState:a?.networkState,error:a?.error?{code:a.error.code,message:a.error.message}:null,history:this.history};}
- effect(event,selfId){if(!this.effects||this.seen.has(event.eventId)||event.type!=='FX')return;this.seen.add(event.eventId);while(this.seen.size>500)this.seen.delete(this.seen.values().next().value);const d=event.data,own=d.sourceId===selfId,hurt=d.targetId===selfId;if(!own&&!hurt)return;
+ effect(event,selfId,life){if(!this.effects||this.seen.has(event.eventId)||event.type!=='FX')return;this.seen.add(event.eventId);while(this.seen.size>500)this.seen.delete(this.seen.values().next().value);const d=event.data,own=d.sourceId===selfId,hurt=d.targetId===selfId;if(!own&&!hurt)return;
   this.session.soundMuted=!this.effects;
   // Hit/shield audio is emitted by the original brRegisterHitFeedback throttles.
   if(d.kind==='elimination'&&own)this.controller.sfx('elimination',true);
-
+  // Confirmed contact audio cannot wait for a busy Canvas/Pixi first paint.
+  // Connection scope/cursor checks precede this hook; no restored/old-life cue.
+  if(own&&life!=null&&d.geometry?.lifeSeq===life&&d.geometry.confirmed&&['pan-contact','goblin-first'].includes(d.style)&&!document.hidden)this.action('parry',1);
  }
  countdown(id,number,host){
   const key=id? id+':'+number:'';if(this.countdownKey===key)return;this.countdownKey=key;
@@ -36,7 +38,16 @@ export class GameAudio{
   osc.type='sine';osc.frequency.setValueAtTime(number===5?880:660,at);gain.gain.setValueAtTime(.15*this.volume,at);gain.gain.exponentialRampToValueAtTime(.001,at+.14);
   osc.connect(gain);gain.connect(ac.destination);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(at);osc.stop(at+.15);
  }
- action(kind,weight=2){if(!this.effects)return;this.controller.ensure();this.controller.sfx(kind,weight);}
+ action(kind,weight=2){if(!this.effects)return;
+  if(kind==='sniper'||kind==='parry'){
+   if(document.hidden||this.volume<=0)return;
+   const ac=this.controller.ensure();if(!ac||ac.state!=='running')return;
+   const osc=ac.createOscillator(),gain=ac.createGain(),at=ac.currentTime;
+   osc.type=kind==='parry'?'triangle':'sawtooth';osc.frequency.setValueAtTime(kind==='parry'?1650:240,at);osc.frequency.exponentialRampToValueAtTime(kind==='parry'?670:65,at+.08);
+   gain.gain.setValueAtTime(.15*this.volume,at);gain.gain.exponentialRampToValueAtTime(.001,at+.13);osc.connect(gain);gain.connect(ac.destination);osc.onended=()=>{osc.disconnect();gain.disconnect();};osc.start(at);osc.stop(at+.14);return;
+  }
+  this.controller.ensure();this.controller.sfx(kind,weight);
+ }
  victory(){
   if(!this.effects||this.session.soundMuted||document.hidden||this.volume<=0)return;
   const ac=this.controller.ensure();if(!ac||ac.state!=='running')return;
