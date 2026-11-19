@@ -111,7 +111,8 @@ try{
 }catch(error){report.status='FAIL';report.error=error.stack;report.state=await h.rpc('polish-state');report.telemetry=await h.rpc('status');report.presentationTrace=await h.host.evaluate(()=>({resets:m.renderer.resetObserved,visibility:m.ui.resultFlow?.visibilityObserved,transport:window.transportObserved,observed:m.ui.resultFlow?.polishObserved,phase:m.ui.room.phase,remaining:m.ui.resultFlow?.clock.remaining(),now:performance.now(),offset:m.net.serverWallOffset}));for(const [i,p]of [h.host,h.student].entries())await p.screenshot({path:dir+'/failure-'+i+'.png'}).catch(()=>{});throw error;}
 finally{
  clearInterval(timer);report.ms=performance.now()-started;report.errors=h.errors;const teardownAt=performance.now();
- if(traceActions)report.finalActionTrace={wire:h.browser.contexts().flatMap(c=>c.pages()).map(p=>p.deliveryWire),authority:await h.rpc('polish-action-trace').catch(()=>[]),browsers:await Promise.all(h.browser.contexts().flatMap(c=>c.pages()).map(p=>p.evaluate(()=>window.actionObserved).catch(()=>null)))};
+ if(traceActions)report.finalTransport=(await h.rpc('status').catch(()=>({}))).transport;
+ if(traceActions)report.finalActionTrace={wire:h.browser.contexts().flatMap(c=>c.pages()).map(p=>p.deliveryWire),authority:await h.rpc('polish-action-trace').catch(()=>[]),browsers:await Promise.all(h.browser.contexts().flatMap(c=>c.pages()).map(p=>p.evaluate(()=>window.actionObserved).catch(()=>null))),delivery:await Promise.all(h.browser.contexts().flatMap(c=>c.pages()).map(p=>p.evaluate(()=>window.deliveryObserved).catch(()=>null)))};
  try{await h.close();}catch(error){
   report.teardownError=error.stack;
   // Preserve the original failed assertion. A cleanup-only failure still fails.

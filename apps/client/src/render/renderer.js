@@ -13,6 +13,7 @@ import {effectLife} from '../presentation/effect-life.js';
 import {createScene} from './original-scene.js';
 import {StudentCamera} from './viewport.js';
 import {AttackPoses} from './attack-pose.js';
+import {FrameTurn} from './frame-turn.js';
 import {HostCamera} from './camera.js';
 import {manifest} from '../../../../packages/content/src/manifest.js';
 import {ObjectiveArrows} from './objectives.js';
@@ -23,7 +24,7 @@ import {Application,Container,Graphics,Sprite,Texture,Text} from 'pixi.js';
 import {createPainters} from './original-painters.js';
 export class Renderer{
  get enabled(){return !!this._enabled;}
- set enabled(value){this._enabled=!!value;if(!value){if(this.raf!=null)cancelAnimationFrame(this.raf);this.raf=null;}else if(this.renderReady&&this.raf==null){this.last=performance.now();this.raf=requestAnimationFrame(t=>this.frame(t));}}
+ set enabled(value){this._enabled=!!value;if(!value){this.frameTurn?.cancel();if(this.raf!=null)cancelAnimationFrame(this.raf);this.raf=null;}else if(this.renderReady&&this.raf==null&&this.frameTurn?.pending==null){this.last=performance.now();this.raf=requestAnimationFrame(t=>this.frame(t));}}
  constructor(canvas,timeline,session){this.staticFloor=new StaticFloor();this.camera=new HostCamera();this.studentCamera=new StudentCamera();this.poses=new AttackPoses();this.objectives=new ObjectiveArrows();this.canvas=canvas;this.timeline=timeline;this.session=session;this.paint=createPainters(session);this.scene=createScene(session);this.hostTracks=new Map();this.hostCanvas=createHostCanvas(this);this.canvasFx=createFx(session);this.wallImages=new Map();this.deaths=new Map();this.textures=new Map();this.sprites=new Map();this.labels=new Map();this.tracks=new Map();this.frameTimes=[];this.enabled=false;this.teacher=false;this.cam={x:0,y:0};this.last=performance.now();this.ready=this.init();}
  async init(){
   await hostAssetsReady;
@@ -95,6 +96,10 @@ export class Renderer{
  level(a,x,y,zoom,now){let track=this.tracks.get(a.id);if(!track){track={};this.tracks.set(a.id,track);}if(!this.pixi){this.paint.brLevelCanvasDraw(this.ctx,track,a.level,a.lifeSeq,x,y,zoom,this.teacher);return;}const pose=this.paint.brLevelPose(track,a.level,a.lifeSeq,now,true),source=this.paint.brLevelCanvas(a.level);if(!pose||!source)return;const key='level-'+a.id,texture=this.texture(source);let s=this.sprites.get(key);if(!s){s=new Sprite(texture);s.anchor.set(.5);this.sprites.set(key,s);this.world.addChild(s);}s.texture=texture;s.position.set(x,y);const k=(this.teacher?.8:1)*pose.scale/zoom;s.width=source._levelW*k;s.height=source._levelH*k;s.alpha=pose.alpha;s.visible=true;}
  frame(now){
   this.raf=null;if(!this.enabled)return;
+  // rAF's timestamp belongs to the rendering opportunity, before other
+  // callbacks/compositor work. Socket events use performance.now(); sample
+  // that same clock here so a fresh event cannot sit behind an old frame time.
+  now=performance.now();
   const gap=now-this.last;this.last=now;
   const captureHost=this.teacher&&this.session.roomMeta?.mode==='team-capture';
   const fps=this.session.captureHostFPS||(this.session.captureHostQuality==='balanced'?30:60);
@@ -111,7 +116,10 @@ export class Renderer{
     else this.reportFault(error);
    }
   }
-  if(this.enabled)this.raf=requestAnimationFrame(t=>this.frame(t));
+  if(this.enabled){
+   this.frameTurn??=new FrameTurn(()=>{if(this.enabled&&this.raf==null)this.raf=requestAnimationFrame(t=>this.frame(t));});
+   this.frameTurn.request();
+  }
  }
  reportFault(error){
   this.renderBlocked=true;this.lastRenderError=error?.name||'RENDER_ERROR';

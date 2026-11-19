@@ -2,6 +2,7 @@
 // This is deliberately separate from continuous-play/performance measurements.
 import fs from 'node:fs';import assert from 'node:assert/strict';
 import {installDeliveryProbe} from './delivery-probe.mjs';
+import {selectedScenes} from './overdrive357-scenes.mjs';
 import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';import {stepWorld} from '../../packages/engine/src/index.js';
 const renderer=process.argv[2]||'canvas',quality=process.argv[3]||'low',start=performance.now(),dir=`artifacts/v35-7/identity-${renderer}-${quality}`;fs.mkdirSync(dir,{recursive:true});
 const h=await auditHarness({players:3,renderer,quality,mode:'solo',viewport:{width:1024,height:720},studentContext:{hasTouch:true}}),report={status:'FAIL',renderer,quality,environment:{browser:process.env.PLAYWRIGHT_CHANNEL||'chromium',built:process.env.LOAD_BUILT==='1',physicalDevices:false},rows:[],scope:'real WS; fixture-driven exact authority contacts, not continuous-play evidence'};
@@ -59,9 +60,9 @@ try{
   report.rows.push({name,status:'PASS',samples:rows.map(r=>r.poses.length)});return rows;
  }
 
- const scenes=[['regen','139'],['expansion','003'],['signature_duration','014'],['signature_range','142'],['swift','056'],['amplify','007'],['quick','023'],['control','042'],['impact','025'],['heavy','137']];
- report.selected=process.env.OVERDRIVE_PATHS?.split(',')||scenes.map(s=>s[0]);
- for(const [path,id]of scenes.filter(s=>report.selected.includes(s[0]))){
+ const scenes=selectedScenes(process.env.OVERDRIVE_GROUP,process.env.OVERDRIVE_PATHS);
+ report.selected=scenes.map(s=>s[0]);
+ for(const [path,id]of scenes){
   await reset('emoji-'+id,'emoji-137');const p=ps[0],q=ps[1];p.run.level=4;p.run.pending=3;
   for(let tier=1;tier<=3;tier++){
    const alternatives=Object.keys(w.BR_RUN_PATHS).filter(k=>k!==path&&w.brRunEffectiveNext(p,k)).slice(0,2);
