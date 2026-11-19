@@ -36,8 +36,6 @@ jobs:
       - run: npm run build
       - run: node tests/combat/recovery356-identity.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
         env: {CLASSROOM_BUNDLE: '1', LOAD_BUILT: '1'}
-      - run: node tests/combat/overdrive357-identity.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
-        env: {CLASSROOM_BUNDLE: '1', LOAD_BUILT: '1'}
       - run: node tests/combat/recovery356-grapple.mjs
         if: matrix.renderer == 'canvas' && matrix.quality == 'low'
         env: {CLASSROOM_BUNDLE: '1', LOAD_BUILT: '1'}
@@ -48,6 +46,31 @@ jobs:
           path: |
             artifacts/v35-6/
             artifacts/v35-7/
+          retention-days: 30
+  overdrive-identity:
+    # Independent evidence: a legacy pose failure must not skip the new tiers,
+    # and both suites keep their original eight-minute job budget/assertions.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [canvas, pixi]
+        quality: [low, balanced, high]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: npm run build
+      - run: node tests/combat/overdrive357-identity.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
+        env: {CLASSROOM_BUNDLE: '1', LOAD_BUILT: '1'}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: overdrive357-tiers-${{ matrix.renderer }}-${{ matrix.quality }}-${{ github.sha }}
+          path: artifacts/v35-7/
           retention-days: 30
   paired:
     runs-on: ubuntu-24.04
