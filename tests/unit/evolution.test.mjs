@@ -78,13 +78,13 @@ test('fixed-seed sniper rolls are per accepted whitelisted skill; scoped crit pe
 });
 test('melee and ranged augment cards agree with their own authoritative profiles; regen uses safe unhit frames',t=>{
  const f=setup(t,['emoji-025','emoji-137']),{w,players:[p,q]}=f;
- const expected={rapid:['basicSpeed',[1.7,2.3,3],[1.6,2.15,2.75]],heavy:['basicDamage',[1.6,2.05,2.65],[1.44,1.825,2.32]],impact:['basicKnockback',[1.75,2.4,3.1],[1.44,1.88,2.43]]};
+ const expected={rapid:['basicSpeed',[1.7,2.3,3],[1.6,2.15,2.75]],heavy:['basicDamage',[1.8,2.45,3.5],[1.55,2.1,3]],impact:['basicKnockback',[2,2.9,4],[1.6,2.3,3.25]]};
  for(const [id,[key,close,ranged]] of Object.entries(expected))for(let tier=1;tier<=3;tier++)for(const [a,mul] of [[p,close[tier-1]],[q,ranged[tier-1]]]){
   const mods=w.brRunModsForPaths({[id]:tier},a.run.capabilities,a.ability);assert.equal(mods[key],mul);
   assert.ok(w.brRunCard(a,id,tier).effect.includes(w.brStatNumber(mul)));
  }
- p.run.paths={wide:3,swift:3,titan:3,regen:3};w.brRecomputeRun(p);assert.equal(p.run.mods.basicRange,3);assert.equal(p.run.mods.maxHp,2.25);assert.equal(p.run.mods.moveSpeed,1.65);
- p.hp=100;p.run.lastDamageFrame=f.g.frame;f.tick(119);assert.equal(p.hp,100);f.tick(60);
+ p.run.paths={wide:3,swift:3,titan:3,regen:3};w.brRecomputeRun(p);assert.equal(p.run.mods.basicRange,3);assert.equal(p.run.mods.maxHp,2.25);assert.equal(p.run.mods.moveSpeed,2);
+ p.hp=100;p.run.lastDamageFrame=f.g.frame;f.tick(59);assert.equal(p.hp,100);f.tick(60);
  assert.ok(Math.abs(p.hp-100-p.maxHp*.065)<.001);
  const ids=manifest.roster.map(a=>a.id);assert.equal(ids.length,86);assert.deepEqual(ids.slice(-2),['emoji-152','emoji-153']);
 });

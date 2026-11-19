@@ -1,3 +1,4 @@
+import {expectedPaths357,expectedRuntime357} from '../v35-7/approved.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -15,11 +16,11 @@ test('v35.6 exactly nine reviewed IDs; every other leaf of all86 and global rule
  let unchanged=0;
  for(const [id,row]of Object.entries(base.mechanics)){
   assert.ok(sameMechanics(actual[id],expected356({...row,id})),id+' approved content leaves');
-  assert.ok(sameMechanics(runtime[id],expected356(base.runtime[id],runtime356)),id+' actual Lv1 authority profile');
-  if(!recoveryIds.includes(id)){unchanged++;assert.ok(sameMechanics(actual[id],row));assert.ok(sameMechanics(runtime[id],base.runtime[id]));}
+  assert.ok(sameMechanics(runtime[id],expectedRuntime357(expected356(base.runtime[id],runtime356))),id+' actual Lv1 authority profile');
+  if(!recoveryIds.includes(id)){unchanged++;assert.ok(sameMechanics(actual[id],row));assert.ok(sameMechanics(runtime[id],expectedRuntime357(base.runtime[id])));}
  }assert.equal(unchanged,77);
  const globals=mechanics(Object.fromEntries(Object.entries(manifest).filter(([key])=>!['roster','reworkDefinitions','rosterVersion'].includes(key))));
- assert.deepEqual(globals,base.globals,'augment/wanggui/mode/tier/6level/global protection constants');
+ assert.deepEqual(globals,{...base.globals,augments:expectedPaths357(base.globals.augments,createRuleContext().brRunTierText)},'augment/wanggui/mode/tier/6level/global protection constants');
 });
 test('v35.6 reviewed deltas refer to the frozen old values, not arbitrary current leaves',()=>{
  for(const [scope,changes]of [['mechanics',approved356],['runtime',runtime356]])for(const d of changes){

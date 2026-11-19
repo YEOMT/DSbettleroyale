@@ -48,7 +48,7 @@ export const display={
     "emoji-001": {
       "basic": "번개 근접 타격",
       "skill": "0.3초 착지 예고 후 조준 지점 강림 · 반경 245 피해 72 · 1.5초 기절(강화 상한 2초) · 최대 조준 거리 700 · 대기 17초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 사거리",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 사거리 · 실효 기절 기본/I/II/III 1.5초/2.1초/2.7초/3초",
       "cooldown": "17초",
       "label": "천둥군주",
       "category": "암살자",
@@ -69,7 +69,13 @@ export const display={
           "cooldownFrames": 1020,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 72
+          "damageCoefficient": 72,
+          "controlStunFrames": [
+            90,
+            126,
+            162,
+            180
+          ]
         },
         "eligibleAugments": [
           "rapid",
@@ -90,7 +96,7 @@ export const display={
     "emoji-002": {
       "basic": "근접 포획 타격",
       "skill": "최장거리 포획탄 · 첫 적을 고정된 앞 지점으로 끌어옴 · 도착 후 0.6초 기절 · 벽 차단 · 최대 조준 거리 1320 · 대기 14초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 사거리",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 사거리 · 실효 기절 기본/I/II/III 0.6초/0.833초/1.083초/1.35초",
       "cooldown": "14초",
       "label": "우주 납치범",
       "category": "근접형",
@@ -111,7 +117,13 @@ export const display={
           "cooldownFrames": 840,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 52
+          "damageCoefficient": 52,
+          "controlStunFrames": [
+            36,
+            50,
+            65,
+            81
+          ]
         },
         "eligibleAugments": [
           "rapid",
@@ -712,7 +724,7 @@ export const display={
     "emoji-085": {
       "basic": "마안 탄 · 1발 · 유도",
       "skill": "큰 유도 마안 4발 · 탄당 피해 27.81 · 대상별 시전당 1회 0.75초 기절 · 회전 상한/벽/은신/사거리 적용 · 최대 조준 거리 1110 · 대기 18초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 개수 · 제어",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 개수 · 제어 · 실효 기절 기본/I/II/III 0.75초/1.05초/1.35초/1.683초",
       "cooldown": "18초",
       "label": "심연의 눈",
       "category": "원거리형",
@@ -733,7 +745,13 @@ export const display={
           "cooldownFrames": 1080,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 27.81
+          "damageCoefficient": 27.81,
+          "controlStunFrames": [
+            45,
+            63,
+            81,
+            101
+          ]
         },
         "eligibleAugments": [
           "rapid",
@@ -796,7 +814,7 @@ export const display={
     "emoji-110": {
       "basic": "뿔 근접 타격",
       "skill": "빠른 직선 돌진 · 첫 적 실제 접촉점에서 정지 · 피해 75와 1초 기절 · 적중 시 1.5초 자기 피해 감소 24% · 최대 조준 거리 650 · 대기 16초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 회복·보호 · 고유 사거리",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 회복·보호 · 고유 사거리 · 실효 기절 기본/I/II/III 1초/1.4초/1.8초/2.25초",
       "cooldown": "16초",
       "label": "철갑 코뿔소",
       "category": "탱커",
@@ -817,7 +835,13 @@ export const display={
           "cooldownFrames": 960,
           "cooldownJitter": false,
           "durationFrames": 90,
-          "damageCoefficient": 75
+          "damageCoefficient": 75,
+          "controlStunFrames": [
+            60,
+            84,
+            108,
+            135
+          ]
         },
         "eligibleAugments": [
           "rapid",
@@ -967,7 +991,7 @@ export const display={
     "emoji-024": {
       "basic": "바람 근접 베기",
       "skill": "3.5초 동안 회오리 3개를 전개합니다. 시전 방향의 가까운 적을 당기며 짧게 경직시킵니다. · 최대 조준 거리 330 · 대기 14.25초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 지속",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 지속 · 실효 기절 기본/I/II/III 0.2초/0.283초/0.367초/0.45초",
       "cooldown": "14.25초",
       "label": "회오리 전개",
       "category": "근접형",
@@ -988,7 +1012,13 @@ export const display={
           "cooldownFrames": 855,
           "cooldownJitter": false,
           "durationFrames": null,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "controlStunFrames": [
+            12,
+            17,
+            22,
+            27
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -1052,7 +1082,7 @@ export const display={
     "emoji-026": {
       "basic": "근접 얼음 주먹",
       "skill": "0.3초 준비 후 주변 적에게 피해와 1.1초 빙결을 줍니다. 적을 멀리 밀어내지 않습니다. · 자기 중심 · 대기 13초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 실효 기절 기본/I/II/III 1.1초/1.533초/1.983초/2.483초",
       "cooldown": "13초",
       "label": "아이스킹",
       "category": "탱커",
@@ -1073,7 +1103,13 @@ export const display={
           "cooldownFrames": 780,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 27
+          "damageCoefficient": 27,
+          "controlStunFrames": [
+            66,
+            92,
+            119,
+            149
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -1219,7 +1255,7 @@ export const display={
     "emoji-030": {
       "basic": "촉수 근접 타격",
       "skill": "세 갈래 촉수로 최대 3명의 적을 포획해 겹치지 않는 전방 위치로 당기고 도착 후 1초 기절시킵니다. 벽을 통과하지 않습니다. · 최대 조준 거리 780 · 대기 14초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 사거리",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 사거리 · 실효 기절 기본/I/II/III 1초/1.4초/1.8초/2.25초",
       "cooldown": "14초",
       "label": "크라켄",
       "category": "근접형",
@@ -1240,7 +1276,13 @@ export const display={
           "cooldownFrames": 840,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 24
+          "damageCoefficient": 24,
+          "controlStunFrames": [
+            60,
+            84,
+            108,
+            135
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -1262,7 +1304,7 @@ export const display={
     "emoji-031": {
       "basic": "꼬리 근접 타격",
       "skill": "조준 방향으로 돌진하며 독 흔적을 남깁니다. 접촉한 적에게 피해와 짧은 밀침·기절을 줍니다. 지면 흔적의 반복 피해 계수는 기존 대비 10% 증가하며 접촉 피해·시간·제어는 같습니다. · 최대 조준 거리 641.52 · 대기 3.233초~3.967초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 사거리",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 고유 사거리 · 실효 기절 기본/I/II/III 0.133초/0.183초/0.233초/0.3초",
       "cooldown": "3.233초~3.967초",
       "label": "독길 돌진",
       "category": "기동형",
@@ -1283,7 +1325,13 @@ export const display={
           "cooldownFrames": 216,
           "cooldownJitter": true,
           "durationFrames": null,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "controlStunFrames": [
+            8,
+            11,
+            14,
+            18
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -1735,7 +1783,7 @@ export const display={
     "emoji-133": {
       "basic": "영혼 근접 검격",
       "skill": "0.4초 전방 직사각형 예고 후 돌진 베기를 하며 0.8초 기절시킵니다. 첫 적중에 보호막 42, 추가 대상마다 12를 얻고 최대 78까지 유지합니다. · 최대 조준 거리 560 · 대기 13초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 회복·보호 · 고유 사거리",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 회복·보호 · 고유 사거리 · 실효 기절 기본/I/II/III 0.8초/1.117초/1.433초/1.8초",
       "cooldown": "13초",
       "label": "영혼 검사",
       "category": "근접형",
@@ -1756,7 +1804,13 @@ export const display={
           "cooldownFrames": 780,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 46
+          "damageCoefficient": 46,
+          "controlStunFrames": [
+            48,
+            67,
+            86,
+            108
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -1779,7 +1833,7 @@ export const display={
     "emoji-038": {
       "basic": "단도 근접 베기",
       "skill": "조준 지점으로 순간이동해 착지 근처 적 한 명을 타격합니다. HP 35% 이하인 적에게 추가 피해를 주며 즉사시키지는 않습니다. · 최대 조준 거리 520 · 대기 15초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 실효 기절 기본/I/II/III 0.233초/0.333초/0.417초/0.533초",
       "cooldown": "15초",
       "label": "그림자 기습",
       "category": "암살자",
@@ -1800,7 +1854,13 @@ export const display={
           "cooldownFrames": 900,
           "cooldownJitter": false,
           "durationFrames": null,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "controlStunFrames": [
+            14,
+            20,
+            25,
+            32
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -1864,7 +1924,7 @@ export const display={
     "emoji-040": {
       "basic": "엄니 근접 타격 · 적중 시 짧은 피해 감소",
       "skill": "조준 방향으로 돌진하며 접촉한 적을 한 번 타격하고 밀치며 짧게 기절시킵니다. · 최대 조준 거리 492.48 · 대기 3.633초~4.433초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 제어",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 제어 · 실효 기절 기본/I/II/III 0.283초/0.4초/0.517초/0.633초",
       "cooldown": "3.633초~4.433초",
       "label": "멧돼지 돌진",
       "category": "탱커",
@@ -1885,7 +1945,13 @@ export const display={
           "cooldownFrames": 242,
           "cooldownJitter": true,
           "durationFrames": null,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "controlStunFrames": [
+            17,
+            24,
+            31,
+            38
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -1949,7 +2015,7 @@ export const display={
     "emoji-042": {
       "basic": "망치 근접 타격",
       "skill": "짧은 준비 후 전방 한 명에게 망치를 내려쳐 1초 기절시킵니다. 일반 공격에는 기절이 없고 적을 멀리 밀지 않습니다. · 최대 조준 거리 168 · 대기 10초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 실효 기절 기본/I/II/III 1초/1.4초/1.8초/2.25초",
       "cooldown": "10초",
       "label": "뿅망치",
       "category": "탱커",
@@ -1970,7 +2036,13 @@ export const display={
           "cooldownFrames": 600,
           "cooldownJitter": false,
           "durationFrames": 0,
-          "damageCoefficient": 28
+          "damageCoefficient": 28,
+          "controlStunFrames": [
+            60,
+            84,
+            108,
+            135
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -2330,7 +2402,7 @@ export const display={
     "emoji-112": {
       "basic": "등껍질 근접 타격 · 적중 시 짧은 피해 감소",
       "skill": "주변 적에게 피해·밀침·짧은 기절을 줍니다. 자신은 1.2초 동안 받는 피해가 20% 줄어듭니다. · 최대 조준 거리 210 · 대기 16.5초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 회복·보호",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 회복·보호 · 실효 기절 기본/I/II/III 0.433초/0.6초/0.783초/0.983초",
       "cooldown": "16.5초",
       "label": "대지 진압",
       "category": "탱커",
@@ -2351,7 +2423,13 @@ export const display={
           "cooldownFrames": 990,
           "cooldownJitter": false,
           "durationFrames": null,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "controlStunFrames": [
+            26,
+            36,
+            47,
+            59
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -2587,7 +2665,7 @@ export const display={
     "emoji-094": {
       "basic": "크레파스 · 1발",
       "skill": "좌→우 빨강 1.60배 직격 / 파랑 0.85배·25% 감속 1.5초 / 노랑 0.80배·기절 0.35초(시전당 한 번) / 초록 0.80배·0.5초마다 4 피해×4틱. 추가 탄도 같은 색 순서, 평타에는 미적용. · 최대 조준 거리 830 · 대기 17.25초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 개수 · 제어",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 개수 · 제어 · 실효 기절 기본/I/II/III 0.35초/0.483초/0.633초/0.783초",
       "cooldown": "17.25초",
       "label": "크레파스 산탄",
       "category": "원거리형",
@@ -2608,7 +2686,13 @@ export const display={
           "cooldownFrames": 1035,
           "cooldownJitter": false,
           "durationFrames": null,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "controlStunFrames": [
+            21,
+            29,
+            38,
+            47
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -2882,7 +2966,7 @@ export const display={
     "emoji-128": {
       "basic": "촉수 근접 타격",
       "skill": "조준 방향으로 돌진하며 먹물 흔적을 남깁니다. 경로의 적에게 지속 피해와 짧은 감속을 주고 첫 접촉 적의 시야를 잠시 가립니다. 지면 흔적의 반복 피해 계수는 기존 대비 10% 증가하며 접촉 피해·시간·제어는 같습니다. · 최대 조준 거리 540 · 대기 3.083초~3.783초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 실효 기절 기본/I/II/III 0.133초/0.183초/0.233초/0.3초",
       "cooldown": "3.083초~3.783초",
       "label": "먹물길 돌진",
       "category": "기동형",
@@ -2903,7 +2987,13 @@ export const display={
           "cooldownFrames": 206,
           "cooldownJitter": true,
           "durationFrames": null,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "controlStunFrames": [
+            8,
+            11,
+            14,
+            18
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -2924,7 +3014,7 @@ export const display={
     "emoji-052": {
       "basic": "벽돌 탄 · 1발",
       "skill": "주변 적을 밀치고 짧게 기절시킵니다. 2초 동안 자신이 받는 피해가 35% 줄어듭니다. · 최대 조준 거리 165 · 대기 15초",
-      "passive": "스킬 증강: 대기 단축 · 제어 · 회복·보호",
+      "passive": "스킬 증강: 대기 단축 · 제어 · 회복·보호 · 실효 기절 기본/I/II/III 0.133초/0.183초/0.233초/0.3초",
       "cooldown": "15초",
       "label": "철괴",
       "category": "원거리형",
@@ -2945,7 +3035,13 @@ export const display={
           "cooldownFrames": 900,
           "cooldownJitter": false,
           "durationFrames": null,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "controlStunFrames": [
+            8,
+            11,
+            14,
+            18
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -3005,7 +3101,7 @@ export const display={
     "emoji-056": {
       "basic": "비눗방울 · 1발 · 유도",
       "skill": "반경 34, 속도 10의 유도 방울 · 피해 10.3 · 0.5초 기절. 평타는 기존 약한 유도를 유지하며 기절 없음. · 최대 조준 거리 590 · 대기 7초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 실효 기절 기본/I/II/III 0.5초/0.7초/0.9초/1.133초",
       "cooldown": "7초",
       "label": "비눗방울 놀이",
       "category": "원거리형",
@@ -3035,7 +3131,13 @@ export const display={
           "intervalFrames": 0,
           "windupFrames": 0,
           "turnRate": 0.035,
-          "stunFrames": 30
+          "stunFrames": 30,
+          "controlStunFrames": [
+            30,
+            42,
+            54,
+            68
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -3063,7 +3165,7 @@ export const display={
     "emoji-114": {
       "basic": "모아이 근접 타격 · 적중 시 짧은 피해 감소",
       "skill": "전방 적 한 명을 강하게 밀치며 짧게 기절시킵니다. 자신은 1.2초 동안 받는 피해가 20% 줄어듭니다. · 최대 조준 거리 247.022 · 대기 13.25초",
-      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 회복·보호 · 고유 지속",
+      "passive": "스킬 증강: 대기 단축 · 위력 · 범위 · 제어 · 회복·보호 · 고유 지속 · 실효 기절 기본/I/II/III 0.217초/0.3초/0.383초/0.483초",
       "cooldown": "13.25초",
       "label": "초중량 펀치",
       "category": "탱커",
@@ -3084,7 +3186,13 @@ export const display={
           "cooldownFrames": 795,
           "cooldownJitter": false,
           "durationFrames": null,
-          "damageCoefficient": null
+          "damageCoefficient": null,
+          "controlStunFrames": [
+            13,
+            18,
+            23,
+            29
+          ]
         },
         "eligibleAugments": [
           "wanggui",
@@ -3644,7 +3752,7 @@ export const display={
     "emoji-152": {
       "basic": "단발 스타 탄 · 1발",
       "skill": "0.6초 예고 후 자신 중심 반경 550 안의 모든 생존 적을 벽 너머에도 3초 기절시킵니다. 직접 피해 없음 · 제어 강화 상한 3.6초. · 자기 중심 · 대기 24초",
-      "passive": "스킬 증강: 대기 단축 · 제어",
+      "passive": "스킬 증강: 대기 단축 · 제어 · 실효 기절 기본/I/II/III 3초/3.6초/3.6초/3.6초",
       "cooldown": "24초",
       "label": "스포트라이트",
       "category": "원거리형",
@@ -3669,7 +3777,13 @@ export const display={
           "radius": 550,
           "windupFrames": 36,
           "stunFrames": 180,
-          "stunCap": 216
+          "stunCap": 216,
+          "controlStunFrames": [
+            180,
+            216,
+            216,
+            216
+          ]
         },
         "eligibleAugments": [
           "rapid",

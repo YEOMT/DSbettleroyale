@@ -1,0 +1,89 @@
+{
+  "release": {
+    "protocolVersion": 33,
+    "contentHash": "50bf66b2cf37e2bf137e107715510d4393aa5110f3787a5c0b5162ca09788598",
+    "engineRevision": "v35.7-authority-1-overdrive-ii",
+    "buildId": "v33-a83708d43737f174",
+    "sourceHash": "a83708d43737f174021a0a17456b2cef325a7f824db3bb21a5707b795dbe17e4"
+  },
+  "rows": [
+    {
+      "file": "evolution-02.log",
+      "pass": 17,
+      "fail": 0,
+      "durationMs": 2834.7012,
+      "failed": [],
+      "status": "PASS"
+    },
+    {
+      "file": "focused-01.log",
+      "pass": 33,
+      "fail": 1,
+      "durationMs": 1304.3314,
+      "failed": [
+        "all ten cumulative tiers, melee/ranged split, approved caps and legal five-choice builds (14.8539ms)",
+        "failing tests:",
+        "all ten cumulative tiers, melee/ranged split, approved caps and legal five-choice builds (14.8539ms)"
+      ],
+      "status": "FAIL"
+    },
+    {
+      "file": "focused-02.log",
+      "pass": 41,
+      "fail": 1,
+      "durationMs": 1567.8039,
+      "failed": [
+        "EXPANSION every tier: native/rework projectile, growing zone and rect actual geometry equals wire/guide (11.4812ms)",
+        "failing tests:",
+        "EXPANSION every tier: native/rework projectile, growing zone and rect actual geometry equals wire/guide (11.4812ms)"
+      ],
+      "status": "FAIL"
+    },
+    {
+      "file": "focused-03.log",
+      "pass": 43,
+      "fail": 0,
+      "durationMs": 1558.8122,
+      "failed": [],
+      "status": "PASS"
+    },
+    {
+      "file": "focused-04.log",
+      "pass": 43,
+      "fail": 2,
+      "durationMs": 5699.7655,
+      "failed": [
+        "v35.7 allowlist: all 86 neutral authority kits, eligibility, non-target augments and global rules (134.025ms)",
+        "v35.6 exactly nine reviewed IDs; every other leaf of all86 and global rules preserved (174.9058ms)",
+        "failing tests:",
+        "v35.7 allowlist: all 86 neutral authority kits, eligibility, non-target augments and global rules (134.025ms)",
+        "v35.6 exactly nine reviewed IDs; every other leaf of all86 and global rules preserved (174.9058ms)"
+      ],
+      "status": "FAIL"
+    },
+    {
+      "file": "focused-06.log",
+      "pass": 3,
+      "fail": 0,
+      "durationMs": 1084.5759,
+      "failed": [],
+      "status": "PASS"
+    },
+    {
+      "file": "parity-05.log",
+      "pass": 3,
+      "fail": 0,
+      "durationMs": 888.1936,
+      "failed": [],
+      "status": "PASS"
+    },
+    {
+      "file": "quick-01.log",
+      "status": "TIMEOUT",
+      "pass": 434,
+      "fail": 1,
+      "limitMs": 300000,
+      "failed": "old evolution augment expectations; separately corrected, evolution-02 PASS"
+    }
+  ]
+}

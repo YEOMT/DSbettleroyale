@@ -5,6 +5,7 @@ export function install(__brScope){
 export const initializers=[
 [308,__brScope=>{(function bridgeNativeCombat(R){
     'use strict';
+    const controlledCasts=new WeakMap();
     R.damageResolver=function(c,target,amount,opts){
         target.takeDamage(amount,c.owner,!!opts.reflected,opts.direction||c.aim,{...opts,scaled:true,rw:true,ctx:c});
         const result=target._lastDamageResult||{valid:false,hpDamage:0,shieldAbsorbed:0,killed:false};
@@ -12,7 +13,13 @@ export const initializers=[
     };
     R.nativeStun=function(target,frames,source,snapshot){
         if(!source||!__brScope.game||!target?.alive||!__brScope.brCanHostileTarget(target,source)||frames<=0)return false;
-        const c=source._rwCast||R.context(source,__brScope.game,source.lastAimDir,1);
+        // Only opted-in CONTROL casts share their snapshot's hit ledger. The
+        // key is weak, life/match scoped, and cannot grow a room-level history.
+        let c=source._rwCast||(snapshot?.controlTier>0?controlledCasts.get(snapshot):null);
+        if(!c||!R.validContext(c)){
+            c=R.context(source,__brScope.game,source.lastAimDir,1);
+            if(snapshot?.controlTier>0)controlledCasts.set(snapshot,c);
+        }
         if(snapshot)c.run={...c.run,...snapshot};
         return R.applyStun(c,target,frames,Math.min(120,Math.max(frames,frames*1.35)));
     };

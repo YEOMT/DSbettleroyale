@@ -1,4 +1,4 @@
-name: v35.6 focused comparison
+name: v35.7 focused comparison
 on:
   pull_request:
     paths:
@@ -7,6 +7,9 @@ on:
       - 'tests/combat/recovery356*.mjs'
       - 'tests/unit/recovery356*.test.mjs'
       - 'tests/v35-6/**'
+      - 'tests/v35-7/**'
+      - 'tests/combat/overdrive357*.mjs'
+      - 'tests/unit/overdrive357.test.mjs'
       - 'tools/ci/recovery356-pair.mjs'
       - '.github/workflows/recovery356.yml'
   workflow_dispatch: null
@@ -33,14 +36,18 @@ jobs:
       - run: npm run build
       - run: node tests/combat/recovery356-identity.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
         env: {CLASSROOM_BUNDLE: '1', LOAD_BUILT: '1'}
+      - run: node tests/combat/overdrive357-identity.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
+        env: {CLASSROOM_BUNDLE: '1', LOAD_BUILT: '1'}
       - run: node tests/combat/recovery356-grapple.mjs
         if: matrix.renderer == 'canvas' && matrix.quality == 'low'
         env: {CLASSROOM_BUNDLE: '1', LOAD_BUILT: '1'}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: recovery356-identity-${{ matrix.renderer }}-${{ matrix.quality }}-${{ github.sha }}
-          path: artifacts/v35-6/
+          name: overdrive357-identity-${{ matrix.renderer }}-${{ matrix.quality }}-${{ github.sha }}
+          path: |
+            artifacts/v35-6/
+            artifacts/v35-7/
           retention-days: 30
   paired:
     runs-on: ubuntu-24.04
@@ -53,7 +60,7 @@ jobs:
           - {renderer: canvas, quality: low, players: 20, rounds: 5}
           - {renderer: pixi, quality: balanced, players: 20, rounds: 5}
           - {renderer: canvas, quality: low, players: 30, rounds: 1}
-          - {renderer: pixi, quality: high, players: 30, rounds: 1}
+          - {renderer: pixi, quality: high, players: 30, rounds: 3}
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
@@ -63,14 +70,15 @@ jobs:
       - run: npm run build
       - run: node tools/ci/recovery356-pair.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
         env:
+          OVERDRIVE357: '1'
           POLISH_PLAYERS: ${{ matrix.players }}
           POLISH_ROUNDS: ${{ matrix.rounds }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: recovery356-pair-${{ matrix.renderer }}-${{ matrix.players }}-${{ github.sha }}
+          name: overdrive357-pair-${{ matrix.renderer }}-${{ matrix.players }}-${{ github.sha }}
           path: |
-            artifacts/v35-6/pair-*.json
-            artifacts/v35-6/*-r*.log
-            artifacts/v35-6/live-*/
+            artifacts/v35-7/pair-*.json
+            artifacts/v35-7/*-r*.log
+            artifacts/v35-7/live-*/
           retention-days: 30

@@ -1,0 +1,1550 @@
+[
+  {
+    "id": "emoji-000",
+    "name": "용의 분노",
+    "eligible": true,
+    "kind": "fireball",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 18,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-001",
+    "name": "천둥군주",
+    "eligible": true,
+    "kind": "thunder-landing",
+    "base": 90,
+    "legacyCap": 120,
+    "frames": [
+      90,
+      126,
+      162,
+      180
+    ],
+    "push": 5,
+    "pull": 0,
+    "native": false,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-002",
+    "name": "우주 납치범",
+    "eligible": true,
+    "kind": "hook",
+    "base": 36,
+    "legacyCap": 48,
+    "frames": [
+      36,
+      50,
+      65,
+      81
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-003",
+    "name": "대마법사",
+    "eligible": true,
+    "kind": "sequential-barrage",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 1.5,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-004",
+    "name": "공허 암살자",
+    "eligible": true,
+    "kind": "blink-finisher",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 2,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-006",
+    "name": "검성",
+    "eligible": true,
+    "kind": "orbit-finisher",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 2,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-007",
+    "name": "폴아웃",
+    "eligible": true,
+    "kind": "nuclear-pulse",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 17,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-008",
+    "name": "폴터가이스트",
+    "eligible": false,
+    "kind": "ghost-ambush",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-010",
+    "name": "블랙홀",
+    "eligible": true,
+    "kind": "gravity-field",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 1.1,
+    "native": false,
+    "policy": "당김만 강화"
+  },
+  {
+    "id": "emoji-012",
+    "name": "지니",
+    "eligible": false,
+    "kind": "turret",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-013",
+    "name": "블러드로드",
+    "eligible": true,
+    "kind": "blood-pulse",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 3,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-014",
+    "name": "역병군주",
+    "eligible": false,
+    "kind": "growing-poison",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-019",
+    "name": "폭주기관차",
+    "eligible": true,
+    "kind": "train-charge",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 44,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-020",
+    "name": "초신성",
+    "eligible": true,
+    "kind": "radial-waves",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 7,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-022",
+    "name": "요요 마스터",
+    "eligible": true,
+    "kind": "yoyo",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 5,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-037",
+    "name": "구급차",
+    "eligible": false,
+    "kind": "self-regeneration",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-085",
+    "name": "심연의 눈",
+    "eligible": true,
+    "kind": "homing-eyes",
+    "base": 45,
+    "legacyCap": 60,
+    "frames": [
+      45,
+      63,
+      81,
+      101
+    ],
+    "push": 2,
+    "pull": 0,
+    "native": false,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-098",
+    "name": "성역술사",
+    "eligible": false,
+    "kind": "sanctuary-cleanse",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-110",
+    "name": "철갑 코뿔소",
+    "eligible": true,
+    "kind": "rhino-charge",
+    "base": 60,
+    "legacyCap": 78,
+    "frames": [
+      60,
+      84,
+      108,
+      135
+    ],
+    "push": 8,
+    "pull": 0,
+    "native": false,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-131",
+    "name": "가위 수호자",
+    "eligible": true,
+    "kind": "scissor-volley",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 1.2,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-132",
+    "name": "공허 파괴자",
+    "eligible": false,
+    "kind": "channel-beam",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-023",
+    "name": "헤드슈터",
+    "eligible": false,
+    "kind": "sniper",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 2,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-024",
+    "name": "윈드워커",
+    "eligible": true,
+    "kind": "TORNADO_ORBIT",
+    "base": 12,
+    "legacyCap": 90,
+    "frames": [
+      12,
+      17,
+      22,
+      27
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-025",
+    "name": "핵주먹",
+    "eligible": true,
+    "kind": "front",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 70,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-026",
+    "name": "아이스킹",
+    "eligible": true,
+    "kind": "freeze",
+    "base": 66,
+    "legacyCap": 84,
+    "frames": [
+      66,
+      92,
+      119,
+      149
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-027",
+    "name": "로드킬",
+    "eligible": true,
+    "kind": "recast-dash",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 6,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-028",
+    "name": "아이언월",
+    "eligible": false,
+    "kind": "iron-reflect",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-029",
+    "name": "스카이 하이",
+    "eligible": true,
+    "kind": "leap",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 7,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-030",
+    "name": "크라켄",
+    "eligible": true,
+    "kind": "hook",
+    "base": 60,
+    "legacyCap": 78,
+    "frames": [
+      60,
+      84,
+      108,
+      135
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-031",
+    "name": "스컹크 대쉬",
+    "eligible": true,
+    "kind": "POISON_TRAIL",
+    "base": 8,
+    "legacyCap": 10.8,
+    "frames": [
+      8,
+      11,
+      14,
+      18
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-033",
+    "name": "불도저",
+    "eligible": true,
+    "kind": "plow",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 6,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-034",
+    "name": "볼링 챔피언",
+    "eligible": true,
+    "kind": "bowling-strike",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 42,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-035",
+    "name": "체인소맨",
+    "eligible": false,
+    "kind": "chainsaw",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-036",
+    "name": "뱀파이어 떼",
+    "eligible": false,
+    "kind": "marked-homing",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 1,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-063",
+    "name": "버거 캐논",
+    "eligible": true,
+    "kind": "shotgun",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 5,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-066",
+    "name": "프로 부메랑",
+    "eligible": false,
+    "kind": "boomerang",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 2,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-087",
+    "name": "사냥꾼",
+    "eligible": false,
+    "kind": "hunter-mark",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 1,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-099",
+    "name": "전투 의무병",
+    "eligible": false,
+    "kind": "TEAM_MEDIC",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-101",
+    "name": "가속마도사",
+    "eligible": false,
+    "kind": "team-haste",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-133",
+    "name": "영혼 검사",
+    "eligible": true,
+    "kind": "soul-dash",
+    "base": 48,
+    "legacyCap": 66,
+    "frames": [
+      48,
+      67,
+      86,
+      108
+    ],
+    "push": 2,
+    "pull": 0,
+    "native": false,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-038",
+    "name": "암살자",
+    "eligible": true,
+    "kind": "BACKSTAB",
+    "base": 14,
+    "legacyCap": 18.900000000000002,
+    "frames": [
+      14,
+      20,
+      25,
+      32
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-039",
+    "name": "다이너마이트",
+    "eligible": true,
+    "kind": "lob",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 8,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-040",
+    "name": "멧라이더",
+    "eligible": true,
+    "kind": "BOAR_CHARGE",
+    "base": 17,
+    "legacyCap": 22.950000000000003,
+    "frames": [
+      17,
+      24,
+      31,
+      38
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-041",
+    "name": "킬러비",
+    "eligible": true,
+    "kind": "STING",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "기존 native 경로; 감속 계수 유지"
+  },
+  {
+    "id": "emoji-042",
+    "name": "뿅망치",
+    "eligible": true,
+    "kind": "hammer",
+    "base": 60,
+    "legacyCap": 78,
+    "frames": [
+      60,
+      84,
+      108,
+      135
+    ],
+    "push": 1,
+    "pull": 0,
+    "native": false,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-043",
+    "name": "로켓 점프",
+    "eligible": true,
+    "kind": "rocket-dash",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 11,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-044",
+    "name": "스노우보더",
+    "eligible": true,
+    "kind": "ice-dash",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 3,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-045",
+    "name": "테니스 챔피언",
+    "eligible": true,
+    "kind": "bounce",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 4,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-047",
+    "name": "파워 슛",
+    "eligible": true,
+    "kind": "power-shot",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 27,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-070",
+    "name": "다트 챔피언",
+    "eligible": false,
+    "kind": "dart-haste",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-072",
+    "name": "탄산 폭탄",
+    "eligible": true,
+    "kind": "soda-bomb",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 25,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-089",
+    "name": "농구왕",
+    "eligible": false,
+    "kind": "basketball",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-102",
+    "name": "보호술사",
+    "eligible": false,
+    "kind": "team-shield",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-112",
+    "name": "람북스",
+    "eligible": true,
+    "kind": "TANK_TURTLE",
+    "base": 26,
+    "legacyCap": 35.1,
+    "frames": [
+      26,
+      36,
+      47,
+      59
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-137",
+    "name": "BB 스나이퍼",
+    "eligible": true,
+    "kind": "AIMED_SHOT",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "기존 native 경로; 감속 계수 유지"
+  },
+  {
+    "id": "emoji-074",
+    "name": "슬리퍼 스나이퍼",
+    "eligible": false,
+    "kind": "precision",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 4,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-075",
+    "name": "사과 투척",
+    "eligible": false,
+    "kind": "apple-fragments",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 3,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-077",
+    "name": "크루아상 부메랑",
+    "eligible": false,
+    "kind": "boomerang",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 2,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-092",
+    "name": "팬테옹",
+    "eligible": false,
+    "kind": "pan-parry",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-094",
+    "name": "크레파스 난사",
+    "eligible": true,
+    "kind": "native",
+    "base": 21,
+    "legacyCap": 28.35,
+    "frames": [
+      21,
+      29,
+      38,
+      47
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-105",
+    "name": "응원단장",
+    "eligible": false,
+    "kind": "team-basic-haste",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-113",
+    "name": "게렌",
+    "eligible": true,
+    "kind": "guard-strike",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 6,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-121",
+    "name": "청소반장",
+    "eligible": true,
+    "kind": "directional-sweep",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 42,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-122",
+    "name": "통조림 투척",
+    "eligible": false,
+    "kind": "thorn-pot",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 2,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-126",
+    "name": "압정 난사",
+    "eligible": false,
+    "kind": "pin-traps",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-127",
+    "name": "롤러스케이트",
+    "eligible": true,
+    "kind": "simple-dash",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 5,
+    "pull": 0,
+    "native": false,
+    "policy": "밀침만 강화"
+  },
+  {
+    "id": "emoji-128",
+    "name": "먹물 대쉬",
+    "eligible": true,
+    "kind": "INK_TRAIL",
+    "base": 8,
+    "legacyCap": 10.8,
+    "frames": [
+      8,
+      11,
+      14,
+      18
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-052",
+    "name": "벽돌",
+    "eligible": true,
+    "kind": "STONE",
+    "base": 8,
+    "legacyCap": 10.8,
+    "frames": [
+      8,
+      11,
+      14,
+      18
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-054",
+    "name": "비누",
+    "eligible": false,
+    "kind": "SLIP",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-056",
+    "name": "비눗방울 놀이",
+    "eligible": true,
+    "kind": "bubble",
+    "base": 30,
+    "legacyCap": 42,
+    "frames": [
+      30,
+      42,
+      54,
+      68
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-114",
+    "name": "킹 모아이",
+    "eligible": true,
+    "kind": "TANK_HEDGEHOG",
+    "base": 13,
+    "legacyCap": 17.55,
+    "frames": [
+      13,
+      18,
+      23,
+      29
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": true,
+    "policy": "짧은 기절: 180f 또는 기존 높은 cap"
+  },
+  {
+    "id": "emoji-139",
+    "name": "좀비",
+    "eligible": false,
+    "kind": "zombie-regen",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-140",
+    "name": "짐승형 거인",
+    "eligible": false,
+    "kind": "rock-fan",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-141",
+    "name": "조커",
+    "eligible": false,
+    "kind": "decoy-blink",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-142",
+    "name": "마운틴 팀",
+    "eligible": false,
+    "kind": "self-grapple",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-143",
+    "name": "킹 오브 데마시아",
+    "eligible": false,
+    "kind": "duel-ring",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-144",
+    "name": "버섯돌보미",
+    "eligible": false,
+    "kind": "mushroom",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-145",
+    "name": "부캉이",
+    "eligible": false,
+    "kind": "shark-haste",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-146",
+    "name": "푸바오",
+    "eligible": false,
+    "kind": "panda-next-basic",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-147",
+    "name": "외계인",
+    "eligible": false,
+    "kind": "safe-dash",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-148",
+    "name": "도깨비",
+    "eligible": false,
+    "kind": "goblin-shield",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-149",
+    "name": "꿀꿀이",
+    "eligible": false,
+    "kind": "pig-haste",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-150",
+    "name": "찍찍이",
+    "eligible": false,
+    "kind": "safe-dash",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-151",
+    "name": "신호등",
+    "eligible": false,
+    "kind": "red-light",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  },
+  {
+    "id": "emoji-152",
+    "name": "마이클 잭슨",
+    "eligible": true,
+    "kind": "spotlight",
+    "base": 180,
+    "legacyCap": 216,
+    "frames": [
+      180,
+      216,
+      216,
+      216
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "고유 장시간 상한 유지"
+  },
+  {
+    "id": "emoji-153",
+    "name": "미러링",
+    "eligible": false,
+    "kind": "mirror",
+    "base": 0,
+    "legacyCap": 0,
+    "frames": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "push": 0,
+    "pull": 0,
+    "native": false,
+    "policy": "CONTROL 제외"
+  }
+]
