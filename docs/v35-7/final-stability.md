@@ -96,3 +96,32 @@ artifact와 로컬 `artifacts/v35-7/final-stability-*`, 익명화한 요약은
 [evidence/final-stability-before.json](evidence/final-stability-before.json)에 있다.
 실물 Samsung/iPhone/iPad, 별도 서버/브라우저 기기, 장시간 Deep, 운영 배포는
 NOT_RUN. AWS/main/공식 Pages는 변경하지 않았다.
+
+## 렌더 수정 006ffdc의 결과 및 최종 보완
+
+- [필수 CI44529701388](https://github.com/YEOMT/DSbettleroyale/actions/runs/44529701388) 13PASS/2scopeSKIP, required-checks PASS.
+- [v35.4 44529701268](https://github.com/YEOMT/DSbettleroyale/actions/runs/44529701268) 4PASS(Pixi5회147.103s), [v35.5 44529701248](https://github.com/YEOMT/DSbettleroyale/actions/runs/44529701248) 5PASS(Pixi20×5 229.256s). v35.5 마지막 개인전 결과 수신 6795→797ms.
+- [focused44529701284](https://github.com/YEOMT/DSbettleroyale/actions/runs/44529701284) 18PASS/1FAIL/취소0. 모든 새 증강10경로×3품질×Canvas/Pixi PASS. Pixi20×5 기준223.432s/후보216.657s 양쪽PASS, 후보 개인전 결과 수신305/2159ms. Pixi30×3 기준185.844s/후보186.394s 양쪽PASS. 30인 호스트 결과 수신1735/9090/11380ms가 남았으므로 지연 전체 해결은 아니다.
+- 다섯째20 CPU153.15→201.99ms/s, snapshot p952.11→2.43ms, host/student gap316.6/316.7→332.9/329.1ms. 30인 첫 CPU223.12→273.28ms/s. 성능은 계속 PARTIAL. [원자료 요약](evidence/final-stability-render-turn.json).
+
+남은 legacy Pixi high FAIL31.365s는 같은 tick20의 swing/hit/swing이 한
+학생에게 24743.0/25073.5/25409.5ms에 따로 도착해 두205/135ms 모션의
+동시 표본이 없었던 것이다. 다른 두 화면에서는 세 이벤트가 한 번에 도착해
+같은 assertion을 통과했다. 정지 fixture가 `stepWorld`를 직접 호출하면서
+실제 `SimulationRunner`의 `Peer.beginBatch/endBatch`를 빠뜨린 원인을 확인했다.
+두 identity fixture의 직접 step도 동일 EVENT_BATCH 경로로 감싼다. 커서,
+이벤트 내용, snapshot 순서, exception 뒤 batch 정리 회귀를 추가했다.
+검사 시간/모션 수명/단일 클릭/동시 표시 assertion은 그대로이며 가상 시계를
+도입하거나 렌더 함수를 직접 호출해 표본을 만들지 않는다.
+
+30인 메시지 지연에 대해서는 Scheduling API가 있는 브라우저에서 다음 rAF
+예약 task를 `background` 우선순위로 제출해 대기 중인 socket/input task를
+우선 처리한다. 지원하지 않는 브라우저는 MessageChannel로 돌아간다. 대기
+타이머나 FPS cap은 없고 작업은 한 개로 제한되며 중단된 경기의 작업은 폐기한다.
+
+최종 보완 로컬 검증: frame/fixture focused unit4PASS207ms, 필수 paired
+buildPASS(Vite6.86s), 실제 Pixi high identity12장면PASS75.849s. 직전
+EVENT_BATCH만 적용한 같은 suite는PASS44.341s였다. 실행 시간 증가는 그대로
+남기며 이 fixture 시간을 실시간 FPS 성능으로 바꾸어 해석하지 않는다.
+새 unit 작성 중 괄호 오류1FAIL은 즉시 수정 후 해당unit1PASS259ms;
+다른7개PASS는 재실행하지 않았다. 최종 CI 및 동일 A/B 성능은 PR에서 확인한다.

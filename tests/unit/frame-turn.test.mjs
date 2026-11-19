@@ -27,3 +27,13 @@ test('one render task yields to delivery; stopped/replaced rounds cannot rearm a
  for(let i=0;i<300;i++){turn.request();assert.equal(messages.length,1);next();}
  assert.equal(turn.pending,null);assert.equal(messages.length,0);assert.equal(calls.length,302);
 });
+
+test('pending message tasks precede the next render request; unsupported scheduling falls back without a timer',async()=>{
+ const tasks=[],messages=[],calls=[],channel={port1:{},port2:{postMessage:id=>messages.push(id)}};
+ const turn=new FrameTurn(()=>calls.push('render'),channel,(run,options)=>{assert.equal(options.priority,'background');tasks.push(run);return Promise.resolve();});
+ turn.request();turn.request();assert.equal(tasks.length,1);assert.equal(messages.length,0);
+ calls.push('socket1','socket2','input');tasks.shift()();assert.deepEqual(calls,['socket1','socket2','input','render']);
+ turn.request();turn.cancel();tasks.shift()();assert.equal(calls.length,4);
+ const fallback=new FrameTurn(()=>calls.push('fallback'),channel,()=>Promise.reject(Error('unsupported')));
+ fallback.request();await Promise.resolve();assert.equal(messages.length,1);channel.port1.onmessage({data:messages.shift()});assert.equal(calls.at(-1),'fallback');
+});

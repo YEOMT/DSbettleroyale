@@ -1,0 +1,729 @@
+{
+  "head": "006ffdccdbea946ae452dacebb00c62844a7bdc8",
+  "comparisons": [
+    {
+      "baseSha": "9b2d45ff13d4ee0890179103ef66e6edb1bf174c",
+      "renderer": "pixi",
+      "quality": "balanced",
+      "players": 20,
+      "rounds": 5,
+      "attempts": [
+        {
+          "label": "baseline-build",
+          "command": "tools/build.mjs",
+          "ms": 3089.5789529999997,
+          "exit": 0,
+          "status": "PASS"
+        },
+        {
+          "label": "baseline",
+          "command": "tests/combat/recovery356-live.mjs baseline pixi balanced",
+          "ms": 224065.93978000002,
+          "exit": 0,
+          "status": "PASS",
+          "report": "live-baseline-pixi-balanced-solo-20-prepared-r5/report.json",
+          "liveStatus": "PASS",
+          "liveMs": 223432.460189
+        },
+        {
+          "label": "candidate",
+          "command": "tests/combat/recovery356-live.mjs candidate pixi balanced",
+          "ms": 217284.77921299997,
+          "exit": 0,
+          "status": "PASS",
+          "report": "live-candidate-pixi-balanced-solo-20-prepared-r5/report.json",
+          "liveStatus": "PASS",
+          "liveMs": 216656.837745
+        }
+      ],
+      "comparison": [
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 20,
+          "before": {
+            "stepP95": 1.105714999997872,
+            "snapshotP95": 2.903848999994807,
+            "windowMs": 2527.411245000003,
+            "serverCpuMs": 398.535,
+            "cpuMsPerSecond": 157.6850624481571,
+            "rss": 180297728,
+            "bytes": 32049883,
+            "bytesPerSecond": 12680913.350925589,
+            "hostDrawP95": 15.699999999953434,
+            "studentDrawP95": 16.599999999976717,
+            "studentGapP95": 333.2999999999993,
+            "hostGapP95": 316.59999999999854
+          },
+          "after": {
+            "stepP95": 1.3448960000023362,
+            "snapshotP95": 2.2373700000025565,
+            "windowMs": 2523.392691000001,
+            "serverCpuMs": 358.082,
+            "cpuMsPerSecond": 141.9049842211023,
+            "rss": 182292480,
+            "bytes": 32134001,
+            "bytesPerSecond": 12734443.241676169,
+            "hostDrawP95": 24.300000000046566,
+            "studentDrawP95": 20,
+            "studentGapP95": 324.80000000004657,
+            "hostGapP95": 317.20000000006985
+          },
+          "ratios": {
+            "stepP95": 1.2163134261585713,
+            "snapshotP95": 0.7704842779381977,
+            "windowMs": 0.9984100118221948,
+            "serverCpuMs": 0.898495740650131,
+            "cpuMsPerSecond": 0.8999266133262122,
+            "rss": 1.0110636557771822,
+            "bytes": 1.0026245961646725,
+            "bytesPerSecond": 1.0042212961534567,
+            "hostDrawP95": 1.5477707006444994,
+            "studentDrawP95": 1.2048192771101236,
+            "studentGapP95": 0.9744974497451163,
+            "hostGapP95": 1.0018951358182921
+          }
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 6,
+          "before": {
+            "stepP95": 0.5381739999938873,
+            "snapshotP95": 1.0628989999968326,
+            "windowMs": 2519.9211050000013,
+            "serverCpuMs": 186.559,
+            "cpuMsPerSecond": 74.03366701831719,
+            "rss": 187408384,
+            "bytes": 5001041,
+            "bytesPerSecond": 1984602.2123775964,
+            "hostDrawP95": 36.40000000002328,
+            "studentDrawP95": 22.900000000023283,
+            "studentGapP95": 216.79999999999563,
+            "hostGapP95": 233.3000000000029
+          },
+          "after": {
+            "stepP95": 0.6005809999987832,
+            "snapshotP95": 2.2649920000039856,
+            "windowMs": 2524.445383000002,
+            "serverCpuMs": 224.317,
+            "cpuMsPerSecond": 88.85793351307368,
+            "rss": 192364544,
+            "bytes": 5023034,
+            "bytesPerSecond": 1989757.446853821,
+            "hostDrawP95": 33.5,
+            "studentDrawP95": 22.70000000006985,
+            "studentGapP95": 211.5,
+            "hostGapP95": 214.70000000006985
+          },
+          "ratios": {
+            "stepP95": 1.1159606372764288,
+            "snapshotP95": 2.130956939474715,
+            "windowMs": 1.0017954046224002,
+            "serverCpuMs": 1.2023917366623964,
+            "cpuMsPerSecond": 1.2002368259171696,
+            "rss": 1.0264457752327665,
+            "bytes": 1.0043976844021074,
+            "bytesPerSecond": 1.0025976160079195,
+            "hostDrawP95": 0.9203296703290816,
+            "studentDrawP95": 0.9912663755478939,
+            "studentGapP95": 0.975553505535075,
+            "hostGapP95": 0.9202743249038455
+          }
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 5,
+          "before": {
+            "stepP95": 0.3581110000013723,
+            "snapshotP95": 0.8028039999990142,
+            "windowMs": 2515.667063000001,
+            "serverCpuMs": 182.931,
+            "cpuMsPerSecond": 72.71669716971603,
+            "rss": 189472768,
+            "bytes": 3141756,
+            "bytesPerSecond": 1248875.9129570075,
+            "hostDrawP95": 17.400000000023283,
+            "studentDrawP95": 12.5,
+            "studentGapP95": 216.6999999999971,
+            "hostGapP95": 216.70000000000437
+          },
+          "after": {
+            "stepP95": 0.9012839999995776,
+            "snapshotP95": 1.0401649999985239,
+            "windowMs": 2516.657561,
+            "serverCpuMs": 217.015,
+            "cpuMsPerSecond": 86.23143782572015,
+            "rss": 195080192,
+            "bytes": 3560833,
+            "bytesPerSecond": 1414905.6491361083,
+            "hostDrawP95": 24.400000000023283,
+            "studentDrawP95": 25.199999999953434,
+            "studentGapP95": 229.79999999993015,
+            "hostGapP95": 233.19999999995343
+          },
+          "ratios": {
+            "stepP95": 2.516772732465978,
+            "snapshotP95": 1.2956649443697354,
+            "windowMs": 1.0003937317519347,
+            "serverCpuMs": 1.186321618533764,
+            "cpuMsPerSecond": 1.1858547098813028,
+            "rss": 1.0295948808854685,
+            "bytes": 1.1333894166192409,
+            "bytesPerSecond": 1.1329433408528045,
+            "hostDrawP95": 1.4022988505741742,
+            "studentDrawP95": 2.0159999999962745,
+            "studentGapP95": 1.0604522381169046,
+            "hostGapP95": 1.0761421319794588
+          }
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 3,
+          "before": {
+            "stepP95": 0.25972799999726703,
+            "snapshotP95": 0.5671489999949699,
+            "windowMs": 2511.3824620000014,
+            "serverCpuMs": 125.214,
+            "cpuMsPerSecond": 49.8585945767427,
+            "rss": 190111744,
+            "bytes": 1551501,
+            "bytesPerSecond": 617787.6223458309,
+            "hostDrawP95": 15.400000000023283,
+            "studentDrawP95": 8.699999999953434,
+            "studentGapP95": 216.70000000000437,
+            "hostGapP95": 216.6999999999971
+          },
+          "after": {
+            "stepP95": 0.2191889999958221,
+            "snapshotP95": 0.7110420000026352,
+            "windowMs": 2509.4039730000004,
+            "serverCpuMs": 151.024,
+            "cpuMsPerSecond": 60.18321546667926,
+            "rss": 195780608,
+            "bytes": 1679537,
+            "bytesPerSecond": 669297.1789600333,
+            "hostDrawP95": 11.400000000023283,
+            "studentDrawP95": 10.900000000023283,
+            "studentGapP95": 220.19999999995343,
+            "hostGapP95": 214.80000000004657
+          },
+          "ratios": {
+            "stepP95": 0.8439174828979874,
+            "snapshotP95": 1.2537128691207098,
+            "windowMs": 0.9992121912811219,
+            "serverCpuMs": 1.2061271103870175,
+            "cpuMsPerSecond": 1.207078057004692,
+            "rss": 1.0298185892187701,
+            "bytes": 1.0825239558337378,
+            "bytesPerSecond": 1.083377450034711,
+            "hostDrawP95": 0.740259740260133,
+            "studentDrawP95": 1.252873563227773,
+            "studentGapP95": 1.016151361328791,
+            "hostGapP95": 0.9912321181358996
+          }
+        },
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 2,
+          "before": {
+            "stepP95": 0.24480600000242703,
+            "snapshotP95": 0.4597829999984242,
+            "windowMs": 2520.117271999996,
+            "serverCpuMs": 115.928,
+            "cpuMsPerSecond": 46.001033875696635,
+            "rss": 190574592,
+            "bytes": 1036407,
+            "bytesPerSecond": 411253.48074674903,
+            "hostDrawP95": 13.599999999976717,
+            "studentDrawP95": 7.799999999930151,
+            "studentGapP95": 216.6999999999971,
+            "hostGapP95": 216.59999999999854
+          },
+          "after": {
+            "stepP95": 0.2752420000033453,
+            "snapshotP95": 0.6094789999988279,
+            "windowMs": 2518.2238230000003,
+            "serverCpuMs": 121.331,
+            "cpuMsPerSecond": 48.181181867883545,
+            "rss": 196276224,
+            "bytes": 1060390,
+            "bytesPerSecond": 421086.4778241755,
+            "hostDrawP95": 9.100000000093132,
+            "studentDrawP95": 9.5,
+            "studentGapP95": 209.80000000004657,
+            "hostGapP95": 212.79999999993015
+          },
+          "ratios": {
+            "stepP95": 1.124327018131159,
+            "snapshotP95": 1.3255796756315845,
+            "windowMs": 0.9992486663136542,
+            "serverCpuMs": 1.046606514388241,
+            "cpuMsPerSecond": 1.0473934563748737,
+            "rss": 1.0299181120639629,
+            "bytes": 1.0231405229798718,
+            "bytesPerSecond": 1.0239098209201094,
+            "hostDrawP95": 0.669117647066817,
+            "studentDrawP95": 1.2179487179596247,
+            "studentGapP95": 0.9681587448087189,
+            "hostGapP95": 0.9824561403505613
+          }
+        },
+        {
+          "round": 2,
+          "mode": "team-elim",
+          "alive": 20,
+          "before": {
+            "stepP95": 1.0845610000105808,
+            "snapshotP95": 3.66226800000004,
+            "windowMs": 2529.462405000013,
+            "serverCpuMs": 516.425,
+            "cpuMsPerSecond": 204.16393577511872,
+            "rss": 207695872,
+            "bytes": 33294041,
+            "bytesPerSecond": 13162496.874508727,
+            "hostDrawP95": 12.300000000046566,
+            "studentDrawP95": 18.400000000023283,
+            "studentGapP95": 316.6999999999971,
+            "hostGapP95": 300.1000000000058
+          },
+          "after": {
+            "stepP95": 1.2527600000030361,
+            "snapshotP95": 3.4527450000023236,
+            "windowMs": 2519.5401640000055,
+            "serverCpuMs": 468.494,
+            "cpuMsPerSecond": 185.94424756310374,
+            "rss": 265478144,
+            "bytes": 33884836,
+            "bytesPerSecond": 13448817.559710838,
+            "hostDrawP95": 15.099999999976717,
+            "studentDrawP95": 17.099999999976717,
+            "studentGapP95": 296.9000000000233,
+            "hostGapP95": 326.5
+          },
+          "ratios": {
+            "stepP95": 1.155084868431388,
+            "snapshotP95": 0.9427887309181867,
+            "windowMs": 0.9960773320922287,
+            "serverCpuMs": 0.9071869100062934,
+            "cpuMsPerSecond": 0.9107595171358595,
+            "rss": 1.2782061648293135,
+            "bytes": 1.0177447669989954,
+            "bytesPerSecond": 1.0217527637751327,
+            "hostDrawP95": 1.2276422764162236,
+            "studentDrawP95": 0.9293478260845152,
+            "studentGapP95": 0.9374802652353206,
+            "hostGapP95": 1.0879706764411652
+          }
+        },
+        {
+          "round": 3,
+          "mode": "team-capture",
+          "alive": 20,
+          "before": {
+            "stepP95": 2.653556999997818,
+            "snapshotP95": 4.837371999994502,
+            "windowMs": 2532.5815740000107,
+            "serverCpuMs": 400.823,
+            "cpuMsPerSecond": 158.26657040978625,
+            "rss": 265588736,
+            "bytes": 34996637,
+            "bytesPerSecond": 13818562.592132265,
+            "hostDrawP95": 28.099999999976717,
+            "studentDrawP95": 19.400000000023283,
+            "studentGapP95": 333.3999999999942,
+            "hostGapP95": 316.6000000000058
+          },
+          "after": {
+            "stepP95": 1.4819489999936195,
+            "snapshotP95": 4.018610999992234,
+            "windowMs": 2539.285422000001,
+            "serverCpuMs": 413.712,
+            "cpuMsPerSecond": 162.9245757155376,
+            "rss": 282574848,
+            "bytes": 36796510,
+            "bytesPerSecond": 14490891.682045812,
+            "hostDrawP95": 15.400000000023283,
+            "studentDrawP95": 15.5,
+            "studentGapP95": 321.30000000004657,
+            "hostGapP95": 350.79999999993015
+          },
+          "ratios": {
+            "stepP95": 0.5584764148630831,
+            "snapshotP95": 0.8307426015606822,
+            "windowMs": 1.0026470412913104,
+            "serverCpuMs": 1.032156338333878,
+            "cpuMsPerSecond": 1.0294313909355006,
+            "rss": 1.0639564473095726,
+            "bytes": 1.051429884534334,
+            "bytesPerSecond": 1.0486540539532196,
+            "hostDrawP95": 0.5480427046276172,
+            "studentDrawP95": 0.7989690721639896,
+            "studentGapP95": 0.9637072585484469,
+            "hostGapP95": 1.1080227416295758
+          }
+        },
+        {
+          "round": 4,
+          "mode": "solo",
+          "alive": 20,
+          "before": {
+            "stepP95": 1.0696549999993294,
+            "snapshotP95": 2.9328960000129882,
+            "windowMs": 2530.2750349999988,
+            "serverCpuMs": 332.461,
+            "cpuMsPerSecond": 131.39322619131804,
+            "rss": 299094016,
+            "bytes": 33172956,
+            "bytesPerSecond": 13110415.089717714,
+            "hostDrawP95": 15.099999999976717,
+            "studentDrawP95": 22.20000000006985,
+            "studentGapP95": 383.4000000000233,
+            "hostGapP95": 383.30000000001746
+          },
+          "after": {
+            "stepP95": 1.6225149999954738,
+            "snapshotP95": 4.148387000022922,
+            "windowMs": 2529.962614000018,
+            "serverCpuMs": 436.542,
+            "cpuMsPerSecond": 172.54879482578664,
+            "rss": 309329920,
+            "bytes": 31515396,
+            "bytesPerSecond": 12456862.336859724,
+            "hostDrawP95": 20.70000000006985,
+            "studentDrawP95": 18.5,
+            "studentGapP95": 392.0999999999767,
+            "hostGapP95": 401.4000000000233
+          },
+          "ratios": {
+            "stepP95": 1.5168582393355716,
+            "snapshotP95": 1.4144337201198238,
+            "windowMs": 0.9998765268614443,
+            "serverCpuMs": 1.3130622839972206,
+            "cpuMsPerSecond": 1.3132244319394604,
+            "rss": 1.034223031730598,
+            "bytes": 0.9500327917717071,
+            "bytesPerSecond": 0.9501501097878616,
+            "hostDrawP95": 1.3708609271590575,
+            "studentDrawP95": 0.8333333333307114,
+            "studentGapP95": 1.0226917057901745,
+            "hostGapP95": 1.0472214975215366
+          }
+        },
+        {
+          "round": 5,
+          "mode": "team-capture",
+          "alive": 20,
+          "before": {
+            "stepP95": 0.9450420000066515,
+            "snapshotP95": 2.1101610000187065,
+            "windowMs": 2534.8492030000198,
+            "serverCpuMs": 388.207,
+            "cpuMsPerSecond": 153.14796617508966,
+            "rss": 314757120,
+            "bytes": 34203053,
+            "bytesPerSecond": 13493131.251957845,
+            "hostDrawP95": 17.800000000046566,
+            "studentDrawP95": 16.099999999976717,
+            "studentGapP95": 316.69999999998254,
+            "hostGapP95": 316.5999999999767
+          },
+          "after": {
+            "stepP95": 1.1847790000028908,
+            "snapshotP95": 2.432514000014635,
+            "windowMs": 2525.6551919999765,
+            "serverCpuMs": 510.168,
+            "cpuMsPerSecond": 201.9943187874415,
+            "rss": 315273216,
+            "bytes": 35318023,
+            "bytesPerSecond": 13983707.32151799,
+            "hostDrawP95": 12.5,
+            "studentDrawP95": 14.800000000046566,
+            "studentGapP95": 329.0999999999767,
+            "hostGapP95": 332.9000000000233
+          },
+          "ratios": {
+            "stepP95": 1.2536786724765163,
+            "snapshotP95": 1.1527622773774469,
+            "windowMs": 0.9963729554447807,
+            "serverCpuMs": 1.3141648656515725,
+            "cpuMsPerSecond": 1.318948751539457,
+            "rss": 1.0016396642592231,
+            "bytes": 1.0325985519479797,
+            "bytesPerSecond": 1.0363574666546702,
+            "hostDrawP95": 0.7022471910093988,
+            "studentDrawP95": 0.9192546583893149,
+            "studentGapP95": 1.0391537732870062,
+            "hostGapP95": 1.0514845230576366
+          }
+        }
+      ],
+      "performanceStatus": "PARTIAL",
+      "scope": "same runner, sequential production builds; synthetic peers + three real browsers; physical devices NOT_RUN",
+      "functionStatus": "PASS",
+      "expectedComparisons": 9
+    },
+    {
+      "baseSha": "9b2d45ff13d4ee0890179103ef66e6edb1bf174c",
+      "renderer": "pixi",
+      "quality": "high",
+      "players": 30,
+      "rounds": 3,
+      "attempts": [
+        {
+          "label": "baseline-build",
+          "command": "tools/build.mjs",
+          "ms": 3426.539365,
+          "exit": 0,
+          "status": "PASS"
+        },
+        {
+          "label": "baseline",
+          "command": "tests/combat/recovery356-live.mjs baseline pixi high",
+          "ms": 186423.64708700002,
+          "exit": 0,
+          "status": "PASS",
+          "report": "live-baseline-pixi-high-solo-30-prepared-r3/report.json",
+          "liveStatus": "PASS",
+          "liveMs": 185844.419204
+        },
+        {
+          "label": "candidate",
+          "command": "tests/combat/recovery356-live.mjs candidate pixi high",
+          "ms": 186975.100526,
+          "exit": 0,
+          "status": "PASS",
+          "report": "live-candidate-pixi-high-solo-30-prepared-r3/report.json",
+          "liveStatus": "PASS",
+          "liveMs": 186393.50402800002
+        }
+      ],
+      "comparison": [
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 30,
+          "before": {
+            "stepP95": 2.6170210000054794,
+            "snapshotP95": 8.618516999995336,
+            "windowMs": 8025.0121,
+            "serverCpuMs": 1790.537,
+            "cpuMsPerSecond": 223.11953897240852,
+            "rss": 297893888,
+            "bytes": 238152579,
+            "bytesPerSecond": 29676289.086218324,
+            "hostDrawP95": 37.29999999998836,
+            "studentDrawP95": 32.89999999999418,
+            "studentGapP95": 416.70000000000437,
+            "hostGapP95": 500
+          },
+          "after": {
+            "stepP95": 3.371290000002773,
+            "snapshotP95": 8.293324000005668,
+            "windowMs": 8023.7499819999975,
+            "serverCpuMs": 2192.724,
+            "cpuMsPerSecond": 273.2792029810284,
+            "rss": 296566784,
+            "bytes": 234350046,
+            "bytesPerSecond": 29207047.393765625,
+            "hostDrawP95": 8.900000000023283,
+            "studentDrawP95": 36.399999999965075,
+            "studentGapP95": 421.5,
+            "hostGapP95": 414.70000000001164
+          },
+          "ratios": {
+            "stepP95": 1.2882166402163813,
+            "snapshotP95": 0.9622681025065166,
+            "windowMs": 0.9998427269661061,
+            "serverCpuMs": 1.2246180894335053,
+            "cpuMsPerSecond": 1.224810719131249,
+            "rss": 0.9955450445495545,
+            "bytes": 0.9840332067115679,
+            "bytesPerSecond": 0.9841879929431401,
+            "hostDrawP95": 0.23860589812402308,
+            "studentDrawP95": 1.1063829787225385,
+            "studentGapP95": 1.0115190784737116,
+            "hostGapP95": 0.8294000000000232
+          }
+        },
+        {
+          "round": 2,
+          "mode": "team-elim",
+          "alive": 30,
+          "before": {
+            "stepP95": 2.503093000006629,
+            "snapshotP95": 7.384701999995741,
+            "windowMs": 8031.594404999996,
+            "serverCpuMs": 1690.841,
+            "cpuMsPerSecond": 210.5237036057725,
+            "rss": 315502592,
+            "bytes": 243000310,
+            "bytesPerSecond": 30255550.485557683,
+            "hostDrawP95": 22.300000000046566,
+            "studentDrawP95": 22.70000000001164,
+            "studentGapP95": 366.6999999999971,
+            "hostGapP95": 366.6000000000058
+          },
+          "after": {
+            "stepP95": 2.5960529999865685,
+            "snapshotP95": 7.949910000010277,
+            "windowMs": 8022.930223999996,
+            "serverCpuMs": 1630.071,
+            "cpuMsPerSecond": 203.17651462601088,
+            "rss": 372011008,
+            "bytes": 261679231,
+            "bytesPerSecond": 32616416.158924844,
+            "hostDrawP95": 30.70000000001164,
+            "studentDrawP95": 23.29999999998836,
+            "studentGapP95": 411.6000000000349,
+            "hostGapP95": 404.70000000001164
+          },
+          "ratios": {
+            "stepP95": 1.037138052792962,
+            "snapshotP95": 1.076537685612075,
+            "windowMs": 0.9989212377315012,
+            "serverCpuMs": 0.9640593053989109,
+            "cpuMsPerSecond": 0.9651004193165821,
+            "rss": 1.1791060277565009,
+            "bytes": 1.0768678895924042,
+            "bytesPerSecond": 1.0780308285745488,
+            "hostDrawP95": 1.376681614347423,
+            "studentDrawP95": 1.0264317180606348,
+            "studentGapP95": 1.1224434142351738,
+            "hostGapP95": 1.1039279869067244
+          }
+        },
+        {
+          "round": 3,
+          "mode": "team-capture",
+          "alive": 30,
+          "before": {
+            "stepP95": 2.768653999999515,
+            "snapshotP95": 6.915095999996993,
+            "windowMs": 8022.929404999988,
+            "serverCpuMs": 1790.089,
+            "cpuMsPerSecond": 223.12161925348548,
+            "rss": 322949120,
+            "bytes": 251320279,
+            "bytesPerSecond": 31325251.20355342,
+            "hostDrawP95": 26.100000000034925,
+            "studentDrawP95": 19.399999999965075,
+            "studentGapP95": 416.6999999999971,
+            "hostGapP95": 433.29999999998836
+          },
+          "after": {
+            "stepP95": 3.6358609999879263,
+            "snapshotP95": 7.277352000004612,
+            "windowMs": 8056.766512999995,
+            "serverCpuMs": 1946.104,
+            "cpuMsPerSecond": 241.54901310095855,
+            "rss": 378413056,
+            "bytes": 272445548,
+            "bytesPerSecond": 33815743.27124852,
+            "hostDrawP95": 21.29999999998836,
+            "studentDrawP95": 29.70000000001164,
+            "studentGapP95": 500.1000000000349,
+            "hostGapP95": 513.5999999999767
+          },
+          "ratios": {
+            "stepP95": 1.313223320786405,
+            "snapshotP95": 1.0523862575454883,
+            "windowMs": 1.0042175502602477,
+            "serverCpuMs": 1.087154884477811,
+            "cpuMsPerSecond": 1.082589010913093,
+            "rss": 1.171742025493056,
+            "bytes": 1.0840571603853741,
+            "bytesPerSecond": 1.0795042967576454,
+            "hostDrawP95": 0.8160919540214504,
+            "studentDrawP95": 1.5309278350549025,
+            "studentGapP95": 1.2001439884810137,
+            "hostGapP95": 1.1853219478421197
+          }
+        }
+      ],
+      "performanceStatus": "PARTIAL",
+      "scope": "same runner, sequential production builds; synthetic peers + three real browsers; physical devices NOT_RUN",
+      "functionStatus": "PASS",
+      "expectedComparisons": 3
+    }
+  ],
+  "identityFailure": {
+    "status": "FAIL",
+    "ms": 31365.338669,
+    "error": "AssertionError [ERR_ASSERTION]: confirmed HP hit with preserved own attack on attacker/opponent/host\n    at checkPoses (file:///__w/DSbettleroyale/DSbettleroyale/tests/combat/recovery356-identity.mjs:54:59)\n    at async file:///__w/DSbettleroyale/DSbettleroyale/tests/combat/recovery356-identity.mjs:65:28",
+    "surfaces": [
+      {
+        "events": [
+          {
+            "type": "FX",
+            "tick": 20,
+            "kind": "swing",
+            "at": 25559.899999999965
+          },
+          {
+            "type": "FX",
+            "tick": 20,
+            "kind": "hit",
+            "at": 25560.399999999965
+          },
+          {
+            "type": "FX",
+            "tick": 20,
+            "kind": "swing",
+            "at": 25560.599999999977
+          }
+        ],
+        "concurrentSamples": 1
+      },
+      {
+        "events": [
+          {
+            "type": "FX",
+            "tick": 20,
+            "kind": "swing",
+            "at": 24743
+          },
+          {
+            "type": "FX",
+            "tick": 20,
+            "kind": "hit",
+            "at": 25073.5
+          },
+          {
+            "type": "FX",
+            "tick": 20,
+            "kind": "swing",
+            "at": 25409.5
+          }
+        ],
+        "concurrentSamples": 0
+      },
+      {
+        "events": [
+          {
+            "type": "FX",
+            "tick": 20,
+            "kind": "swing",
+            "at": 24351
+          },
+          {
+            "type": "FX",
+            "tick": 20,
+            "kind": "hit",
+            "at": 24352.600000000035
+          },
+          {
+            "type": "FX",
+            "tick": 20,
+            "kind": "swing",
+            "at": 24352.900000000023
+          }
+        ],
+        "concurrentSamples": 1
+      }
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 // Real WS/browser presentation, with a private authority fixture for exact contacts.
 // This is deliberately separate from continuous-play/performance measurements.
 import fs from 'node:fs';import assert from 'node:assert/strict';
+import {batchFixture} from '../simulation-fixture.mjs';
 import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';import {stepWorld} from '../../packages/engine/src/index.js';
 const renderer=process.argv[2]||'canvas',quality=process.argv[3]||'low',start=performance.now(),dir=`artifacts/v35-6/identity-${renderer}-${quality}`;fs.mkdirSync(dir,{recursive:true});
 const h=await auditHarness({players:3,renderer,quality,mode:'solo',viewport:{width:1024,height:720},studentContext:{hasTouch:true}}),report={status:'FAIL',renderer,quality,environment:{browser:process.env.PLAYWRIGHT_CHANNEL||'chromium',built:process.env.LOAD_BUILT==='1',physicalDevices:false},rows:[],scope:'real WS; fixture-driven exact authority contacts, not continuous-play evidence'};
@@ -25,7 +26,7 @@ try{
  });
  async function ticks(n){
   for(let i=0;i<n;i++){
-   stepWorld(w);if(i%3!==2&&i!==n-1)continue;
+   batchFixture(h.room,()=>stepWorld(w));if(i%3!==2&&i!==n-1)continue;
    h.publish();await delay(55);
    // This is a manually stepped contact fixture, not a real-time benchmark.
    // Do not advance its authority clock beyond an unobserved browser frame.

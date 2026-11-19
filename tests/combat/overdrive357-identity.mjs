@@ -1,6 +1,7 @@
 // Real WS/browser presentation, with a private authority fixture for exact contacts.
 // This is deliberately separate from continuous-play/performance measurements.
 import fs from 'node:fs';import assert from 'node:assert/strict';
+import {batchFixture} from '../simulation-fixture.mjs';
 import {installDeliveryProbe} from './delivery-probe.mjs';
 import {selectedScenes} from './overdrive357-scenes.mjs';
 import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';import {stepWorld} from '../../packages/engine/src/index.js';
@@ -29,7 +30,7 @@ try{
  for(const page of pages)await installDeliveryProbe(page);
  async function ticks(n){
   for(let i=0;i<n;i++){
-   stepWorld(w);if(i%3!==2&&i!==n-1)continue;
+   batchFixture(h.room,()=>stepWorld(w));if(i%3!==2&&i!==n-1)continue;
    h.publish();await delay(55);
    // This is a manually stepped contact fixture, not a real-time benchmark.
    // Do not advance its authority clock beyond an unobserved browser frame.
