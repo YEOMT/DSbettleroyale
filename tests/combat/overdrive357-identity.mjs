@@ -1,6 +1,7 @@
 // Real WS/browser presentation, with a private authority fixture for exact contacts.
 // This is deliberately separate from continuous-play/performance measurements.
 import fs from 'node:fs';import assert from 'node:assert/strict';
+import {installDeliveryProbe} from './delivery-probe.mjs';
 import {auditHarness,delay} from '../fidelity-v33-2/harness.mjs';import {stepWorld} from '../../packages/engine/src/index.js';
 const renderer=process.argv[2]||'canvas',quality=process.argv[3]||'low',start=performance.now(),dir=`artifacts/v35-7/identity-${renderer}-${quality}`;fs.mkdirSync(dir,{recursive:true});
 const h=await auditHarness({players:3,renderer,quality,mode:'solo',viewport:{width:1024,height:720},studentContext:{hasTouch:true}}),report={status:'FAIL',renderer,quality,environment:{browser:process.env.PLAYWRIGHT_CHANNEL||'chromium',built:process.env.LOAD_BUILT==='1',physicalDevices:false},rows:[],scope:'real WS; fixture-driven exact authority contacts, not continuous-play evidence'};
@@ -13,7 +14,8 @@ try{
  report.wallContacts=[];const emitFx=g.emitStudentFx;
  g.emitStudentFx=function(kind,pos,options){if(options?.style==='heavy-wall')report.wallContacts.push({kind,pos:{x:pos.x,y:pos.y},...options,authority:authorityEvidence()});return emitFx.apply(this,arguments);};
  for(const page of pages)await page.evaluate(async()=>{
-  window.m=await import('/src/main.js');window.observed={events:[],frames:[],sounds:[],poses:[]};
+  window.m=await import('/src/main.js');window.observed={events:[],frames:[],sounds:[],poses:[],accepted:[]};
+  const accept=m.renderer.poses.accept.bind(m.renderer.poses);m.renderer.poses.accept=(event,actors,now)=>{accept(event,actors,now);const id=event.data?.owner||event.data?.sourceId;const entry=m.renderer.poses.active.get(id);if(entry){observed.accepted.push({id,event:event.type,tick:event.serverTick,at:now,entry:{...entry}});if(observed.accepted.length>100)observed.accepted.shift();}};
   m.net.addEventListener('event',e=>{observed.events.push({...e.detail,observedAt:performance.now(),pendingSound:m.controls.sounds.get('skill')||null});if(observed.events.length>800)observed.events.shift();});
   const draw=m.renderer.draw.bind(m.renderer);m.renderer.draw=(view,t)=>{observed.frames.push({tick:view.renderTick,sourceTick:m.timeline.samples.at(-1)?.state.serverTick,shots:view.shots.map(q=>({id:q.id,owner:q.owner,radius:q.radius,style:q.style,color:q.color,returned:q.returned,crit:q.crit,giant:q.giant})),fx:view.effects.map(f=>({style:f.style,kind:f.kind,terminal:f.terminal}))});if(observed.frames.length>160)observed.frames.shift();return draw(view,t);};
   const sample=m.renderer.poses.sample.bind(m.renderer.poses);m.renderer.poses.sample=(actor,zoom,...args)=>{
@@ -23,6 +25,7 @@ try{
   };
   const action=m.audio.action.bind(m.audio);m.audio.action=(...args)=>{observed.sounds.push(args[0]);return action(...args);};
  });
+ for(const page of pages)await installDeliveryProbe(page);
  async function ticks(n){
   for(let i=0;i<n;i++){
    stepWorld(w);if(i%3!==2&&i!==n-1)continue;
@@ -83,5 +86,5 @@ try{
  }
  await h.command('END');await h.command('REMATCH');for(const page of pages){await page.waitForFunction(()=>m.ui.room.phase==='LOBBY');assert.deepEqual(await page.evaluate(()=>['active','hurts','walls','contacts'].map(k=>m.renderer.poses[k].size)),[0,0,0,0]);}
  assert.deepEqual(h.errors,[]);report.status='PASS';
-}catch(error){report.error=error.stack;report.authorityFailure=authorityEvidence();throw error;}
-finally{report.ms=performance.now()-start;report.errors=h.errors;fs.writeFileSync(dir+'/report.json',JSON.stringify(report,null,2));await h.close();console.log(JSON.stringify({status:report.status,ms:report.ms,rows:report.rows.length,dir}));}
+}catch(error){report.error=error.stack;report.authorityFailure=authorityEvidence();report.failureViews=await Promise.all(h.browser.contexts().flatMap(c=>c.pages()).map(async p=>({wire:p.deliveryWire,view:await p.evaluate(()=>({observed:window.observed,delivery:window.deliveryObserved,active:[...(window.m||window.auditApp).renderer.poses.active],now:performance.now()}))})));throw error;}
+finally{report.ms=performance.now()-start;report.errors=h.errors;report.delivery=await Promise.all(h.browser.contexts().flatMap(c=>c.pages()).map(async p=>({wire:p.deliveryWire,view:await p.evaluate(()=>window.deliveryObserved)})));fs.writeFileSync(dir+'/report.json',JSON.stringify(report,null,2));await h.close();console.log(JSON.stringify({status:report.status,ms:report.ms,rows:report.rows.length,dir}));}

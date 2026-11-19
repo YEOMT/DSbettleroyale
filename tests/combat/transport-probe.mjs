@@ -2,6 +2,10 @@
 export function serverTransportProbe(app){
  const events=[];let serial=0;const detailed=process.env.POLISH_ACTION_TRACE==='1';
  const record=value=>{events.push({at:Date.now(),...value});if(events.length>(detailed?1600:400))events.shift();};
+ const start=app.manager.startBattle;app.manager.startBattle=room=>{
+  if(!room._deliveryFinish){room._deliveryFinish=true;const finish=room.finish;room.finish=function(...args){record({kind:'finish-start',match:room.matchId,tick:room.world?.game.frame});try{return finish.apply(this,args);}finally{record({kind:'finish-end',match:room.matchId,phase:room.phase,presentation:room.resultPresentation?{startedAt:room.resultPresentation.startedAt,showResultsAt:room.resultPresentation.showResultsAt}:null});}};}
+  return start(room);
+ };
  app.wss.on('connection',(ws,request)=>{
   const peer=[...app.peers].find(p=>p.socket===ws),connection=++serial;let lastInboundAt=0,lastInboundType='';
   const browser=!!request?.headers['user-agent'];
@@ -23,6 +27,10 @@ export function serverTransportProbe(app){
    if(/^\{"type":"(ROOM_STATE|FULL_STATE)"/.test(prefix)){
     const m=JSON.parse(raw),room=m.payload.room||m.payload;
     record({kind:'send-room',...state(),serverTime:room.serverTime,phase:room.phase,presentation:room.resultPresentation?{startedAt:room.resultPresentation.startedAt,showResultsAt:room.resultPresentation.showResultsAt}:null});
+    if(room.phase==='RESULTS'){
+     const callback=typeof args.at(-1)==='function'?args.pop():null;
+     args.push(error=>{record({kind:'sent-room',...state(),serverTime:room.serverTime,error:error?.message});callback?.(error);});
+    }
    }
    if(detailed&&browser&&/^\{"type":"COMMAND_RESULT"/.test(prefix)){const m=JSON.parse(raw);record({kind:'send-result',...state(),requestId:m.payload.requestId,type:m.payload.command,accepted:m.payload.accepted,reason:m.payload.reason});}
    return send(raw,...args);

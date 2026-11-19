@@ -12,6 +12,7 @@ import {getTeacherState,getHostVisibleState,getVisibleState,getStaticState} from
 import {snapshotEncoder} from '../../apps/server/src/ws/snapshot.js';
 export const delay=ms=>new Promise(r=>setTimeout(r,ms));
 export async function auditHarness({players=20,mode='solo',renderer='canvas',hostRenderer=renderer,studentRenderer=renderer,quality='balanced',viewport={width:1366,height:768},audio=false,browserArgs=[],studentContext={},browserEngine='chromium',initScript,serverProcess=false}={}){
+ if(process.env.BROWSER_SOFTWARE_GL==='1')browserArgs=[...browserArgs,'--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'];
  let app,rpc,child;
  if(serverProcess){
   child=fork('tools/load/server.mjs',[],{windowsHide:true});const port=await new Promise((resolve,reject)=>{child.once('message',m=>resolve(m.port));child.once('error',reject);});let seq=0;const pending=new Map();

@@ -4,7 +4,7 @@ import {getHeapSpaceStatistics} from 'node:v8';
 let session;
 const post=(method,params={})=>new Promise((resolve,reject)=>session.post(method,params,(error,value)=>error?reject(error):resolve(value)));
 export async function recovery356Profile(type){
- if(process.env.RECOVERY356_PROFILE!=='1')throw Error('DIAGNOSTIC_ONLY');
+ if(process.env.RECOVERY356_PROFILE!=='1'&&process.env.RECOVERY357_PROFILE!=='1')throw Error('DIAGNOSTIC_ONLY');
  if(type==='diagnostic-356-start'){
   if(session)throw Error('PROFILE_ALREADY_ACTIVE');session=new Session();session.connect();
   await post('Profiler.enable');await post('Profiler.setSamplingInterval',{interval:1000});

@@ -94,6 +94,7 @@ jobs:
       - run: node tools/ci/recovery356-pair.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
         env:
           OVERDRIVE357: '1'
+          RECOVERY357_PROFILE: '1'
           POLISH_PLAYERS: ${{ matrix.players }}
           POLISH_ROUNDS: ${{ matrix.rounds }}
       - uses: actions/upload-artifact@v4
