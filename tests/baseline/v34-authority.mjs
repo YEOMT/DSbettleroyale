@@ -1,4 +1,5 @@
 import {expected355} from '../v35-5/approved.mjs';
+import {expected356} from '../v35-6/approved.mjs';
 // Explicit release deltas against the immutable legacy and main-790fb11 fixtures.
 // Clone the historical expectations so every unlisted key stays checked.
 const speeds={'emoji-139':[1,1.18],'emoji-028':[1.14,1.27],'emoji-007':[1.20,1.30],'emoji-132':[1.296,1.38]};
@@ -44,5 +45,5 @@ export function currentExpected(row, definition){
   }
  }
  if(changes[id]?.cooldown)result.timing.cooldown=changes[id].cooldown;
- return expected355(result);
+ return expected356(expected355(result));
 }

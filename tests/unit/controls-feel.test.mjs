@@ -66,7 +66,7 @@ test('pure shield absorbs have contact but no HP hurt pose; miss/duplicate/life/
  const p=new AttackPoses(),actors=[{...ready,abilityId:'emoji-025',radius:32},{...ready,id:'b',abilityId:'emoji-114',radius:32}];
  const hit={type:'FX',serverTick:10,data:{kind:'hit',sourceId:'a',targetId:'b',amount:0,style:'punch',geometry:{confirmed:true,lifeSeq:0,targetLife:0,absorbed:20}}};
  p.accept(hit,actors,100);assert.ok(p.contacts.has('a'));assert.equal(p.active.has('b'),false);assert.equal(p.sample(actors[0],1,11,140,true,false),null);
- p.accept({...hit,data:{...hit.data,amount:5}},actors,100);assert.equal(p.active.get('b').family,'hit');assert.equal(p.sample({...actors[1],lifeSeq:1},1,11,140,false,false),null);
+ p.accept({...hit,data:{...hit.data,amount:5}},actors,100);assert.equal(p.hurts.get('b').family,'hit');assert.equal(p.sample({...actors[1],lifeSeq:1},1,11,140,false,false),null);
  p.clear();p.accept({type:'COMMAND_RESULT',data:{},serverTick:10},actors,100);assert.equal(p.active.size,0);
 });
 test('request receipt cannot overwrite execution or a new request, stale epochs cannot flash, and prepared audio waits for confirmed FX',async t=>{

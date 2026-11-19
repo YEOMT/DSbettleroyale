@@ -13,6 +13,7 @@ if(process.env.LOAD_MEMORY_DIAGNOSTIC==='1'){const start=app.manager.startBattle
 const telemetry=loadTelemetry(app,{onOverload:value=>process.send?.({type:'fixture-overload',value})});
 process.send({ready:true,port:app.address.port});
 process.on('message',async m=>{try{let value;const room=[...app.manager.rooms.values()][0];
+ if(m.type.startsWith('diagnostic-356-'))value=await(await import('../../tests/combat/recovery356-profiler.mjs')).recovery356Profile(m.type);
  if(m.type.startsWith('polish-'))value=(await import('../../tests/combat/polish354-authority.mjs')).polishFixture(app,m);
  if(m.type.startsWith('classroom-'))value=(await import('../../tests/combat/classroom-authority.mjs')).classroomFixture(app,m);
  if(m.type==='fixture-origin'){app.config.origins.push(m.origin);value=true;}

@@ -1,5 +1,6 @@
 import fs from 'node:fs';import path from 'node:path';import http from 'node:http';import assert from 'node:assert/strict';import {createRequire} from 'node:module';import {pathToFileURL} from 'node:url';import {randomBytes} from 'node:crypto';import {execFileSync} from 'node:child_process';
 import {inspectBundle} from './validation.mjs';import {lifecycle} from './lifecycle.mjs';
+import {launchIsolatedBrowser} from './isolated-browser.mjs';
 const dir=path.resolve(process.env.CANDIDATE_DIR||'artifacts/candidate'),{manifest:m,manifestSha256}=inspectBundle(dir),req=createRequire(dir+'/ops/package.json'),{chromium}=req('playwright'),WebSocket=req('ws');
 if(process.env.RELEASE_SHA&&m.releaseId!==process.env.RELEASE_SHA)throw Error('SELECTED_RELEASE_MISMATCH');
 const local=process.env.LOCAL_ISOLATED_FIXTURE==='1',secret=randomBytes(24).toString('hex'),admin=randomBytes(24).toString('hex'),checks=[{name:'bundle',status:'PASS'}],started=Date.now();
@@ -23,7 +24,7 @@ try{
  const version=await(await fetch(base+'/version')).json();for(const k of ['buildId','contentHash','engineRevision','protocolVersion'])assert.equal(version[k],m.fingerprint[k]);checks.push({name:'http-version',status:'PASS'});
  await new Promise((resolve,reject)=>{const ws=new WebSocket(base.replace('http:','ws:')+'/ws',{origin:'https://invalid.example'}),timer=setTimeout(()=>{ws.terminate();reject(Error('ORIGIN_CHECK_TIMEOUT'));},5000);ws.on('error',()=>{});ws.on('unexpected-response',(_req,res)=>{clearTimeout(timer);res.resume();ws.terminate();res.statusCode===403?resolve():reject(Error('ORIGIN_RESPONSE_'+res.statusCode));});ws.on('open',()=>{clearTimeout(timer);ws.close();reject(Error('INVALID_ORIGIN_ACCEPTED'));});});checks.push({name:'origins',status:'PASS'});
  await new Promise(r=>web.listen(0,'127.0.0.1',r));const pagesUrl='http://127.0.0.1:'+web.address().port+m.targets.pages.base;
- browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHANNEL?{channel:process.env.PLAYWRIGHT_CHANNEL}:{})});
+ browser=await launchIsolatedBrowser(chromium);
  const result=await lifecycle({browser,urls:[base,pagesUrl,pagesUrl],secret,buildId:m.releaseId,configureContext:async(ctx,role,wire)=>{
   await ctx.routeWebSocket('**',route=>{
    assert.equal(route.url(),m.targets.production.ws);wire.open(route.url());

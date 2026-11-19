@@ -226,6 +226,6 @@ export const initializers=[
     add('emoji-056','비눗방울 놀이','F','원거리형',{type:'missile',homingTurnRate:.025},
         {kind:'bubble',shape:'line',cooldown:frames(7),range:590,radius:30,speed:7,damage:10,stun:30,stunCap:42,knockback:0,color:'#a5f3fc',emoji:'🫧',caps:{...projectileCaps,cc:true},
          description:'느리고 약하게 유도되는 큰 방울 · 피해 10.3 · 0.5초 기절. 평타도 약한 유도이며 기절 없음.',strength:'맞혔을 때 확실한 짧은 제어',success:'느린 방울을 이동 경로에 맞히기',failure:'쉽게 피할 수 있는 속도',counterplay:'방울 옆으로 움직이기'},
-        (ctx,s)=>shot(ctx,s,{homing:true,turnRate:.025,homingCone:Math.cos(1.22)}));
+        (ctx,s)=>shot(ctx,s,{homing:true,turnRate:s.turnRate??.025,homingCone:Math.cos(1.22)}));
 })(__brScope.BRRework);}]
 ];

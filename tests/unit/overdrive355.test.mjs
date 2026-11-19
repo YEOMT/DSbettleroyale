@@ -6,6 +6,7 @@ import {parryActive,parryProjectile} from '../../packages/engine/src/combat/parr
 import {manifest} from '../../packages/content/src/manifest.js';
 import {rosterMechanics,sameMechanics} from '../../tools/ci/roster-scope.mjs';
 import {approved355,expected355} from '../v35-5/approved.mjs';
+import {expected356} from '../v35-6/approved.mjs';
 import {giantOutline,overdriveEffect,overdriveShot} from '../../apps/client/src/render/overdrive-feedback.js';
 import {GameAudio} from '../../apps/client/src/audio/audio.js';
 import {AttackPoses} from '../../apps/client/src/render/attack-pose.js';
@@ -124,7 +125,7 @@ test('D01-D07: tier multipliers replace previous tier, preserve damage and widen
 });
 test('A01-A06/D10: all 86 immutable baseline projections change only reviewed leaves; modes/other augments unchanged',()=>{
  const actual=rosterMechanics(manifest);assert.equal(Object.keys(actual).length,86);assert.equal(new Set(approved355.map(d=>d.path.split('.')[0])).size,11);
- for(const [id,row]of Object.entries(base.mechanics))assert.ok(sameMechanics(actual[id],expected355({...row,id})),id);
+ for(const [id,row]of Object.entries(base.mechanics))assert.ok(sameMechanics(actual[id],expected356(expected355({...row,id}))),id);
  const w=createRuleContext();for(const [id,path]of Object.entries(base.paths))if(!['rapid','giant','wide'].includes(id))assert.deepEqual(w.BR_RUN_PATHS[id],path,id);
  assert.equal(manifest.roster.find(a=>a.id==='emoji-094').skill.projectile.damage,3.15);assert.equal(manifest.roster.find(a=>a.id==='emoji-137').skill.projectile.speed,65);
 });

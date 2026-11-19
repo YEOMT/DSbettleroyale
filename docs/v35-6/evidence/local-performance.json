@@ -1,0 +1,638 @@
+{
+  "baseline": "e328aad252e243428123e3d576ea8ffefcdb8604",
+  "candidateSourceHash": "37d530c5129d2a4bc0279d092e1eaa2638ee28005d92f99bc9dc62657cf6fcd1",
+  "scope": "Windows Edge, Intel Iris Xe D3D11, same PC sequential, synthetic20/30 + actual host/student2; not classroom or long-run evidence",
+  "functionStatus": "PASS",
+  "performanceStatus": "PARTIAL",
+  "comparisons": [
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "players": 20,
+      "round": 1,
+      "mode": "solo",
+      "alive": 20,
+      "before": {
+        "windowMs": 2538.693500000001,
+        "serverCpuMsPerSecond": 467.9572386347542,
+        "rssMiB": 163.6640625,
+        "heapMiB": 55.57781219482422,
+        "stepP95": 3.175100000000384,
+        "snapshotP95": 7.83469999999943,
+        "bytesPerSecond": 13549799.53271239,
+        "hostDrawP95": 3.600000023841858,
+        "studentDrawP95": 2.699999988079071,
+        "hostGapP95": 16.80000000000291,
+        "studentGapP95": 16.80000000000109,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "after": {
+        "windowMs": 2517.9130000000005,
+        "serverCpuMsPerSecond": 248.61859802145662,
+        "rssMiB": 136.6796875,
+        "heapMiB": 37.200897216796875,
+        "stepP95": 2.6243000000031316,
+        "snapshotP95": 5.466099999997823,
+        "bytesPerSecond": 13595535.270678531,
+        "hostDrawP95": 4,
+        "studentDrawP95": 2.600000023841858,
+        "hostGapP95": 16.80000000000109,
+        "studentGapP95": 16.80000000000109,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "over20Percent": []
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "players": 20,
+      "round": 1,
+      "mode": "solo",
+      "alive": 6,
+      "before": {
+        "windowMs": 2516.4588000000003,
+        "serverCpuMsPerSecond": 242.4041275780076,
+        "rssMiB": 169.30078125,
+        "heapMiB": 65.61434173583984,
+        "stepP95": 1.242099999999482,
+        "snapshotP95": 3.0535999999992782,
+        "bytesPerSecond": 2191252.2470067856,
+        "hostDrawP95": 3.399999976158142,
+        "studentDrawP95": 1.9000000357627869,
+        "hostGapP95": 16.899999999997817,
+        "studentGapP95": 16.899999999999636,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "after": {
+        "windowMs": 2525.7338999999993,
+        "serverCpuMsPerSecond": 210.63184843027216,
+        "rssMiB": 140.4140625,
+        "heapMiB": 47.178070068359375,
+        "stepP95": 1.010600000001432,
+        "snapshotP95": 2.2849999999998545,
+        "bytesPerSecond": 2247314.730977797,
+        "hostDrawP95": 4,
+        "studentDrawP95": 2.199999988079071,
+        "hostGapP95": 16.899999999997817,
+        "studentGapP95": 16.899999999999636,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "over20Percent": []
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "players": 20,
+      "round": 1,
+      "mode": "solo",
+      "alive": 5,
+      "before": {
+        "windowMs": 2524.294399999995,
+        "serverCpuMsPerSecond": 241.65168690308118,
+        "rssMiB": 170.5703125,
+        "heapMiB": 55.79148864746094,
+        "stepP95": 1.035200000005716,
+        "snapshotP95": 2.245999999999185,
+        "bytesPerSecond": 1277846.9896379781,
+        "hostDrawP95": 5.5,
+        "studentDrawP95": 1.199999988079071,
+        "hostGapP95": 16.900000000001455,
+        "studentGapP95": 16.899999999997817,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "after": {
+        "windowMs": 2519.3088000000025,
+        "serverCpuMsPerSecond": 167.50626203504692,
+        "rssMiB": 159.71484375,
+        "heapMiB": 56.26781463623047,
+        "stepP95": 1.0881999999983236,
+        "snapshotP95": 2.3029999999998836,
+        "bytesPerSecond": 1286931.5583702945,
+        "hostDrawP95": 4.099999964237213,
+        "studentDrawP95": 1.699999988079071,
+        "hostGapP95": 16.899999999997817,
+        "studentGapP95": 16.900000000001455,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "over20Percent": [
+        "studentDrawP95"
+      ]
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "players": 20,
+      "round": 1,
+      "mode": "solo",
+      "alive": 3,
+      "before": {
+        "windowMs": 2522.957100000007,
+        "serverCpuMsPerSecond": 160.92227648262386,
+        "rssMiB": 170.5078125,
+        "heapMiB": 61.95416259765625,
+        "stepP95": 0.7756000000008498,
+        "snapshotP95": 1.4102999999959138,
+        "bytesPerSecond": 686404.0613294595,
+        "hostDrawP95": 5.800000011920929,
+        "studentDrawP95": 1.199999988079071,
+        "hostGapP95": 16.900000000001455,
+        "studentGapP95": 16.900000000001455,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "after": {
+        "windowMs": 2518.673999999999,
+        "serverCpuMsPerSecond": 105.61112712482841,
+        "rssMiB": 168.22265625,
+        "heapMiB": 55.87928009033203,
+        "stepP95": 0.722700000002078,
+        "snapshotP95": 1.8408000000017637,
+        "bytesPerSecond": 709455.4515590349,
+        "hostDrawP95": 5,
+        "studentDrawP95": 1.5,
+        "hostGapP95": 16.900000000001455,
+        "studentGapP95": 16.80000000000291,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "over20Percent": [
+        "snapshotP95",
+        "studentDrawP95"
+      ]
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "players": 20,
+      "round": 1,
+      "mode": "solo",
+      "alive": 2,
+      "before": {
+        "windowMs": 2527.4649999999965,
+        "serverCpuMsPerSecond": 92.5828844316342,
+        "rssMiB": 170.40625,
+        "heapMiB": 66.45161437988281,
+        "stepP95": 0.5774999999994179,
+        "snapshotP95": 1.236799999998766,
+        "bytesPerSecond": 431374.9151818132,
+        "hostDrawP95": 4,
+        "studentDrawP95": 1.0999999642372131,
+        "hostGapP95": 16.900000000001455,
+        "studentGapP95": 16.899999999997817,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "after": {
+        "windowMs": 2515.159499999998,
+        "serverCpuMsPerSecond": 80.71058714169028,
+        "rssMiB": 168.25390625,
+        "heapMiB": 52.738372802734375,
+        "stepP95": 0.5364999999983411,
+        "snapshotP95": 1.105200000001787,
+        "bytesPerSecond": 444273.21607238066,
+        "hostDrawP95": 4.699999988079071,
+        "studentDrawP95": 1.2999999523162842,
+        "hostGapP95": 16.900000000001455,
+        "studentGapP95": 16.899999999997817,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "over20Percent": []
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "players": 20,
+      "round": 2,
+      "mode": "team-elim",
+      "alive": 20,
+      "before": {
+        "windowMs": 2533.161899999999,
+        "serverCpuMsPerSecond": 536.4836728359132,
+        "rssMiB": 197.921875,
+        "heapMiB": 59.07953643798828,
+        "stepP95": 3.918600000004517,
+        "snapshotP95": 7.391300000002957,
+        "bytesPerSecond": 14113174.921823991,
+        "hostDrawP95": 3,
+        "studentDrawP95": 2.100000023841858,
+        "hostGapP95": 16.900000000001455,
+        "studentGapP95": 16.900000000001455,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "after": {
+        "windowMs": 2510.5845999999947,
+        "serverCpuMsPerSecond": 280.01446356358656,
+        "rssMiB": 133.265625,
+        "heapMiB": 42.473121643066406,
+        "stepP95": 2.5235000000029686,
+        "snapshotP95": 4.631499999995867,
+        "bytesPerSecond": 13815967.802877495,
+        "hostDrawP95": 3.400000035762787,
+        "studentDrawP95": 2.800000011920929,
+        "hostGapP95": 16.900000000001455,
+        "studentGapP95": 16.900000000001455,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "over20Percent": [
+        "studentDrawP95"
+      ]
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "players": 20,
+      "round": 3,
+      "mode": "team-capture",
+      "alive": 20,
+      "before": {
+        "windowMs": 2558.650099999999,
+        "serverCpuMsPerSecond": 531.5302784073526,
+        "rssMiB": 236.00390625,
+        "heapMiB": 45.245948791503906,
+        "stepP95": 3.92160000000149,
+        "snapshotP95": 7.806899999995949,
+        "bytesPerSecond": 15590418.557035219,
+        "hostDrawP95": 3,
+        "studentDrawP95": 2.199999988079071,
+        "hostGapP95": 16.900000000001455,
+        "studentGapP95": 16.80000000000291,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "after": {
+        "windowMs": 2514.601600000002,
+        "serverCpuMsPerSecond": 260.87631535747033,
+        "rssMiB": 171.45703125,
+        "heapMiB": 42.44220733642578,
+        "stepP95": 3.1101999999955297,
+        "snapshotP95": 8.001000000003842,
+        "bytesPerSecond": 16132408.012466058,
+        "hostDrawP95": 3.900000035762787,
+        "studentDrawP95": 3.199999988079071,
+        "hostGapP95": 16.900000000001455,
+        "studentGapP95": 16.900000000001455,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "over20Percent": [
+        "hostDrawP95",
+        "studentDrawP95"
+      ]
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "players": 20,
+      "round": 4,
+      "mode": "solo",
+      "alive": 20,
+      "before": {
+        "windowMs": 2527.5522000000055,
+        "serverCpuMsPerSecond": 420.56500356352586,
+        "rssMiB": 165.5625,
+        "heapMiB": 59.18482971191406,
+        "stepP95": 2.7620999999926426,
+        "snapshotP95": 6.911600000006729,
+        "bytesPerSecond": 13023272.872465275,
+        "hostDrawP95": 3.400000035762787,
+        "studentDrawP95": 2.599999964237213,
+        "hostGapP95": 16.89999999999418,
+        "studentGapP95": 16.80000000000291,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "after": {
+        "windowMs": 2510.0432,
+        "serverCpuMsPerSecond": 367.32435521428476,
+        "rssMiB": 195.84765625,
+        "heapMiB": 49.02351379394531,
+        "stepP95": 3.1160999999992782,
+        "snapshotP95": 5.730000000010477,
+        "bytesPerSecond": 14387967.505897906,
+        "hostDrawP95": 4.899999976158142,
+        "studentDrawP95": 2.899999976158142,
+        "hostGapP95": 16.89999999999418,
+        "studentGapP95": 16.900000000001455,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "over20Percent": [
+        "hostDrawP95"
+      ]
+    },
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "players": 20,
+      "round": 5,
+      "mode": "team-capture",
+      "alive": 20,
+      "before": {
+        "windowMs": 2528.25989999999,
+        "serverCpuMsPerSecond": 550.1807784872138,
+        "rssMiB": 173.1328125,
+        "heapMiB": 40.57526397705078,
+        "stepP95": 5.3125,
+        "snapshotP95": 10.345700000005309,
+        "bytesPerSecond": 14774392.854152434,
+        "hostDrawP95": 2.5,
+        "studentDrawP95": 2.199999988079071,
+        "hostGapP95": 16.89999999999418,
+        "studentGapP95": 16.80000000000291,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "after": {
+        "windowMs": 2530.282699999996,
+        "serverCpuMsPerSecond": 265.58297221097115,
+        "rssMiB": 152.37890625,
+        "heapMiB": 61.19093322753906,
+        "stepP95": 3.1396999999997206,
+        "snapshotP95": 6.010099999999511,
+        "bytesPerSecond": 15605353.899783634,
+        "hostDrawP95": 3,
+        "studentDrawP95": 2.699999988079071,
+        "hostGapP95": 16.90000000000873,
+        "studentGapP95": 16.89999999999418,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "over20Percent": [
+        "heapMiB",
+        "studentDrawP95"
+      ]
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "players": 30,
+      "round": 1,
+      "mode": "solo",
+      "alive": 30,
+      "before": {
+        "windowMs": 8176.035100000001,
+        "serverCpuMsPerSecond": 366.9260177222086,
+        "rssMiB": 270.9921875,
+        "heapMiB": 102.97898864746094,
+        "stepP95": 4.480899999998655,
+        "snapshotP95": 8.983399999997346,
+        "bytesPerSecond": 26402504.925645437,
+        "hostDrawP95": 12.900000035762787,
+        "studentDrawP95": 12.100000023841858,
+        "hostGapP95": 16.899999999999636,
+        "studentGapP95": 16.899999999997817,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "after": {
+        "windowMs": 8019.089100000001,
+        "serverCpuMsPerSecond": 366.37577701936243,
+        "rssMiB": 269.08984375,
+        "heapMiB": 114.29269409179688,
+        "stepP95": 3.073100000001432,
+        "snapshotP95": 6.027399999999034,
+        "bytesPerSecond": 27182403.92166237,
+        "hostDrawP95": 10,
+        "studentDrawP95": 10.900000035762787,
+        "hostGapP95": 16.899999999997817,
+        "studentGapP95": 16.899999999997817,
+        "drawImpliedFPSNote": "rAF interval measures display cadence, not independent input latency"
+      },
+      "over20Percent": []
+    }
+  ],
+  "runs": [
+    {
+      "renderer": "canvas",
+      "quality": "low",
+      "players": 20,
+      "rounds": 5,
+      "baselineStatus": "PASS",
+      "candidateStatus": "PASS",
+      "baselineMs": 103205.9941,
+      "candidateMs": 89036.1445,
+      "candidateCleanup": [
+        {
+          "round": 1,
+          "connected": 20,
+          "browserResources": [
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            }
+          ]
+        },
+        {
+          "round": 2,
+          "connected": 20,
+          "browserResources": [
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            }
+          ]
+        },
+        {
+          "round": 3,
+          "connected": 20,
+          "browserResources": [
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            }
+          ]
+        },
+        {
+          "round": 4,
+          "connected": 20,
+          "browserResources": [
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            }
+          ]
+        },
+        {
+          "round": 5,
+          "connected": 20,
+          "browserResources": [
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "renderer": "pixi",
+      "quality": "high",
+      "players": 30,
+      "rounds": 1,
+      "baselineStatus": "PASS",
+      "candidateStatus": "PASS",
+      "baselineMs": 37775.0771,
+      "candidateMs": 28323.945499999998,
+      "candidateCleanup": [
+        {
+          "round": 1,
+          "connected": 30,
+          "browserResources": [
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            },
+            {
+              "sprites": 0,
+              "textures": 0,
+              "labels": 0,
+              "samples": 0,
+              "effects": 0,
+              "inputs": 0,
+              "pending": 0,
+              "poses": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "finalSourceHash": "ea84952e7cf0361c307deb83e6e0a0b174de253a93e3715e965a71f54ef91024",
+  "finalNote": "Rows precede the final neutral/axis-aligned renderer fastpath; final paired measurements are CI artifacts. Do not relabel these rows as final-head performance."
+}

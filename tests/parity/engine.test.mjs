@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {createRuleContext,createWorld,stepWorld,destroyWorld,getTeacherState} from '../../packages/engine/src/index.js';
 import {manifest} from '../../packages/content/src/manifest.js';
+import {normalize356Legacy} from '../v35-6/approved.mjs';
 const retired=new Set(['emoji-048','emoji-065','emoji-073','emoji-076']),reworked=new Set(['emoji-034','emoji-070']);
 const fixtures=JSON.parse(fs.readFileSync('tests/baseline/combat.json','utf8'));
 const approved355=JSON.parse(fs.readFileSync('tests/v35-5/combat.json','utf8'));
@@ -21,6 +22,7 @@ test('all active effective actor stats and final basic profiles match the real b
 for(const expected of fixtures)test(`${retired.has(expected.id)?'approved retirement rejects historical ID':reworked.has(expected.id)?'approved rework replaces historical skill only':'legacy parity with only approved balance deltas normalized'}: ${expected.id}`,()=>{
  if(retired.has(expected.id)){assert.throws(()=>createWorld(undefined,{},'retired-fixture',[{id:'retired',name:'Retired',abilityId:expected.id}]),/INVALID_ABILITY/);return;}
  const r=createRuleContext({seed:'fixture',matchId:'fixture|1|1'});
+ normalize356Legacy(r);
  // Preserve every original combat fixture/assertion. The live defaults are
  // separately checked by roster10 balance tests, never by rewriting goldens.
  Object.assign(r.ROSTER10_BALANCE,{bcHp:1,rangedPush:1,farmInitial:1,farmXpWave:1,farmHealWave:1,initialCap:42,xpWaveCap:8,xpCap:48,healCap:6,respawnExtra:3,genieHp:70,genieTicks:1800});

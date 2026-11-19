@@ -29,16 +29,22 @@ try{
    window.drawMs=[];window.bodyPeak={};const draw=r.draw.bind(r);r.draw=(view,now)=>{const start=performance.now();draw(view,now);drawMs.push(performance.now()-start);if(drawMs.length>1800)drawMs.shift();const next=new Set(objects());for(const o of next)if(!previous.has(o))objectCounts.created++;for(const o of previous)if(!next.has(o))objectCounts.removed++;previous=next;};
    window.contactDraws=[];window.sfxCalls=[];const attack=r.paint.brPaintAttack,fx=m.audio.controller.sfx;m.audio.controller.sfx=(kind,level)=>{sfxCalls.push({kind,level,tick:m.timeline.samples.at(-1)?.state.serverTick});if(sfxCalls.length>80)sfxCalls.shift();return fx(kind,level);};r.paint.brPaintAttack=(p,row,...args)=>{const out=attack(p,row,...args);if(out&&row[1]==='hit'&&row[13]?.confirmed){contactDraws.push({x:row[2],y:row[3],level:row[12],life:row[13].lifeSeq,targetLife:row[13].targetLife,cast:row[13].castId});if(contactDraws.length>80)contactDraws.shift();}return out;};
    window.bodyDraws=[];window.castEvents=[];window.poseSamples=[];let current=null;
-   const accept=r.poses.accept.bind(r.poses);r.poses.accept=(e,actors,now)=>{accept(e,actors,now);if(['SHOT_SPAWN','FX'].includes(e.type))castEvents.push([e.type,e.data.kind,e.data.geometry?.seq,e.data.actionSeq,e.serverTick,[...r.poses.active.values()].map(s=>[s.family,s.tick,s.id])]);if(castEvents.length>32)castEvents.shift();};
-   const sample=r.poses.sample.bind(r.poses);r.poses.sample=(a,z,t,n,rm,low)=>{const s=r.poses.active.get(a.id),out=sample(a,z,t,n,rm,low);if(s){poseSamples.push([s.family,a.lifeSeq,s.life,s.tick,t,Math.round(n-s.born),rm,!!out]);if(poseSamples.length>24)poseSamples.shift();}return out;};
+   const channels=['active','hurts','walls'];
+   const accept=r.poses.accept.bind(r.poses);r.poses.accept=(e,actors,now)=>{accept(e,actors,now);if(['SHOT_SPAWN','FX'].includes(e.type))castEvents.push([e.type,e.data.kind,e.data.geometry?.seq,e.data.actionSeq,e.serverTick,channels.flatMap(k=>[...(r.poses[k]?.values()||[])].map(s=>[s.family,s.tick,s.id]))]);if(castEvents.length>32)castEvents.shift();};
+   // Forward host LOD and every future argument. Observer wrappers must not
+   // change the production transform or hide v35.6's independent hurt channel.
+   const sample=r.poses.sample.bind(r.poses);r.poses.sample=(...args)=>{const [a,z,t,n,rm]=args,out=sample(...args);for(const key of channels){const s=r.poses[key]?.get(a.id);if(s){poseSamples.push([s.family,a.lifeSeq,s.life,s.tick,t,Math.round(n-s.born),rm,!!out]);if(poseSamples.length>24)poseSamples.shift();}}return out;};
    r.actorBody=(src,actor,...args)=>{current=actor;try{return body(src,actor,...args);}finally{current=null;}};
-   r.image=(src,x,y,radius,key,angle,alpha,squash)=>{
-    image(src,x,y,radius,key,angle,alpha,squash);
+   r.image=(...args)=>{
+    image(...args);const [src,x,y,radius,key,angle,alpha,squash,axis]=args;
     if(!current||(!angle&&!squash))return;
-    const pose=r.poses.active.get(current.id);
-    if(pose){const z=r.cameraPose?.zoom||1,key=pose.family;bodyPeak[key]=Math.max(bodyPeak[key]||0,Math.hypot(x-current.x,y-current.y)*z);}
-    if(pose&&!bodyDraws.some(row=>row.id===pose.id&&row.life===pose.life&&row.kind===pose.kind&&row.family===pose.family&&row.seq===pose.seq)){
-     bodyDraws.push({id:pose.id,life:pose.life,kind:pose.kind,family:pose.family,seq:pose.seq,dx:x-current.x,dy:y-current.y,angle,squash});
+    for(const channel of channels){
+     const pose=r.poses[channel]?.get(current.id);
+     if(!pose||pose.shownAt==null||channel==='hurts'&&!axis?.hurt&&!axis?.reflection||channel==='walls'&&!axis?.wall)continue;
+     const z=r.cameraPose?.zoom||1,key=pose.family;bodyPeak[key]=Math.max(bodyPeak[key]||0,Math.hypot(x-current.x,y-current.y)*z);
+     if(!bodyDraws.some(row=>row.id===pose.id&&row.life===pose.life&&row.kind===pose.kind&&row.family===pose.family&&row.seq===pose.seq)){
+      bodyDraws.push({id:pose.id,life:pose.life,kind:pose.kind,family:pose.family,seq:pose.seq,channel,dx:x-current.x,dy:y-current.y,angle,squash,axisX:axis?.axisX,axisY:axis?.axisY});
+     }
     }
    };
   });
@@ -80,7 +86,7 @@ try{
  // Each socket independently receives the rematch. The first student's lobby
  // cannot establish that the rival and teacher have left the old battle yet.
  await Promise.all(pages.map(page=>page.waitForFunction(matchId=>m.ui.room?.matchId===matchId&&m.ui.room.phase==='LOBBY'&&!m.renderer.enabled,h.room.matchId)));
- const resources=await Promise.all(pages.map(page=>page.evaluate(()=>({...objectCounts,retained:m.renderer.sprites.size+m.renderer.textures.size,poses:m.renderer.poses.active.size,contacts:m.renderer.poses.contacts?.size||0}))));
+ const resources=await Promise.all(pages.map(page=>page.evaluate(()=>({...objectCounts,retained:m.renderer.sprites.size+m.renderer.textures.size,poses:['active','hurts','walls','contacts','fired','hurtLedger','wallLedger','contactLedger','outputs'].reduce((n,k)=>n+(m.renderer.poses[k]?.size||0),0),contacts:m.renderer.poses.contacts?.size||0}))));
  for(const row of resources){assert.equal(row.retained,0,JSON.stringify(resources));assert.equal(row.poses,0);assert.equal(row.contacts,0);}
  checks.push({afterTwoRematches:resources});
  assert.deepEqual(h.errors,[]);console.log(checks);

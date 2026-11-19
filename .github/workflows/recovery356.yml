@@ -1,0 +1,76 @@
+name: v35.6 focused comparison
+on:
+  pull_request:
+    paths:
+      - 'apps/client/**'
+      - 'packages/**'
+      - 'tests/combat/recovery356*.mjs'
+      - 'tests/unit/recovery356*.test.mjs'
+      - 'tests/v35-6/**'
+      - 'tools/ci/recovery356-pair.mjs'
+      - '.github/workflows/recovery356.yml'
+  workflow_dispatch: null
+permissions:
+  contents: read
+concurrency:
+  group: recovery356-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  identity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [canvas, pixi]
+        quality: [low, balanced, high]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: npm run build
+      - run: node tests/combat/recovery356-identity.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
+        env: {CLASSROOM_BUNDLE: '1', LOAD_BUILT: '1'}
+      - run: node tests/combat/recovery356-grapple.mjs
+        if: matrix.renderer == 'canvas' && matrix.quality == 'low'
+        env: {CLASSROOM_BUNDLE: '1', LOAD_BUILT: '1'}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery356-identity-${{ matrix.renderer }}-${{ matrix.quality }}-${{ github.sha }}
+          path: artifacts/v35-6/
+          retention-days: 30
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {renderer: canvas, quality: low, players: 20, rounds: 5}
+          - {renderer: pixi, quality: balanced, players: 20, rounds: 5}
+          - {renderer: canvas, quality: low, players: 30, rounds: 1}
+          - {renderer: pixi, quality: high, players: 30, rounds: 1}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: npm run build
+      - run: node tools/ci/recovery356-pair.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
+        env:
+          POLISH_PLAYERS: ${{ matrix.players }}
+          POLISH_ROUNDS: ${{ matrix.rounds }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery356-pair-${{ matrix.renderer }}-${{ matrix.players }}-${{ github.sha }}
+          path: |
+            artifacts/v35-6/pair-*.json
+            artifacts/v35-6/*-r*.log
+            artifacts/v35-6/live-*/
+          retention-days: 30

@@ -29,8 +29,9 @@ test('all five F characters use each final HP/attack multiplier once and preserv
   if(id==='emoji-052')assert.equal(p.maxHp,1920);
  }finally{f.close();}}
 });
-test('authoritative flat-world walk over 60 inputs increases only the four designated kit speeds',t=>{
- const samples=[['139',135.99662214817153,1.18],['028',238.2632804463429,1.27/1.14],['007',217.64434271540966,1.3/1.2],['132',224.27964906464763,1.38/1.296],['114',299.5322207959889,1]];
+test('authoritative flat-world walk retains v34 speeds and the approved v35.6 zombie/fallout deltas',t=>{
+ // Original distances remain frozen; only the explicitly approved cumulative ratios change.
+ const samples=[['139',135.99662214817153,3.2/2.326968*((1-.22*.92)/.78)],['028',238.2632804463429,1.27/1.14],['007',217.64434271540966,1.4/1.2],['132',224.27964906464763,1.38/1.296],['114',299.5322207959889,1]];
  const rows=[];
  for(const [suffix,before,ratio] of samples){const f=fixture('emoji-'+suffix),{w,p,q,g,v}=f;try{
   q.pos=v(0,1800);g.rebuildSpatialGrid();

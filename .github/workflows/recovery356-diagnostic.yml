@@ -1,0 +1,36 @@
+name: v35.6 Pixi cause separation
+on:
+  workflow_dispatch: null
+permissions:
+  contents: read
+jobs:
+  comparison:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {players: 20, order: ABC}
+          - {players: 20, order: CBA}
+          - {players: 30, order: ABCCBA}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: node tools/ci/recovery356-diagnostic.mjs
+        env:
+          POLISH_PLAYERS: ${{ matrix.players }}
+          DIAGNOSTIC_ORDER: ${{ matrix.order }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovery356-diagnostic-${{ matrix.players }}-${{ matrix.order }}-${{ github.sha }}
+          path: |
+            artifacts/v35-6/diagnostic/diagnostic-*.json
+            artifacts/v35-6/diagnostic/diag-*.json
+            artifacts/v35-6/diagnostic/*.log
+          retention-days: 30

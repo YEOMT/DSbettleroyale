@@ -27,8 +27,8 @@ test('straight bullet opt-in shares client/server limits; excluded attacks and t
  for(const a of r.EMOJI_DB)for(const kind of ['attack','skill']){const p=r.brAimHelpProfile(a,kind);if(p.name==='melee'||p.name==='precision')assert.equal(p.max,r.BR_AIM_HELP[p.name].max);if(p.basic.type==='missile'&&kind==='attack')assert.equal(p.name,'none');}
  for(const id of ['emoji-141','emoji-142','emoji-144','emoji-147','emoji-150'])assert.equal(profile(id,'skill').name,'none');
 });
-test('archmage actual24/32 projectile edge hits, misses and wall radius use identical geometry',()=>{
- for(const radius of [24,32])for(const scenario of ['hit','miss','wall']){
+test('archmage actual27/35 projectile edge hits, misses and wall radius use identical geometry',()=>{
+ for(const radius of [27,35])for(const scenario of ['hit','miss','wall']){
   const f=fixture(),{w,p,q,R}=f;try{
    const ctx=R.context(p,w.game,new w.Vec2(1,0),1);q.pos=new w.Vec2(200,q.radius+radius+(scenario==='hit'?-.1:.1));w.game.rebuildSpatialGrid();
    if(scenario==='wall')w.game.walls=[new w.Wall(120,radius+5-.1,20,10,0,'wall')];
@@ -49,12 +49,12 @@ test('aim OFF/old/new geometry comparison, manual crate priority, stale life and
  t.samples[0].state.farm.b=[['manual',300,0,10,10,48]];assert.equal(assist.resolve('attack',raw).assist,undefined);t.samples[0].state.farm.b=[];t.samples[0].at-=500;assert.equal(assist.resolve('attack',raw).assist,undefined);
  }finally{destroyWorld(w);}
 });
-test('archmage casts14 fixed-direction rounds at24/32 with single size multiplier and unchanged timing/damage',()=>{
+test('archmage casts14 fixed-direction rounds at27/35 with single size multiplier and unchanged launch cadence/damage',()=>{
  for(const scale of [1,1.25]){const f=fixture(),{w,p,R,events}=f;try{
- p.run.mods.skillSize=scale;const definition=R.defs[p.ability.id].skill;assert.equal(definition.width,48);assert.equal(definition.finalRadius,32);
- const profile=getPrivateSelfState(w,'a').visualProfiles.skill;assert.equal(profile.radius,24*scale);assert.equal(profile.finalRadius,32*scale);
- assert.equal(R.cast(p,w.game,new w.Vec2(1,0),1),true);assert.equal(p.cooldown,1200);p.lastAimDir=new w.Vec2(0,1);f.tick(66);
- const shots=events.filter(e=>e.type==='SHOT_SPAWN'&&e.data.kind==='projectile');assert.equal(shots.length,14);assert.deepEqual(shots.map(e=>e.serverTick),Array.from({length:14},(_,i)=>10+i*4));assert.deepEqual(shots.map(e=>e.data.radius),Array.from({length:14},(_,i)=>(i===13?32:24)*scale));assert.ok(shots.every(e=>e.data.dx===1&&e.data.dy===0));assert.equal(definition.speed,31.5);assert.equal(definition.damage,11.55);assert.equal(definition.finalDamage,17.85);
+ p.run.mods.skillSize=scale;const definition=R.defs[p.ability.id].skill;assert.equal(definition.width,54);assert.equal(definition.finalRadius,35);
+ const profile=getPrivateSelfState(w,'a').visualProfiles.skill;assert.equal(profile.radius,27*scale);assert.equal(profile.finalRadius,35*scale);
+ assert.equal(R.cast(p,w.game,new w.Vec2(1,0),1),true);assert.equal(p.cooldown,990);p.lastAimDir=new w.Vec2(0,1);f.tick(66);
+ const shots=events.filter(e=>e.type==='SHOT_SPAWN'&&e.data.kind==='projectile');assert.equal(shots.length,14);assert.deepEqual(shots.map(e=>e.serverTick),Array.from({length:14},(_,i)=>10+i*4));assert.deepEqual(shots.map(e=>e.data.radius),Array.from({length:14},(_,i)=>(i===13?35:27)*scale));assert.ok(shots.every(e=>e.data.dx===1&&e.data.dy===0));assert.equal(definition.speed,31.5);assert.equal(definition.damage,11.55);assert.equal(definition.finalDamage,17.85);
  }finally{destroyWorld(w);}}
 });
 test('moving targets, manual lead and crossing targets retain the original intent safeguards',()=>{

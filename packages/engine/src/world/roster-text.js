@@ -78,9 +78,13 @@ export function applyRosterText(r){
    if(key==='132')s.description=`${s.durationFrames/60}초 지속 광선 · ${s.intervalFrames/60}초마다 피해 계수 ${s.damage} · 조준 회전 가능 · 이동/평타 잠금 · 벽 차단, 기절 없음`;
    const f=n=>String(Number(n.toFixed(4)));
    if(key==='000')s.description=`느린 거대 화염구 1발 · 충돌/종점 폭발 ${s.damage} · 2.5초 화염(0.5초마다 ${f(s.zoneDamage)}, 최대 2곳) · 기절 없음`;
-   if(key==='007')s.description=`0.6초 고정 원형 경고 후 방사능 폭발 ${s.damage} · 2.5초 오염(0.5초마다 ${f(s.zoneDamage)}) · 사망 폭발은 30, 생명당 1회`;
+   if(key==='007')s.description=`0.6초 고정 원형 경고 후 반경 ${s.radius} 방사능 폭발 ${s.damage} · 반경 ${s.zoneRadius} 오염 2.5초(0.5초마다 ${f(s.zoneDamage)}) · 사망 폭발은 30, 생명당 1회`;
    if(key==='010')s.description=`3.5초 중력장 1개 · 외곽 330 약한 흡입 / 내부 170 틱 피해 ${f(s.damage)} · 자연 종료 때 반경 225 붕괴 ${s.collapseDamage}`;
-   if(key==='014')s.description=`5초 독구름 1개 · 2.5초간 반경 110→310 확장 · 현재 범위에서 0.5초마다 피해 ${f(s.damage)} · 기절 없음`;
+   if(key==='014')s.description=`${s.durationFrames/60}초 독구름 1개 · ${s.growFrames/60}초간 반경 ${s.radius}→${s.maxRadius} 확장 · 현재 범위에서 0.5초마다 피해 ${f(s.damage)} · 기절 없음`;
+   if(key==='063')s.description=`굵은 산탄 ${s.count}발을 사거리 ${s.range}, 탄간각 ${s.spread}rad로 한 번에 발사합니다. 가까울수록 여러 탄을 맞힐 수 있으며 같은 일제사격의 밀침은 대상당 한 번만 적용됩니다.`;
+   if(key==='087'){s.description=`반경 ${s.radius}, 속도 ${s.speed}의 화살 한 발로 ${s.markDuration/60}초 표식을 남깁니다. 그 적에게 성공한 다음 일반 공격 ${s.markCharges}회가 강화되며 여러 탄도 한 공격당 한 번만 소비합니다.`;s.counterplay=`${s.markDuration/60}초 동안 엄폐하거나 거리 이탈`;}
+   if(key==='056')s.description=`반경 ${s.radius}, 속도 ${s.speed}의 유도 방울 · 피해 ${s.damage} · ${s.stunFrames/60}초 기절. 평타는 기존 약한 유도를 유지하며 기절 없음.`;
+   if(key==='142')s.description=`밧줄 ${s.range} · 첫 플레이어/벽/상자/포탑 표면까지 자신만 ${s.pullSpeed}/틱으로 이동 · 피해·기절·넉백 없음`;
    if(key==='121')s.description=`전방 ${s.range}×${s.width} 직사각형 쓸기 · 피해 ${s.damage} · 조준 방향 넉백 ${s.knockback} · 준비 ${s.windupFrames}틱 · 벽 너머/뒤쪽 제외 · 기절 없음`;
    if(key==='039')s.description=`${s.flightFrames}틱 비행 후 반경 ${s.radius} 폭발 ${s.damage} · 중심 ${s.innerRadius} 피해 ${s.centerDamage} · 벽 차단`;
    if(key==='072')s.description=`탄산탄 1발 · 접촉/종점 반경 ${s.blastRadius} 폭발 피해 계수 ${s.damage} · 넉백 ${s.knockback} · 기절 없음`;

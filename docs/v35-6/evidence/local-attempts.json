@@ -1,0 +1,215 @@
+[
+  {
+    "file": "identity-canvas-low-initial-fail.json",
+    "status": "FAIL",
+    "ms": 20792.7882,
+    "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:",
+    "passedScenes": [
+      "heavy MISS: attack body without victim hurt",
+      "confirmed HP hit with preserved own attack"
+    ],
+    "environment": null
+  },
+  {
+    "file": "identity-canvas-low-fixture-action-fail.json",
+    "status": "FAIL",
+    "ms": 25532.8306,
+    "error": "AssertionError [ERR_ASSERTION]: emoji-148 actual body on three views",
+    "passedScenes": [
+      "heavy MISS: attack body without victim hurt",
+      "confirmed HP hit with preserved own attack",
+      "actual wall normal: one bounded body rebound",
+      "wall proximity without actual impulse/contact has no rebound",
+      "full shield absorption: rim preserved, no HP hurt body",
+      "actual authority reflection: return body and original shot turn",
+      "emoji-094 distinct actual skill/body",
+      "emoji-023 distinct actual skill/body",
+      "emoji-025 distinct actual skill/body"
+    ],
+    "environment": null
+  },
+  {
+    "file": "identity-canvas-low/second-wall-fail.json",
+    "status": "FAIL",
+    "ms": 16589.3388,
+    "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:",
+    "passedScenes": [
+      "heavy MISS: attack body without victim hurt",
+      "confirmed HP hit with preserved own attack"
+    ],
+    "environment": null
+  },
+  {
+    "file": "identity-canvas-low/report.json",
+    "status": "PASS",
+    "ms": 22315.286300000003,
+    "error": "",
+    "passedScenes": [
+      "heavy MISS: attack body without victim hurt",
+      "confirmed HP hit with preserved own attack",
+      "actual wall normal: one bounded body rebound",
+      "wall proximity without actual impulse/contact has no rebound",
+      "full shield absorption: rim preserved, no HP hurt body",
+      "actual authority reflection: return body and original shot turn",
+      "emoji-094 distinct actual attack/skill body",
+      "emoji-023 distinct actual attack/skill body",
+      "emoji-025 distinct actual attack/skill body",
+      "emoji-148 distinct actual attack/skill body",
+      "reduced-motion: no affine body deformation",
+      "reconnect/rematch clears attack, hurt and wall lifetimes"
+    ],
+    "environment": {
+      "browser": "msedge",
+      "built": true,
+      "physicalDevices": false
+    }
+  },
+  {
+    "file": "identity-pixi-high/report.json",
+    "status": "PASS",
+    "ms": 22819.2211,
+    "error": "",
+    "passedScenes": [
+      "heavy MISS: attack body without victim hurt",
+      "confirmed HP hit with preserved own attack",
+      "actual wall normal: one bounded body rebound",
+      "wall proximity without actual impulse/contact has no rebound",
+      "full shield absorption: rim preserved, no HP hurt body",
+      "actual authority reflection: return body and original shot turn",
+      "emoji-094 distinct actual attack/skill body",
+      "emoji-023 distinct actual attack/skill body",
+      "emoji-025 distinct actual attack/skill body",
+      "emoji-148 distinct actual attack/skill body",
+      "reduced-motion: no affine body deformation",
+      "reconnect/rematch clears attack, hurt and wall lifetimes"
+    ],
+    "environment": {
+      "browser": "chrome",
+      "built": true,
+      "physicalDevices": false
+    }
+  },
+  {
+    "scope": "focused identity fixture diagnosis, not continuous-play or performance evidence",
+    "wallFailure": {
+      "status": "FAIL",
+      "evidence": "identity-canvas-low/second-wall-fail.json",
+      "cause": "native Wall constructor uses random spinSpeed; axis-aligned boundary assertion assumed angle=0 throughout",
+      "fix": "set spinSpeed=0 only on both test-only axis-aligned walls; original collision bound retained"
+    },
+    "attempts": [
+      {
+        "renderer": "canvas",
+        "quality": "low",
+        "browser": "default chromium",
+        "status": "INFRA_FAILURE",
+        "cause": "sandbox default Playwright Chromium executable not installed; browser did not launch"
+      },
+      {
+        "renderer": "canvas",
+        "quality": "low",
+        "browser": "chrome",
+        "status": "PASS",
+        "ms": 22344.1301,
+        "report": "identity-canvas-low/chrome-fixture-check.json"
+      },
+      {
+        "renderer": "canvas",
+        "quality": "low",
+        "browser": "msedge",
+        "status": "PASS",
+        "ms": 22315.2863,
+        "report": "identity-canvas-low/report.json"
+      },
+      {
+        "renderer": "pixi",
+        "quality": "high",
+        "browser": "chrome",
+        "status": "PASS",
+        "ms": 22819.2211,
+        "report": "identity-pixi-high/report.json"
+      }
+    ],
+    "imageReview": {
+      "files": [
+        "identity-canvas-low/attack-hurt.png",
+        "identity-canvas-low/wall-contact.png",
+        "identity-pixi-high/attack-hurt.png",
+        "identity-pixi-high/wall-contact.png"
+      ],
+      "result": "Actors, attack directions and stationary wall rendered; static screenshots do not demonstrate continuous feel.",
+      "observation": "Pixi attack-hurt screenshot includes LIFE_MISMATCH toast. Fixture increments actor life while connections remain active; stale life input rejection is a possible fixture explanation, not yet independently traced. Subsequent actual-action and reconnect/rematch assertions passed."
+    },
+    "untested": "Other renderer/quality combinations await CI; physical devices NOT_RUN"
+  },
+  {
+    "file": "quick-initial-results.json",
+    "ms": 249901,
+    "results": [
+      {
+        "command": "--test tests/unit/releaseops.test.mjs",
+        "status": "PASS",
+        "ms": 941
+      },
+      {
+        "command": "tools/check-boundaries.mjs",
+        "status": "PASS",
+        "ms": 634
+      },
+      {
+        "command": "tools/content/generate.mjs --check",
+        "status": "PASS",
+        "ms": 192
+      },
+      {
+        "command": "all Quick unit/parity/integration/roster10 tests (422)",
+        "status": "FAIL",
+        "ms": 248131
+      }
+    ]
+  },
+  {
+    "status": "PASS",
+    "name": "post-Quick polish354 targeted",
+    "tests": 17,
+    "ms": 1973.1084
+  },
+  {
+    "status": "PASS",
+    "name": "actual MULTICAST6/7/8+invalid99 cap8",
+    "tests": 1,
+    "ms": 214.722
+  },
+  {
+    "status": "PASS",
+    "name": "grapple in-flight reconnect",
+    "ms": 15990.113299999999,
+    "rows": [
+      {
+        "name": "actual skill input creates a live 800-range rope flight",
+        "status": "PASS"
+      },
+      {
+        "name": "same member and life resume the existing in-flight rope in FULL_STATE",
+        "status": "PASS"
+      },
+      {
+        "name": "first wall anchor stops self-pull safely; no target damage, stun or displacement",
+        "status": "PASS"
+      },
+      {
+        "name": "after restored arrival, real movement/basic input executes and host receives the shot",
+        "status": "PASS"
+      },
+      {
+        "name": "same-room rematch disposes grapple, queues and browser resources",
+        "status": "PASS"
+      }
+    ],
+    "environment": {
+      "browser": "msedge",
+      "built": true,
+      "physicalDevices": false
+    }
+  }
+]
