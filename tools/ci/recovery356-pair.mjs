@@ -26,6 +26,7 @@ try{
   fs.writeFileSync(marker,baseSha+'\n');
  }
  fs.copyFileSync('tests/combat/recovery356-live.mjs',base+'/tests/combat/recovery356-live.mjs');
+ fs.copyFileSync('tests/combat/recovery356-browser-meter.mjs',base+'/tests/combat/recovery356-browser-meter.mjs');
  const built=run('baseline-build',base,['tools/build.mjs']);
  if(built.status!=='PASS')throw Error('BASELINE_BUILD_FAILED');
  for(const [label,cwd]of [['baseline',base],['candidate',root]]){

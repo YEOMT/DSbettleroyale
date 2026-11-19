@@ -7,8 +7,10 @@ import {createHash} from 'node:crypto';
 const root=process.cwd(),out=path.resolve('artifacts/v35-6/diagnostic');fs.mkdirSync(out,{recursive:true});
 const baseSha='e328aad252e243428123e3d576ea8ffefcdb8604',headSha='5a0fccbe67378a7aae15800fe68c7a68df64a6af';
 const players=Number(process.env.POLISH_PLAYERS||20),rounds=players===20?5:1,quality=players===20?'balanced':'high';assert.ok([20,30].includes(players));
-const report={baseSha,headSha,players,rounds,quality,order:['A','B','C','C','B','A'],runs:[],
+const order=process.env.DIAGNOSTIC_ORDER||'ABCCBA';assert.ok(['ABCCBA','ABC','CBA'].includes(order));
+const report={baseSha,headSha,players,rounds,quality,order:[...order],runs:[],
  definition:'Same machine, three live browser surfaces, same full participant/quality/rule/traffic scenario. Sequential fresh server+browser processes. C isolates only body rendering; no release weakening. CPU/RSS belong to server process; browser body/draw/heap separate. Profiling is identical across variants. No retry.'};
+const checkpoint=()=>fs.writeFileSync(path.join(out,`diagnostic-${players}-${order}.json`),JSON.stringify(report,null,2));
 const instrumentation=['tests/combat/recovery356-live.mjs','tests/combat/recovery356-profiler.mjs','tests/combat/recovery356-browser-meter.mjs','tools/load/server.mjs'];
 function node(cwd,args,env,log){const start=performance.now();const r=spawnSync(process.execPath,args,{cwd,env:{...process.env,...env},windowsHide:true,encoding:'utf8',maxBuffer:20e6,timeout:600000});fs.writeFileSync(path.join(out,log),(r.stdout||'')+'\n'+(r.stderr||''));return {ms:performance.now()-start,exit:r.status,status:r.error?.code==='ETIMEDOUT'?'TIMEOUT':r.error?'INFRA_FAILURE':r.status===0?'PASS':'FAIL'};}
 function extract(label,sha){
@@ -26,6 +28,7 @@ try{
  report.builds=[];for(const label of ['A','B','C']){const r=node(dirs[label],['tools/build.mjs'],{},`${players}-${label}-build.log`);report.builds.push({label,...r});assert.equal(r.status,'PASS');}
  for(const [index,label]of report.order.entries()){
   const tag=`diag-${players}-${index}-${label}`;
+  report.active={index,label,status:'RUNNING'};checkpoint();
   const result=node(dirs[label],['--expose-gc','tests/combat/recovery356-live.mjs',tag,'pixi',quality],{
    CLASSROOM_BUNDLE:'1',LOAD_BUILT:'1',RECOVERY356_PROFILE:'1',LOAD_MEMORY_DIAGNOSTIC:'1',POLISH_PLAYERS:String(players),POLISH_ROUNDS:String(rounds)
   },tag+'.log');
@@ -42,10 +45,10 @@ try{
     screens:s.screens.map(x=>({draw:x.draw,gap:x.gap,heap:x.heap,resources:x.resources})),profile:s.profile})));
    row.postRematchBeforeGC=live.postRematchBeforeGC;row.postRematchAfterGC=live.postRematchAfterGC;row.error=live.error;
   }
-  report.runs.push(row);console.log(JSON.stringify({players,index,label,status:row.functionStatus||row.status,ms:row.ms}));
+  report.runs.push(row);report.active=null;checkpoint();console.log(JSON.stringify({players,index,label,status:row.functionStatus||row.status,ms:row.ms}));
   // Preserve failures; continue only the predeclared other samples, never replace them.
  }
  report.functionStatus=report.runs.every(r=>r.status==='PASS'&&r.functionStatus==='PASS')?'PASS':'PARTIAL';
  if(report.functionStatus!=='PASS')process.exitCode=1;
 }catch(error){report.error=error.stack;report.functionStatus='INFRA_FAILURE';process.exitCode=1;}
-finally{fs.writeFileSync(path.join(out,`diagnostic-${players}.json`),JSON.stringify(report,null,2));console.log(JSON.stringify({functionStatus:report.functionStatus,players,runs:report.runs.length}));}
+finally{checkpoint();console.log(JSON.stringify({functionStatus:report.functionStatus,players,runs:report.runs.length}));}

@@ -34,7 +34,7 @@
 | G09 | 방향 이동·보간·벽·거점·카메라 스케일과의 일관성 | PARTIAL | 방향축·zoom·LOD·동일 affine 단위검사와 로컬20인5경기(점령 포함)/30인 연속 플레이 통과. 주관적 명료성·실물 터치/카메라 조작감은 미검증. 정지 캡처만으로 개선을 주장하지 않는다. |
 | G10 | 생명 변경·탈락/부활·리롤·재경기·재접속 pose 정리 | PASS | 생명/사망/부재 actor 단위검사, 실제 갈고리 비행 중 동일 학생 재접속, 20인5경기의 탈락·부활 퀴즈·리롤·복귀 입력·결과/재경기 통과. 최종 pose9맵·렌더 자원·서버 월드/큐 정리 확인. |
 | G11 | Canvas/Pixi × host/student × low/balanced/high | PASS | 최종 런타임(sourceHash ea84952) Linux CI44384120024에서 Canvas/Pixi×low/balanced/high 6Job 모두 PASS. 실제 WS 공격자·상대·호스트의12행 및 Canvaslow 갈고리 재접속5행 통과. 실물 기기는C08 별도. |
-| G12 | reduced-motion 존중, 새 고비용 필터·파티클 없음 | PARTIAL | E1 reduced-motion 반환 중립 및 모든 채널 정리, 기존 텍스처/스프라이트 재사용 검증. 필터·셰이더·새 파티클 시스템 추가 없음. 브라우저 reduced-motion 행은 E6 앞선 FAIL 뒤 미도달했으므로 최종 실관측 대기. |
+| G12 | reduced-motion 존중, 새 고비용 필터·파티클 없음 | PASS | E1 reduced-motion 반환 중립 및 모든 채널 정리, 기존 텍스처/스프라이트 재사용 검증. 필터·셰이더·새 파티클 시스템 추가 없음. 동일 최종 게임 소스의 CI44384120024 여섯 identity 조합에서 reduced-motion 행도 실제 PASS. 초기 미도달 기록은 보존한다. |
 | G13 | 학생/교사 render·draw·RAF·자원·server event bytes A/B | PARTIAL | 최종 Linux4개 A/B 함수 검사는 모두PASS. Canvas20/Pixi20/Pixi30 성능PARTIAL, Canvas30은PASS. 20Pixi team-elim CPU124.34→242.78ms/s, snapshot2.77→4.97ms;30PixiRSS305.88→372.52MiB. 다른개선/악화도 ci-performance.json 전20구간에보존. 단일실행으로패치인과/전체성능개선을확정하지않음. |
 | G14 | 헤드슈터 실제 발사·잔상·명중 유지, 전용음 검사 제외 | PASS | E6 Canvas low 세 화면의 `emoji-023`: 실제 SHOT_END, transit 잔상, 상대 HP 감소와 recoil 관측. E4 v35.5 기존 전투 수치 유지. 전용 발사음1회는 사용자 제외 사항이며 기존 사운드를 맞추기 위해 변경하지 않음. Pixi 전체 가시성은 G11에서 별도 추적. |
 

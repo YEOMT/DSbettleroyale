@@ -1,11 +1,5 @@
 name: v35.6 Pixi cause separation
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/recovery356-diagnostic.yml'
-      - 'tools/ci/recovery356-diagnostic.mjs'
-      - 'tests/combat/recovery356-profiler.mjs'
-      - 'tests/combat/recovery356-browser-meter.mjs'
   workflow_dispatch: null
 permissions:
   contents: read
@@ -17,7 +11,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        players: [20, 30]
+        include:
+          - {players: 20, order: ABC}
+          - {players: 20, order: CBA}
+          - {players: 30, order: ABCCBA}
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
@@ -27,10 +24,11 @@ jobs:
       - run: node tools/ci/recovery356-diagnostic.mjs
         env:
           POLISH_PLAYERS: ${{ matrix.players }}
+          DIAGNOSTIC_ORDER: ${{ matrix.order }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: recovery356-diagnostic-${{ matrix.players }}-${{ github.sha }}
+          name: recovery356-diagnostic-${{ matrix.players }}-${{ matrix.order }}-${{ github.sha }}
           path: |
             artifacts/v35-6/diagnostic/diagnostic-*.json
             artifacts/v35-6/diagnostic/diag-*.json
