@@ -1,0 +1,423 @@
+{
+  "runId": 44518862169,
+  "head": "388f9739ba51e985c84ec97a50b0ce2937e45bda",
+  "attempts": [
+    {
+      "label": "baseline",
+      "status": "FAIL",
+      "error": "page.evaluate: Error: 경기 상태를 복원하는 중입니다.",
+      "ms": 326166.533777,
+      "completedRounds": 2,
+      "serverPhase": "BATTLE",
+      "hostPhase": "BATTLE",
+      "connected": 30,
+      "browserErrors": [],
+      "closures": [
+        {
+          "at": 1795089496714,
+          "kind": "terminate",
+          "reason": "",
+          "connection": 1,
+          "role": "host",
+          "epoch": 1,
+          "match": "upgrade-fixed-3",
+          "phase": "BATTLE",
+          "buffered": 88289,
+          "queue": 312343,
+          "alive": false,
+          "lastInboundAt": 1795089494551,
+          "lastInboundType": "PING",
+          "stack": [
+            "    at ws.<computed> [as terminate] (file:///__w/DSbettleroyale/DSbettleroyale/artifacts/v35-7/baseline-source/tests/combat/transport-probe.mjs:12:195)",
+            "    at Timeout._onTimeout (file:///__w/DSbettleroyale/DSbettleroyale/artifacts/v35-7/baseline-source/dist/server/main.js:32705:21)",
+            "    at listOnTimeout (node:internal/timers:685:17)",
+            "    at process.processTimers (node:internal/timers:618:7)"
+          ],
+          "memory": {
+            "rss": 469442560,
+            "heapTotal": 311672832,
+            "heapUsed": 110053120,
+            "external": 21221326,
+            "arrayBuffers": 14253187
+          },
+          "step": {
+            "count": 10178,
+            "mean": 2.2926017920024946,
+            "p95": 7.103472000017064,
+            "p99": 13.037043999996968,
+            "max": 88.1806000000015
+          },
+          "snapshot": {
+            "count": 3384,
+            "mean": 8.539921538120108,
+            "p95": 14.855848999985028,
+            "p99": 19.439010999994935,
+            "max": 48.00927499998943
+          }
+        },
+        {
+          "at": 1795089496721,
+          "kind": "closed",
+          "code": 1006,
+          "reason": "",
+          "connection": 1,
+          "role": "host",
+          "epoch": 1,
+          "match": "upgrade-fixed-3",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": false,
+          "lastInboundAt": 1795089494551,
+          "lastInboundType": "PING"
+        },
+        {
+          "at": 1795089586727,
+          "kind": "terminate",
+          "reason": "",
+          "connection": 37,
+          "role": "host",
+          "epoch": 2,
+          "match": "upgrade-fixed-3",
+          "phase": "BATTLE",
+          "buffered": 67691,
+          "queue": 105850,
+          "alive": false,
+          "lastInboundAt": 1795089585480,
+          "lastInboundType": "PING",
+          "stack": [
+            "    at ws.<computed> [as terminate] (file:///__w/DSbettleroyale/DSbettleroyale/artifacts/v35-7/baseline-source/tests/combat/transport-probe.mjs:12:195)",
+            "    at Timeout._onTimeout (file:///__w/DSbettleroyale/DSbettleroyale/artifacts/v35-7/baseline-source/dist/server/main.js:32705:21)",
+            "    at listOnTimeout (node:internal/timers:685:17)",
+            "    at process.processTimers (node:internal/timers:618:7)"
+          ],
+          "memory": {
+            "rss": 461287424,
+            "heapTotal": 201048064,
+            "heapUsed": 71194496,
+            "external": 10430696,
+            "arrayBuffers": 3462557
+          },
+          "step": {
+            "count": 15579,
+            "mean": 2.4718419110340895,
+            "p95": 7.3781249999883585,
+            "p99": 11.184964000014588,
+            "max": 88.1806000000015
+          },
+          "snapshot": {
+            "count": 5181,
+            "mean": 8.987817631730858,
+            "p95": 15.675472999981139,
+            "p99": 20.63704400000279,
+            "max": 48.00927499998943
+          }
+        },
+        {
+          "at": 1795089586734,
+          "kind": "closed",
+          "code": 1006,
+          "reason": "",
+          "connection": 37,
+          "role": "host",
+          "epoch": 2,
+          "match": "upgrade-fixed-3",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": false,
+          "lastInboundAt": 1795089585480,
+          "lastInboundType": "PING"
+        }
+      ],
+      "lastTransition": [
+        {
+          "at": 1795089571733,
+          "kind": "send-room",
+          "epoch": 2,
+          "phase": "BATTLE",
+          "queue": 0,
+          "buffered": 0,
+          "lastInboundAt": 1795089571509,
+          "lastInboundType": "PING"
+        },
+        {
+          "at": 1795089577929,
+          "kind": "send-room",
+          "epoch": 2,
+          "phase": "BATTLE",
+          "queue": 229121,
+          "buffered": 43341,
+          "lastInboundAt": 1795089577282,
+          "lastInboundType": "PING"
+        }
+      ],
+      "window": {
+        "windowMs": 97448.549068,
+        "cpuMs": {
+          "user": 33605.965,
+          "system": 2740.063,
+          "total": 36346.028
+        },
+        "memory": {
+          "rss": 461287424,
+          "heapTotal": 210223104,
+          "heapUsed": 85506432,
+          "external": 9717726,
+          "arrayBuffers": 2749587
+        },
+        "eventLoop": {
+          "p95": 34.340863,
+          "p99": 56.066047,
+          "max": 107.544575
+        },
+        "step": {
+          "count": 5845,
+          "mean": 2.7924073262615376,
+          "p95": 7.283728999958839,
+          "p99": 11.006650000053924,
+          "max": 28.858317999984138,
+          "p50": 1.9607620000024326,
+          "sampleCount": 4096,
+          "scope": "latest-4096-in-window"
+        },
+        "snapshot": {
+          "count": 1946,
+          "mean": 9.79094352106867,
+          "p95": 15.889893999963533,
+          "p99": 20.723265999986324,
+          "max": 39.27115500002401,
+          "p50": 9.408686000009766,
+          "sampleCount": 1946,
+          "scope": "entire-window"
+        },
+        "overloads": []
+      },
+      "stages": [
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 30,
+          "cpuMsPerSecond": 296.53094576770303,
+          "rss": 425930752,
+          "snapshotP95": 12.312153999999282,
+          "hostFrameGapP95": 566.6999999999971,
+          "studentFrameGapP95": 583.2999999999956
+        },
+        {
+          "round": 2,
+          "mode": "team-elim",
+          "alive": 30,
+          "cpuMsPerSecond": 323.81281861309645,
+          "rss": 431837184,
+          "snapshotP95": 14.936553999985335,
+          "hostFrameGapP95": 583.3000000000175,
+          "studentFrameGapP95": 583.2999999999884
+        },
+        {
+          "round": 3,
+          "mode": "team-capture",
+          "alive": 30,
+          "cpuMsPerSecond": 376.095762941866,
+          "rss": 467779584,
+          "snapshotP95": 12.728536000009626,
+          "hostFrameGapP95": 716.6000000000058,
+          "studentFrameGapP95": 783.2999999999884
+        }
+      ]
+    },
+    {
+      "label": "candidate",
+      "status": "FAIL",
+      "error": "AssertionError [ERR_ASSERTION]: second browser attack and skill fired",
+      "ms": 249008.331042,
+      "completedRounds": 2,
+      "serverPhase": "BATTLE",
+      "hostPhase": "BATTLE",
+      "connected": 29,
+      "browserErrors": [],
+      "closures": [
+        {
+          "at": 1795089676978,
+          "kind": "closed",
+          "code": 1006,
+          "reason": "",
+          "connection": 34,
+          "role": "host",
+          "epoch": 2,
+          "match": "upgrade-fixed-1",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": false,
+          "lastInboundAt": 1795089676486,
+          "lastInboundType": "PING"
+        },
+        {
+          "at": 1795089822850,
+          "kind": "close",
+          "code": 4008,
+          "reason": "SLOW_RECEIVER_RESYNC",
+          "connection": 35,
+          "role": "host",
+          "epoch": 3,
+          "match": "upgrade-fixed-3",
+          "phase": "BATTLE",
+          "buffered": 66180,
+          "queue": 1048999,
+          "alive": true,
+          "lastInboundAt": 1795089821261,
+          "lastInboundType": "PING",
+          "stack": [
+            "    at ws.<computed> [as close] (file:///__w/DSbettleroyale/DSbettleroyale/tests/combat/transport-probe.mjs:12:195)",
+            "    at Peer.close (file:///__w/DSbettleroyale/DSbettleroyale/dist/server/main.js:32202:49)",
+            "    at Peer.send (file:///__w/DSbettleroyale/DSbettleroyale/dist/server/main.js:32128:14)",
+            "    at sendEvent (file:///__w/DSbettleroyale/DSbettleroyale/dist/server/main.js:32549:14)"
+          ],
+          "memory": {
+            "rss": 385265664,
+            "heapTotal": 249151488,
+            "heapUsed": 164861024,
+            "external": 26797301,
+            "arrayBuffers": 19825368
+          },
+          "step": {
+            "count": 10241,
+            "mean": 2.1886736110732006,
+            "p95": 6.969901000004029,
+            "p99": 12.150224000011804,
+            "max": 56.413481000010506
+          },
+          "snapshot": {
+            "count": 3404,
+            "mean": 8.310201355464013,
+            "p95": 14.820229000004474,
+            "p99": 19.844027999999525,
+            "max": 48.253541000012774
+          }
+        },
+        {
+          "at": 1795089827414,
+          "kind": "closed",
+          "code": 4008,
+          "reason": "SLOW_RECEIVER_RESYNC",
+          "connection": 35,
+          "role": "host",
+          "epoch": 3,
+          "match": "upgrade-fixed-3",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": false,
+          "lastInboundAt": 1795089827126,
+          "lastInboundType": "PING"
+        }
+      ],
+      "lastTransition": [
+        {
+          "at": 1795089828761,
+          "kind": "send-room",
+          "epoch": 4,
+          "phase": "BATTLE",
+          "queue": 0,
+          "buffered": 0,
+          "lastInboundAt": 1795089828749,
+          "lastInboundType": "HELLO"
+        },
+        {
+          "at": 1795089828766,
+          "kind": "send-room",
+          "epoch": 4,
+          "phase": "BATTLE",
+          "queue": 0,
+          "buffered": 0,
+          "lastInboundAt": 1795089828749,
+          "lastInboundType": "HELLO"
+        },
+        {
+          "at": 1795089831759,
+          "kind": "send-room",
+          "epoch": 4,
+          "phase": "BATTLE",
+          "queue": 0,
+          "buffered": 0,
+          "lastInboundAt": 1795089828773,
+          "lastInboundType": "RESUME"
+        },
+        {
+          "at": 1795089832003,
+          "kind": "send-room",
+          "epoch": 4,
+          "phase": "BATTLE",
+          "queue": 0,
+          "buffered": 0,
+          "lastInboundAt": 1795089828773,
+          "lastInboundType": "RESUME"
+        }
+      ],
+      "window": {
+        "windowMs": 76336.38962500001,
+        "cpuMs": {
+          "user": 24980.976,
+          "system": 2670.06,
+          "total": 27651.036
+        },
+        "memory": {
+          "rss": 464506880,
+          "heapTotal": 335396864,
+          "heapUsed": 224602112,
+          "external": 16736924,
+          "arrayBuffers": 9764991
+        },
+        "eventLoop": {
+          "p95": 35.160063,
+          "p99": 58.392575,
+          "max": 157.417471
+        },
+        "step": {
+          "count": 3775,
+          "mean": 3.2100000543046945,
+          "p95": 8.237082999985432,
+          "p99": 13.103665999980876,
+          "max": 34.61189900001045,
+          "p50": 2.096646000019973,
+          "sampleCount": 3775,
+          "scope": "entire-window"
+        },
+        "snapshot": {
+          "count": 1252,
+          "mean": 9.908355862619953,
+          "p95": 16.483133999980055,
+          "p99": 23.270140999986324,
+          "max": 48.253541000012774,
+          "p50": 9.239260000002105,
+          "sampleCount": 1252,
+          "scope": "entire-window"
+        },
+        "overloads": []
+      },
+      "stages": [
+        {
+          "round": 1,
+          "mode": "solo",
+          "alive": 30,
+          "cpuMsPerSecond": 359.96381969642084,
+          "rss": 367058944,
+          "snapshotP95": 13.131819000001997,
+          "hostFrameGapP95": 649.9000000000087,
+          "studentFrameGapP95": 783.4000000000087
+        },
+        {
+          "round": 2,
+          "mode": "team-elim",
+          "alive": 30,
+          "cpuMsPerSecond": 223.43578709930307,
+          "rss": 379133952,
+          "snapshotP95": 10.49591299999156,
+          "hostFrameGapP95": 649.8999999999942,
+          "studentFrameGapP95": 650
+        }
+      ]
+    }
+  ]
+}
