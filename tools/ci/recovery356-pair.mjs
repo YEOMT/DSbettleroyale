@@ -28,6 +28,7 @@ try{
  }
  fs.copyFileSync('tests/combat/recovery356-live.mjs',base+'/tests/combat/recovery356-live.mjs');
  fs.copyFileSync('tests/combat/recovery356-browser-meter.mjs',base+'/tests/combat/recovery356-browser-meter.mjs');
+ for(const file of ['tests/combat/recovery357-probe.mjs','tests/combat/transport-probe.mjs'])fs.copyFileSync(file,base+'/'+file);
  if(overdrive357){
   fs.mkdirSync(base+'/tests/v35-7',{recursive:true});
   for(const file of ['tests/v35-7/scenario.mjs','tests/combat/polish354-authority.mjs'])fs.copyFileSync(file,base+'/'+file);
@@ -35,7 +36,7 @@ try{
  const built=run('baseline-build',base,['tools/build.mjs']);
  if(built.status!=='PASS')throw Error('BASELINE_BUILD_FAILED');
  for(const [label,cwd]of [['baseline',base],['candidate',root]]){
-  const result=run(label,cwd,['tests/combat/recovery356-live.mjs',label,renderer,quality],{CLASSROOM_BUNDLE:'1',LOAD_BUILT:'1',POLISH_PLAYERS:String(players),POLISH_ROUNDS:String(rounds)});
+  const result=run(label,cwd,['tests/combat/recovery356-live.mjs',label,renderer,quality],{CLASSROOM_BUNDLE:'1',LOAD_BUILT:'1',POLISH_ACTION_TRACE:overdrive357?'1':'0',POLISH_PLAYERS:String(players),POLISH_ROUNDS:String(rounds)});
   const dir=path.join(cwd,'artifacts',version,name(label));
   if(fs.existsSync(dir+'/report.json')){
    result.live=JSON.parse(fs.readFileSync(dir+'/report.json','utf8'));

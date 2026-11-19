@@ -11,7 +11,7 @@ const order=process.env.DIAGNOSTIC_ORDER||'ABCCBA';assert.ok(['ABCCBA','ABC','CB
 const report={baseSha,headSha,players,rounds,quality,order:[...order],runs:[],
  definition:'Same machine, three live browser surfaces, same full participant/quality/rule/traffic scenario. Sequential fresh server+browser processes. C isolates only body rendering; no release weakening. CPU/RSS belong to server process; browser body/draw/heap separate. Profiling is identical across variants. No retry.'};
 const checkpoint=()=>fs.writeFileSync(path.join(out,`diagnostic-${players}-${order}.json`),JSON.stringify(report,null,2));
-const instrumentation=['tests/combat/recovery356-live.mjs','tests/combat/recovery356-profiler.mjs','tests/combat/recovery356-browser-meter.mjs','tools/load/server.mjs'];
+const instrumentation=['tests/combat/recovery356-live.mjs','tests/combat/recovery357-probe.mjs','tests/combat/recovery356-profiler.mjs','tests/combat/recovery356-browser-meter.mjs','tools/load/server.mjs'];
 function node(cwd,args,env,log){const start=performance.now();const r=spawnSync(process.execPath,args,{cwd,env:{...process.env,...env},windowsHide:true,encoding:'utf8',maxBuffer:20e6,timeout:600000});fs.writeFileSync(path.join(out,log),(r.stdout||'')+'\n'+(r.stderr||''));return {ms:performance.now()-start,exit:r.status,status:r.error?.code==='ETIMEDOUT'?'TIMEOUT':r.error?'INFRA_FAILURE':r.status===0?'PASS':'FAIL'};}
 function extract(label,sha){
  const dir=path.join(out,'source-'+label),marker=dir+'/.source-sha';
