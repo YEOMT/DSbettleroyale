@@ -1,3 +1,4 @@
+import {expectedPaths357} from '../v35-7/approved.mjs';
 import {createRuleContext} from '../../packages/engine/src/index.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -30,6 +31,7 @@ test('current content retains every approved permanent ID and only approved base
   paths[id].meleeTiers=paths[id].tiers.map((t,i)=>({...t,[key]:values[i]}));
  }
  paths.wide.tiers=paths.wide.tiers.map(({basicRange,basicSpeed,basicArcDegrees})=>({basicRange,basicArcDegrees,basicSpeed}));paths.wide.text=paths.wide.tiers.map(t=>r.brRunTierText('wide',t));
+ reference.augments=expectedPaths357(reference.augments,r.brRunTierText);
  reference.ring.soloMultiplier=1.95;
  for(const key of ['retired','augments','xp','maxLevel','maxChoices','pathMaxTier','deathXpCap','ring','respawn','questions'])assert.deepEqual(manifest[key],reference[key],key);
  assert.deepEqual(manifest.wanggui,{...reference.wanggui,F:[[2.2,2.6],[3.35,4.4],[4.8,7.2]]});

@@ -1,6 +1,8 @@
 // Test-only IPC extension. The production server never imports this fixture.
 import * as engine from '../../packages/engine/src/index.js';
 import {snapshotEncoder} from '../../apps/server/src/ws/snapshot.js';
+import {prepare357,finish357} from '../v35-7/scenario.mjs';
+import {authorityActionProbe} from './recovery357-probe.mjs';
 let observations=new Map(),previous;
 export function polishFixture(app,m){
  const room=[...app.manager.rooms.values()][0],w=room?.world;
@@ -14,6 +16,8 @@ export function polishFixture(app,m){
   previous=w;const g=w.game;g.finalPhaseTriggered=true;observations=new Map();
   for(const [i,p]of g.participants.entries()){p.pos=new w.Vec2((i%5)*180-360,Math.floor(i/5)*180-270);p.vel=new w.Vec2(0,0);p.hp=p.maxHp=100000;p.spawnProtectionUntilFrame=0;p.run.rng=w.brHashRandom('polish-'+i);}
   if(m.overdrive){for(const p of g.participants){p.run.paths={rapid:2,[w.brBasicCombatProfile(p.ability).close?'wide':'giant']:2};p.run.level=6;p.run.choices=4;p.run.pending=1;w.brRecomputeRun(p);p.hp=p.maxHp=100000;}}
+  if(m.overdrive2)for(const [i,p]of g.participants.entries())prepare357(w,p,i);
+  if(process.env.POLISH_ACTION_TRACE==='1')authorityActionProbe(w);
   g.rebuildSpatialGrid();
   const bounds=w.brViewerBounds;w.brViewerBounds=(p,interest)=>{if(interest===w.session.inputs[p.remoteId])observations.get(p.remoteId).views++;return bounds(p,interest);};
   for(const member of room.members.values()){
@@ -29,6 +33,8 @@ export function polishFixture(app,m){
   try{for(const [i,p]of g.participants.entries()){const path=i%2?(w.brBasicCombatProfile(p.ability).close?'wide':'giant'):'rapid';p.run.offer={id:'overdrive-'+i,cards:[w.brRunCard(p,path,3)]};if(w.brChooseRun(p,p.run.offer.id,path))accepted++;}}
   finally{g.emitStudentFx=emit;}return {accepted,fx};
  }
+ if(m.type==='polish-overdrive2-growth')return finish357(w);
+ if(m.type==='polish-action-trace')return w?.actionObserved||previous?.actionObserved||[];
  if(m.type==='polish-population'){
   const g=w.game;for(const p of g.participants.slice(m.alive))if(p.alive){p.spawnProtectionUntilFrame=0;p.takeDamage(1e8,g.participants[0]);}return true;
  }

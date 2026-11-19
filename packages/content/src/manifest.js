@@ -1,5 +1,5 @@
 // Generated from current authority runtime by npm run content:generate; legacy baseline remains immutable.
-export const contentHash="eb9d3d3f9599ab6a5b04ebbf0669a9c96f73625e3ac9bbec66da83545afeec37";
+export const contentHash="50bf66b2cf37e2bf137e107715510d4393aa5110f3787a5c0b5162ca09788598";
 export const manifest={
   "roster": [
     {
@@ -16922,34 +16922,34 @@ export const manifest={
       "family": "BASIC",
       "tiers": [
         {
-          "basicDamage": 1.44,
+          "basicDamage": 1.55,
           "basicSpeed": 0.9
         },
         {
-          "basicDamage": 1.825,
+          "basicDamage": 2.1,
           "basicSpeed": 0.95
         },
         {
-          "basicDamage": 2.32,
+          "basicDamage": 3,
           "basicSpeed": 1
         }
       ],
       "text": [
-        "일반 피해 +44% (×1.44) · 공격속도 10% 감소 (×0.9)",
-        "일반 피해 +82.5% (×1.83) · 공격속도 5% 감소 (×0.95)",
-        "일반 피해 +132% (×2.32) · 공격속도 기본 유지"
+        "일반 피해 +55% (×1.55) · 공격속도 10% 감소 (×0.9)",
+        "일반 피해 +110% (×2.1) · 공격속도 5% 감소 (×0.95)",
+        "일반 피해 +200% (×3) · 공격속도 기본 유지"
       ],
       "meleeTiers": [
         {
-          "basicDamage": 1.6,
+          "basicDamage": 1.8,
           "basicSpeed": 0.9
         },
         {
-          "basicDamage": 2.05,
+          "basicDamage": 2.45,
           "basicSpeed": 0.95
         },
         {
-          "basicDamage": 2.65,
+          "basicDamage": 3.5,
           "basicSpeed": 1
         }
       ]
@@ -17008,34 +17008,34 @@ export const manifest={
       "family": "BASIC",
       "tiers": [
         {
-          "basicKnockback": 1.44,
+          "basicKnockback": 1.6,
           "basicDamage": 0.95
         },
         {
-          "basicKnockback": 1.88,
+          "basicKnockback": 2.3,
           "basicDamage": 1
         },
         {
-          "basicKnockback": 2.43,
+          "basicKnockback": 3.25,
           "basicDamage": 1.055
         }
       ],
       "text": [
-        "일반 넉백 +44% (×1.44) · 일반 피해 5% 감소 (×0.95)",
-        "일반 넉백 +88% (×1.88) · 일반 피해 기본 유지",
-        "일반 넉백 +143% (×2.43) · 일반 피해 +5.5% (×1.06)"
+        "일반 넉백 +60% (×1.6) · 일반 피해 5% 감소 (×0.95)",
+        "일반 넉백 +130% (×2.3) · 일반 피해 기본 유지",
+        "일반 넉백 +225% (×3.25) · 일반 피해 +5.5% (×1.06)"
       ],
       "meleeTiers": [
         {
-          "basicKnockback": 1.75,
+          "basicKnockback": 2,
           "basicDamage": 0.95
         },
         {
-          "basicKnockback": 2.4,
+          "basicKnockback": 2.9,
           "basicDamage": 1
         },
         {
-          "basicKnockback": 3.1,
+          "basicKnockback": 4,
           "basicDamage": 1.055
         }
       ]
@@ -17081,14 +17081,14 @@ export const manifest={
           "skillDamage": 0.97
         },
         {
-          "skillCooldown": 0.428,
+          "skillCooldown": 0.3,
           "skillDamage": 1
         }
       ],
       "text": [
         "스킬 쿨타임 27.5% 감소 (×0.73) · 스킬 피해 8% 감소 (×0.92)",
         "스킬 쿨타임 41.8% 감소 (×0.58) · 스킬 피해 3% 감소 (×0.97)",
-        "스킬 쿨타임 57.2% 감소 (×0.43) · 스킬 피해 기본 유지"
+        "스킬 쿨타임 70% 감소 (×0.3) · 스킬 피해 기본 유지"
       ]
     },
     "amplify": {
@@ -17105,14 +17105,14 @@ export const manifest={
           "skillCooldown": 1.05
         },
         {
-          "skillDamage": 2.32,
+          "skillDamage": 2.5,
           "skillCooldown": 1
         }
       ],
       "text": [
         "스킬 피해 +44% (×1.44) · 스킬 쿨타임 +10% (×1.1)",
         "스킬 피해 +82.5% (×1.83) · 스킬 쿨타임 +5% (×1.05)",
-        "스킬 피해 +132% (×2.32) · 스킬 쿨타임 기본 유지"
+        "스킬 피해 +150% (×2.5) · 스킬 쿨타임 기본 유지"
       ]
     },
     "expansion": {
@@ -17121,22 +17121,22 @@ export const manifest={
       "family": "SKILL",
       "tiers": [
         {
-          "skillSize": 1.33,
+          "skillSize": 1.45,
           "skillDamage": 0.95
         },
         {
-          "skillSize": 1.66,
+          "skillSize": 1.85,
           "skillDamage": 1
         },
         {
-          "skillSize": 2.045,
+          "skillSize": 2.5,
           "skillDamage": 1.055
         }
       ],
       "text": [
-        "스킬 범위·크기 +33% (×1.33) · 스킬 피해 5% 감소 (×0.95)",
-        "스킬 범위·크기 +66% (×1.66) · 스킬 피해 기본 유지",
-        "스킬 범위·크기 +104.5% (×2.05) · 스킬 피해 +5.5% (×1.06)"
+        "스킬 범위·크기 +45% (×1.45) · 스킬 피해 5% 감소 (×0.95)",
+        "스킬 범위·크기 +85% (×1.85) · 스킬 피해 기본 유지",
+        "스킬 범위·크기 +150% (×2.5) · 스킬 피해 +5.5% (×1.06)"
       ]
     },
     "multicast": {
@@ -17169,22 +17169,22 @@ export const manifest={
       "family": "SKILL",
       "tiers": [
         {
-          "skillControl": 1.275,
+          "skillControl": 1.4,
           "skillDamage": 0.95
         },
         {
-          "skillControl": 1.495,
+          "skillControl": 1.8,
           "skillDamage": 1
         },
         {
-          "skillControl": 1.715,
+          "skillControl": 2.25,
           "skillDamage": 1.055
         }
       ],
       "text": [
-        "제어 효과 +27.5% (×1.28) · 스킬 피해 5% 감소 (×0.95)",
-        "제어 효과 +49.5% (×1.5) · 스킬 피해 기본 유지",
-        "제어 효과 +71.5% (×1.72) · 스킬 피해 +5.5% (×1.06)"
+        "제어 효과 +40% (×1.4) · 스킬 피해 5% 감소 (×0.95)",
+        "제어 효과 +80% (×1.8) · 스킬 피해 기본 유지",
+        "제어 효과 +125% (×2.25) · 스킬 피해 +5.5% (×1.06)"
       ]
     },
     "restore": {
@@ -17225,14 +17225,14 @@ export const manifest={
           "maxHp": 1
         },
         {
-          "moveSpeed": 1.65,
+          "moveSpeed": 2,
           "maxHp": 1.055
         }
       ],
       "text": [
         "이동속도 +25% (×1.25) · 최대 HP 5% 감소 (×0.95)",
         "이동속도 +43% (×1.43) · 최대 HP 기본 유지",
-        "이동속도 +65% (×1.65) · 최대 HP +5.5% (×1.06)"
+        "이동속도 +100% (×2) · 최대 HP +5.5% (×1.06)"
       ]
     },
     "titan": {
@@ -17266,24 +17266,24 @@ export const manifest={
       "tiers": [
         {
           "regenRate": 0.028,
-          "regenDelay": 240,
+          "regenDelay": 210,
           "maxHp": 0.95
         },
         {
           "regenRate": 0.045,
-          "regenDelay": 180,
+          "regenDelay": 150,
           "maxHp": 1
         },
         {
           "regenRate": 0.065,
-          "regenDelay": 120,
+          "regenDelay": 60,
           "maxHp": 1.055
         }
       ],
       "text": [
-        "4초 무피격 후 초당 HP 2.8% · 최대 HP 5% 감소 (×0.95)",
-        "3초 무피격 후 초당 HP 4.5% · 최대 HP 기본 유지",
-        "2초 무피격 후 초당 HP 6.5% · 최대 HP +5.5% (×1.06)"
+        "3.5초 무피격 후 초당 HP 2.8% · 최대 HP 5% 감소 (×0.95)",
+        "2.5초 무피격 후 초당 HP 4.5% · 최대 HP 기본 유지",
+        "1초 무피격 후 초당 HP 6.5% · 최대 HP +5.5% (×1.06)"
       ]
     },
     "signature_range": {
@@ -17292,23 +17292,23 @@ export const manifest={
       "family": "SKILL",
       "tiers": [
         {
-          "signatureRange": 1.165,
+          "signatureRange": 1.25,
           "skillCooldown": 1.05
         },
         {
-          "signatureRange": 1.308,
+          "signatureRange": 1.45,
           "skillCooldown": 1.02
         },
         {
-          "signatureRange": 1.462,
+          "signatureRange": 2,
           "skillCooldown": 1
         }
       ],
       "signature": true,
       "text": [
-        "고유 이동 거리 +16.5% (×1.17) · 스킬 쿨타임 +5% (×1.05)",
-        "고유 이동 거리 +30.8% (×1.31) · 스킬 쿨타임 +2% (×1.02)",
-        "고유 이동 거리 +46.2% (×1.46) · 스킬 쿨타임 기본 유지"
+        "고유 이동 거리 +25% (×1.25) · 스킬 쿨타임 +5% (×1.05)",
+        "고유 이동 거리 +45% (×1.45) · 스킬 쿨타임 +2% (×1.02)",
+        "고유 이동 거리 +100% (×2) · 스킬 쿨타임 기본 유지"
       ]
     },
     "signature_duration": {
@@ -17317,23 +17317,23 @@ export const manifest={
       "family": "SKILL",
       "tiers": [
         {
-          "signatureDuration": 1.22,
+          "signatureDuration": 1.3,
           "skillCooldown": 1.08
         },
         {
-          "signatureDuration": 1.385,
+          "signatureDuration": 1.55,
           "skillCooldown": 1.04
         },
         {
-          "signatureDuration": 1.55,
+          "signatureDuration": 2,
           "skillCooldown": 1
         }
       ],
       "signature": true,
       "text": [
-        "고유 지속 시간 +22% (×1.22) · 스킬 쿨타임 +8% (×1.08)",
-        "고유 지속 시간 +38.5% (×1.39) · 스킬 쿨타임 +4% (×1.04)",
-        "고유 지속 시간 +55% (×1.55) · 스킬 쿨타임 기본 유지"
+        "고유 지속 시간 +30% (×1.3) · 스킬 쿨타임 +8% (×1.08)",
+        "고유 지속 시간 +55% (×1.55) · 스킬 쿨타임 +4% (×1.04)",
+        "고유 지속 시간 +100% (×2) · 스킬 쿨타임 기본 유지"
       ]
     }
   },

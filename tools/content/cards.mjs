@@ -28,7 +28,9 @@ export function currentCard(r,a){
   for(const key of ['width','radius','speed','count','countCap','intervalFrames','windupFrames','finalRadius','zoneRadius','zoneDamage','maxRadius','growFrames','pullSpeed','spread','markDuration','markCharges','markBonus','turnRate','stunFrames'])
    if(s?.[key]!=null)facts.skill[key]=s[key];
  }
+ const control=skillAugments.includes('control')?r.brRunStunProfile(a):null;
+ if(control?.base>0)facts.skill.controlStunFrames=[0,1,2,3].map(tier=>r.brRunMeasured(p,r.brRunModsForPaths(tier?{control:tier}:{},p.run.capabilities,a)).stunFrames);
  const reach=m.skillRange>0?'최대 조준 거리 '+number(m.skillRange):!s&&a.teamOnly&&r.brSupportProfile(a).global?'전장 전체':'자기 중심';
  return {basic:a.basicSummary+(tags.length?' · '+tags.join(' · '):''),skill:text+' · '+reach+' · 대기 '+cooldown,
-  passive:'스킬 증강: '+(skillAugments.map(k=>pathLabels[k]).join(' · ')||'별도 강화 없음'),cooldown,label:s?.label||a.skillLabel||a.n,category:d?.category||d?.role||a.category||'기타',concept:a.concept,facts};
+  passive:'스킬 증강: '+(skillAugments.map(k=>pathLabels[k]).join(' · ')||'별도 강화 없음')+(facts.skill.controlStunFrames?' · 실효 기절 기본/I/II/III '+facts.skill.controlStunFrames.map(seconds).join('/') : ''),cooldown,label:s?.label||a.skillLabel||a.n,category:d?.category||d?.role||a.category||'기타',concept:a.concept,facts};
 }

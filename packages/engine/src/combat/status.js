@@ -61,11 +61,23 @@ __brScope.brWangguiPower = function brWangguiPower(owner,context=null,reflected=
             return Number(context?.wangguiPower??context?.ctx?.run?.wangguiPower??context?.basicSnapshot?.ctx?.run?.wangguiPower??owner._runSkillCast?.wangguiPower??__brScope.brRunMod(owner,'wangguiPower'))||1;
         };
 
-__brScope.brRunSkillSnapshot = function brRunSkillSnapshot(p) { return {wangguiPower:__brScope.brRunMod(p,'wangguiPower'),damage:__brScope.brRunMod(p,'skillDamage')*__brScope.brCombatPower(p),size:__brScope.brRunMod(p,'skillSize'),control:__brScope.brRunMod(p,'skillControl'),restore:__brScope.brRunMod(p,'skillRestore'),duration:Math.max(.5,__brScope.brRunMod(p,'signatureDuration')+__brScope.brRunMod(p,'skillDuration')-1),cooldown:__brScope.brRunMod(p,'skillCooldown')}; };
+__brScope.brRunSkillSnapshot = function brRunSkillSnapshot(p) { return {wangguiPower:__brScope.brRunMod(p,'wangguiPower'),damage:__brScope.brRunMod(p,'skillDamage')*__brScope.brCombatPower(p),size:__brScope.brRunMod(p,'skillSize'),control:__brScope.brRunMod(p,'skillControl'),controlTier:p?.run?.capabilities?.skill?.cc?Number(p.run.paths.control||0):0,restore:__brScope.brRunMod(p,'skillRestore'),duration:Math.max(.5,__brScope.brRunMod(p,'signatureDuration')+__brScope.brRunMod(p,'skillDuration')-1),cooldown:__brScope.brRunMod(p,'skillCooldown')}; };
 
 __brScope.brRunCount = function brRunCount(base,extra,cap=12) { return base+Math.min(3,Math.max(0,Math.floor(extra||0)),Math.max(0,cap-base)); };
 
 __brScope.brRunCC = function brRunCC(base,mult=1) { return mult===1?base:Math.max(base,Math.min(90,Math.round(base*mult))); };
+
+// Preview of the existing native/rework stun path, not a new stun grant.
+__brScope.brRunStunProfile = function brRunStunProfile(a) {
+            const s=__brScope.brReworkDefinition(a)?.skill;
+            if(s)return {base:Number(s.stunFrames??s.stun??0),cap:s.stunCap};
+            const key=__brScope.brGetPlayableSkillInfo(a)?.key;
+            let base=key==='guard-pulse'?8:key==='tank-stun'?__brScope.brTierValue(a.t,{S:34,A:30,B:26,C:22,F:17}):key==='tank-punch'?__brScope.brTierValue(a.t,{S:15,A:13,B:11,C:9,F:7}):key==='teleport-assassin'?14:0;
+            if(a.id==='emoji-094')base=__brScope.getPlayerSignatureProjectileProfile(a).stunFrames;
+            if(a.sub==='TORNADO_ORBIT')base=12;
+            if(a.type===__brScope.ABILITY_TYPES.DASH&&(!key||key==='native'))base=a.sub==='BOAR_CHARGE'?17:8;
+            return {base,cap:a.sub==='TORNADO_ORBIT'?90:Math.min(120,Math.max(base,base*1.35))};
+        };
 
 __brScope.brWithRunSkill = function brWithRunSkill(p,g,fn,snapshot=null,finishCast=true) {
             if(p._runSkillCast)return fn();

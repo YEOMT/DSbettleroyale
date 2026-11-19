@@ -2,10 +2,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync,spawnSync} from 'node:child_process';
-const root=process.cwd(),baseSha='e328aad252e243428123e3d576ea8ffefcdb8604';
+const overdrive357=process.env.OVERDRIVE357==='1',version=overdrive357?'v35-7':'v35-6';
+const root=process.cwd(),baseSha=overdrive357?'9b2d45ff13d4ee0890179103ef66e6edb1bf174c':'e328aad252e243428123e3d576ea8ffefcdb8604';
 const renderer=process.argv[2]||'canvas',quality=process.argv[3]||'low';
 const players=Number(process.env.POLISH_PLAYERS||20),rounds=Number(process.env.POLISH_ROUNDS||5);
-const out=path.resolve('artifacts/v35-6'),base=path.join(out,'baseline-source');
+const out=path.resolve('artifacts',version),base=path.join(out,'baseline-source');
 fs.mkdirSync(out,{recursive:true});
 const report={baseSha,renderer,quality,players,rounds,attempts:[],comparison:[],performanceStatus:'NOT_RUN',scope:'same runner, sequential production builds; synthetic peers + three real browsers; physical devices NOT_RUN'};
 const name=label=>`live-${label}-${renderer}-${quality}-solo-${players}-prepared-r${rounds}`;
@@ -27,11 +28,16 @@ try{
  }
  fs.copyFileSync('tests/combat/recovery356-live.mjs',base+'/tests/combat/recovery356-live.mjs');
  fs.copyFileSync('tests/combat/recovery356-browser-meter.mjs',base+'/tests/combat/recovery356-browser-meter.mjs');
+ for(const file of ['tests/combat/recovery357-probe.mjs','tests/combat/transport-probe.mjs','tests/combat/delivery-probe.mjs','tests/combat/recovery356-profiler.mjs'])fs.copyFileSync(file,base+'/'+file);
+ if(overdrive357){
+  fs.mkdirSync(base+'/tests/v35-7',{recursive:true});
+  for(const file of ['tests/v35-7/scenario.mjs','tests/combat/polish354-authority.mjs'])fs.copyFileSync(file,base+'/'+file);
+ }
  const built=run('baseline-build',base,['tools/build.mjs']);
  if(built.status!=='PASS')throw Error('BASELINE_BUILD_FAILED');
  for(const [label,cwd]of [['baseline',base],['candidate',root]]){
-  const result=run(label,cwd,['tests/combat/recovery356-live.mjs',label,renderer,quality],{CLASSROOM_BUNDLE:'1',LOAD_BUILT:'1',POLISH_PLAYERS:String(players),POLISH_ROUNDS:String(rounds)});
-  const dir=path.join(cwd,'artifacts/v35-6',name(label));
+  const result=run(label,cwd,['tests/combat/recovery356-live.mjs',label,renderer,quality],{CLASSROOM_BUNDLE:'1',LOAD_BUILT:'1',POLISH_ACTION_TRACE:overdrive357?'1':'0',POLISH_PLAYERS:String(players),POLISH_ROUNDS:String(rounds)});
+  const dir=path.join(cwd,'artifacts',version,name(label));
   if(fs.existsSync(dir+'/report.json')){
    result.live=JSON.parse(fs.readFileSync(dir+'/report.json','utf8'));
    if(result.live.status==='PARTIAL')result.status='PARTIAL';

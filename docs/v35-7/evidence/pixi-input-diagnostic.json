@@ -1,0 +1,1642 @@
+{
+  "runId": 44518862169,
+  "head": "388f9739ba51e985c84ec97a50b0ce2937e45bda",
+  "attempts": [
+    {
+      "label": "baseline",
+      "status": "FAIL",
+      "ms": 200784.913408,
+      "error": "AssertionError [ERR_ASSERTION]: second browser attack and skill fired",
+      "completedRounds": 4,
+      "round": 5,
+      "observedAt": 1795089466562,
+      "actions": [
+        {
+          "alive": true,
+          "x": -302.9565704122931,
+          "y": -270,
+          "life": 0,
+          "attack": 1,
+          "skill": 1
+        },
+        {
+          "alive": true,
+          "x": 1048.5608540064009,
+          "y": 270,
+          "life": 0,
+          "attack": 0,
+          "skill": 0
+        }
+      ],
+      "authority": [
+        {
+          "at": 1795089457188,
+          "tick": 323,
+          "kind": "authority-before",
+          "index": 0,
+          "life": 0,
+          "alive": true,
+          "stunned": 0,
+          "cooldown": 0,
+          "basicCooldown": 0,
+          "locks": {
+            "move": false,
+            "attack": false,
+            "skill": false,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            0
+          ],
+          "resolved": [
+            0,
+            0
+          ],
+          "fired": [
+            0,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089457188,
+          "tick": 323,
+          "kind": "authority-after",
+          "index": 0,
+          "life": 0,
+          "alive": true,
+          "stunned": 0,
+          "cooldown": 0,
+          "basicCooldown": 29,
+          "locks": {
+            "move": false,
+            "attack": false,
+            "skill": false,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            0
+          ],
+          "resolved": [
+            1,
+            0
+          ],
+          "fired": [
+            1,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089460283,
+          "tick": 509,
+          "kind": "authority-before",
+          "index": 0,
+          "life": 0,
+          "alive": true,
+          "stunned": 0,
+          "cooldown": 0,
+          "basicCooldown": 0,
+          "locks": {
+            "move": false,
+            "attack": false,
+            "skill": false,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            1
+          ],
+          "resolved": [
+            1,
+            0
+          ],
+          "fired": [
+            1,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089460283,
+          "tick": 509,
+          "kind": "authority-after",
+          "index": 0,
+          "life": 0,
+          "alive": true,
+          "stunned": 0,
+          "cooldown": 424,
+          "basicCooldown": 0,
+          "locks": {
+            "move": false,
+            "attack": true,
+            "skill": false,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            1
+          ],
+          "resolved": [
+            1,
+            1
+          ],
+          "fired": [
+            1,
+            1
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089463318,
+          "tick": 691,
+          "kind": "authority-before",
+          "index": 19,
+          "life": 0,
+          "alive": true,
+          "stunned": 11,
+          "cooldown": 0,
+          "basicCooldown": 0,
+          "locks": {
+            "move": true,
+            "attack": true,
+            "skill": true,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            0
+          ],
+          "resolved": [
+            0,
+            0
+          ],
+          "fired": [
+            0,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089463318,
+          "tick": 691,
+          "kind": "authority-after",
+          "index": 19,
+          "life": 0,
+          "alive": true,
+          "stunned": 11,
+          "cooldown": 0,
+          "basicCooldown": 0,
+          "locks": {
+            "move": true,
+            "attack": true,
+            "skill": true,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            0
+          ],
+          "resolved": [
+            1,
+            0
+          ],
+          "fired": [
+            0,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        }
+      ],
+      "browserEvents": [
+        {
+          "wall": 1795089450919,
+          "at": 122248.20000000001,
+          "kind": "authority-self",
+          "type": "SNAPSHOT",
+          "actions": {
+            "attack": 0,
+            "skill": 0,
+            "firedAttack": 0,
+            "firedSkill": 0
+          },
+          "epoch": 5,
+          "life": 0,
+          "stunned": 0,
+          "stunEnd": 0,
+          "sourceTick": 0,
+          "handlerMs": 0.7000000000116415
+        },
+        {
+          "wall": 1795089463305,
+          "at": 134634.3,
+          "kind": "dom-pointerdown",
+          "button": "br-attack",
+          "pointer": 1,
+          "pointerType": "mouse",
+          "trusted": true,
+          "state": {
+            "epoch": 5,
+            "match": "upgrade-fixed-5",
+            "life": 0,
+            "tick": 490,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "READY",
+            "actions": {
+              "attack": 0,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089463307,
+          "at": 134635.9,
+          "kind": "dom-pointerup",
+          "button": "br-attack",
+          "pointer": 1,
+          "pointerType": "mouse",
+          "trusted": true,
+          "state": {
+            "epoch": 5,
+            "match": "upgrade-fixed-5",
+            "life": 0,
+            "tick": 490,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "READY",
+            "actions": {
+              "attack": 0,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089463307,
+          "at": 134635.9,
+          "kind": "fire-enter",
+          "action": "attack",
+          "state": {
+            "epoch": 5,
+            "match": "upgrade-fixed-5",
+            "life": 0,
+            "tick": 490,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "READY",
+            "actions": {
+              "attack": 0,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089463307,
+          "at": 134636.4,
+          "kind": "command",
+          "type": "ACTION",
+          "action": "attack",
+          "seq": 1,
+          "state": {
+            "epoch": 5,
+            "match": "upgrade-fixed-5",
+            "life": 0,
+            "tick": 490,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "REQUEST_GUARD",
+            "skill": "READY",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089463307,
+          "at": 134636.5,
+          "kind": "wire-send",
+          "type": "ACTION",
+          "requestId": "a68d0517-35cb-4be5-9eec-40985d65eaa6",
+          "action": "attack",
+          "seq": 1,
+          "epoch": 5,
+          "life": 0,
+          "buffered": 0
+        },
+        {
+          "wall": 1795089463307,
+          "at": 134636.6,
+          "kind": "fire-return",
+          "action": "attack",
+          "state": {
+            "epoch": 5,
+            "match": "upgrade-fixed-5",
+            "life": 0,
+            "tick": 490,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "REQUEST_GUARD",
+            "skill": "READY",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          },
+          "feedback": "sent"
+        },
+        {
+          "wall": 1795089465060,
+          "at": 136389.6,
+          "kind": "wire-send",
+          "type": "ACTION",
+          "requestId": "a68d0517-35cb-4be5-9eec-40985d65eaa6",
+          "action": "attack",
+          "seq": 1,
+          "epoch": 5,
+          "life": 0,
+          "buffered": 0
+        },
+        {
+          "wall": 1795089465336,
+          "at": 136665.1,
+          "kind": "dom-pointerdown",
+          "button": "br-skill",
+          "pointer": 1,
+          "pointerType": "mouse",
+          "trusted": true,
+          "state": {
+            "epoch": 5,
+            "match": "upgrade-fixed-5",
+            "life": 0,
+            "tick": 628,
+            "stunned": 74,
+            "stunEnd": 702,
+            "attack": "STUNNED",
+            "skill": "STUNNED",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089465337,
+          "at": 136665.8,
+          "kind": "dom-pointerup",
+          "button": "br-skill",
+          "pointer": 1,
+          "pointerType": "mouse",
+          "trusted": true,
+          "state": {
+            "epoch": 5,
+            "match": "upgrade-fixed-5",
+            "life": 0,
+            "tick": 628,
+            "stunned": 74,
+            "stunEnd": 702,
+            "attack": "STUNNED",
+            "skill": "STUNNED",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089465337,
+          "at": 136665.8,
+          "kind": "fire-enter",
+          "action": "skill",
+          "state": {
+            "epoch": 5,
+            "match": "upgrade-fixed-5",
+            "life": 0,
+            "tick": 628,
+            "stunned": 74,
+            "stunEnd": 702,
+            "attack": "STUNNED",
+            "skill": "STUNNED",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089465337,
+          "at": 136665.8,
+          "kind": "fire-return",
+          "action": "skill",
+          "state": {
+            "epoch": 5,
+            "match": "upgrade-fixed-5",
+            "life": 0,
+            "tick": 628,
+            "stunned": 74,
+            "stunEnd": 702,
+            "attack": "STUNNED",
+            "skill": "STUNNED",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089466343,
+          "at": 137672,
+          "kind": "ack",
+          "type": "ACTION",
+          "action": "attack",
+          "seq": 1,
+          "accepted": true,
+          "state": {
+            "epoch": 5,
+            "match": "upgrade-fixed-5",
+            "life": 0,
+            "tick": 688,
+            "stunned": 14,
+            "stunEnd": 702,
+            "attack": "STUNNED",
+            "skill": "STUNNED",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089466344,
+          "at": 137673.4,
+          "kind": "authority-self",
+          "type": "SNAPSHOT",
+          "actions": {
+            "attack": 1,
+            "skill": 0,
+            "firedAttack": 0,
+            "firedSkill": 0
+          },
+          "epoch": 5,
+          "life": 0,
+          "stunned": 11,
+          "stunEnd": 702,
+          "sourceTick": 691,
+          "handlerMs": 0.29999999998835847
+        }
+      ],
+      "serverEvents": [
+        {
+          "at": 1795089463310,
+          "kind": "received-command",
+          "connection": 25,
+          "role": "student",
+          "epoch": 5,
+          "match": "upgrade-fixed-5",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true,
+          "lastInboundAt": 1795089463302,
+          "lastInboundType": "INPUT_BATCH",
+          "type": "ACTION",
+          "requestId": "a68d0517-35cb-4be5-9eec-40985d65eaa6",
+          "commandEpoch": 5,
+          "life": 0,
+          "action": "attack",
+          "seq": 1
+        },
+        {
+          "at": 1795089463310,
+          "kind": "send-result",
+          "connection": 25,
+          "role": "student",
+          "epoch": 5,
+          "match": "upgrade-fixed-5",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true,
+          "lastInboundAt": 1795089463302,
+          "lastInboundType": "INPUT_BATCH",
+          "requestId": "a68d0517-35cb-4be5-9eec-40985d65eaa6",
+          "type": "ACTION",
+          "accepted": true
+        },
+        {
+          "at": 1795089465061,
+          "kind": "received-command",
+          "connection": 25,
+          "role": "student",
+          "epoch": 5,
+          "match": "upgrade-fixed-5",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": false,
+          "lastInboundAt": 1795089464810,
+          "lastInboundType": "INPUT_BATCH",
+          "type": "ACTION",
+          "requestId": "a68d0517-35cb-4be5-9eec-40985d65eaa6",
+          "commandEpoch": 5,
+          "life": 0,
+          "action": "attack",
+          "seq": 1
+        },
+        {
+          "at": 1795089465061,
+          "kind": "send-result",
+          "connection": 25,
+          "role": "student",
+          "epoch": 5,
+          "match": "upgrade-fixed-5",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": false,
+          "lastInboundAt": 1795089464810,
+          "lastInboundType": "INPUT_BATCH",
+          "requestId": "a68d0517-35cb-4be5-9eec-40985d65eaa6",
+          "type": "ACTION",
+          "accepted": true
+        }
+      ],
+      "handler": {
+        "count": 11461,
+        "maxMs": 24.60000000000582
+      },
+      "longTasks": [
+        {
+          "at": 135651.5,
+          "ms": 222
+        },
+        {
+          "at": 135886.3,
+          "ms": 239
+        },
+        {
+          "at": 136138.4,
+          "ms": 242
+        },
+        {
+          "at": 136391.4,
+          "ms": 255
+        },
+        {
+          "at": 136666.6,
+          "ms": 228
+        },
+        {
+          "at": 136914.3,
+          "ms": 263
+        },
+        {
+          "at": 137186.6,
+          "ms": 237
+        },
+        {
+          "at": 137440.8,
+          "ms": 229
+        }
+      ],
+      "serverWindow": {
+        "windowMs": 25608.78536400001,
+        "cpuMs": {
+          "user": 3009.464,
+          "system": 259.093,
+          "total": 3268.557
+        },
+        "memory": {
+          "rss": 330821632,
+          "heapTotal": 155688960,
+          "heapUsed": 50727360,
+          "external": 8247904,
+          "arrayBuffers": 1279765
+        },
+        "step": {
+          "count": 921,
+          "mean": 1.278184599348681,
+          "p95": 2.6102630000095814,
+          "p99": 5.0802200000034645,
+          "max": 18.0394700000179,
+          "p50": 0.9850579999911133,
+          "sampleCount": 921,
+          "scope": "entire-window"
+        },
+        "snapshot": {
+          "count": 308,
+          "mean": 3.366215366883583,
+          "p95": 6.454911999986507,
+          "p99": 8.362718999997014,
+          "max": 12.243680999992648,
+          "p50": 2.6632420000096317,
+          "sampleCount": 308,
+          "scope": "entire-window"
+        },
+        "debtMs": 0.09168199999733062,
+        "overloads": []
+      }
+    },
+    {
+      "label": "candidate",
+      "status": "FAIL",
+      "ms": 32583.288893,
+      "error": "AssertionError [ERR_ASSERTION]: second browser attack and skill fired",
+      "completedRounds": 0,
+      "round": 1,
+      "observedAt": 1795089500711,
+      "actions": [
+        {
+          "alive": true,
+          "x": -333.4147580176729,
+          "y": -257.4945267737755,
+          "life": 0,
+          "attack": 1,
+          "skill": 1
+        },
+        {
+          "alive": true,
+          "x": 975.9124690664506,
+          "y": 300.12589414757184,
+          "life": 0,
+          "attack": 0,
+          "skill": 1
+        }
+      ],
+      "authority": [
+        {
+          "at": 1795089488492,
+          "tick": 345,
+          "kind": "authority-before",
+          "index": 0,
+          "life": 0,
+          "alive": true,
+          "stunned": 0,
+          "cooldown": 0,
+          "basicCooldown": 0,
+          "locks": {
+            "move": false,
+            "attack": false,
+            "skill": false,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            0
+          ],
+          "resolved": [
+            0,
+            0
+          ],
+          "fired": [
+            0,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089488492,
+          "tick": 345,
+          "kind": "authority-after",
+          "index": 0,
+          "life": 0,
+          "alive": true,
+          "stunned": 0,
+          "cooldown": 0,
+          "basicCooldown": 29,
+          "locks": {
+            "move": false,
+            "attack": false,
+            "skill": false,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            0
+          ],
+          "resolved": [
+            1,
+            0
+          ],
+          "fired": [
+            1,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089491486,
+          "tick": 525,
+          "kind": "authority-before",
+          "index": 0,
+          "life": 0,
+          "alive": true,
+          "stunned": 0,
+          "cooldown": 0,
+          "basicCooldown": 0,
+          "locks": {
+            "move": false,
+            "attack": false,
+            "skill": false,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            1
+          ],
+          "resolved": [
+            1,
+            0
+          ],
+          "fired": [
+            1,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089491486,
+          "tick": 525,
+          "kind": "authority-after",
+          "index": 0,
+          "life": 0,
+          "alive": true,
+          "stunned": 0,
+          "cooldown": 297,
+          "basicCooldown": 0,
+          "locks": {
+            "move": false,
+            "attack": true,
+            "skill": false,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            1
+          ],
+          "resolved": [
+            1,
+            1
+          ],
+          "fired": [
+            1,
+            1
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089494702,
+          "tick": 718,
+          "kind": "authority-before",
+          "index": 19,
+          "life": 0,
+          "alive": true,
+          "stunned": 79,
+          "cooldown": 0,
+          "basicCooldown": 0,
+          "locks": {
+            "move": true,
+            "attack": true,
+            "skill": true,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            0
+          ],
+          "resolved": [
+            0,
+            0
+          ],
+          "fired": [
+            0,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089494702,
+          "tick": 718,
+          "kind": "authority-after",
+          "index": 19,
+          "life": 0,
+          "alive": true,
+          "stunned": 79,
+          "cooldown": 0,
+          "basicCooldown": 0,
+          "locks": {
+            "move": true,
+            "attack": true,
+            "skill": true,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            0
+          ],
+          "resolved": [
+            1,
+            0
+          ],
+          "fired": [
+            0,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089499455,
+          "tick": 1003,
+          "kind": "authority-before",
+          "index": 19,
+          "life": 0,
+          "alive": true,
+          "stunned": 0,
+          "cooldown": 0,
+          "basicCooldown": 0,
+          "locks": {
+            "move": false,
+            "attack": false,
+            "skill": false,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            1
+          ],
+          "resolved": [
+            1,
+            0
+          ],
+          "fired": [
+            0,
+            0
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        },
+        {
+          "at": 1795089499455,
+          "tick": 1003,
+          "kind": "authority-after",
+          "index": 19,
+          "life": 0,
+          "alive": true,
+          "stunned": 0,
+          "cooldown": 663,
+          "basicCooldown": 0,
+          "locks": {
+            "move": false,
+            "attack": false,
+            "skill": false,
+            "steerAllowed": false
+          },
+          "received": [
+            1,
+            1
+          ],
+          "resolved": [
+            1,
+            1
+          ],
+          "fired": [
+            0,
+            1
+          ],
+          "pending": [
+            null,
+            null
+          ],
+          "queue": []
+        }
+      ],
+      "browserEvents": [
+        {
+          "wall": 1795089481525,
+          "at": 5804,
+          "kind": "authority-self",
+          "type": "SNAPSHOT",
+          "actions": {
+            "attack": 0,
+            "skill": 0,
+            "firedAttack": 0,
+            "firedSkill": 0
+          },
+          "epoch": 2,
+          "life": 0,
+          "stunned": 0,
+          "stunEnd": 0,
+          "sourceTick": 0,
+          "handlerMs": 4.7999999999883585
+        },
+        {
+          "wall": 1795089494685,
+          "at": 18963.599999999977,
+          "kind": "dom-pointerdown",
+          "button": "br-attack",
+          "pointer": 1,
+          "pointerType": "mouse",
+          "trusted": true,
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 584,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "READY",
+            "actions": {
+              "attack": 0,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089494686,
+          "at": 18965.099999999977,
+          "kind": "dom-pointerup",
+          "button": "br-attack",
+          "pointer": 1,
+          "pointerType": "mouse",
+          "trusted": true,
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 584,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "READY",
+            "actions": {
+              "attack": 0,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089494687,
+          "at": 18965.099999999977,
+          "kind": "fire-enter",
+          "action": "attack",
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 584,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "READY",
+            "actions": {
+              "attack": 0,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089494688,
+          "at": 18966.70000000001,
+          "kind": "command",
+          "type": "ACTION",
+          "action": "attack",
+          "seq": 1,
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 584,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "REQUEST_GUARD",
+            "skill": "READY",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089494688,
+          "at": 18967.099999999977,
+          "kind": "wire-send",
+          "type": "ACTION",
+          "requestId": "70c03f9f-c8db-461c-b9be-3b5e53eeb3e5",
+          "action": "attack",
+          "seq": 1,
+          "epoch": 2,
+          "life": 0,
+          "buffered": 0
+        },
+        {
+          "wall": 1795089494689,
+          "at": 18967.20000000001,
+          "kind": "fire-return",
+          "action": "attack",
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 584,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "REQUEST_GUARD",
+            "skill": "READY",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          },
+          "feedback": "sent"
+        },
+        {
+          "wall": 1795089496697,
+          "at": 20975.399999999965,
+          "kind": "wire-send",
+          "type": "ACTION",
+          "requestId": "70c03f9f-c8db-461c-b9be-3b5e53eeb3e5",
+          "action": "attack",
+          "seq": 1,
+          "epoch": 2,
+          "life": 0,
+          "buffered": 0
+        },
+        {
+          "wall": 1795089496959,
+          "at": 21237.20000000001,
+          "kind": "ack",
+          "type": "ACTION",
+          "action": "attack",
+          "seq": 1,
+          "accepted": true,
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 716,
+            "stunned": 81,
+            "stunEnd": 797,
+            "attack": "STUNNED",
+            "skill": "STUNNED",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 0,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089496960,
+          "at": 21238.79999999999,
+          "kind": "authority-self",
+          "type": "SNAPSHOT",
+          "actions": {
+            "attack": 1,
+            "skill": 0,
+            "firedAttack": 0,
+            "firedSkill": 0
+          },
+          "epoch": 2,
+          "life": 0,
+          "stunned": 78,
+          "stunEnd": 797,
+          "sourceTick": 719,
+          "handlerMs": 0.20000000001164153
+        },
+        {
+          "wall": 1795089499433,
+          "at": 23712.099999999977,
+          "kind": "dom-pointerdown",
+          "button": "br-skill",
+          "pointer": 1,
+          "pointerType": "mouse",
+          "trusted": true,
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 888,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "READY",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 1,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089499435,
+          "at": 23713.29999999999,
+          "kind": "dom-pointerup",
+          "button": "br-skill",
+          "pointer": 1,
+          "pointerType": "mouse",
+          "trusted": true,
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 888,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "READY",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 1,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089499435,
+          "at": 23713.29999999999,
+          "kind": "fire-enter",
+          "action": "skill",
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 888,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "READY",
+            "actions": {
+              "attack": 1,
+              "skill": 0
+            },
+            "authority": {
+              "attack": 1,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089499435,
+          "at": 23713.599999999977,
+          "kind": "command",
+          "type": "ACTION",
+          "action": "skill",
+          "seq": 1,
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 888,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "REQUEST_GUARD",
+            "actions": {
+              "attack": 1,
+              "skill": 1
+            },
+            "authority": {
+              "attack": 1,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          }
+        },
+        {
+          "wall": 1795089499435,
+          "at": 23713.79999999999,
+          "kind": "wire-send",
+          "type": "ACTION",
+          "requestId": "1fc76cd4-e57e-4a08-8e44-87236695e2a0",
+          "action": "skill",
+          "seq": 1,
+          "epoch": 2,
+          "life": 0,
+          "buffered": 0
+        },
+        {
+          "wall": 1795089499435,
+          "at": 23714,
+          "kind": "fire-return",
+          "action": "skill",
+          "state": {
+            "epoch": 2,
+            "match": "upgrade-fixed-1",
+            "life": 0,
+            "tick": 888,
+            "stunned": 0,
+            "stunEnd": 0,
+            "attack": "READY",
+            "skill": "REQUEST_GUARD",
+            "actions": {
+              "attack": 1,
+              "skill": 1
+            },
+            "authority": {
+              "attack": 1,
+              "skill": 0,
+              "firedAttack": 0,
+              "firedSkill": 0
+            },
+            "enabled": true,
+            "restoring": false
+          },
+          "feedback": "sent"
+        }
+      ],
+      "serverEvents": [
+        {
+          "at": 1795089494690,
+          "kind": "received-command",
+          "connection": 22,
+          "role": "student",
+          "epoch": 2,
+          "match": "upgrade-fixed-1",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true,
+          "lastInboundAt": 1795089494443,
+          "lastInboundType": "INPUT_BATCH",
+          "type": "ACTION",
+          "requestId": "70c03f9f-c8db-461c-b9be-3b5e53eeb3e5",
+          "commandEpoch": 2,
+          "life": 0,
+          "action": "attack",
+          "seq": 1
+        },
+        {
+          "at": 1795089494690,
+          "kind": "send-result",
+          "connection": 22,
+          "role": "student",
+          "epoch": 2,
+          "match": "upgrade-fixed-1",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true,
+          "lastInboundAt": 1795089494443,
+          "lastInboundType": "INPUT_BATCH",
+          "requestId": "70c03f9f-c8db-461c-b9be-3b5e53eeb3e5",
+          "type": "ACTION",
+          "accepted": true
+        },
+        {
+          "at": 1795089496697,
+          "kind": "received-command",
+          "connection": 22,
+          "role": "student",
+          "epoch": 2,
+          "match": "upgrade-fixed-1",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true,
+          "lastInboundAt": 1795089496168,
+          "lastInboundType": "PING",
+          "type": "ACTION",
+          "requestId": "70c03f9f-c8db-461c-b9be-3b5e53eeb3e5",
+          "commandEpoch": 2,
+          "life": 0,
+          "action": "attack",
+          "seq": 1
+        },
+        {
+          "at": 1795089496698,
+          "kind": "send-result",
+          "connection": 22,
+          "role": "student",
+          "epoch": 2,
+          "match": "upgrade-fixed-1",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true,
+          "lastInboundAt": 1795089496168,
+          "lastInboundType": "PING",
+          "requestId": "70c03f9f-c8db-461c-b9be-3b5e53eeb3e5",
+          "type": "ACTION",
+          "accepted": true
+        },
+        {
+          "at": 1795089499437,
+          "kind": "received-command",
+          "connection": 22,
+          "role": "student",
+          "epoch": 2,
+          "match": "upgrade-fixed-1",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true,
+          "lastInboundAt": 1795089499182,
+          "lastInboundType": "INPUT_BATCH",
+          "type": "ACTION",
+          "requestId": "1fc76cd4-e57e-4a08-8e44-87236695e2a0",
+          "commandEpoch": 2,
+          "life": 0,
+          "action": "skill",
+          "seq": 1
+        },
+        {
+          "at": 1795089499437,
+          "kind": "send-result",
+          "connection": 22,
+          "role": "student",
+          "epoch": 2,
+          "match": "upgrade-fixed-1",
+          "phase": "BATTLE",
+          "buffered": 0,
+          "queue": 0,
+          "alive": true,
+          "lastInboundAt": 1795089499182,
+          "lastInboundType": "INPUT_BATCH",
+          "requestId": "1fc76cd4-e57e-4a08-8e44-87236695e2a0",
+          "type": "ACTION",
+          "accepted": true
+        }
+      ],
+      "handler": {
+        "count": 2019,
+        "maxMs": 8.700000000011642
+      },
+      "longTasks": [
+        {
+          "at": 22923,
+          "ms": 277
+        },
+        {
+          "at": 23218.599999999977,
+          "ms": 234
+        },
+        {
+          "at": 23471.599999999977,
+          "ms": 239
+        },
+        {
+          "at": 23714.79999999999,
+          "ms": 289
+        },
+        {
+          "at": 24017.29999999999,
+          "ms": 259
+        },
+        {
+          "at": 24285.20000000001,
+          "ms": 256
+        },
+        {
+          "at": 24556.399999999965,
+          "ms": 238
+        },
+        {
+          "at": 24816.29999999999,
+          "ms": 253
+        }
+      ],
+      "serverWindow": {
+        "windowMs": 29138.402550000003,
+        "cpuMs": {
+          "user": 3614.165,
+          "system": 430.393,
+          "total": 4044.558
+        },
+        "memory": {
+          "rss": 261197824,
+          "heapTotal": 183218176,
+          "heapUsed": 93304864,
+          "external": 21086866,
+          "arrayBuffers": 14109463
+        },
+        "step": {
+          "count": 1089,
+          "mean": 1.1434905261708694,
+          "p95": 2.512092000000848,
+          "p99": 6.002872000000934,
+          "max": 29.404904999999417,
+          "p50": 0.8160759999991569,
+          "sampleCount": 1089,
+          "scope": "entire-window"
+        },
+        "snapshot": {
+          "count": 364,
+          "mean": 2.429116739010954,
+          "p95": 5.285162999998647,
+          "p99": 10.069282999998904,
+          "max": 14.205321999999796,
+          "p50": 1.9413969999986875,
+          "sampleCount": 364,
+          "scope": "entire-window"
+        },
+        "debtMs": 8.448375999998984,
+        "overloads": []
+      }
+    }
+  ]
+}

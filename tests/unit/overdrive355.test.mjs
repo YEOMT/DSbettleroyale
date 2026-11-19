@@ -1,3 +1,4 @@
+import {expectedPaths357} from '../v35-7/approved.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -126,7 +127,7 @@ test('D01-D07: tier multipliers replace previous tier, preserve damage and widen
 test('A01-A06/D10: all 86 immutable baseline projections change only reviewed leaves; modes/other augments unchanged',()=>{
  const actual=rosterMechanics(manifest);assert.equal(Object.keys(actual).length,86);assert.equal(new Set(approved355.map(d=>d.path.split('.')[0])).size,11);
  for(const [id,row]of Object.entries(base.mechanics))assert.ok(sameMechanics(actual[id],expected356(expected355({...row,id}))),id);
- const w=createRuleContext();for(const [id,path]of Object.entries(base.paths))if(!['rapid','giant','wide'].includes(id))assert.deepEqual(w.BR_RUN_PATHS[id],path,id);
+ const w=createRuleContext();for(const [id,path]of Object.entries(expectedPaths357(base.paths,w.brRunTierText)))if(!['rapid','giant','wide'].includes(id))assert.deepEqual(w.BR_RUN_PATHS[id],path,id);
  assert.equal(manifest.roster.find(a=>a.id==='emoji-094').skill.projectile.damage,3.15);assert.equal(manifest.roster.find(a=>a.id==='emoji-137').skill.projectile.speed,65);
 });
 test('D04-D06: accepted inputs with stacked haste respect a six-tick floor and no extra shot on duplicate',t=>{

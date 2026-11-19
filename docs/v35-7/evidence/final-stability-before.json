@@ -1,0 +1,1165 @@
+{
+  "head": "16ef6abaceff81e88918236bd9e22e597ece56d5",
+  "scope": "Synthetic CI fixtures only; no physical device evidence",
+  "cpu": [
+    {
+      "label": "baseline",
+      "status": "PASS",
+      "ms": 297650.735698,
+      "fifth": {
+        "cpuMsPerSecond": 194.49514033788003,
+        "windowMs": 2538.6649719999987,
+        "rssMiB": 312.484375,
+        "heapMiB": 91.53571319580078,
+        "bytesPerSecond": 14037446.607980385,
+        "step": {
+          "count": 153,
+          "mean": 0.9045031241845458,
+          "p95": 1.8762020000140183,
+          "p99": 4.9353249999985565,
+          "max": 5.425901000009617,
+          "p50": 0.6814410000224598,
+          "sampleCount": 153,
+          "scope": "entire-window"
+        },
+        "snapshot": {
+          "count": 51,
+          "mean": 2.6411443137251043,
+          "p95": 5.1544339999963995,
+          "p99": 6.133912000019336,
+          "max": 6.155523999972502,
+          "p50": 2.33988600000157,
+          "sampleCount": 51,
+          "scope": "entire-window"
+        },
+        "gc": {
+          "count": 3,
+          "mean": 2.0623336666612886,
+          "p95": 1.7765320000471547,
+          "p99": 1.7765320000471547,
+          "max": 3.1009069999563508,
+          "p50": 1.7765320000471547,
+          "sampleCount": 3,
+          "scope": "entire-window"
+        },
+        "roster10": {
+          "retained": 19,
+          "active": 19,
+          "decoy": 0,
+          "grapple": 0,
+          "mushroom": 0,
+          "poison": 2,
+          "ring-wall": 0,
+          "wallSegments": 0,
+          "wallRevision": 0
+        },
+        "objects": {
+          "projectiles": 9,
+          "particles": 99,
+          "zones": 0,
+          "turrets": 0,
+          "texts": 2,
+          "swings": 7,
+          "walls": 8,
+          "smokes": 4,
+          "signatures": 0,
+          "rings": 7
+        },
+        "ownership": {
+          "rooms": 1,
+          "members": 21,
+          "tokens": 21,
+          "peers": 21,
+          "commandLedgers": 298,
+          "commandLedgerCapPerMember": 512,
+          "replayEntries": 12956,
+          "replayJsonBytes": 9600216,
+          "replayMaxEntriesPerMember": 2048,
+          "replayMaxJsonBytesPerMember": 1048576,
+          "replayAgeMaxMs": 9434,
+          "queuedMessages": 0,
+          "queueBytes": 0,
+          "profileStates": 20,
+          "inputPending": 0,
+          "actionPending": 0,
+          "spatialCells": 32,
+          "activeSpatialCells": 16,
+          "captureRecords": 20,
+          "farmBoxes": 30,
+          "farmFlash": 0,
+          "attackContexts": 19
+        },
+        "machine": {
+          "cpuBusyPercent": 97.22772277227722,
+          "freeBytes": 14061613056,
+          "totalBytes": 16760344576,
+          "logicalCpus": 4
+        },
+        "bodyCost": [
+          {
+            "poseSample": {
+              "calls": 260,
+              "ms": 0.6000000000931323,
+              "max": 0.1000000000349246
+            },
+            "poseSnapshot": {
+              "calls": 44,
+              "ms": 4.999999999883585,
+              "max": 4.099999999976717
+            },
+            "poseAccept": {
+              "calls": 176,
+              "ms": 0.4999999998835847,
+              "max": 0.09999999997671694
+            },
+            "image": {
+              "calls": 652,
+              "ms": 1.8000000002211891,
+              "max": 0.20000000001164153
+            },
+            "actorBody": {
+              "calls": 260,
+              "ms": 1.2000000001280569,
+              "max": 0.1000000000349246
+            }
+          },
+          {
+            "poseSample": {
+              "calls": 260,
+              "ms": 1.099999999976717,
+              "max": 0.1000000000349246
+            },
+            "poseSnapshot": {
+              "calls": 55,
+              "ms": 6.300000000104774,
+              "max": 3.800000000046566
+            },
+            "poseAccept": {
+              "calls": 222,
+              "ms": 4,
+              "max": 3
+            },
+            "image": {
+              "calls": 608,
+              "ms": 4.7000000000116415,
+              "max": 3
+            },
+            "actorBody": {
+              "calls": 260,
+              "ms": 5.300000000221189,
+              "max": 3
+            }
+          },
+          {
+            "poseSample": {
+              "calls": 156,
+              "ms": 1.1000000000931323,
+              "max": 0.1000000000349246
+            },
+            "poseSnapshot": {
+              "calls": 86,
+              "ms": 2.400000000023283,
+              "max": 1.2000000000116415
+            },
+            "poseAccept": {
+              "calls": 321,
+              "ms": 1.6999999999534339,
+              "max": 0.7999999999883585
+            },
+            "image": {
+              "calls": 412,
+              "ms": 1.2999999999883585,
+              "max": 0.1000000000349246
+            },
+            "actorBody": {
+              "calls": 156,
+              "ms": 2.9000000000814907,
+              "max": 1.099999999976717
+            }
+          }
+        ],
+        "serverProfile": {
+          "profileDurationUs": 6432187,
+          "cpuTop": [
+            [
+              "(idle)||-1",
+              5179669
+            ],
+            [
+              "writev||-1",
+              173469
+            ],
+            [
+              "json|baseline-source/dist/server/main.js|32456",
+              145301
+            ],
+            [
+              "post|node:inspector|114",
+              120036
+            ],
+            [
+              "||-1",
+              85014
+            ],
+            [
+              "send|baseline-source/dist/server/main.js|32085",
+              66713
+            ],
+            [
+              "toString|node:buffer|917",
+              44536
+            ],
+            [
+              "getVisibleState|baseline-source/dist/server/main.js|31452",
+              43112
+            ],
+            [
+              "report|baseline-source/dist/server/main.js|32422",
+              33593
+            ],
+            [
+              "(garbage collector)||-1",
+              32495
+            ],
+            [
+              "utf8Write|node:internal/buffer|987",
+              30827
+            ],
+            [
+              "utf8Slice||-1",
+              30494
+            ],
+            [
+              "update|baseline-source/dist/server/main.js|6088",
+              23699
+            ],
+            [
+              "brRunSnapshot|baseline-source/dist/server/main.js|11465",
+              21370
+            ],
+            [
+              "privateProfileState|baseline-source/dist/server/main.js|32028",
+              20283
+            ],
+            [
+              "getPrivateSelfState|baseline-source/dist/server/main.js|31368",
+              19992
+            ],
+            [
+              "wirePlayer|baseline-source/dist/server/main.js|7724",
+              15880
+            ],
+            [
+              "pump|baseline-source/dist/server/main.js|32527",
+              14751
+            ],
+            [
+              "ws.send|baseline-source/tools/load/telemetry.mjs|30",
+              13858
+            ],
+            [
+              "(program)||-1",
+              13545
+            ],
+            [
+              "concat|node:buffer|627",
+              12793
+            ],
+            [
+              "update|baseline-source/dist/server/main.js|2990",
+              11246
+            ],
+            [
+              "|baseline-source/dist/server/main.js|32465",
+              11226
+            ],
+            [
+              "writevGeneric|node:internal/stream_base_commons|71",
+              10524
+            ],
+            [
+              "report|server/src/diagnostics/metrics.js|3",
+              10124
+            ],
+            [
+              "actor|baseline-source/dist/server/main.js|31322",
+              10022
+            ],
+            [
+              "subarray|node:buffer|1282",
+              9218
+            ],
+            [
+              "sendEvent|baseline-source/dist/server/main.js|32501",
+              9175
+            ],
+            [
+              "listOnTimeout|node:internal/timers|622",
+              8931
+            ],
+            [
+              "peer.socket.send|baseline-source/tests/combat/polish354-authority.mjs|24",
+              8878
+            ],
+            [
+              "update|baseline-source/dist/server/main.js|3589",
+              8022
+            ],
+            [
+              "|baseline-source/dist/server/main.js|32283",
+              7072
+            ],
+            [
+              "nativeShot|baseline-source/dist/server/main.js|31168",
+              6824
+            ],
+            [
+              "getParticipation|baseline-source/dist/server/main.js|31014",
+              6718
+            ],
+            [
+              "stepWorld|baseline-source/dist/server/main.js|31249",
+              6683
+            ]
+          ],
+          "allocationTop": [
+            [
+              "send|baseline-source/dist/server/main.js|32085",
+              2623248
+            ],
+            [
+              "byteLength|node:buffer|853",
+              1574016
+            ],
+            [
+              "push||-1",
+              529056
+            ],
+            [
+              "post|node:inspector|114",
+              526608
+            ],
+            [
+              "processTimers|node:internal/timers|602",
+              525824
+            ]
+          ],
+          "definition": "1ms statistical CPU samples; 512KiB retained-allocation sampling; same instrumentation in A/B/C; not precise allocation totals"
+        }
+      },
+      "cleanup": [
+        {
+          "world": true,
+          "actors": 0,
+          "inputs": 0,
+          "actions": 0,
+          "entities": 0
+        },
+        {
+          "world": true,
+          "actors": 0,
+          "inputs": 0,
+          "actions": 0,
+          "entities": 0
+        },
+        {
+          "world": true,
+          "actors": 0,
+          "inputs": 0,
+          "actions": 0,
+          "entities": 0
+        },
+        {
+          "world": true,
+          "actors": 0,
+          "inputs": 0,
+          "actions": 0,
+          "entities": 0
+        },
+        {
+          "world": true,
+          "actors": 0,
+          "inputs": 0,
+          "actions": 0,
+          "entities": 0
+        }
+      ]
+    },
+    {
+      "label": "candidate",
+      "status": "PARTIAL",
+      "ms": 327903.962391,
+      "fifth": {
+        "cpuMsPerSecond": 234.67872829686294,
+        "windowMs": 2525.963917999994,
+        "rssMiB": 311.046875,
+        "heapMiB": 57.599510192871094,
+        "bytesPerSecond": 16472226.187991058,
+        "step": {
+          "count": 152,
+          "mean": 1.0793563749998851,
+          "p95": 1.948067999968771,
+          "p99": 3.283709999988787,
+          "max": 5.24428700003773,
+          "p50": 0.8827830000082031,
+          "sampleCount": 152,
+          "scope": "entire-window"
+        },
+        "snapshot": {
+          "count": 50,
+          "mean": 3.0761815400014165,
+          "p95": 5.749955000006594,
+          "p99": 6.9464980000047944,
+          "max": 8.284473999985494,
+          "p50": 2.5487490000086837,
+          "sampleCount": 50,
+          "scope": "entire-window"
+        },
+        "gc": {
+          "count": 4,
+          "mean": 6.127736749971518,
+          "p95": 6.349625000031665,
+          "p99": 6.349625000031665,
+          "max": 10.685339999967255,
+          "p50": 3.919041999964975,
+          "sampleCount": 4,
+          "scope": "entire-window"
+        },
+        "roster10": {
+          "retained": 2,
+          "active": 2,
+          "decoy": 0,
+          "grapple": 0,
+          "mushroom": 0,
+          "poison": 2,
+          "ring-wall": 0,
+          "wallSegments": 0,
+          "wallRevision": 0
+        },
+        "objects": {
+          "projectiles": 7,
+          "particles": 55,
+          "zones": 0,
+          "turrets": 0,
+          "texts": 4,
+          "swings": 0,
+          "walls": 8,
+          "smokes": 4,
+          "signatures": 0,
+          "rings": 4
+        },
+        "ownership": {
+          "rooms": 1,
+          "members": 21,
+          "tokens": 21,
+          "peers": 21,
+          "commandLedgers": 262,
+          "commandLedgerCapPerMember": 512,
+          "replayEntries": 12375,
+          "replayJsonBytes": 9359662,
+          "replayMaxEntriesPerMember": 2048,
+          "replayMaxJsonBytesPerMember": 1048576,
+          "replayAgeMaxMs": 9421,
+          "queuedMessages": 0,
+          "queueBytes": 0,
+          "profileStates": 20,
+          "inputPending": 0,
+          "actionPending": 0,
+          "spatialCells": 33,
+          "activeSpatialCells": 18,
+          "captureRecords": 20,
+          "farmBoxes": 30,
+          "farmFlash": 1,
+          "attackContexts": 2
+        },
+        "machine": {
+          "cpuBusyPercent": 97.00897308075773,
+          "freeBytes": 14159884288,
+          "totalBytes": 16760344576,
+          "logicalCpus": 4
+        },
+        "bodyCost": [
+          {
+            "poseSample": {
+              "calls": 240,
+              "ms": 3.300000000046566,
+              "max": 3.099999999976717
+            },
+            "poseSnapshot": {
+              "calls": 46,
+              "ms": 1.1999999997206032,
+              "max": 0.09999999997671694
+            },
+            "poseAccept": {
+              "calls": 135,
+              "ms": 0.7000000000698492,
+              "max": 0.10000000009313226
+            },
+            "image": {
+              "calls": 583,
+              "ms": 1.0999999998603016,
+              "max": 0.10000000009313226
+            },
+            "actorBody": {
+              "calls": 240,
+              "ms": 4.300000000279397,
+              "max": 3.099999999976717
+            }
+          },
+          {
+            "poseSample": {
+              "calls": 194,
+              "ms": 0.9000000000232831,
+              "max": 0.10000000009313226
+            },
+            "poseSnapshot": {
+              "calls": 106,
+              "ms": 2.300000000395812,
+              "max": 0.10000000009313226
+            },
+            "poseAccept": {
+              "calls": 315,
+              "ms": 1.5000000002328306,
+              "max": 0.40000000002328306
+            },
+            "image": {
+              "calls": 463,
+              "ms": 6.399999999906868,
+              "max": 5
+            },
+            "actorBody": {
+              "calls": 194,
+              "ms": 1.4999999998835847,
+              "max": 0.10000000009313226
+            }
+          },
+          {
+            "poseSample": {
+              "calls": 105,
+              "ms": 0.8000000000465661,
+              "max": 0.10000000009313226
+            },
+            "poseSnapshot": {
+              "calls": 83,
+              "ms": 0.9000000000232831,
+              "max": 0.10000000009313226
+            },
+            "poseAccept": {
+              "calls": 305,
+              "ms": 0.7999999999301508,
+              "max": 0.10000000009313226
+            },
+            "image": {
+              "calls": 329,
+              "ms": 10.899999999790452,
+              "max": 6.400000000023283
+            },
+            "actorBody": {
+              "calls": 105,
+              "ms": 7.899999999906868,
+              "max": 6.400000000023283
+            }
+          }
+        ],
+        "serverProfile": {
+          "profileDurationUs": 5806212,
+          "cpuTop": [
+            [
+              "(idle)||-1",
+              4658827
+            ],
+            [
+              "writev||-1",
+              230307
+            ],
+            [
+              "json|DSbettleroyale/dist/server/main.js|32481",
+              109195
+            ],
+            [
+              "post|node:inspector|114",
+              63674
+            ],
+            [
+              "(garbage collector)||-1",
+              62836
+            ],
+            [
+              "||-1",
+              56468
+            ],
+            [
+              "toString|node:buffer|917",
+              48950
+            ],
+            [
+              "send|DSbettleroyale/dist/server/main.js|32109",
+              48428
+            ],
+            [
+              "utf8Write|node:internal/buffer|987",
+              33819
+            ],
+            [
+              "utf8Slice||-1",
+              25953
+            ],
+            [
+              "report|DSbettleroyale/dist/server/main.js|32447",
+              24516
+            ],
+            [
+              "getPrivateSelfState|DSbettleroyale/dist/server/main.js|31392",
+              23013
+            ],
+            [
+              "update|DSbettleroyale/dist/server/main.js|6098",
+              22057
+            ],
+            [
+              "brRunSnapshot|DSbettleroyale/dist/server/main.js|11489",
+              20318
+            ],
+            [
+              "concat|node:buffer|627",
+              18479
+            ],
+            [
+              "pump|DSbettleroyale/dist/server/main.js|32552",
+              17145
+            ],
+            [
+              "peer.socket.send|DSbettleroyale/tests/combat/polish354-authority.mjs|24",
+              17118
+            ],
+            [
+              "(program)||-1",
+              16087
+            ],
+            [
+              "getVisibleState|DSbettleroyale/dist/server/main.js|31476",
+              15757
+            ],
+            [
+              "brSmokeConcealed|DSbettleroyale/dist/server/main.js|1804",
+              15171
+            ],
+            [
+              "ws.send|DSbettleroyale/tools/load/telemetry.mjs|30",
+              14352
+            ],
+            [
+              "rows|DSbettleroyale/dist/server/main.js|32492",
+              12383
+            ],
+            [
+              "isConcealedFrom|DSbettleroyale/dist/server/main.js|5675",
+              11177
+            ],
+            [
+              "flush|DSbettleroyale/dist/server/main.js|32148",
+              9972
+            ],
+            [
+              "|node:internal/validators|546",
+              9633
+            ],
+            [
+              "brApplyPlayerInput|DSbettleroyale/dist/server/main.js|12035",
+              9045
+            ],
+            [
+              "stepWorld|DSbettleroyale/dist/server/main.js|31273",
+              8806
+            ],
+            [
+              "sendEvent|DSbettleroyale/dist/server/main.js|32526",
+              7170
+            ],
+            [
+              "rebuildSpatialGrid|DSbettleroyale/dist/server/main.js|5712",
+              6509
+            ],
+            [
+              "report|server/src/diagnostics/metrics.js|3",
+              6483
+            ],
+            [
+              "processTimers|node:internal/timers|602",
+              6350
+            ],
+            [
+              "snapshotEncoder|DSbettleroyale/dist/server/main.js|32480",
+              6200
+            ],
+            [
+              "fromStringFast|node:buffer|495",
+              5802
+            ],
+            [
+              "listOnTimeout|node:internal/timers|622",
+              5719
+            ],
+            [
+              "writeChannelMessage|node:internal/child_process/serialization|120",
+              5370
+            ]
+          ],
+          "allocationTop": [
+            [
+              "send|DSbettleroyale/dist/server/main.js|32109",
+              5247864
+            ],
+            [
+              "byteLength|node:buffer|853",
+              4721808
+            ],
+            [
+              "post|node:inspector|114",
+              1105904
+            ],
+            [
+              "combatWallGrid|DSbettleroyale/dist/server/main.js|1127",
+              524352
+            ],
+            [
+              "targetKey|DSbettleroyale/dist/server/main.js|6375",
+              524320
+            ],
+            [
+              "now|node:internal/perf/performance|136",
+              524304
+            ]
+          ],
+          "definition": "1ms statistical CPU samples; 512KiB retained-allocation sampling; same instrumentation in A/B/C; not precise allocation totals"
+        }
+      },
+      "cleanup": [
+        {
+          "world": true,
+          "actors": 0,
+          "inputs": 0,
+          "actions": 0,
+          "entities": 0
+        },
+        {
+          "world": true,
+          "actors": 0,
+          "inputs": 0,
+          "actions": 0,
+          "entities": 0
+        },
+        {
+          "world": true,
+          "actors": 0,
+          "inputs": 0,
+          "actions": 0,
+          "entities": 0
+        },
+        {
+          "world": true,
+          "actors": 0,
+          "inputs": 0,
+          "actions": 0,
+          "entities": 0
+        },
+        {
+          "world": true,
+          "actors": 0,
+          "inputs": 0,
+          "actions": 0,
+          "entities": 0
+        }
+      ]
+    }
+  ],
+  "c07": {
+    "durationMs": 3500,
+    "finalizedTick": 1997,
+    "server": [
+      {
+        "kind": "finish-start",
+        "afterFinalMs": 0,
+        "buffered": null,
+        "queue": null
+      },
+      {
+        "kind": "finish-end",
+        "afterFinalMs": 0,
+        "buffered": null,
+        "queue": null
+      },
+      {
+        "kind": "send-room",
+        "afterFinalMs": 4,
+        "buffered": 12836,
+        "queue": 0
+      },
+      {
+        "kind": "sent-room",
+        "afterFinalMs": 14,
+        "buffered": 0,
+        "queue": 0
+      }
+    ],
+    "hostReceivedMs": 5376,
+    "hostFlowMs": 5382,
+    "remainingMs": 0
+  },
+  "identity": {
+    "status": "FAIL",
+    "ms": 352750.133775,
+    "error": "AssertionError [ERR_ASSERTION]: amplify v35.6 body preserved\n    at file:///__w/DSbettleroyale/DSbettleroyale/tests/combat/overdrive357-identity.mjs:80:164",
+    "passedPaths": [
+      "regen",
+      "expansion",
+      "signature_duration",
+      "signature_range",
+      "swift"
+    ],
+    "surfaces": [
+      {
+        "acceptedTick": 390,
+        "acceptedAt": 342172.3,
+        "attackPoseSamples": 1,
+        "drawsNearEvent": [
+          {
+            "kind": "draw-end",
+            "at": 340550.7,
+            "wall": 1795092456853,
+            "ms": 6.400000000023283
+          },
+          {
+            "kind": "draw-end",
+            "at": 341098.8,
+            "wall": 1795092457401,
+            "ms": 2.099999999976717
+          },
+          {
+            "kind": "draw-end",
+            "at": 341650.49999999994,
+            "wall": 1795092457953,
+            "ms": 4.099999999976717
+          },
+          {
+            "kind": "draw-end",
+            "at": 342180.8,
+            "wall": 1795092458483,
+            "ms": 5
+          },
+          {
+            "kind": "draw-end",
+            "at": 342756.2,
+            "wall": 1795092459059,
+            "ms": 4.900000000023283
+          },
+          {
+            "kind": "draw-end",
+            "at": 343335.10000000003,
+            "wall": 1795092459638,
+            "ms": 2.5
+          },
+          {
+            "kind": "draw-end",
+            "at": 343913.3,
+            "wall": 1795092460216,
+            "ms": 5.400000000023283
+          }
+        ],
+        "longTasks": [
+          {
+            "at": 342175.7,
+            "ms": 574
+          },
+          {
+            "at": 342751.2,
+            "ms": 579
+          },
+          {
+            "at": 343331.89999999997,
+            "ms": 575
+          },
+          {
+            "at": 343907.8,
+            "ms": 575
+          },
+          {
+            "at": 344484.7,
+            "ms": 577
+          },
+          {
+            "at": 345062.49999999994,
+            "ms": 577
+          },
+          {
+            "at": 345641.60000000003,
+            "ms": 573
+          },
+          {
+            "at": 346215.60000000003,
+            "ms": 581
+          },
+          {
+            "at": 346798.8,
+            "ms": 616
+          },
+          {
+            "at": 347420.99999999994,
+            "ms": 621
+          }
+        ]
+      },
+      {
+        "acceptedTick": 390,
+        "acceptedAt": 340673.3,
+        "attackPoseSamples": 0,
+        "drawsNearEvent": [
+          {
+            "kind": "draw-end",
+            "at": 339020.2,
+            "wall": 1795092456082,
+            "ms": 3.599999999976717
+          },
+          {
+            "kind": "draw-end",
+            "at": 339574.10000000003,
+            "wall": 1795092456636,
+            "ms": 2.6000000000931323
+          },
+          {
+            "kind": "draw-end",
+            "at": 340127.7,
+            "wall": 1795092457189,
+            "ms": 2.800000000046566
+          },
+          {
+            "kind": "draw-end",
+            "at": 340683.10000000003,
+            "wall": 1795092457745,
+            "ms": 5
+          },
+          {
+            "kind": "draw-end",
+            "at": 341219.60000000003,
+            "wall": 1795092458281,
+            "ms": 13.800000000046566
+          },
+          {
+            "kind": "draw-end",
+            "at": 341773.8,
+            "wall": 1795092458835,
+            "ms": 3.5
+          },
+          {
+            "kind": "draw-end",
+            "at": 342356.7,
+            "wall": 1795092459418,
+            "ms": 4.700000000069849
+          }
+        ],
+        "longTasks": [
+          {
+            "at": 340676.99999999994,
+            "ms": 528
+          },
+          {
+            "at": 341205.60000000003,
+            "ms": 563
+          },
+          {
+            "at": 341770.3,
+            "ms": 575
+          },
+          {
+            "at": 342350.60000000003,
+            "ms": 574
+          },
+          {
+            "at": 342926.3,
+            "ms": 570
+          },
+          {
+            "at": 343499.7,
+            "ms": 579
+          },
+          {
+            "at": 344080.7,
+            "ms": 578
+          },
+          {
+            "at": 344660.99999999994,
+            "ms": 572
+          },
+          {
+            "at": 345237.3,
+            "ms": 573
+          },
+          {
+            "at": 345813.3,
+            "ms": 580
+          }
+        ]
+      },
+      {
+        "acceptedTick": 390,
+        "acceptedAt": 340416.49999999994,
+        "attackPoseSamples": 1,
+        "drawsNearEvent": [
+          {
+            "kind": "draw-end",
+            "at": 338767.7,
+            "wall": 1795092456460,
+            "ms": 8.300000000046566
+          },
+          {
+            "kind": "draw-end",
+            "at": 339318.89999999997,
+            "wall": 1795092457011,
+            "ms": 2.199999999953434
+          },
+          {
+            "kind": "draw-end",
+            "at": 339870.8,
+            "wall": 1795092457563,
+            "ms": 3.5
+          },
+          {
+            "kind": "draw-end",
+            "at": 340423.8,
+            "wall": 1795092458116,
+            "ms": 5.900000000023283
+          },
+          {
+            "kind": "draw-end",
+            "at": 340970.39999999997,
+            "wall": 1795092458663,
+            "ms": 5.799999999930151
+          },
+          {
+            "kind": "draw-end",
+            "at": 341548.89999999997,
+            "wall": 1795092459241,
+            "ms": 5.900000000023283
+          },
+          {
+            "kind": "draw-end",
+            "at": 342129.8,
+            "wall": 1795092459822,
+            "ms": 8.099999999976717
+          }
+        ],
+        "longTasks": [
+          {
+            "at": 339867.10000000003,
+            "ms": 548
+          },
+          {
+            "at": 340417.7,
+            "ms": 545
+          },
+          {
+            "at": 340964.3,
+            "ms": 576
+          },
+          {
+            "at": 341542.99999999994,
+            "ms": 577
+          },
+          {
+            "at": 342121.39999999997,
+            "ms": 571
+          },
+          {
+            "at": 342697.3,
+            "ms": 576
+          },
+          {
+            "at": 343274.49999999994,
+            "ms": 575
+          },
+          {
+            "at": 343861.2,
+            "ms": 567
+          },
+          {
+            "at": 344429.99999999994,
+            "ms": 575
+          },
+          {
+            "at": 345010.3,
+            "ms": 573
+          }
+        ]
+      }
+    ]
+  },
+  "localStaleClock": {
+    "before": {
+      "status": "FAIL",
+      "ms": 16592.4337,
+      "error": [
+        "AssertionError [ERR_ASSERTION]: quick v35.6 body preserved"
+      ],
+      "rows": []
+    },
+    "after": {
+      "status": "PASS",
+      "ms": 16937.897200000003,
+      "error": [],
+      "rows": [
+        {
+          "path": "quick",
+          "id": "023",
+          "status": "PASS",
+          "mods": {
+            "wangguiHp": 1,
+            "wangguiPower": 1,
+            "basicSpeed": 1,
+            "basicDamage": 1,
+            "basicCount": 0,
+            "basicSize": 1,
+            "basicVelocity": 1,
+            "basicKnockback": 1,
+            "basicRange": 1,
+            "basicArcDegrees": 0,
+            "skillCooldown": 0.30000000000000004,
+            "skillDamage": 1,
+            "skillCount": 0,
+            "skillSize": 1,
+            "skillControl": 1,
+            "skillRestore": 1,
+            "skillDuration": 1,
+            "moveSpeed": 1,
+            "maxHp": 1,
+            "regenRate": 0,
+            "regenDelay": 300,
+            "signatureRange": 1,
+            "signatureDuration": 1
+          },
+          "aim": {
+            "shape": "line",
+            "label": "헤드슈터",
+            "range": 1380,
+            "width": 14.56,
+            "radius": 7.28,
+            "impactRadius": 0,
+            "halfAngle": 0.5,
+            "rework": true,
+            "wallWarning": true
+          },
+          "actualDamage": 209.45600000000013,
+          "frames": [
+            104,
+            105,
+            105
+          ],
+          "poseSamples": [
+            20,
+            20,
+            19
+          ]
+        }
+      ]
+    }
+  }
+}

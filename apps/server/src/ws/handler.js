@@ -40,7 +40,10 @@ export function attachConnection(socket,manager,config,metrics,transport){
    message=decodeClient(buffer.toString('utf8'));const p=message.payload;
    if(message.type==='HELLO'){if(peer.hello)fail('ALREADY_HELLO');if(!matchesFingerprint(p)){peer.send('VERSION_MISMATCH',{expected:fingerprint});peer.close(4002,'VERSION_MISMATCH');return;}peer.hello=true;peer.send('WELCOME',fingerprint);return;}
    if(!peer.hello)fail('HELLO_REQUIRED');
-   if(message.type==='PING'){peer.send('PONG',{clientTime:p.clientTime,serverNow:performance.now()});return;}
+   // A decoded application heartbeat is also evidence that this socket is
+   // alive. Busy browsers can delay the control pong while still sending PING.
+   // Keep the same 15s silent-peer deadline and all rate/queue limits.
+   if(message.type==='PING'){peer.alive=true;peer.send('PONG',{clientTime:p.clientTime,serverNow:performance.now()});return;}
    if(message.type==='AUTH'){if(!secretMatches(p.secret,config.hostSecret))fail('AUTH_FAILED');peer.hostAuthUntil=Date.now()+300000;peer.send('AUTH_OK',{});return;}
    if(message.type==='CREATE'){if(!(peer.hostAuthUntil>Date.now()))fail('HOST_AUTH_REQUIRED');const r=manager.create(p.name);bind(r,r.host);return;}
    if(message.type==='JOIN'){const r=manager.rooms.get(p.code);if(!r)fail('ROOM_NOT_FOUND');bind(r,r.addMember(p.name));return;}
