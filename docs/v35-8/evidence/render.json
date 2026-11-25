@@ -1,0 +1,23 @@
+{
+  "scope": "Real Pixi Sprite allocation/transform microbenchmark; no GPU rendering, not classroom FPS evidence",
+  "baseline": "5585c8ca5f262d51e3732fb2115bab6e660fefd5",
+  "workload": {
+    "frames": 200,
+    "newShotsPerFrame": 60,
+    "totalShots": 12000,
+    "previousFrameSpritesRetiredAfterDrawingNextFrame": true,
+    "attemptsAfterFix": 1
+  },
+  "before": {"created": 12000, "peakActive": 120, "retained": 0, "elapsedMs": 30.4392, "processCpuMs": 94},
+  "after": {"created": 120, "peakActive": 120, "retained": 64, "elapsedMs": 24.532, "processCpuMs": 62},
+  "checks": [
+    {"command": "node --test tests/unit/smooth358-render.test.mjs tests/unit/recovery356-feel.test.mjs", "status": "FAIL", "pass": 9, "fail": 3, "durationMs": 2702.065, "cause": "New pool used setTransform, which is not a Pixi8 Sprite method. Replaced with explicit property setters; prior body tests passed."},
+    {"command": "node --test tests/unit/smooth358-render.test.mjs", "status": "PASS", "pass": 3, "durationMs": 1873.0885, "coverage": "Transform/order parity, bounded reserve with 150 active sprites across five clears, same 12000-shot lifecycle allocation comparison"},
+    {"command": "node --test --test-name-pattern='retired projectile' tests/unit/smooth358-render.test.mjs", "status": "PASS", "pass": 1, "durationMs": 2088.2069, "coverage": "Strengthened unique retired texture assertion: pool releases reference without destroying shared texture"}
+  ],
+  "limits": [
+    "Allocation counts are deterministic; elapsed/process CPU timings are a single shared-PC sample, not a speed guarantee.",
+    "Dormant reserve adds up to 64 detached Sprite objects, emptied on room reset and Canvas fallback. Active count is not capped.",
+    "Browser render, GPU, real-device and end-to-end performance must be reported separately."
+  ]
+}

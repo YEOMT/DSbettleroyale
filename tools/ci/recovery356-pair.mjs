@@ -2,8 +2,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync,spawnSync} from 'node:child_process';
-const overdrive357=process.env.OVERDRIVE357==='1',version=overdrive357?'v35-7':'v35-6';
-const root=process.cwd(),baseSha=overdrive357?'9b2d45ff13d4ee0890179103ef66e6edb1bf174c':'e328aad252e243428123e3d576ea8ffefcdb8604';
+const smooth358=process.env.SMOOTH358==='1',overdrive357=process.env.OVERDRIVE357==='1',version=smooth358?'v35-8':overdrive357?'v35-7':'v35-6';
+const root=process.cwd(),baseSha=smooth358?'5585c8ca5f262d51e3732fb2115bab6e660fefd5':overdrive357?'9b2d45ff13d4ee0890179103ef66e6edb1bf174c':'e328aad252e243428123e3d576ea8ffefcdb8604';
 const renderer=process.argv[2]||'canvas',quality=process.argv[3]||'low';
 const players=Number(process.env.POLISH_PLAYERS||20),rounds=Number(process.env.POLISH_ROUNDS||5);
 const out=path.resolve('artifacts',version),base=path.join(out,'baseline-source');
@@ -45,14 +45,14 @@ try{
   }
  }
  const a=report.attempts.find(r=>r.label==='baseline')?.live,b=report.attempts.find(r=>r.label==='candidate')?.live;
- const metrics=s=>({stepP95:s.server.step.p95,snapshotP95:s.server.snapshot.p95,windowMs:s.server.windowMs,serverCpuMs:s.server.cpuMs.total,cpuMsPerSecond:s.server.cpuMs.total*1000/s.server.windowMs,rss:s.server.memory.rss,bytes:s.server.transport.bytes,bytesPerSecond:s.server.transport.bytes*1000/s.server.windowMs,hostDrawP95:s.screens[0].draw.p95,studentDrawP95:s.screens[1].draw.p95,studentGapP95:s.screens[1].gap.p95,hostGapP95:s.screens[0].gap.p95});
+ const metrics=s=>({stepP95:s.server.step.p95,snapshotP95:s.server.snapshot.p95,windowMs:s.server.windowMs,serverCpuMs:s.server.cpuMs.total,cpuMsPerSecond:s.server.cpuMs.total*1000/s.server.windowMs,rss:s.server.memory.rss,bytes:s.server.transport.bytes,bytesPerSecond:s.server.transport.bytes*1000/s.server.windowMs,hostDrawP95:s.screens[0].draw.p95,studentDrawP95:s.screens[1].draw.p95,studentGapP95:s.screens[1].gap.p95,hostGapP95:s.screens[0].gap.p95,...(smooth358?{hostGapP99:s.screens[0].gap.p99,studentGapP99:s.screens[1].gap.p99,secondStudentGapP95:s.screens[2].gap.p95,secondStudentGapP99:s.screens[2].gap.p99,hostDrawP99:s.screens[0].draw.p99,studentDrawP99:s.screens[1].draw.p99}: {})});
  for(const ar of a?.rows||[]){const br=b?.rows.find(r=>r.round===ar.round&&r.mode===ar.mode);if(!br)continue;
   for(const as of ar.stages){const bs=br.stages.find(s=>s.alive===as.alive);if(!bs)continue;const av=metrics(as),bv=metrics(bs);report.comparison.push({round:ar.round,mode:ar.mode,alive:as.alive,before:av,after:bv,ratios:Object.fromEntries(Object.keys(av).map(k=>[k,av[k]?bv[k]/av[k]:null]))});}
  }
  report.functionStatus=report.attempts.every(r=>r.status==='PASS')?'PASS':report.attempts.some(r=>['FAIL','TIMEOUT','INFRA_FAILURE'].includes(r.status))?'FAIL':'PARTIAL';
  // A single shared-runner sample is a risk signal, never a classroom guarantee.
  report.expectedComparisons=rounds+(players===20?4:0);
- report.performanceStatus=!report.comparison.length?'NOT_RUN':report.comparison.length!==report.expectedComparisons||report.comparison.some(r=>!Object.values(r.before).every(Number.isFinite)||!Object.values(r.after).every(Number.isFinite)||r.before.windowMs<=0||r.after.windowMs<=0||['bytesPerSecond','stepP95','snapshotP95','cpuMsPerSecond','rss','hostDrawP95','studentDrawP95','studentGapP95','hostGapP95'].some(k=>r.ratios[k]>1.20))?'PARTIAL':'PASS';
+ report.performanceStatus=!report.comparison.length?'NOT_RUN':report.comparison.length!==report.expectedComparisons||report.comparison.some(r=>!Object.values(r.before).every(Number.isFinite)||!Object.values(r.after).every(Number.isFinite)||r.before.windowMs<=0||r.after.windowMs<=0||['bytesPerSecond','stepP95','snapshotP95','cpuMsPerSecond','rss','hostDrawP95','studentDrawP95','studentGapP95','hostGapP95',...(smooth358?['hostGapP99','studentGapP99','secondStudentGapP95','secondStudentGapP99']:[])].some(k=>r.ratios[k]>1.20))?'PARTIAL':'PASS';
  if(report.functionStatus!=='PASS')process.exitCode=1;
 }catch(error){report.error=error.stack;report.functionStatus=report.attempts.length?'FAIL':'INFRA_FAILURE';process.exitCode=1;}
 finally{

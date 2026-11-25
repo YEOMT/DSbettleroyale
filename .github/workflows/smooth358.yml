@@ -1,0 +1,43 @@
+name: v35.8 production-baseline comparison
+on:
+  pull_request:
+    paths: ['apps/client/**', 'apps/server/**', 'tests/combat/recovery356-live.mjs', 'tools/ci/recovery356-pair.mjs', '.github/workflows/smooth358.yml']
+  workflow_dispatch: null
+permissions:
+  contents: read
+concurrency:
+  group: smooth358-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  paired:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {renderer: pixi, quality: balanced, players: 20}
+          - {renderer: pixi, quality: high, players: 30}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version-file: .nvmrc, cache: npm}
+      - run: npm ci
+      - run: npm run build
+      - run: node tools/ci/recovery356-pair.mjs ${{ matrix.renderer }} ${{ matrix.quality }}
+        env:
+          SMOOTH358: '1'
+          OVERDRIVE357: '1'
+          POLISH_PLAYERS: ${{ matrix.players }}
+          POLISH_ROUNDS: '5'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smooth358-${{ matrix.players }}-${{ github.sha }}
+          path: |
+            artifacts/v35-8/pair-*.json
+            artifacts/v35-8/*-r*.log
+            artifacts/v35-8/live-*/
+          retention-days: 30

@@ -1,0 +1,76 @@
+{
+  "baseSha": "5585c8ca5f262d51e3732fb2115bab6e660fefd5",
+  "scope": "Local Windows, prepared live-engine team-capture views with legal v35.7 five-choice builds and concentrated players; no simulation/WS/browser work in the measured loop. Sequential baseline then candidate. All compared UTF-8 bytes identical.",
+  "wholeStringAssembly": {
+    "decision": "REJECTED: CPU and wall-time regression at 30 players",
+    "iterations": 1500,
+    "warmups": 3,
+    "rows": [
+      {
+        "players": 20,
+        "before": {
+          "wallMs": 1994.4743,
+          "cpuMs": 2265,
+          "bytes": 729441273
+        },
+        "after": {
+          "wallMs": 2024.0538,
+          "cpuMs": 1907,
+          "bytes": 729441273
+        }
+      },
+      {
+        "players": 30,
+        "before": {
+          "wallMs": 1633.6137,
+          "cpuMs": 2047,
+          "bytes": 1545830903
+        },
+        "after": {
+          "wallMs": 3175.371,
+          "cpuMs": 3172,
+          "bytes": 1545830903
+        }
+      }
+    ]
+  },
+  "farmTupleCachePrototype": {
+    "decision": "IMPLEMENTED with added null/sparse-array and optional-field JSON guards; final implementation/live comparison reported separately",
+    "iterations": 750,
+    "warmups": 1,
+    "rows": [
+      {
+        "players": 20,
+        "before": {
+          "wallMs": 467.5516,
+          "cpuMs": 453,
+          "bytes": 364707690
+        },
+        "after": {
+          "wallMs": 457.797,
+          "cpuMs": 438,
+          "bytes": 364707690
+        }
+      },
+      {
+        "players": 30,
+        "before": {
+          "wallMs": 777.8916,
+          "cpuMs": 781,
+          "bytes": 772896340
+        },
+        "after": {
+          "wallMs": 691.175,
+          "cpuMs": 703,
+          "bytes": 772896340
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "Prepared snapshot encoding microbenchmark only",
+    "No measured WS/network reduction (same bytes)",
+    "Not long-run memory/physical-device proof",
+    "Final hardened code benchmark remains distinct from this prototype run"
+  ]
+}
