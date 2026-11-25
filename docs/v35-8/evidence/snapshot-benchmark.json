@@ -1,0 +1,42 @@
+{
+  "baseSha": "5585c8ca5f262d51e3732fb2115bab6e660fefd5",
+  "iterations": 750,
+  "warmups": 1,
+  "scope": "one sequential synthetic prepared-snapshot encoding pair; no physics, WS or browser cost; no forced GC",
+  "rows": [
+    {
+      "players": 20,
+      "actorCount": 20,
+      "shots": 0,
+      "boxes": 30,
+      "views": 21,
+      "before": {
+        "wallMs": 460.42049999999995,
+        "cpuMs": 469,
+        "bytes": 364707690
+      },
+      "after": {
+        "wallMs": 422.1141,
+        "cpuMs": 422,
+        "bytes": 364707690
+      }
+    },
+    {
+      "players": 30,
+      "actorCount": 30,
+      "shots": 0,
+      "boxes": 45,
+      "views": 31,
+      "before": {
+        "wallMs": 778.7826,
+        "cpuMs": 797,
+        "bytes": 772896340
+      },
+      "after": {
+        "wallMs": 820.7196999999996,
+        "cpuMs": 797,
+        "bytes": 772896340
+      }
+    }
+  ]
+}

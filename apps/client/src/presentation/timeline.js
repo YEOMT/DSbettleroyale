@@ -3,9 +3,13 @@ import {effectLife} from './effect-life.js';
 import {shotKey,previewShots,previewCue,terminalPoints} from './previews.js';
 import {createMovementKernel,predictMovement} from '../../../../packages/engine/src/movement/prediction.js';
 import {sampleFlight} from './flight.js';
+function byId(rows){const index=new Map();for(const row of rows)index.set(row.id,row);return index;}
+// Snapshot rows remain immutable after hydration. Cache only the playback and
+// newest samples, not all 40 history entries; reset drops these references too.
+function indexes(timeline,sample){const cached=timeline.sampleIndexes.find(index=>index.sample===sample);if(cached)return cached;const index={sample,actors:byId(sample.state.actors),shots:byId(sample.state.shots)};timeline.sampleIndexes.push(index);if(timeline.sampleIndexes.length>3)timeline.sampleIndexes.shift();return index;}
 export class Timeline{
  constructor(){this.kernel=createMovementKernel();this.reset();this.metrics={accepted:0,discarded:0,corrections:[],arrivalGaps:[],sourceGaps:[],holds:0,interpolated:0};}
- reset(){this.escape=null;this.static=null;this.walls=[];this.staticWalls=[];this.dynamicRevision=-1;this.collisionCache=null;this.samples=[];this.history=[];this.predicted=null;this.lastSeq=0;this.renderTick=0;this.lifeKey='';this.effects=[];this.terminals=new Map();this.spawns=new Map();this.previews=new Map();this.pendingInputs=new Map();this.offset={x:0,y:0};this.correctedAt=0;}
+ reset(){this.escape=null;this.static=null;this.walls=[];this.staticWalls=[];this.dynamicRevision=-1;this.collisionCache=null;this.samples=[];this.history=[];this.predicted=null;this.lastSeq=0;this.renderTick=0;this.lifeKey='';this.effects=[];this.terminals=new Map();this.spawns=new Map();this.previews=new Map();this.pendingInputs=new Map();this.offset={x:0,y:0};this.correctedAt=0;this.sampleIndexes=[];this.frameActors=new Map();this.visibleShots=new Set();this.handedShots=new Set();}
  displayOffset(now){const k=.8**(Math.max(0,now-this.correctedAt)*.06);return {x:this.offset.x*k,y:this.offset.y*k};}
  setStatic(data){this.static=data;this.escape=data.escapeState||null;this.staticWalls=(data.walls||[]).map(w=>({...w,pos:{x:w.x,y:w.y},width:w.w,height:w.h}));this.walls=this.staticWalls;this.dynamicRevision=-1;this.collisionCache=null;}
  accept(s,now=performance.now()){
@@ -49,8 +53,8 @@ export class Timeline{
   this.renderTick=Math.max(this.renderTick,last.state.serverTick+Math.min(150,now-last.clockAt)*.06-4.5);
   let left=this.samples[0],right=last;for(let i=1;i<this.samples.length;i++)if(this.samples[i].state.serverTick>=this.renderTick){left=this.samples[i-1];right=this.samples[i];break;}
   const span=right.state.serverTick-left.state.serverTick,alpha=span?Math.max(0,Math.min(1,(this.renderTick-left.state.serverTick)/span)):1;
-  const priorActors=new Map(left.state.actors.map(a=>[a.id,a])),priorShots=new Map(left.state.shots.map(q=>[q.id,q]));
-  const actors=right.state.actors.flatMap(a=>{const row=priorActors.get(a.id),old=row?.lifeSeq===a.lifeSeq&&row?.warpSeq===a.warpSeq?row:null,past=this.renderTick<right.state.serverTick,base=past?old:a;if(!base)return [];return [{...base,x:old?old.x+(a.x-old.x)*alpha:a.x,y:old?old.y+(a.y-old.y)*alpha:a.y,statusTick:effectTick(this.renderTick,last.state.serverTick)}];});
+  const {actors:priorActors,shots:priorShots}=indexes(this,left),statusTick=effectTick(this.renderTick,last.state.serverTick),actors=[];
+  for(const a of right.state.actors){const row=priorActors.get(a.id),old=row?.lifeSeq===a.lifeSeq&&row?.warpSeq===a.warpSeq?row:null,past=this.renderTick<right.state.serverTick,base=past?old:a;if(base)actors.push({...base,x:old?old.x+(a.x-old.x)*alpha:a.x,y:old?old.y+(a.y-old.y)*alpha:a.y,statusTick});}
   if(now-last.at>150)this.metrics.holds++;else this.metrics.interpolated++;
   if(this.predicted){const index=actors.findIndex(a=>a.id===this.predicted.id);const offset=this.displayOffset(now);const self={...this.predicted,x:this.predicted.x+offset.x,y:this.predicted.y+offset.y,statusTick:last.state.serverTick};if(index>=0)actors[index]=self;else actors.push(self);}
   const selfId=this.predicted?.id,shots=[],residuals=[];
@@ -59,8 +63,8 @@ export class Timeline{
   // The local actor already uses the newest authority tick. A short rope can
   // begin and end before the remote interpolation clock reaches its snapshot.
   for(const row of last.state.shots){if(!ownedPersistent(row)||row.start>last.state.serverTick)continue;const end=this.terminals.get(row.id);if(end&&end.tick<=last.state.serverTick)continue;shots.push(row);}
-  const visibleIds=new Set(shots.map(s=>s.id));
-  const currentOwners=this.spawns.size?new Map(last.state.actors.map(a=>[a.id,a])):null;
+  const visibleIds=this.visibleShots;visibleIds.clear();for(const shot of shots)visibleIds.add(shot.id);
+  const currentOwners=this.spawns.size?indexes(this,last).actors:null;
   for(const [id,born]of this.spawns){
    const owner=currentOwners.get(born.owner);
    if(owner&&owner.lifeSeq!==born.life){this.spawns.delete(id);this.terminals.delete(id);continue;}
@@ -71,10 +75,16 @@ export class Timeline{
    else if(born.type!=='ORBIT'&&target-end.tick<(born.crit!==undefined?9:12)&&['projectile','hook','lob','bomb',undefined].includes(born.kind)){const points=terminalPoints(end,born);if(points.length>=4)residuals.push({kind:'transit',tick:end.tick,x:end.x,y:end.y,color:end.color,geometry:{points,width:born.crit!==undefined?2:Math.min(5,end.radius*.4),displayMs:born.crit!==undefined?150:200},terminal:id});}
   }
   for(const [id,end] of this.terminals)if(this.renderTick-end.tick>30)this.terminals.delete(id);
-  const handed=new Set(shots.filter(q=>['projectile','hook','lob','bomb'].includes(q.kind)).map(shotKey));
-  for(const [id,q]of this.previews){const ended=[...this.terminals.values()].some(e=>shotKey(e)===id);if(handed.has(id)||ended||now>q.expires){this.previews.delete(id);continue;}if(now<q.bornAt)continue;const ticks=Math.min((now-q.bornAt)*.06,q.rangeRemaining/Math.max(1,Math.hypot(q.dx,q.dy)));shots.push({...q,x:q.x+q.dx*ticks,y:q.y+q.dy*ticks});}
+  const handed=this.handedShots;handed.clear();
+  if(this.previews.size){
+   for(const q of shots)if(['projectile','hook','lob','bomb'].includes(q.kind))handed.add(shotKey(q));
+   for(const e of this.terminals.values())handed.add(shotKey(e));
+   for(const [id,q]of this.previews){if(handed.has(id)||now>q.expires){this.previews.delete(id);continue;}if(now<q.bornAt)continue;const ticks=Math.min((now-q.bornAt)*.06,q.rangeRemaining/Math.max(1,Math.hypot(q.dx,q.dy)));shots.push({...q,x:q.x+q.dx*ticks,y:q.y+q.dy*ticks});}
+  }
+  const frameActors=this.frameActors;frameActors.clear();if(this.effects.length)for(const a of actors)frameActors.set(a.id,a);
   this.effects=this.effects.filter(e=>{
-   if(!actors.every(a=>(a.id!==e.targetId||e.geometry?.targetLife==null||a.lifeSeq===e.geometry.targetLife)&&(a.id!==e.sourceId||e.geometry?.lifeSeq==null||a.lifeSeq===e.geometry.lifeSeq)))return false;
+   const target=frameActors.get(e.targetId),source=frameActors.get(e.sourceId);
+   if(target&&e.geometry?.targetLife!=null&&target.lifeSeq!==e.geometry.targetLife||source&&e.geometry?.lifeSeq!=null&&source.lifeSeq!==e.geometry.lifeSeq)return false;
    // A busy first paint must not discard a newly received confirmed contact.
    // Only its display clock is adjusted, once; server tick/position and all
    // attack/warning timings remain authoritative. Old/replayed FX never renew.
@@ -96,8 +106,8 @@ export class Timeline{
       // A previous draw already saw this fresh event in the interpolation buffer.
       // Charge the time since its tick crossed between draws to its display life.
       // A respawning actor can be absent from the interpolated draw list.
-      if(last.state.actors.some(a=>(a.id===e.targetId&&e.geometry.targetLife!=null&&a.lifeSeq!==e.geometry.targetLife)||
-       (a.id===e.sourceId&&e.geometry.lifeSeq!=null&&a.lifeSeq!==e.geometry.lifeSeq)))return false;
+      const newest=indexes(this,last).actors,target=newest.get(e.targetId),source=newest.get(e.sourceId);
+      if(target&&e.geometry.targetLife!=null&&target.lifeSeq!==e.geometry.targetLife||source&&e.geometry.lifeSeq!=null&&source.lifeSeq!==e.geometry.lifeSeq)return false;
       const fraction=(e.tick-e.waitingTick)/(this.renderTick-e.waitingTick);
       visibleAt=e.waitingAt+(now-e.waitingAt)*fraction;
      }

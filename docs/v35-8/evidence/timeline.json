@@ -1,0 +1,98 @@
+{
+  "command": "node --expose-gc tools/performance/timeline358.mjs",
+  "interpretation": "Synthetic Timeline CPU workload only; no claim of browser FPS, GPU or network improvement. Retained heap deltas include GC/JIT noise and do not establish absence of a long-run leak. Four preplanned alternating samples are all retained.",
+  "checks": {
+    "baselineCandidateOutputParity": "PASS: deep equality over 300 frames, checksum equal in every measured sample",
+    "existingFocused": "PASS 16 tests / 451.1339ms",
+    "newFocused": "PASS 4 tests / 129.28ms; five same-instance simulated matches with 180 snapshots each, bounded three-index cache, resets and exact idle coordinate",
+    "initialAuthoringFailure": "1 FAIL / 3 PASS at 137.9222ms: new test expected actor absent at exact old snapshot tick6 (125ms). Corrected fixture observation to tick7.5 between old/new warp states (150ms), matching existing behavior. Runtime code unchanged between these runs."
+  },
+  "baseSha": "5585c8ca5f262d51e3732fb2115bab6e660fefd5",
+  "fixture": "30 actors / 200 straight shots / 100 FX / 30 spawn entries; 20Hz snapshots / 60Hz frames; 6000 synthetic frames; output parity across initial300frames",
+  "environment": {
+    "node": "v24.22.3",
+    "platform": "win32"
+  },
+  "trials": [
+    {
+      "trial": 0,
+      "label": "baseline",
+      "ms": 544.5966000000001,
+      "msPerFrame": 0.09076610000000002,
+      "checksum": 57750037.5,
+      "retainedHeapDelta": -84880,
+      "indexes": null,
+      "samples": 40
+    },
+    {
+      "trial": 0,
+      "label": "candidate",
+      "ms": 269.15139999999997,
+      "msPerFrame": 0.04485856666666666,
+      "checksum": 57750037.5,
+      "retainedHeapDelta": 29432,
+      "indexes": 3,
+      "samples": 40
+    },
+    {
+      "trial": 1,
+      "label": "candidate",
+      "ms": 248.5552,
+      "msPerFrame": 0.04142586666666667,
+      "checksum": 57750037.5,
+      "retainedHeapDelta": -8288,
+      "indexes": 3,
+      "samples": 40
+    },
+    {
+      "trial": 1,
+      "label": "baseline",
+      "ms": 565.1217000000001,
+      "msPerFrame": 0.09418695000000002,
+      "checksum": 57750037.5,
+      "retainedHeapDelta": 84168,
+      "indexes": null,
+      "samples": 40
+    },
+    {
+      "trial": 2,
+      "label": "baseline",
+      "ms": 546.9667,
+      "msPerFrame": 0.09116111666666665,
+      "checksum": 57750037.5,
+      "retainedHeapDelta": 5136,
+      "indexes": null,
+      "samples": 40
+    },
+    {
+      "trial": 2,
+      "label": "candidate",
+      "ms": 260.1167999999998,
+      "msPerFrame": 0.04335279999999996,
+      "checksum": 57750037.5,
+      "retainedHeapDelta": 105440,
+      "indexes": 3,
+      "samples": 40
+    },
+    {
+      "trial": 3,
+      "label": "candidate",
+      "ms": 246.03499999999985,
+      "msPerFrame": 0.04100583333333331,
+      "checksum": 57750037.5,
+      "retainedHeapDelta": -3424,
+      "indexes": 3,
+      "samples": 40
+    },
+    {
+      "trial": 3,
+      "label": "baseline",
+      "ms": 567.5809999999997,
+      "msPerFrame": 0.09459683333333328,
+      "checksum": 57750037.5,
+      "retainedHeapDelta": 83256,
+      "indexes": null,
+      "samples": 40
+    }
+  ]
+}
